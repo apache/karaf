@@ -42,16 +42,16 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
     private final static Logger LOGGER = LoggerFactory.getLogger(DiagnosticDumpMBeanImpl.class);
 
     /**
-     * Creates new diagnostic mbean.
+     * Create new diagnostic MBean.
      *
-     * @throws NotCompliantMBeanException
+     * @throws NotCompliantMBeanException If the MBean is not valid.
      */
     public DiagnosticDumpMBeanImpl() throws NotCompliantMBeanException {
         super(DiagnosticDumpMBean.class);
     }
 
     /**
-     * Creates dump witch given name
+     * Create dump witch given name.
      *
      * @param name Name of the dump.
      */
@@ -83,9 +83,12 @@ public class DiagnosticDumpMBeanImpl extends StandardMBean implements Diagnostic
     }
 
     /**
-     * Sets the bundle context
+     * Set the bundle context.
+     *
+     * @param bundleContext The bundle context to use in the MBean.
      */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
+
 }

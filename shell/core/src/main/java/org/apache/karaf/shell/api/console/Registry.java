@@ -32,14 +32,17 @@ public interface Registry {
 
     /**
      * Return a list of available commands.
+     *
+     * @return the list of available commands.
      */
     List<Command> getCommands();
 
     /**
+     * Get the actual command with the corresponding scope and name.
      *
-     * @param scope
-     * @param name
-     * @return
+     * @param scope the command scope.
+     * @param name the command name.
+     * @return the actual corresponding {@link Command}.
      */
     Command getCommand(String scope, String name);
 
@@ -49,14 +52,16 @@ public interface Registry {
      * a {@link Callable} can be registered and each injection will
      * call it to obtain the actual service implementation.
      *
-     * @param factory
-     * @param clazz
-     * @param <T>
+     * @param factory the service factory.
+     * @param clazz the registration class.
+     * @param <T> the corresponding type.
      */
     <T> void register(Callable<T> factory, Class<T> clazz);
 
     /**
      * Register a service.
+     *
+     * @param service register a given service.
      */
     void register(Object service);
 
@@ -64,21 +69,34 @@ public interface Registry {
      * Unregister a service.
      * If the registration has been done using a factory, the same
      * factory should be used to unregister.
+     *
+     * @param service unregister a given service.
      */
     void unregister(Object service);
 
     /**
      * Obtain a service implementing the given class.
+     *
+     * @param clazz the class/interface to look for service.
+     * @param <T> the service type.
+     * @return the service corresponding to the given class/interface.
      */
     <T> T getService(Class<T> clazz);
 
     /**
      * Obtain a list of services implementing the given class.
+     *
+     * @param clazz the class/interface to look for services.
+     * @param <T> the service type.
+     * @return the list of services corresponding to the given class/interface.
      */
     <T> List<T> getServices(Class<T> clazz);
 
     /**
      * Check whether the registry has a service of the given class.
+     *
+     * @param clazz the class/interface to look for service.
+     * @return true if at least one service is found for the corresponding interface, false else.
      */
     boolean hasService(Class<?> clazz);
 

@@ -49,7 +49,7 @@ public class MavenUtil {
      * N.B. version is required in mvn urls.
      *
      * @param name PAX URL mvn format: mvn-uri := [ 'wrap:' ] 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
-     * @return aether coordinate format: <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
+     * @return aether coordinate format: &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
      */
     public static String mvnToAether(String name) {
         Matcher m = mvnPattern.matcher(name);
@@ -86,7 +86,7 @@ public class MavenUtil {
      * N.B. we do not handle repository-url in mvn urls.
      * N.B. version is required in mvn urls.
      *
-     * @param name aether coordinate format: <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
+     * @param name aether coordinate format: &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
      * @return PAX URL mvn format: mvn-uri := 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
      */
     public static String aetherToMvn(String name) {

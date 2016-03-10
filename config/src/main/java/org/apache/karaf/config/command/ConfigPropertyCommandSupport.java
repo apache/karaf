@@ -51,16 +51,18 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
 
     /**
      * Perform an action on the properties.
-     * @param props
+     *
+     * @param props the dictionary where to apply the action.
      */
     @SuppressWarnings("rawtypes")
     protected abstract void propertyAction(Dictionary props);
 
     /**
-     * Checks if the configuration requires to be updated.
+     * Check if the configuration requires to be updated.
      * The default behavior is to update if a valid pid has been passed to the method.
-     * @param pid
-     * @return
+     *
+     * @param pid the PID to check.
+     * @return <code>true</code> if the configuration requires an update, <code>false</code> else.
      */
     protected boolean requiresUpdate(String pid) {
         if (pid != null) {
@@ -70,11 +72,11 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
         }
     }
 
-
     /**
-     * Retrieves confguration from the pid, if used or delegates to session from getting the configuration.
-     * @return
-     * @throws Exception
+     * Retrieve configuration from the pid, if used or delegates to session from getting the configuration.
+     *
+     * @return the edited dictionary.
+     * @throws Exception in case of configuration failure.
      */
     @SuppressWarnings("rawtypes")
     @Override

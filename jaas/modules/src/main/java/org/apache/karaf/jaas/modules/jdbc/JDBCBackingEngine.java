@@ -51,9 +51,6 @@ public class JDBCBackingEngine implements BackingEngine {
     private String selectUsersQuery = "SELECT USERNAME FROM USERS";
     private String selectRolesQuery = "SELECT ROLE FROM ROLES WHERE USERNAME=?";
 
-    /**
-     * Constructor
-     */
     public JDBCBackingEngine(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -64,7 +61,10 @@ public class JDBCBackingEngine implements BackingEngine {
     }
 
     /**
-     * Adds a new user.
+     * Add a new user.
+     *
+     * @param username the user name.
+     * @param password the user password.
      */
     public void addUser(String username, String password) {
         if (username.startsWith(GROUP_PREFIX)) {
@@ -91,6 +91,8 @@ public class JDBCBackingEngine implements BackingEngine {
 
     /**
      * Delete user by username.
+     *
+     * @param username the user name.
      */
     public void deleteUser(String username) {
         try {
@@ -107,7 +109,9 @@ public class JDBCBackingEngine implements BackingEngine {
     }
 
     /**
-     * List all Users
+     * List all users.
+     *
+     * @return the list of {@link UserPrincipal}.
      */
     public List<UserPrincipal> listUsers() {
         try {
@@ -126,7 +130,10 @@ public class JDBCBackingEngine implements BackingEngine {
     }
 
     /**
-     * List the roles of the {@param principal}.
+     * List the roles of the <code>principal</code>.
+     *
+     * @param principal the principal (user or group).
+     * @return the list of {@link RolePrincipal}.
      */
     public List<RolePrincipal> listRoles(Principal principal) {
         try {
@@ -156,6 +163,9 @@ public class JDBCBackingEngine implements BackingEngine {
 
     /**
      * Add a role to a user.
+     *
+     * @param username the user name.
+     * @param role the role.
      */
     public void addRole(String username, String role) {
         try {
@@ -172,6 +182,9 @@ public class JDBCBackingEngine implements BackingEngine {
 
     /**
      * Remove role from user.
+     *
+     * @param username the user name.
+     * @param role the role to remove.
      */
     public void deleteRole(String username, String role) {
         try {

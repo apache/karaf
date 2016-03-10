@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.karaf.jaas.modules.jdbc;
 
 import java.sql.Connection;
@@ -36,12 +35,15 @@ public final class JDBCUtils {
     public static final String JNDI = "jndi:";
     public static final String OSGI = "osgi:";
 
-    private JDBCUtils() {
-
-    }
+    private JDBCUtils() { }
 
     /**
-     * Looks up a datasource from the url. The datasource can be passed either as jndi name or bundles ldap filter.
+     * Look up a datasource from the url. The datasource can be passed either as jndi name or bundles ldap filter.
+     *
+     * @param bc the bundle context.
+     * @param url the datasource URL.
+     * @return the {@link DataSource} object.
+     * @throws Exception in case of datasource creation failure.
      */
     public static DataSource createDatasource(BundleContext bc, String url) throws Exception {
         Object ds = doCreateDatasource(bc, url);

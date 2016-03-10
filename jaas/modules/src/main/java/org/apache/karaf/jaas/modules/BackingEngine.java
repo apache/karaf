@@ -27,99 +27,103 @@ public interface BackingEngine {
     static final String GROUP_PREFIX = "_g_:";
     
     /**
-     * Create a new User.
+     * Create a new user.
      *
-     * @param username
-     * @param password
+     * @param username the user name.
+     * @param password the user password.
      */
     void addUser(String username, String password);
 
     /**
-     * Delete User
+     * Delete an user.
      *
-     * @param username
+     * @param username the user name.
      */
     void deleteUser(String username);
 
     /**
-     * List Users
+     * List all users.
+     *
+     * @return the list of {@link UserPrincipal}.
      */
     List<UserPrincipal> listUsers();
 
     /**
-     * List groups that a user is in.
+     * List groups that a user is member of.
      *
-     * @param user
-     * @return
+     * @param user the {@link UserPrincipal}.
+     * @return the list of {@link GroupPrincipal}.
      */
     List<GroupPrincipal> listGroups(UserPrincipal user);
     
     /**
-     * List groups in a certain realm
-     * @return the groups in a certain realm
+     * List all groups.
+     *
+     * @return the groups.
      */
     Map<GroupPrincipal, String> listGroups();
 
     /**
-     * Add a user to a group.
+     * Add a user into a given group.
      *
-     * @param username
-     * @param group
+     * @param username the user name.
+     * @param group the group.
      */
     void addGroup(String username, String group);
     
     /**
      * Create a group
-     * @param group
+     *
+     * @param group the group.
      */
     void createGroup(String group);
 
     /**
      * Remove a user from a group.
      *
-     * @param username
-     * @param group
+     * @param username the user name.
+     * @param group the group.
      */
     void deleteGroup(String username, String group);
 
     /**
-     * List Roles for {@param principal}. This could either be a
+     * List Roles for <code>principal</code>. This could either be a
      * {@link UserPrincipal} or a {@link GroupPrincipal}.
      *
-     * @param principal
-     * @return
+     * @param principal the principal.
+     * @return the list of roles.
      */
     List<RolePrincipal> listRoles(Principal principal);
 
     /**
-     * Add a role to the user
+     * Add a role to the user.
      *
-     * @param username
-     * @param role
+     * @param username the user name.
+     * @param role the role.
      */
     void addRole(String username, String role);
 
     /**
      * Remove a role from a user.
      *
-     * @param username
-     * @param role
+     * @param username the user name.
+     * @param role the role.
      */
     void deleteRole(String username, String role);
 
     /**
      * Add a role in a group.
      *
-     * @param group
-     * @param role
+     * @param group the group.
+     * @param role the role.
      */
     void addGroupRole(String group, String role);
 
     /**
      * Remove a role from a group.
      *
-     * @param group
-     * @param role
+     * @param group the group.
+     * @param role the role.
      */
     void deleteGroupRole(String group, String role);
 

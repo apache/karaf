@@ -51,7 +51,6 @@ import java.util.Map;
  * from ${project.build.directory}/classes. Thus, a file in src/main/resources/etc
  * will be copied by the resource plugin to ${project.build.directory}/classes/etc,
  * and then added to the assembly by this goal.
- * <br>
  */
 @Mojo(name = "assembly", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class AssemblyMojo extends MojoSupport {
@@ -218,8 +217,8 @@ public class AssemblyMojo extends MojoSupport {
             </edit>
          </edits>
       </property-edits>
-     </pre>
     }
+     </pre>
      */
     @Parameter(defaultValue = "${project.basedir}/src/main/karaf/assembly-property-edits.xml")
     protected String propertyFileEdits;

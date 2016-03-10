@@ -50,23 +50,24 @@ public final class Overrides {
     }
 
     /**
-     * Compute a list of bundles to install, taking into account overrides.
-     * <p/>
-     * The file containing the overrides will be loaded from the given url.
+     * <p>Compute a list of bundles to install, taking into account overrides</p>.
+     *
+     * <p>The file containing the overrides will be loaded from the given url.
      * Blank lines and lines starting with a '#' will be ignored, all other lines
-     * are considered as urls to override bundles.
-     * <p/>
-     * The list of resources to resolve will be scanned and for each bundle,
-     * if a bundle override matches that resource, it will be used instead.
-     * <p/>
-     * Matching is done on bundle symbolic name (they have to be the same)
+     * are considered as urls to override bundles.</p>
+     *
+     * <p>The list of resources to resolve will be scanned and for each bundle,
+     * if a bundle override matches that resource, it will be used instead.</p>
+     *
+     * <p>Matching is done on bundle symbolic name (they have to be the same)
      * and version (the bundle override version needs to be greater than the
      * resource to be resolved, and less than the next minor version.  A range
      * directive can be added to the override url in which case, the matching
-     * will succeed if the resource to be resolved is within the given range.
+     * will succeed if the resource to be resolved is within the given range.</p>
      *
      * @param resources the list of resources to resolve
      * @param overrides list of bundle overrides
+     * @param <T> the resource type.
      */
     public static <T extends Resource> void override(Map<String, T> resources, Collection<String> overrides) {
         // Do override replacement

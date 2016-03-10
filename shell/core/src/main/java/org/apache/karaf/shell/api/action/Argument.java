@@ -37,16 +37,22 @@ public @interface Argument
     /**
      * Name of the argument.
      * By default, the field name will be used.
+     *
+     * @return the argument name.
      */
     String name() default DEFAULT;
 
     /**
      * A textual description of the argument.
+     *
+     * @return the argument description.
      */
     String description() default "";
 
     /**
      * Whether this argument is mandatory or not.
+     *
+     * @return true if the argument is required, false else.
      */
     boolean required() default false;
 
@@ -54,12 +60,16 @@ public @interface Argument
      * Position of the argument in the command line.
      * When using multiple arguments, the indices must be
      * starting from 0 and incrementing without any holes.
+     *
+     * @return the argument index.
      */
     int index() default 0;
 
     /**
      * The last argument can be multi-valued in which case
      * the field type must be a List.
+     *
+     * @return true if the argument has multiple values, false else.
      */
     boolean multiValued() default false;
 
@@ -68,6 +78,8 @@ public @interface Argument
      * In case the value displayed in the help to the user should
      * be different that the default value of the field, one
      * can use this property to specify the value to display.
+     *
+     * @return the argument help string representation.
      */
     String valueToShowInHelp() default DEFAULT_STRING;
 }

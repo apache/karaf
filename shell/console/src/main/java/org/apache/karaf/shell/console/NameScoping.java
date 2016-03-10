@@ -19,7 +19,6 @@ package org.apache.karaf.shell.console;
 
 import org.apache.felix.service.command.CommandSession;
 
-
 /**
  * A helper class for name scoping
  */
@@ -29,8 +28,12 @@ public class NameScoping {
     public static final String MULTI_SCOPE_MODE_KEY = "MULTI_SCOPE_MODE";
 
     /**
-     * Returns the name of the command which can omit the global scope prefix if the command starts with the
-     * same prefix as the current application
+     * Return the name of the command which can omit the global scope prefix if the command starts with the
+     * same prefix as the current application.
+     *
+     * @param session The command session.
+     * @param key The command key.
+     * @return The command name without the global prefix.
      */
     public static String getCommandNameWithoutGlobalPrefix(CommandSession session, String key) {
         if (!isMultiScopeMode(session)) {
@@ -48,7 +51,11 @@ public class NameScoping {
     }
 
     /**
-     * Returns true if the given scope is the global scope so that it can be hidden from help messages
+     * Return true if the given scope is the global scope so that it can be hidden from help messages.
+     *
+     * @param session The command session.
+     * @param scope The command scope.
+     * @return True if the scope is global, false else.
      */
     public static boolean isGlobalScope(CommandSession session, String scope) {
         if (session == null)
@@ -64,8 +71,11 @@ public class NameScoping {
     }
 
     /**
-     * Returns true if we are in multi-scope mode (the default) or if we are in single scope mode which means we
-     * avoid prefixing commands with their scope
+     * Return true if we are in multi-scope mode (the default) or if we are in single scope mode which means we
+     * avoid prefixing commands with their scope.
+     *
+     * @param session The command session.
+     * @return True if the command is multi-scoped, false else.
      */
     public static boolean isMultiScopeMode(CommandSession session) {
         if (session == null)

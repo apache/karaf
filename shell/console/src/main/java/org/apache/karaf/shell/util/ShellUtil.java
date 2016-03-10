@@ -101,11 +101,11 @@ public class ShellUtil {
     }
 
     /**
-     * Check if a bundle is a system bundle (start level < 50)
+     * Check if a bundle is a system bundle (start level minor than 50)
      *
-     * @param bundleContext
-     * @param bundle
-     * @return true if the bundle has start level minor than 50
+     * @param bundleContext The bundle context.
+     * @param bundle The bundle to check.
+     * @return True if the bundle has start level minor than 50, false else.
      */
     public static boolean isASystemBundle(BundleContext bundleContext, Bundle bundle) {
         int level = bundle.adapt(BundleStartLevel.class).getStartLevel();

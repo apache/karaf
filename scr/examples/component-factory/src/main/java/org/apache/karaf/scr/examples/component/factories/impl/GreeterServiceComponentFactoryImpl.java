@@ -34,8 +34,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * configuration includes setting the name attribute and setting the
  * configuration policy to required. The default is optional and when the
  * component attempts to activate it will throw a RuntimeException.
- *
- * @author sully6768
  */
 // the ConfigAdmin PID of our component
 @Component(name = GreeterServiceComponentFactoryImpl.COMPONENT_NAME,
@@ -54,6 +52,8 @@ public class GreeterServiceComponentFactoryImpl implements GreeterServiceCompone
 
     /**
      * Called when all of the SCR Components required dependencies have been satisfied.
+     *
+     * @param properties The activation properties.
      */
     @Activate
     public void activate(final Map<String, ?> properties) {

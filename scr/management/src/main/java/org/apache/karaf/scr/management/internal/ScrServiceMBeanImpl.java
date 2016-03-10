@@ -60,7 +60,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     /**
      * Creates new Declarative Services MBean.
      *
-     * @throws NotCompliantMBeanException
+     * @throws NotCompliantMBeanException If the MBean is not a valid MBean.
      */
     public ScrServiceMBeanImpl() throws NotCompliantMBeanException {
         super(ScrServiceMBean.class);
@@ -69,7 +69,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     /**
      * Service component activation call back.  Called when all dependencies are satisfied.
      *
-     * @throws Exception
+     * @throws Exception If the activation fails.
      */
     @Activate
     public void activate() throws Exception {
@@ -92,7 +92,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
      * Service component deactivation call back.  Called after the component is in an active
      * state when any dependencies become unsatisfied.
      *
-     * @throws Exception
+     * @throws Exception If the deactivation fails.
      */
     @Deactivate
     public void deactivate() throws Exception {

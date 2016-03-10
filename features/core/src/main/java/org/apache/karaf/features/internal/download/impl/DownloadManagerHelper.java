@@ -29,6 +29,9 @@ public final class DownloadManagerHelper {
 
     /**
      * Strips download urls from wrapper protocols.
+     *
+     * @param url the given url.
+     * @return the stripped URL for the wrapper protocols.
      */
     public static String stripUrl(String url) {
         String strippedUrl = url;

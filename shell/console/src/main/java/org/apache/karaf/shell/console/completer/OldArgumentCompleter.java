@@ -196,16 +196,20 @@ public class OldArgumentCompleter implements Completer {
     }
 
     /**
-     *  If true, a completion at argument index N will only succeed
-     *  if all the completions from 0-(N-1) also succeed.
+     * If true, a completion at argument index N will only succeed
+     * if all the completions from 0-(N-1) also succeed.
+     *
+     * @param strict The new value of the strict flag.
      */
     public void setStrict(final boolean strict) {
         this.strict = strict;
     }
 
     /**
-     *  Returns whether a completion at argument index N will succees
-     *  if all the completions from arguments 0-(N-1) also succeed.
+     * Return whether a completion at argument index N will succees
+     * if all the completions from arguments 0-(N-1) also succeed.
+     *
+     * @return The value of the strict flag.
      */
     public boolean getStrict() {
         return this.strict;
@@ -312,14 +316,14 @@ public class OldArgumentCompleter implements Completer {
         int pos = ret + (list.getBufferPosition() - argpos);
 
         /**
-         *  Special case: when completing in the middle of a line, and the
-         *  area under the cursor is a delimiter, then trim any delimiters
-         *  from the candidates, since we do not need to have an extra
-         *  delimiter.
+         * Special case: when completing in the middle of a line, and the
+         * area under the cursor is a delimiter, then trim any delimiters
+         * from the candidates, since we do not need to have an extra
+         * delimiter.
          *
-         *  E.g., if we have a completion for "foo", and we
-         *  enter "f bar" into the buffer, and move to after the "f"
-         *  and hit TAB, we want "foo bar" instead of "foo  bar".
+         * E.g., if we have a completion for "foo", and we
+         * enter "f bar" into the buffer, and move to after the "f"
+         * and hit TAB, we want "foo bar" instead of "foo  bar".
          */
 
         if ((buffer != null) && (cursor != buffer.length()) && isDelimiter(buffer, cursor)) {
@@ -355,14 +359,14 @@ public class OldArgumentCompleter implements Completer {
     }
 
     /**
-     *  Returns true if the specified character is a whitespace
-     *  parameter. Check to ensure that the character is not
-     *  escaped and returns true from
-     *  {@link #isDelimiterChar}.
+     * Return true if the specified character is a whitespace
+     * parameter. Check to ensure that the character is not
+     * escaped and returns true from
+     * {@link #isDelimiterChar}.
      *
-     *  @param  buffer the complete command buffer
-     *  @param  pos    the index of the character in the buffer
-     *  @return        true if the character should be a delimiter
+     * @param buffer The complete command buffer.
+     * @param pos The index of the character in the buffer.
+     * @return True if the character should be a delimiter, false else.
      */
     public boolean isDelimiter(final String buffer, final int pos) {
         return !isEscaped(buffer, pos) && isDelimiterChar(buffer, pos);
@@ -373,29 +377,32 @@ public class OldArgumentCompleter implements Completer {
     }
 
     /**
-     *  The character is a delimiter if it is whitespace, and the
-     *  preceeding character is not an escape character.
+     * The character is a delimiter if it is whitespace, and the
+     * preceding character is not an escape character.
+     *
+     * @param buffer The complete command buffer.
+     * @param pos The position of the character in the buffer.
+     * @return True if the character is a delimiter, false else.
      */
     public boolean isDelimiterChar(String buffer, int pos) {
         return Character.isWhitespace(buffer.charAt(pos));
     }
 
     /**
-     *  The result of a delimited buffer.
+     * The result of a delimited buffer.
      */
     public static class ArgumentList {
+
         private String[] arguments;
         private int cursorArgumentIndex;
         private int argumentPosition;
         private int bufferPosition;
 
         /**
-         *  @param  arguments           the array of tokens
-         *  @param  cursorArgumentIndex the token index of the cursor
-         *  @param  argumentPosition    the position of the cursor in the
-         *                              current token
-         *  @param  bufferPosition      the position of the cursor in
-         *                              the whole buffer
+         *  @param arguments The array of tokens.
+         *  @param cursorArgumentIndex The token index of the cursor.
+         *  @param argumentPosition The position of the cursor in the current token.
+         *  @param bufferPosition The position of the cursor in the whole buffer.
          */
         public ArgumentList(String[] arguments, int cursorArgumentIndex,
             int argumentPosition, int bufferPosition) {

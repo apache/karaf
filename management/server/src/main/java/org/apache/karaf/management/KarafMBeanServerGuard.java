@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 public class KarafMBeanServerGuard implements InvocationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(KarafMBeanServerGuard.class);    
@@ -45,7 +46,6 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     private static final String JMX_ACL_PID_PREFIX = "jmx.acl";
     
     private static final String JMX_ACL_WHITELIST = "jmx.acl.whitelist";
-
 
     private static final String JMX_OBJECTNAME_PROPERTY_WILDCARD = "_";
 
@@ -85,27 +85,27 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     /**
-     * Returns whether there is any method that the current user can invoke.
+     * Return whether there is any method that the current user can invoke.
      *
-     * @param mbeanServer the MBeanServer where the object is registered.
-     * @param objectName the ObjectName to check.
-     * @return {@code true} if there is a method on the object that can be invoked, {@code false} else.
-     * @throws JMException
-     * @throws IOException
+     * @param mbeanServer The MBeanServer where the object is registered.
+     * @param objectName The ObjectName to check.
+     * @return {@code True} if there is a method on the object that can be invoked, {@code false} else.
+     * @throws JMException If the invocation fails.
+     * @throws IOException If the invocation fails.
      */
     public boolean canInvoke(MBeanServer mbeanServer, ObjectName objectName) throws JMException, IOException {
         return canInvoke(null, mbeanServer, objectName);
     }
 
     /**
-     * Returns whether there is any method that the current user can invoke.
+     * Return whether there is any method that the current user can invoke.
      *
-     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>
-     * @param mbeanServer the MBeanServer where the object is registered.
-     * @param objectName the ObjectName to check.
-     * @return {@code true} if there is a method on the object that can be invoked, {@code false} else.
-     * @throws JMException
-     * @throws IOException
+     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>.
+     * @param mbeanServer The MBeanServer where the object is registered.
+     * @param objectName The ObjectName to check.
+     * @return {@code True} if there is a method on the object that can be invoked, {@code false} else.
+     * @throws JMException If the invocation fails.
+     * @throws IOException If the invocation fails.
      */
     public boolean canInvoke(BulkRequestContext context, MBeanServer mbeanServer, ObjectName objectName) throws JMException, IOException {
         MBeanInfo info = mbeanServer.getMBeanInfo(objectName);
@@ -135,29 +135,29 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     /**
-     * Returns whether there is any overload of the specified method that can be invoked by the current user.
+     * Return whether there is any overload of the specified method that can be invoked by the current user.
      *
-     * @param mbeanServer the MBeanServer where the object is registered.
-     * @param objectName the MBean ObjectName.
-     * @param methodName the name of the method.
-     * @return {@code true} if there is an overload of the method that can be invoked by the current user.
-     * @throws JMException
-     * @throws IOException
+     * @param mbeanServer The MBeanServer where the object is registered.
+     * @param objectName The MBean ObjectName.
+     * @param methodName The name of the method.
+     * @return {@code True} if there is an overload of the method that can be invoked by the current user.
+     * @throws JMException If the invocation fails.
+     * @throws IOException If the invocation fails.
      */
     public boolean canInvoke(MBeanServer mbeanServer, ObjectName objectName, String methodName) throws JMException, IOException {
         return canInvoke(null, mbeanServer, objectName, methodName);
     }
 
     /**
-     * Returns whether there is any overload of the specified method that can be invoked by the current user.
+     * Return whether there is any overload of the specified method that can be invoked by the current user.
      *
-     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>
-     * @param mbeanServer the MBeanServer where the object is registered.
-     * @param objectName the MBean ObjectName.
-     * @param methodName the name of the method.
-     * @return {@code true} if there is an overload of the method that can be invoked by the current user.
-     * @throws JMException
-     * @throws IOException
+     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>.
+     * @param mbeanServer The MBeanServer where the object is registered.
+     * @param objectName The MBean ObjectName.
+     * @param methodName The name of the method.
+     * @return {@code True} if there is an overload of the method that can be invoked by the current user.
+     * @throws JMException If the invocation fails.
+     * @throws IOException If the invocation fails.
      */
     public boolean canInvoke(BulkRequestContext context, MBeanServer mbeanServer, ObjectName objectName, String methodName) throws JMException, IOException {
         methodName = methodName.trim();
@@ -191,35 +191,35 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     /**
-     * Returns true if the method on the MBean with the specified signature can be invoked.
+     * Return true if the method on the MBean with the specified signature can be invoked.
      *
-     * @param mbeanServer the MBeanServer where the object is registered.
-     * @param objectName the MBean ObjectName.
-     * @param methodName the name of the method.
-     * @param signature the signature of the method.
-     * @return {@code true} if the method can be invoked, {@code false} else. Note that if a method name or signature
+     * @param mbeanServer The MBeanServer where the object is registered.
+     * @param objectName The MBean ObjectName.
+     * @param methodName The name of the method.
+     * @param signature The signature of the method.
+     * @return {@code True} if the method can be invoked, {@code false} else. Note that if a method name or signature
      *      is provided that does not exist on the MBean, the behaviour of this method is undefined. In other words,
      *      if you ask whether a method that does not exist can be invoked, the method may return {@code true} but
      *      actually invoking that method will obviously not work.
-     * @throws IOException
+     * @throws IOException If the invocation fails.
      */
     public boolean canInvoke(MBeanServer mbeanServer, ObjectName objectName, String methodName, String[] signature) throws IOException {
         return canInvoke(null, mbeanServer, objectName, methodName, signature);
     }
 
     /**
-     * Returns true if the method on the MBean with the specified signature can be invoked.
+     * Return true if the method on the MBean with the specified signature can be invoked.
      *
-     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>
-     * @param mbeanServer the MBeanServer where the object is registered.
-     * @param objectName the MBean ObjectName.
-     * @param methodName the name of the method.
-     * @param signature the signature of the method.
-     * @return {@code true} if the method can be invoked, {@code false} else. Note that if a method name or signature
+     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>.
+     * @param mbeanServer The MBeanServer where the object is registered.
+     * @param objectName The MBean ObjectName.
+     * @param methodName The name of the method.
+     * @param signature The signature of the method.
+     * @return {@code True} if the method can be invoked, {@code false} else. Note that if a method name or signature
      *      is provided that does not exist on the MBean, the behaviour of this method is undefined. In other words,
      *      if you ask whether a method that does not exist can be invoked, the method may return {@code true} but
      *      actually invoking that method will obviously not work.
-     * @throws IOException
+     * @throws IOException If the invocation fails.
      */
     public boolean canInvoke(BulkRequestContext context, MBeanServer mbeanServer, ObjectName objectName, String methodName, String[] signature) throws IOException {
         // no checking done on the MBeanServer of whether the method actually exists...
@@ -451,7 +451,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
     /**
      * <code>nulls</code>-last comparator of PIDs split to segments. {@link #JMX_OBJECTNAME_PROPERTY_WILDCARD}
-     * in a segment makes the PID more generic, thus - with lower prioroty.
+     * in a segment makes the PID more generic, thus - with lower priority.
      */
     private static class WildcardPidComparator implements Comparator<String[]> {
         @Override

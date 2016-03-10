@@ -50,7 +50,9 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
     private final BundleContext bundleContext;
 
     /**
-     * Creates new dump entry which contains information about the runtime environment.
+     * Create new dump entry which contains information about the runtime environment.
+     *
+     * @param context The bundle context to use in the MBean.
      */
     public EnvironmentDumpProvider(final BundleContext context) {
         super("environment.txt");
@@ -247,10 +249,10 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
     }
 
     /**
-     * Prints the duration in a human readable format as X days Y hours Z minutes etc.
+     * Print the duration in a human readable format as X days Y hours Z minutes etc.
      *
-     * @param uptime the uptime in millis
-     * @return the time used for displaying on screen or in logs
+     * @param uptime The uptime in millis.
+     * @return The time used for displaying on screen or in logs.
      */
     private String printDuration(double uptime) {
         // Code based on code taken from Karaf

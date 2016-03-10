@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Security MBean. This MBean can be used to find out whether the currently logged user can access certain MBeans
+ * <p>Security MBean. This MBean can be used to find out whether the currently logged user can access certain MBeans
  * or invoke operations on these MBeans. It can be used when building client-facing consoles to ensure that only
- * operations appropriate for the current user are presented.<p/>
- * This MBean does not actually invoke any operations on the given objects, it only checks permissions.
+ * operations appropriate for the current user are presented.</p>
+ * <p>This MBean does not actually invoke any operations on the given objects, it only checks permissions.</p>
  */
 public interface JMXSecurityMBean {
 
@@ -55,32 +55,32 @@ public interface JMXSecurityMBean {
     /**
      * Checks whether the current user can invoke any methods on a JMX MBean.
      *
-     * @param objectName the Object Name of the JMX MBean.
-     * @return {@code true} if there is at least one method on the MBean that the user can invoke, {@code false} else.
-     * @throws Exception
+     * @param objectName The Object Name of the JMX MBean.
+     * @return {@code True} if there is at least one method on the MBean that the user can invoke, {@code false} else.
+     * @throws Exception If the invocation check fails.
      */
     boolean canInvoke(String objectName) throws Exception;
 
     /**
      * Checks whether the current user can invoke overload of the given method.
      *
-     * @param objectName the Object Name of the JMX MBean.
-     * @param methodName the name of the method to check.
-     * @return {@code true} if there is an overload of the specified method that the user can invoke, {@code false} else.
-     * @throws Exception
+     * @param objectName The Object Name of the JMX MBean.
+     * @param methodName The name of the method to check.
+     * @return {@code True} if there is an overload of the specified method that the user can invoke, {@code false} else.
+     * @throws Exception If the invocation check fails.
      */
     boolean canInvoke(String objectName, String methodName) throws Exception;
 
     /**
      * Checks whether the current user can invoke the given method.
      *
-     * @param objectName the Object Name of the JMX MBean.
-     * @param methodName the name of the method to check.
-     * @param argumentTypes the argument types of the method.
-     * @return {@code true} if the user is allowed to invoke the method, or any of the methods with the given name if
+     * @param objectName The Object Name of the JMX MBean.
+     * @param methodName The name of the method to check.
+     * @param argumentTypes The argument types of the method.
+     * @return {@code True} if the user is allowed to invoke the method, or any of the methods with the given name if
      * {@code null} is used for the arguments. There may still be certain values that the user does not have permissions
      * to pass to the method.
-     * @throws Exception
+     * @throws Exception If the invocation check fails.
      */
     boolean canInvoke(String objectName, String methodName, String[] argumentTypes) throws Exception;
 
@@ -88,10 +88,10 @@ public interface JMXSecurityMBean {
      * Bulk operation to check whether the current user can access the requested MBeans or invoke the requested
      * methods.
      *
-     * @param bulkQuery a map of Object Name to requested operations. Operations can be specified with or without
+     * @param bulkQuery <p>a map of Object Name to requested operations. Operations can be specified with or without
      *                  argument types. An operation without arguments matches any overloaded method with this
      *                  name. If an empty list is provided for the operation names, a check is done whether the
-     *                  current user can invoke <em>any</em> operation on the MBean.<p/>
+     *                  current user can invoke <em>any</em> operation on the MBean.</p>
      *                  Example:
      *                  <pre>{@code
      *                  Map<String, List<String>> query = new HashMap<>();
@@ -104,7 +104,7 @@ public interface JMXSecurityMBean {
      *                  TabularData result = mb.canInvoke(query);
      *                  }</pre>
      * @return A Tabular Data object with the result. This object conforms the structure as defined in {@link #CAN_INVOKE_TABULAR_TYPE}
-     * @throws Exception
+     * @throws Exception If the invocation check fails.
      */
     TabularData canInvoke(Map<String, List<String>> bulkQuery) throws Exception;
 

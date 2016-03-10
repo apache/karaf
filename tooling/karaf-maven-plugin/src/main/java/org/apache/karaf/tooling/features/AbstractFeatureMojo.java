@@ -137,8 +137,8 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
      * Resolves and copies the given artifact to the repository path.
      * Prefers to resolve using the repository of the artifact if present.
      * 
-     * @param artifact
-     * @param remoteRepos
+     * @param artifact The artifact.
+     * @param remoteRepos The {@link List} of remote repositories to use for artifact resolution.
      */
     @SuppressWarnings("deprecation")
     protected void resolveArtifact(Artifact artifact, List<ArtifactRepository> remoteRepos) {
@@ -164,10 +164,10 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
      * Populate the features by traversing the listed features and their
      * dependencies if transitive is true
      *  
-     * @param featureNames
-     * @param features
-     * @param featuresMap
-     * @param transitive
+     * @param featureNames The {@link List} of feature names.
+     * @param features The {@link Set} of features.
+     * @param featuresMap The {@link Map} of features.
+     * @param transitive True to add transitive features, false else.
      */
     protected void addFeatures(List<String> featureNames, Set<Feature> features, Map<String, Feature> featuresMap, boolean transitive) {
         for (String feature : featureNames) {
@@ -284,7 +284,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
 
     /**
      * Maven ArtifactResolver leaves file handles around so need to clean up
-     * or we will run out of file descriptors
+     * or we will run out of file descriptors.
      */
     protected void checkDoGarbageCollect() {
         if (this.resolveCount++ % 100 == 0) {

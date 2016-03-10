@@ -19,14 +19,14 @@
 package org.apache.karaf.shell.api.action.lifecycle;
 
 /**
- * The <code>Manager</code> service can be used to programmatically
+ * <p>The <code>Manager</code> service can be used to programmatically
  * register {@link org.apache.karaf.shell.api.action.Action}s or
- * {@link org.apache.karaf.shell.api.console.Completer}s.
+ * {@link org.apache.karaf.shell.api.console.Completer}s.</p>
  *
- * Registered objects must be annotated with the {@link Service} annotation.
+ * <p>Registered objects must be annotated with the {@link Service} annotation.</p>
  *
- * Objects will be registered in the {@link org.apache.karaf.shell.api.console.Registry}
- * associated with this <code>Manager</code>.
+ * <p>Objects will be registered in the {@link org.apache.karaf.shell.api.console.Registry}
+ * associated with this <code>Manager</code>.</p>
  *
  * @see org.apache.karaf.shell.api.console.Registry
  * @see org.apache.karaf.shell.api.action.lifecycle.Service
@@ -38,11 +38,15 @@ public interface Manager {
      * If the given class is an {@link org.apache.karaf.shell.api.action.Action},
      * a {@link org.apache.karaf.shell.api.console.Command} will be created and registered,
      * else, an instance of the class will be created, injected and registered.
+     *
+     * @param clazz the Action class to register.
      */
     void register(Class<?> clazz);
 
     /**
      * Unregister a previously registered class.
+     *
+     * @param clazz the Action class to unregister.
      */
     void unregister(Class<?> clazz);
 

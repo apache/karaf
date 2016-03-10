@@ -28,76 +28,76 @@ public interface JndiMBean {
     /**
      * Get a map of JNDI names/class names (as attribute).
      *
-     * @return the MBean attribute containing the map of names/class names.
-     * @throws MBeanException
+     * @return The MBean attribute containing the {@link Map} of names/class names.
+     * @throws MBeanException If the MBean fails.
      */
     public Map<String, String> getNames() throws MBeanException;
 
     /**
      * Get a list of JNDI sub-contexts (as attribute).
      *
-     * @return the MBean attribute containing the list of sub-contexts.
-     * @throws MBeanException
+     * @return The MBean attribute containing the {@link List} of sub-contexts.
+     * @throws MBeanException If the MBean fails.
      */
     public List<String> getContexts() throws MBeanException;
 
     /**
-     * Get a map of JNDI names/class names children of a given base context.
+     * Get a {@link Map} of JNDI names/class names children of a given base context.
      *
-     * @param context the base context.
-     * @return the map of names/class names.
-     * @throws MBeanException
+     * @param context The base context.
+     * @return The {@link Map} of names/class names.
+     * @throws MBeanException If the MBean fails.
      */
     public Map<String, String> getNames(String context) throws MBeanException;
 
     /**
-     * Get a list of JNDI sub-contexts children of a given base context.
+     * Get a {@link List} of JNDI sub-contexts children of a given base context.
      *
-     * @param context the base context.
-     * @return the list of sub-contexts.
-     * @throws MBeanException
+     * @param context The base context.
+     * @return The {@link List} of sub-contexts.
+     * @throws MBeanException If the MBean fails.
      */
     public List<String> getContexts(String context) throws MBeanException;
 
     /**
      * Create a JNDI sub-context.
      *
-     * @param context the JNDI sub-context name.
-     * @throws MBeanException
+     * @param context The JNDI sub-context name.
+     * @throws MBeanException If the MBean fails.
      */
     public void create(String context) throws MBeanException;
 
     /**
      * Delete a JNDI sub-context.
      *
-     * @param context the JNDI sub-context name.
-     * @throws MBeanException
+     * @param context The JNDI sub-context name.
+     * @throws MBeanException If the MBean fails.
      */
     public void delete(String context) throws MBeanException;
 
     /**
      * Create another JNDI name (alias) for a given one.
      *
-     * @param name the "source" JNDI name.
-     * @param alias the JNDI alias name.
-     * @throws MBeanException
+     * @param name The "source" JNDI name.
+     * @param alias The JNDI alias name.
+     * @throws MBeanException If the MBean fails.
      */
     public void alias(String name, String alias) throws MBeanException;
 
     /**
      * Bind an OSGi service with a JNDI name.
      *
-     * @param serviceId the OSGi service id (service.id property on the service, created by the framework).
-     * @param name the JNDI name.
-     * @throws MBeanException
+     * @param serviceId The OSGi service id (service.id property on the service, created by the framework).
+     * @param name The JNDI name.
+     * @throws MBeanException If the MBean fails.
      */
     public void bind(Long serviceId, String name) throws MBeanException;
 
     /**
      * Unbind a given JNDI name.
      *
-     * @param name the JNDI name.
-     * @throws MBeanException
+     * @param name The JNDI name.
+     * @throws MBeanException If the MBean fails.
      */
     public void unbind(String name) throws MBeanException;
 

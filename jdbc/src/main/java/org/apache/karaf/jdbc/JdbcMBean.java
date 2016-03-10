@@ -29,39 +29,39 @@ public interface JdbcMBean {
     /**
      * Get the list of JDBC datasources.
      *
-     * @return a tabular data containing the list of JDBC datasources.
-     * @throws MBeanException
+     * @return A {@link TabularData} containing the list of JDBC datasources.
+     * @throws MBeanException In case of MBean failure.
      */
     TabularData getDatasources() throws MBeanException;
 
     /**
      * Create a JDBC datasource.
      *
-     * @param name the JDBC datasource name
-     * @param driverName org.osgi.driver.name of the DataSourceFactory to use
-     * @param driverClass org.osgi.driver.class of the DataSourceFactory to use
-     * @param databaseName name of the database to access
-     * @param url JDBC URL
-     * @param user Database username
-     * @param password Database password
-     * @throws MBeanException
+     * @param name The JDBC datasource name.
+     * @param driverName The {@code org.osgi.driver.name} of the DataSourceFactory to use.
+     * @param driverClass The {@code org.osgi.driver.class} of the DataSourceFactory to use.
+     * @param databaseName The name of the database to access.
+     * @param url The JDBC URL.
+     * @param user The database username.
+     * @param password The database password.
+     * @throws MBeanException In case of MBean failure.
      */
     void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws MBeanException;
 
     /**
      * Delete a JDBC datasource.
      *
-     * @param name the JDBC datasource name (the one used at creation time).
-     * @throws MBeanException
+     * @param name The JDBC datasource name (the one used at creation time).
+     * @throws MBeanException In case of MBean failure.
      */
     void delete(String name) throws MBeanException;
 
     /**
      * Get details about a JDBC datasource.
      *
-     * @param datasource the JDBC datasource name.
-     * @return a map (property/value) containing JDBC datasource details.
-     * @throws MBeanException
+     * @param datasource The JDBC datasource name.
+     * @return A {@link Map} (property/value) containing JDBC datasource details.
+     * @throws MBeanException In case of MBean failure.
      */
     Map<String, String> info(String datasource) throws MBeanException;
 
@@ -69,27 +69,27 @@ public interface JdbcMBean {
      * Get the tables available on a JDBC datasource.
      *
      * @param datasource the JDBC datasource name.
-     * @return a tabular data containg datasource tables.
-     * @throws MBeanException
+     * @return A {@link TabularData} containing the datasource tables.
+     * @throws MBeanException In case of MBean failure.
      */
     TabularData tables(String datasource) throws MBeanException;
 
     /**
      * Execute a SQL command on a JDBC datasource.
      *
-     * @param datasource the JDBC datasource name.
-     * @param command the SQL command to execute.
-     * @throws MBeanException
+     * @param datasource The JDBC datasource name.
+     * @param command The SQL command to execute.
+     * @throws MBeanException In case of MBean failure.
      */
     void execute(String datasource, String command) throws MBeanException;
 
     /**
      * Execute a SQL query on a JDBC datasource.
      *
-     * @param datasource the JDBC datasource name.
-     * @param query the SQL query to execute.
-     * @return a tabular data with the result of execute (columns/values).
-     * @throws MBeanException
+     * @param datasource The JDBC datasource name.
+     * @param query The SQL query to execute.
+     * @return A {@link TabularData} with the result of execute (columns/values).
+     * @throws MBeanException In case of MBean failure.
      */
     TabularData query(String datasource, String query) throws MBeanException;
 

@@ -25,6 +25,8 @@ public interface WrapperService {
 
     /**
      * Install the Karaf container as a system service in the OS.
+     *
+     * @throws Exception If the wrapper install fails.
      */
     public void install() throws Exception;
 
@@ -35,7 +37,8 @@ public interface WrapperService {
      * @param displayName The display name of the service.
      * @param description The description of the service.
      * @param startType Mode in which the service is installed. AUTO_START or DEMAND_START.
-     * @return an array containing the wrapper configuration file (index 0) and the service file (index 1)
+     * @return An array containing the wrapper configuration file (index 0) and the service file (index 1).
+     * @throws Exception If the wrapper install fails.
      */
     public File[] install(String name, String displayName, String description, String startType) throws Exception;
     
@@ -48,7 +51,8 @@ public interface WrapperService {
      * @param startType Mode in which the service is installed. AUTO_START or DEMAND_START.
      * @param envs The environment variable and values
      * @param includes The include statement for JSW wrapper conf
-     * @return an array containing the wrapper configuration file (index 0) and the service file (index 1)
+     * @return An array containing the wrapper configuration file (index 0) and the service file (index 1).
+     * @throws Exception If the wrapper install fails.
      */
     public File[] install(String name, String displayName, String description, String startType, String[] envs, String[] includes) throws Exception;
 

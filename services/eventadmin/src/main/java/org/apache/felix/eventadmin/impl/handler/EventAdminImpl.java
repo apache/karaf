@@ -63,10 +63,17 @@ public class EventAdminImpl implements EventAdmin
     private boolean addSubject;
 
     /**
-     * The constructor of the <tt>EventAdmin</tt> implementation.
+     * The constructor of the <code>EventAdmin</code> implementation.
      *
-     * @param syncPool The synchronous thread pool
-     * @param asyncPool The asynchronous thread pool
+     * @param bundleContext The bundle context to use.
+     * @param syncPool The synchronous thread pool.
+     * @param asyncPool The asynchronous thread pool.
+     * @param timeout The thread execution timeout.
+     * @param ignoreTimeout The thread ignore timeout.
+     * @param requireTopic True to define the topic as required, false else.
+     * @param ignoreTopics The array of topics to ignore.
+     * @param addTimestamp True to add timestamp to the event, false else.
+     * @param addSubject True to add subject to the event, false else.
      */
     public EventAdminImpl(
             final BundleContext bundleContext,
@@ -93,9 +100,10 @@ public class EventAdminImpl implements EventAdmin
     }
 
     /**
-     * Check if the event admin is active and return the tracker
-     * @return The tracker
-     * @throws IllegalArgumentException if the event admin has been stopped
+     * Check if the event admin is active and return the tracker.
+     *
+     * @return The event tracker.
+     * @throws IllegalArgumentException If the event admin has been stopped.
      */
     private EventHandlerTracker getTracker() {
         final EventHandlerTracker localTracker = tracker;
@@ -106,7 +114,10 @@ public class EventAdminImpl implements EventAdmin
     }
 
     /**
-     * Check whether the topic should be delivered at all
+     * Check whether the topic should be delivered at all.
+     *
+     * @param event The event.
+     * @return True if the topic is delivered, false else.
      */
     private boolean checkTopic( final Event event )
     {
@@ -157,9 +168,8 @@ public class EventAdminImpl implements EventAdmin
     /**
      * Post an asynchronous event.
      *
-     * @param event The event to be posted by this service
-     *
-     * @throws IllegalStateException - In case we are stopped
+     * @param event The event to be posted by this service.
+     * @throws IllegalStateException In case we are stopped.
      *
      * @see org.osgi.service.event.EventAdmin#postEvent(org.osgi.service.event.Event)
      */
@@ -174,9 +184,8 @@ public class EventAdminImpl implements EventAdmin
     /**
      * Send a synchronous event.
      *
-     * @param event The event to be send by this service
-     *
-     * @throws IllegalStateException - In case we are stopped
+     * @param event The event to be send by this service.
+     * @throws IllegalStateException In case we are stopped.
      *
      * @see org.osgi.service.event.EventAdmin#sendEvent(org.osgi.service.event.Event)
      */
@@ -199,6 +208,13 @@ public class EventAdminImpl implements EventAdmin
 
     /**
      * Update the event admin with new configuration.
+     *
+     * @param timeout The event timeout.
+     * @param ignoreTimeout The event ignore timeout.
+     * @param requireTopic True if the event require a topic, false else.
+     * @param ignoreTopics The array of topic to ignore.
+     * @param addTimestamp True to add timestamp to the event, false else.
+     * @param addSubject True to add subject to the event, false else.
      */
     public void update(final int timeout,
                        final String[] ignoreTimeout,
@@ -217,9 +233,13 @@ public class EventAdminImpl implements EventAdmin
     }
 
     /**
-     * This is a utility method that will throw a <tt>NullPointerException</tt>
+     * This is a utility method that will throw a <code>NullPointerException</code>
      * in case that the given object is null. The message will be of the form
      * "${name} + may not be null".
+     *
+     * @param object The object to check.
+     * @param name The object name (in the event).
+     * @throws NullPointerException If the object is null.
      */
     private void checkNull(final Object object, final String name)
     {

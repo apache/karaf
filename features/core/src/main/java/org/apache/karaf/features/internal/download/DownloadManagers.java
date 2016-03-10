@@ -25,9 +25,6 @@ public final class DownloadManagers {
 
     private DownloadManagers() { }
 
-    /**
-     * Creates a DownloadManager
-     */
     public static DownloadManager createDownloadManager(MavenResolver resolver, ScheduledExecutorService executorService) {
         return createDownloadManager(resolver, executorService, 0, 0);
     }

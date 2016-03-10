@@ -27,144 +27,144 @@ public interface JmsService {
     /**
      * List the JMS connection factories.
      *
-     * @return the list of JMS connection factory names.
-     * @throws Exception
+     * @return The {@link List} of JMS connection factory names.
+     * @throws Exception If the service fails.
      */
     List<String> connectionFactories() throws Exception;
 
     /**
-     * List the JMS connecion factories file names.
+     * List the JMS connection factories file names.
      *
-     * @return the list of JMS connection factory file names.
-     * @throws Exception
+     * @return The {@link List} of JMS connection factory file names.
+     * @throws Exception If the service fails.
      */
     List<String> connectionFactoryFileNames() throws Exception;
 
     /**
      * Create a new JMS connection factory.
      *
-     * @param name the JMS connection factory name.
-     * @param type the JMS connection factory type (ActiveMQ, WebsphereMQ, ...).
-     * @param url the JMS URL to use.
-     * @throws Exception
+     * @param name The JMS connection factory name.
+     * @param type The JMS connection factory type (ActiveMQ, WebsphereMQ, ...).
+     * @param url The JMS URL to use.
+     * @throws Exception If the service fails.
      */
     void create(String name, String type, String url) throws Exception;
 
     /**
      * Create a new JMS connection factory.
      *
-     * @param name the JMS connection factory name.
-     * @param type the JMS connection factory type (ActiveMQ, WebsphereMQ, ...).
-     * @param url the JMS URL to use.
-     * @param username the username to use.
-     * @param password the password to use.
-     * @throws Exception
+     * @param name The JMS connection factory name.
+     * @param type The JMS connection factory type (ActiveMQ, WebsphereMQ, ...).
+     * @param url The JMS URL to use.
+     * @param username The username to use.
+     * @param password The password to use.
+     * @throws Exception If the service fails.
      */
     void create(String name, String type, String url, String username, String password) throws Exception;
 
     /**
      * Delete a JMS connection factory.
      *
-     * @param name the JMS connection factory name.
-     * @throws Exception
+     * @param name The JMS connection factory name.
+     * @throws Exception If the service fails.
      */
     void delete(String name) throws Exception;
 
     /**
      * Get details about a given JMS connection factory.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return a map (property/value) containing details.
-     * @throws Exception
+     * @param connectionFactory The JMS connection factory name.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return A {@link Map} (property/value) containing details.
+     * @throws Exception If the service fails.
      */
     Map<String, String> info(String connectionFactory, String username, String password) throws Exception;
 
     /**
      * Count the number of messages in a JMS queue.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param queue the queue name.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the number of messages in a JMS queue.
-     * @throws Exception
+     * @param connectionFactory The JMS connection factory name.
+     * @param queue The queue name.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The number of messages in a JMS queue.
+     * @throws Exception If the service fails.
      */
     int count(String connectionFactory, String queue, String username, String password) throws Exception;
 
     /**
      * List the queues.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the list of queues.
-     * @throws Exception
+     * @param connectionFactory The JMS connection factory name.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The {@link List} of queues.
+     * @throws Exception If the service fails.
      */
     List<String> queues(String connectionFactory, String username, String password) throws Exception;
 
     /**
      * List the topics.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the list of topics.
-     * @throws Exception
+     * @param connectionFactory The JMS connection factory name.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The {@link List} of topics.
+     * @throws Exception If the service fails.
      */
     List<String> topics(String connectionFactory, String username, String password) throws Exception;
 
     /**
      * Browse a destination.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param queue the queue name.
-     * @param selector the selector.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the list of messages.
-     * @throws Exception
+     * @param connectionFactory The JMS connection factory name.
+     * @param queue The queue name.
+     * @param selector The selector.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The {@link List} of messages.
+     * @throws Exception If the service fails.
      */
     List<JmsMessage> browse(String connectionFactory, String queue, String selector, String username, String password) throws Exception;
 
     /**
      * Send a message on the given queue.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param queue the queue name.
-     * @param body the message body.
-     * @param replyTo the message replyTo header.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @throws Exception
+     * @param connectionFactory The JMS connection factory name.
+     * @param queue The queue name.
+     * @param body The message body.
+     * @param replyTo The message replyTo header.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @throws Exception If the service fails.
      */
     void send(String connectionFactory, String queue, String body, String replyTo, String username, String password) throws Exception;
 
     /**
      * Consume messages from a given destination.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param queue the queue name.
-     * @param selector the messages selector.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the number of messages consumed.
-     * @throws Exception
+     * @param connectionFactory The JMS connection factory name.
+     * @param queue The queue name.
+     * @param selector The messages selector.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The number of messages consumed.
+     * @throws Exception If the service fails.
      */
     int consume(String connectionFactory, String queue, String selector, String username, String password) throws Exception;
 
     /**
      * Move messages from a destination to another.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param sourceQueue the source queue.
-     * @param targetQueue the target queue.
-     * @param selector the messages selector on the source queue.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the number of messages moved.
-     * @throws Exception
+     * @param connectionFactory The JMS connection factory name.
+     * @param sourceQueue The source queue.
+     * @param targetQueue The target queue.
+     * @param selector The messages selector on the source queue.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The number of messages moved.
+     * @throws Exception If the service fails.
      */
     int move(String connectionFactory, String sourceQueue, String targetQueue, String selector, String username, String password) throws Exception;
 

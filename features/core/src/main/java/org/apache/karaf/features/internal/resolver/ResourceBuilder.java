@@ -1132,6 +1132,7 @@ public final class ResourceBuilder {
      *
      * @param value the delimited string to parse.
      * @param delim the characters delimiting the tokens.
+     * @param trim true to trim the string, false else.
      * @return a list of string or an empty list if there are none.
      */
     public static List<String> parseDelimitedString(String value, String delim, boolean trim) {

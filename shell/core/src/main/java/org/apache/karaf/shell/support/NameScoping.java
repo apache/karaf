@@ -17,7 +17,6 @@
  */
 package org.apache.karaf.shell.support;
 
-
 import org.apache.karaf.shell.api.console.Session;
 
 /**
@@ -28,8 +27,12 @@ public class NameScoping {
     public static final String MULTI_SCOPE_MODE_KEY = "MULTI_SCOPE_MODE";
 
     /**
-     * Returns the name of the command which can omit the global scope prefix if the command starts with the
-     * same prefix as the current application
+     * Return the name of the command which can omit the global scope prefix if the command starts with the
+     * same prefix as the current application.
+     *
+     * @param session the command session.
+     * @param key the command key.
+     * @return the command without the prefix.
      */
     public static String getCommandNameWithoutGlobalPrefix(Session session, String key) {
         if (!isMultiScopeMode(session)) {
@@ -47,7 +50,11 @@ public class NameScoping {
     }
 
     /**
-     * Returns true if the given scope is the global scope so that it can be hidden from help messages
+     * Return true if the given scope is the global scope so that it can be hidden from help messages.
+     *
+     * @param session the command session.
+     * @param scope the command scope.
+     * @return true if the command scope is global, false else.
      */
     public static boolean isGlobalScope(Session session, String scope) {
         if (session == null)
@@ -63,8 +70,11 @@ public class NameScoping {
     }
 
     /**
-     * Returns true if we are in multi-scope mode (the default) or if we are in single scope mode which means we
-     * avoid prefixing commands with their scope
+     * Return true if we are in multi-scope mode (the default) or if we are in single scope mode which means we
+     * avoid prefixing commands with their scope.
+     *
+     * @param session the command session.
+     * @return true if the command is multi-scoped, false else.
      */
     public static boolean isMultiScopeMode(Session session) {
         if (session == null)

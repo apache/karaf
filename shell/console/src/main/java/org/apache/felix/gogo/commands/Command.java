@@ -31,23 +31,32 @@ import java.lang.annotation.ElementType;
 @Target({ElementType.TYPE})
 @Deprecated
 public @interface Command {
+
     /**
-     * Returns the scope or sub shell of the command
+     * Return the scope or sub shell of the command.
+     *
+     * @return The command scope.
      */
     String scope();
 
     /**
-     * REturns the name of the command if used inside a shell
+     * Return the name of the command if used inside a shell.
+     *
+     * @return The command name.
      */
     String name();
 
     /**
-     * Returns the description of the command which is used to generate command line help
+     * Return the description of the command which is used to generate command line help.
+     *
+     * @return The command description.
      */
     String description() default "";
 
     /**
-     * Returns a detailed description of the command
+     * Return a detailed description of the command.
+     *
+     * @return The command detailed description.
      */
     String detailedDescription() default "";
 }

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.util.process;
 
 import java.io.InputStream;
@@ -26,8 +25,8 @@ import java.io.IOException;
 /**
  * Copies all data from an input stream to an output stream.
  */
-public class StreamPumper implements Runnable
-{
+public class StreamPumper implements Runnable {
+
     private InputStream in;
 
     private OutputStream out;
@@ -53,10 +52,9 @@ public class StreamPumper implements Runnable
     /**
      * Create a new stream pumper.
      *
-     * @param in                    Input stream to read data from
-     * @param out                   Output stream to write data to.
-     * @param closeWhenExhausted    If true, the output stream will be closed when
-     *                              the input is exhausted.
+     * @param in The input stream to read data from.
+     * @param out The output stream to write data to.
+     * @param closeWhenExhausted If true, the output stream will be closed when the input is exhausted.
      */
     public StreamPumper(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
         assert in != null;
@@ -70,8 +68,8 @@ public class StreamPumper implements Runnable
     /**
      * Create a new stream pumper.
      *
-     * @param in    Input stream to read data from
-     * @param out   Output stream to write data to.
+     * @param in The input stream to read data from.
+     * @param out The output stream to write data to.
      */
     public StreamPumper(final InputStream in, final OutputStream out) {
         this(in, out, false);
@@ -88,7 +86,7 @@ public class StreamPumper implements Runnable
     /**
      * Set whether data should be flushed through to the output stream.
      *
-     * @param autoflush     If true, push through data; if false, let it be buffered
+     * @param autoflush If true, push through data; if false, let it be buffered.
      */
     public void setAutoflush(boolean autoflush) {
         this.autoflush = autoflush;
@@ -96,16 +94,17 @@ public class StreamPumper implements Runnable
 
     /**
      * Set whether data should be read in a non blocking way.
-     * @param nonBlocking   If true, data will be read in a non blocking mode
+     *
+     * @param nonBlocking If true, data will be read in a non blocking mode.
      */
     public void setNonBlocking(boolean nonBlocking) {
         this.nonBlocking = nonBlocking;
     }
 
     /**
-     * Copies data from the input stream to the output stream.
+     * Copy data from the input stream to the output stream.
      *
-     * Terminates as soon as the input stream is closed or an error occurs.
+     * Terminate as soon as the input stream is closed or an error occurs.
      */
     public void run() {
         synchronized (this) {
@@ -175,9 +174,9 @@ public class StreamPumper implements Runnable
     }
 
     /**
-     * Tells whether the end of the stream has been reached.
+     * Tell whether the end of the stream has been reached.
      *
-     * @return true     If the stream has been exhausted.
+     * @return true if the stream has been exhausted.
      */
     public synchronized boolean isFinished() {
         return finished;
@@ -187,6 +186,7 @@ public class StreamPumper implements Runnable
      * This method blocks until the stream pumper finishes.
      *
      * @see #isFinished()
+     * @throws InterruptedException if the stream pumper has been interrupted.
      */
     public synchronized void waitFor() throws InterruptedException {
         while (!isFinished()) {
@@ -198,7 +198,6 @@ public class StreamPumper implements Runnable
      * Set the size in bytes of the read buffer.
      *
      * @param bufferSize the buffer size to use.
-     * @throws IllegalStateException if the StreamPumper is already running.
      */
     public synchronized void setBufferSize(final int bufferSize) {
         if (started) {

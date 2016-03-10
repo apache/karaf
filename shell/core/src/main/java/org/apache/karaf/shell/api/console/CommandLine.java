@@ -28,16 +28,22 @@ public interface CommandLine {
 
     /**
      * Retrieve the argument index for the cursor position
+     *
+     * @return the cursor argument index
      */
     int getCursorArgumentIndex();
 
     /**
      * Retrieve the argument for the cursor position
+     *
+     * @return the cursor argument at position
      */
     String getCursorArgument();
 
     /**
      * Retrieve the position of the cursor within the argument
+     *
+     * @return the position of the argument
      */
     int getArgumentPosition();
 
@@ -45,16 +51,22 @@ public interface CommandLine {
      * List of arguments on the current command.
      * If the command line contains multiple commands, only the command corresponding
      * to the cursor position is available.
+     *
+     * @return array of arguments
      */
     String[] getArguments();
 
     /**
      * Retrieve the position of the cursor within the command line.
+     *
+     * @return the buffer position
      */
     int getBufferPosition();
 
     /**
      * Retrieve the full buffer.
+     *
+     * @return the buffer
      */
     String getBuffer();
 

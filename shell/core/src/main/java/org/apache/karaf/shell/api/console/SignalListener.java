@@ -24,8 +24,9 @@ package org.apache.karaf.shell.api.console;
 public interface SignalListener {
 
     /**
+     * Callback method called when a signal occurs.
      *
-     * @param signal
+     * @param signal the signal event.
      */
     void signal(Signal signal);
 }

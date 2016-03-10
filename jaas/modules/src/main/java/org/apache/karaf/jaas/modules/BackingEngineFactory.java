@@ -20,13 +20,18 @@ import java.util.Map;
 public interface BackingEngineFactory {
 
     /**
-     * Returns the corresponding module class.
+     * Get the module class.
+     *
+     * @return the module class.
      */
     String getModuleClass();
 
 
     /**
      * Backing engine factory method.
+     *
+     * @param options the factory options.
+     * @return the built backing engine.
      */
     BackingEngine build(Map<String,?> options);
 

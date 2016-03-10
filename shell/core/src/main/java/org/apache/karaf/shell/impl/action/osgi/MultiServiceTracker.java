@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceReference;
  * Track multiple service by its type.
  * When tracking multiple services, the dependency is always considered optional.
  *
- * @param <T>
+ * @param <T> the service type (interface)..
  */
 public abstract class MultiServiceTracker<T> {
 

@@ -25,34 +25,35 @@ import java.io.IOException;
 public interface ProcessBuilder {
 
     /**
-     * Specified the current directory to run the command from
+     * Specify the current directory to run the command from.
      *
-     * @param dir the directory to run the command from
-     * @return the ProcessBuilder instance
+     * @param dir The directory to run the command from.
+     * @return The {@link ProcessBuilder} instance.
      */
     ProcessBuilder directory(File dir);
 
     /**
-     * Set the command to execute
+     * Set the command to execute.
      *
-     * @param command the command to execute
-     * @return the ProcessBuilder instance
+     * @param command The command to execute.
+     * @return The {@link ProcessBuilder} instance.
      */
     ProcessBuilder command(String command);
 
     /**
-     * Create and start the process
+     * Create and start the process.
      *
-     * @return the process that has been started
-     * @throws IOException if the process can not be created
+     * @return The process that has been started.
+     * @throws IOException If the process can not be created.
      */
     org.apache.karaf.jpm.Process start() throws IOException;
 
     /**
-     * Attach to an existing process
+     * Attach to an existing process.
      *
-     * @return the process that has been attached
-     * @throws IOException if the process can not be attached to
+     * @param pid The process PID to attach.
+     * @return The process that has been attached.
+     * @throws IOException if the process can not be attached to.
      */
     org.apache.karaf.jpm.Process attach(int pid) throws IOException;
 

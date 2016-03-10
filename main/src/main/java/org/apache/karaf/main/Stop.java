@@ -32,11 +32,11 @@ import java.net.Socket;
 public class Stop {
 
     /**
-     * Sends the shutdown command to the running karaf instance. Uses either a shut down port configured in config.properties or
+     * Send the shutdown command to the running Karaf instance. Uses either a shut down port configured in config.properties or
      * the port from the shutdown port file.
      *
-     * @param args
-     * @throws Exception
+     * @param args The arguments to the stop main method.
+     * @throws Exception In case of failure while stopping.
      */
     public static void main(String[] args) throws Exception {
         ConfigProperties config = new ConfigProperties();

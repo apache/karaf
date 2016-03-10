@@ -23,7 +23,7 @@ import java.io.OutputStream;
 public interface DumpDestination {
 
     /**
-     * Creates new entry in dump destination.
+     * Create new entry in dump destination.
      * 
      * Destination does not close returned output stream by default, dump
      * provider should do this after completing write operation.
@@ -36,6 +36,8 @@ public interface DumpDestination {
 
     /**
      * Complete creation of the dump.
+     *
+     * @throws Exception If the save operation fails.
      */
     void save() throws Exception;
 

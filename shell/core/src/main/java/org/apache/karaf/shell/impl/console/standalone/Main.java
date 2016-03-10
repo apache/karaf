@@ -62,8 +62,8 @@ public class Main {
     /**
      * Use this method when the shell is being executed as a top level shell.
      *
-     * @param args
-     * @throws Exception
+     * @param args the arguments.
+     * @throws Exception in case of a failure.
      */
     public void run(String args[]) throws Exception {
 
@@ -171,13 +171,13 @@ public class Main {
     /**
      * Allow sub classes of main to change the ConsoleImpl implementation used.
      *
-     * @param sessionFactory
-     * @param in
-     * @param out
-     * @param err
-     * @param terminal
-     * @return
-     * @throws Exception
+     * @param sessionFactory the session factory.
+     * @param in the input stream (console std in).
+     * @param out the output stream (console std out).
+     * @param err the error stream (console std err).
+     * @param terminal the terminal.
+     * @return the created session.
+     * @throws Exception if something goes wrong during session creation.
      */
     protected Session createSession(SessionFactory sessionFactory, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
         return sessionFactory.create(in, out, err, terminal, null, null);
@@ -192,6 +192,8 @@ public class Main {
     /**
      * Sub classes can override so that their registered commands do not conflict with the default shell
      * implementation.
+     *
+     * @return the location of the discovery resource.
      */
     public String getDiscoveryResource() {
         return "META-INF/services/org/apache/karaf/shell/commands";
@@ -233,10 +235,12 @@ public class Main {
     }
 
     /**
-     * Returns whether or not we are in multi-scope mode.
-     * <p/>
-     * The default mode is multi-scoped where we prefix commands by their scope. If we are in single
-     * scoped mode then we don't use scope prefixes when registering or tab completing commands.
+     * <p>Returns whether or not we are in multi-scope mode.</p>
+     *
+     * <p>The default mode is multi-scoped where we prefix commands by their scope. If we are in single
+     * scoped mode then we don't use scope prefixes when registering or tab completing commands.</p>
+     *
+     * @return true if the console is multi-scope, false else.
      */
     public boolean isMultiScopeMode() {
         return true;

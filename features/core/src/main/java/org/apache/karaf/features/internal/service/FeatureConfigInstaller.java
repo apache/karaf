@@ -149,8 +149,7 @@ public class FeatureConfigInstaller {
 
     /**
      * Substitute variables in the final name and append prefix if necessary.
-     * 
-     * <p>
+     *
      * <ol>
      * <li>If the final name does not start with '${' it is prefixed with
      * karaf.base (+ file separator).</li>
@@ -161,7 +160,6 @@ public class FeatureConfigInstaller {
      * substituted, it will be prefixed with karaf.base (+ file separator), too.
      * </li>
      * </ol>
-     * </p>
      * 
      * @param finalname
      *            The final name that should be processed.

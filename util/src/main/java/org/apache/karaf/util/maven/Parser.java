@@ -22,7 +22,7 @@ import java.net.MalformedURLException;
 import java.util.Map;
 
 /**
- * Parser for mvn: protocol.<br/>
+ * Parser for mvn: protocol.
  *
  * @author Alin Dreghiciu
  * @author Toni Menzel
@@ -122,7 +122,6 @@ public class Parser
      * Creates a new protocol parser.
      *
      * @param path the path part of the url (without starting mvn:)
-     *
      * @throws MalformedURLException if provided path does not comply to expected syntax or an malformed repository URL
      */
     public Parser( final String path )
@@ -151,10 +150,10 @@ public class Parser
     }
 
     /**
-     * Returns the artifact path from the given maven uri.
-     * @param uri the maven uri
-     * @return the artifact path
-     * @throws MalformedURLException
+     * Return the artifact path from the given maven uri.
+     * @param uri the Maven URI.
+     * @return the artifact actual path.
+     * @throws MalformedURLException in case of "bad" provided URL/URI.
      */
     public static String pathFromMaven(String uri) throws MalformedURLException {
         if (!uri.startsWith("mvn:")) {
@@ -211,10 +210,9 @@ public class Parser
     }
 
     /**
-     * Parses the artifact part of the url ( without the repository).
+     * Parse the artifact part of the url (without the repository).
      *
      * @param part url part without protocol and repository.
-     *
      * @throws MalformedURLException if provided path does not comply to syntax.
      */
     private void parseArtifactPart( final String part )
@@ -259,9 +257,9 @@ public class Parser
     }
 
     /**
-     * Returns the repository URL if present, null otherwise
+     * Return the repository URL if present, null otherwise.
      *
-     * @return repository URL
+     * @return repository URL.
      */
     public String getRepositoryURL()
     {
@@ -269,9 +267,9 @@ public class Parser
     }
 
     /**
-     * Returns the group id of the artifact.
+     * Return the group id of the artifact.
      *
-     * @return group Id
+     * @return group ID.
      */
     public String getGroup()
     {
@@ -279,9 +277,9 @@ public class Parser
     }
 
     /**
-     * Returns the artifact id.
+     * Return the artifact id.
      *
-     * @return artifact id
+     * @return artifact id.
      */
     public String getArtifact()
     {
@@ -289,9 +287,9 @@ public class Parser
     }
 
     /**
-     * Returns the artifact version.
+     * Return the artifact version.
      *
-     * @return version
+     * @return version.
      */
     public String getVersion()
     {
@@ -299,9 +297,9 @@ public class Parser
     }
 
     /**
-     * Returns the artifact type.
+     * Return the artifact type.
      *
-     * @return type
+     * @return type.
      */
     public String getType()
     {
@@ -309,9 +307,9 @@ public class Parser
     }
 
     /**
-     * Returns the artifact classifier.
+     * Return the artifact classifier.
      *
-     * @return classifier
+     * @return classifier.
      */
     public String getClassifier()
     {
@@ -319,9 +317,9 @@ public class Parser
     }
 
     /**
-     * Returns the complete path to artifact as stated by Maven 2 repository layout.
+     * Return the complete path to artifact as stated by Maven 2 repository layout.
      *
-     * @return artifact path
+     * @return artifact path.
      */
     public String getArtifactPath()
     {
@@ -329,11 +327,10 @@ public class Parser
     }
 
     /**
-     * Returns the complete path to artifact as stated by Maven 2 repository layout.
+     * Return the complete path to artifact as stated by Maven 2 repository layout.
      *
      * @param version The version of the artifact.
-     *
-     * @return artifact path
+     * @return artifact path.
      */
     public String getArtifactPath( final String version )
     {
@@ -354,13 +351,12 @@ public class Parser
     }
 
     /**
-     * Returns the version for an artifact for a snapshot version.
+     * Return the version for an artifact for a snapshot version.
      *
-     * @param version     The version of the snapshot.
-     * @param timestamp   The timestamp of the snapshot.
+     * @param version The version of the snapshot.
+     * @param timestamp The timestamp of the snapshot.
      * @param buildnumber The buildnumber of the snapshot.
-     *
-     * @return artifact path
+     * @return artifact path.
      */
     public String getSnapshotVersion( final String version, final String timestamp, final String buildnumber )
     {
@@ -368,13 +364,12 @@ public class Parser
     }
 
     /**
-     * Returns the complete path to artifact for a snapshot file.
+     * Return the complete path to artifact for a snapshot file.
      *
-     * @param version     The version of the snapshot.
-     * @param timestamp   The timestamp of the snapshot.
+     * @param version The version of the snapshot.
+     * @param timestamp The timestamp of the snapshot.
      * @param buildnumber The buildnumber of the snapshot.
-     *
-     * @return artifact path
+     * @return artifact path.
      */
     public String getSnapshotPath( final String version, final String timestamp, final String buildnumber )
     {
@@ -395,11 +390,10 @@ public class Parser
     }
 
     /**
-     * Returns the path to metdata file corresponding to this artifact version.
+     * Return the path to metadata file corresponding to this artifact version.
      *
      * @param version The version of the the metadata.
-     *
-     * @return metadata file path
+     * @return metadata file path.
      */
     public String getVersionMetadataPath( final String version )
     {
@@ -415,11 +409,10 @@ public class Parser
     }
 
     /**
-     * Returns the path to local metdata file corresponding to this artifact version.
+     * Return the path to local metadata file corresponding to this artifact version.
      *
      * @param version The version of the the metadata.
-     *
-     * @return metadata file path
+     * @return metadata file path.
      */
     public String getVersionLocalMetadataPath( final String version )
     {
@@ -435,9 +428,9 @@ public class Parser
     }
 
     /**
-     * Returns the complete path to artifact local metadata file.
+     * Return the complete path to artifact local metadata file.
      *
-     * @return artifact path
+     * @return artifact path.
      */
     public String getArtifactLocalMetdataPath()
     {
@@ -451,9 +444,9 @@ public class Parser
     }
 
     /**
-     * Returns the complete path to artifact metadata file.
+     * Return the complete path to artifact metadata file.
      *
-     * @return artifact path
+     * @return artifact path.
      */
     public String getArtifactMetdataPath()
     {

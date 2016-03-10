@@ -32,20 +32,21 @@ public interface KeystoreManager {
     KeystoreInstance getKeystore(String name);
 
     /**
-     * Gets a SSLContext using one Keystore to access the private key
+     * Get a SSLContext using one Keystore to access the private key
      * and another to provide the list of trusted certificate authorities.
-     * @param provider
-     * @param protocol The SSL protocol to use
-     * @param algorithm The SSL algorithm to use
-     * @param keyStore The key keystore name as provided by listKeystores.  The
+     *
+     * @param provider the SSL provider to use.
+     * @param protocol the SSL protocol to use.
+     * @param algorithm the SSL algorithm to use.
+     * @param keyStore the key keystore name as provided by listKeystores.  The
      *                 KeystoreInstance for this keystore must be unlocked.
-     * @param keyAlias The name of the private key in the keystore.  The
+     * @param keyAlias the name of the private key in the keystore.  The
      *                 KeystoreInstance for this keystore must have unlocked
      *                 this key.
      * @param trustStore The trust keystore name as provided by listKeystores.
      *                   The KeystoreInstance for this keystore must have
      *                   unlocked this key.
-     *
+     * @return the SSLContext.
      * @throws KeystoreIsLocked Occurs when the requested key keystore cannot
      *                          be used because it has not been unlocked.
      * @throws KeyIsLocked Occurs when the requested private key in the key
@@ -57,9 +58,10 @@ public interface KeystoreManager {
                                 String keyAlias, String trustStore) throws GeneralSecurityException;
 
     /**
-     * Gets a SSLContext using one Keystore to access the private key
+     * Get a SSLContext using one Keystore to access the private key
      * and another to provide the list of trusted certificate authorities.
-     * @param provider
+     *
+     * @param provider the SSL provider to use.
      * @param protocol The SSL protocol to use
      * @param algorithm The SSL algorithm to use
      * @param keyStore The key keystore name as provided by listKeystores.  The
@@ -71,12 +73,8 @@ public interface KeystoreManager {
      *                   The KeystoreInstance for this keystore must have
      *                   unlocked this key.
      * @param timeout Amount of time waiting for the keyStore and keyAlias to be available.
-     *
-     * @throws KeystoreIsLocked Occurs when the requested key keystore cannot
-     *                          be used because it has not been unlocked.
-     * @throws KeyIsLocked Occurs when the requested private key in the key
-     *                     keystore cannot be used because it has not been
-     *                     unlocked.
+     * @return the SSLContext.
+     * @throws GeneralSecurityException General security failure.
      */
     SSLContext createSSLContext(String provider, String protocol,
                                 String algorithm, String keyStore,
@@ -84,36 +82,32 @@ public interface KeystoreManager {
                                 long timeout) throws GeneralSecurityException;
 
     /**
-     * Gets a ServerSocketFactory using one Keystore to access the private key
+     * Get a ServerSocketFactory using one Keystore to access the private key
      * and another to provide the list of trusted certificate authorities.
-     * @param provider
-     * @param protocol The SSL protocol to use
-     * @param algorithm The SSL algorithm to use
-     * @param keyStore The key keystore name as provided by listKeystores.  The
+     * @param provider the SSL provider to use.
+     * @param protocol The SSL protocol to use.
+     * @param algorithm The SSL algorithm to use.
+     * @param keyStore The key keystore name as provided by listKeystores. The
      *                 KeystoreInstance for this keystore must be unlocked.
-     * @param keyAlias The name of the private key in the keystore.  The
+     * @param keyAlias The name of the private key in the keystore. The
      *                 KeystoreInstance for this keystore must have unlocked
      *                 this key.
      * @param trustStore The trust keystore name as provided by listKeystores.
      *                   The KeystoreInstance for this keystore must have
      *                   unlocked this key.
-     *
-     * @throws KeystoreIsLocked Occurs when the requested key keystore cannot
-     *                          be used because it has not been unlocked.
-     * @throws KeyIsLocked Occurs when the requested private key in the key
-     *                     keystore cannot be used because it has not been
-     *                     unlocked.
+     * @return the SSLServerSocketFactory.
+     * @throws GeneralSecurityException General security failure.
      */
     SSLServerSocketFactory createSSLServerFactory(String provider, String protocol,
                                                   String algorithm, String keyStore,
                                                   String keyAlias, String trustStore) throws GeneralSecurityException;
 
     /**
-     * Gets a ServerSocketFactory using one Keystore to access the private key
+     * Get a ServerSocketFactory using one Keystore to access the private key
      * and another to provide the list of trusted certificate authorities.
-     * @param provider
-     * @param protocol The SSL protocol to use
-     * @param algorithm The SSL algorithm to use
+     * @param provider the SSL provider to use.
+     * @param protocol The SSL protocol to use.
+     * @param algorithm The SSL algorithm to use.
      * @param keyStore The key keystore name as provided by listKeystores.  The
      *                 KeystoreInstance for this keystore must be unlocked.
      * @param keyAlias The name of the private key in the keystore.  The
@@ -123,12 +117,8 @@ public interface KeystoreManager {
      *                   The KeystoreInstance for this keystore must have
      *                   unlocked this key.
      * @param timeout Amount of time to wait for keyStore and keyAlias to be available.
-     *
-     * @throws KeystoreIsLocked Occurs when the requested key keystore cannot
-     *                          be used because it has not been unlocked.
-     * @throws KeyIsLocked Occurs when the requested private key in the key
-     *                     keystore cannot be used because it has not been
-     *                     unlocked.
+     * @return the SSLServerSocketFactory.
+     * @throws GeneralSecurityException General security failure.
      */
     SSLServerSocketFactory createSSLServerFactory(String provider, String protocol,
                                                   String algorithm, String keyStore,
@@ -136,33 +126,34 @@ public interface KeystoreManager {
                                                   long timeout) throws GeneralSecurityException;
 
     /**
-     * Gets a SocketFactory using one Keystore to access the private key
+     * Get a SocketFactory using one Keystore to access the private key
      * and another to provide the list of trusted certificate authorities.
-     * @param provider The SSL provider to use, or null for the default
-     * @param protocol The SSL protocol to use
-     * @param algorithm The SSL algorithm to use
-     * @param keyStore The key keystore name as provided by listKeystores.  The
+     *
+     * @param provider the SSL provider to use, or null for the default.
+     * @param protocol the SSL protocol to use.
+     * @param algorithm the SSL algorithm to use.
+     * @param keyStore the key keystore name as provided by listKeystores.  The
      *                 KeystoreInstance for this keystore must be unlocked.
-     * @param keyAlias The name of the private key in the keystore.  The
+     * @param keyAlias the name of the private key in the keystore.  The
      *                 KeystoreInstance for this keystore must have unlocked
      *                 this key.
-     * @param trustStore The trust keystore name as provided by listKeystores.
+     * @param trustStore the trust keystore name as provided by listKeystores.
      *                   The KeystoreInstance for this keystore must have
      *                   unlocked this key.
-     *
+     * @return the SSLSocketFactory.
      * @throws KeystoreIsLocked Occurs when the requested key keystore cannot
      *                          be used because it has not been unlocked.
      * @throws KeyIsLocked Occurs when the requested private key in the key
      *                     keystore cannot be used because it has not been
      *                     unlocked.
-     * @throws GeneralSecurityException
+     * @throws GeneralSecurityException General security failure.
      */
     SSLSocketFactory createSSLFactory(String provider, String protocol,
                                       String algorithm, String keyStore,
                                       String keyAlias, String trustStore) throws GeneralSecurityException;
 
     /**
-     * Gets a SocketFactory using one Keystore to access the private key
+     * Get a SocketFactory using one Keystore to access the private key
      * and another to provide the list of trusted certificate authorities.
      * @param provider The SSL provider to use, or null for the default
      * @param protocol The SSL protocol to use
@@ -176,13 +167,13 @@ public interface KeystoreManager {
      *                   The KeystoreInstance for this keystore must have
      *                   unlocked this key.
      * @param timeout Amount of time to wait for keyStore and keyAlias to be available.
-     *
+     * @return the SSLSocketFactory.
      * @throws KeystoreIsLocked Occurs when the requested key keystore cannot
      *                          be used because it has not been unlocked.
      * @throws KeyIsLocked Occurs when the requested private key in the key
      *                     keystore cannot be used because it has not been
      *                     unlocked.
-     * @throws GeneralSecurityException
+     * @throws GeneralSecurityException General security failure.
      */
     SSLSocketFactory createSSLFactory(String provider, String protocol,
                                       String algorithm, String keyStore,

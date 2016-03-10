@@ -58,10 +58,7 @@ public class BootFeaturesInstaller {
      * The system separator character.
      */
     private static final char SYSTEM_SEPARATOR = File.separatorChar;
-    
-    /**
-     * @param features list of boot features separated by comma. Optionally contains ;version=x.x.x to specify a specific feature version
-     */
+
     public BootFeaturesInstaller(BundleContext bundleContext,
                                  FeaturesServiceImpl featuresService,
                                  String repositories,

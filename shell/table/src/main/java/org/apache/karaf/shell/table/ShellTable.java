@@ -67,9 +67,10 @@ public class ShellTable {
     }
     
     /**
-     * Set text to display if there are no rows in the table
-     * @param text 
-     * @return
+     * Set text to display if there are no rows in the table.
+     *
+     * @param text The text to display when the table is empty.
+     * @return The shell table.
      */
     public ShellTable emptyTableText(String text) {
         this.emptyTableText = text;

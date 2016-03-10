@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.features.internal.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -26,25 +25,23 @@ import javax.xml.bind.annotation.XmlValue;
 
 import org.apache.karaf.features.BundleInfo;
 
-
 /**
- * Deployable element to install.
- * <p/>
- * <p/>
- * <p>Java class for bundle complex type.
- * <p/>
- * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ * <p>Deployable element to install.</p>
+ *
+ * <p>Java class for bundle complex type.</p>
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ *
  * <pre>
- * &lt;complexType name="bundle">
- *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>anyURI">
- *       &lt;attribute name="start-level" type="{http://www.w3.org/2001/XMLSchema}int" />
- *       &lt;attribute name="start" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="dependency" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *     &lt;/extension>
- *   &lt;/simpleContent>
- * &lt;/complexType>
+ * &lt;complexType name="bundle"&gt;
+ *   &lt;simpleContent&gt;
+ *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;anyURI"&gt;
+ *       &lt;attribute name="start-level" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+ *       &lt;attribute name="start" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="dependency" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/simpleContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)

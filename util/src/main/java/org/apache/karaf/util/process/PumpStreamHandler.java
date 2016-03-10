@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.karaf.util.process;
 
 import java.io.InputStream;
@@ -26,8 +25,8 @@ import java.io.IOException;
 /**
  * Copies standard output and error of children streams to standard output and error of the parent.
  */
-public class PumpStreamHandler
-{
+public class PumpStreamHandler {
+
     private final InputStream in;
 
     private final OutputStream out;
@@ -72,6 +71,8 @@ public class PumpStreamHandler
 
     /**
      * Set the input stream from which to read the standard output of the child.
+     *
+     * @param in the the child output stream.
      */
     public void setChildOutputStream(final InputStream in) {
         assert in != null;
@@ -81,6 +82,8 @@ public class PumpStreamHandler
 
     /**
      * Set the input stream from which to read the standard error of the child.
+     *
+     * @param in set the child error stream.
      */
     public void setChildErrorStream(final InputStream in) {
         assert in != null;
@@ -92,6 +95,8 @@ public class PumpStreamHandler
 
     /**
      * Set the output stream by means of which input can be sent to the child.
+     *
+     * @param out set the child output stream.
      */
     public void setChildInputStream(final OutputStream out) {
         assert out != null;
@@ -109,7 +114,7 @@ public class PumpStreamHandler
     /**
      * Attach to a child streams from the given process.
      *
-     * @param p     The process to attach to.
+     * @param p The process to attach to.
      */
     public void attach(final Process p) {
         assert p != null;
@@ -118,6 +123,7 @@ public class PumpStreamHandler
         setChildOutputStream(p.getInputStream());
         setChildErrorStream(p.getErrorStream());
     }
+
     /**
      * Start pumping the streams.
      */
@@ -191,6 +197,9 @@ public class PumpStreamHandler
 
     /**
      * Create the pump to handle child output.
+     *
+     * @param in the child input stream.
+     * @param out the child output stream.
      */
     protected void createChildOutputPump(final InputStream in, final OutputStream out) {
         assert in != null;
@@ -201,6 +210,9 @@ public class PumpStreamHandler
 
     /**
      * Create the pump to handle error output.
+     *
+     * @param in the child input stream.
+     * @param out the child output stream.
      */
     protected void createChildErrorPump(final InputStream in, final OutputStream out) {
         assert in != null;
@@ -210,7 +222,11 @@ public class PumpStreamHandler
     }
 
     /**
-     * Creates a stream pumper to copy the given input stream to the given output stream.
+     * Create a stream pumper to copy the given input stream to the given output stream.
+     *
+     * @param in the child input stream.
+     * @param out the child output stream.
+     * @return A thread object that does the pumping.
      */
     protected StreamPumper createPump(final InputStream in, final OutputStream out) {
         assert in != null;
@@ -220,13 +236,13 @@ public class PumpStreamHandler
     }
 
     /**
-     * Creates a stream pumper to copy the given input stream to the
+     * Create a stream pumper to copy the given input stream to the
      * given output stream.
      *
-     * @param in                    The input stream to copy from.
-     * @param out                   The output stream to copy to.
-     * @param closeWhenExhausted    If true close the inputstream.
-     * @return                      A thread object that does the pumping.
+     * @param in The input stream to copy from.
+     * @param out The output stream to copy to.
+     * @param closeWhenExhausted If true close the input stream.
+     * @return A thread object that does the pumping.
      */
     protected StreamPumper createPump(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
         assert in != null;
@@ -237,8 +253,13 @@ public class PumpStreamHandler
     }
 
     /**
-     * Creates a stream pumper to copy the given input stream to the
+     * Create a stream pumper to copy the given input stream to the
      * given output stream. Used for standard input.
+     *
+     * @param in The input stream to copy from.
+     * @param out The output stream to copy to.
+     * @param closeWhenExhausted If true close the input stream.
+     * @return A thread object that does the pumping.
      */
     protected StreamPumper createInputPump(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
         assert in != null;
@@ -257,4 +278,5 @@ public class PumpStreamHandler
     public StreamPumper getErrorPump() {
         return this.errorPump;
     }
+
 }

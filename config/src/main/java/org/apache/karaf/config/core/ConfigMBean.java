@@ -26,7 +26,7 @@ public interface ConfigMBean {
      * Get the list of all configuration PIDs.
      *
      * @return the list of all configuration PIDs.
-     * @throws Exception
+     * @throws MBeanException in case of MBean failure.
      */
     List<String> getConfigs() throws MBeanException;
 
@@ -34,7 +34,7 @@ public interface ConfigMBean {
      * Create a new configuration for the given PID.
      *
      * @param pid the configuration PID.
-     * @throws Exception
+     * @throws MBeanException in case of MBean failure.
      */
     void create(String pid) throws MBeanException;
 
@@ -42,7 +42,7 @@ public interface ConfigMBean {
      * Delete a configuration identified by the given PID.
      *
      * @param pid the configuration PID to delete.
-     * @throws Exception
+     * @throws MBeanException in case of MBean failure.
      */
     void delete(String pid) throws MBeanException;
 
@@ -51,7 +51,7 @@ public interface ConfigMBean {
      *
      * @param pid the configuration PID.
      * @return the list of properties.
-     * @throws Exception
+     * @throws MBeanException in case of MBean failure.
      */
     Map<String, String> listProperties(String pid) throws MBeanException;
 
@@ -60,7 +60,7 @@ public interface ConfigMBean {
      *
      * @param pid the configuration PID.
      * @param key the property key.
-     * @throws Exception
+     * @throws MBeanException in case of MBean failure.
      */
     void deleteProperty(String pid, String key) throws MBeanException;
 
@@ -70,7 +70,7 @@ public interface ConfigMBean {
      * @param pid the configuration PID.
      * @param key the property key.
      * @param value the value to append to the current property value.
-     * @throws Exception
+     * @throws MBeanException in case of MBean failure.
      */
     void appendProperty(String pid, String key, String value) throws MBeanException;
 
@@ -80,7 +80,7 @@ public interface ConfigMBean {
      * @param pid the configuration PID.
      * @param key the property key.
      * @param value the property value.
-     * @throws Exception
+     * @throws MBeanException in case of MBean failure.
      */
     void setProperty(String pid, String key, String value) throws MBeanException;
 
@@ -89,19 +89,18 @@ public interface ConfigMBean {
      *
      * @param pid the configuration PID.
      * @param properties the new properties to set in the configuration.
-     * @throws MBeanException
+     * @throws MBeanException in case of MBean failure.
      */
     void update(String pid, Map<String, String> properties) throws MBeanException;
     
     /**
      * Create a factory based configuration.
      *
-     * @param factoryPid
+     * @param factoryPid the configuration factory PID.
      * @param properties the new properties to set in the configuration.
-     * @return created pid
-     * @throws MBeanException
+     * @return the created PID.
+     * @throws MBeanException in case of MBean failure.
      */
     String createFactoryConfiguration(String factoryPid, Map<String, String> properties) throws MBeanException;
-
 
 }

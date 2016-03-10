@@ -46,9 +46,6 @@ import org.apache.karaf.jaas.config.KeystoreIsLocked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- */
 public class ResourceKeystoreInstance implements KeystoreInstance {
 
     private final Logger logger = LoggerFactory.getLogger(ResourceKeystoreInstance.class);
@@ -104,7 +101,8 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
     }
 
     /**
-     * @param keystorePath the keystorePath to set
+     * @param keystorePath the keystorePath to set.
+     * @throws IOException in case of failure while setting the path.
      */
     public void setPath(URL keystorePath) throws IOException {
         this.path = keystorePath;

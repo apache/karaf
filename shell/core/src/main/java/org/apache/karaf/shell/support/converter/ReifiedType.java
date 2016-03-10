@@ -30,10 +30,8 @@ package org.apache.karaf.shell.support.converter;
  * a subclass that provide type arguments should be respected. Blueprint
  * extender implementations can subclass this class and provide access to the
  * generics type graph if used in a conversion. Such a subclass must
- * <em>reify<em> the different Java 5 <code>Type</code> instances into the
+ * <em>reify</em> the different Java 5 <code>Type</code> instances into the
  * reified form. That is, a form where the raw Class is available with its optional type arguments as Reified Types.
- *
- * @Immutable
  */
 public class ReifiedType {
 	final static ReifiedType ALL = new ReifiedType(Object.class);
@@ -80,7 +78,7 @@ public class ReifiedType {
 	 * object is assignable to Object and therefore no conversion is then
 	 * necessary, this is compatible with older Javas than 5. For this reason,
 	 * the implementation in this class always returns the
-	 * <code>Object<code> class, regardless of the given index.
+	 * <code>Object</code> class, regardless of the given index.
 	 *
 	 * This method should be overridden by a subclass that provides access to
 	 * the generic information.
@@ -96,7 +94,7 @@ public class ReifiedType {
 	 *
 	 * @param i
 	 *            The index of the type argument
-	 * @return <code>ReifiedType(Object.class)<code>, subclasses must override this and return the generic argument at index <code>i</code>
+	 * @return <code>ReifiedType</code>, subclasses must override this and return the generic argument at index <code>i</code>
 	 */
 	public ReifiedType getActualTypeArgument(int i) {
 		return ALL;

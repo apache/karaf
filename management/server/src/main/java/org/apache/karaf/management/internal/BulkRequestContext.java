@@ -93,26 +93,30 @@ public class BulkRequestContext {
     }
 
     /**
-     * Returns list of PIDs related to RBAC/ACL
-     * @return
+     * Return list of PIDs related to RBAC/ACL.
+     *
+     * @return The list of PIDs.
      */
     public List<String> getAllPids() {
         return allPids;
     }
 
     /**
-     * Returns list of configurations from
-     * @return
+     * Return list of configurations from the whitelist.
+     *
+     * @return The list of configurations.
      */
     public List<Dictionary<String,Object>> getWhitelistProperties() {
         return whiteListProperties;
     }
 
     /**
-     * Returns {@link Configuration ConfigAdmin configuration} - may be cached in this instance of
+     * Return {@link Configuration ConfigAdmin configuration} - may be cached in this instance of
      * {@link BulkRequestContext context}
-     * @param generalPid
-     * @return
+     *
+     * @param generalPid The configuration PID.
+     * @return The configuration.
+     * @throws IOException If an error ocurrs while retrieving the configuration.
      */
     public Dictionary<String, Object> getConfiguration(String generalPid) throws IOException {
         if (!cachedConfigurations.containsKey(generalPid)) {

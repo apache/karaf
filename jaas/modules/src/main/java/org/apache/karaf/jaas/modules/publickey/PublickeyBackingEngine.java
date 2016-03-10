@@ -34,20 +34,11 @@ public class PublickeyBackingEngine implements BackingEngine {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(PublickeyBackingEngine.class);
 
-    
     private Properties users;
-   
 
-    /**
-     * Constructor
-     *
-     * @param users
-     */
     public PublickeyBackingEngine(Properties users) {
         this.users = users;
     }
-
-    
 
     @Override
     public void addUser(String username, String publickey) {
@@ -257,8 +248,6 @@ public class PublickeyBackingEngine implements BackingEngine {
         deleteRole(GROUP_PREFIX + group, role);
     }
 
-
-
     public Map<GroupPrincipal, String> listGroups() {
         Map<GroupPrincipal, String> result = new HashMap<GroupPrincipal, String>();
         for (String name : users.keySet()) {
@@ -268,8 +257,6 @@ public class PublickeyBackingEngine implements BackingEngine {
         }
         return result;
     }
-
-
 
     public void createGroup(String group) {
         String groupName = GROUP_PREFIX + group;

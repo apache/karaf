@@ -32,7 +32,7 @@ import org.osgi.framework.ServiceReference;
  * Track a single service by its type.
  * When tracking a single service, the dependency is always considered mandatory.
  *
- * @param <T>
+ * @param <T> the service type (interface).
  */
 public abstract class SingleServiceTracker<T> {
 

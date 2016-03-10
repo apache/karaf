@@ -22,17 +22,23 @@ package org.apache.karaf.shell.console;
 public interface SubShell {
 
     /**
-     * Returns the name of the command if used inside a shell
+     * Return the name of the command if used inside a shell.
+     *
+     * @return The name of the command in the shell.
      */
     String getName();
 
     /**
-     * Returns the description of the command which is used to generate command line help
+     * Return the description of the command which is used to generate command line help.
+     *
+     * @return The description of the command in the shell.
      */
     String getDescription();
 
     /**
-     * Returns a detailed description of the command
+     * Return a detailed description of the command.
+     *
+     * @return The detailed description of the command in the shell.
      */
     String getDetailedDescription();
 

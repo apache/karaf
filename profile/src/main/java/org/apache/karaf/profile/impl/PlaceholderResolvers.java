@@ -71,8 +71,11 @@ public final class PlaceholderResolvers {
     }
 
     /**
-     * Substitutes a placeholder with profile:[property file]/[key], with the target value.
-     * @return  The target value or the key as is.
+     * Substitute a placeholder with profile:[property file]/[key], with the target value.
+     *
+     * @param key The key in the configuration.
+     * @param configs A {@link Map} of configurations where to perform the substitution.
+     * @return The target value or the key as is.
      */
     public static String substituteProfileProperty(String key, Map<String, Map<String, String>> configs) {
         String pid = key.substring("profile:".length(), key.indexOf("/"));
@@ -87,7 +90,10 @@ public final class PlaceholderResolvers {
 
     /**
      * Substitutes bundle property.
-     * @return  The target value or an empty String.
+     *
+     * @param key The key in the configuration.
+     * @param bundleContext The bundle context to use.
+     * @return The target value or an empty String.
      */
     public static String substituteBundleProperty(String key, BundleContext bundleContext) {
         String value = null;

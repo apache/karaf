@@ -23,17 +23,24 @@ public interface History {
 
     /**
      * First available index.
+     *
+     * @return first index in the history
      */
     int first();
 
     /**
      * Last available index.
+     *
+     * @return last index in the history
      */
     int last();
 
     /**
      * Command at the given index.
      * Indices can range from <code>first()</code> to <code>last()</code>.
+     *
+     * @param index the index in the history.
+     * @return the command in the history at the given index.
      */
     CharSequence get(int index);
 

@@ -30,12 +30,13 @@ public class ACLConfigurationParser {
     };
 
     /**
-     * Returns the roles that can invoke the given operation. This is determined by matching the
-     * operation details against configuration provided.<p/>
+     * <p>Returns the roles that can invoke the given operation. This is determined by matching the
+     * operation details against configuration provided.</p>
      *
-     * The following configuration is supported. Keys are used to match an invocation against. The value can contain
+     * <p>The following configuration is supported. Keys are used to match an invocation against. The value can contain
      * a comma-separated list of roles. Spaces are ignored for the role values. Note that comments are allowed in the
-     * value field after the hash {@code #} character:
+     * value field after the hash {@code #} character:</p>
+     *
      * <pre>
      *     {@code
      *     myMethod = role1, role2
@@ -49,7 +50,7 @@ public class ACLConfigurationParser {
      *     }
      * </pre>
      *
-     * The following algorithm is used to find matching roles:
+     * <p>The following algorithm is used to find matching roles:</p>
      * <ol>
      *     <li>Find all regex and exact value matches. For all parameters these matches are found by calling {@code toString()}
      *         on the parameters passed in. If there are multiple matches in this category all the matching roles are collected.

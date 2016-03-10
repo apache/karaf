@@ -191,7 +191,7 @@ public class ConsoleSessionImpl implements Session {
     /**
      * Subclasses can override to use a different history file.
      *
-     * @return
+     * @return the history file
      */
     protected File getHistoryFile() {
         String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();

@@ -31,6 +31,7 @@ public interface ScheduleOptions {
      * Add optional configuration for the job.
      *
      * @param config An optional configuration object - this configuration is only passed to the job the job implements {@link Job}.
+     * @return The {@code ScheduleOptions}.
      */
     ScheduleOptions config(final Map<String, Serializable> config);
 
@@ -39,7 +40,8 @@ public interface ScheduleOptions {
      * A job only needs a name if it is scheduled and should be cancelled later on. The name can then be used to cancel the job.
      * If a second job with the same name is started, the second one replaces the first one.
      *
-     * @param name The job name
+     * @param name The job name.
+     * @return The {@code ScheduleOptions}.
      */
     ScheduleOptions name(final String name);
 
@@ -48,6 +50,7 @@ public interface ScheduleOptions {
      * This defaults to false.
      *
      * @param flag Whether this job can run even if previous scheduled runs are still running.
+     * @return The {@code ScheduleOptions}.
      */
     ScheduleOptions canRunConcurrently(final boolean flag);
 
@@ -56,4 +59,5 @@ public interface ScheduleOptions {
     boolean canRunConcurrently();
 
     String schedule();
+
 }

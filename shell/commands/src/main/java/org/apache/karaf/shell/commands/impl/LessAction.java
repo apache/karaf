@@ -665,9 +665,9 @@ public class LessAction implements Action, SignalListener {
     }
 
     /**
-     * This is for long running commands to be interrupted by ctrl-c
+     * This is for long running commands to be interrupted by ctrl-c.
      *
-     * @throws InterruptedException
+     * @throws InterruptedException If the command is interrupted.
      */
     public static void checkInterrupted() throws InterruptedException {
         Thread.yield();

@@ -29,7 +29,7 @@ public interface WebMBean {
      * Return the list of web bundles.
      * 
      * @return a tabular data of web bundles.
-     * @throws Exception in case of lookup failure.
+     * @throws MBeanException in case of lookup failure.
      */
     TabularData getWebBundles() throws MBeanException;
 
@@ -37,7 +37,7 @@ public interface WebMBean {
      * Start web context of the given web bundle (identified by ID).
      *
      * @param bundleId the bundle ID.
-     * @throws MBeanException
+     * @throws MBeanException in case of start failure.
      */
     void start(Long bundleId) throws MBeanException;
 
@@ -46,7 +46,7 @@ public interface WebMBean {
      * 
      * @param bundleIds the list of bundle IDs.
      *                  TODO use a BundleSelector service
-     * @throws Exception in case of start failure.
+     * @throws MBeanException in case of start failure.
      */
     void start(List<Long> bundleIds) throws MBeanException;
 
@@ -54,7 +54,7 @@ public interface WebMBean {
      * Stop web context of the given web bundle (identified by ID).
      *
      * @param bundleId the bundle ID.
-     * @throws MBeanException
+     * @throws MBeanException in case of stop failure.
      */
     void stop(Long bundleId) throws MBeanException;
 
@@ -63,7 +63,7 @@ public interface WebMBean {
      *
      * @param bundleIds the list of bundle IDs.
      *                  TODO use a BundleSelector service
-     * @throws Exception in case of stop failure
+     * @throws MBeanException in case of stop failure
      */
     void stop(List<Long> bundleIds) throws MBeanException;
     

@@ -32,65 +32,65 @@ import org.apache.karaf.main.ConfigProperties;
 import org.apache.karaf.main.util.BootstrapLogManager;
 
 /**
- * This classs is the base class used to provide a master/slave configuration for
+ * <p>This class is the base class used to provide a master/slave configuration for
  * a given set of active karaf instances using JDBC. </p>
  *
- * This implementation uses two different tables.  A KARAF_NODE_ID, and KARAF_LOCK tables.  The
+ * <p>This implementation uses two different tables.  A KARAF_NODE_ID, and KARAF_LOCK tables.  The
  * KARAF_NODE_ID table is used to generate a unique id for each instance in the cluster.  While
  * the KARAF_LOCK table is used to determine who is the master of these instances. </p>
  *
- * The tables configurations for the different tables are. </p>
+ * <p>The tables configurations for the different tables are. </p>
  *
  * <pre>
  *   CREATE TABLE KARAF_NODE_ID ( ID INTEGER DEFAULT 0 )
  *   CREATE TABLE KARAF_LOCK ( ID INTEGER DEFAULT 0, STATE INTEGER DEFAULT 0, LOCK_DELAY INTEGER DEFAULT 0 )
  * </pre>
  *
- * The two tables will include a single row each that is created by a single instance in the cluster. </p>
+ * <p>The two tables will include a single row each that is created by a single instance in the cluster. </p>
  *
- * The KARAF_NODE_ID table will be updated once for each active karaf instance with there unique id compared
+ * <p>The KARAF_NODE_ID table will be updated once for each active karaf instance with there unique id compared
  * to the other instances within the cluster.  The single row will contain the next available unique id and
  * will not include each clustered instance unique id since these instances can come and go throughout the
  * system lifetime. </p>
  *
- * The KARAF_LOCK table will be used to determine which of the instances will become the master. The master
+ * <p>The KARAF_LOCK table will be used to determine which of the instances will become the master. The master
  * will set the STATE to an initial value and the LOCK_DELAY to a time in milliseconds of when the
  * table will be updated.  It is the responsibility of the master instance to update the STATE field by the
  * allocated lock delay by incrementing the state value.  If the STATE value has not been updated by the 
  * LOCK_DELAY time then a slave has permission to attempt to become the master. </p>
  *
- * While the overview does not describe exactly how this is implemented.  Here is a description of how this
+ * <p>While the overview does not describe exactly how this is implemented.  Here is a description of how this
  * is done and what is provides as a fail safe solution. </p>
  *
- * Each instance of this class provides an initialization step, a lock, isAlive and release interface. </p>
+ * <p>Each instance of this class provides an initialization step, a lock, isAlive and release interface. </p>
  *
- * INITIALIZE:</p>
+ * <p>INITIALIZE:</p>
  *
- * During the initialization step it will determine if the given tables exist within the database.  We only 
+ * <p>During the initialization step it will determine if the given tables exist within the database.  We only
  * check for a single table since we assume that if one is available then the other must exist. We then
  * add a row to each of the tables.  The added row to the KARAF_NODE_ID table will set the ID to zero since 
  * this is consider a non-existent karaf instance.  The added row to the KARAF_LOCK will set the ID to zero
  * which allows a karaf instances to acquire the lock and become the master instance. </p>
  *
  *
- * LOCK:</p>
+ * <p>LOCK:</p>
  *
- * The current instance will try to acquire the master lock by using the following sql statement. </p>
+ * <p>The current instance will try to acquire the master lock by using the following sql statement. </p>
  *
  * <pre>
  *   UPDATE KARAF_LOCK SET ID = unique_id, STATE = state, LOCK_DELAY = lock_delay 
  *       WHERE ID = 0 OR ID = curId
  * </pre>
  *
- * Now you must be asking why are we using this update statement? The reason is that the statement will
+ * <p>Now you must be asking why are we using this update statement? The reason is that the statement will
  * guarantee that only one instance will be able to update this row.  The curId is set to this instance
  * unique id or to the prior master unique id if the row was not updated within that master lock_delay. </p>
  *
- * The current update command will set the curId to this instance unique id.  If this fails then it will
+ * <p>The current update command will set the curId to this instance unique id.  If this fails then it will
  * determine if the current master has not updated the row within its lock_delay.  If it hasn't updated
  * the row within the allocated time then this instance can try to become the master. </p>
  *
- * The current slave instance will then try to steal the lock from the master instance.  Why are we trying
+ * <p>The current slave instance will then try to steal the lock from the master instance.  Why are we trying
  * to steal the lock from the master?  The reason is that it is possible that the master instance had a 
  * hard failure and there is no mechanisms to determine if that is the case. We then assume that it has 
  * crashed without releasing the lock gracefully.  The slave instance then used the following update statement. </p>
@@ -100,31 +100,28 @@ import org.apache.karaf.main.util.BootstrapLogManager;
  *       WHERE ( ID = 0 OR ID = curId ) AND STATE = curState
  * </pre>
  *
- * Now why are we using the state value as part of the where clause?  The reason that even though the row was 
+ * <p>Now why are we using the state value as part of the where clause?  The reason that even though the row was
  * not updated by the allocated delay time.  It is possible that the update statement was performed just after 
  * the current slave check.  This update will insure that the row will be updated if and only if the state was
  * also not updated.  It is possible that the master instance updated the row after the current slave check 
  * and we do not want the slave to update the row and make itself the master.  This will insure that that will
  * not be the case. </p>
  *
- * ISALIVE: </p>
+ * <p>ISALIVE: </p>
  *
- * This just checks if the connection is active and then just updates the row's STATE by using the lock
+ * <p>This just checks if the connection is active and then just updates the row's STATE by using the lock
  * update call mentioned above. </p>
  *
- * RELEASE: </p>
+ * <p>RELEASE: </p>
  *
- * The release process just updates the KARAF_LOCK ID to zero so that other instances will have a chance
+ * <p>The release process just updates the KARAF_LOCK ID to zero so that other instances will have a chance
  * to become the master. </p>
  *
- * There are two main scenarios that we need to worry about.  Soft and Hard failures.  The soft failure 
+ * <p>There are two main scenarios that we need to worry about.  Soft and Hard failures.  The soft failure
  * basically allows the master instance to release the master lock and allow other instances to become
  * the master.  As for a hard failure, the current karaf instance crashes and does not release the lock
  * then the other karaf instances will notice that the KARAF_LOCK has not been updated for the current
  * master id and then they can compete for the master lock. </p>
- *
- * @author Claudio Corsi
- *
  */
 public class GenericJDBCLock implements Lock {
 
@@ -188,7 +185,7 @@ public class GenericJDBCLock implements Lock {
     /**
      * This method is called to create an instance of the JDBCStatements instance.
      *
-     * @return an instance of a JDBCStatement object
+     * @return An instance of a JDBCStatement object.
      */
     GenericStatements createStatements() {
         GenericStatements statements = new GenericStatements(table, table_id, clusterName);
@@ -255,7 +252,7 @@ public class GenericJDBCLock implements Lock {
     /**
      * This method is called to determine if the required database schemas have already been created or not.
      *
-     * @return true, if the schemas are available else false.
+     * @return True, if the schemas are available else false.
      */
     boolean schemaExists() {
         return schemaExist(this.statements.getLockTableName())
@@ -265,9 +262,8 @@ public class GenericJDBCLock implements Lock {
     /**
      * This method is called to determine if the required table is available or not.
      *
-     * @param tableName  The name of the table to determine if it exists
-     *
-     * @return true, if the table exists else false
+     * @param tableName The name of the table to determine if it exists.
+     * @return True, if the table exists else false.
      */
     private boolean schemaExist(String tableName) {
         ResultSet rs = null;
@@ -342,12 +338,11 @@ public class GenericJDBCLock implements Lock {
     }
     
     /**
-     * This method is called to determine if this instance jdbc connection is
+     * This method is called to determine if this instance JDBC connection is
      * still connected.
      *
-     * @return true, if the connection is still connected else false
-     *
-     * @throws SQLException
+     * @return True, if the connection is still connected else false.
+     * @throws SQLException If an SQL error occurs while checking if the lock is connected to the database.
      */
     boolean isConnected() throws SQLException {
         return lockConnection != null && !lockConnection.isClosed();
@@ -356,7 +351,7 @@ public class GenericJDBCLock implements Lock {
     /**
      * This method is called to safely close a Statement.
      *
-     * @param preparedStatement The statement to be closed
+     * @param preparedStatement The statement to be closed.
      */
     void closeSafely(Statement preparedStatement) {
         if (preparedStatement != null) {
@@ -371,7 +366,7 @@ public class GenericJDBCLock implements Lock {
     /**
      * This method is called to safely close a ResultSet instance.
      *
-     * @param rs The result set to be closed
+     * @param rs The result set to be closed.
      */
     void closeSafely(ResultSet rs) {
         if (rs != null) {
@@ -386,9 +381,8 @@ public class GenericJDBCLock implements Lock {
     /**
      * This method will return an active connection for this given jdbc driver.
      *
-     * @return jdbc Connection instance
-     *
-     * @throws Exception
+     * @return The JDBC connection instance
+     * @throws Exception If the JDBC connection can't be retrieved.
      */
     protected Connection getConnection() throws Exception {
         if (!isConnected()) {
@@ -399,14 +393,14 @@ public class GenericJDBCLock implements Lock {
     }
 
     /**
-     * Create a new jdbc connection.
+     * Create a new JDBC connection.
      *
-     * @param driver The fully qualified driver class name
-     * @param url  The database connection url
-     * @param username The username for the database
-     * @param password  The password for the data
-     * @return a new jdbc connection
-     * @throws Exception
+     * @param driver The fully qualified driver class name.
+     * @param url The database connection URL.
+     * @param username The username for the database.
+     * @param password  The password for the database.
+     * @return a new JDBC connection.
+     * @throws Exception If the JDBC connection can't be created.
      */
     protected Connection createConnection(String driver, String url, String username, String password) throws Exception {
         if (url.toLowerCase().startsWith("jdbc:derby")) {
@@ -422,15 +416,15 @@ public class GenericJDBCLock implements Lock {
     }
 
     /**
-     * This method could be used to inject a mock jdbc connection for testing purposes.
+     * This method could be used to inject a mock JDBC connection for testing purposes.
      *
-     * @param driver
-     * @param url
-     * @param username
-     * @param password
-     * @return
-     * @throws ClassNotFoundException
-     * @throws SQLException
+     * @param driver The fully qualified driver class name.
+     * @param url The database connection URL.
+     * @param username The username for the database.
+     * @param password The password for the database.
+     * @return a new JDBC connection.
+     * @throws ClassNotFoundException If the JDBC driver class is not found.
+     * @throws SQLException If the JDBC connection can't be created.
      */
     protected Connection doCreateConnection(String driver, String url, String username, String password) throws ClassNotFoundException, SQLException {
         Class.forName(driver);
@@ -442,7 +436,7 @@ public class GenericJDBCLock implements Lock {
      * The different option depend if we are the competing for the master or the lock delay time
      * has been exceeded or that we are the master and are update the state.
      *
-     * @return true, if we are the master instance else false
+     * @return True, if we are the master instance else false.
      *
      * @see org.apache.karaf.main.lock.Lock#lock()
      */
@@ -509,9 +503,8 @@ public class GenericJDBCLock implements Lock {
      * is already the master instance.  It will try to update the row given the passed data and will
      * succeed if and only if the generated where clause was valid else it would not update the row.
      *
-     * @param lockUpdateIdStatement The sql statement used to execute the update
-     *
-     * @return true, if the row was updated else false
+     * @param lockUpdateIdStatement The sql statement used to execute the update.
+     * @return True, if the row was updated else false.
      */
     private boolean acquireLock(String lockUpdateIdStatement) {
         PreparedStatement preparedStatement = null;
@@ -566,7 +559,7 @@ public class GenericJDBCLock implements Lock {
      * This method will check if the jdbc connection is still active and if we were able to 
      * acquire or update the karaf_table information.
      *
-     * @return true, if the connection is still active and we still have the lock
+     * @return True, if the connection is still active and we still have the lock.
      *
      * @see org.apache.karaf.main.lock.Lock#isAlive()
      *

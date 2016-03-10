@@ -26,7 +26,7 @@ public interface DiagnosticDumpMBean {
      * Creates dump over JMX.
      * 
      * @param name Name of the dump.
-     * @throws Exception In case of any problems.
+     * @throws MBeanException In case of any problems.
      */
     void createDump(String name) throws MBeanException;
 
@@ -35,7 +35,9 @@ public interface DiagnosticDumpMBean {
      * 
      * @param directory Should dump be created in directory.
      * @param name Name of the dump.
-     * @throws Exception In case of any problems.
+     * @param noThreadDump True to not include thread dump, false else.
+     * @param noHeapDump True to not include heap dump, false else.
+     * @throws MBeanException In case of any problems.
      */
     void createDump(boolean directory, String name, boolean noThreadDump, boolean noHeapDump) throws MBeanException;
 

@@ -34,6 +34,8 @@ public interface SessionFactory {
 
     /**
      * Retrieve the {@link Registry} used by this <code>SessionFactory</code>.
+     *
+     * @return a registry built by the factory.
      */
     Registry getRegistry();
 

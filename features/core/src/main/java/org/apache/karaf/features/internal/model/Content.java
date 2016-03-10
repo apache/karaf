@@ -16,17 +16,9 @@
  */
 package org.apache.karaf.features.internal.model;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -43,24 +35,22 @@ public class Content {
     protected List<Bundle> bundle;
 
     /**
-     * Gets the value of the config property.
-     * <p/>
-     * <p/>
-     * This accessor method returns a reference to the live list,
+     * <p>Gets the value of the config property.</p>
+     *
+     * <p>This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the config property.
-     * <p/>
-     * <p/>
-     * For example, to add a new item, do as follows:
+     * This is why there is not a <CODE>set</CODE> method for the config property.</p>
+     *
+     * <p>For example, to add a new item, do as follows:</p>
      * <pre>
      *    getConfig().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Config }
+     *
+     * <p>Objects of the following type(s) are allowed in the list
+     * {@link Config }</p>
+     *
+     * @return the list of config elements in a feature.
      */
     public List<Config> getConfig() {
         if (config == null) {
@@ -70,24 +60,22 @@ public class Content {
     }
 
     /**
-     * Gets the value of the configfile property.
-     * <p/>
-     * <p/>
-     * This accessor method returns a reference to the live list,
+     * <p>Gets the value of the configfile property.</p>
+     *
+     * <p>This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the configfile property.
-     * <p/>
-     * <p/>
-     * For example, to add a new item, do as follows:
+     * This is why there is not a <CODE>set</CODE> method for the configfile property.</p>
+     *
+     * <p>For example, to add a new item, do as follows:</p>
      * <pre>
      *    getConfigfile().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
-     * Objects of the following type(s) are allowed in the list
-     * {@link ConfigFile }
+     *
+     * <p>Objects of the following type(s) are allowed in the list
+     * {@link ConfigFile }</p>
+     *
+     * @return the list of configfile elements in a feature.
      */
     public List<ConfigFile> getConfigfile() {
         if (configfile == null) {
@@ -97,24 +85,22 @@ public class Content {
     }
 
     /**
-     * Gets the value of the feature property.
-     * <p/>
-     * <p/>
-     * This accessor method returns a reference to the live list,
+     * <p>Gets the value of the feature property.</p>
+     *
+     * <p>This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the feature property.
-     * <p/>
-     * <p/>
-     * For example, to add a new item, do as follows:
+     * This is why there is not a <CODE>set</CODE> method for the feature property.</p>
+     *
+     * <p>For example, to add a new item, do as follows:</p>
      * <pre>
      *    getFeatures().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Dependency }
+     *
+     * <p>Objects of the following type(s) are allowed in the list
+     * {@link Dependency }</p>
+     *
+     * @return the list of dependency features in a feature.
      */
     public List<Dependency> getFeature() {
         if (feature == null) {
@@ -124,24 +110,22 @@ public class Content {
     }
 
     /**
-     * Gets the value of the bundle property.
-     * <p/>
-     * <p/>
-     * This accessor method returns a reference to the live list,
+     * <p>Gets the value of the bundle property.</p>
+     *
+     * <p>This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the bundle property.
-     * <p/>
-     * <p/>
-     * For example, to add a new item, do as follows:
+     * This is why there is not a <CODE>set</CODE> method for the bundle property.</p>
+     *
+     * <p>For example, to add a new item, do as follows:</p>
      * <pre>
      *    getBundle().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Bundle }
+     *
+     * <p>Objects of the following type(s) are allowed in the list
+     * {@link Bundle }</p>
+     *
+     * @return the list of bundle elements in a feature.
      */
     public List<Bundle> getBundle() {
         if (bundle == null) {

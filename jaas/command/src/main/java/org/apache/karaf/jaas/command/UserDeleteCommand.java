@@ -27,13 +27,6 @@ public class UserDeleteCommand extends JaasCommandSupport {
     @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)
     private String username;
 
-    /**
-     * Execute the RoleAddCommand in the given Excecution Context.
-     *
-     * @param engine
-     * @return
-     * @throws Exception
-     */
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
         engine.deleteUser(username);

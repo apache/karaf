@@ -35,7 +35,11 @@ public final class RequirementSort<T extends Resource> {
     }
 
     /**
-     * Sorts {@link Resource} based on their {@link Requirement}s and {@link Capability}s.
+     * Sort {@link Resource} based on their {@link Requirement}s and {@link Capability}s.
+     *
+     * @param resources the resource to sort.
+     * @param <T> the resources type.
+     * @return sorted collection of resources.
      */
     public static <T extends Resource> Collection<T> sort(Collection<T> resources) {
         Set<String> namespaces = new HashSet<String>();
@@ -57,7 +61,6 @@ public final class RequirementSort<T extends Resource> {
         }
         return sorted;
     }
-
 
     private static <T extends Resource> void visit(T resource, Set<T> visited, Set<T> sorted, CapabilitySet capSet) {
         if (!visited.add(resource)) {

@@ -35,17 +35,23 @@ import java.lang.annotation.Target;
 public @interface Command
 {
     /**
-     * Returns the scope or sub shell of the command
+     * Returns the scope or sub shell of the command.
+     *
+     * @return the command scope.
      */
     String scope();
 
     /**
-     * Returns the name of the command if used inside a shell
+     * Returns the name of the command if used inside a shell.
+     *
+     * @return the command name.
      */
     String name();
 
     /**
-     * Returns the description of the command which is used to generate command line help
+     * Returns the description of the command which is used to generate command line help.
+     *
+     * @return the command description.
      */
     String description() default "";
 
@@ -54,8 +60,10 @@ public @interface Command
      * This description will be shown in the help for the command.
      * Longer descriptions can be externalized using a
      * <code>classpath:[location]</code> url, in which case the
-     * descrition will be loaded from the bundle at the given location,
+     * description will be loaded from the bundle at the given location,
      * relatively to the implementation of the command.
+     *
+     * @return the command long description.
      */
     String detailedDescription() default "";
 }

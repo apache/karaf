@@ -25,10 +25,11 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public interface ConfigRepository {
 
     /**
-     * Saves config to storage or ConfigurationAdmin.
-     * @param pid
-     * @param props
-     * @throws IOException
+     * Save config to storage or ConfigurationAdmin.
+     *
+     * @param pid the configuration PID.
+     * @param props the dictionary used to update the configuration.
+     * @throws IOException in case of update failure.
      */
     @SuppressWarnings("rawtypes")
     void update(String pid, Dictionary props) throws IOException;
@@ -43,9 +44,9 @@ public interface ConfigRepository {
     /**
      * Create a factory based configuration.
      *
-     * @param factoryPid
+     * @param factoryPid the configuration factory PID.
      * @param properties the new properties to set in the configuration.
-     * @return created pid
+     * @return the created configuration PID.
      */
 	String createFactoryConfiguration(String factoryPid, Dictionary<String, ?> properties);
 }

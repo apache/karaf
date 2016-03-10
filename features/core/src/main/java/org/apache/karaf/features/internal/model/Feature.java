@@ -34,34 +34,30 @@ import org.apache.felix.utils.version.VersionCleaner;
 
 
 /**
- * Definition of the Feature.
- * <p/>
- * <p/>
- * <p>Java class for feature complex type.
- * <p/>
- * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ * <p>Definition of the Feature.</p>
+ * <p>Java class for feature complex type.</p>
+ * <p>The following schema fragment specifies the expected content contained within this class.</p>
  * <pre>
- * &lt;complexType name="feature">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="details" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="config" type="{http://karaf.apache.org/xmlns/features/v1.0.0}config" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="configfile" type="{http://karaf.apache.org/xmlns/features/v1.0.0}configFile" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="feature" type="{http://karaf.apache.org/xmlns/features/v1.0.0}dependency" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="bundle" type="{http://karaf.apache.org/xmlns/features/v1.0.0}bundle" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="conditional" type="{http://karaf.apache.org/xmlns/features/v1.0.0}conditional" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="capability" type="{http://karaf.apache.org/xmlns/features/v1.0.0}capability" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="requirement" type="{http://karaf.apache.org/xmlns/features/v1.0.0}requirement" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="name" use="required" type="{http://karaf.apache.org/xmlns/features/v1.0.0}featureName" />
- *       &lt;attribute name="version" type="{http://www.w3.org/2001/XMLSchema}string" default="0.0.0" />
- *       &lt;attribute name="description" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="resolver" type="{http://karaf.apache.org/xmlns/features/v1.0.0}resolver" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="feature"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="details" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="config" type="{http://karaf.apache.org/xmlns/features/v1.0.0}config" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="configfile" type="{http://karaf.apache.org/xmlns/features/v1.0.0}configFile" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="feature" type="{http://karaf.apache.org/xmlns/features/v1.0.0}dependency" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="bundle" type="{http://karaf.apache.org/xmlns/features/v1.0.0}bundle" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="conditional" type="{http://karaf.apache.org/xmlns/features/v1.0.0}conditional" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="capability" type="{http://karaf.apache.org/xmlns/features/v1.0.0}capability" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="requirement" type="{http://karaf.apache.org/xmlns/features/v1.0.0}requirement" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="name" use="required" type="{http://karaf.apache.org/xmlns/features/v1.0.0}featureName" /&gt;
+ *       &lt;attribute name="version" type="{http://www.w3.org/2001/XMLSchema}string" default="0.0.0" /&gt;
+ *       &lt;attribute name="description" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="resolver" type="{http://karaf.apache.org/xmlns/features/v1.0.0}resolver" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -122,7 +118,6 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         this.version = VersionCleaner.clean(version);
     }
 
-
     public static org.apache.karaf.features.Feature valueOf(String str) {
         if (str.contains(VERSION_SEPARATOR)) {
             String strName = str.substring(0, str.indexOf(VERSION_SEPARATOR));
@@ -136,36 +131,32 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     }
 
-
     public String getId() {
         return getName() + VERSION_SEPARATOR + getVersion();
     }
 
     /**
-     * Gets the value of the name property.
+     * Get the value of the name property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String}
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Sets the value of the name property.
+     * Set the value of the name property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String}
      */
     public void setName(String value) {
         this.name = value;
     }
 
     /**
-     * Gets the value of the version property.
+     * Get the value of the version property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String}
      */
     public String getVersion() {
         if (version == null) {
@@ -176,10 +167,9 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     }
 
     /**
-     * Sets the value of the version property.
+     * Set the value of the version property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String}
      */
     @XmlAttribute
     public void setVersion(String value) {
@@ -189,120 +179,139 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     /**
      * Since version has a default value ("0.0.0"), returns
      * whether or not the version has been set.
+     *
+     * @return true if the feature has a version, false else.
      */
     public boolean hasVersion() {
         return this.version != null;
     }
 
     /**
-     * Gets the value of the description property.
+     * Get the value of the description property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String}.
      */
     public String getDescription() {
         return description;
     }
 
     /**
-     * Sets the value of the description property.
+     * Set the value of the description property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String}.
      */
     public void setDescription(String value) {
         this.description = value;
     }
 
+    /**
+     * Get the feature details.
+     *
+     * @return the feature details.
+     */
     public String getDetails() {
         return details;
     }
 
+    /**
+     * Set the feature details.
+     *
+     * @param details the feature details.
+     */
     public void setDetails(String details) {
         this.details = details;
     }
 
     /**
-     * Gets the value of the resolver property.
+     * Get the value of the resolver property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String}.
      */
     public String getResolver() {
         return resolver;
     }
 
+    /**
+     * Get the feature install flag.
+     *
+     * @return the feature install flags.
+     */
     public String getInstall() {
         return install;
     }
 
+    /**
+     * Set the feature install flag.
+     *
+     * @param install the feature install flag.
+     */
     public void setInstall(String install) {
         this.install = install;
     }
 
     /**
-     * Sets the value of the resolver property.
+     * Set the value of the resolver property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String}.
      */
     public void setResolver(String value) {
         this.resolver = value;
     }
 
     /**
-     * Gets the value of the startLevel property.
+     * Get the value of the startLevel property.
      *
-     * @return possible object is
-     * {@link Integer }
+     * @return possible object is {@link Integer}.
      */
     public int getStartLevel() {
         return startLevel == null ? 0 : startLevel;
     }
 
     /**
-     * Sets the value of the startLevel property.
+     * Set the value of the startLevel property.
      *
-     * @param value allowed object is
-     *              {@link Integer }
+     * @param value allowed object is {@link Integer}.
      */
     public void setStartLevel(Integer value) {
         this.startLevel = value;
     }
 
     /**
-     * Gets the value of the hidden property.
+     * Get the value of the hidden property.
+     *
+     * @return true if the feature is hidden, false else.
      */
     public boolean isHidden() {
         return hidden == null ? false : hidden;
     }
 
     /**
-     * Sets the value of the hidden property.
+     * Set the value of the hidden property.
+     *
+     * @param value true to set the feature as hidden, false else.
      */
     public void setHidden(Boolean value) {
         this.hidden = value;
     }
 
     /**
-     * Gets the value of the conditional property.
-     * <p/>
-     * <p/>
+     * Get the value of the conditional property.
+     *
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the feature property.
-     * <p/>
-     * <p/>
+     *
      * For example, to add a new item, do as follows:
+     *
      * <pre>
      *    getConditionals().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
+     *
      * Objects of the following type(s) are allowed in the list
-     * {@link Conditional }
+     * {@link Conditional}.
+     *
+     * @return the list of feature conditions.
      */
     public List<Conditional> getConditional() {
         if (conditional == null) {
@@ -311,6 +320,11 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         return this.conditional;
     }
 
+    /**
+     * Get the feature capabilities.
+     *
+     * @return the feature capabilities as a {@link List}..
+     */
     public List<Capability> getCapabilities() {
         if (capability == null) {
             capability = new ArrayList<>();
@@ -318,6 +332,11 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         return this.capability;
     }
 
+    /**
+     * Get the feature requirements.
+     *
+     * @return the feature requirements as a {@link List}.
+     */
     public List<Requirement> getRequirements() {
         if (requirement == null) {
             requirement = new ArrayList<>();
@@ -325,14 +344,29 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         return this.requirement;
     }
 
+    /**
+     * Get the feature scoping.
+     *
+     * @return the feature scoping.
+     */
     public Scoping getScoping() {
         return scoping;
     }
 
+    /**
+     * Set the feature scoping.
+     *
+     * @param scoping the feature scoping.
+     */
     public void setScoping(Scoping scoping) {
         this.scoping = scoping;
     }
 
+    /**
+     * Return a string representation of the feature.
+     *
+     * @return the feature string representation.
+     */
     public String toString() {
         return getId();
     }

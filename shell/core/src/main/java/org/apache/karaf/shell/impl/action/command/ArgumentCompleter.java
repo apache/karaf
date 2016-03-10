@@ -314,14 +314,14 @@ public class ArgumentCompleter implements Completer {
     }
 
     /**
-     *  Returns true if the specified character is a whitespace
-     *  parameter. Check to ensure that the character is not
-     *  escaped and returns true from
-     *  {@link #isDelimiterChar}.
+     * Returns true if the specified character is a whitespace
+     * parameter. Check to ensure that the character is not
+     * escaped and returns true from
+     * {@link #isDelimiterChar}.
      *
-     *  @param  buffer the complete command buffer
-     *  @param  pos    the index of the character in the buffer
-     *  @return        true if the character should be a delimiter
+     * @param buffer the complete command buffer.
+     * @param pos the index of the character in the buffer.
+     * @return true if the character should be a delimiter, false else.
      */
     public boolean isDelimiter(final String buffer, final int pos) {
         return !isEscaped(buffer, pos) && isDelimiterChar(buffer, pos);
@@ -332,8 +332,12 @@ public class ArgumentCompleter implements Completer {
     }
 
     /**
-     *  The character is a delimiter if it is whitespace, and the
-     *  preceeding character is not an escape character.
+     * The character is a delimiter if it is whitespace, and the
+     * preceding character is not an escape character.
+     *
+     * @param buffer the complete command buffer.
+     * @param pos the index of the character in the buffer.
+     * @return true if the character should be a delimiter, false else.
      */
     public boolean isDelimiterChar(String buffer, int pos) {
         return Character.isWhitespace(buffer.charAt(pos));

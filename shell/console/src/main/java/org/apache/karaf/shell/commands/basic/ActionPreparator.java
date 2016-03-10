@@ -28,15 +28,15 @@ public interface ActionPreparator {
 
     /**
      * Check if the arguments are valid for the action and inject the arguments into the fields
-     * of the action
+     * of the action.
      * 
-     * Using deprecated Action for compatiblity
+     * Using deprecated Action for compatibility.
      * 
-     * @param action
-     * @param session
-     * @param arguments
-     * @return
-     * @throws Exception
+     * @param action The action to perform.
+     * @param session The command session to use.
+     * @param arguments The action arguments.
+     * @return True if the action preparation succeed, false else.
+     * @throws Exception In case of preparation failure.
      */
     boolean prepare(@SuppressWarnings("deprecation") Action action, CommandSession session, List<Object> arguments) throws Exception;
 

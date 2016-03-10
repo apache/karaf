@@ -42,7 +42,7 @@ public class SimpleMavenResolver implements ArtifactResolver {
     /**
      * Resolve from pax-url format for maven URIs to the file that is referenced by the URI
      * The URI format is:
-     * mvn:<groupId>/<artifactId>/<version>/<type>/<classifier>
+     * mvn:&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;/&lt;type&gt;/&lt;classifier&gt;
      * 
      * If artifactUri does not match the Syntax the local file that corresponds to the path is returned
      * 

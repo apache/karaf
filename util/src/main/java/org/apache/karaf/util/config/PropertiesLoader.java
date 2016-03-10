@@ -50,12 +50,13 @@ public class PropertiesLoader {
      * The installation directory of Felix is assumed to be the parent
      * directory of the <tt>felix.jar</tt> file as found on the system class
      * path property. The precise file from which to load configuration
-     * properties can be set by initializing the "<tt>felix.config.properties</tt>"
+     * properties can be set by initializing the "<code>felix.config.properties</code>"
      * system property to an arbitrary URL.
      * </p>
      *
-     * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
-     * @throws Exception if something wrong occurs
+     * @param file the config file where to load the properties.
+     * @return A <code>Properties</code> instance or <code>null</code> if there was an error.
+     * @throws Exception if something wrong occurs.
      */
     public static Properties loadConfigProperties(File file) throws Exception {
         // See if the property URL was specified as a property.
@@ -96,8 +97,8 @@ public class PropertiesLoader {
      * arbitrary URL.
      * </p>
      *
-     * @param karafBase the karaf base folder
-     * @throws IOException
+     * @param file the Karaf base folder.
+     * @throws IOException if the system file can't be loaded.
      */
     public static void loadSystemProperties(File file) throws IOException {
         Properties props = new Properties(false);

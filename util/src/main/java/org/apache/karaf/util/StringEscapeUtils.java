@@ -134,12 +134,11 @@ public class StringEscapeUtils {
      * <p>The only difference between Java strings and JavaScript strings
      * is that in JavaScript, a single quote must be escaped.</p>
      *
-     * <p>Example:
+     * Example:
      * <pre>
      * input string: He didn't say, "Stop!"
      * output string: He didn't say, \"Stop!\"
      * </pre>
-     * </p>
      *
      * @param str  String to escape values in, may be null
      * @return String with escaped values, <code>null</code> if null string input

@@ -212,7 +212,9 @@ public abstract class MojoSupport extends AbstractMojo {
     }
 
     /**
-     * Required because Maven 3 returns null in {@link ArtifactRepository#getProtocol()} (see KARAF-244)
+     * Required because Maven 3 returns null in {@link ArtifactRepository#getProtocol()} (see KARAF-244).
+     *
+     * @return The protocol extracted from the local Maven repository URL.
      */
     private String extractProtocolFromLocalMavenRepo() {
         try {
@@ -237,10 +239,10 @@ public abstract class MojoSupport extends AbstractMojo {
     /**
      * Convert a feature resourceLocation (bundle or configuration file) into an artifact.
      *
-     * @param resourceLocation the feature resource location (bundle or configuration file).
-     * @param skipNonMavenProtocols flag to skip protocol different than mvn:
-     * @return the artifact corresponding to the resource.
-     * @throws MojoExecutionException
+     * @param resourceLocation The feature resource location (bundle or configuration file).
+     * @param skipNonMavenProtocols A flag to skip protocol different than mvn:
+     * @return The artifact corresponding to the resource.
+     * @throws MojoExecutionException If the plugin execution fails.
      */
     protected Artifact resourceToArtifact(String resourceLocation, boolean skipNonMavenProtocols) throws MojoExecutionException {
         resourceLocation = resourceLocation.replace("\r\n", "").replace("\n", "").replace(" ", "").replace("\t", "");
@@ -363,10 +365,10 @@ public abstract class MojoSupport extends AbstractMojo {
     
 
     /**
-     * Make sure the target directory exists and
-     * that is actually a directory
-     * @param targetDir
-     * @throws IOException
+     * Make sure the target directory exists and that is actually a directory.
+     *
+     * @param targetDir The target directory.
+     * @throws IOException If the target directory is not actually a directory or can't be created.
      */
     private static void ensureDirExists(File targetDir) {
         if (!targetDir.exists()) {

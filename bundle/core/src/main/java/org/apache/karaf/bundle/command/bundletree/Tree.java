@@ -20,9 +20,10 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * Represents a tree that can be written to the console.
+ * <p>Represent a tree that can be written to the console.</p>
  *
  * The output will look like this:
+ *
  * <pre>
  * root
  * +- child1
@@ -33,7 +34,7 @@ import java.io.PrintWriter;
 public class Tree<T> extends Node<T> {
 
     /**
-     * Creates a new tree with the given root node
+     * Create a new tree with the given root node.
      *
      * @param root the root node
      */
@@ -42,28 +43,28 @@ public class Tree<T> extends Node<T> {
     }
 
     /**
-     * Write the tree to a PrintStream, using the default toString() method to output the node values
+     * Write the tree to a PrintStream, using the default toString() method to output the node values.
      *
-     * @param stream
+     * @param stream the stream where to write.
      */
     public void write(PrintStream stream) {
         write(new PrintWriter(stream));
     }
 
     /**
-     * Write the tree to a PrintStream, using the provided converter to output the node values
+     * Write the tree to a PrintStream, using the provided converter to output the node values.
      *
-     * @param stream
-     * @param converter
+     * @param stream the stream where to write.
+     * @param converter the converter to use.
      */
     public void write(PrintStream stream, Converter<T> converter) {
         write(new PrintWriter(stream), converter);
     }
 
     /**
-     * Write the tree to a PrintWriter, using the default toString() method to output the node values
+     * Write the tree to a PrintWriter, using the default toString() method to output the node values.
      *
-     * @param writer
+     * @param writer the writer where to write.
      */
     public void write(PrintWriter writer) {
         write(writer, new Converter() {
@@ -74,10 +75,10 @@ public class Tree<T> extends Node<T> {
     }
 
     /**
-     * Write the tree to a PrintWriter, using the provided converter to output the node values
+     * Write the tree to a PrintWriter, using the provided converter to output the node values.
      *
-     * @param writer
-     * @param converter
+     * @param writer the writer where to write.
+     * @param converter the converter to use.
      */
     public void write(PrintWriter writer, Converter<T> converter) {
         writer.printf("%s%n", converter.toString(this));
@@ -88,7 +89,7 @@ public class Tree<T> extends Node<T> {
     }
 
     /**
-     * Interface to convert node values to string
+     * Interface to convert node values to string.
      *
      * @param <T> the object type for the node value
      */

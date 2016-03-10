@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.apache.karaf.profile.impl.ProfileBuilderImpl;
 
-
 /**
  * A profile builder.
  */
@@ -49,11 +48,14 @@ public interface ProfileBuilder {
     Set<String> getConfigurationKeys();
 
     /**
-     * Returns a copy of the configuration with the specified pid
+     * Return a copy of the configuration with the specified pid
      * or an empty map if it does not exist yet.
      * The copy should be used for updates and then used with
      * {@link #addConfiguration(String, java.util.Map)} to keep
      * the layout and comments.
+     *
+     * @param pid The configuration PID.
+     * @return The copy of the configuration with the given PID.
      */
     Map<String, String> getConfiguration(String pid);
     

@@ -191,10 +191,11 @@ public class Deployer {
     }
 
     /**
+     * Perform a deployment.
      *
      * @param dstate  deployment state
      * @param request deployment request
-     * @throws Exception
+     * @throws Exception in case of deployment failure.
      */
     public void deploy(DeploymentState dstate, DeploymentRequest request) throws Exception {
 

@@ -1151,6 +1151,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
      *
      * @param ois ObjectInputStream to read object from.
      * @throws IOException if an I/O error occur.
+     * @throws ClassNotFoundException If the object class is not found.
      */
     private void readObject(ObjectInputStream ois) throws IOException,
             ClassNotFoundException {

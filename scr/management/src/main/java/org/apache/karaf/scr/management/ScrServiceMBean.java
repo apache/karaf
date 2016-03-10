@@ -60,47 +60,47 @@ public interface ScrServiceMBean {
     String[] REFERENCE = {REFERENCE_NAME, REFERENCE_SATISFIED, REFERENCE_CARDINALITY, REFERENCE_AVAILABILITY, REFERENCE_POLICY, REFERENCE_BOUND_SERVICES};
 
     /**
-     * Displays a {@link TabularData} with all the component details.
+     * Display a {@link TabularData} with all the component details.
      *
-     * @return
+     * @return A {@link TabularData} containing all SCR components.
      */
     TabularData getComponents();
 
     /**
-     * Presents a {@String} array of components currently registered with the SCR.
+     * Present a {@code String} array of components currently registered with the SCR.
      *
-     * @return String[]
+     * @return A {@code String[]} containing all SCR components ID.
      */
     String[] listComponents();
 
     /**
-     * Verifies if the named component is currently in an ACTIVE state.
+     * Verify if the named component is currently in an ACTIVE state.
      *
-     * @param componentName the components name
-     * @return true if ACTIVE, otherwise false
-     * @throws Exception
+     * @param componentName The component name.
+     * @return True if the component is ACTIVE, otherwise false.
+     * @throws MBeanException If the check fails.
      */
     boolean isComponentActive(String componentName) throws MBeanException;
 
     /**
-     * Returns the named components state
+     * Return the named components state.
      *
-     * @param componentName the components name
-     * @return
+     * @param componentName The component name.
+     * @return The component status.
      */
     int componentState(String componentName);
 
     /**
-     * Activates a component that is currently in a DISABLED state.
+     * Activate a component that is currently in a DISABLED state.
      *
-     * @param componentName the components name
+     * @param componentName The component name.
      */
     void activateComponent(String componentName);
 
     /**
-     * Disables a component that is not in an ACTIVE state.
+     * Disable a component that is not in an ACTIVE state.
      *
-     * @param componentName the components name
+     * @param componentName The component name.
      */
     void deactivateComponent(String componentName);
 

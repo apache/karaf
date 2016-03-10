@@ -59,9 +59,6 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
     private List<String> watchURLs = new CopyOnWriteArrayList<String>();
     private AtomicInteger counter = new AtomicInteger(0);
 
-    /**
-     * Constructor
-     */
     @SuppressWarnings("deprecation")
     public BundleWatcherImpl(BundleContext bundleContext, MavenConfigService mavenConfigService, BundleService bundleService) {
         this.bundleContext = bundleContext;
@@ -213,10 +210,11 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
     }
 
     /**
-     * Returns the location of the Bundle inside the local maven repository.
+     * Return the location of the Bundle inside the local maven repository.
      * 
-     * @param bundle
-     * @return
+     * @param localRepository the repository where to look for bundle update.
+     * @param bundle the bundle to check update.
+     * @return the updated file.
      */
     private File getBundleExternalLocation(File localRepository, Bundle bundle) {
         try {
@@ -240,7 +238,7 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
     }
 
     /**
-     * Stops the execution of the thread and releases the singleton instance
+     * Stop the execution of the thread and releases the singleton instance.
      */
     public void stop() {
         running.set(false);

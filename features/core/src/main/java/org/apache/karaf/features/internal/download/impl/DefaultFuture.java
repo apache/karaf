@@ -52,6 +52,8 @@ public class DefaultFuture<T extends DefaultFuture> {
 
     /**
      * Creates a new instance.
+     *
+     * @param lock the future lock.
      */
     public DefaultFuture(Object lock) {
         this.lock = lock != null ? lock : this;
@@ -236,7 +238,9 @@ public class DefaultFuture<T extends DefaultFuture> {
     }
 
     /**
-     * Sets the result of the asynchronous operation, and mark it as finished.
+     * Set the result of the asynchronous operation, and mark it as finished.
+     *
+     * @param newValue the result of the asynchronous operation.
      */
     public void setValue(Object newValue) {
         synchronized (lock) {
@@ -256,7 +260,9 @@ public class DefaultFuture<T extends DefaultFuture> {
     }
 
     /**
-     * Returns the result of the asynchronous operation.
+     * Return the result of the asynchronous operation.
+     *
+     * @return the result of the asynchronous operation.
      */
     protected Object getValue() {
         synchronized (lock) {

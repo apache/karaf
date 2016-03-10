@@ -30,13 +30,6 @@ public class RoleAddCommand extends JaasCommandSupport {
     @Argument(index = 1, name = "role", description = "Role", required = true, multiValued = false)
     private String role;
 
-    /**
-     * Execute the RoleAddCommand in the given Excecution Context.
-     *
-     * @param engine
-     * @return
-     * @throws Exception
-     */
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
         engine.addRole(username, role);

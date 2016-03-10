@@ -31,8 +31,8 @@ public class Status {
      * Checks if the shutdown port is bound. The shutdown port can be configured in config.properties
      * or in the shutdown port file.
      *
-     * @param args
-     * @throws Exception
+     * @param args The arguments to the status main method.
+     * @throws Exception If an error occurs while checking the status.
      */
     public static void main(String[] args) throws Exception {
         ConfigProperties config = new ConfigProperties();

@@ -57,8 +57,8 @@ public class Main {
     /**
      * Use this method when the shell is being executed as a top level shell.
      *
-     * @param args
-     * @throws Exception
+     * @param args The console main arguments.
+     * @throws Exception In case of console running failure.
      */
     public void run(String args[]) throws Exception {
 
@@ -80,9 +80,10 @@ public class Main {
      * Use this method when the shell is being executed as a command
      * of another shell.
      *
-     * @param parent
-     * @param args
-     * @throws Exception
+     * @param parent The parent command session.
+     * @param threadIO The thread IO to use to execute the console.
+     * @param args The console arguments.
+     * @throws Exception In case of console running failure.
      */
     public void run(CommandSession parent, ThreadIO threadIO, String args[]) throws Exception {
 
@@ -221,13 +222,14 @@ public class Main {
     /**
      * Allow sub classes of main to change the ConsoleImpl implementation used.
      *
-     * @param commandProcessor
-     * @param in
-     * @param out
-     * @param err
-     * @param terminal
-     * @return
-     * @throws Exception
+     * @param commandProcessor The command processor to use.
+     * @param threadIO The thread IO to use for the console.
+     * @param in The input stream.
+     * @param out The output stream.
+     * @param err The error stream.
+     * @param terminal The terminal to use.
+     * @return The created console implementation.
+     * @throws Exception If the console creation fails.
      */
     protected ConsoleImpl createConsole(CommandProcessorImpl commandProcessor, ThreadIO threadIO, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
         return new ConsoleImpl(commandProcessor, threadIO, in, out, err, terminal, null, null, null, false);
@@ -237,7 +239,7 @@ public class Main {
      * Sub classes can override so that their registered commands do not conflict with the default shell
      * implementation.
      *
-     * @return
+     * @return The location of the commands resource.
      */
     public String getDiscoveryResource() {
         return "META-INF/services/org/apache/karaf/shell/commands";
@@ -299,10 +301,12 @@ public class Main {
     }
 
     /**
-     * Returns whether or not we are in multi-scope mode.
-     * <p/>
-     * The default mode is multi-scoped where we prefix commands by their scope. If we are in single
-     * scoped mode then we don't use scope prefixes when registering or tab completing commands.
+     * <p>Returns whether or not we are in multi-scope mode.</p>
+     *
+     * <p>The default mode is multi-scoped where we prefix commands by their scope. If we are in single
+     * scoped mode then we don't use scope prefixes when registering or tab completing commands.</p>
+     *
+     * @return True if the command is multi-scoped, false else.
      */
     public boolean isMultiScopeMode() {
         return true;

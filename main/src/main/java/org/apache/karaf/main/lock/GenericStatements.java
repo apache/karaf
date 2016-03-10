@@ -20,16 +20,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * This class is used to create the sql statements for the karaf lock tables that are used
- * for clustering of karaf instances.
+ * <p>This class is used to create the sql statements for the Karaf lock tables that are used
+ * for clustering of Karaf instances.</p>
  * 
- * It will generate sql statement to create two separate tables, a lock table and a lock id table
- * 
+ * <p>It will generate sql statement to create two separate tables, a lock table and a lock id table:</p>
+ *
+ * <code>
  *   CREATE TABLE LOCK ( ID INTEGER DEFAULT 0, STATE INTEGER DEFAULT 0, LOCK_DELAY INTEGER DEFAULT 0 )
  *   
  *   CREATE TABLE LOCK_ID ( ID INTEGER DEFAULT 0 )
- *   
- * @author Claudio Corsi
+ * </code>
  * 
  */
 public class GenericStatements {
@@ -39,12 +39,12 @@ public class GenericStatements {
 	private final String clusterName;
 
 	/**
-	 * This constructor is used to determine the name of the karaf lock table, the karaf lock id
+	 * This constructor is used to determine the name of the Karaf lock table, the Karaf lock id
 	 * table and the name of the clustered instances.
 	 *
-	 * @param lockTableName The name of the karaf lock table
-	 * @param lockIdTableName The name of the karaf lock id table
-	 * @param clusterName the name of the cluster being used
+	 * @param lockTableName The name of the karaf lock table.
+	 * @param lockIdTableName The name of the karaf lock id table.
+	 * @param clusterName the name of the cluster being used.
 	 */
 	public GenericStatements(String lockTableName, String lockIdTableName, String clusterName) {
 		this.lockTableName   = lockTableName;
@@ -56,16 +56,16 @@ public class GenericStatements {
 	 * This method will return the name of the cluster that the instances are using to compete for the
 	 * master lock.
 	 *
-	 * @return cluster node name
+	 * @return The cluster node name.
 	 */
 	public final String getNodeName() {
 		return this.clusterName;
 	}
 
 	/**
-	 * This method will return the name of the karaf lock table.
+	 * This method will return the name of the Karaf lock table.
 	 *
-	 * @return name of the karaf lock table
+	 * @return The name of the Karaf lock table.
 	 */
 	public final String getLockTableName() {
 		return lockTableName;
@@ -75,22 +75,30 @@ public class GenericStatements {
 	 * This method will return the insert statement used to create a row in the Lock table and will
 	 * generate the following sql statement.
 	 *
+	 * <code>
 	 * INSERT INTO KARAF_LOCK (ID, STATE, LOCK_DELAY) VALUES (0, 0, 0)
+	 * </code>
 	 * 
-	 * @return sql insert statement
+	 * @return The SQL insert statement.
 	 */
 	private String getLockTableInitialInsertStatement() {
 		return "INSERT INTO " + this.getLockTableName() + "(ID, STATE, LOCK_DELAY) VALUES (0, 0, 0)";
 	}
 
 	/**
-	 * This will be called when trying to acquire the lock and will generate the following sql statemnt.
+	 * This will be called when trying to acquire the lock and will generate the following sql statement.
 	 *
+	 * <code>
 	 *  UPDATE KARAF_LOCK SET ID = ?, STATE = ?, LOCK_DELAY = ? WHERE ID = 0 OR ID = ?
+	 * </code>
 	 * 
 	 * You are then expected to assign the values associated with the sql statement.
 	 *
-	 * @return sql update statement
+	 * @param id The new ID.
+	 * @param state The new lock state.
+	 * @param lock_delay The new lock delay.
+	 * @param curId The current ID.
+	 * @return The SQL update statement.
 	 */
 	public String getLockUpdateIdStatement(int id, int state, int lock_delay, int curId) {
 		return String.format("UPDATE %s SET ID = %d, STATE = %d, LOCK_DELAY = %d WHERE ID = 0 OR ID = %d", 
@@ -98,14 +106,21 @@ public class GenericStatements {
 	}
 
 	/**
-	 * This will be called when trying to steal the lock and will generate the following sql statemnt.
+	 * This will be called when trying to steal the lock and will generate the following sql statement.
 	 *
+	 * <code>
 	 *  UPDATE KARAF_LOCK SET ID = ?, STATE = ?, LOCK_DELAY = ? WHERE ( ID = 0 OR ID = ? ) AND STATE = ?
+	 * </code>
 	 *
-	 * You are then responsible to assign the values of the different fields using standard jdbc statement
+	 * You are then responsible to assign the values of the different fields using standard JDBC statement
 	 * calls.
-	 * 
-	 * @return sql update statement
+	 *
+	 * @param id The new ID.
+	 * @param state The new lock state.
+	 * @param lock_delay The new lock delay.
+	 * @param curId The current ID.
+     * @param curState The current state.
+	 * @return The SQL update statement.
 	 */
 	public String getLockUpdateIdStatementToStealLock(int id, int state, int lock_delay, int curId, int curState) {
 		return String.format("UPDATE %s SET ID = %d, STATE = %d, LOCK_DELAY = %d WHERE ( ID = 0 OR ID = %d ) AND STATE = %d", 
@@ -117,7 +132,8 @@ public class GenericStatements {
 	 * statement.
 	 *
 	 *  UPDATE KARAF_LOCK SET ID = 0 WHERE ID = ?
-	 * 
+	 *
+	 * @param id The current ID.
 	 * @return sql update statement
 	 */
 	public String getLockResetIdStatement(int id) {
@@ -128,7 +144,9 @@ public class GenericStatements {
 	 * This will be called to determine the current master instance for the lock table and will 
 	 * generate the following sql statement.
 	 *
+	 * <code>
 	 * SELECT ID, STATE, LOCK_DELAY FROM KARAF_LOCK
+	 * </code>
 	 *
 	 * @return sql select statement
 	 */
@@ -152,25 +170,26 @@ public class GenericStatements {
 	 * This method should only be called during the creation of the KARAF_LOCK table and will
 	 * generate the following sql statement.
 	 *
+     * <code>
 	 * CREATE TABLE KARAF_LOCK (ID INTEGER DEFAULT 0, STATE INTEGER DEFAULT 0, LOCK_DELAY INTEGER DEFAULT 0)
-	 * 
-	 * @return sql create table statement
+	 * </code>
+     *
+	 * @return The SQL create table statement.
 	 */
 	private String getLockTableCreateStatement() {
 		return "CREATE TABLE " + this.getLockTableName() 
 			   + " ( ID INTEGER DEFAULT 0, STATE INTEGER DEFAULT 0 , LOCK_DELAY INTEGER DEFAULT 0 )";
 	}
 
-	
-	//  ==================  LOCK ID TABLE ========================
-
 	/**
 	 * This method will generate the create table sql statement to create the karaf id table and will
 	 * generate the following sql statement.
 	 *
+     * <code>
 	 * CREATE TABLE KARAF_ID ( ID INTEGER DEFAULT 0 )
+     * </code>
 	 *
-	 * @return sql create table statement
+	 * @return The SQL create table statement.
 	 */
 	private String getLockIdTableCreateStatement() {
 		return "CREATE TABLE " + this.getLockIdTableName() 
@@ -181,9 +200,11 @@ public class GenericStatements {
 	 * This method will return the sql statement to retreive the id of the lock id table and will
 	 * generate the following sql statement.
 	 *
+     * <code>
 	 * SELECT ID FROM KARAF_ID
+     * </code>
 	 *
-	 * @return sql select statement
+	 * @return The SQL select statement.
 	 */
 	public String getLockIdSelectStatement() {
 		return "SELECT ID FROM " + this.getLockIdTableName();
@@ -197,18 +218,22 @@ public class GenericStatements {
 	 * This method will return the update statement for the lock id table and will generate the
 	 * following sql statement.
 	 *
+     * <code>
 	 * UPDATE KARAF_ID SET ID = ? WHERE ID = ?
+     * </code>
 	 *
-	 * @return sql update statement
+     * @param id The new ID.
+     * @param curId The current ID.
+	 * @return The SQL update statement.
 	 */
 	public String getLockIdUpdateIdStatement(int id, int curId) {
 		return String.format("UPDATE %s SET ID = %d WHERE ID = %d", this.getLockIdTableName(), id, curId);
 	}
 	
 	/**
-	 * This method will return the name of the karaf lock id table.
+	 * This method will return the name of the Karaf lock id table.
 	 *
-	 * @return name of the karaf lock id table
+	 * @return The name of the Karaf lock id table.
 	 */
 	public final String getLockIdTableName() {
 		return lockIdTableName;
@@ -217,7 +242,8 @@ public class GenericStatements {
 	/**
 	 * This method will return the required sql statements to initialize the lock database.
 	 *
-	 * @return array of sql statements
+     * @param moment The moment.
+	 * @return The array of SQL statements.
 	 */
 	public String[] getLockCreateSchemaStatements(long moment) {
 		return new String[] {
@@ -232,9 +258,11 @@ public class GenericStatements {
 	 * This method will return the insert statement to insert a row in the lock id table and will
 	 * generate the following sql statement.
 	 *
+     * <code>
 	 * INSERT INTO KARAF_ID (ID) VALUES (0)
+     * </code>
 	 *
-	 * @return sql insert statement
+	 * @return The SQL insert statement.
 	 */
 	private String getLockIdTableInitialInsertStatement() {
 		return "INSERT INTO " + this.getLockIdTableName() + "(ID) VALUES (0)";

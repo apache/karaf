@@ -37,9 +37,9 @@ public interface EncryptionService {
      * If the parameters are not supported, a <code>null</code> should
      * be returned or an IllegalArgumentException thrown.
      *
-     * @param params
-     * @return
-     * @throws IllegalArgumentException
+     * @param params define the encryption configuration.
+     * @return the {@link Encryption}.
+     * @throws IllegalArgumentException if the {@link Encryption} can't be created.
      */
     Encryption createEncryption(Map<String,String> params) throws IllegalArgumentException;
 

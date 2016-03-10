@@ -25,11 +25,15 @@ public interface Command extends Function {
 
     /**
      * Retrieve the scope of this command.
+     *
+     * @return the command scope.
      */
     String getScope();
 
     /**
      * Retrieve the name of this command.
+     *
+     * @return the command name.
      */
     String getName();
 
@@ -37,6 +41,8 @@ public interface Command extends Function {
      * Retrieve the description of this command.
      * This short command description will be printed
      * when using the <code>help</code> command.
+     *
+     * @return the command description.
      */
     String getDescription();
 
@@ -51,7 +57,7 @@ public interface Command extends Function {
     /**
      * Retrieve the parser associated with this command or null for the default one.
      *
-     * @return
+     * @return the command parser.
      */
     Parser getParser();
 

@@ -46,6 +46,8 @@ public class ManagedGreeterServiceImpl implements ManagedGreeterService {
 
     /**
      * Called when all of the SCR Components required dependencies have been satisfied.
+     *
+     * @param properties The activation properties.
      */
     @Activate
     public void activate(final Map<String, ?> properties) {
@@ -87,6 +89,8 @@ public class ManagedGreeterServiceImpl implements ManagedGreeterService {
 
     /**
      * Called when the configuration associated with this component has been updated.
+     *
+     * @param properties The updated configuration.
      */
     @Modified
     public void modified(final Map<String, ?> properties) {

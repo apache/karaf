@@ -32,6 +32,7 @@ public final class ChecksumUtils {
      *
      * @param is the input stream
      * @return a checksum identifying any change
+     * @throws IOException in case of checksum failure.
      */
     public static long checksum(InputStream is) throws IOException {
         CRC32 crc = new CRC32();

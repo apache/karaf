@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A class annotated with {@link @Service} can have a method
+ * A class annotated with {@link Service} can have a method
  * annotation with <code>@Init</code> in which case the annotated
  * method will be called after a successful injection.
  */

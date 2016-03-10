@@ -24,16 +24,19 @@ public interface PlaceholderResolver {
 
     /**
      * The placeholder scheme.
+     *
+     * @return The placeholder scheme.
      */
     public String getScheme();
 
     /**
-     * Resolves the placeholder found inside the value, for the specific key of the pid.
-     * @param profile   The current profile
-     * @param pid       The pid that contains the placeholder.
-     * @param key       The key of the configuration value that contains the placeholder.
-     * @param value     The value with the placeholder.
-     * @return          The resolved value or EMPTY_STRING.
+     * Resolve the placeholder found inside the value, for the specific key of the pid.
+     *
+     * @param profile The current profile.
+     * @param pid The pid that contains the placeholder.
+     * @param key The key of the configuration value that contains the placeholder.
+     * @param value The value with the placeholder.
+     * @return The resolved value or EMPTY_STRING.
      */
     public String resolve(Map<String, Map<String, String>> profile, String pid, String key, String value);
 

@@ -40,7 +40,7 @@ public interface Process extends Serializable {
     /**
      * Destroy the process.
      *
-     * @throws IOException
+     * @throws IOException If an error occurs.
      */
     void destroy() throws IOException;
 

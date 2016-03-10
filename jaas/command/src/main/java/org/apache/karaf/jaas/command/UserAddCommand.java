@@ -30,13 +30,6 @@ public class UserAddCommand extends JaasCommandSupport {
     @Argument(index = 1, name = "password", description = "Password", required = true, multiValued = false)
     private String password;
 
-    /**
-     * Execute the RoleAddCommand in the given Excecution Context.
-     *
-     * @param engine
-     * @return
-     * @throws Exception
-     */
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
         engine.addUser(username, password);

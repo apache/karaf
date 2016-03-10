@@ -62,9 +62,9 @@ public enum HAlign {
     /**
      * Calculate text position.
      * 
-     * @param text Text 
-     * @param colWidth
-     * @return
+     * @param text  the text to align.
+     * @param colWidth the column width.
+     * @return the string at the given position.
      */
     public abstract String position(String text, int colWidth);
 

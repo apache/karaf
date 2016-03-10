@@ -33,6 +33,8 @@ public @interface Parsing {
 
     /**
      * The parser class to use for this command.
+     *
+     * @return the parsing value.
      */
     Class<?> value();
 

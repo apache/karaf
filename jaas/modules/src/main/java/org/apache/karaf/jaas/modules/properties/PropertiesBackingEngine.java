@@ -30,20 +30,13 @@ import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class PropertiesBackingEngine implements BackingEngine {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesBackingEngine.class);
 
-
     private Properties users;
     private EncryptionSupport encryptionSupport;
 
-    /**
-     * Constructor
-     *
-     * @param users
-     */
     public PropertiesBackingEngine(Properties users) {
         this.users = users;
     }

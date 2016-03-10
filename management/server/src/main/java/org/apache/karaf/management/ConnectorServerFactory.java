@@ -137,7 +137,7 @@ public class ConnectorServerFactory {
     /**
      * Authenticator type to use. Acceptable values are "none", "password", and "certificate"
      *
-     * @param value
+     * @param value The authenticator type: "none", "password", "certificate".
      */
     public void setAuthenticatorType(String value) {
         this.authenticatorType = AuthenticatorType.valueOf(value.toUpperCase());
@@ -146,7 +146,7 @@ public class ConnectorServerFactory {
     /**
      * Use this param to allow KeyStoreManager to wait for expected keystores to be loaded by other bundle
      *
-     * @param keyStoreAvailabilityTimeout
+     * @param keyStoreAvailabilityTimeout The keystore timeout.
      */
     public void setKeyStoreAvailabilityTimeout(long keyStoreAvailabilityTimeout) {
         this.keyStoreAvailabilityTimeout = keyStoreAvailabilityTimeout;

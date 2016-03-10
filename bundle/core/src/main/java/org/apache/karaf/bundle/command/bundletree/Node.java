@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Represents a node in a {@link Tree}
+ * Represent a node in a {@link Tree}
  */
 public class Node<T> {
     
@@ -32,7 +32,7 @@ public class Node<T> {
     private List<Node<T>> children = new LinkedList<Node<T>>();
 
     /**
-     * Creates a new node. Only meant for wrapper use,
+     * Create a new node. Only meant for wrapper use,
      * new nodes should be added using the {@link #addChild(Object)} method
      *
      * @param value the node value
@@ -43,10 +43,11 @@ public class Node<T> {
     }
 
     /**
-     * Creates a new node. Only meant for wrapper use,
-     * new nodes should be added using the {@link #addChild(Object)} method
+     * Create a new node. Only meant for wrapper use,
+     * new nodes should be added using the {@link #addChild(Object)} method.
      *
-     * @param value the node value
+     * @param value the node value.
+     * @param parent the parent node.
      */
     protected Node(T value, Node<T> parent) {
         this(value);
@@ -54,24 +55,28 @@ public class Node<T> {
     }
 
     /**
-     * Access the node's value
+     * Access the node's value.
+     *
+     * @return T the node's value.
      */
     public T getValue() {
         return value;
     }
 
     /**
-     * Access the node's child nodes
+     * Access the node's child nodes.
+     *
+     * @return the list of node children.
      */
     public List<Node<T>> getChildren() {
         return children;
     }
 
     /**
-     * Adds a child to this node
+     * Add a child to this node.
      *
-     * @param value the child's value
-     * @return the child node
+     * @param value the child's value.
+     * @return the child node.
      */
     public Node<T> addChild(T value) {
         Node<T> node = new Node<T>(value, this);
@@ -82,7 +87,7 @@ public class Node<T> {
     /**
      * Give a set of values in the tree.
      *
-     * @return
+     * @return the set of values.
      */
     public Set<T> flatten() {
         Set<T> result = new HashSet<T>();
@@ -94,10 +99,10 @@ public class Node<T> {
     }
 
     /**
-     * Check if the node has an ancestor that represents the given value
+     * Check if the node has an ancestor that represents the given value.
      *
-     * @param value the node value
-     * @return <code>true</code> it there's an ancestor that represents the value
+     * @param value the node value.
+     * @return <code>true</code> if there's an ancestor that represents the value.
      */
     public boolean hasAncestor(T value) {
         if (parent == null) {

@@ -23,75 +23,85 @@ import java.util.Collection;
  */
 public interface ProfileService {
 
-    //
-    // Lock management
-    //
 
     /**
      * Acquire a write lock for the profile.
+     *
+     * @return The write lock handler.
      */
     LockHandle acquireWriteLock();
 
     /**
      * Acquire a read lock for the profile.
      * A read lock cannot be upgraded to a write lock.
+     *
+     * @return The read lock handler.
      */
     LockHandle acquireReadLock();
 
-    //
-    // PlaceholderResolver management
-    //
-
     /**
      * Register the given resolver.
-     * @param resolver the resolver to register
+     *
+     * @param resolver The resolver to register.
      */
     void registerResolver(PlaceholderResolver resolver);
 
     /**
      * Unregister the given resolver.
-     * @param resolver the resolver to unregister
+     *
+     * @param resolver The resolver to unregister.
      */
     void unregisterResolver(PlaceholderResolver resolver);
 
-    //
-    // Profile management
-    //
-    
     /**
      * Create the given profile in the data store.
+     *
+     * @param profile The profile to create.
      */
     void createProfile(Profile profile);
     
     /**
      * Create the given profile in the data store.
+     *
+     * @param profile The profile to update.
      */
     void updateProfile(Profile profile);
 
     /**
      * True if the given profile exists in the given version.
+     *
+     * @param profileId The profile ID.
+     * @return True if the given profile exists, false else.
      */
     boolean hasProfile(String profileId);
 
     /**
      * Get the profile for the given version and id.
-     * @return The profile or null
+     *
+     * @param profileId The profile ID.
+     * @return The profile or null if not found.
      */
     Profile getProfile(String profileId);
 
     /**
      * Get the profile for the given version and id.
-     * @throws IllegalStateException if the required profile does not exist
+     *
+     * @param profileId The profile ID.
+     * @return The profile or null if not found.
      */
     Profile getRequiredProfile(String profileId);
 
     /** 
      * Get the list of profiles associated with the given version.
+     *
+     * @return The collection of all profiles.
      */
     Collection<String> getProfiles();
 
     /**
      * Delete the given profile from the data store.
+     *
+     * @param profileId The profile ID to remove.
      */
     void deleteProfile(String profileId);
 
@@ -100,6 +110,9 @@ public interface ProfileService {
      *
      * The overlay profile is computed by getting all the parent profiles
      * and overriding the settings by children profiles.
+     *
+     * @param profile The profile.
+     * @return The overlay profile.
      */
     Profile getOverlayProfile(Profile profile);
 
@@ -108,6 +121,10 @@ public interface ProfileService {
      *
      * The overlay profile is computed by getting all the parent profiles
      * and overriding the settings by children profiles.
+     *
+     * @param profile The profile.
+     * @param environment The environment.
+     * @return The overlay profile.
      */
     Profile getOverlayProfile(Profile profile, String environment);
 
@@ -116,6 +133,9 @@ public interface ProfileService {
      *
      * The effective profile is computed by performing all substitutions
      * in the given profile configurations.
+     *
+     * @param profile The profile to compute.
+     * @return The effective profile.
      */
     Profile getEffectiveProfile(Profile profile);
 
@@ -125,7 +145,9 @@ public interface ProfileService {
      * The effective profile is computed by performing all substitutions
      * in the given profile configurations.
      *
-     * @param defaultsToEmptyString if no substitution is valid, defaults to an empty string
+     * @param profile The profile to compute.
+     * @param defaultsToEmptyString if no substitution is valid, defaults to an empty string.
+     * @return The effective profile.
      */
     Profile getEffectiveProfile(Profile profile, boolean defaultsToEmptyString);
 

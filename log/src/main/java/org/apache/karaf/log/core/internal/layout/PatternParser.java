@@ -101,10 +101,12 @@ public class PatternParser {
 
 
   /**
-     The option is expected to be in decimal and positive. In case of
-     error, zero is returned.  */
-  protected
-  int extractPrecisionOption() {
+   * The option is expected to be in decimal and positive.
+   * In case of error, zero is returned.
+   *
+   * @return The precision value, or zero in case of error.
+   */
+  protected int extractPrecisionOption() {
     String opt = extractOption();
     int r = 0;
     if(opt != null) {

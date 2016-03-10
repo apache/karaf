@@ -73,9 +73,9 @@ public interface Scheduler {
      * by one of the provided methods from this scheduler.
      *
      * @param job The job to execute (either {@link Job} or {@link Runnable}).
-     * @param options Required options defining how to schedule the job
-     * @throws SchedulerException if the job can't be scheduled
-     * @throws IllegalArgumentException If the preconditions are not met
+     * @param options Required options defining how to schedule the job.
+     * @throws SchedulerException if the job can't be scheduled.
+     * @throws IllegalArgumentException If the preconditions are not met.
      * @see #NOW()
      * @see #NOW(int, long)
      * @see #AT(Date)
@@ -88,7 +88,7 @@ public interface Scheduler {
      * Remove a scheduled job by name.
      *
      * @param jobName The name of the job.
-     * @return <code>true</code> if the job existed and could be stopped, <code>false</code> otherwise.
+     * @return <code>True</code> if the job existed and could be stopped, <code>false</code> otherwise.
      */
     boolean unschedule(String jobName);
 
@@ -96,35 +96,43 @@ public interface Scheduler {
 
     /**
      * Create a schedule options to fire a job immediately and only once.
+     *
+     * @return The corresponding {@link ScheduleOptions}.
      */
     ScheduleOptions NOW();
 
     /**
      * Create a schedule options to fire a job immediately more than once.
-     * @param times The number of times this job should be started (must be higher than 1 or
-     *              -1 for endless)
+     * @param times The number of times this job should be started (must be higher than 1 or -1 for endless).
      * @param period Every period seconds this job is started (must be at higher than 0).
+     * @return The corresponding {@link ScheduleOptions}.
      */
     ScheduleOptions NOW(int times, long period);
 
     /**
-     * Create a schedule options to fire a job once at a specific date
+     * Create a schedule options to fire a job once at a specific date.
+     *
      * @param date The date this job should be run.
+     * @return The corresponding {@link ScheduleOptions}.
      */
     ScheduleOptions AT(final Date date);
 
     /**
-     * Create a schedule options to fire a job period starting at a specific date
+     * Create a schedule options to fire a job period starting at a specific date.
+     *
      * @param date The date this job should be run.
-     * @param times The number of times this job should be started (must be higher than 1 or
-     *              -1 for endless)
+     * @param times The number of times this job should be started (must be higher than 1 or -1 for endless).
      * @param period Every period seconds this job is started (must be at higher than 0).
+     * @return The corresponding {@link ScheduleOptions}.
      */
     ScheduleOptions AT(final Date date, int times, long period);
 
     /**
-     * Create a schedule options to schedule the job based on the expression
-     * @param expression The cron exception
+     * Create a schedule options to schedule the job based on the expression.
+     *
+     * @param expression The cron exception.
+     * @return The corresponding {@link ScheduleOptions}.
      */
     ScheduleOptions EXPR(final String expression);
+
 }

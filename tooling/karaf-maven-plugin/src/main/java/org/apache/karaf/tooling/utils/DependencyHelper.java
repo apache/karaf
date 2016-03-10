@@ -54,16 +54,18 @@ public interface DependencyHelper {
     /**
      * Convert a Maven <code>Artifact</code> into a PAX URL mvn format.
      *
-     * @param artifact the Maven <code>Artifact</code>.
-     * @return the corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier)
+     * @param artifact The Maven <code>Artifact</code>.
+     * @return The corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier)
+     * @throws MojoExecutionException If the plugin execution fails.
      */
     public String artifactToMvn(Artifact artifact) throws MojoExecutionException;
 
     /**
      * Convert an Aether (Sonatype or Eclipse) artifact into a PAX URL mvn format.
      *
-     * @param object the Aether <code>org.sonatype|eclipse.aether.artifact.Artifact</code>.
-     * @return the corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier)
+     * @param object The Aether <code>org.sonatype|eclipse.aether.artifact.Artifact</code>.
+     * @return The corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier).
+     * @throws MojoExecutionException If the plugin execution fails.
      */
     public String artifactToMvn(Object object) throws MojoExecutionException;
 
@@ -73,15 +75,17 @@ public interface DependencyHelper {
      * Convert a PAX URL mvn format into a filesystem path.
      *
      * @param name PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier).
-     * @return a filesystem path.
+     * @return The filesystem path.
+     * @throws MojoExecutionException If the plugin execution fails.
      */
     public String pathFromMaven(String name) throws MojoExecutionException;
 
     /**
      * Convert an Aether coordinate format into a filesystem path.
      *
-     * @param name the Aether coordinate format (groupId:artifactId[:extension[:classifier]]:version).
-     * @return the filesystem path.
+     * @param name The Aether coordinate format (groupId:artifactId[:extension[:classifier]]:version).
+     * @return The filesystem path.
+     * @throws MojoExecutionException If the plugin execution fails.
      */
     public String pathFromAether(String name) throws MojoExecutionException;
 

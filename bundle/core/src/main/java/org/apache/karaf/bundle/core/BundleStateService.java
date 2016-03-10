@@ -23,6 +23,7 @@ import org.osgi.framework.Bundle;
  * also reports on  dependencies and status on the injection container level
  */
 public interface BundleStateService {
+
     public final static String NAME_BLUEPRINT = "Blueprint";
     public final static String NAME_SPRING_DM = "Spring DM";
     public final static String NAME_DS = "Declarative Services";
@@ -40,8 +41,8 @@ public interface BundleStateService {
      * like missing namespace handlers or service dependencies.
      * Should also give the details if there are config errors
      * 
-     * @param bundle
-     * @return diagnostic details
+     * @param bundle the bundle to get diag for.
+     * @return diagnostic details.
      */
     String getDiag(Bundle bundle);
     
@@ -49,8 +50,8 @@ public interface BundleStateService {
      * Report the bundle state from the framework point of view. 
      * If the framework is not active it should return Unknown.
      * 
-     * @param bundle
-     * @return status
+     * @param bundle the bundle to get state for.
+     * @return the current bundle state.
      */
     BundleState getState(Bundle bundle);
 

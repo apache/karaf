@@ -27,19 +27,19 @@ import org.apache.karaf.shell.api.action.Action;
 public interface CommandHelpPrinter {
 
     /**
-     * Print help for a single action to the out stream
+     * Print help for a single action to the out stream.
      * 
-     * @param action
-     * @param out stream to write to
-     * @param includeHelpOption include the help option in the doc
+     * @param action The command {@link Action}.
+     * @param out The stream where to print the help.
+     * @param includeHelpOption True to include the help option in the doc, false else.
      */
     void printHelp(Action action, PrintStream out, boolean includeHelpOption);
     
     /**
-     * Print the overview of all given commands to the out stream 
+     * Print the overview of all given commands to the out stream.
      * 
-     * @param commands
-     * @param out
+     * @param commands The {@link Map} of commands to consider in the overview.
+     * @param out The stream where to write the overview.
      */
     void printOverview(Map<String, Set<String>> commands, PrintStream out);
 

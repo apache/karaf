@@ -42,17 +42,23 @@ public @interface Completion {
      * {@link org.apache.karaf.shell.support.completers.StringsCompleter},
      * in which case, the <code>values</code> property will be used
      * as the list of possible completions.
+     *
+     * @return the completer class.
      */
     Class<?> value();
 
     /**
      * When using a static completer, returns the possible values.
+     *
+     * @return possible completion values as string array.
      */
     String[] values() default { };
 
     /**
      * When using a static completer, indicates if completion
      * should be done case sensitive or not.
+     *
+     * @return true if the completion is case sensitive, false else.
      */
     boolean caseSensitive() default false;
 

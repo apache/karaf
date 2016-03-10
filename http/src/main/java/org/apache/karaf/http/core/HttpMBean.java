@@ -27,8 +27,8 @@ public interface HttpMBean {
     /**
      * List details for servlets.
      *
-     * @return a tabular view of the servlets information.
-     * @throws Exception
+     * @return A {@link TabularData} containing the servlets information.
+     * @throws MBeanException In case of MBean failure.
      */
     TabularData getServlets() throws MBeanException;
 

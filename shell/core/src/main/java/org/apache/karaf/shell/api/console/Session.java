@@ -60,16 +60,17 @@ public interface Session extends Runnable {
     /**
      * Execute a program in this session.
      *
-     * @param commandline
+     * @param commandline the provided command line
      * @return the result of the execution
+     * @throws Exception in case of execution failure.
      */
     Object execute(CharSequence commandline) throws Exception;
 
     /**
      * Get the value of a variable.
      *
-     * @param name
-     * @return
+     * @param name the key name in the session
+     * @return the corresponding object
      */
     Object get(String name);
 
@@ -98,17 +99,17 @@ public interface Session extends Runnable {
      * bypass the piping. If the output is piped to a file, then the object
      * returned must be null.
      *
-     * @return
+     * @return the console stream
      */
     PrintStream getConsole();
 
     /**
      * Prompt the user for a line.
      *
-     * @param prompt
-     * @param mask
-     * @return
-     * @throws java.io.IOException
+     * @param prompt the session prompt
+     * @param mask the session mask
+     * @return the corresponding line
+     * @throws java.io.IOException in case of prompting failure
      */
     String readLine(String prompt, final Character mask) throws IOException;
 
@@ -116,6 +117,8 @@ public interface Session extends Runnable {
      * Retrieve the {@link org.apache.karaf.shell.api.console.Terminal} associated
      * with this <code>Session</code> or <code>null</code> if this <code>Session</code>
      * is headless.
+     *
+     * @return the session terminal
      */
     Terminal getTerminal();
 
@@ -123,18 +126,24 @@ public interface Session extends Runnable {
      * Retrieve the {@link org.apache.karaf.shell.api.console.History} associated
      * with this <code>Session</code> or <code>null</code> if this <code>Session</code>
      * is headless.
+     *
+     * @return the session history
      */
     History getHistory();
 
     /**
      * Retrieve the {@link org.apache.karaf.shell.api.console.Registry} associated
      * with this <code>Session</code>.
+     *
+     * @return the session registry
      */
     Registry getRegistry();
 
     /**
      * Retrieve the {@link org.apache.karaf.shell.api.console.SessionFactory} associated
      * with this <code>Session</code>.
+     *
+     * @return the session factory
      */
     SessionFactory getFactory();
 
@@ -142,6 +151,9 @@ public interface Session extends Runnable {
      * Resolve a command name.  If the command name has no specified scope, the fully
      * qualified command name will be returned, depending on the scopes and current
      * subshell.
+     *
+     * @param name the command name
+     * @return the full qualified command name
      */
     String resolveCommand(String name);
 

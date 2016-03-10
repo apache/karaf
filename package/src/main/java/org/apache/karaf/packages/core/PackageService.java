@@ -22,29 +22,27 @@ import java.util.SortedMap;
 public interface PackageService {
 
 	/**
-	 * Gets the simplified package exports of a bundle. This does not show the 
+	 * Get the simplified package exports of a bundle. This does not show the
 	 * package versions.
 	 * 
-	 * @param bundleId
-	 * @return
+	 * @param bundleId The bundle ID.
+	 * @return The {@link List} of package exports in the given bundle.
 	 */
     List<String> getExports(long bundleId);
 
     List<String> getImports(long bundleId);
 
 	/**
-	 * Gets a map of all exported packages with their version and the bundles that export them
-	 * The key is in the form packagename:version.
+	 * Get all package exports with their version, and the bundles exporting them.
 	 * 
-	 * @return 
+	 * @return A {@link List} containing all package exports (as {@link PackageVersion}).
 	 */
     List<PackageVersion> getExports();
 
     /**
-     * Gets a map of all package imports. 
-     * The key is the import filter.
+	 * Get all package imports with their requirement.
      *  
-     * @return
+     * @return A {@link List} containing all package imports (as {@link PackageRequirement}).
      */
     List<PackageRequirement> getImports();
 

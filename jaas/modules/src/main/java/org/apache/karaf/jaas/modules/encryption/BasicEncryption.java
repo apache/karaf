@@ -100,8 +100,9 @@ public class BasicEncryption implements Encryption {
     }
 
     /**
-     * encode the input data producing a base 64 encoded byte array.
+     * Encode the input data producing a base 64 encoded byte array.
      *
+     * @param input the String to encore as an array of byte.
      * @return a byte array containing the base 64 encoded data.
      */
     public static String base64Encode(byte[] input) {

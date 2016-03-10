@@ -95,45 +95,62 @@ public interface Profile {
     String getId();
 
     /**
-     * Get the configuration file names that are available on this profile
+     * Get the configuration file names that are available on this profile.
+     *
+     * @return The configuration file names in the profile.
      */
     Set<String> getConfigurationFileNames();
 
     /**
-     * Get all file configurations
+     * Get all file configurations.
+     *
+     * @return The file configurations in the profile.
      */
     Map<String, byte[]> getFileConfigurations();
 
     /**
-     * Get the configuration file for the given name
+     * Get the configuration file for the given name.
+     *
+     * @param fileName The file configuration name to look for in the profile.
+     * @return The file configuration in the profile.
      */
     byte[] getFileConfiguration(String fileName);
 
     /**
-     * Get all configuration properties
+     * Get all configuration properties.
+     *
+     * @return The configurations in the profile.
      */
     Map<String, Map<String, String>> getConfigurations();
 
     /**
-     * Get the configuration properties for the given PID
-     * @return an empty map if the there is no configuration for the given pid
+     * Get the configuration properties for the given PID.
+     *
+     * @param pid The configuration PID to look for.
+     * @return An empty map if the there is no configuration for the given pid.
      */
     Map<String, String> getConfiguration(String pid);
 
     /**
      * Indicate if this profile is an overlay or not.
+     *
+     * @return True if the profile is an overlay, false else.
      */
     boolean isOverlay();
 
     /**
-     * Returns true if this profile is Abstract. 
-     * Abstract profiles should not be provisioned by default, they are intended to be inherited
+     * Return true if this profile is Abstract.
+     * Abstract profiles should not be provisioned by default, they are intended to be inherited.
+     *
+     * @return True if the profile is abstract, false else.
      */
     boolean isAbstract();
 
     /**
-     * Returns true if this profile is hidden.  
+     * Return true if this profile is hidden.
      * Hidden profiles are not listed by default.
+     *
+     * @return True if the profile is hidden, false else.
      */
     boolean isHidden();
 

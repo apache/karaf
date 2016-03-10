@@ -37,12 +37,9 @@ import java.util.Set;
  *
  * <p>Currently, the following methods are supported:</p>
  * <ul>
- *     <li><code>password</code>
- *          Password authentication against a given JAAS domain.</p></li>
- *     <li><code>publickey</code>
- *          Public key authentication against an OpenSSH <code>authorized_keys</code> file.</p></li>
+ *     <li><code>password</code> Password authentication against a given JAAS domain.</li>
+ *     <li><code>publickey</code> Public key authentication against an OpenSSH <code>authorized_keys</code> file.</li>
  * </ul>
- * </p>
  */
 public class UserAuthFactoriesFactory {
 

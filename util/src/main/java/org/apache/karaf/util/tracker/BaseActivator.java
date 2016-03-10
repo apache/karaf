@@ -129,7 +129,9 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doOpen()}
+     * Called in {@link #doOpen()}.
+     *
+     * @param pid The configuration PID to manage (ManagedService).
      */
     protected void manage(String pid) {
         Hashtable<String, Object> props = new Hashtable<>();
@@ -146,8 +148,13 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     protected Dictionary<String, ?> getConfiguration() {
         return configuration;
     }
+
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param key The configuration key
+     * @param def The default value.
+     * @return The value of the configuration key if found, the default value else.
      */
     protected int getInt(String key, int def) {
         if (configuration != null) {
@@ -162,7 +169,11 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param key The configuration key.
+     * @param def The default value.
+     * @return The value of the configuration key if found, the default value else.
      */
     protected boolean getBoolean(String key, boolean def) {
         if (configuration != null) {
@@ -177,7 +188,11 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param key The configuration key.
+     * @param def The default value.
+     * @return The value of the configuration key if found, the default value else.
      */
     protected long getLong(String key, long def) {
         if (configuration != null) {
@@ -192,7 +207,11 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param key The configuration key.
+     * @param def The default value.
+     * @return The value of the configuration key if found, the default value else.
      */
     protected String getString(String key, String def) {
         if (configuration != null) {
@@ -238,7 +257,10 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doOpen()}
+     * Called in {@link #doOpen()}.
+     *
+     * @param clazz The service interface to track.
+     * @throws InvalidSyntaxException If the tracker syntax is not correct.
      */
     protected void trackService(Class<?> clazz) throws InvalidSyntaxException {
         if (!trackers.containsKey(clazz.getName())) {
@@ -249,7 +271,11 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doOpen()}
+     * Called in {@link #doOpen()}.
+     *
+     * @param clazz The service interface to track.
+     * @param filter The filter to use to select the services to track.
+     * @throws InvalidSyntaxException If the tracker syntax is not correct (in the filter especially).
      */
     protected void trackService(Class<?> clazz, String filter) throws InvalidSyntaxException {
         if (!trackers.containsKey(clazz.getName())) {
@@ -271,7 +297,11 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param clazz The service interface to get.
+     * @param <T> The service type.
+     * @return The actual tracker service object.
      */
     protected <T> T getTrackedService(Class<T> clazz) {
         SingleServiceTracker tracker = trackers.get(clazz.getName());
@@ -282,7 +312,10 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param mbean The MBean to register.
+     * @param type The MBean type to register.
      */
     protected void registerMBean(Object mbean, String type) {
         Hashtable<String, Object> props = new Hashtable<>();
@@ -291,28 +324,44 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param clazz The service interface to register.
+     * @param <T> The service type.
+     * @param service The actual service instance to register.
      */
     protected <T> void register(Class<T> clazz, T service) {
         register(clazz, service, null);
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param clazz The service interface to register.
+     * @param <T> The service type.
+     * @param service The actual service instance to register.
+     * @param props The service properties to register.
      */
     protected <T> void register(Class<T> clazz, T service, Dictionary<String, ?> props) {
         trackRegistration(bundleContext.registerService(clazz, service, props));
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param clazz The service interfaces to register.
+     * @param service The actual service instance to register.
      */
     protected void register(Class[] clazz, Object service) {
         register(clazz, service, null);
     }
 
     /**
-     * Called in {@link #doStart()}
+     * Called in {@link #doStart()}.
+     *
+     * @param clazz The service interfaces to register.
+     * @param service The actual service instance to register.
+     * @param props The service properties to register.
      */
     protected void register(Class[] clazz, Object service, Dictionary<String, ?> props) {
         String[] names = new String[clazz.length];

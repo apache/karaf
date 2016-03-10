@@ -153,7 +153,7 @@ public class ConsoleImpl implements Console {
     /**
      * Subclasses can override to use a different history file.
      *
-     * @return
+     * @return The history file.
      */
     protected File getHistoryFile() {
         String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();

@@ -29,136 +29,136 @@ public interface JmsMBean {
     /**
      * List the JMS connection factories.
      *
-     * @return the list of the JMS connection factories name.
-     * @throws MBeanException
+     * @return The {@link List} of the JMS connection factories name.
+     * @throws MBeanException If the MBean fails.
      */
     List<String> getConnectionfactories() throws MBeanException;
 
     /**
      * Create a JMS connection factory.
      *
-     * @param name the JMS connection factory name.
-     * @param type the JMS connection factory type (ActiveMQ or WebsphereMQ).
-     * @param url the JMS connection factory URL. NB: when type is WebsphereMQ, the URL has the format host/port/queuemanager/channel.
-     * @throws MBeanException
+     * @param name The JMS connection factory name.
+     * @param type The JMS connection factory type (ActiveMQ or WebsphereMQ).
+     * @param url The JMS connection factory URL. NB: when type is WebsphereMQ, the URL has the format host/port/queuemanager/channel.
+     * @throws MBeanException If the MBean fails.
      */
     void create(String name, String type, String url) throws MBeanException;
 
     /**
      * Create a JMS connection factory.
      *
-     * @param name the JMS connection factory name.
-     * @param type the JMS connection factory type (ActiveMQ or WebsphereMQ).
-     * @param url the JMS connection factory URL. NB: when type is WebsphereMQ, the URL has the format host/port/queuemanager/channel.
-     * @param username the JMS connection factory authentication username.
-     * @param password the JMS connection factory authentication password.
-     * @throws MBeanException
+     * @param name The JMS connection factory name.
+     * @param type The JMS connection factory type (ActiveMQ or WebsphereMQ).
+     * @param url The JMS connection factory URL. NB: when type is WebsphereMQ, the URL has the format host/port/queuemanager/channel.
+     * @param username The JMS connection factory authentication username.
+     * @param password The JMS connection factory authentication password.
+     * @throws MBeanException If the MBean fails.
      */
     void create(String name, String type, String url, String username, String password) throws MBeanException;
 
     /**
      * Delete a JMS connection factory.
      *
-     * @param name the JMS connection factory name.
-     * @throws MBeanException
+     * @param name The JMS connection factory name.
+     * @throws MBeanException If the MBean fails.
      */
     void delete(String name) throws MBeanException;
 
     /**
      * Get details about a JMS connection factory.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return a map (property/value) containing details.
-     * @throws MBeanException
+     * @param connectionFactory The JMS connection factory name.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return A {@link Map} (property/value) containing details.
+     * @throws MBeanException If the MBean fails.
      */
     Map<String, String> info(String connectionFactory, String username, String password) throws MBeanException;
 
     /**
      * Count the messages on a given JMS queue.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param queue the JMS queue name.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return
-     * @throws MBeanException
+     * @param connectionFactory The JMS connection factory name.
+     * @param queue The JMS queue name.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The number of messages in the queue.
+     * @throws MBeanException If the MBean fails.
      */
     int count(String connectionFactory, String queue, String username, String password) throws MBeanException;
 
     /**
      * List the JMS queues.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the list of JMS queues.
-     * @throws MBeanException
+     * @param connectionFactory The JMS connection factory name.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The {@link List} of JMS queues.
+     * @throws MBeanException If the MBean fails.
      */
     List<String> queues(String connectionFactory, String username, String password) throws MBeanException;
 
     /**
      * List the JMS topics.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the list of JMS topics.
-     * @throws MBeanException
+     * @param connectionFactory The JMS connection factory name.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The @link List} of JMS topics.
+     * @throws MBeanException If the MBean fails.
      */
     List<String> topics(String connectionFactory, String username, String password) throws MBeanException;
 
     /**
      * Browse the messages in a JMS queue.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param queue the JMS queue name.
-     * @param selector a selector to use to browse only certain messages.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return a tabular data with messages details.
-     * @throws MBeanException
+     * @param connectionFactory The JMS connection factory name.
+     * @param queue The JMS queue name.
+     * @param selector A selector to use to browse only certain messages.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return A {@link TabularData} containing messages details.
+     * @throws MBeanException If the MBean fails.
      */
     TabularData browse(String connectionFactory, String queue, String selector, String username, String password) throws MBeanException;
 
     /**
      * Send a JMS message to given queue.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param queue the JMS queue name.
-     * @param content the message content.
-     * @param replyTo the message ReplyTo.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @throws MBeanException
+     * @param connectionFactory The JMS connection factory name.
+     * @param queue The JMS queue name.
+     * @param content The message content.
+     * @param replyTo The message ReplyTo.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @throws MBeanException If the MBean fails.
      */
     void send(String connectionFactory, String queue, String content, String replyTo, String username, String password) throws MBeanException;
 
     /**
      * Consume JMS messages from a given queue.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param queue the JMS queue name.
-     * @param selector a selector to use to consume only certain messages.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the number of messages consumed.
-     * @throws MBeanException
+     * @param connectionFactory The JMS connection factory name.
+     * @param queue The JMS queue name.
+     * @param selector A selector to use to consume only certain messages.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The number of messages consumed.
+     * @throws MBeanException If the MBean fails.
      */
     int consume(String connectionFactory, String queue, String selector, String username, String password) throws MBeanException;
 
     /**
      * Move JMS messages from one queue to another.
      *
-     * @param connectionFactory the JMS connection factory name.
-     * @param source the source JMS queue name.
-     * @param destination the destination JMS queue name.
-     * @param selector a selector to move only certain messages.
-     * @param username optional username to connect to the JMS broker.
-     * @param password optional password to connect to the JMS broker.
-     * @return the number of messages moved.
-     * @throws MBeanException
+     * @param connectionFactory The JMS connection factory name.
+     * @param source The source JMS queue name.
+     * @param destination The destination JMS queue name.
+     * @param selector A selector to move only certain messages.
+     * @param username The (optional) username to connect to the JMS broker.
+     * @param password The (optional) password to connect to the JMS broker.
+     * @return The number of messages moved.
+     * @throws MBeanException If the MBean fails.
      */
     int move(String connectionFactory, String source, String destination, String selector, String username, String password) throws MBeanException;
 

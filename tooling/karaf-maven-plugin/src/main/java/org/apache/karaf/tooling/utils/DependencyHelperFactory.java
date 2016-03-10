@@ -42,12 +42,12 @@ public class DependencyHelperFactory {
      *
      * <p>When {@code karaf-maven-plugin} switches to {@code maven-core:3.1.0+}, reflection should be use for Sonatype variant of Aether.</p>
      *
-     * @param container
-     * @param mavenProject
-     * @param mavenSession
-     * @param log
-     * @return
-     * @throws MojoExecutionException
+     * @param container The Maven Plexus container to use.
+     * @param mavenProject The Maven project to use.
+     * @param mavenSession The Maven session.
+     * @param log The log to use for the messages.
+     * @return The {@link DependencyHelper} depending of the Maven version used.
+     * @throws MojoExecutionException If the plugin execution fails.
      */
     public static DependencyHelper createDependencyHelper(PlexusContainer container, MavenProject mavenProject, MavenSession mavenSession, Log log) throws MojoExecutionException {
         try {

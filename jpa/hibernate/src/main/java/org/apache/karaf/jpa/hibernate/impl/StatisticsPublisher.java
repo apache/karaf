@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Track EntityManagerFactory services for the persistence units. 
  * Manage on StatisticsMXBean for each persistence unit named like:
- * org.hibernate.statistics:unitName=<name of persistence unit>
+ * org.hibernate.statistics:unitName=&lt;name of persistence unit&gt;
  */
 public class StatisticsPublisher implements ServiceTrackerCustomizer<EntityManagerFactory, EntityManagerFactory> {
     private static Logger LOG = LoggerFactory.getLogger(StatisticsPublisher.class);

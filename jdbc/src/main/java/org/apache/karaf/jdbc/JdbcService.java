@@ -27,12 +27,14 @@ public interface JdbcService {
     /**
      * Create a JDBC datasource configuration.
      *
-     * @param name Datasource name 
-     * @param driverName Backend database type (osgi.jdbc.driver.name of DataSourceFactory)
-     * @param url JDBC URL
-     * @param user Database user name
-     * @param password Database password
-     * @param password2 
+     * @param name The datasource name.
+     * @param driverName The backend database type (osgi.jdbc.driver.name of DataSourceFactory).
+     * @param driverClass The JDBC driver class.
+     * @param databaseName The database name.
+     * @param url The JDBC URL.
+     * @param user The database user name.
+     * @param password The database password.
+     * @throws Exception If the service fails.
      */
     void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws Exception;
 
@@ -40,38 +42,43 @@ public interface JdbcService {
      * Delete a JDBC datasource identified by a name. Works only
      * for datasources that have a corresponding configuration
      *
-     * @param name Datasource name
+     * @param name The datasource name to delete.
+     * @throws Exception If the service fails.
      */
     void delete(String name) throws Exception;
     
     /**
      * List the JDBC DataSourceFactories available.
      *
-     * @return a list of DataSourceFactory names
+     * @return a {@link List} of DataSourceFactory names.
+     * @throws Exception If the service fails.
      */
     List<String> factoryNames() throws Exception;
 
     /**
      * List the JDBC datasources available.
      *
-     * @return a list of datasources names
+     * @return A {@link List} of datasources names.
+     * @throws Exception If the service fails.
      */
     List<String> datasources() throws Exception;
 
     /**
      * Execute a SQL query on a given JDBC datasource.
      *
-     * @param datasource the JDBC datasource name.
-     * @param query the SQL query to execute.
-     * @return the SQL query result (as a String).
+     * @param datasource The JDBC datasource name.
+     * @param query The SQL query to execute.
+     * @return The SQL query result (as a {@link Map}).
+     * @throws Exception If the service fails.
      */
     Map<String, List<String>> query(String datasource, String query) throws Exception;
 
     /**
      * Execute a SQL command on a given JDBC datasource.
      *
-     * @param datasource the JDBC datasource name.
-     * @param command the SQL command to execute.
+     * @param datasource The JDBC datasource name.
+     * @param command The SQL command to execute.
+     * @throws Exception If the service fails.
      */
     void execute(String datasource, String command) throws Exception;
 
@@ -79,15 +86,17 @@ public interface JdbcService {
      * List the tables available on a given JDBC datasource.
      *
      * @param datasource the JDBC datasource name.
-     * @return the list of table names.
+     * @return A {@link Map} containing the tables.
+     * @throws Exception If the service fails.
      */
     Map<String, List<String>> tables(String datasource) throws Exception;
 
     /**
      * Get detailed info about a JDBC datasource.
      *
-     * @param datasource the JDBC datasource name.
-     * @return a map of info (name/value).
+     * @param datasource The JDBC datasource name.
+     * @return A {@link Map} of info (name/value).
+     * @throws Exception If the service fails.
      */
     Map<String, String> info(String datasource) throws Exception;
 

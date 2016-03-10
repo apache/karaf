@@ -29,17 +29,23 @@ import java.lang.annotation.Target;
 public @interface SubShell {
 
     /**
-     * Returns the name of the command if used inside a shell
+     * Return the name of the command if used inside a shell.
+     *
+     * @return The name of the command in the shell.
      */
     String name();
 
     /**
-     * Returns the description of the command which is used to generate command line help
+     * Return the description of the command which is used to generate command line help.
+     *
+     * @return The description of the command in the shell.
      */
     String description() default "";
 
     /**
-     * Returns a detailed description of the command
+     * Return a detailed description of the command.
+     *
+     * @return The detailed description of the command in the shell.
      */
     String detailedDescription() default "";
 

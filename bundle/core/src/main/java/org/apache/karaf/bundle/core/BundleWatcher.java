@@ -23,24 +23,24 @@ public interface BundleWatcher {
     void bundleChanged(BundleEvent event);
 
     /**
-     * Adds a Bundle URLs to the watch list.
+     * Add a Bundle URLs to the watch list.
      * 
-     * @param url
+     * @param url the URL to watch.
      */
     void add(String url);
 
     /**
-     * Removes a bundle URLs from the watch list.
+     * Remove a bundle URLs from the watch list.
      * 
-     * @param url
+     * @param url the URL to stop to watch.
      */
     void remove(String url);
 
     /**
-     * Returns the bundles that match
+     * Return the bundles that match
      * 
-     * @param url
-     * @return
+     * @param url the bundles URL.
+     * @return the list of bundles.
      */
     List<Bundle> getBundlesByURL(String url);
 

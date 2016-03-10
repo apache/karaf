@@ -95,7 +95,7 @@ public class Main {
      * when invoked:
      * </p>
      * <ol>
-     *   <li><i><b>Read the system properties file.<b></i> This is a file
+     *   <li><i><b>Read the system properties file.</b></i> This is a file
      *       containing properties to be pushed into <tt>System.setProperty()</tt>
      *       before starting the framework. This mechanism is mainly shorthand
      *       for people starting the framework from the command line to avoid having
@@ -123,8 +123,7 @@ public class Main {
      *       the desired URL using the <tt>felix.config.properties</tt>
      *       system property; this should be set using the <tt>-D</tt> syntax
      *       when executing the JVM. Refer to the
-     *       <a href="Felix.html#Felix(java.util.Map, java.util.List)">
-     *       <tt>Felix</tt></a> constructor documentation for more
+     *       <tt>Felix</tt> constructor documentation for more
      *       information on the framework configuration options.
      *   </li>
      *   <li><i><b>Perform system property variable substitution on configuration
@@ -158,8 +157,7 @@ public class Main {
      * the configuration property file cannot be found, the framework will appear to
      * be hung or deadlocked. This is not the case, it is executing correctly,
      * there is just no way to interact with it. Refer to the
-     * <a href="Felix.html#Felix(java.util.Map, java.util.List)">
-     * <tt>Felix</tt></a> constructor documentation for more information on
+     * <tt>Felix</tt> constructor documentation for more information on
      * framework configuration options.
      * </p>
      * @param args An array of arguments, all of which are ignored.

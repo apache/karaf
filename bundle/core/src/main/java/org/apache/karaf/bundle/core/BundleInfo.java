@@ -21,6 +21,7 @@ import java.util.List;
 import org.osgi.framework.Bundle;
 
 public interface BundleInfo {
+
     long getBundleId();
     String getSymbolicName();
     String getName();
@@ -30,7 +31,8 @@ public interface BundleInfo {
     
     /**
      * Combined bundle state from OSGi and all BundleStateServices
-     * @return
+     *
+     * @return the current {@link BundleState}.
      */
     BundleState getState();
     
@@ -40,4 +42,5 @@ public interface BundleInfo {
     
     List<Bundle> getFragments();
     List<Bundle> getFragmentHosts();
+
 }

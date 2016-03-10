@@ -24,23 +24,23 @@ public interface Lock {
      * A KeepAlive function to maintain the lock. 
      * Indicates whether or not the lock could be aquired.
      * 
-     * @return true if connection lock retained, false otherwise.
-     * @throws Exception
+     * @return True if connection lock retained, false otherwise.
+     * @throws Exception If the lock can't be acquired.
      */
     boolean lock() throws Exception;
 
     /**
      * Terminate the lock connection safely.
      * 
-     * @throws Exception
+     * @throws Exception If the lock can't be released.
      */
     void release() throws Exception;
 
     /**
-     * Indicates whether or not the lock still exists.
+     * Indicate whether or not the lock still exists.
      * 
-     * @return true, if the lock still exists, otherwise false.
-     * @throws Exception
+     * @return True, if the lock still exists, otherwise false.
+     * @throws Exception If an error occurs while checking if the lock is alive.
      */
     boolean isAlive() throws Exception;
 }

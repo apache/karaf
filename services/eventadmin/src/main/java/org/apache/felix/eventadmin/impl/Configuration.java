@@ -18,7 +18,6 @@
  */
 package org.apache.felix.eventadmin.impl;
 
-
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -40,61 +39,60 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.metatype.MetaTypeProvider;
 
-
 /**
- * The <code>Configuration</code> class encapsules the
- * configuration for the event admin.
+ * <p>The <code>Configuration</code> class encapsules the
+ * configuration for the event admin.</p>
  *
- * The service knows about the following properties which are read at bundle startup:
- * <p>
+ * <p>The service knows about the following properties which are read at bundle startup:</p>
  * <p>
  *      <tt>org.apache.felix.eventadmin.ThreadPoolSize</tt> - The size of the thread
  *          pool.
  * </p>
- * The default value is 10. Increase in case of a large amount of synchronous events
+ *
+ * <p>The default value is 10. Increase in case of a large amount of synchronous events
  * where the <tt>EventHandler</tt> services in turn send new synchronous events in
  * the event dispatching thread or a lot of timeouts are to be expected. A value of
  * less then 2 triggers the default value. A value of 2 effectively disables thread
- * pooling.
- * </p>
- * <p>
+ * pooling.</p>
+ *
  * <p>
  *      <tt>org.apache.felix.eventadmin.Timeout</tt> - The black-listing timeout in
  *          milliseconds
  * </p>
- * The default value is 5000. Increase or decrease at own discretion. A value of less
+ *
+ * <p>The default value is 5000. Increase or decrease at own discretion. A value of less
  * then 100 turns timeouts off. Any other value is the time in milliseconds granted
- * to each <tt>EventHandler</tt> before it gets blacklisted.
- * </p>
- * <p>
+ * to each <tt>EventHandler</tt> before it gets blacklisted.</p>
+ *
  * <p>
  *      <tt>org.apache.felix.eventadmin.RequireTopic</tt> - Are <tt>EventHandler</tt>
  *          required to be registered with a topic?
  * </p>
- * The default is <tt>true</tt>. The specification says that <tt>EventHandler</tt>
+ *
+ * <p>The default is <tt>true</tt>. The specification says that <tt>EventHandler</tt>
  * must register with a list of topics they are interested in. Setting this value to
  * <tt>false</tt> will enable that handlers without a topic are receiving all events
- * (i.e., they are treated the same as with a topic=*).
- * </p>
- * <p>
+ * (i.e., they are treated the same as with a topic=*).</p>
+ *
  * <p>
  *      <tt>org.apache.felix.eventadmin.IgnoreTimeout</tt> - Configure
  *         <tt>EventHandler</tt>s to be called without a timeout.
  * </p>
- * If a timeout is configured by default all event handlers are called using the timeout.
+ *
+ * <p>If a timeout is configured by default all event handlers are called using the timeout.
  * For performance optimization it is possible to configure event handlers where the
  * timeout handling is not used - this reduces the thread usage from the thread pools
  * as the timout handling requires an additional thread to call the event handler.
  * However, the application should work without this configuration property. It is a
- * pure optimization!
+ * pure optimization.
  * The value is a list of string (separated by comma). If the string ends with a dot,
  * all handlers in exactly this package are ignored. If the string ends with a star,
  * all handlers in this package and all subpackages are ignored. If the string neither
- * ends with a dot nor with a start, this is assumed to define an exact class name.
+ * ends with a dot nor with a start, this is assumed to define an exact class name.</p>
  *
- * These properties are read at startup and serve as a default configuration.
+ * <p>These properties are read at startup and serve as a default configuration.
  * If a configuration admin is configured, the event admin can be configured
- * through the config admin.
+ * through the config admin.</p>
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */

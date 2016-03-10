@@ -31,12 +31,6 @@ public class PublickeyBackingEngineFactory implements BackingEngineFactory {
 
     private static final String USER_FILE = "users";
 
-    /**
-     * Builds the Backing Engine
-     *
-     * @param options
-     * @return
-     */
     public BackingEngine build(Map options) {
         PublickeyBackingEngine engine = null;
         String usersFile = (String) options.get(USER_FILE);
@@ -53,12 +47,8 @@ public class PublickeyBackingEngineFactory implements BackingEngineFactory {
         }
     }
 
-    /**
-     * Returns the login module class, that this factory can build.
-     *
-     * @return
-     */
     public String getModuleClass() {
         return PublickeyLoginModule.class.getName();
     }
+
 }

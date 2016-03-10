@@ -45,7 +45,7 @@ public interface KarService {
      * @param karUri Uri of the kar to be installed
      * @param repoDir destination for the repository contents of the kar
      * @param resourceDir destination for the resource contents of the kar
-     * @throws Exception
+     * @throws Exception in case of installation failure.
      */
     void install(URI karUri, File repoDir, File resourceDir) throws Exception;
 
@@ -70,11 +70,10 @@ public interface KarService {
      * Each named feature including all transitive deps will be added.
      * For each named repo all features in the repo and their transitive deps will be added.
      * 
-     * @param repoName
-     * @param features 
-     * @param console
+     * @param repoName the feature repository to use to create the kar.
+     * @param features the list of features to include in the created kar.
+     * @param console the console stream where to print details.
      */
     void create(String repoName, List<String> features, PrintStream console);
-
     
 }
