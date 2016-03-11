@@ -2069,6 +2069,7 @@
                 <inherited>true</inherited>
                 <extensions>true</extensions>
                 <configuration>
+                    <obrRepository>NONE</obrRepository>
                     <instructions>
                         <nsh_interface>org.apache.aries.blueprint.NamespaceHandler</nsh_interface>
                         <nsh_namespace>osgi.service.blueprint.namespace</nsh_namespace>
