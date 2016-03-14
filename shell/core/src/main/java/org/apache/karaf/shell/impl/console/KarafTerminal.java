@@ -43,8 +43,13 @@ public class KarafTerminal extends TerminalSupport implements Terminal2 {
         if (type == null && terminal.isAnsiSupported()) {
             type = "ansi";
         }
+        String caps;
         try {
-            String caps = InfoCmp.getInfoCmp(type);
+            caps = InfoCmp.getInfoCmp(type);
+        } catch (Exception e) {
+            caps = InfoCmp.getAnsiCaps();
+        }
+        try {
             InfoCmp.parseInfoCmp(caps, bools, ints, strings);
         } catch (Exception e) {
             // TODO
