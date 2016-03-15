@@ -1258,6 +1258,7 @@ public class Builder {
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE;
         request.featureResolutionRange = FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE;
+        request.serviceRequirements = FeaturesService.SERVICE_REQUIREMENTS_DEFAULT;
         request.overrides = new HashSet<>();
         request.requirements = new HashMap<>();
         request.stateChanges = new HashMap<>();
