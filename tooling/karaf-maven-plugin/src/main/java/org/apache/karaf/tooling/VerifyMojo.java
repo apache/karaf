@@ -288,7 +288,8 @@ public class VerifyMojo extends MojoSupport {
         for (Feature feature : featuresToTest) {
             try {
                 String id = feature.getName() + "/" + feature.getVersion();
-                verifyResolution(manager, repositories, Collections.singleton(id), properties);
+                verifyResolution(new CustomDownloadManager(resolver, executor),
+                                 repositories, Collections.singleton(id), properties);
                 getLog().info("Verification of feature " + id + " succeeded");
             } catch (Exception e) {
                 if (e.getCause() instanceof ResolutionException) {
