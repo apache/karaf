@@ -246,7 +246,7 @@
         <hibernate.validator.version>5.2.4.Final</hibernate.validator.version>
         <jansi.version>1.11</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jline.version>2.13</jline.version>
+        <jline.version>2.14.1</jline.version>
         <jledit.version>0.2.1</jledit.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
