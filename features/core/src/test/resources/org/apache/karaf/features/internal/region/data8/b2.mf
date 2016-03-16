@@ -1,0 +1,6 @@
+Manifest-Version: 1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: b
+Bundle-Version: 2.0.0
+Export-Package: b;version=2.0
+
