@@ -57,7 +57,9 @@ public interface FeaturesService {
         NoAutoManageBundles,
         Simulate,
         Verbose,
-        Upgrade
+        Upgrade,
+        DisplayFeaturesWiring,
+        DisplayAllWiring
     }
 
     /**

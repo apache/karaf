@@ -49,6 +49,8 @@ import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.region.SubsystemResolver;
 import org.apache.karaf.features.internal.resolver.FeatureResource;
+import org.apache.karaf.features.internal.resolver.ResolverUtil;
+import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.util.ChecksumUtils;
 import org.apache.karaf.features.internal.util.Macro;
 import org.apache.karaf.features.internal.util.MapUtils;
@@ -97,7 +99,6 @@ import static org.apache.karaf.features.internal.util.MapUtils.map;
 import static org.apache.karaf.features.internal.util.MapUtils.removeFromMapSet;
 import static org.osgi.framework.Bundle.ACTIVE;
 import static org.osgi.framework.Bundle.RESOLVED;
-import static org.osgi.framework.Bundle.STARTING;
 import static org.osgi.framework.Bundle.STOPPING;
 import static org.osgi.framework.Bundle.STOP_TRANSIENT;
 import static org.osgi.framework.Bundle.UNINSTALLED;
@@ -206,6 +207,10 @@ public class Deployer {
         boolean verbose = request.options.contains(FeaturesService.Option.Verbose);
         boolean simulate = request.options.contains(FeaturesService.Option.Simulate);
         boolean noManageBundles = request.options.contains(FeaturesService.Option.NoAutoManageBundles);
+        boolean showWiring = request.options.contains(FeaturesService.Option.DisplayFeaturesWiring)
+                    || request.options.contains(FeaturesService.Option.DisplayAllWiring);
+        boolean showFeaturesWiringOnly = request.options.contains(FeaturesService.Option.DisplayFeaturesWiring)
+                    && !request.options.contains(FeaturesService.Option.DisplayAllWiring);
 
         // TODO: add an option to unmanage bundles instead of uninstalling those
 
@@ -488,6 +493,13 @@ public class Deployer {
                     }
                 }
             }
+        }
+
+        //
+        // Log wiring
+        //
+        if (showWiring) {
+            logWiring(resolver.getWiring(), showFeaturesWiringOnly);
         }
 
         //
@@ -1057,6 +1069,30 @@ public class Deployer {
             Bundle bundle = iterator.next();
             if ((bundle.getState() & state) != 0) {
                 iterator.remove();
+            }
+        }
+    }
+
+    protected void logWiring(Map<Resource, List<Wire>> wiring, boolean onlyFeatures) {
+        print("Wiring:", true);
+        Map<Resource, Set<Resource>> wires = new HashMap<>();
+        for (Resource r : wiring.keySet()) {
+            if (onlyFeatures && !ResourceUtils.TYPE_FEATURE.equals(ResourceUtils.getType(r))) {
+                continue;
+            }
+            for (Wire w : wiring.get(r)) {
+                if (onlyFeatures && !ResourceUtils.TYPE_FEATURE.equals(ResourceUtils.getType(w.getProvider()))) {
+                    continue;
+                }
+                MapUtils.addToMapSet(wires, w.getRequirer(), w.getProvider());
+            }
+        }
+        List<Resource> sorted = new ArrayList<>(wires.keySet());
+        Collections.sort(sorted, (r1, r2) -> wires.get(r1).size() - wires.get(r2).size());
+        for (Resource r : sorted) {
+            print("    " + ResolverUtil.getSymbolicName(r) + " / " + ResolverUtil.getVersion(r), true);
+            for (Resource w : wires.get(r)) {
+                print("        " + ResolverUtil.getSymbolicName(w) + " / " + ResolverUtil.getVersion(w), true);
             }
         }
     }
