@@ -23,8 +23,8 @@ import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 
-import org.apache.sshd.ClientSession;
-import org.apache.sshd.client.ServerKeyVerifier;
+import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
+import org.apache.sshd.client.session.ClientSession;
 
 public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 

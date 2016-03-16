@@ -20,6 +20,7 @@ package org.apache.karaf.shell.ssh;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
@@ -31,13 +32,13 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
-import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.server.command.ScpCommandFactory;
+import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
+import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
-import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
-import org.apache.sshd.server.sftp.SftpSubsystem;
+import org.apache.sshd.server.scp.ScpCommandFactory;
+import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -130,7 +131,7 @@ public class Activator extends BaseActivator implements ManagedService {
         if (server != null) {
             try {
                 server.stop(true);
-            } catch (InterruptedException e) {
+            } catch (IOException e) {
                 LOGGER.warn("Exception caught while stopping SSH server", e);
             }
             server = null;
@@ -162,7 +163,7 @@ public class Activator extends BaseActivator implements ManagedService {
             return null;
         }
 
-        keyPairProvider.setPath(hostKey);
+        keyPairProvider.setPath(Paths.get(hostKey));
         if (new File(hostKey).exists()) {
             // do not trash key file if there's something wrong with it.
             keyPairProvider.setOverwriteAllowed(false);
@@ -182,12 +183,12 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setMacFactories(SshUtils.buildMacs(macs));
         server.setCipherFactories(SshUtils.buildCiphers(ciphers));
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
-        server.setCommandFactory(new ScpCommandFactory(new ShellCommandFactory(sessionFactory)));
-        server.setSubsystemFactories(Arrays.<NamedFactory<org.apache.sshd.server.Command>>asList(new SftpSubsystem.Factory()));
+        server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(new ShellCommandFactory(sessionFactory)).build());
+        server.setSubsystemFactories(Arrays.<NamedFactory<org.apache.sshd.server.Command>>asList(new SftpSubsystemFactory()));
         server.setKeyPairProvider(keyPairProvider);
         server.setPasswordAuthenticator(authenticator);
         server.setPublickeyAuthenticator(authenticator);
-        server.setFileSystemFactory(new KarafFileSystemFactory());
+        server.setFileSystemFactory(new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))));
         server.setUserAuthFactories(authFactoriesFactory.getFactories());
         server.setAgentFactory(agentFactory);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));

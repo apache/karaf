@@ -21,7 +21,7 @@ package org.apache.karaf.shell.ssh;
 import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.support.terminal.SignalSupport;
-import org.apache.sshd.common.PtyMode;
+import org.apache.sshd.common.channel.PtyMode;
 import org.apache.sshd.server.Environment;
 
 public class SshTerminal extends SignalSupport implements Terminal {

@@ -23,8 +23,11 @@ import org.apache.commons.ssl.PEMUtil;
 import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,15 +42,17 @@ public class OpenSSHGeneratorFileKeyProvider extends AbstractGeneratorHostKeyPro
     }
 
     public OpenSSHGeneratorFileKeyProvider(String path) {
-        super(path);
+        setPath(Paths.get(path));
     }
 
     public OpenSSHGeneratorFileKeyProvider(String path, String algorithm) {
-        super(path, algorithm);
+        this(path);
+        setAlgorithm(algorithm);
     }
 
     public OpenSSHGeneratorFileKeyProvider(String path, String algorithm, int keySize) {
-        super(path, algorithm, keySize);
+        this(path, algorithm);
+        setKeySize(keySize);
     }
 
     public String getPassword() {
@@ -59,17 +64,18 @@ public class OpenSSHGeneratorFileKeyProvider extends AbstractGeneratorHostKeyPro
     }
 
     @Override
-    protected KeyPair doReadKeyPair(InputStream is) throws Exception {
+    protected KeyPair doReadKeyPair(String resourceKey, InputStream is) throws IOException, GeneralSecurityException {
         PKCS8Key pkcs8 = new PKCS8Key(is, password == null ? null : password.toCharArray());
         return new KeyPair(pkcs8.getPublicKey(), pkcs8.getPrivateKey());
     }
 
     @Override
-    protected void doWriteKeyPair(KeyPair kp, OutputStream os) throws Exception {
+    protected void doWriteKeyPair(String resourceKey, KeyPair kp, OutputStream os) throws IOException, GeneralSecurityException {
         Collection<Object> items = new ArrayList<>();
         items.add(kp.getPrivate());
         items.add(kp.getPublic());
         byte[] bytes = PEMUtil.encode(items);
         os.write(bytes);
     }
+
 }

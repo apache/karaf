@@ -33,11 +33,12 @@ import org.apache.sshd.agent.common.AgentDelegate;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.AgentServerProxy;
 import org.apache.sshd.agent.local.ChannelAgentForwarding;
-import org.apache.sshd.common.Channel;
+import org.apache.sshd.agent.local.ChannelAgentForwardingFactory;
 import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.common.Session;
+import org.apache.sshd.common.channel.Channel;
 import org.apache.sshd.common.session.ConnectionService;
+import org.apache.sshd.common.session.Session;
 import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +51,11 @@ public class KarafAgentFactory implements SshAgentFactory {
     private final Map<String, SshAgent> locals = new ConcurrentHashMap<String, SshAgent>();
 
     public NamedFactory<Channel> getChannelForwardingFactory() {
-        return new ChannelAgentForwarding.Factory();
+        return new ChannelAgentForwardingFactory();
     }
 
     public SshAgent createClient(FactoryManager manager) throws IOException {
-        String proxyId = manager.getProperties().get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
+        String proxyId = (String) manager.getProperties().get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
         if (proxyId == null) {
             throw new IllegalStateException("No " + SshAgent.SSH_AUTHSOCKET_ENV_NAME + " environment variable set");
         }
@@ -81,7 +82,12 @@ public class KarafAgentFactory implements SshAgentFactory {
                 return proxy.getId();
             }
 
-            public void close() {
+            @Override
+            public boolean isOpen() {
+                return proxy.isOpen();
+            }
+
+            public void close() throws IOException {
                 proxies.remove(proxy.getId());
                 proxy.close();
             }
