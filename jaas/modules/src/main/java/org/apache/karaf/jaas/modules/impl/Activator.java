@@ -71,13 +71,16 @@ public class Activator extends BaseActivator implements ManagedService {
 
         karafRealm = new KarafRealm(bundleContext, config);
         register(JaasRealm.class, karafRealm);
-
-        autoEncryptionSupport = new AutoEncryptionSupport(config);
+        if (Boolean.parseBoolean((String) config.get(ENCRYPTION_ENABLED))) {
+          autoEncryptionSupport = new AutoEncryptionSupport(config);
+        }
     }
 
     @Override
     protected void doStop() {
-        StreamUtils.close(autoEncryptionSupport);
+        if (autoEncryptionSupport != null) {
+          autoEncryptionSupport.close();
+        }
         super.doStop();
         LDAPCache.clear();
     }
@@ -89,9 +92,12 @@ public class Activator extends BaseActivator implements ManagedService {
             karafRealm.updated(config);
         }
         if (autoEncryptionSupport != null) {
-            StreamUtils.close(autoEncryptionSupport);
+            autoEncryptionSupport.close();
+            autoEncryptionSupport = null;
         }
-        autoEncryptionSupport = new AutoEncryptionSupport(config);
+        if (Boolean.parseBoolean((String) config.get(ENCRYPTION_ENABLED))) {
+          autoEncryptionSupport = new AutoEncryptionSupport(config);
+        }
     }
 
     private Map<String, Object> getConfig() {

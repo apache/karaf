@@ -41,13 +41,13 @@ import org.slf4j.LoggerFactory;
 public class AutoEncryptionSupport implements Runnable, Closeable {
 
     private final Logger LOGGER = LoggerFactory.getLogger(AutoEncryptionSupport.class);
-    boolean running;
-    private volatile EncryptionSupport encryptionSupport;
+    private volatile boolean running;
+    private EncryptionSupport encryptionSupport;
     private ExecutorService executor;
 
     public AutoEncryptionSupport(Map<String, Object> properties) {
         running = true;
-        this.encryptionSupport = new EncryptionSupport(properties);
+        encryptionSupport = new EncryptionSupport(properties);
         executor = Executors.newSingleThreadExecutor();
         executor.execute(this);
     }
