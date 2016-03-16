@@ -19,13 +19,17 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.karaf.features.Feature;
-import org.apache.sshd.ClientChannel;
-import org.apache.sshd.ClientSession;
-import org.apache.sshd.SshClient;
+import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Assert;
@@ -118,16 +122,17 @@ public class SshCommandTestBase extends KarafTestSupport {
         client = SshClient.setUpDefaultClient();
         client.start();
         String sshPort = getSshPort();
-        ConnectFuture future = client.connect(username, "localhost", Integer.parseInt(sshPort)).await();
+        ConnectFuture future = client.connect(username, "localhost", Integer.parseInt(sshPort));
+        future.await();
         session = future.getSession();
 
-        int ret = ClientSession.WAIT_AUTH;
-        while ((ret & ClientSession.WAIT_AUTH) != 0) {
+        Set<ClientSessionEvent> ret = EnumSet.of(ClientSessionEvent.WAIT_AUTH);
+        while (ret.contains(ClientSessionEvent.WAIT_AUTH)) {
             session.addPasswordIdentity(password);
             session.auth().verify();
-            ret = session.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
+            ret = session.waitFor(EnumSet.of(ClientSessionEvent.WAIT_AUTH, ClientSessionEvent.CLOSED, ClientSessionEvent.AUTHED), 0);
         }
-        if ((ret & ClientSession.CLOSED) != 0) {
+        if (ret.contains(ClientSessionEvent.CLOSED)) {
             throw new Exception("Could not open SSH channel");
         }
         channel = session.createChannel("shell");
@@ -158,7 +163,7 @@ public class SshCommandTestBase extends KarafTestSupport {
         pipe.write("logout\n".getBytes());
         pipe.flush();
 
-        channel.waitFor(ClientChannel.CLOSED, 0);
+        channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
         session.close(true);
         client.stop();
 

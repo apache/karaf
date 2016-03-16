@@ -26,22 +26,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.sshd.common.Cipher;
-import org.apache.sshd.common.Mac;
 import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.common.cipher.AES128CBC;
-import org.apache.sshd.common.cipher.AES128CTR;
-import org.apache.sshd.common.cipher.AES192CBC;
-import org.apache.sshd.common.cipher.AES256CBC;
-import org.apache.sshd.common.cipher.AES256CTR;
-import org.apache.sshd.common.cipher.ARCFOUR128;
-import org.apache.sshd.common.cipher.ARCFOUR256;
-import org.apache.sshd.common.cipher.BlowfishCBC;
-import org.apache.sshd.common.cipher.TripleDESCBC;
-import org.apache.sshd.common.mac.HMACMD5;
-import org.apache.sshd.common.mac.HMACMD596;
-import org.apache.sshd.common.mac.HMACSHA1;
-import org.apache.sshd.common.mac.HMACSHA196;
+import org.apache.sshd.common.cipher.BuiltinCiphers;
+import org.apache.sshd.common.cipher.Cipher;
+import org.apache.sshd.common.mac.BuiltinMacs;
+import org.apache.sshd.common.mac.Mac;
 
 public class SshUtils {
 
@@ -59,24 +48,24 @@ public class SshUtils {
 
     public static List<NamedFactory<Mac>> buildMacs(String names) {
         return filter(Arrays.<NamedFactory<Mac>>asList(
-                        new HMACMD5.Factory(),
-                        new HMACSHA1.Factory(),
-                        new HMACMD596.Factory(),
-                        new HMACSHA196.Factory()),
+                        BuiltinMacs.hmacmd5,
+                        BuiltinMacs.hmacsha1,
+                        BuiltinMacs.hmacmd596,
+                        BuiltinMacs.hmacsha196),
                 names);
     }
 
     public static List<NamedFactory<Cipher>> buildCiphers(String names) {
         List<NamedFactory<Cipher>> avail = new LinkedList<NamedFactory<Cipher>>();
-        avail.add(new AES128CTR.Factory());
-        avail.add(new AES256CTR.Factory());
-        avail.add(new ARCFOUR128.Factory());
-        avail.add(new ARCFOUR256.Factory());
-        avail.add(new AES128CBC.Factory());
-        avail.add(new TripleDESCBC.Factory());
-        avail.add(new BlowfishCBC.Factory());
-        avail.add(new AES192CBC.Factory());
-        avail.add(new AES256CBC.Factory());
+        avail.add(BuiltinCiphers.aes128ctr);
+        avail.add(BuiltinCiphers.aes256ctr);
+        avail.add(BuiltinCiphers.arcfour128);
+        avail.add(BuiltinCiphers.arcfour256);
+        avail.add(BuiltinCiphers.aes128cbc);
+        avail.add(BuiltinCiphers.tripledescbc);
+        avail.add(BuiltinCiphers.blowfishcbc);
+        avail.add(BuiltinCiphers.aes192cbc);
+        avail.add(BuiltinCiphers.aes256cbc);
 
         avail = filter(avail, names);
 

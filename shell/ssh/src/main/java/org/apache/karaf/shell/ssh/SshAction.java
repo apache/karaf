@@ -18,10 +18,18 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.security.KeyPair;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,23 +46,24 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
-import org.apache.sshd.ClientChannel;
-import org.apache.sshd.ClientSession;
-import org.apache.sshd.SshClient;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.LocalAgentFactory;
-import org.apache.sshd.client.ServerKeyVerifier;
-import org.apache.sshd.client.UserInteraction;
+import org.apache.sshd.client.channel.ClientChannelEvent;
+import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
+import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.auth.keyboard.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
+import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.future.ConnectFuture;
-import org.apache.sshd.common.PtyMode;
+import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.SshConstants;
-import org.apache.sshd.common.channel.AbstractChannel;
-import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
-import org.apache.sshd.common.util.Buffer;
-import org.apache.sshd.common.util.NoCloseInputStream;
-import org.apache.sshd.common.util.NoCloseOutputStream;
+import org.apache.sshd.common.channel.PtyMode;
+import org.apache.sshd.common.keyprovider.AbstractFileKeyPairProvider;
+import org.apache.sshd.common.util.SecurityUtils;
+import org.apache.sshd.common.util.buffer.Buffer;
+import org.apache.sshd.common.util.io.NoCloseInputStream;
+import org.apache.sshd.common.util.io.NoCloseOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +100,6 @@ public class SshAction implements Action {
     private Session session;
 
 
-
     @Override
     public Object execute() throws Exception {
 
@@ -123,11 +131,13 @@ public class SshAction implements Action {
         client.setServerKeyVerifier(serverKeyVerifier);
         log.debug("Created client: {}", client);
         client.setUserInteraction(new UserInteraction() {
-            public void welcome(String banner) {
+            @Override
+            public void welcome(ClientSession session, String banner, String lang) {
                 System.out.println(banner);
             }
 
-            public String[] interactive(String destination, String name, String instruction, String[] prompt, boolean[] echo) {
+            @Override
+            public String[] interactive(ClientSession s, String name, String instruction, String lang, String[] prompt, boolean[] echo) {
                 String[] answers = new String[prompt.length];
                 try {
                     for (int i = 0; i < prompt.length; i++) {
@@ -136,6 +146,18 @@ public class SshAction implements Action {
                 } catch (IOException e) {
                 }
                 return answers;
+            }
+            @Override
+            public boolean isInteractionAllowed(ClientSession session) {
+                return true;
+            }
+            @Override
+            public void serverVersionInfo(ClientSession session, List<String> lines) {
+
+            }
+            @Override
+            public String getUpdatedPassword(ClientSession session, String prompt, String lang) {
+                return null;
             }
         });
         client.start();
@@ -169,7 +191,7 @@ public class SshAction implements Action {
                     channel.setOut(new NoCloseOutputStream(System.out));
                     channel.setErr(new NoCloseOutputStream(System.err));
                     channel.open().verify();
-                    channel.waitFor(ClientChannel.CLOSED, 0);
+                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                 } else if (session.getTerminal() != null) {
                     final ChannelShell channel = sshSession.createShellChannel();
                     final jline.Terminal jlineTerminal = (jline.Terminal) session.get(".jline.terminal");
@@ -256,7 +278,7 @@ public class SshAction implements Action {
                                     // Ignore
                                 }
                                 // TODO: replace with PtyCapableChannelSession#sendWindowChange
-                                org.apache.sshd.common.Session sshSession = ((AbstractChannel) channel).getSession();
+                                org.apache.sshd.common.session.Session sshSession = channel.getSession();
                                 Buffer buffer = sshSession.createBuffer(SshConstants.SSH_MSG_CHANNEL_REQUEST);
                                 buffer.putInt(channel.getRecipient());
                                 buffer.putString("window-change");
@@ -273,7 +295,7 @@ public class SshAction implements Action {
                     };
                     session.getTerminal().addSignalListener(signalListener, Signal.WINCH);
                     try {
-                        channel.waitFor(ClientChannel.CLOSED, 0);
+                        channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                     } finally {
                         session.getTerminal().removeSignalListener(signalListener);
                     }
@@ -324,8 +346,8 @@ public class SshAction implements Action {
             is.close();
             agent.addIdentity(keyPair, user);
             if (keyFile != null) {
-                String[] keyFiles = new String[]{keyFile};
-                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(keyFiles);
+                AbstractFileKeyPairProvider fileKeyPairProvider = SecurityUtils.createFileKeyPairProvider();
+                fileKeyPairProvider.setPaths(Collections.singleton(Paths.get(keyFile)));
                 for (KeyPair key : fileKeyPairProvider.loadKeys()) {
                     agent.addIdentity(key, user);
                 }

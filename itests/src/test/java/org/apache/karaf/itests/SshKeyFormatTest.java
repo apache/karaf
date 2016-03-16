@@ -23,16 +23,19 @@ package org.apache.karaf.itests;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import org.apache.commons.ssl.PKCS8Key;
-import org.apache.sshd.ClientSession;
-import org.apache.sshd.SshClient;
+import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.keyverifier.RequiredServerKeyVerifier;
+import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
 import java.io.File;
 import java.net.URL;
+import java.util.EnumSet;
+import java.util.Set;
 
 import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
@@ -64,16 +67,17 @@ public class SshKeyFormatTest extends SshCommandTestBase {
 
         client.setServerKeyVerifier(new RequiredServerKeyVerifier(pkcs8.getPublicKey()));
         client.start();
-        ConnectFuture future = client.connect("karaf", "localhost", Integer.parseInt(sshPort)).await();
+        ConnectFuture future = client.connect("karaf", "localhost", Integer.parseInt(sshPort));
+        future.await();
         ClientSession session = future.getSession();
-        int ret = ClientSession.WAIT_AUTH;
-        while ((ret & ClientSession.WAIT_AUTH) != 0) {
+
+        Set<ClientSessionEvent> ret = EnumSet.of(ClientSessionEvent.WAIT_AUTH);
+        while (ret.contains(ClientSessionEvent.WAIT_AUTH)) {
             session.addPasswordIdentity("karaf");
             session.auth().verify();
-            ret = session.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
+            ret = session.waitFor(EnumSet.of(ClientSessionEvent.WAIT_AUTH, ClientSessionEvent.CLOSED, ClientSessionEvent.AUTHED), 0);
         }
-        if ((ret & ClientSession.CLOSED) != 0) {
-            System.err.format("ret %d%n", ret);
+        if (ret.contains(ClientSessionEvent.CLOSED)) {
             throw new Exception("Could not open SSH channel");
         }
         session.close(true);
