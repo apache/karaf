@@ -1,0 +1,5 @@
+Manifest-Version: 1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: spring-core
+Bundle-Version: 4.0.7
+Export-Package: org.springframework.beans;version=4.0.7
