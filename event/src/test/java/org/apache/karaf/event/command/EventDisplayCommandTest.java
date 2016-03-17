@@ -14,13 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.event;
+package org.apache.karaf.event.command;
 
 import static org.easymock.EasyMock.createControl;
 import static org.easymock.EasyMock.expect;
 
 import java.util.HashMap;
 
+import org.apache.karaf.event.command.EventDisplayCommand;
 import org.apache.karaf.event.service.EventCollector;
 import org.apache.karaf.shell.api.console.Session;
 import org.easymock.IMocksControl;

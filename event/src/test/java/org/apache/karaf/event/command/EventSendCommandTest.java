@@ -1,4 +1,4 @@
-package org.apache.karaf.event;
+package org.apache.karaf.event.command;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expectLastCall;
@@ -12,6 +12,7 @@ import static org.junit.Assert.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.karaf.event.command.EventSendCommand;
 import org.easymock.Capture;
 import org.junit.Test;
 import org.osgi.service.event.Event;

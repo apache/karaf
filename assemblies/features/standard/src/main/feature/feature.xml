@@ -499,6 +499,7 @@
         </config>
         <bundle start-level="5">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="5">mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf/org.apache.karaf.event/${project.version}</bundle>
         <conditional>
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin.webconsole.plugin.version}</bundle>
@@ -573,7 +574,7 @@
         </config>
         <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
     </feature>
-
+    
     <feature name="standard" description="Wrap feature describing all features part of a standard distribution" version="${project.version}">
         <feature>wrap</feature>
         <feature>aries-blueprint</feature>

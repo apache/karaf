@@ -44,7 +44,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <_dsannotations>*</_dsannotations>
+                        <Bundle-Activator>org.apache.karaf.event.service.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

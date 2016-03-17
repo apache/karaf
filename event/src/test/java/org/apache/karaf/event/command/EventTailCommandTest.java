@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.event;
+package org.apache.karaf.event.command;
 
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.mock;
@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.karaf.event.command.EventTailCommand;
 import org.apache.karaf.event.service.EventCollector;
 import org.apache.karaf.shell.api.console.Session;
 import org.junit.Test;
@@ -56,8 +57,8 @@ public class EventTailCommandTest {
         });
         tail.collector.handleEvent(event());
         Thread.sleep(200);
-        executor.shutdownNow();
-        executor.awaitTermination(100, TimeUnit.SECONDS);
+        executor.shutdownNow(); // Will interrupt the tail
+        executor.awaitTermination(10, TimeUnit.SECONDS);
         if (exception != null) {
             throw exception;
         }
