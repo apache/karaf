@@ -23,16 +23,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
-@Component(
-           service = {EventHandler.class, EventCollector.class},
-           name = "org.apache.karaf.eventadmin.collector",
-           immediate = true,
-           property = "event.topics=*"
-       )
 public class EventCollector implements EventHandler {
     private Deque<Event> events;
     private int maxSize;
