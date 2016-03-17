@@ -7,9 +7,12 @@ import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.event.command.EventSendCommand;
@@ -19,6 +22,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 public class EventSendCommandTest {
+
     @Test
     public void testExecute() throws Exception {
         EventSendCommand send = new EventSendCommand();
@@ -29,7 +33,7 @@ public class EventSendCommandTest {
 
         replay(send.eventAdmin);
         send.topic = "myTopic";
-        send.propertiesSt = "a=b";
+        send.properties = Arrays.asList("a=b");
         send.execute();
         verify(send.eventAdmin);
         
@@ -40,17 +44,39 @@ public class EventSendCommandTest {
     
     @Test
     public void testParse() {
-        String propSt = "a=b,b=c";
+        List<String> propList = Arrays.asList("a=b","b=c");
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("a", "b");
         expectedMap.put("b", "c");
-        Map<String, String> props = new EventSendCommand().parse(propSt);
-        assertThat(props.entrySet(), equalTo(expectedMap.entrySet())); 
+        Map<String, String> props = EventSendCommand.parse(propList);
+        assertThat(props.size(), equalTo(2));
+        assertThat(props.get("a"), equalTo("b"));
+        assertThat(props.get("b"), equalTo("c"));
+    }
+    
+    @Test
+    public void testParseNull() {
+        Map<String, String> props = EventSendCommand.parse(null);
+        assertNotNull(props);
+        assertThat(props.size(), equalTo(0));
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void testParseError() {
-        String propSt = "a=b,c=";
-        new EventSendCommand().parse(propSt);
+    public void testParseNoKeyValue() {
+        EventSendCommand.parse(Arrays.asList("="));
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testParseNoKey() {
+        EventSendCommand.parse(Arrays.asList("=b"));
+    }
+    
+    @Test
+    public void testParseStrange() {
+        Map<String, String> props = EventSendCommand.parse(Arrays.asList("a=b","c=d=3", "e="));
+        assertThat(props.size(), equalTo(3));
+        assertThat(props.get("a"), equalTo("b"));
+        assertThat(props.get("c"), equalTo("d=3"));
+        assertThat(props.get("e"), equalTo(""));
     }
 }

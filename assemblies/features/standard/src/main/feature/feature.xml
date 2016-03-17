@@ -499,13 +499,16 @@
         </config>
         <bundle start-level="5">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="5">mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf/org.apache.karaf.event/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <bundle>mvn:org.apache.karaf/org.apache.karaf.event/${project.version}</bundle>
+        </conditional>
         <conditional>
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin.webconsole.plugin.version}</bundle>
         </conditional>
     </feature>
-
+    
     <feature name="jasypt-encryption" description="Advanced encryption support for Karaf security" version="${project.version}">
         <feature>jaas</feature>
         <bundle dependency="true" start-level="30">mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>

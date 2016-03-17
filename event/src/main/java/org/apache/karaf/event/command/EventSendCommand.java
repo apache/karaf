@@ -17,6 +17,7 @@
 package org.apache.karaf.event.command;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -37,27 +38,32 @@ public class EventSendCommand implements Action {
     @Reference
     EventAdmin eventAdmin;
 
-    @Argument
+    @Argument(index=0, required=true)
     String topic;
 
-    @Argument(multiValued=true)
-    String propertiesSt;
+    @Argument(index=1, multiValued=true, description="Event properties in format key=value key2=value2 ...")
+    List<String> properties;
 
     @Override
     public Object execute() throws Exception {
-        eventAdmin.sendEvent(new Event(topic, parse(propertiesSt)));
+        eventAdmin.sendEvent(new Event(topic, parse(properties)));
         return null;
     }
 
-    Map<String, String> parse(String propSt) {
+    static Map<String, String> parse(List<String> propList) {
         Map<String, String> properties = new HashMap<>();
-        for (String keyValue : propSt.split(",")) {
-            String[] splitted = keyValue.split("=");
-            if (splitted.length != 2) {
-                throw new IllegalArgumentException("Invalid entry " + keyValue);
+        if (propList != null) {
+            for (String keyValue : propList) {
+                int splitAt = keyValue.indexOf("=");
+                if (splitAt <= 0) {
+                    throw new IllegalArgumentException("Invalid property " + keyValue);
+                } else {
+                    String key = keyValue.substring(0, splitAt);
+                    String value = keyValue.substring(splitAt + 1, keyValue.length());
+                    properties.put(key, value);
+                }
             }
-            properties.put(splitted[0], splitted[1]);
-        };
+        }
         return properties;
     }
 
