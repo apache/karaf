@@ -19,6 +19,8 @@ package java.lang;
 
 import java.lang.reflect.Field;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 
 /**
  * {@code Exception} is the superclass of all classes that represent recoverable
@@ -116,8 +118,14 @@ public class Exception extends Throwable {
 
     }
  
+    @XmlTransient
+    @Deprecated
     public Class[] getClassContext() {
         return classContext;
+    }
+    
+    protected Class[] classContext() {
+      return classContext;
     }
 
     private static class SecurityManagerEx extends SecurityManager
