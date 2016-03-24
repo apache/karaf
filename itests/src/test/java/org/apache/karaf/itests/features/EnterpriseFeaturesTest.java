@@ -16,9 +16,11 @@ package org.apache.karaf.itests.features;
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.karaf.itests.util.RunIfRules.RunIfNotOnJdk8;
 import org.apache.karaf.itests.util.RunIfRule;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -29,7 +31,8 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
 
     @Rule
     public RunIfRule rule = new RunIfRule();
-
+    
+    
     @Test
     public void installTransaction130Feature() throws Exception {
         installAssertAndUninstallFeature("transaction", "1.3.0");

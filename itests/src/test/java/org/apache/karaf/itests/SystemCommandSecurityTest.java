@@ -28,6 +28,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @ExamReactorStrategy(PerClass.class)
 public class SystemCommandSecurityTest extends SshCommandTestBase {
     private static int counter = 0;
+          
     @Test
     public void testSystemCommandSecurityViaSsh() throws Exception {
         String manageruser = "man" + System.nanoTime() + "_" + counter++;

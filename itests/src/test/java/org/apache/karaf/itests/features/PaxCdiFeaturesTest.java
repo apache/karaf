@@ -16,10 +16,12 @@ package org.apache.karaf.itests.features;
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.karaf.itests.util.RunIfRule;
 import org.apache.karaf.itests.util.RunIfRules.RunIfNotOnJdk8;
+
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -31,6 +33,7 @@ public class PaxCdiFeaturesTest extends KarafTestSupport {
     @Rule
     public RunIfRule rule = new RunIfRule();
 
+    
     @Test
     public void installPaxCdiFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi");

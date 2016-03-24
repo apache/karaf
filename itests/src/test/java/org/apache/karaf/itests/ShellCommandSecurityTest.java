@@ -27,6 +27,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @ExamReactorStrategy(PerClass.class)
 public class ShellCommandSecurityTest extends SshCommandTestBase {
     private static int counter = 0;
+        
     @Test
     public void testShellCommandSecurityViaSsh() throws Exception {
         String vieweruser = "view" + System.nanoTime() + "_" + counter++;

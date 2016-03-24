@@ -19,8 +19,10 @@ package org.apache.karaf.itests;
 import java.util.EnumSet;
 
 import org.apache.karaf.features.FeaturesService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -29,8 +31,10 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @ExamReactorStrategy(PerClass.class)
 public class ConditionalFeaturesTest extends KarafTestSupport {
 
+     
     @Test
     public void testScr() throws Exception {
+        featureService.installFeature("management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         //Remove management and install scr
         featureService.uninstallFeature("management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         featureService.installFeature("scr", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));

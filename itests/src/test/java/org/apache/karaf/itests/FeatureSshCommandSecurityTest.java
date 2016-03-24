@@ -21,6 +21,9 @@ import org.junit.Test;
  * /framework/src/main/resources/resources/etc/org.apache.karaf.command.acl.feature.cfg
  */
 public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
+    
+    
+    
     @Test
     public void testFeatureCommandSecurityViaSsh() throws Exception {
         String vieweruser = "viewer" + System.nanoTime() + "_features";

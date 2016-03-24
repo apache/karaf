@@ -25,6 +25,7 @@ import javax.management.openmbean.TabularData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -35,9 +36,10 @@ public class ObrTest extends KarafTestSupport {
 
     @Before
     public void installObrFeature() throws Exception {
-    	installAndAssertFeature("obr");
+        installAndAssertFeature("obr");
     }
 
+       
     @Test
     public void listCommands() throws Exception {
         System.out.println(executeCommand("obr:url-list"));

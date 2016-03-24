@@ -21,8 +21,10 @@ import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -32,7 +34,8 @@ import java.lang.management.ManagementFactory;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class FeatureTest extends KarafTestSupport {
-
+    
+    
     @Test
     public void bootFeatures() throws Exception {
         assertFeaturesInstalled("jaas", "ssh", "management", "bundle", "config", "deployer", "diagnostic",

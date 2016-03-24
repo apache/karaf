@@ -37,7 +37,7 @@ import org.apache.karaf.features.Feature;
         })
 public class Conditional extends Content implements org.apache.karaf.features.Conditional {
 
-    @XmlElement(name = "condition")
+    @XmlElement(name = "condition", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> condition;
 
     @XmlTransient

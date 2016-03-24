@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
@@ -78,7 +79,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     public static final String VERSION_SEPARATOR = "/";
     public static final String DEFAULT_VERSION = "0.0.0";
 
-
+    @XmlElement(name = "details", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected String details;
     @XmlAttribute(required = true)
     protected String name;
@@ -94,10 +95,15 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected Integer startLevel;
     @XmlAttribute
     protected Boolean hidden;
+    @XmlElement(name = "conditional", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Conditional> conditional;
+    @XmlElement(name = "capability", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Capability> capability;
+    @XmlElement(name = "requirement", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Requirement> requirement;
+    @XmlElement(name = "scoping", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected Scoping scoping;
+    @XmlElement(name = "library", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Library> library;
     @XmlTransient
     protected String namespace;

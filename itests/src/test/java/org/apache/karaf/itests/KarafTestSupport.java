@@ -61,10 +61,16 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
+import org.ops4j.pax.exam.RerunTestException;
 import org.ops4j.pax.exam.TestProbeBuilder;
+import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.osgi.framework.Bundle;
@@ -112,12 +118,53 @@ public class KarafTestSupport {
 
     @Inject
     protected ConfigurationAdmin configurationAdmin;
-
+    
+    
     /**
      * To make sure the tests run only when the boot features are fully installed
      */
     @Inject
     BootFinished bootFinished;
+    
+    public static class Retry implements TestRule {
+        private static boolean retry = true;
+        
+        public Retry(boolean retry) {
+            Retry.retry = retry;
+        }
+
+        public Statement apply(Statement base, Description description) {
+            return statement(base, description);
+        }
+
+        private Statement statement(final Statement base, final Description description) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    Throwable caughtThrowable = null;
+                    
+                    // implement retry logic here
+                    // retry once to honor the FeatureService refresh
+                    try {
+                        base.evaluate();
+                        return;
+                    } catch (Throwable t) {
+                        LOG.debug(t.getMessage(), t);
+                        if (retry && !(t instanceof org.junit.AssumptionViolatedException)) {
+                            retry = false;
+                            throw new RerunTestException("rerun this test pls");
+                        } else {
+                            throw t;
+                        }
+                    }
+                                        
+                }
+            };
+        }
+    }
+
+    @Rule
+    public Retry retry = new Retry(true);
 
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
@@ -143,7 +190,7 @@ public class KarafTestSupport {
         String sshPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_SSH_PORT), Integer.parseInt(MAX_SSH_PORT)));
 
         return new Option[]{
-            // KarafDistributionOption.debugConfiguration("8889", true),
+            //KarafDistributionOption.debugConfiguration("8889", true),
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
             // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
             configureSecurity().disableKarafMBeanServerBuilder(),
@@ -441,6 +488,7 @@ public class KarafTestSupport {
                 return;
             }
         }
+        
         Assert.fail("Feature " + featureName + (featureVersion != null ? "/" + featureVersion : "") + " should be installed but is not");
     }
 

@@ -558,7 +558,8 @@ public class Deployer {
         //  - start the bundle
         //  - exit
         // When restarting, the resolution will be attempted again
-        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(dstate.serviceBundle)) {
+        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(dstate.serviceBundle)
+            ) {
             callback.persistResolveRequest(request);
             // If the bundle is updated because of a different checksum,
             // save the new checksum persistently
