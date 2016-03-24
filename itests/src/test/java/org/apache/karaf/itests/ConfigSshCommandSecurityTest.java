@@ -31,6 +31,8 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 public class ConfigSshCommandSecurityTest extends SshCommandTestBase {
 
     private static int counter = 0;
+    
+    
 
     @Test
     public void testConfigCommandSecurityViaSsh() throws Exception {

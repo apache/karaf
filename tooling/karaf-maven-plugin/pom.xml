@@ -34,6 +34,7 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <mvn.opts/>
     </properties>
 
     <dependencies>
@@ -225,7 +226,7 @@
                     <postBuildHookScript>verify</postBuildHookScript>
                     <!--<localRepositoryPath>${project.build.directory}/system</localRepositoryPath>-->
                     <!--<settingsFile>src/it/settings.xml</settingsFile>-->
-                    <mavenOpts>-Djava.io.tmpdir=${project.build.directory}</mavenOpts>
+                    <mavenOpts>${mvn.opts}</mavenOpts>
                     <skipInstallation>${invoker.skip}</skipInstallation>
                     <skipInvocation>${invoker.skip}</skipInvocation>
                     <goals>
@@ -273,6 +274,16 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <maxmem>256M</maxmem>
+                    <fork>${compiler.fork}</fork>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -285,5 +296,17 @@
             </plugin>
         </plugins>
     </reporting>
+    <profiles>
+        <profile>
+	    <id>java9</id>
+	    <properties>
+                <mvn.opts>-XaddExports:java.base/sun.net.www.protocol.http=ALL-UNNAMED -XaddExports:java.base/sun.net.www.protocol.https=ALL-UNNAMED -XaddExports:java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED -XaddExports:jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED -addmods java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
+	    </properties>
+	    <activation>
+        	<jdk>9</jdk>
+            </activation>
+	</profile>
+    </profiles>
+
 
 </project>

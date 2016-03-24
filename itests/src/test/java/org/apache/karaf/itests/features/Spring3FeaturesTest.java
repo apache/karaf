@@ -14,9 +14,11 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -26,7 +28,8 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 public class Spring3FeaturesTest extends KarafTestSupport {
 
     // Spring DM
-
+    
+ 
     @Test
     public void installSpringDmFeature() throws Exception {
         installAssertAndUninstallFeatures("spring-dm");

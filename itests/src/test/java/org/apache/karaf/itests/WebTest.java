@@ -23,6 +23,7 @@ import javax.management.openmbean.TabularData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -35,9 +36,9 @@ public class WebTest extends KarafTestSupport {
 
     @Before
     public void installWarFeature() throws Exception {
-    	installAndAssertFeature("war");
+        installAndAssertFeature("war");
     }
-
+    
     @Test
     public void listCommand() throws Exception {
         String listOutput = executeCommand("web:list");

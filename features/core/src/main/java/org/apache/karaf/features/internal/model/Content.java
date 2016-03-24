@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.karaf.features.BundleInfo;
@@ -28,10 +29,14 @@ import org.apache.karaf.features.ConfigInfo;
 
 @XmlTransient
 public class Content {
-
+    
+    @XmlElement(name = "config", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Config> config;
+    @XmlElement(name = "configfile", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<ConfigFile> configfile;
+    @XmlElement(name = "feature", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Dependency> feature;
+    @XmlElement(name = "bundle", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Bundle> bundle;
 
     /**

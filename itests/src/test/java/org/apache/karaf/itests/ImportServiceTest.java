@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
@@ -58,7 +59,8 @@ public class ImportServiceTest extends KarafTestSupport {
         options.add(CoreOptions.streamBundle(testBundleRequireService));
         return options.toArray(new Option[] {});
     }
-
+    
+  
     /**
      * Checks that the resolver does not mandate specified required services to be present.
      * This is done for backwards compatibility as not all bundles define capabilities for services they start.

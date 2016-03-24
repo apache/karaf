@@ -56,6 +56,7 @@ public class SshKeyFormatTest extends SshCommandTestBase {
                 );
     }
 
+        
     @Test
     public void usePemKey() throws Exception {
         SshClient client = SshClient.setUpDefaultClient();

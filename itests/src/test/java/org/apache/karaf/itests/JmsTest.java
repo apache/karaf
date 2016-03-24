@@ -16,6 +16,7 @@ package org.apache.karaf.itests;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -34,11 +35,12 @@ import java.util.List;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class JmsTest extends KarafTestSupport {
-
+    
     @Before
     public void installJmsFeatureAndActiveMQBroker() throws Exception {
         installAndAssertFeature("jms");
-        featureService.addRepository(new URI("mvn:org.apache.activemq/activemq-karaf/5.10.0/xml/features"));
+        featureService
+            .addRepository(new URI("mvn:org.apache.activemq/activemq-karaf/5.10.0/xml/features"));
         installAndAssertFeature("activemq-broker-noweb");
         // check if ActiveMQ is completely started
         System.out.println("Waiting for the ActiveMQ transport connector on 61616 ...");
@@ -56,6 +58,7 @@ public class JmsTest extends KarafTestSupport {
 
     @Test(timeout = 120000)
     public void testCommands() throws Exception {
+        System.out.println("===>testCommands");
         // jms:create command
         System.out.println(executeCommand("jms:create -t ActiveMQ -u karaf -p karaf --url tcp://localhost:61616 test"));
         // give time to fileinstall to load the blueprint file by looking for the connection factory OSGi service
@@ -105,6 +108,7 @@ public class JmsTest extends KarafTestSupport {
 
     @Test(timeout = 120000)
     public void testMBean() throws Exception {
+        System.out.println("===>testMBean");
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=jms,name=root");
         // create operation

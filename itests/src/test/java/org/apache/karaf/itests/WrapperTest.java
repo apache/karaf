@@ -19,8 +19,10 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -29,13 +31,16 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class WrapperTest extends KarafTestSupport {
-
+    
+       
     @Before
     public void installWrapperFeature() throws Exception {
-    	installAndAssertFeature("wrapper");
+        installAndAssertFeature("wrapper");
     }
-
+    
+    
     @Test
     public void installCommand() throws Exception {
         String installOutput = executeCommand("wrapper:install");
@@ -49,5 +54,7 @@ public class WrapperTest extends KarafTestSupport {
         ObjectName name = new ObjectName("org.apache.karaf:type=wrapper,name=root");
         mbeanServer.invoke(name, "install", new Object[]{}, new String[]{});
     }
+    
+    
 
 }

@@ -49,15 +49,18 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;/complexType&gt;
  * </pre>
  */
-@XmlRootElement(name = "features")
+@XmlRootElement(name = "features", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "features", propOrder = {"repository", "resourceRepository", "feature"})
 public class Features {
 
     @XmlSchemaType(name = "anyURI")
+    @XmlElement(name = "repository", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> repository;
-    @XmlSchemaType(name = "anyURI") @XmlElement(name = "resource-repository")
+    @XmlSchemaType(name = "anyURI") 
+    @XmlElement(name = "resource-repository", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> resourceRepository;
+    @XmlElement(name = "feature", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Feature> feature;
     @XmlAttribute
     protected String name;

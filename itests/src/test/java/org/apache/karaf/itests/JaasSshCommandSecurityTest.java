@@ -23,6 +23,8 @@ import org.junit.Test;
  * /framework/src/main/resources/resources/etc/org.apache.karaf.command.acl.jaas.cfg
  */
 public class JaasSshCommandSecurityTest extends SshCommandTestBase {
+    
+        
     @Test
     public void testJaasCommandSecurityViaSsh() throws Exception {
         String vieweruser = "viewer" + System.nanoTime() + "_jaas";
