@@ -50,4 +50,5 @@ Building
    all located in your local maven repository. It usually takes some time for 
    maven to download required dependencies in the first build.
 3) The distributions will be available under "assembly/target" directory.
+   Since Karaf 4, the distribution will be available under "assemblies/apache-karaf/target" directory.
 
