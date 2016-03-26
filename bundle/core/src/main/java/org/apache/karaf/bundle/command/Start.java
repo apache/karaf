@@ -30,7 +30,7 @@ public class Start extends BundlesCommand {
 
     public Start() {
         defaultAllBundles = false;
-        errorMessage = "Error starting bundle";
+        errorMessage = "Error starting bundle ";
     }
 
     @Override
