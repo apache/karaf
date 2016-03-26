@@ -16,18 +16,7 @@
  */
 package org.apache.karaf.service.command;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Argument;
-import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Completion;
-import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.*;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.ShellUtil;
@@ -35,6 +24,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+
+import java.util.*;
 
 @Command(scope = "service", name = "list", description = "Lists OSGi services.")
 @Service
@@ -111,7 +102,7 @@ public class ListServices implements Action {
         return serviceNames;
     }
 
-    private void printServiceRef(ServiceReference<?> serviceRef) {
+    public static void printServiceRef(ServiceReference<?> serviceRef) {
         String[] objectClass = (String[]) serviceRef.getProperty(Constants.OBJECTCLASS);
         String serviceClasses = ShellUtil.getValueString(objectClass);
         System.out.println(serviceClasses);
@@ -141,7 +132,7 @@ public class ListServices implements Action {
         return false;
     }
 
-    private void printProperties(ServiceReference<?> serviceRef) {
+    private static void printProperties(ServiceReference<?> serviceRef) {
         for (String key : serviceRef.getPropertyKeys()) {
             if (!Constants.OBJECTCLASS.equals(key)) {
                 System.out.println(" " + key + " = " + ShellUtil.getValueString(serviceRef.getProperty(key)));
