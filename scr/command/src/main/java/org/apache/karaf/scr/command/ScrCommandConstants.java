@@ -22,7 +22,7 @@ public class ScrCommandConstants {
 
     public static final String SCR_COMMAND = "scr";
 
-    public static final String LIST_FUNCTION = "list";
+    public static final String LIST_FUNCTION = "components";
 
     public static final String ACTIVATE_FUNCTION = "activate";
 
