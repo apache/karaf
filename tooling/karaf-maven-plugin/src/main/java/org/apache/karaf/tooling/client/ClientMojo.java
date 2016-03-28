@@ -92,23 +92,24 @@ public class ClientMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
         // Add commands from scripts to already declared commands
-        for (File script : scripts) {
-            try (BufferedReader br = new BufferedReader(new FileReader(script))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    if (line.isEmpty()) {
-                        continue;
+        if (scripts != null) {
+            for (File script : scripts) {
+                try (BufferedReader br = new BufferedReader(new FileReader(script))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        line = line.trim();
+                        if (line.isEmpty()) {
+                            continue;
+                        }
+                        commands.add(line);
                     }
-                    commands.add(line);
+                } catch (Exception e) {
+                    throw new MojoExecutionException(e, e.getMessage(), e.toString());
                 }
-            }
-            catch (Exception e) {
-                throw new MojoExecutionException(e, e.getMessage(), e.toString());
             }
         }
 
-        if (commands.isEmpty()) {
+        if (commands == null || commands.isEmpty()) {
             getLog().warn("No OSGi command was specified");
             return;
         }
