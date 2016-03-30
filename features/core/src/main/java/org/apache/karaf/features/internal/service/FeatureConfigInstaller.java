@@ -104,7 +104,7 @@ public class FeatureConfigInstaller {
 				cfgProps.put(CONFIG_KEY, key);
 				cfg.update(cfgProps);
                 try {
-                    updateStorage(pid[0], props);
+                    updateStorage(pid[0], pid[1], props);
                 } catch (Exception e) {
                     LOGGER.warn("Can't update cfg file", e);
                 }
@@ -120,7 +120,7 @@ public class FeatureConfigInstaller {
                 if (update) {
                     cfg.update(properties);
                     try {
-                        updateStorage(pid[0], props);
+                        updateStorage(pid[0], pid[1], props);
                     } catch (Exception e) {
                         LOGGER.warn("Can't update cfg file", e);
                     }
@@ -236,11 +236,16 @@ public class FeatureConfigInstaller {
         }
     }
 
-    protected void updateStorage(String pid, Dictionary props) throws IOException {
+    protected void updateStorage(String pid, String factoryPid, Dictionary props) throws Exception {
         if (storage != null) {
             // get the cfg file
-            File cfgFile = new File(storage, pid + ".cfg");
-            Configuration cfg = configAdmin.getConfiguration(pid, null);
+            File cfgFile;
+            if (factoryPid != null) {
+                cfgFile = new File(storage, pid + "-" + factoryPid + ".cfg");
+            } else {
+                cfgFile = new File(storage, pid + ".cfg");
+            }
+            Configuration cfg = findExistingConfiguration(configAdmin, factoryPid, pid);
             // update the cfg file depending of the configuration
             if (cfg != null && cfg.getProperties() != null) {
                 Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
