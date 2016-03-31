@@ -38,7 +38,7 @@ The Maven Quickstart archetype can create an empty Maven project where you can p
 You can directly use:
 
 ----
-mvn archetype:create \
+mvn archetype:generate \
   -DarchetypeArtifactId=maven-archetype-quickstart \
   -DgroupId=org.apache.karaf.shell.samples \
   -DartifactId=shell-sample-commands \
