@@ -120,7 +120,7 @@ public class FeatureConfigInstaller {
                 if (update) {
                     cfg.update(properties);
                     try {
-                        updateStorage(pid[0], pid[1], props);
+                        updateStorage(pid[0], pid[1], properties);
                     } catch (Exception e) {
                         LOGGER.warn("Can't update cfg file", e);
                     }
