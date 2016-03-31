@@ -447,4 +447,13 @@
         </capability>
     </feature>
 
+    <!-- Aries Blueprint Spring support -->
+
+    <feature name="aries-blueprint-spring">
+        <feature>aries-blueprint</feature>
+        <feature>spring</feature>
+        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.spring/${aries.blueprint.spring.version}</bundle>
+        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.spring.extender/${aries.blueprint.spring.extender.version}</bundle>
+    </feature>
+
 </features>
