@@ -15,6 +15,128 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.5
+                    ==================
+
+ This is an update patch for Apache Karaf 4.0.x, containing many bug fixes, dependency updates, and improvements. It is recommended that users update their deployment after reviewing the changelog below.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-3983] - Failed to start openjpa bundle - javax.transaction.SystemException not found
+    * [KARAF-4072] - Karaf shell not working properly in windows
+    * [KARAF-4129] - Installing a feature with a fragment that attaches to pax-logging-api fails
+    * [KARAF-4255] - karaf-maven-plugin does include unused feature conditional dependencies in assembly
+    * [KARAF-4267] - Remove derby config from windows karaf.bat
+    * [KARAF-4270] - Shell-compat gets NPE trying to give help for combo of local and compat commands
+    * [KARAF-4278] - clean not working
+    * [KARAF-4280] - Feature config overwrites existing values
+    * [KARAF-4282] - Wrapper set KARAF_DATA to null in the generated wrapper.conf file
+    * [KARAF-4288] - karaf-maven-plugin doesn't pass custom settings.xml option onto pax-url-aether
+    * [KARAF-4293] - SyncopeLoginModule could potentialy receive wrong message format
+    * [KARAF-4294] - System scripts: Improove support for Solaris 10 init scripts
+    * [KARAF-4299] - NoSuchElementException when clearing history
+    * [KARAF-4307] - Archive Mojo does not set permissions properly in bin if usePathPrefix=false
+    * [KARAF-4309] - Missing dependency javax.transaction.TransactionManager with transaction feature and activemq-camel
+    * [KARAF-4311] - karaf maven plugin does not respect -s setting on maven
+    * [KARAF-4313] - karaf-maven-plugin should set x bit on assembly
+    * [KARAF-4319] - Completion does not work after semicolon
+    * [KARAF-4328] - Align group definition in users.properties and keys.properties
+    * [KARAF-4330] - Instance script doesn't return correct PID number if root instance is started two times
+    * [KARAF-4335] - Scripts attribute in ClientMojo is null by default.
+    * [KARAF-4348] - [RBAC] Wildcard PIDs chosen before more specific ones
+    * [KARAF-4357] - OBR R5 Resources do not have Presentation Names
+    * [KARAF-4358] - Spring feature forces the wrong jta version. Can cause an error if it is installed before transaction
+    * [KARAF-4365] - Document feature prerequiste option in feature descriptor
+    * [KARAF-4371] - karaf shell scripts use "local" which is not a posix compliant
+    * [KARAF-4373] - Karaf.bat script produces "The syntax of the command is incorrect" even if it is working properly
+    * [KARAF-4413] - Can't start karaf on solaris 10
+    * [KARAF-4416] - When reporting problems, the verify goal lists all bundles downloaded so far instead of just the ones from the failing feature
+    * [KARAF-4420] - Ensure the maven plugin uses the same policy for service requirements
+    * [KARAF-4423] - jaas: AutoEncryptionSupport can fail to shutdown
+    * [KARAF-4428] - The bin/client script displays a badly formatted message from the AcceptAllServerKeyVerifier
+    * [KARAF-4429] - JaxB marshalling failure due to endorsed java.lang.Exception 
+    * [KARAF-4433] - Unable to connect to a child instance with instance:connect
+    * [KARAF-4441] - Datasource config file created from feature.xml without instance suffix
+    * [KARAF-4446] - Display error in the console. glued text
+    * [KARAF-4447] - BUILDING (file) update distribution directory
+    * [KARAF-4456] - Features repo without name breaks WebConsole features plugin
+
+** Dependency upgrade
+    * [KARAF-4266] - Upgrade to Spring 4.2.4.RELEASE
+    * [KARAF-4286] - Upgrade Felix Utils to version 1.8.2
+    * [KARAF-4287] - Upgrade Felix Fileinstall to version 3.5.2
+    * [KARAF-4289] - Upgrade to ServiceMix Specs 2.6.0
+    * [KARAF-4292] - Upgrade Felix Eventadmin to version 1.4.6
+    * [KARAF-4343] - Upgrade to Xalan 2.7.2_3
+    * [KARAF-4345] - Upgrade to Jolokia 1.3.3
+    * [KARAF-4353] - Upgrade to Pax URL 2.4.6
+    * [KARAF-4359] - Update Openjpa to 2.4.1
+    * [KARAF-4381] - Upgrade to maven-antrun-plugin 1.8
+    * [KARAF-4382] - Upgrade to maven-assembly-plugin 2.6
+    * [KARAF-4384] - Upgrade to maven-compiler-plugin 3.5.1
+    * [KARAF-4385] - Upgrade to maven-dependency-plugin 2.10
+    * [KARAF-4386] - Upgrade to maven-deploy-plugin 2.8.2
+    * [KARAF-4387] - Upgrade to maven-eclipse-plugin 2.10
+    * [KARAF-4388] - Upgrade to maven-enforcer-plugin 1.4.1
+    * [KARAF-4389] - Upgrade to maven-gpg-plugin 1.6
+    * [KARAF-4390] - Upgrade to maven-install-plugin 2.5.2
+    * [KARAF-4391] - Upgrade to maven-jar-plugin 2.6
+    * [KARAF-4393] - Upgrade to maven-jxr-plugin 2.5
+    * [KARAF-4394] - Upgrade to maven-project-info-reports-plugin 2.9
+    * [KARAF-4395] - Upgrade to maven-release-plugin 2.5.3
+    * [KARAF-4396] - Upgrade to maven-resources-plugin 2.7
+    * [KARAF-4397] - Upgrade to maven-site-plugin 3.5
+    * [KARAF-4398] - Upgrade to maven-source-plugin 3.0.0
+    * [KARAF-4399] - Upgrade to maven-surefire-plugin and maven-surefire-report-plugin 2.18.1
+    * [KARAF-4400] - Upgrade to maven-war-plugin 2.6
+    * [KARAF-4401] - Upgrade to depends-maven-plugin 1.3.1
+    * [KARAF-4402] - Upgrade to build-helper-maven-plugin 1.10
+    * [KARAF-4403] - Upgrade to exec-maven-plugin 1.4.0
+    * [KARAF-4410] - Upgrade to Aries JPA Container 1.0.4
+    * [KARAF-4421] - Upgrade to JLine 2.14.x
+    * [KARAF-4449] - Upgrade to Aries proxy-impl 1.0.5
+    * [KARAF-4450] - Upgrade to Aries jmx-core 1.1.6
+    * [KARAF-4451] - Upgrade to Aries blueprint-core 1.6.0
+    * [KARAF-4452] - Upgrade to Aries blueprint-cm 1.0.8
+    * [KARAF-4459] - Upgrade Cglib to version 3.2.1
+
+** Documentation
+    * [KARAF-4056] - Developer-guide/extending: replace mvn archetype:create by generate
+    * [KARAF-4147] - karaf-maven-plugin: Add description of configuration property "libraries"
+    * [KARAF-4180] - Document overrides configuration
+    * [KARAF-4415] - karaf-maven-plugin - The feature validate goal is missing
+
+** Improvement
+    * [KARAF-129] - Support for upgrading from one version of a feature to another version of the same feature
+    * [KARAF-2971] - there is no MBean operation for easily get bundle status
+    * [KARAF-3551] - Extend Karaf Instance interface with getRmiRegistryHost, getRmiServerHost, getSshHost
+    * [KARAF-3871] - Offer bundle:diag (without args) output via JMX
+    * [KARAF-4187] - Make karaf-maven-plugin @threadSafe
+    * [KARAF-4340] - System scripts: improve system scripts templates
+    * [KARAF-4351] - [RBAC] Optimize access to JMXSecurityMBean.canInvoke(Map)
+    * [KARAF-4366] - system scripts : fallback to generic init script for unknown os 
+    * [KARAF-4412] - system scripts : first line in solaris smf template should not be empty
+    * [KARAF-4414] - Add LogAuditLoginModule and replace FileAuditLoginModule by default
+
+** New Feature
+    * [KARAF-4157] - Provide system script to start Karaf without service wrapper
+    * [KARAF-4277] - System scripts: add option to configure the executable to use to start/stop karaf
+    * [KARAF-4281] - System scripts: provide Systemd templates to manage Karaf child instances
+
+** Task
+    * [KARAF-4258] - Cleanup deprecated and unused properties
+    * [KARAF-4349] - Use the same approach of KARAF-4330 in karaf.bat script
+    * [KARAF-4363] - ssh:sshd command shows default values twice
+    * [KARAF-4406] - Use javax.servlet-api 3.1.0 instead of Geronimo servlet spec
+
+** Test
+    * [KARAF-1897] - Use dynamic port allocation of integration tests
+
+** Wish
+    * [KARAF-3853] - Use configured Java path to startup wrapper
+
                     Apache Karaf 4.0.4
                     ==================
 
