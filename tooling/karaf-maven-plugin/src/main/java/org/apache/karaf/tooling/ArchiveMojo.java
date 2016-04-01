@@ -91,6 +91,18 @@ public class ArchiveMojo extends MojoSupport {
     private boolean archiveZip = true;
 
     /**
+     * Whether to attach the resulting assembly to the project as an artifact.
+     */
+    @Parameter(defaultValue="true")
+    private boolean attach = true;
+
+    /**
+     * If supplied, the classifer for the artifact when attached.
+     */
+    @Parameter
+    private String classifier;
+
+    /**
      * use symbolic links in tar.gz or zip archives
      *
      * Symbolic links are not very well supported by windows Platform.
@@ -121,7 +133,9 @@ public class ArchiveMojo extends MojoSupport {
 	private void archive(String type) throws IOException {
         Artifact artifact1 = factory.createArtifactWithClassifier(project.getArtifact().getGroupId(), project.getArtifact().getArtifactId(), project.getArtifact().getVersion(), type, "bin");
         File target1 = archive(targetServerDirectory, destDir, artifact1);
-        projectHelper.attachArtifact( project, artifact1.getType(), null, target1 );
+        if (attach) {
+            projectHelper.attachArtifact(project, artifact1.getType(), classifier, target1);
+        }
     }
 
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
