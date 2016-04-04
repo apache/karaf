@@ -27,7 +27,6 @@
     * [KARAF-3983] - Failed to start openjpa bundle - javax.transaction.SystemException not found
     * [KARAF-4072] - Karaf shell not working properly in windows
     * [KARAF-4129] - Installing a feature with a fragment that attaches to pax-logging-api fails
-    * [KARAF-4255] - karaf-maven-plugin does include unused feature conditional dependencies in assembly
     * [KARAF-4267] - Remove derby config from windows karaf.bat
     * [KARAF-4270] - Shell-compat gets NPE trying to give help for combo of local and compat commands
     * [KARAF-4278] - clean not working
@@ -51,6 +50,7 @@
     * [KARAF-4365] - Document feature prerequiste option in feature descriptor
     * [KARAF-4371] - karaf shell scripts use "local" which is not a posix compliant
     * [KARAF-4373] - Karaf.bat script produces "The syntax of the command is incorrect" even if it is working properly
+    * [KARAF-4411] - FeatureResolver: spring-dm-web feature installs Spring ver 3.1.4 and 3.2.14 at the same time
     * [KARAF-4413] - Can't start karaf on solaris 10
     * [KARAF-4416] - When reporting problems, the verify goal lists all bundles downloaded so far instead of just the ones from the failing feature
     * [KARAF-4420] - Ensure the maven plugin uses the same policy for service requirements
@@ -101,6 +101,10 @@
     * [KARAF-4451] - Upgrade to Aries blueprint-core 1.6.0
     * [KARAF-4452] - Upgrade to Aries blueprint-cm 1.0.8
     * [KARAF-4459] - Upgrade Cglib to version 3.2.1
+    * [KARAF-4469] - Upgrade to Felix FileInstall 3.5.4
+    * [KARAF-4470] - Upgrade to Pax Web 4.2.5
+    * [KARAF-4471] - Upgrade to Pax JDBC 0.8.0
+    * [KARAF-4472] - Upgrade to Felix BundleRepository 2.0.8
 
 ** Documentation
     * [KARAF-4056] - Developer-guide/extending: replace mvn archetype:create by generate
@@ -130,6 +134,7 @@
     * [KARAF-4349] - Use the same approach of KARAF-4330 in karaf.bat script
     * [KARAF-4363] - ssh:sshd command shows default values twice
     * [KARAF-4406] - Use javax.servlet-api 3.1.0 instead of Geronimo servlet spec
+    * [KARAF-4464] - Upgrade to Spring 4.2.5
 
 ** Test
     * [KARAF-1897] - Use dynamic port allocation of integration tests
