@@ -238,7 +238,7 @@
         <aries.transaction.jdbc.version>2.1.1</aries.transaction.jdbc.version>
         <aries.util.version>1.1.1</aries.util.version>
 
-        <narayana.version>5.3.1.Final</narayana.version>
+        <narayana.version>5.3.2.Final</narayana.version>
         <gemini.blueprint.version>1.0.2.RELEASE</gemini.blueprint.version>
         <hibernate.annotations.common.version>3.3.0.ga</hibernate.annotations.common.version>
         <hibernate.annotations.version>3.4.0.GA</hibernate.annotations.version>
