@@ -85,6 +85,7 @@ public class GrepAction implements Action {
 
     @Override
     public Object execute() throws Exception {
+        final List<String> grepResult = new ArrayList();
         if (after < 0) {
             after = context;
         }
@@ -113,7 +114,8 @@ public class GrepAction implements Action {
         }
         try (BufferedReader r = new BufferedReader(new InputStreamReader(System.in))) {
             if (count) {
-                printNumberOfLines(p, r.lines());
+                final long numberOfLines = printNumberOfLines(p, r.lines());
+                grepResult.add(String.valueOf(numberOfLines));
             } else {
                 boolean firstPrint = true;
                 int lineno = 1;
@@ -127,12 +129,12 @@ public class GrepAction implements Action {
                         } else {
                             if (lineMatch != 0 & lineMatch + after + before <= lines.size()) {
                                 if (!firstPrint && before + after > 0) {
-                                    System.out.println("--");
+                                    grepResult.add("--");
                                 } else {
                                     firstPrint = false;
                                 }
                                 for (int i = 0; i < lineMatch + after; i++) {
-                                    System.out.println(lines.get(i));
+                                    grepResult.add(lines.get(i));
                                 }
                                 while (lines.size() > before) {
                                     lines.remove(0);
@@ -149,15 +151,15 @@ public class GrepAction implements Action {
                 }
                 if (lineMatch > 0) {
                     if (!firstPrint && before + after > 0) {
-                        System.out.println("--");
+                        grepResult.add("--");
                     }
                     for (int i = 0; i < lineMatch + after && i < lines.size(); i++) {
-                        System.out.println(lines.get(i));
+                        grepResult.add(lines.get(i));
                     }
                 }
             }
         }
-        return null;
+        return grepResult;
     }
 
     private String matchXorInvertedMatch(final String line, final Pattern p2, final int lineno) {
@@ -216,13 +218,13 @@ public class GrepAction implements Action {
         return sb.toString();
     }
 
-    private void printNumberOfLines(Pattern p, final Stream<String> lines) {
+    private long printNumberOfLines(Pattern p, final Stream<String> lines) {
         final long numberOfLines = lines
             .filter(line -> line.length() > 1
                 || line.length() == 1 && line.charAt(0) != '\n')
             .filter(line -> p.matcher(line).matches() ^ invertMatch)
             .count();
-        System.out.println(numberOfLines);
+        return numberOfLines;
     }
 
 }

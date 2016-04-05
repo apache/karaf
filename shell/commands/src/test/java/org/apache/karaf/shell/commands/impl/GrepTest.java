@@ -23,10 +23,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -293,25 +293,17 @@ public class GrepTest {
 
     private String systemInOutDecorator(String inputString, GrepAction grepExecute) throws Exception {
         InputStream input = System.in;
-        PrintStream output = System.out;
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(inputString.getBytes());
             System.setIn(bais);
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            System.setOut(new PrintStream(baos));
-
-            grepExecute.execute();
-
-            System.out.flush();
-            String result = baos.toString();
+            String result = ((List<String>) grepExecute.execute()).stream().collect(Collectors.joining("\n"));
             if (result.length() > 1 && result.charAt(result.length() - 1) == '\n') {
                 result = result.substring(0, result.length() - 1);
             }
             return result;
         } finally {
             System.setIn(input);
-            System.setOut(output);
         }
     }
 
