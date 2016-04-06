@@ -135,8 +135,6 @@ public class ConfigProperties {
     
     private static final String KARAF_DELAY_CONSOLE = "karaf.delay.console";
 
-    private static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
-
     private static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
     private static final String SECURITY_PROVIDERS = "org.apache.karaf.security.providers";
@@ -187,8 +185,9 @@ public class ConfigProperties {
         this.karafInstances = Utils.getKarafDirectory(PROP_KARAF_INSTANCES, ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
         Package p = Package.getPackage("org.apache.karaf.main");
-        if (p != null && p.getImplementationVersion() != null)
+        if (p != null && p.getImplementationVersion() != null) {
             System.setProperty(PROP_KARAF_VERSION, p.getImplementationVersion());
+        }
         System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());
@@ -199,6 +198,34 @@ public class ConfigProperties {
         }
         PropertiesLoader.loadSystemProperties(new File(karafEtc, SYSTEM_PROPERTIES_FILE_NAME));
 
+        this.props = PropertiesLoader.loadConfigProperties(new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME));
+
+        this.securityProviders = getSecurityProviders();
+        this.defaultStartLevel = Integer.parseInt(props.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+        System.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
+        this.lockStartLevel = Integer.parseInt(props.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
+        this.lockDelay = Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, DEFAULT_LOCK_DELAY));
+        this.lockSlaveBlock = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_SLAVE_BLOCK, "false"));
+        this.props.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockDefaultBootLevel));
+        this.shutdownTimeout = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
+        this.useLock = Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"));
+        this.lockClass = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
+        this.frameworkFactoryClass = props.getProperty(KARAF_FRAMEWORK_FACTORY);
+        this.frameworkBundle = getFramework();
+        this.defaultRepo = System.getProperty(DEFAULT_REPO, "system");
+        this.bundleLocations = props.getProperty(BUNDLE_LOCATIONS);
+        this.defaultBundleStartlevel = getDefaultBundleStartLevel(60);
+        this.pidFile = props.getProperty(KARAF_SHUTDOWN_PID_FILE);
+        this.shutdownPort = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
+        this.shutdownHost = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
+        this.portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
+        this.shutdownCommand = props.getProperty(KARAF_SHUTDOWN_COMMAND);
+        this.startupMessage = props.getProperty(KARAF_STARTUP_MESSAGE, "Apache Karaf starting up. Press Enter to open the shell now...");
+        this.delayConsoleStart = Boolean.parseBoolean(props.getProperty(KARAF_DELAY_CONSOLE, "false"));
+        System.setProperty(KARAF_DELAY_CONSOLE, new Boolean(this.delayConsoleStart).toString());
+    }
+
+    public void performInit() throws Exception {
         File cleanAllIndicatorFile = new File(karafData, "clean_all");
         File cleanCacheIndicatorFile = new File(karafData, "clean_cache");
         if (Boolean.getBoolean("karaf.clean.all") || cleanAllIndicatorFile.exists()) {
@@ -217,39 +244,21 @@ public class ConfigProperties {
             }
         }
 
-        File file = new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME);
-        this.props = PropertiesLoader.loadConfigProperties(file);
-
-        String prop = props.getProperty(SECURITY_PROVIDERS);
-        this.securityProviders = (prop != null) ? prop.split(",") : new String[] {};
-        this.defaultStartLevel = Integer.parseInt(props.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-        System.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
-        this.lockStartLevel = Integer.parseInt(props.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));                
-        this.lockDelay = Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, DEFAULT_LOCK_DELAY));
-        this.lockSlaveBlock = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_SLAVE_BLOCK, "false"));
-        this.props.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockDefaultBootLevel));
-        this.shutdownTimeout = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
-        this.useLock = Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"));
-        this.lockClass = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
-        initFrameworkStorage(karafData);
-        this.frameworkFactoryClass = props.getProperty(KARAF_FRAMEWORK_FACTORY);
-        this.frameworkBundle = getFramework();
-        this.defaultRepo = System.getProperty(DEFAULT_REPO, "system");
-        this.bundleLocations = props.getProperty(BUNDLE_LOCATIONS);
-        this.defaultBundleStartlevel = getDefaultBundleStartLevel(60);
-        this.pidFile = props.getProperty(KARAF_SHUTDOWN_PID_FILE);
-        this.shutdownPort = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
-        this.shutdownHost = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
-        this.portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
-        this.shutdownCommand = props.getProperty(KARAF_SHUTDOWN_COMMAND);
-        this.startupMessage = props.getProperty(KARAF_STARTUP_MESSAGE, "Apache Karaf starting up. Press Enter to open the shell now...");
-        this.delayConsoleStart = Boolean.parseBoolean(props.getProperty(KARAF_DELAY_CONSOLE, "false"));
-        System.setProperty(KARAF_DELAY_CONSOLE, new Boolean(this.delayConsoleStart).toString());
+        String frameworkStoragePath = props.getProperty(Constants.FRAMEWORK_STORAGE);
+        if (frameworkStoragePath == null) {
+            File storage = new File(karafData.getPath(), "cache");
+            try {
+                storage.mkdirs();
+            } catch (SecurityException se) {
+                throw new Exception(se.getMessage()); 
+            }
+            props.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
+        }
 
         if (shutdownCommand == null || shutdownCommand.isEmpty()) {
             try {
                 shutdownCommand = UUID.randomUUID().toString();
-                Properties temp = new Properties(file);
+                Properties temp = new Properties(new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME));
                 temp.put(KARAF_SHUTDOWN_COMMAND, Arrays.asList("", "#", "# Generated command shutdown", "#"), shutdownCommand);
                 temp.save();
             } catch (IOException ioException) {
@@ -265,26 +274,18 @@ public class ConfigProperties {
         }
         return value;
     }
-    
+
+    private String[] getSecurityProviders() {
+        String prop = props.getProperty(SECURITY_PROVIDERS);
+        return (prop != null) ? prop.split(",") : new String[] {};
+    }
+
     private URI getFramework() throws URISyntaxException {
         String framework = getPropertyOrFail(KARAF_FRAMEWORK);
         String frameworkBundleUri = getPropertyOrFail(KARAF_FRAMEWORK + "." + framework);
         return new URI(frameworkBundleUri);
     }
 
-    private void initFrameworkStorage(File karafData) throws Exception {
-        String frameworkStoragePath = props.getProperty(Constants.FRAMEWORK_STORAGE);
-        if (frameworkStoragePath == null) {
-            File storage = new File(karafData.getPath(), "cache");
-            try {
-                storage.mkdirs();
-            } catch (SecurityException se) {
-                throw new Exception(se.getMessage()); 
-            }
-            props.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
-        }
-    }
-    
     private int getDefaultBundleStartLevel(int ibsl) {
         try {
             String str = props.getProperty("karaf.startlevel.bundle");

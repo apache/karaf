@@ -228,6 +228,7 @@ public class Main {
 
     public void launch() throws Exception {
         config = new ConfigProperties();
+        config.performInit();
         if (config.delayConsoleStart) {
             System.out.println(config.startupMessage);
         }
