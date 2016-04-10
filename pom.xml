@@ -263,7 +263,7 @@
         <pax.exam.version>4.8.0</pax.exam.version>
         <pax.logging.version>1.8.5</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
-        <pax.url.version>2.4.6</pax.url.version>
+        <pax.url.version>2.4.7</pax.url.version>
         <pax.web.version>6.0.0-SNAPSHOT</pax.web.version>
         <pax.tinybundle.version>2.1.1</pax.tinybundle.version>
         <pax.jdbc.version>0.8.0</pax.jdbc.version>
