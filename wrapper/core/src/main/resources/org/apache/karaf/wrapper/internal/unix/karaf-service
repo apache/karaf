@@ -22,7 +22,7 @@
 #
 
 # set the JAVA_HOME to launch the wrapper
-set JAVA_HOME="${java.home}"
+JAVA_HOME="${java.home}"
 
 # Application
 APP_NAME="${name}"
