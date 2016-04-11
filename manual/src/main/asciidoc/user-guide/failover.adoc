@@ -46,7 +46,7 @@ The configuration of the lock system has to be defined in the `etc/system.proper
 
 ----
 karaf.lock=true
-karaf.lock.class=org.apache.karaf.main.SimpleFileLock
+karaf.lock.class=org.apache.karaf.main.lock.SimpleFileLock
 karaf.lock.dir=<PathToLockFileDirectory>
 karaf.lock.delay=10000
 ----
@@ -73,7 +73,7 @@ The database lock uses JDBC (Java DataBase Connectivity). To use database lockin
 
 ----
 karaf.lock=true
-karaf.lock.class=org.apache.karaf.main.DefaultJDBCLock
+karaf.lock.class=org.apache.karaf.main.lock.DefaultJDBCLock
 karaf.lock.level=50
 karaf.lock.delay=10000
 karaf.lock.jdbc.url=jdbc:derby://dbserver:1527/sample
@@ -86,7 +86,7 @@ karaf.lock.jdbc.timeout=30
 ----
 
 * `karaf.lock` property enabled the HA/failover mechanism
-* `karaf.lock.class` property contains the class name providing the lock implementation. The `org.apache.karaf.main.DefaultJDBCLock`
+* `karaf.lock.class` property contains the class name providing the lock implementation. The `org.apache.karaf.main.lock.DefaultJDBCLock`
  is the most generic database lock system implementation. Apache Karaf supports lock system for specific databases (see later for details).
 * `karaf.lock.level` property is the container-level locking (see later for details).
 * `karaf.lock.delay` property is the interval period (in milliseconds) to check if the lock has been released or not.
