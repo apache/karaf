@@ -143,8 +143,8 @@ public class LDAPOptions {
         }
         env.put(Context.INITIAL_CONTEXT_FACTORY, getInitialContextFactory());
         env.put(Context.PROVIDER_URL, getConnectionURL());
+        env.put(Context.SECURITY_AUTHENTICATION, getAuthentication());
         if (getConnectionUsername() != null && getConnectionUsername().trim().length() > 0) {
-            env.put(Context.SECURITY_AUTHENTICATION, getAuthentication());
             env.put(Context.SECURITY_PRINCIPAL, getConnectionUsername());
             env.put(Context.SECURITY_CREDENTIALS, getConnectionPassword());
         }
