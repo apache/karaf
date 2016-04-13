@@ -47,6 +47,7 @@ public interface FeaturesService {
     int DEFAULT_SCHEDULE_MAX_RUN = 9;
     long DEFAULT_REPOSITORY_EXPIRATION = 60000; // 1 minute
 
+    boolean DEFAULT_CONFIG_CFG_STORE = true;
 
     enum Option {
         NoFailOnFeatureNotFound,

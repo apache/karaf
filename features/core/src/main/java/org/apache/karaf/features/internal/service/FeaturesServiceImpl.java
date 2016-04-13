@@ -165,6 +165,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     private final String blacklisted;
 
+    private final boolean configCfgStore;
+
     private final ThreadLocal<String> outputFile = new ThreadLocal<>();
 
     /**
@@ -179,7 +181,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final State state = new State();
     private final Map<String, Repository> repositoryCache = new HashMap<>();
     private Map<String, Map<String, Feature>> featureCache;
-
 
     public FeaturesServiceImpl(Bundle bundle,
                                BundleContext systemBundleContext,
@@ -206,7 +207,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.eventAdminListener = eventAdminListener;
         this.configurationAdmin = configurationAdmin;
         this.resolver = resolver;
-        this.configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin) : null;
+        this.configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, FeaturesService.DEFAULT_CONFIG_CFG_STORE) : null;
         this.digraph = digraph;
         this.overrides = overrides;
         this.featureResolutionRange = featureResolutionRange;
@@ -218,9 +219,52 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.scheduleDelay = scheduleDelay;
         this.scheduleMaxRun = scheduleMaxRun;
         this.blacklisted = blacklisted;
+        this.configCfgStore = FeaturesService.DEFAULT_CONFIG_CFG_STORE;
         loadState();
         checkResolve();
+    }
 
+    public FeaturesServiceImpl(Bundle bundle,
+                               BundleContext systemBundleContext,
+                               StateStorage storage,
+                               FeatureFinder featureFinder,
+                               EventAdminListener eventAdminListener,
+                               ConfigurationAdmin configurationAdmin,
+                               Resolver resolver,
+                               RegionDigraph digraph,
+                               String overrides,
+                               String featureResolutionRange,
+                               String bundleUpdateRange,
+                               String updateSnaphots,
+                               String serviceRequirements,
+                               org.osgi.service.repository.Repository globalRepository,
+                               int downloadThreads,
+                               long scheduleDelay,
+                               int scheduleMaxRun,
+                               String blacklisted,
+                               boolean configCfgStore) {
+        this.bundle = bundle;
+        this.systemBundleContext = systemBundleContext;
+        this.storage = storage;
+        this.featureFinder = featureFinder;
+        this.eventAdminListener = eventAdminListener;
+        this.configurationAdmin = configurationAdmin;
+        this.resolver = resolver;
+        this.configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, configCfgStore) : null;
+        this.digraph = digraph;
+        this.overrides = overrides;
+        this.featureResolutionRange = featureResolutionRange;
+        this.bundleUpdateRange = bundleUpdateRange;
+        this.updateSnaphots = updateSnaphots;
+        this.serviceRequirements = serviceRequirements;
+        this.globalRepository = globalRepository;
+        this.downloadThreads = downloadThreads > 0 ? downloadThreads : 1;
+        this.scheduleDelay = scheduleDelay;
+        this.scheduleMaxRun = scheduleMaxRun;
+        this.blacklisted = blacklisted;
+        this.configCfgStore = configCfgStore;
+        loadState();
+        checkResolve();
     }
 
     @SuppressWarnings("unchecked")
