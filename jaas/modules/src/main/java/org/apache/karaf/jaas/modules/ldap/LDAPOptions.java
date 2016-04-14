@@ -144,9 +144,15 @@ public class LDAPOptions {
         env.put(Context.INITIAL_CONTEXT_FACTORY, getInitialContextFactory());
         env.put(Context.PROVIDER_URL, getConnectionURL());
         if (getConnectionUsername() != null && getConnectionUsername().trim().length() > 0) {
-            env.put(Context.SECURITY_AUTHENTICATION, getAuthentication());
+            String auth = getAuthentication();
+            if (auth == null) {
+                auth = DEFAULT_AUTHENTICATION;
+            }
+            env.put(Context.SECURITY_AUTHENTICATION, auth);
             env.put(Context.SECURITY_PRINCIPAL, getConnectionUsername());
             env.put(Context.SECURITY_CREDENTIALS, getConnectionPassword());
+        } else if (getAuthentication() != null) {
+            env.put(Context.SECURITY_AUTHENTICATION, getAuthentication());
         }
         if (getSsl()) {
             setupSsl(env);
@@ -202,11 +208,7 @@ public class LDAPOptions {
     }
 
     public String getAuthentication() {
-        String authentication = (String) options.get(AUTHENTICATION);
-        if (authentication == null) {
-            authentication = DEFAULT_AUTHENTICATION;
-        }
-        return authentication;
+        return (String) options.get(AUTHENTICATION);
     }
 
     public boolean getSsl() {
