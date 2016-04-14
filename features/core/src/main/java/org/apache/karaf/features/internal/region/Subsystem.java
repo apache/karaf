@@ -372,13 +372,22 @@ public class Subsystem extends ResourceImpl {
                 infos.put(bi, null);
             }
         }
+        boolean removeServiceRequirements;
+        if (FeaturesService.SERVICE_REQUIREMENTS_DISABLE.equals(serviceRequirements)) {
+            removeServiceRequirements = true;
+        } else if (feature != null && FeaturesService.SERVICE_REQUIREMENTS_DEFAULT.equals(serviceRequirements)) {
+            removeServiceRequirements = !FeaturesNamespaces.URI_1_3_0.equals(feature.getNamespace())
+                                     && !FeaturesNamespaces.URI_1_4_0.equals(feature.getNamespace());
+        } else {
+            removeServiceRequirements = false;
+        }
         for (Map.Entry<BundleInfo, Conditional> entry : infos.entrySet()) {
             final BundleInfo bi = entry.getKey();
             final String loc = bi.getLocation();
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider), serviceRequirements);
+                    ResourceImpl res = createResource(loc, getMetadata(provider), removeServiceRequirements);
                     bundles.put(loc, res);
                 }
             });
@@ -388,7 +397,7 @@ public class Subsystem extends ResourceImpl {
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider), serviceRequirements);
+                    ResourceImpl res = createResource(loc, getMetadata(provider), removeServiceRequirements);
                     bundles.put(loc, res);
                 }
             });
@@ -398,7 +407,7 @@ public class Subsystem extends ResourceImpl {
             downloader.download(loc, new DownloadCallback() {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider), serviceRequirements);
+                    ResourceImpl res = createResource(loc, getMetadata(provider), removeServiceRequirements);
                     bundles.put(loc, res);
                 }
             });
@@ -410,7 +419,7 @@ public class Subsystem extends ResourceImpl {
                     downloader.download(loc, new DownloadCallback() {
                         @Override
                         public void downloaded(StreamProvider provider) throws Exception {
-                            ResourceImpl res = createResource(loc, getMetadata(provider), serviceRequirements);
+                            ResourceImpl res = createResource(loc, getMetadata(provider), removeServiceRequirements);
                             bundles.put(loc, res);
                         }
                     });
@@ -589,12 +598,7 @@ public class Subsystem extends ResourceImpl {
         return policy;
     }
 
-    ResourceImpl createResource(String uri, Map<String, String> headers, String serviceRequirements) throws Exception {
-        boolean removeServiceRequirements = false;
-        if (feature != null && FeaturesService.SERVICE_REQUIREMENTS_DEFAULT.equals(serviceRequirements)
-                && !FeaturesNamespaces.URI_1_3_0.equals(uri)) {
-            removeServiceRequirements = true;
-        }
+    ResourceImpl createResource(String uri, Map<String, String> headers, boolean removeServiceRequirements) throws Exception {
         try {
             return ResourceBuilder.build(uri, headers, removeServiceRequirements);
         } catch (BundleException e) {
