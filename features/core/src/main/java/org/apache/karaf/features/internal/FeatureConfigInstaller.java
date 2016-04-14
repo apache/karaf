@@ -47,11 +47,19 @@ public class FeatureConfigInstaller {
 
     private final ConfigurationAdmin configAdmin;
     private File storage;
+    private boolean configCfgStore = true;
     
     public FeatureConfigInstaller(ConfigurationAdmin configAdmin) {
 		this.configAdmin = configAdmin;
         this.storage = new File(System.getProperty("karaf.etc"));
+        this.configCfgStore = true;
 	}
+
+    public FeatureConfigInstaller(ConfigurationAdmin configAdmin, boolean configCfgStore) {
+        this.configAdmin = configAdmin;
+        this.storage = new File(System.getProperty("karaf.etc"));
+        this.configCfgStore = configCfgStore;
+    }
 
     private String[] parsePid(String pid) {
         int n = pid.indexOf('-');
@@ -208,7 +216,7 @@ public class FeatureConfigInstaller {
     }
 
     protected void updateStorage(String pid, Dictionary props) throws IOException {
-        if (storage != null) {
+        if (storage != null && configCfgStore) {
             // get the cfg file
             File cfgFile = new File(storage, pid + ".cfg");
             Configuration cfg = configAdmin.getConfiguration(pid, null);
