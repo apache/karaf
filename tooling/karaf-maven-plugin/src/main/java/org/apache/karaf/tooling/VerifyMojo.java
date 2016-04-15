@@ -147,10 +147,16 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
+    @Parameter(property = "skip", defaultValue = "${features.verify.skip}")
+    protected boolean skip;
+
     protected MavenResolver resolver;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            return;
+        }
         Hashtable<String, String> config = new Hashtable<>();
         StringBuilder remote = new StringBuilder();
         for (Object obj : project.getRemoteProjectRepositories()) {
