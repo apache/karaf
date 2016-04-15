@@ -435,6 +435,36 @@ public class FeaturesServiceTest extends TestBase {
     }
 
     @Test
+    public void testInstallFeatureRepositoryWithSystemPropertyInterpolation() throws Exception {
+
+        URI repo = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'></features>");
+
+
+        final String fullPath = repo.toString().substring("file:/".length());
+        final String uri = "file:/${karaf.test.fullPath}";
+        System.setProperty("karaf.test.fullPath", fullPath);
+
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        BundleManager bundleManager = new BundleManager(bundleContext);
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]).anyTimes();
+        File stateFile = new File("target/FeaturesServiceState.properties");
+        try {
+            expect(bundleContext.getDataFile("FeaturesServiceState.properties")).andReturn(stateFile).anyTimes();
+            replay(bundleContext);
+            FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
+            svc.setUrls(uri);
+            svc.start();
+            Repository repository = svc.getRepository(repo);
+            verify(bundleContext);
+            assertNotNull(repository);
+            svc.stop();
+        } finally {
+            assertTrue("Unable to remove state file, subsequent tests will fail (clean install required).", stateFile.delete());
+            System.getProperties().remove("karaf.test.fullPath");
+        }
+    }
+
+    @Test
     public void testInstallBatchFeatureWithoutContinueOnFailureNoClean() throws Exception {
         String bundle1Uri = "file:bundle1";
         String bundle2Uri = "file:bundle2";

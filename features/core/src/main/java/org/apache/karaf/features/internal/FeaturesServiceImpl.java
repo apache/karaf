@@ -16,6 +16,15 @@
  */
 package org.apache.karaf.features.internal;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.felix.utils.properties.InterpolationHelper;
+
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
@@ -148,6 +157,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         this.uris = new HashSet<URI>();
         for (String value : s) {
             value = value.trim();
+            value = InterpolationHelper.substVars(value, "featuresRepositories", null, null);
             if (!value.isEmpty()) {
                 this.uris.add(new URI(value));
             }
