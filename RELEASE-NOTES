@@ -50,7 +50,7 @@
     * [KARAF-4365] - Document feature prerequiste option in feature descriptor
     * [KARAF-4371] - karaf shell scripts use "local" which is not a posix compliant
     * [KARAF-4373] - Karaf.bat script produces "The syntax of the command is incorrect" even if it is working properly
-    * [KARAF-4411] - FeatureResolver: spring-dm-web feature installs Spring ver 3.1.4 and 3.2.14 at the same time
+    * [KARAF-4374] - Problems in Karaf start script
     * [KARAF-4413] - Can't start karaf on solaris 10
     * [KARAF-4416] - When reporting problems, the verify goal lists all bundles downloaded so far instead of just the ones from the failing feature
     * [KARAF-4420] - Ensure the maven plugin uses the same policy for service requirements
@@ -62,6 +62,9 @@
     * [KARAF-4446] - Display error in the console. glued text
     * [KARAF-4447] - BUILDING (file) update distribution directory
     * [KARAF-4456] - Features repo without name breaks WebConsole features plugin
+    * [KARAF-4475] - Performing status check will wipe cache if karaf.clean.all/karaf.clean.cache is set
+    * [KARAF-4479] - Incorrect syntax in wrapper launch script karaf-service
+    * [KARAF-4485] - The failover page is not up to date regarding lock package
 
 ** Dependency upgrade
     * [KARAF-4266] - Upgrade to Spring 4.2.4.RELEASE
@@ -105,6 +108,11 @@
     * [KARAF-4470] - Upgrade to Pax Web 4.2.5
     * [KARAF-4471] - Upgrade to Pax JDBC 0.8.0
     * [KARAF-4472] - Upgrade to Felix BundleRepository 2.0.8
+    * [KARAF-4473] - Upgrade to Pax Web 4.2.6
+    * [KARAF-4476] - Upgrade to Aries Blueprint Core 1.6.1
+    * [KARAF-4477] - Upgrade to Pax URL 2.4.7
+    * [KARAF-4492] - Upgrade Apache Commons-compress to version 1.11
+    * [KARAF-4497] - Upgrade to Apache ServiceMix Specs 2.7.0
 
 ** Documentation
     * [KARAF-4056] - Developer-guide/extending: replace mvn archetype:create by generate
@@ -123,6 +131,8 @@
     * [KARAF-4366] - system scripts : fallback to generic init script for unknown os 
     * [KARAF-4412] - system scripts : first line in solaris smf template should not be empty
     * [KARAF-4414] - Add LogAuditLoginModule and replace FileAuditLoginModule by default
+    * [KARAF-4454] - Resolve scr:list conflict between gogo and Karaf
+    * [KARAF-4489] - Introduce a property in etc/org.apache.karaf.features.cfg to decide if <config/> should create cfg file or not
 
 ** New Feature
     * [KARAF-4157] - Provide system script to start Karaf without service wrapper
@@ -135,6 +145,7 @@
     * [KARAF-4363] - ssh:sshd command shows default values twice
     * [KARAF-4406] - Use javax.servlet-api 3.1.0 instead of Geronimo servlet spec
     * [KARAF-4464] - Upgrade to Spring 4.2.5
+
 
 ** Test
     * [KARAF-1897] - Use dynamic port allocation of integration tests
