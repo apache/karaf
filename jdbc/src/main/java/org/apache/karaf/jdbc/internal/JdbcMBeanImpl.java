@@ -64,9 +64,9 @@ public class JdbcMBeanImpl implements JdbcMBean {
     }
 
     @Override
-    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws MBeanException {
+    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws MBeanException {
         try {
-            jdbcService.create(name, driverName, driverClass, databaseName, url, user, password);
+            jdbcService.create(name, driverName, driverClass, databaseName, url, user, password, databaseType);
         } catch (Exception e) {
             throw new MBeanException(null, e.getMessage());
         }
