@@ -37,16 +37,17 @@ public interface JdbcMBean {
     /**
      * Create a JDBC datasource.
      *
-     * @param name the JDBC datasource name
-     * @param driverName org.osgi.driver.name of the DataSourceFactory to use
-     * @param driverClass org.osgi.driver.class of the DataSourceFactory to use
-     * @param databaseName name of the database to access
-     * @param url JDBC URL
-     * @param user Database username
-     * @param password Database password
-     * @throws MBeanException
+     * @param name The JDBC datasource name.
+     * @param driverName The {@code org.osgi.driver.name} of the DataSourceFactory to use.
+     * @param driverClass The {@code org.osgi.driver.class} of the DataSourceFactory to use.
+     * @param databaseName The name of the database to access.
+     * @param url The JDBC URL.
+     * @param user The database username.
+     * @param password The database password.
+     * @param databaseType The database type (ConnectionPoolDataSource, XADataSource or DataSource).
+     * @throws MBeanException In case of MBean failure.
      */
-    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws MBeanException;
+    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws MBeanException;
 
     /**
      * Delete a JDBC datasource.

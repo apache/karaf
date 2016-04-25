@@ -27,14 +27,17 @@ public interface JdbcService {
     /**
      * Create a JDBC datasource configuration.
      *
-     * @param name Datasource name 
-     * @param driverName Backend database type (osgi.jdbc.driver.name of DataSourceFactory)
-     * @param url JDBC URL
-     * @param user Database user name
-     * @param password Database password
-     * @param password2 
+     * @param name The datasource name.
+     * @param driverName The backend database type (osgi.jdbc.driver.name of DataSourceFactory).
+     * @param driverClass The JDBC driver class.
+     * @param databaseName The database name.
+     * @param url The JDBC URL.
+     * @param user The database user name.
+     * @param password The database password.
+     * @param databaseType The database type (ConnectionPoolDataSource, XADataSource or DataSource).
+     * @throws Exception If the service fails.
      */
-    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws Exception;
+    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws Exception;
 
     /**
      * Delete a JDBC datasource identified by a name. Works only
