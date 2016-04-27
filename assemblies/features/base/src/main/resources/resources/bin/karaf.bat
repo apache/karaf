@@ -77,7 +77,8 @@ if "%KARAF_BASE%" == "" (
 if not "%KARAF_DATA%" == "" (
     if not exist "%KARAF_DATA%" (
         call :warn KARAF_DATA is not valid: "%KARAF_DATA%"
-        goto END
+        call :warn Creating %KARAF_DATA%
+        mkdir %KARAF_DATA%
     )
 )
 if "%KARAF_DATA%" == "" (
