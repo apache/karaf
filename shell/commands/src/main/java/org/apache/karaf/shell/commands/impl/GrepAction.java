@@ -33,7 +33,6 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.fusesource.jansi.Ansi;
 
-
 @Command(scope = "shell", name="grep", description="Prints lines matching the given pattern.", detailedDescription="classpath:grep.txt")
 @Service
 public class GrepAction implements Action {
@@ -141,7 +140,9 @@ public class GrepAction implements Action {
                         nb++;
                     }
                     matcher2.appendTail(sb);
-                    sb.append(Ansi.ansi().reset().toString());
+                    if(color != ColorOption.never) {
+                        sb.append(Ansi.ansi().reset().toString());
+                    }
                     if (!count && lineNumber) {
                         lines.add(String.format("%6d  ", lineno) + sb.toString());
                     } else {
