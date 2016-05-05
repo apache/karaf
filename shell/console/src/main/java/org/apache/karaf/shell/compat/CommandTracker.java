@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.compat;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +26,13 @@ import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.api.console.Parser;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.CommandWithAction;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
@@ -39,7 +40,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> {
-
     SessionFactory sessionFactory;
     BundleContext context;
     ServiceTracker<?, ?> tracker;
@@ -66,6 +66,7 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
     @Override
     public Object addingService(final ServiceReference reference) {
         Object service = context.getService(reference);
+
         if (service instanceof CommandWithAction) {
             final CommandWithAction oldCommand = (CommandWithAction) service;
             final org.apache.karaf.shell.api.console.Command command = new org.apache.karaf.shell.api.console.Command() {
@@ -84,9 +85,16 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                     final Command cmd = oldCommand.getActionClass().getAnnotation(Command.class);
                     if (cmd != null) {
                         return cmd.description();
-                    } else {
-                        return getName();
                     }
+
+                    try {
+                        Method method = oldCommand.getActionClass().getMethod("description");
+                        method.setAccessible(true);
+                        return (String) method.invoke(oldCommand.createNewAction());
+                    } catch (Throwable ignore) {
+                    }
+
+                    return getName();
                 }
 
                 @Override
@@ -132,9 +140,16 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                     final org.apache.felix.gogo.commands.Command cmd = oldCommand.getActionClass().getAnnotation(org.apache.felix.gogo.commands.Command.class);
                     if (cmd != null) {
                         return cmd.description();
-                    } else {
-                        return getName();
                     }
+
+                    try {
+                        Method method = oldCommand.getActionClass().getMethod("description");
+                        method.setAccessible(true);
+                        return (String) method.invoke(oldCommand.createNewAction());
+                    } catch (Throwable ignore) {
+                    }
+
+                    return getName();
                 }
 
                 @Override
