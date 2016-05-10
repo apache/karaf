@@ -206,6 +206,49 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
         assertEquals(false, cd5.get("CanInvoke"));
     }
 
+    public void testCanInvokeBulkWithDuplicateMethods() throws Exception {
+        MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
+        EasyMock.replay(mbs);
+
+        ConfigurationAdmin testConfigAdmin = EasyMock.createMock(ConfigurationAdmin.class);
+        EasyMock.expect(testConfigAdmin.listConfigurations(EasyMock.eq("(service.pid=jmx.acl*)")))
+                .andReturn(new Configuration[0]).anyTimes();
+        EasyMock.expect(testConfigAdmin.listConfigurations(EasyMock.eq("(service.pid=jmx.acl.whitelist)")))
+                .andReturn(new Configuration[0]).once();
+        EasyMock.replay(testConfigAdmin);
+
+        KarafMBeanServerGuard testGuard = EasyMock.createMock(KarafMBeanServerGuard.class);
+        String objectName = "foo.bar.testing:type=SomeMBean";
+        final String[] la = new String[]{"long"};
+        final String[] sa = new String[]{"java.lang.String"};
+        EasyMock.expect(testGuard.getConfigAdmin()).andReturn(testConfigAdmin).anyTimes();
+        EasyMock.expect(testGuard.canInvoke(EasyMock.anyObject(BulkRequestContext.class), EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("duplicateMethod1"), EasyMock.aryEq(la))).andReturn(true).anyTimes();
+        EasyMock.expect(testGuard.canInvoke(EasyMock.anyObject(BulkRequestContext.class), EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("duplicateMethod1"), EasyMock.aryEq(sa))).andReturn(false).anyTimes();
+        EasyMock.expect(testGuard.canInvoke(EasyMock.anyObject(BulkRequestContext.class), EasyMock.eq(mbs), EasyMock.eq(new ObjectName(objectName)), EasyMock.eq("duplicateMethod2"))).andReturn(true).anyTimes();
+        EasyMock.replay(testGuard);
+
+        JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
+        mb.setMBeanServer(mbs);
+        mb.setGuard(testGuard);
+        Map<String, List<String>> query = new HashMap<String, List<String>>();
+        query.put(objectName, Arrays.asList("duplicateMethod1(long)", "duplicateMethod1(java.lang.String)", "duplicateMethod1(long)", "duplicateMethod2", "duplicateMethod2"));
+        TabularData result = mb.canInvoke(query);
+        assertEquals(3, result.size());
+
+        CompositeData cd = result.get(new Object[]{objectName, "duplicateMethod1(long)"});
+        assertEquals(objectName, cd.get("ObjectName"));
+        assertEquals("duplicateMethod1(long)", cd.get("Method"));
+        assertEquals(true, cd.get("CanInvoke"));
+        CompositeData cd2 = result.get(new Object[]{objectName, "duplicateMethod1(java.lang.String)"});
+        assertEquals(objectName, cd2.get("ObjectName"));
+        assertEquals("duplicateMethod1(java.lang.String)", cd2.get("Method"));
+        assertEquals(false, cd2.get("CanInvoke"));
+        CompositeData cd3 = result.get(new Object[]{objectName, "duplicateMethod2"});
+        assertEquals(objectName, cd3.get("ObjectName"));
+        assertEquals("duplicateMethod2", cd3.get("Method"));
+        assertEquals(true, cd3.get("CanInvoke"));
+    }
+
     public void testCanInvokeBulkCacheConfigAdmin() throws Exception {
         MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
         EasyMock.replay(mbs);
