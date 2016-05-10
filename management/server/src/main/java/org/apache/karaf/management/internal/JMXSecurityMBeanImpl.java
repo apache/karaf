@@ -18,6 +18,8 @@ package org.apache.karaf.management.internal;
 
 import org.apache.karaf.management.JMXSecurityMBean;
 import org.apache.karaf.management.KarafMBeanServerGuard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
@@ -25,6 +27,7 @@ import javax.management.ObjectName;
 import javax.management.StandardMBean;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.KeyAlreadyExistsException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import java.util.ArrayList;
@@ -32,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMBean {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JMXSecurityMBeanImpl.class);
 
     private MBeanServer mbeanServer;
     private KarafMBeanServerGuard guard;
@@ -99,7 +104,12 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
                         res = canInvoke(context, objectName, name, argTypes.toArray(new String[]{}));
                     }
                     CompositeData data = new CompositeDataSupport(CAN_INVOKE_RESULT_ROW_TYPE, CAN_INVOKE_RESULT_COLUMNS, new Object[]{ objectName, method, res });
-                    table.put(data);
+                    try {
+                        table.put(data);
+                    } catch (KeyAlreadyExistsException e) {
+                        // KeyAlreadyExistsException can happen only when methods are not empty
+                        LOG.warn("{} (objectName = \"{}\", method = \"{}\")", e, objectName, method);
+                    }
                 }
             }
         }
