@@ -38,7 +38,7 @@ import org.osgi.framework.launch.Framework;
 
 public class InstanceHelper {
 
-    static void updateInstancePid(final File karafHome, File karafBase, final boolean isStartingInstance) {
+    static void updateInstancePid(final File karafHome, final File karafBase, final boolean isStartingInstance) {
         try {
             final String instanceName = System.getProperty("karaf.name");
             final String pid = isStartingInstance ? getPid() : "0";
@@ -88,7 +88,7 @@ public class InstanceHelper {
                             // it's the first instance running, so we consider as root
                             props.setProperty("count", "1");
                             props.setProperty("item.0.name", instanceName);
-                            props.setProperty("item.0.loc", karafHome.getAbsolutePath());
+                            props.setProperty("item.0.loc", karafBase.getAbsolutePath());
                             props.setProperty("item.0.pid", pid);
                             props.setProperty("item.0.root", "true");
                         } else {
