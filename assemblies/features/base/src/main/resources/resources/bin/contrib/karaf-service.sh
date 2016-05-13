@@ -137,7 +137,22 @@ function generate_service_descriptor {
 if [[ ! $KARAF_SERVICE_TEMPLATE ]]; then
     case $(uname | tr [:upper:] [:lower:]) in
         sunos)
-            # smc vs initv
+            # add KARAF_ENV vars to envirioment
+            for var in "${KARAF_ENV[@]}"; do
+                export $var
+            done
+
+            # Default java path if not set
+            if [[ ! $JAVA_HOME ]]; then
+                export JAVA_HOME=/usr/java
+            fi
+
+            # escape spaces in path
+            export KARAF_SERVICE_PATH="$(echo $KARAF_SERVICE_PATH | sed 's/ /\\ /g')"
+            export KARAF_SERVICE_DATA="$(echo $KARAF_SERVICE_DATA | sed 's/ /\\ /g')"
+            export KARAF_SERVICE_CONF="$(echo $KARAF_SERVICE_CONF | sed 's/ /\\ /g')"
+            export KARAF_SERVICE_PIDFILE="$(echo $KARAF_SERVICE_PIDFILE | sed 's/ /\\ /g')"
+            
             generate_service_descriptor \
                 "$SOLARIS_SMF_TEMPLATE" \
                 "${PWD}/${KARAF_SERVICE_NAME}.xml"
