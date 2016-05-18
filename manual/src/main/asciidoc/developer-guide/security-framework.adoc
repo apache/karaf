@@ -505,6 +505,17 @@ The LDAPLoginModule doesn't provide backend engine. It means that the administra
 performed directly on the LDAP backend.
 ====
 
+===== KerberosLoginModule
+
+|===
+|LoginModule |BackendEngineFactory
+
+|org.apache.karaf.jaas.modules.krb5.Krb5LoginModule
+|
+|===
+
+The Kerberos login module uses the Oracle JVM Krb5 internal login module.
+
 ===== SyncopeLoginModule
 
 |===
