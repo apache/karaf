@@ -131,6 +131,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-kerberos-test</artifactId>
+            <version>${directory-version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>${derby-version}</version>
