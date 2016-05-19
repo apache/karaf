@@ -31,8 +31,6 @@ import org.apache.directory.server.protocol.shared.transport.TcpTransport;
 import org.apache.directory.server.protocol.shared.transport.Transport;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,7 +52,6 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -130,8 +127,7 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
     }
 
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
