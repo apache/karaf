@@ -20,11 +20,13 @@ public class Krb5LoginModule implements LoginModule {
     public void initialize(Subject _subject, CallbackHandler _callbackHandler, Map<String, ?> _sharedState, Map<String, ?> _options) {
         Map<String, Object> options = new HashMap<>(_options);
         // interpolate system properties like ${karaf.etc} in options
-        _options.forEach((key, value) -> {
-            if (value instanceof String) {
-                options.put(key, Krb5LoginModule.interpolate((String) value));
+        for (Map.Entry<String, ?> entry : _options.entrySet()) {
+            if (entry.getValue() instanceof String) {
+                options.put(entry.getKey(), Krb5LoginModule.interpolate((String)entry.getValue()));
+            } else {
+                options.put(entry.getKey(), entry.getValue());
             }
-        });
+        }
         this.loginModule.initialize(_subject, _callbackHandler, _sharedState, options);
     }
 
