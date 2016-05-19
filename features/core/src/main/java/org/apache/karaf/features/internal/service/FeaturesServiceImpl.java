@@ -912,7 +912,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                         Feature[] installedFeatures = listInstalledFeatures();
                         for (int i=0;i<installedFeatures.length;i++) {
                             if (installedFeatures[i].getName().equals(f.getName()) && installedFeatures[i].getVersion().equals(f.getVersion())) {
-                                System.out.println("The specified feature: '" + installedFeatures[i].getName() + "' version '" + installedFeatures[i].getVersion() + "' is already installed");
+                                LOGGER.info("The specified feature: '{}' version '{}' {}",f.getName(),f.getVersion(),f.getVersion().endsWith("SNAPSHOT") ? "has been upgraded": "is already installed");
                             }
                         }
                         matched = true;
