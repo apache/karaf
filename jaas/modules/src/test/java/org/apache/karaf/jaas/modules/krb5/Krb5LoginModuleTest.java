@@ -31,6 +31,8 @@ import org.apache.directory.server.protocol.shared.transport.TcpTransport;
 import org.apache.directory.server.protocol.shared.transport.Transport;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,13 +45,19 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.kerberos.KerberosPrincipal;
+import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(FrameworkRunner.class)
 @CreateDS(name = "Krb5LoginModuleTest-class",
@@ -145,7 +153,33 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         Krb5LoginModule module = new Krb5LoginModule();
         module.initialize(subject, cb, null, new HashMap<>());
 
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+
         Assert.assertTrue(module.login());
+        Assert.assertTrue(module.commit());
+
+        assertEquals(1, subject.getPrincipals().size());
+
+        boolean foundUser = false;
+        for (Principal pr : subject.getPrincipals()) {
+            if (pr instanceof KerberosPrincipal) {
+                assertEquals("hnelson@EXAMPLE.COM", pr.getName());
+                foundUser = true;
+                break;
+            }
+        }
+        assertTrue(foundUser);
+
+        boolean foundToken = false;
+        for (Object crd : subject.getPrivateCredentials()) {
+            if (crd instanceof KerberosTicket) {
+                assertEquals("hnelson@EXAMPLE.COM", ((KerberosTicket) crd).getClient().getName());
+                assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ((KerberosTicket) crd).getServer().getName());
+                foundToken = true;
+                break;
+            }
+        }
+        assertTrue(foundToken);
 
         Assert.assertTrue(module.logout());
 
@@ -169,9 +203,9 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         Krb5LoginModule module = new Krb5LoginModule();
         module.initialize(subject, cb, null, new HashMap<>());
 
-        Assert.assertTrue(module.login());
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
 
-        Assert.assertTrue(module.logout());
+        Assert.assertFalse(module.login());
 
     }
 
@@ -193,9 +227,9 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         Krb5LoginModule module = new Krb5LoginModule();
         module.initialize(subject, cb, null, new HashMap<>());
 
-        Assert.assertTrue(module.login());
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
 
-        Assert.assertTrue(module.logout());
+        Assert.assertFalse(module.login());
 
     }
 
