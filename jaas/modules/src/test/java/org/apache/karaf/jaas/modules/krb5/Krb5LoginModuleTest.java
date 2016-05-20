@@ -383,27 +383,25 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         return file.getAbsolutePath();
     }
 
-    private KeytabEntry createKeytabEntry() throws ParseException
-    {
+    private KeytabEntry createKeytabEntry() throws ParseException {
         String principalName = "hnelson@EXAMPLE.COM";
         int principalType = 1;
 
         String zuluTime = "20070217235745Z";
         Date date = null;
 
-        synchronized ( KerberosUtils.UTC_DATE_FORMAT )
-        {
-            date = KerberosUtils.UTC_DATE_FORMAT.parse( zuluTime );
+        synchronized (KerberosUtils.UTC_DATE_FORMAT) {
+            date = KerberosUtils.UTC_DATE_FORMAT.parse(zuluTime);
         }
 
-        KerberosTime timeStamp = new KerberosTime( date.getTime() );
+        KerberosTime timeStamp = new KerberosTime(date.getTime());
 
         byte keyVersion = 1;
         String passPhrase = "secret";
-        Map<EncryptionType, EncryptionKey> keys = KerberosKeyFactory.getKerberosKeys( principalName, passPhrase );
-        EncryptionKey key = keys.get( EncryptionType.AES128_CTS_HMAC_SHA1_96 );
+        Map<EncryptionType, EncryptionKey> keys = KerberosKeyFactory.getKerberosKeys(principalName, passPhrase);
+        EncryptionKey key = keys.get(EncryptionType.AES128_CTS_HMAC_SHA1_96);
 
-        return new KeytabEntry( principalName, principalType, timeStamp, keyVersion, key );
+        return new KeytabEntry(principalName, principalType, timeStamp, keyVersion, key);
     }
 
     private String createKeytab() throws Exception {
@@ -411,10 +409,10 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
 
         List<KeytabEntry> entries = new ArrayList<KeytabEntry>();
 
-        entries.add( createKeytabEntry() );
+        entries.add(createKeytabEntry());
 
         Keytab writer = Keytab.getInstance();
-        writer.setEntries( entries );
+        writer.setEntries(entries);
         writer.write(file);
 
         return file.getAbsolutePath();
