@@ -341,14 +341,17 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         }
 
         // First pass to look for features
-        // Track other features we depend on
+        // Track other features we depend on and their repositories (we track repositories instead of building them from
+        // the feature's Maven artifact to allow for multi-feature repositories)
+        // TODO Initialise the repositories from the existing feature file if any
         Map<Dependency, Feature> otherFeatures = new HashMap<Dependency, Feature>();
+        Map<Feature, String> featureRepositories = new HashMap<Feature, String>();
         for (Object artifact : localDependencies.keySet()) {
             if (excludedArtifactIds.contains(this.dependencyHelper.getArtifactId(artifact))) {
                 continue;
             }
 
-            processFeatureArtifact(features, feature, otherFeatures, artifact, true);
+            processFeatureArtifact(features, feature, otherFeatures, featureRepositories, artifact, true);
         }
 
         // Second pass to look for bundles
@@ -401,6 +404,19 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             features.getFeature().add(feature);
         }
 
+        // Add any missing repositories for the included features
+        for (Feature includedFeature : features.getFeature()) {
+            for (Dependency dependency : includedFeature.getFeature()) {
+                Feature dependedFeature = otherFeatures.get(dependency);
+                if (dependedFeature != null && !features.getFeature().contains(dependedFeature)) {
+                    String repository = featureRepositories.get(dependedFeature);
+                    if (repository != null && !features.getRepository().contains(repository)) {
+                        features.getRepository().add(repository);
+                    }
+                }
+            }
+        }
+
         JaxbUtil.marshal(features, out);
         try {
             checkChanges(features, objectFactory);
@@ -411,7 +427,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     }
 
     private void processFeatureArtifact(Features features, Feature feature, Map<Dependency, Feature> otherFeatures,
-                                        Object artifact, boolean add)
+                                        Map<Feature, String> featureRepositories, Object artifact, boolean add)
             throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
         if (this.dependencyHelper.isArtifactAFeature(artifact) && FEATURE_CLASSIFIER.equals(
                 this.dependencyHelper.getClassifier(artifact))) {
@@ -422,7 +438,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             }
             Features includedFeatures = readFeaturesFile(featuresFile);
             for (String repository : includedFeatures.getRepository()) {
-                processFeatureArtifact(features, feature, otherFeatures,
+                processFeatureArtifact(features, feature, otherFeatures, featureRepositories,
                         new DefaultArtifact(MavenUtil.mvnToAether(repository)), false);
             }
             for (Feature includedFeature : includedFeatures.getFeature()) {
@@ -435,13 +451,10 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                     }
                     if (aggregateFeatures) {
                         features.getFeature().add(includedFeature);
-                    } else {
-                        // Add the feature to the repositories, if it isn't already there
-                        String mvn = this.dependencyHelper.artifactToMvn(artifact);
-                        if (!features.getRepository().contains(mvn)) {
-                            features.getRepository().add(mvn);
-                        }
                     }
+                }
+                if (!featureRepositories.containsKey(includedFeature)) {
+                    featureRepositories.put(includedFeature, this.dependencyHelper.artifactToMvn(artifact));
                 }
             }
         }
