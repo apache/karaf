@@ -29,4 +29,9 @@
         <bundle>mvn:test/aggregate-recursive-module-c/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/aggregate-recursive-module-b/1.0-SNAPSHOT</bundle>
     </feature>
+    <feature name="aggregate-features" description="aggregate-features" version="1.0.0.SNAPSHOT">
+        <details>Test Description</details>
+        <feature version="1.0.0.SNAPSHOT" prerequisite="false" dependency="false">aggregate-recursive-module-c</feature>
+        <feature version="1.0.0.SNAPSHOT" prerequisite="false" dependency="false">aggregate-recursive-module-d</feature>
+    </feature>
 </features>
