@@ -21,6 +21,7 @@ package org.apache.karaf.util.tracker;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -33,32 +34,24 @@ import org.osgi.framework.ServiceReference;
 //This is from aries util
 public final class SingleServiceTracker<T> implements ServiceListener {
 
-    public static interface SingleServiceListener {
-        public void serviceFound();
-
-        public void serviceLost();
-
-        public void serviceReplaced();
-    }
-
     private final BundleContext ctx;
     private final String className;
     private final AtomicReference<T> service = new AtomicReference<>();
     private final AtomicReference<ServiceReference> ref = new AtomicReference<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
-    private final SingleServiceListener serviceListener;
+    private final BiConsumer<T, T> serviceListener;
     private final String filterString;
     private final Filter filter;
 
-    public SingleServiceTracker(BundleContext context, Class<T> clazz, SingleServiceListener sl) throws InvalidSyntaxException {
+    public SingleServiceTracker(BundleContext context, Class<T> clazz, BiConsumer<T, T> sl) throws InvalidSyntaxException {
         this(context, clazz, null, sl);
     }
 
-    public SingleServiceTracker(BundleContext context, Class<T> clazz, String filterString, SingleServiceListener sl) throws InvalidSyntaxException {
+    public SingleServiceTracker(BundleContext context, Class<T> clazz, String filterString, BiConsumer<T, T> sl) throws InvalidSyntaxException {
         this(context, clazz.getName(), filterString, sl);
     }
 
-    public SingleServiceTracker(BundleContext context, String className, String filterString, SingleServiceListener sl) throws InvalidSyntaxException {
+    public SingleServiceTracker(BundleContext context, String className, String filterString, BiConsumer<T, T> sl) throws InvalidSyntaxException {
         this.ctx = context;
         this.className = className;
         this.serviceListener = sl;
@@ -119,7 +112,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
                     clear = false;
 
                     // We do the unget out of the lock so we don't exit this class while holding a lock.
-                    if (!!!update(original, refs[0], service)) {
+                    if (!update(original, refs[0], service)) {
                         ctx.ungetService(refs[0]);
                     }
                 }
@@ -137,7 +130,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
 
     private boolean update(ServiceReference deadRef, ServiceReference newRef, T service) {
         boolean result = false;
-        int foundLostReplaced = -1;
+        T prev = null;
 
         // Make sure we don't try to get a lock on null
         Object lock;
@@ -153,19 +146,13 @@ public final class SingleServiceTracker<T> implements ServiceListener {
             if (open.get()) {
                 result = this.ref.compareAndSet(deadRef, newRef);
                 if (result) {
-                    this.service.set(service);
-
-                    if (deadRef == null && newRef != null) foundLostReplaced = 0;
-                    if (deadRef != null && newRef == null) foundLostReplaced = 1;
-                    if (deadRef != null && newRef != null) foundLostReplaced = 2;
+                    prev = this.service.getAndSet(service);
                 }
             }
         }
 
-        if (serviceListener != null) {
-            if (foundLostReplaced == 0) serviceListener.serviceFound();
-            else if (foundLostReplaced == 1) serviceListener.serviceLost();
-            else if (foundLostReplaced == 2) serviceListener.serviceReplaced();
+        if (result && serviceListener != null) {
+            serviceListener.accept(prev, service);
         }
 
         return result;
@@ -176,12 +163,13 @@ public final class SingleServiceTracker<T> implements ServiceListener {
             ctx.removeServiceListener(this);
 
             ServiceReference deadRef;
+            T prev;
             synchronized (this) {
                 deadRef = ref.getAndSet(null);
-                service.set(null);
+                prev = service.getAndSet(null);
             }
             if (deadRef != null) {
-                serviceListener.serviceLost();
+                serviceListener.accept(prev, null);
                 ctx.ungetService(deadRef);
             }
         }

@@ -39,7 +39,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaseActivator implements BundleActivator, SingleServiceTracker.SingleServiceListener, Runnable {
+public class BaseActivator implements BundleActivator, Runnable {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected BundleContext bundleContext;
@@ -223,21 +223,6 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
         return def;
     }
 
-    @Override
-    public void serviceFound() {
-        reconfigure();
-    }
-
-    @Override
-    public void serviceLost() {
-        reconfigure();
-    }
-
-    @Override
-    public void serviceReplaced() {
-        reconfigure();
-    }
-
     protected void reconfigure() {
         if (scheduled.compareAndSet(false, true)) {
             executor.submit(this);
@@ -264,7 +249,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
      */
     protected void trackService(Class<?> clazz) throws InvalidSyntaxException {
         if (!trackers.containsKey(clazz.getName())) {
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, this);
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(clazz.getName(), tracker);
         }
@@ -282,7 +267,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
             if (filter != null && filter.isEmpty()) {
                 filter = null;
             }
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, this);
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(clazz.getName(), tracker);
         }
@@ -290,7 +275,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
 
     protected void trackService(String className, String filter) throws InvalidSyntaxException {
         if (!trackers.containsKey(className)) {
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, className, filter, this);
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, className, filter, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(className, tracker);
         }
