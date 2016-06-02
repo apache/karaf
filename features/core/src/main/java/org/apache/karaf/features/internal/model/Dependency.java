@@ -50,6 +50,15 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     @XmlAttribute
     protected boolean dependency;
 
+    public Dependency() {
+        // Nothing to do
+    }
+
+    public Dependency(String name, String version) {
+        this.name = name;
+        this.version = version;
+    }
+
     /**
      * Feature name should be non empty string.
      *
@@ -116,4 +125,26 @@ public class Dependency implements org.apache.karaf.features.Dependency {
         return getName() + Feature.VERSION_SEPARATOR + getVersion();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Dependency that = (Dependency) o;
+
+        if (prerequisite != that.prerequisite) return false;
+        if (dependency != that.dependency) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        return version != null ? version.equals(that.version) : that.version == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (prerequisite ? 1 : 0);
+        result = 31 * result + (dependency ? 1 : 0);
+        return result;
+    }
 }
