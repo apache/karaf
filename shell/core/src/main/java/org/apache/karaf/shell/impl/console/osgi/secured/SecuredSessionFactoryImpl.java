@@ -49,7 +49,7 @@ import org.osgi.service.cm.ConfigurationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements ConfigurationListener, SingleServiceTracker.SingleServiceListener {
+public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements ConfigurationListener {
 
     private static final String PROXY_COMMAND_ACL_PID_PREFIX = "org.apache.karaf.command.acl.";
     private static final String CONFIGURATION_FILTER =
@@ -66,7 +66,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         super(threadIO);
         this.bundleContext = bundleContext;
         this.registration = bundleContext.registerService(ConfigurationListener.class, this, null);
-        this.configAdminTracker = new SingleServiceTracker<>(bundleContext, ConfigurationAdmin.class, this);
+        this.configAdminTracker = new SingleServiceTracker<>(bundleContext, ConfigurationAdmin.class, this::update);
         this.configAdminTracker.open();
     }
 
@@ -212,10 +212,8 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         }
     }
 
-    @Override
-    public void serviceFound() {
+    protected void update(ConfigurationAdmin prev, ConfigurationAdmin configAdmin) {
         try {
-            ConfigurationAdmin configAdmin = this.configAdminTracker.getService();
             Configuration[] configs = configAdmin.listConfigurations(CONFIGURATION_FILTER);
             if (configs != null) {
                 for (Configuration config : configs) {
@@ -225,14 +223,5 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         } catch (Exception e) {
             // Ignore, should never happen
         }
-    }
-
-    @Override
-    public void serviceLost() {
-    }
-
-    @Override
-    public void serviceReplaced() {
-        serviceFound();
     }
 }

@@ -25,6 +25,7 @@ import org.apache.karaf.diagnostic.management.internal.DiagnosticDumpMBeanImpl;
 import org.apache.karaf.diagnostic.common.FeaturesDumpProvider;
 import org.apache.karaf.diagnostic.common.LogDumpProvider;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -44,21 +45,16 @@ public class Activator implements BundleActivator {
         registrations = new ArrayList<ServiceRegistration<DumpProvider>>();
         registrations.add(context.registerService(DumpProvider.class, new LogDumpProvider(context), null));
 
-        featuresServiceTracker = new SingleServiceTracker<FeaturesService>(context, FeaturesService.class, new SingleServiceTracker.SingleServiceListener() {
-            @Override
-            public void serviceFound() {
-                featuresProviderRegistration =
-                        context.registerService(
-                                DumpProvider.class,
-                                new FeaturesDumpProvider(featuresServiceTracker.getService()),
-                                null);
-            }
-            @Override
-            public void serviceLost() {
-            }
-            @Override
-            public void serviceReplaced() {
+        featuresServiceTracker = new SingleServiceTracker<FeaturesService>(context, FeaturesService.class, (oldFs, newFs) -> {
+            if (featuresProviderRegistration != null) {
                 featuresProviderRegistration.unregister();
+                featuresProviderRegistration = null;
+            }
+            if (newFs != null) {
+                featuresProviderRegistration = context.registerService(
+                        DumpProvider.class,
+                        new FeaturesDumpProvider(newFs),
+                        null);
             }
         });
         featuresServiceTracker.open();
