@@ -221,6 +221,34 @@ public class Install implements Action {
                 System.out.println("   $ systemctl disable " + name);
             }
 
+        } else if (os.startsWith("Solaris") || os.startsWith("SunOS")) {
+            System.out.println("  To install the service:");
+            System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
+            System.out.println("");
+            System.out.println("  To start the service when the machine is rebooted for all multi-user run levels");
+            System.out.println("  and stopped for the halt, single-user and reboot runlevels:");
+            System.out.println("    $ ln -s /etc/init.d/" + serviceFile.getName() + " /etc/rc0.d/K20" + serviceFile.getName());
+            System.out.println("    $ ln -s /etc/init.d/" + serviceFile.getName() + " /etc/rc1.d/K20" + serviceFile.getName());
+            System.out.println("    $ ln -s /etc/init.d/" + serviceFile.getName() + " /etc/rc2.d/S20" + serviceFile.getName());
+            System.out.println("    $ ln -s /etc/init.d/" + serviceFile.getName() + " /etc/rc3.d/S20" + serviceFile.getName());
+            System.out.println("");
+            System.out.println("    If your application makes use of other services, then you will need to make");
+            System.out.println("    sure that your application is started after, and then shutdown before. This");
+            System.out.println("    is done by controlling the startup/shutdown order by setting the right order");
+            System.out.println("    value, which in this example it set to 20."); 
+            System.out.println("");
+            System.out.println("  To start the service:");
+            System.out.println("    $ /etc/init.d/" + serviceFile.getName() + " start");
+            System.out.println("");
+            System.out.println("  To stop the service:");
+            System.out.println("    $ /etc/init.d/" + serviceFile.getName() + " stop");
+            System.out.println("");
+            System.out.println("  To uninstall the service :");
+            System.out.println("    $ rm /etc/init.d/" + serviceFile.getName());
+            System.out.println("    $ rm /etc/rc0.d/K20" + serviceFile.getName());
+            System.out.println("    $ rm /etc/rc1.d/K20" + serviceFile.getName());
+            System.out.println("    $ rm /etc/rc2.d/K20" + serviceFile.getName());
+            System.out.println("    $ rm /etc/rc3.d/K20" + serviceFile.getName());
         }
 
         return null;
