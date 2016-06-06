@@ -38,6 +38,10 @@ public class Row {
     public void addContent(Object ... cellDataAr) {
         data.addAll(Arrays.asList(cellDataAr));
     }
+
+    public void addContent(List<Object> data) {
+        this.data = data;
+    }
     
     void formatContent(List<Col> cols) {
         content.clear();

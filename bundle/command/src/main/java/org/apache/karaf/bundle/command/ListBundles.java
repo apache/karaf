@@ -22,12 +22,18 @@ import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.table.Row;
 import org.apache.karaf.shell.table.ShellTable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 
+import java.util.ArrayList;
+
 @Command(scope = "bundle", name = "list", description = "Lists all installed bundles.")
 public class ListBundles extends OsgiCommandSupport {
+
+    @Option(name = "--no-name", description = "Don't show bundle name", required = false, multiValued = false)
+    boolean dontShowName;
 
     @Option(name = "-l", aliases = {}, description = "Show the locations", required = false, multiValued = false)
     boolean showLoc;
@@ -37,7 +43,7 @@ public class ListBundles extends OsgiCommandSupport {
 
     @Option(name = "-u", description = "Shows the update locations", required = false, multiValued = false)
     boolean showUpdate;
-    
+
     @Option(name = "-r", description = "Shows the bundle revisions", required = false, multiValued = false)
     boolean showRevisions;
 
@@ -61,7 +67,7 @@ public class ListBundles extends OsgiCommandSupport {
         }
 
         determineBundleLevelThreshold();
-        
+
         // Display active start level.
         FrameworkStartLevel fsl = getBundleContext().getBundle(0).adapt(FrameworkStartLevel.class);
         if (fsl != null) {
@@ -73,35 +79,57 @@ public class ListBundles extends OsgiCommandSupport {
         table.column("State");
         table.column("Lvl").alignRight();
         table.column("Version");
-        table.column(getNameHeader());
-        
+
+        if (!dontShowName) {
+            table.column("Name");
+        }
+        if (showLoc) {
+            table.column("Location");
+        }
+        if (showSymbolic) {
+            table.column("Symbolic name");
+        }
+        if (showUpdate) {
+            table.column("Update location");
+        }
+        if (showRevisions) {
+            table.column("Revisions");
+        }
+
         for (int i = 0; i < bundles.length; i++) {
             Bundle bundle = bundles[i];
             BundleInfo info = this.bundleService.getInfo(bundle);
             if (info.getStartLevel() >= bundleLevelThreshold) {
-                String name = getNameToShow(info) + printFragments(info) + printHosts(info);
-                String version = info.getVersion();
-                table.addRow().addContent(info.getBundleId(), getStateString(info.getState()), 
-                        info.getStartLevel(), version, name);
+                ArrayList<Object> rowData = new ArrayList<Object>();
+                rowData.add(info.getBundleId());
+                rowData.add(getStateString(info.getState()));
+                rowData.add(info.getStartLevel());
+                rowData.add(info.getVersion());
+                if (!dontShowName) {
+                    String bundleName = (info.getName() == null) ? info.getSymbolicName() : info.getName();
+                    bundleName = (bundleName == null) ? info.getUpdateLocation() : bundleName;
+                    String name = bundleName + printFragments(info) + printHosts(info);
+                    rowData.add(name);
+                }
+                if (showLoc) {
+                    rowData.add(info.getUpdateLocation());
+                }
+                if (showSymbolic) {
+                    rowData.add(info.getSymbolicName() == null ? "<no symbolic name>" : info.getSymbolicName());
+                }
+                if (showUpdate) {
+                    rowData.add(info.getUpdateLocation());
+                }
+                if (showRevisions) {
+                    rowData.add(info.getRevisions());
+                }
+                Row row = table.addRow();
+                row.addContent(rowData);
             }
         }
         table.print(System.out, !noFormat);
 
         return null;
-    }
-
-    private String getNameHeader() {
-        String msg = "Name";
-        if (showLoc) {
-            msg = "Location";
-        } else if (showSymbolic) {
-            msg = "Symbolic name";
-        } else if (showUpdate) {
-            msg = "Update location";
-        } else if (showRevisions) {
-            msg = "Revisions";
-        }
-        return msg;
     }
 
     private void determineBundleLevelThreshold() {
@@ -147,28 +175,6 @@ public class ListBundles extends OsgiCommandSupport {
 
     private String getStateString(BundleState state) {
         return (state == null) ? "" : state.toString();
-    }
-
-    /**
-     * Overwrite the default value is the user specifically requested to display
-     * one or the other.
-     * 
-     * @param info
-     * @return
-     */
-    private String getNameToShow(BundleInfo info) {
-        if (showLoc) {
-            return info.getUpdateLocation();
-        } else if (showSymbolic) {
-            return info.getSymbolicName() == null ? "<no symbolic name>" : info.getSymbolicName();
-        } else if (showUpdate) {
-            return info.getUpdateLocation();
-        } else if (showRevisions) {
-            return info.getRevisions();
-        } else {
-            String name = (info.getName() == null) ? info.getSymbolicName() : info.getName();
-            return (name == null) ? info.getUpdateLocation() : name;
-        }
     }
 
 }
