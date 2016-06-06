@@ -35,6 +35,10 @@ public class Row {
         }
     }
 
+    public void addContent(List<Object> data) {
+        this.data = data;
+    }
+
     public void addContent(Object ... cellDataAr) {
         data.addAll(Arrays.asList(cellDataAr));
     }
