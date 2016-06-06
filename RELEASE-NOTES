@@ -15,6 +15,38 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 3.0.7
+                    ==================
+
+  This is an update patch for Apache Karaf 3.0.x, containing many bug fixes, dependency updates, and some improvements.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-4348] - [RBAC] Wildcard PIDs chosen before more specific ones
+    * [KARAF-4429] - JaxB marshalling failure due to endorsed java.lang.Exception
+    * [KARAF-4479] - Incorrect syntax in wrapper launch script karaf-service
+
+** Dependency upgrade
+    * [KARAF-4343] - Upgrade to Xalan 2.7.2_3
+    * [KARAF-4450] - Upgrade to Aries jmx-core 1.1.6
+    * [KARAF-4451] - Upgrade to Aries blueprint-core 1.6.0
+    * [KARAF-4452] - Upgrade to Aries blueprint-cm 1.0.8
+    * [KARAF-4476] - Upgrade to Aries Blueprint Core 1.6.1
+    * [KARAF-4477] - Upgrade to Pax URL 2.4.7
+    * [KARAF-4491] - Upgrade to Pax Web 3.2.9
+    * [KARAF-4556] - Upgrade to Aries Blueprint CM 1.0.9
+
+** Improvement
+    * [KARAF-4084] - Only one flag could be used in list command
+    * [KARAF-4351] - [RBAC] Optimize access to JMXSecurityMBean.canInvoke(Map)
+    * [KARAF-4489] - Introduce a property in etc/org.apache.karaf.features.cfg to decide if <config/> should create cfg file or not
+    * [KARAF-4494] - FeaturesService Should Support Variable Interpolation in featuresRepositories property
+    * [KARAF-4523] - JMXSecurityMBean bulk canInvoke should be robust even if bulkQuery contains duplicate operations
+    * [KARAF-4557] - Add config:property-get and getProperty operation on the ConfigMBean
+
+
                     Apache Karaf 3.0.6
                     ==================
 
