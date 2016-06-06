@@ -150,6 +150,15 @@
                                     <artifactId>${equinox.artifactId}</artifactId>
                                     <outputDirectory>target/classes/resources/system/${equinox.path}/${equinox.artifactId}/${equinox.version}</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.winsw</groupId>
+                                    <artifactId>winsw</artifactId>
+                                    <version>${winsw.version}</version>
+                                    <classifier>bin</classifier>
+                                    <type>exe</type>
+                                    <outputDirectory>target/classes/resources/bin/contrib</outputDirectory>
+                                    <destFileName>karaf-service-win.exe</destFileName>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -178,4 +187,11 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>jenkins</id>
+            <name>jenkins</name>
+            <url>http://repo.jenkins-ci.org/releases/</url>
+        </repository>
+    </repositories>
 </project>
