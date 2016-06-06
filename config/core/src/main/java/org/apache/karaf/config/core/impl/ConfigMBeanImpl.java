@@ -150,6 +150,19 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
+    public String getProperty(String pid, String key) throws MBeanException {
+        try {
+            Dictionary dictionary = getConfigProperties(pid);
+            Object value = dictionary.get(key);
+            if (value != null) {
+                return value.toString();
+            }
+            return null;
+        } catch (Exception e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
     public void update(String pid, Map<String, String> properties) throws MBeanException {
         try {
             if (properties == null) {

@@ -99,6 +99,18 @@
             </optional-completers>
         </command>
         <command>
+            <action class="org.apache.karaf.config.command.PropGetCommand">
+                <property name="configRepository" ref="configRepo"/>
+            </action>
+            <completers>
+                <ref component-id="configPropertyCompleter"/>
+                <null/>
+            </completers>
+            <optional-completers>
+                <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
+        </command>
+        <command>
             <action class="org.apache.karaf.config.command.UpdateCommand">
                 <property name="configRepository" ref="configRepo"/>
             </action>
