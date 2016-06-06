@@ -29,12 +29,13 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.resolver.Logger;
+import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
 import org.apache.karaf.features.internal.region.DigraphHelper;
-import org.apache.karaf.features.internal.region.SubsystemResolveContext;
 import org.apache.karaf.features.internal.repository.AggregateRepository;
 import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
@@ -66,7 +67,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 @Services(
     requires = {
             @RequireService(ConfigurationAdmin.class),
-            @RequireService(Resolver.class),
             @RequireService(value = URLStreamHandlerService.class, filter = "(url.handler.protocol=mvn)")
     },
     provides = {
@@ -114,7 +114,7 @@ public class Activator extends BaseActivator {
 
     protected void doStart() throws Exception {
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
-        Resolver resolver = getTrackedService(Resolver.class);
+        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_INFO));
         URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
 
         if (configurationAdmin == null || mvnUrlHandler == null) {
