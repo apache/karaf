@@ -25,14 +25,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.support.table.Col;
+import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 
+import java.util.ArrayList;
+
 @Command(scope = "bundle", name = "list", description = "Lists all installed bundles.")
 @Service
 public class List extends BundlesCommand {
+
+    @Option(name = "--no-name", description = "Don't show bundle name", required = false, multiValued = false)
+    boolean dontShowName;
 
     @Option(name = "-l", aliases = {}, description = "Show the locations", required = false, multiValued = false)
     boolean showLocation;
@@ -90,53 +96,77 @@ public class List extends BundlesCommand {
         table.column("State");
         table.column("Lvl").alignRight();
         table.column("Version");
-        table.column(new Col(getNameHeader()) {
-            @Override
-            protected String cut(String value, int size) {
-                if (showLocation && value.length() > size) {
-                    String[] parts = value.split("/");
-                    String cut = "";
-                    int c = parts[0].length() + 4;
-                    for (int idx = parts.length - 1; idx > 0; idx--) {
-                        if (cut.length() + c + parts[idx].length() + 1 < size) {
-                            cut = "/" + parts[idx] + cut;
-                        } else {
-                            break;
+
+        if (!dontShowName) {
+            table.column("Name");
+        }
+
+        if (showLocation) {
+            table.column(new Col("Location") {
+                @Override
+                protected String cut(String value, int size) {
+                    if (showLocation && value.length() > size) {
+                        String[] parts = value.split("/");
+                        String cut = "";
+                        int c = parts[0].length() + 4;
+                        for (int idx = parts.length - 1; idx > 0; idx--) {
+                            if (cut.length() + c + parts[idx].length() + 1 < size) {
+                                cut = "/" + parts[idx] + cut;
+                            } else {
+                                break;
+                            }
                         }
+                        cut = parts[0] + "/..." + cut;
+                        return cut;
+                    } else {
+                        return super.cut(value, size);
                     }
-                    cut = parts[0] + "/..." + cut;
-                    return cut;
-                } else {
-                    return super.cut(value, size);
                 }
-            }
-        });
+            });
+        }
+        if (showSymbolic) {
+            table.column("Symbolic name");
+        }
+        if (showUpdate) {
+            table.column("Update location");
+        }
+        if (showRevisions) {
+            table.column("Revisions");
+        }
 
         for (Bundle bundle : bundles) {
             BundleInfo info = this.bundleService.getInfo(bundle);
             if (info.getStartLevel() >= bundleLevelThreshold) {
-                String name = getNameToShow(info) + printFragments(info) + printHosts(info);
                 String version = info.getVersion();
-                table.addRow().addContent(info.getBundleId(), getStateString(info.getState()), 
-                        info.getStartLevel(), version, name);
+                ArrayList<Object> rowData = new ArrayList<>();
+                rowData.add(info.getBundleId());
+                rowData.add(getStateString(info.getState()));
+                rowData.add(info.getStartLevel());
+                rowData.add(version);
+                if (!dontShowName) {
+                    String bundleName = (info.getName() == null) ? info.getSymbolicName() : info.getName();
+                    bundleName = (bundleName == null) ? info.getUpdateLocation() : bundleName;
+                    String name = bundleName + printFragments(info) + printHosts(info);
+                    rowData.add(name);
+                }
+                if (showLocation) {
+                    rowData.add(info.getUpdateLocation());
+                }
+                if (showSymbolic) {
+                    rowData.add(info.getSymbolicName() == null ? "<no symbolic name>" : info.getSymbolicName());
+                }
+                if (showUpdate) {
+                    rowData.add(info.getUpdateLocation());
+                }
+                if (showRevisions) {
+                    rowData.add(info.getRevisions());
+                }
+                Row row = table.addRow();
+                row.addContent(rowData);
             }
         }
         table.print(System.out, !noFormat);
         return null;
-    }
-
-    private String getNameHeader() {
-        String msg = "Name";
-        if (showLocation) {
-            msg = "Location";
-        } else if (showSymbolic) {
-            msg = "Symbolic name";
-        } else if (showUpdate) {
-            msg = "Update location";
-        } else if (showRevisions) {
-            msg = "Revisions";
-        }
-        return msg;
     }
 
     private void determineBundleLevelThreshold() {
@@ -175,28 +205,6 @@ public class List extends BundlesCommand {
 
     private String getStateString(BundleState state) {
         return (state == null) ? "" : state.toString();
-    }
-
-    /**
-     * Overwrite the default value is the user specifically requested to display
-     * one or the other.
-     * 
-     * @param info
-     * @return
-     */
-    private String getNameToShow(BundleInfo info) {
-        if (showLocation) {
-            return info.getUpdateLocation();
-        } else if (showSymbolic) {
-            return info.getSymbolicName() == null ? "<no symbolic name>" : info.getSymbolicName();
-        } else if (showUpdate) {
-            return info.getUpdateLocation();
-        } else if (showRevisions) {
-            return info.getRevisions();
-        } else {
-            String name = (info.getName() == null) ? info.getSymbolicName() : info.getName();
-            return (name == null) ? info.getUpdateLocation() : name;
-        }
     }
 
 }
