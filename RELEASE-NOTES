@@ -36,7 +36,6 @@
     * [KARAF-4476] - Upgrade to Aries Blueprint Core 1.6.1
     * [KARAF-4477] - Upgrade to Pax URL 2.4.7
     * [KARAF-4491] - Upgrade to Pax Web 3.2.9
-    * [KARAF-4556] - Upgrade to Aries Blueprint CM 1.0.9
 
 ** Improvement
     * [KARAF-4084] - Only one flag could be used in list command
