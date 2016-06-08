@@ -16,8 +16,9 @@
 #    limitations under the License.
 #
 
-DIRNAME=`dirname "$0"`
-PROGNAME=`basename "$0"`
+REALNAME=`realpath -e "$0"`
+DIRNAME=`dirname "$REALNAME"`
+PROGNAME=`basename "$REALNAME"`
 
 #
 # Sourcing environment settings for karaf similar to tomcats setenv
