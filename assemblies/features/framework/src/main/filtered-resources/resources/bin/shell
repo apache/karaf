@@ -162,7 +162,7 @@ setupNativePath() {
 }
 
 pathCanonical() {
-    local dst="${1}"
+    dst="${1}"
     while [ -h "${dst}" ] ; do
         ls=`ls -ld "${dst}"`
         link=`expr "$ls" : '.*-> \(.*\)$'`
@@ -172,8 +172,8 @@ pathCanonical() {
             dst="`dirname "${dst}"`/$link"
         fi
     done
-    local bas=`basename "${dst}"`
-    local dir=`dirname "${dst}"`
+    bas=`basename "${dst}"`
+    dir=`dirname "${dst}"`
     if [ "$bas" != "$dir" ]; then
         dst="`pathCanonical "$dir"`/$bas"
     fi
