@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -30,12 +33,11 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.felix.utils.properties.Properties;
-
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.info.ServerInfo;
 import org.apache.karaf.main.lock.Lock;
 import org.apache.karaf.main.lock.LockCallBack;
@@ -320,6 +322,37 @@ public class Main {
             new StartupListener(LOG, framework.getBundleContext());
         }
         monitor();
+        registerSignalHandler();
+    }
+
+    private void registerSignalHandler() {
+        if (!Boolean.valueOf(System.getProperty("karaf.handle.sigterm", "true"))) {
+            return;
+        }
+
+        try {
+            final Class<?> signalClass = Class.forName("sun.misc.Signal");
+            final Class<?> signalHandlerClass = Class.forName("sun.misc.SignalHandler");
+
+            Object signalHandler = Proxy.newProxyInstance(getClass().getClassLoader(),
+                new Class<?>[] {
+                    signalHandlerClass
+                },
+                new InvocationHandler() {
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        Main.this.destroy();
+                        return null;
+                    }
+                }
+            );
+
+            signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(
+                null,
+                signalClass.getConstructor(String.class).newInstance("TERM"),
+                signalHandler
+            );
+        } catch (Exception e) {
+        }
     }
 
     private void monitor() {
