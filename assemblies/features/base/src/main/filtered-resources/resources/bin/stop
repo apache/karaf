@@ -16,8 +16,12 @@
 #    limitations under the License.
 #
 
-DIRNAME=`dirname "$0"`
-PROGNAME=`basename "$0"`
+REALNAME=`readlink -e "$0" > /dev/null 2>&1`
+if [ $? != 0 ]; then
+    REALNAME=$0
+fi
+DIRNAME=$(dirname "${REALNAME}")
+PROGNAME=$(basename "${REALNAME}")
 
 #
 # Sourcing environment settings for karaf similar to tomcats setenv 
