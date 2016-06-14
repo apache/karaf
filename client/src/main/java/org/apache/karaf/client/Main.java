@@ -25,9 +25,10 @@ import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.KeyPair;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -49,12 +50,10 @@ import org.apache.sshd.client.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.PtyCapableChannelSession;
 import org.apache.sshd.client.future.ConnectFuture;
-import org.apache.sshd.client.kex.ECDHP256;
-import org.apache.sshd.client.kex.ECDHP384;
-import org.apache.sshd.client.kex.ECDHP521;
 import org.apache.sshd.common.*;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.Buffer;
+import org.apache.sshd.common.util.SecurityUtils;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
 
@@ -94,15 +93,7 @@ public class Main {
         int exitStatus = 0;
         try {
             SshBuilder.ClientBuilder clientBuilder = SshBuilder.client();
-            clientBuilder.keyExchangeFactories(Arrays.<NamedFactory<KeyExchange>>asList(
-                     new ECDHP256.Factory(),
-                     new ECDHP256.Factory(),
-                     new ECDHP384.Factory(),
-                     new ECDHP384.Factory(),
-                     new ECDHP521.Factory(),
-                     new ECDHP521.Factory()
-                     )
-                );
+            clientBuilder.keyExchangeFactories(getKexFactories());
 
             client = clientBuilder.build();
             setupAgent(config.getUser(), config.getKeyFile(), client);
@@ -250,6 +241,20 @@ public class Main {
             }
         }
         System.exit(exitStatus);
+    }
+
+    private static List<NamedFactory<KeyExchange>> getKexFactories() {
+        List<NamedFactory<KeyExchange>> list = new ArrayList<>();
+        if (SecurityUtils.hasEcc()) {
+            list.add(new org.apache.sshd.client.kex.ECDHP521.Factory());
+            list.add(new org.apache.sshd.client.kex.ECDHP384.Factory());
+            list.add(new org.apache.sshd.client.kex.ECDHP256.Factory());
+        }
+        list.add(new org.apache.sshd.client.kex.FixedDHGEX256.Factory());
+        list.add(new org.apache.sshd.client.kex.FixedDHGEX.Factory());
+        list.add(new org.apache.sshd.client.kex.DHG14.Factory());
+        list.add(new org.apache.sshd.client.kex.DHG1.Factory());
+        return list;
     }
 
     private static int getFlag(TerminalLineSettings settings, PtyMode mode) {
