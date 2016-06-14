@@ -101,8 +101,8 @@
             new = admin
             java = admin
         </config>
+        <bundle dependency="true" start-level="30">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:jline/jline/${jline.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.jledit/core/${jledit.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/${project.version}</bundle>
     </feature>

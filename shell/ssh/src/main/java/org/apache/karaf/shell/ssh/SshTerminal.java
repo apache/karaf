@@ -18,53 +18,164 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.apache.karaf.shell.api.console.Signal;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.EnumSet;
+import java.util.Map;
+
+import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
-import org.apache.karaf.shell.support.terminal.SignalSupport;
 import org.apache.sshd.common.channel.PtyMode;
 import org.apache.sshd.server.Environment;
+import org.jline.terminal.Attributes.ControlChar;
+import org.jline.terminal.Attributes.InputFlag;
+import org.jline.terminal.Attributes.LocalFlag;
+import org.jline.terminal.Attributes.OutputFlag;
+import org.jline.terminal.Size;
+import org.jline.terminal.impl.ExternalTerminal;
 
-public class SshTerminal extends SignalSupport implements Terminal {
+public class SshTerminal extends ExternalTerminal implements Terminal {
 
     private Environment environment;
-    private boolean echo;
 
-    public SshTerminal(Environment environment) {
+    public SshTerminal(Environment environment, InputStream input, OutputStream output) throws IOException {
+        super("Karaf SSH terminal",
+              environment.getEnv().get(Environment.ENV_TERM),
+              input,
+              output,
+              "UTF-8");
         this.environment = environment;
-        this.environment.addSignalListener(new org.apache.sshd.server.SignalListener() {
-            @Override
-            public void signal(org.apache.sshd.server.Signal signal) {
-                SshTerminal.this.signal(Signal.WINCH);
+        this.environment.addSignalListener(this::handleSignal);
+        for (Map.Entry<PtyMode, Integer> e : environment.getPtyModes().entrySet()) {
+            switch (e.getKey()) {
+                case VINTR:
+                    attributes.setControlChar(ControlChar.VINTR, e.getValue());
+                    break;
+                case VQUIT:
+                    attributes.setControlChar(ControlChar.VQUIT, e.getValue());
+                    break;
+                case VERASE:
+                    attributes.setControlChar(ControlChar.VERASE, e.getValue());
+                    break;
+                case VKILL:
+                    attributes.setControlChar(ControlChar.VKILL, e.getValue());
+                    break;
+                case VEOF:
+                    attributes.setControlChar(ControlChar.VEOF, e.getValue());
+                    break;
+                case VEOL:
+                    attributes.setControlChar(ControlChar.VEOL, e.getValue());
+                    break;
+                case VEOL2:
+                    attributes.setControlChar(ControlChar.VEOL2, e.getValue());
+                    break;
+                case VSTART:
+                    attributes.setControlChar(ControlChar.VSTART, e.getValue());
+                    break;
+                case VSTOP:
+                    attributes.setControlChar(ControlChar.VSTOP, e.getValue());
+                    break;
+                case VSUSP:
+                    attributes.setControlChar(ControlChar.VSUSP, e.getValue());
+                    break;
+                case VDSUSP:
+                    attributes.setControlChar(ControlChar.VDSUSP, e.getValue());
+                    break;
+                case VREPRINT:
+                    attributes.setControlChar(ControlChar.VREPRINT, e.getValue());
+                    break;
+                case VWERASE:
+                    attributes.setControlChar(ControlChar.VWERASE, e.getValue());
+                    break;
+                case VLNEXT:
+                    attributes.setControlChar(ControlChar.VLNEXT, e.getValue());
+                    break;
+                case VSTATUS:
+                    attributes.setControlChar(ControlChar.VSTATUS, e.getValue());
+                    break;
+                case VDISCARD:
+                    attributes.setControlChar(ControlChar.VDISCARD, e.getValue());
+                    break;
+                case ECHO:
+                    attributes.setLocalFlag(LocalFlag.ECHO, e.getValue() != 0);
+                    break;
+                case ICANON:
+                    attributes.setLocalFlag(LocalFlag.ICANON, e.getValue() != 0);
+                    break;
+                case ISIG:
+                    attributes.setLocalFlag(LocalFlag.ISIG, e.getValue() != 0);
+                    break;
+                case ICRNL:
+                    attributes.setInputFlag(InputFlag.ICRNL, e.getValue() != 0);
+                    break;
+                case INLCR:
+                    attributes.setInputFlag(InputFlag.INLCR, e.getValue() != 0);
+                    break;
+                case IGNCR:
+                    attributes.setInputFlag(InputFlag.IGNCR, e.getValue() != 0);
+                    break;
+                case OCRNL:
+                    attributes.setOutputFlag(OutputFlag.OCRNL, e.getValue() != 0);
+                    break;
+                case ONLCR:
+                    attributes.setOutputFlag(OutputFlag.ONLCR, e.getValue() != 0);
+                    break;
+                case ONLRET:
+                    attributes.setOutputFlag(OutputFlag.ONLRET, e.getValue() != 0);
+                    break;
+                case OPOST:
+                    attributes.setOutputFlag(OutputFlag.OPOST, e.getValue() != 0);
+                    break;
             }
-        }, org.apache.sshd.server.Signal.WINCH);
-        this.echo = environment.getPtyModes().containsKey(PtyMode.ECHO);
+        }
     }
 
-    @Override
-    public String getType() {
-        return environment.getEnv().get(Environment.ENV_TERM);
+    protected void handleSignal(org.apache.sshd.server.Signal signal) {
+        if (signal == org.apache.sshd.server.Signal.INT) {
+            raise(Signal.INT);
+        } else if (signal == org.apache.sshd.server.Signal.QUIT) {
+            raise(Signal.QUIT);
+        } else if (signal == org.apache.sshd.server.Signal.TSTP) {
+            raise(Signal.TSTP);
+        } else if (signal == org.apache.sshd.server.Signal.CONT) {
+            raise(Signal.CONT);
+        } else if (signal == org.apache.sshd.server.Signal.WINCH) {
+            int w = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
+            int h = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
+            setSize(new Size(w, h));
+            raise(Signal.WINCH);
+        }
     }
 
     @Override
     public int getWidth() {
-        int width = 0;
-        try {
-            width = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
-        } catch (Throwable t) {
-            // Ignore
-        }
-        return width > 0 ? width : 80;
+        return size.getColumns();
     }
 
     @Override
     public int getHeight() {
-        int height = 0;
-        try {
-            height = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
-        } catch (Throwable t) {
-            // Ignore
-        }
-        return height > 0 ? height : 24;
+        return size.getRows();
+    }
+
+    @Override
+    public void addSignalListener(SignalListener listener) {
+        // TODO:JLINE
+    }
+
+    @Override
+    public void addSignalListener(SignalListener listener, org.apache.karaf.shell.api.console.Signal... signal) {
+        // TODO:JLINE
+    }
+
+    @Override
+    public void addSignalListener(SignalListener listener, EnumSet<org.apache.karaf.shell.api.console.Signal> signals) {
+        // TODO:JLINE
+    }
+
+    @Override
+    public void removeSignalListener(SignalListener listener) {
+        // TODO:JLINE
     }
 
     @Override
@@ -74,16 +185,12 @@ public class SshTerminal extends SignalSupport implements Terminal {
 
     @Override
     public boolean isEchoEnabled() {
-        return echo;
+        return echo();
     }
 
     @Override
     public void setEchoEnabled(boolean enabled) {
-        echo = enabled;
-    }
-
-    public Environment getEnvironment() {
-        return environment;
+        echo(enabled);
     }
 
 }

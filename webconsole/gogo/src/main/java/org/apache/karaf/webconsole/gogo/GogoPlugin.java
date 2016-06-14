@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
@@ -183,13 +184,15 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
                 in = new PipedOutputStream();
                 out = new PipedInputStream();
-                PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
+                InputStream input = new PipedInputStream(in);
+                OutputStream output = new PipedOutputStream(out);
+                PrintStream pipedOut = new PrintStream(output, true);
                 
                 Session session = sessionFactory.create(
-                        new PipedInputStream(in),
+                        input,
                         pipedOut,
                         pipedOut,
-                        new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
+                        new WebTerminal(TERM_WIDTH, TERM_HEIGHT, input, pipedOut),
                         null,
                         null);
                 new Thread(session, "Karaf web console user " + getCurrentUserName()).start();

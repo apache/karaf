@@ -53,8 +53,7 @@ public class FileCompleter implements Completer
     private static final boolean OS_IS_WINDOWS = isWindows();
     
     public static boolean isWindows() {
-        return (OS.indexOf("win") >= 0);
-
+        return OS.contains("win");
     }
 
     public int complete(final Session session, CommandLine commandLine, final List<String> candidates) {

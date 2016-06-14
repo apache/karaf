@@ -34,6 +34,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
@@ -51,8 +52,8 @@ public class ArgumentCompleter implements Completer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArgumentCompleter.class);
 
     final ActionCommand command;
-    final Completer commandCompleter;
-    final Completer optionsCompleter;
+    final CandidateCompleter commandCompleter;
+    final CandidateCompleter optionsCompleter;
     final List<Completer> argsCompleters;
     final Map<String, Completer> optionalCompleters;
     final Map<Option, Field> fields = new HashMap<>();
@@ -66,7 +67,10 @@ public class ArgumentCompleter implements Completer {
         // Command name completer
         Command cmd = actionClass.getAnnotation(Command.class);
         String[] names = scoped || Session.SCOPE_GLOBAL.equals(cmd.scope()) ? new String[] { cmd.name() } : new String[] { cmd.name(), cmd.scope() + ":" + cmd.name() };
-        commandCompleter = new StringsCompleter(names);
+        commandCompleter = new CandidateCompleter();
+        for (String name : names) {
+            commandCompleter.addCandidate(name, cmd.description(), actionClass.getName());
+        }
         // Build options completer
         for (Class<?> type = actionClass; type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {
@@ -94,8 +98,15 @@ public class ArgumentCompleter implements Completer {
         }
         options.put(HelpOption.HELP.name(), HelpOption.HELP);
 
+        optionsCompleter = new CandidateCompleter();
+        for (Map.Entry<String, Option> entry : options.entrySet()) {
+            optionsCompleter.addCandidate(
+                    entry.getKey(),
+                    entry.getValue().description(),
+                    actionClass.getName() + "/" + entry.getValue().name());
+        }
+
         argsCompleters = new ArrayList<>();
-        optionsCompleter = new StringsCompleter(options.keySet());
 
         boolean multi = false;
         for (int key = 0; key < arguments.size(); key++) {
@@ -187,7 +198,17 @@ public class ArgumentCompleter implements Completer {
         return completer;
     }
 
-    public int complete(Session session, final CommandLine list, final List<String> candidates) {
+    public int complete(Session session, final CommandLine commandLine, final List<String> candidates) {
+        List<Candidate> cands = new ArrayList<>();
+        completeCandidates(session, commandLine, cands);
+        for (Candidate cand : cands) {
+            candidates.add(cand.value());
+        }
+        return 0;
+    }
+
+    @Override
+    public void completeCandidates(Session session, final CommandLine list, List<Candidate> candidates) {
         int argIndex = list.getCursorArgumentIndex();
 
         Completer comp = null;
@@ -197,11 +218,11 @@ public class ArgumentCompleter implements Completer {
         if (index < argIndex) {
             // Verify scope
             if (!Session.SCOPE_GLOBAL.equals(command.getScope()) && !session.resolveCommand(args[index]).equals(command.getScope() + ":" + command.getName())) {
-                return -1;
+                return;
             }
             // Verify command name
             if (!verifyCompleter(session, commandCompleter, args[index])) {
-                return -1;
+                return;
             }
             index++;
         } else {
@@ -211,11 +232,11 @@ public class ArgumentCompleter implements Completer {
         if (comp == null) {
             while (index < argIndex && args[index].startsWith("-")) {
                 if (!verifyCompleter(session, optionsCompleter, args[index])) {
-                    return -1;
+                    return;
                 }
                 Option option = options.get(args[index]);
                 if (option == null) {
-                    return -1;
+                    return;
                 }
                 Field field = fields.get(option);
                 if (field != null && field.getType() != boolean.class && field.getType() != Boolean.class) {
@@ -229,7 +250,7 @@ public class ArgumentCompleter implements Completer {
                 comp = optionsCompleter;
             }
         }
-        //Now check for if last Option has a completer
+        // Now check for if last Option has a completer
         int lastAgurmentIndex = argIndex - 1;
         if (lastAgurmentIndex >= 1) {
             Option lastOption = options.get(args[lastAgurmentIndex]);
@@ -265,7 +286,7 @@ public class ArgumentCompleter implements Completer {
             while (index < argIndex) {
                 Completer sub = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
                 if (!verifyCompleter(session, sub, args[index])) {
-                    return -1;
+                    return;
                 }
                 index++;
                 indexArg++;
@@ -273,11 +294,13 @@ public class ArgumentCompleter implements Completer {
             comp = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
         }
 
-        int pos = comp.complete(session, list, candidates);
+        comp.completeCandidates(session, list, candidates);
 
+        /* TODO:JLINE
         if (pos == -1) {
             return -1;
         }
+        */
 
         /**
          *  Special case: when completing in the middle of a line, and the
@@ -290,6 +313,7 @@ public class ArgumentCompleter implements Completer {
          *  and hit TAB, we want "foo bar" instead of "foo  bar".
          */
 
+        /* TODO:JLINE
         String buffer = list.getBuffer();
         int cursor = list.getBufferPosition();
         if ((buffer != null) && (cursor != buffer.length()) && isDelimiter(buffer, cursor)) {
@@ -306,11 +330,13 @@ public class ArgumentCompleter implements Completer {
         }
 
         return pos;
+        */
     }
 
     protected boolean verifyCompleter(Session session, Completer completer, String argument) {
-        List<String> candidates = new ArrayList<>();
-        return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
+        List<Candidate> candidates = new ArrayList<>();
+        completer.completeCandidates(session, new ArgumentCommandLine(argument, argument.length()), candidates);
+        return !candidates.isEmpty();
     }
 
     /**
@@ -341,6 +367,37 @@ public class ArgumentCompleter implements Completer {
      */
     public boolean isDelimiterChar(String buffer, int pos) {
         return Character.isWhitespace(buffer.charAt(pos));
+    }
+
+    static class CandidateCompleter implements Completer {
+
+        private final List<Candidate> candidates = new ArrayList<>();
+
+        public void addCandidate(String value, String desc) {
+            addCandidate(value, desc, null);
+        }
+
+        public void addCandidate(String value, String desc, String key) {
+            if (desc.endsWith(".")) {
+                desc = desc.substring(0, desc.length() - 1);
+            }
+            candidates.add(new Candidate(value, value, null, desc, null, key, true));
+        }
+
+        @Override
+        public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+            List<Candidate> cands = new ArrayList<>();
+            completeCandidates(session, commandLine, cands);
+            for (Candidate cand : cands) {
+                candidates.add(cand.value());
+            }
+            return 0;
+        }
+
+        @Override
+        public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
+            candidates.addAll(this.candidates);
+        }
     }
 
 }

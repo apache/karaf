@@ -21,9 +21,9 @@ package org.apache.karaf.shell.support.completers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
@@ -42,55 +42,22 @@ public class AggregateCompleter implements Completer
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public int complete(final Session session, final CommandLine commandLine, final List candidates) {
+    public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
+        List<Candidate> cands = new ArrayList<>();
+        completeCandidates(session, commandLine, cands);
+        for (Candidate cand : cands) {
+            candidates.add(cand.value());
+        }
+        return 0;
+    }
+
+    @Override
+    public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
         // buffer could be null
         assert candidates != null;
-
-        List<Completion> completions = new ArrayList<Completion>(completers.size());
-
-        // Run each completer, saving its completion results
-        int max = -1;
         for (Completer completer : completers) {
-            Completion completion = new Completion(candidates);
-            completion.complete(session, completer, commandLine);
-
-            // Compute the max cursor position
-            if (completion.cursor > max) {
-                completions.clear();
-                completions.add(completion);
-                max = completion.cursor;
-            } else if (completion.cursor == max) {
-                completions.add(completion);
-            }
-        }
-
-        // Append candidates from completions which have the same cursor position as max
-        for (Completion completion : completions) {
-            // noinspection unchecked
-            candidates.addAll(completion.candidates);
-        }
-
-        return max;
-    }
-
-    private class Completion
-    {
-        public final List<String> candidates;
-
-        public int cursor;
-
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public Completion(final List candidates) {
-            assert candidates != null;
-
-            // noinspection unchecked
-            this.candidates = new LinkedList<String>(candidates);
-        }
-
-        public void complete(final Session session, final Completer completer, final CommandLine commandLine) {
-            assert completer != null;
-
-            this.cursor = completer.complete(session, commandLine, candidates);
+            completer.completeCandidates(session, commandLine, candidates);
         }
     }
+
 }

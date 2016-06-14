@@ -38,7 +38,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.support.ShellUtil;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleCapability;
@@ -174,22 +174,21 @@ public class Headers extends BundlesCommand {
         formatters.put(REQUIRE_BUNDLE_ATTRIB, new ClauseFormatter() {
             public void pre(Clause clause, StringBuilder output) {
                 boolean isSatisfied = checkBundle(clause.getName(), clause.getAttribute("bundle-version"));
-                Ansi.ansi(output).fg(isSatisfied ? Ansi.Color.DEFAULT : Ansi.Color.RED).a("");
+                output.append(isSatisfied ? SimpleAnsi.COLOR_DEFAULT : SimpleAnsi.COLOR_RED);
             }
             public void post(Clause clause, StringBuilder output) {
-                Ansi.ansi(output).reset().a("");
+                output.append(SimpleAnsi.RESET);
             }
         });
         formatters.put(IMPORT_PACKAGES_ATTRIB, new ClauseFormatter() {
             public void pre(Clause clause, StringBuilder output) {
                 boolean isSatisfied = checkPackage(clause.getName(), clause.getAttribute("version"));
                 boolean isOptional = "optional".equals(clause.getDirective("resolution"));
-                Ansi.ansi(output).fg(isSatisfied ? Ansi.Color.DEFAULT : Ansi.Color.RED)
-                                 .a(isSatisfied || isOptional ? Ansi.Attribute.INTENSITY_BOLD_OFF : Ansi.Attribute.INTENSITY_BOLD)
-                                 .a("");
+                output.append(isSatisfied ? SimpleAnsi.COLOR_DEFAULT : SimpleAnsi.COLOR_RED);
+                output.append(isSatisfied || isOptional ? SimpleAnsi.INTENSITY_NORMAL : SimpleAnsi.INTENSITY_BOLD);
             }
             public void post(Clause clause, StringBuilder output) {
-                Ansi.ansi(output).reset().a("");
+                output.append(SimpleAnsi.RESET);
             }
         });
 

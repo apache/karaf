@@ -37,8 +37,8 @@
         <module>commands</module>
         <module>core</module>
         <module>console</module>
-        <module>ssh</module>
         <module>table</module>
+        <module>ssh</module>
     </modules>
 
 </project>

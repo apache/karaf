@@ -18,14 +18,11 @@
  */
 package org.apache.karaf.shell.commands.ansi;
 
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.Ansi.Color;
-
 @Deprecated
 public class SimpleAnsi {
-    public static String COLOR_RED = Ansi.ansi().fg(Color.RED).toString();
-    public static String COLOR_DEFAULT = Ansi.ansi().fg(Color.DEFAULT).toString();
-    
-    public static String INTENSITY_BOLD = Ansi.ansi().bold().toString();
-    public static String INTENSITY_NORMAL = Ansi.ansi().boldOff().toString();
+    public static String COLOR_RED = "\u001b[31m";
+    public static String COLOR_DEFAULT = "\u001b[39m";
+
+    public static String INTENSITY_BOLD = "\u001b[1m";
+    public static String INTENSITY_NORMAL = "\u001b[22m";
 }

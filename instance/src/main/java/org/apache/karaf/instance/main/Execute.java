@@ -41,7 +41,6 @@ import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.impl.action.command.DefaultActionPreparator;
-import org.fusesource.jansi.AnsiConsole;
 
 public class Execute {
     static Class<? extends Action> x = CreateCommand.class;
@@ -87,8 +86,6 @@ public class Execute {
     private static final String PROP_KARAF_OPTS = "karaf.opts";
 
     public static void main(String[] args) throws Exception {
-        AnsiConsole.systemInstall();
-
         if (args.length == 0) {
             listCommands();
             exit(0);

@@ -34,8 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jline.UnixTerminal;
-import jline.internal.TerminalLineSettings;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -64,6 +62,12 @@ import org.apache.sshd.common.util.SecurityUtils;
 import org.apache.sshd.common.util.buffer.Buffer;
 import org.apache.sshd.common.util.io.NoCloseInputStream;
 import org.apache.sshd.common.util.io.NoCloseOutputStream;
+import org.jline.terminal.Attributes;
+import org.jline.terminal.Attributes.ControlChar;
+import org.jline.terminal.Attributes.InputFlag;
+import org.jline.terminal.Attributes.LocalFlag;
+import org.jline.terminal.Attributes.OutputFlag;
+import org.jline.terminal.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +106,6 @@ public class SshAction implements Action {
 
     @Override
     public Object execute() throws Exception {
-
         if (hostname.indexOf('@') >= 0) {
             if (username == null) {
                 username = hostname.substring(0, hostname.indexOf('@'));
@@ -153,7 +156,6 @@ public class SshAction implements Action {
             }
             @Override
             public void serverVersionInfo(ClientSession session, List<String> lines) {
-
             }
             @Override
             public String getUpdatedPassword(ClientSession session, String prompt, String lang) {
@@ -194,110 +196,83 @@ public class SshAction implements Action {
                     channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                 } else if (session.getTerminal() != null) {
                     final ChannelShell channel = sshSession.createShellChannel();
-                    final jline.Terminal jlineTerminal = (jline.Terminal) session.get(".jline.terminal");
-                    if (jlineTerminal instanceof UnixTerminal) {
-                        TerminalLineSettings settings = ((UnixTerminal) jlineTerminal).getSettings();
+                    final org.jline.terminal.Terminal jlineTerminal = (org.jline.terminal.Terminal) session.get(".jline.terminal");
+                    Attributes attributes = jlineTerminal.enterRawMode();
+                    try {
                         Map<PtyMode, Integer> modes = new HashMap<>();
                         // Control chars
-                        modes.put(PtyMode.VINTR, settings.getProperty("vintr"));
-                        modes.put(PtyMode.VQUIT, settings.getProperty("vquit"));
-                        modes.put(PtyMode.VERASE, settings.getProperty("verase"));
-                        modes.put(PtyMode.VKILL, settings.getProperty("vkill"));
-                        modes.put(PtyMode.VEOF, settings.getProperty("veof"));
-                        modes.put(PtyMode.VEOL, settings.getProperty("veol"));
-                        modes.put(PtyMode.VEOL2, settings.getProperty("veol2"));
-                        modes.put(PtyMode.VSTART, settings.getProperty("vstart"));
-                        modes.put(PtyMode.VSTOP, settings.getProperty("vstop"));
-                        modes.put(PtyMode.VSUSP, settings.getProperty("vsusp"));
-                        modes.put(PtyMode.VDSUSP, settings.getProperty("vdusp"));
-                        modes.put(PtyMode.VREPRINT, settings.getProperty("vreprint"));
-                        modes.put(PtyMode.VWERASE, settings.getProperty("vwerase"));
-                        modes.put(PtyMode.VLNEXT, settings.getProperty("vlnext"));
-                        modes.put(PtyMode.VSTATUS, settings.getProperty("vstatus"));
-                        modes.put(PtyMode.VDISCARD, settings.getProperty("vdiscard"));
+                        modes.put(PtyMode.VINTR, attributes.getControlChar(ControlChar.VINTR));
+                        modes.put(PtyMode.VQUIT, attributes.getControlChar(ControlChar.VQUIT));
+                        modes.put(PtyMode.VERASE, attributes.getControlChar(ControlChar.VERASE));
+                        modes.put(PtyMode.VKILL, attributes.getControlChar(ControlChar.VKILL));
+                        modes.put(PtyMode.VEOF, attributes.getControlChar(ControlChar.VEOF));
+                        modes.put(PtyMode.VEOL, attributes.getControlChar(ControlChar.VEOL));
+                        modes.put(PtyMode.VEOL2, attributes.getControlChar(ControlChar.VEOL2));
+                        modes.put(PtyMode.VSTART, attributes.getControlChar(ControlChar.VSTART));
+                        modes.put(PtyMode.VSTOP, attributes.getControlChar(ControlChar.VSTOP));
+                        modes.put(PtyMode.VSUSP, attributes.getControlChar(ControlChar.VSUSP));
+                        modes.put(PtyMode.VDSUSP, attributes.getControlChar(ControlChar.VDSUSP));
+                        modes.put(PtyMode.VREPRINT, attributes.getControlChar(ControlChar.VREPRINT));
+                        modes.put(PtyMode.VWERASE, attributes.getControlChar(ControlChar.VWERASE));
+                        modes.put(PtyMode.VLNEXT, attributes.getControlChar(ControlChar.VLNEXT));
+                        modes.put(PtyMode.VSTATUS, attributes.getControlChar(ControlChar.VSTATUS));
+                        modes.put(PtyMode.VDISCARD, attributes.getControlChar(ControlChar.VDISCARD));
                         // Input flags
-                        modes.put(PtyMode.IGNPAR, getFlag(settings, PtyMode.IGNPAR));
-                        modes.put(PtyMode.PARMRK, getFlag(settings, PtyMode.PARMRK));
-                        modes.put(PtyMode.INPCK, getFlag(settings, PtyMode.INPCK));
-                        modes.put(PtyMode.ISTRIP, getFlag(settings, PtyMode.ISTRIP));
-                        modes.put(PtyMode.INLCR, getFlag(settings, PtyMode.INLCR));
-                        modes.put(PtyMode.IGNCR, getFlag(settings, PtyMode.IGNCR));
-                        modes.put(PtyMode.ICRNL, getFlag(settings, PtyMode.ICRNL));
-                        modes.put(PtyMode.IXON, getFlag(settings, PtyMode.IXON));
-                        modes.put(PtyMode.IXANY, getFlag(settings, PtyMode.IXANY));
-                        modes.put(PtyMode.IXOFF, getFlag(settings, PtyMode.IXOFF));
+                        modes.put(PtyMode.IGNPAR, getFlag(attributes, InputFlag.IGNPAR));
+                        modes.put(PtyMode.PARMRK, getFlag(attributes, InputFlag.PARMRK));
+                        modes.put(PtyMode.INPCK, getFlag(attributes, InputFlag.INPCK));
+                        modes.put(PtyMode.ISTRIP, getFlag(attributes, InputFlag.ISTRIP));
+                        modes.put(PtyMode.INLCR, getFlag(attributes, InputFlag.INLCR));
+                        modes.put(PtyMode.IGNCR, getFlag(attributes, InputFlag.IGNCR));
+                        modes.put(PtyMode.ICRNL, getFlag(attributes, InputFlag.ICRNL));
+                        modes.put(PtyMode.IXON, getFlag(attributes, InputFlag.IXON));
+                        modes.put(PtyMode.IXANY, getFlag(attributes, InputFlag.IXANY));
+                        modes.put(PtyMode.IXOFF, getFlag(attributes, InputFlag.IXOFF));
                         // Local flags
-                        modes.put(PtyMode.ISIG, getFlag(settings, PtyMode.ISIG));
-                        modes.put(PtyMode.ICANON, getFlag(settings, PtyMode.ICANON));
-                        modes.put(PtyMode.ECHO, getFlag(settings, PtyMode.ECHO));
-                        modes.put(PtyMode.ECHOE, getFlag(settings, PtyMode.ECHOE));
-                        modes.put(PtyMode.ECHOK, getFlag(settings, PtyMode.ECHOK));
-                        modes.put(PtyMode.ECHONL, getFlag(settings, PtyMode.ECHONL));
-                        modes.put(PtyMode.NOFLSH, getFlag(settings, PtyMode.NOFLSH));
-                        modes.put(PtyMode.TOSTOP, getFlag(settings, PtyMode.TOSTOP));
-                        modes.put(PtyMode.IEXTEN, getFlag(settings, PtyMode.IEXTEN));
+                        modes.put(PtyMode.ISIG, getFlag(attributes, LocalFlag.ISIG));
+                        modes.put(PtyMode.ICANON, getFlag(attributes, LocalFlag.ICANON));
+                        modes.put(PtyMode.ECHO, getFlag(attributes, LocalFlag.ECHO));
+                        modes.put(PtyMode.ECHOE, getFlag(attributes, LocalFlag.ECHOE));
+                        modes.put(PtyMode.ECHOK, getFlag(attributes, LocalFlag.ECHOK));
+                        modes.put(PtyMode.ECHONL, getFlag(attributes, LocalFlag.ECHONL));
+                        modes.put(PtyMode.NOFLSH, getFlag(attributes, LocalFlag.NOFLSH));
+                        modes.put(PtyMode.TOSTOP, getFlag(attributes, LocalFlag.TOSTOP));
+                        modes.put(PtyMode.IEXTEN, getFlag(attributes, LocalFlag.IEXTEN));
                         // Output flags
-                        modes.put(PtyMode.OPOST, getFlag(settings, PtyMode.OPOST));
-                        modes.put(PtyMode.OLCUC, getFlag(settings, PtyMode.OLCUC));
-                        modes.put(PtyMode.ONLCR, getFlag(settings, PtyMode.ONLCR));
-                        modes.put(PtyMode.OCRNL, getFlag(settings, PtyMode.OCRNL));
-                        modes.put(PtyMode.ONOCR, getFlag(settings, PtyMode.ONOCR));
-                        modes.put(PtyMode.ONLRET, getFlag(settings, PtyMode.ONLRET));
+                        modes.put(PtyMode.OPOST, getFlag(attributes, OutputFlag.OPOST));
+                        modes.put(PtyMode.ONLCR, getFlag(attributes, OutputFlag.ONLCR));
+                        modes.put(PtyMode.OCRNL, getFlag(attributes, OutputFlag.OCRNL));
+                        modes.put(PtyMode.ONOCR, getFlag(attributes, OutputFlag.ONOCR));
+                        modes.put(PtyMode.ONLRET, getFlag(attributes, OutputFlag.ONLRET));
                         channel.setPtyModes(modes);
-                    } else if (session.getTerminal() instanceof SshTerminal) {
-                        channel.setPtyModes(((SshTerminal) session.getTerminal()).getEnvironment().getPtyModes());
-                    } else {
-                        channel.setupSensibleDefaultPty();
-                    }
-                    channel.setPtyColumns(getTermWidth());
-                    channel.setPtyLines(getTermHeight());
-                    channel.setAgentForwarding(true);
-                    channel.setEnv("TERM", session.getTerminal().getType());
-                    Object ctype = session.get("LC_CTYPE");
-                    if (ctype != null) {
-                        channel.setEnv("LC_CTYPE", ctype.toString());
-                    }
-                    channel.setIn(new NoCloseInputStream(System.in));
-                    channel.setOut(new NoCloseOutputStream(System.out));
-                    channel.setErr(new NoCloseOutputStream(System.err));
-                    channel.open().verify();
-                    SignalListener signalListener = new SignalListener() {
-                        @Override
-                        public void signal(Signal signal) {
+                        channel.setPtyColumns(getTermWidth());
+                        channel.setPtyLines(getTermHeight());
+                        channel.setAgentForwarding(true);
+                        channel.setEnv("TERM", session.getTerminal().getType());
+                        Object ctype = session.get("LC_CTYPE");
+                        if (ctype != null) {
+                            channel.setEnv("LC_CTYPE", ctype.toString());
+                        }
+                        channel.setIn(new NoCloseInputStream(System.in));
+                        channel.setOut(new NoCloseOutputStream(System.out));
+                        channel.setErr(new NoCloseOutputStream(System.err));
+                        channel.open().verify();
+                        SignalListener signalListener = signal -> {
                             try {
-                                // Ugly hack to force the jline unix terminal to retrieve the width/height of the terminal
-                                // because results are cached for 1 second.
-                                try {
-                                    Field field = jlineTerminal.getClass().getSuperclass().getDeclaredField("settings");
-                                    field.setAccessible(true);
-                                    Object settings = field.get(jlineTerminal);
-                                    field = settings.getClass().getDeclaredField("configLastFetched");
-                                    field.setAccessible(true);
-                                    field.setLong(settings, 0L);
-                                } catch (Throwable t) {
-                                    // Ignore
-                                }
-                                // TODO: replace with PtyCapableChannelSession#sendWindowChange
-                                org.apache.sshd.common.session.Session sshSession = channel.getSession();
-                                Buffer buffer = sshSession.createBuffer(SshConstants.SSH_MSG_CHANNEL_REQUEST);
-                                buffer.putInt(channel.getRecipient());
-                                buffer.putString("window-change");
-                                buffer.putBoolean(false);
-                                buffer.putInt(session.getTerminal().getWidth());
-                                buffer.putInt(session.getTerminal().getHeight());
-                                buffer.putInt(0);
-                                buffer.putInt(0);
-                                sshSession.writePacket(buffer);
+                                Size size = jlineTerminal.getSize();
+                                channel.sendWindowChange(size.getColumns(), size.getRows());
                             } catch (IOException e) {
                                 // Ignore
                             }
+                        };
+                        session.getTerminal().addSignalListener(signalListener, Signal.WINCH);
+                        try {
+                            channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
+                        } finally {
+                            session.getTerminal().removeSignalListener(signalListener);
                         }
-                    };
-                    session.getTerminal().addSignalListener(signalListener, Signal.WINCH);
-                    try {
-                        channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                     } finally {
-                        session.getTerminal().removeSignalListener(signalListener);
+                        jlineTerminal.setAttributes(attributes);
                     }
                 } else {
                     throw new IllegalStateException("No terminal for interactive ssh session");
@@ -313,10 +288,18 @@ public class SshAction implements Action {
         return null;
     }
 
-    private int getFlag(TerminalLineSettings settings, PtyMode mode) {
-        String name = mode.toString().toLowerCase();
-        return (settings.getPropertyAsString(name) != null) ? 1 : 0;
+    private static int getFlag(Attributes attributes, InputFlag flag) {
+        return attributes.getInputFlag(flag) ? 1 : 0;
     }
+
+    private static int getFlag(Attributes attributes, OutputFlag flag) {
+        return attributes.getOutputFlag(flag) ? 1 : 0;
+    }
+
+    private static int getFlag(Attributes attributes, LocalFlag flag) {
+        return attributes.getLocalFlag(flag) ? 1 : 0;
+    }
+
 
     private int getTermWidth() {
         Terminal term = session.getTerminal();

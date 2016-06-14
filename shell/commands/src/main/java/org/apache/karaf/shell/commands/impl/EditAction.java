@@ -16,27 +16,18 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.UUID;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.regex.Pattern;
 
-import jline.TerminalSupport;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.util.StreamUtils;
-import org.jledit.ConsoleEditor;
-import org.jledit.EditorFactory;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.Terminal;
 
 @Command(scope = "shell", name = "edit", description = "Calls a text editor.")
 @Service
@@ -44,137 +35,21 @@ public class EditAction implements Action {
 
     private final Pattern URL_PATTERN = Pattern.compile("[^: ]+:[^ ]+");
 
-    @Argument(index = 0, name = "url", description = "The url of the resource to edit.", required = true, multiValued = false)
-    private String url;
+    @Argument(index = 0, name = "url", description = "The url of the resource to edit.", required = true, multiValued = true)
+    private List<String> urls;
 
     @Reference
-    private EditorFactory editorFactory;
+    Session session;
 
     @Reference
     Terminal terminal;
 
     @Override
     public Object execute() throws Exception {
-        URLConnection connection = null;
-        InputStream is = null;
-        OutputStream os = null;
-        String path = null;
-        boolean isLocal = true;
-        String sourceUrl = url;
-
-        // if no url format found, assume file url
-        if (!URL_PATTERN.matcher(sourceUrl).matches()) {
-            File f = new File(sourceUrl);
-            sourceUrl = "file://" + f.getAbsolutePath();
-        }
-
-        URL u = new URL(sourceUrl);
-        // if its not a file url
-        if (!u.getProtocol().equals("file")) {
-            isLocal = false;
-
-            try {
-                connection = u.openConnection();
-                is = connection.getInputStream();
-            } catch (IOException ex) {
-                System.out.println("Failed to open " + sourceUrl + " for reading.");
-                return null;
-            }
-            try {
-                os = connection.getOutputStream();
-            } catch (IOException ex) {
-                System.out.println("Failed to open " + sourceUrl + " for writing.");
-                return null;
-            }
-
-            // copy the resource to a tmp location
-            FileOutputStream fos = null;
-            try {
-                path = System.getProperty("karaf.data") + "/editor/" + UUID.randomUUID();
-                File f = new File(path);
-                if (!f.exists()) {
-                    if (!f.getParentFile().exists()) {
-                        f.getParentFile().mkdirs();
-                    }
-                }
-
-                fos = new FileOutputStream(f);
-                StreamUtils.copy(is, fos);
-            } catch (Exception ex) {
-                System.out.println("Failed to copy resource from url:" + sourceUrl + " to tmp file: " + path + "  for editing.");
-            } finally {
-                StreamUtils.close(fos);
-            }
-        } else {
-            path = u.getFile();
-        }
-
-
-        File file = new File(path);
-        if (!file.exists()) {
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
-            }
-        }
-
-        // call the editor
-        ConsoleEditor editor = editorFactory.create(getTerminal());
-        editor.setTitle("Karaf");
-        editor.open(file.getAbsolutePath(), url);
-        editor.setOpenEnabled(false);
-        editor.start();
-
-        // if resource is not local, copy the resource back
-        if (!isLocal) {
-            FileInputStream fis = new FileInputStream(path);
-            try {
-                StreamUtils.copy(fis, os);
-            } finally {
-                StreamUtils.close(fis);
-            }
-        }
-
-        if (is != null) {
-            StreamUtils.close(is);
-        }
-
-        if (os != null) {
-            StreamUtils.close(os);
-        }
-
+        org.jline.terminal.Terminal terminal = (org.jline.terminal.Terminal) session.get(".jline.terminal");
+        Path pwd = Paths.get(System.getProperty("karaf.home"));
+        org.jline.builtins.Commands.nano(terminal, System.out, System.err, pwd,
+                urls.toArray(new String[urls.size()]));
         return null;
     }
-
-    /**
-     * Gets the {@link jline.Terminal} from the current session.
-     *
-     * @return
-     * @throws Exception
-     */
-    private jline.Terminal getTerminal() throws Exception {
-        try {
-            return (jline.Terminal) terminal.getClass().getMethod("getTerminal").invoke(terminal);
-        } catch (Throwable t) {
-            return new TerminalSupport(true) {
-                @Override
-                public int getWidth() {
-                    return terminal.getWidth();
-                }
-
-                @Override
-                public int getHeight() {
-                    return terminal.getHeight();
-                }
-            };
-        }
-    }
-
-    public EditorFactory getEditorFactory() {
-        return editorFactory;
-    }
-
-    public void setEditorFactory(EditorFactory editorFactory) {
-        this.editorFactory = editorFactory;
-    }
-
 }

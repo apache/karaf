@@ -16,16 +16,16 @@
  */
 package org.apache.karaf.features.command.completers;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 /**
  * Base completer for feature commands.
@@ -42,22 +42,33 @@ public abstract class FeatureCompleterSupport implements Completer {
         this.featuresService = featuresService;
     }
 
+    @Override
     public int complete(Session session, final CommandLine commandLine, final List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
+        List<Candidate> cands = new ArrayList<>();
+        completeCandidates(session, commandLine, cands);
+        for (Candidate cand : cands) {
+            candidates.add(cand.value());
+        }
+        return candidates.isEmpty() ? -1 : 0;
+    }
+
+    @Override
+    public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
         try {
             for (Feature feature : featuresService.listFeatures()) {
                 if (acceptsFeature(feature)) {
-                    add(delegate.getStrings(), feature);
+                    add(candidates, feature);
                 }
             }
         } catch (Exception e) {
             // Ignore
         }
-        return delegate.complete(session, commandLine, candidates);
     }
 
-    protected void add(SortedSet<String> candidates, Feature feature) {
-        candidates.add(feature.getName());
+    protected void add(List<Candidate> candidates, Feature feature) {
+        candidates.add(new Candidate(
+                feature.getName(), feature.getName(), null,
+                feature.getDescription(), null, null, true));
     }
 
     /**

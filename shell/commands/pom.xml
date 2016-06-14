@@ -43,10 +43,6 @@
             <artifactId>org.apache.karaf.shell.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jledit</groupId>
-            <artifactId>core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
@@ -110,9 +106,6 @@
                         <Bundle-Activator>
                             org.apache.karaf.shell.commands.impl.info.Activator
                         </Bundle-Activator>
-                        <Require-Capability>
-                            osgi.service;filter:="(objectClass=org.jledit.EditorFactory)";effective:=active
-                        </Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>

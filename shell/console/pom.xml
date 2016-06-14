@@ -48,6 +48,10 @@
             <artifactId>jline</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
@@ -145,7 +149,7 @@
                             org.apache.karaf.shell.core
                         </Fragment-Host>
                         <Import-Package>
-                            !org.apache.felix.gogo.runtime.*,
+                            !org.apache.felix.gogo.*,
                             !org.apache.karaf.shell.inject.impl,
                             org.osgi.service.event;resolution:=optional,
                             org.apache.karaf.branding;resolution:=optional,
@@ -171,9 +175,9 @@
                             org.apache.karaf.shell.inject;version=${project.version};-noimport:=true,
                         	org.apache.karaf.shell.util;version=${project.version};-noimport:=true,
                             org.apache.karaf.shell.util;version=2.3.0;-noimport:=true,
-                            org.apache.felix.gogo*;version=${felix.gogo.version};-noimport:=true,
-                            org.apache.felix.service.command;version=${felix.gogo.version};-noimport:=true,
-                            org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status;-noimport:=true
+                            org.apache.felix.gogo*;version=${felix.gogo.runtime.version};-noimport:=true,
+                            org.apache.felix.service.command;version=${felix.gogo.runtime.version};-noimport:=true,
+                            org.apache.felix.service.threadio;version=${felix.gogo.runtime.version};status=provisional;mandatory:=status;-noimport:=true
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.commands.ansi,
