@@ -44,12 +44,14 @@ public class ImportServiceTest extends KarafTestSupport {
             .set("Import-Service", "FooService")
             .set("Bundle-SymbolicName", BUNDLE1_NAME)
             .set("Bundle-Version", "1.0.0")
+            .set("Bundle-ManifestVersion", "2")
             .build();
         options.add(CoreOptions.streamBundle(testBundleImportService));
         InputStream testBundleRequireService = bundle()
             .set("Require-Capability", "osgi.service;effective:=active;filter:=\"(objectClass=FooService)\"")
             .set("Bundle-SymbolicName", BUNDLE2_NAME)
             .set("Bundle-Version", "1.0.0")
+            .set("Bundle-ManifestVersion", "2")
             .build();
         options.add(CoreOptions.streamBundle(testBundleRequireService));
         return options.toArray(new Option[] {});
