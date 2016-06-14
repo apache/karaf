@@ -19,13 +19,14 @@
 package org.apache.karaf.tooling.utils;
 
 import java.io.File;
-import java.util.Map;
+import java.util.Collection;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingRequest;
 
 /**
  * <p>An interface for accessing available Aether subsystem (Sonatype for Maven 3.0.x or Eclipse for Maven 3.1.x)</p>
@@ -35,7 +36,7 @@ import org.apache.maven.project.MavenProject;
  */
 public interface DependencyHelper {
 
-    public abstract Map<?, String> getLocalDependencies();
+    public abstract Collection<LocalDependency> getLocalDependencies();
 
     public abstract String getTreeListing();
 
@@ -45,19 +46,25 @@ public interface DependencyHelper {
 
     public abstract String getArtifactId(Object artifact);
 
+	public abstract String getBaseVersion(Object artifact);
+
+	public abstract String getGroupId(Object artifact);
+    
     public abstract String getClassifier(Object artifact);
 
     public abstract File resolve(Object artifact, Log log);
 
     public abstract File resolveById(String id, Log log) throws MojoFailureException;
 
+    public abstract void setRepositorySession(ProjectBuildingRequest request) throws MojoExecutionException;
+    
     /**
      * Convert a Maven <code>Artifact</code> into a PAX URL mvn format.
      *
      * @param artifact the Maven <code>Artifact</code>.
      * @return the corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier)
      */
-    public String artifactToMvn(Artifact artifact) throws MojoExecutionException;
+    public String artifactToMvn(Artifact artifact, String versionOrRange) throws MojoExecutionException;
 
     /**
      * Convert an Aether (Sonatype or Eclipse) artifact into a PAX URL mvn format.
@@ -65,7 +72,7 @@ public interface DependencyHelper {
      * @param object the Aether <code>org.sonatype|eclipse.aether.artifact.Artifact</code>.
      * @return the corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier)
      */
-    public String artifactToMvn(Object object) throws MojoExecutionException;
+    public String artifactToMvn(Object object, String versionOrRange) throws MojoExecutionException;
 
     public Artifact mvnToArtifact(String name) throws MojoExecutionException;
 
@@ -84,5 +91,4 @@ public interface DependencyHelper {
      * @return the filesystem path.
      */
     public String pathFromAether(String name) throws MojoExecutionException;
-
 }
