@@ -72,6 +72,7 @@
                         <Private-Package>
                             org.apache.karaf.client;
                             org.slf4j.impl;
+                            org.apache.sshd.client.kex;
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Include-Resource>
