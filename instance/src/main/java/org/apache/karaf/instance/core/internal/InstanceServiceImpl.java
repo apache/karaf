@@ -52,9 +52,9 @@ import org.apache.karaf.jpm.impl.ScriptUtils;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.ProfileService;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.locks.FileLockUtils;
-import org.fusesource.jansi.Ansi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -680,10 +680,10 @@ public class InstanceServiceImpl implements InstanceService {
                     throw new IllegalStateException("Instance not stopped");
                 }
 
-                println(Ansi.ansi().a("Renaming instance ")
-                        .a(Ansi.Attribute.INTENSITY_BOLD).a(oldName).a(Ansi.Attribute.RESET)
-                        .a(" to ")
-                        .a(Ansi.Attribute.INTENSITY_BOLD).a(newName).a(Ansi.Attribute.RESET).toString());
+                println("Renaming instance "
+                        + SimpleAnsi.INTENSITY_BOLD + oldName + SimpleAnsi.INTENSITY_NORMAL
+                        + " to "
+                        + SimpleAnsi.INTENSITY_BOLD + newName + SimpleAnsi.INTENSITY_NORMAL);
                 // rename directory
                 String oldLocationPath = instance.loc;
                 File oldLocation = new File(oldLocationPath);

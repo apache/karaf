@@ -18,25 +18,29 @@
  */
 package org.apache.karaf.shell.impl.console;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import jline.Terminal2;
-import jline.TerminalSupport;
-import jline.internal.InfoCmp;
 import org.apache.karaf.shell.api.console.Terminal;
+import org.jline.terminal.Attributes;
+import org.jline.terminal.Size;
+import org.jline.terminal.impl.AbstractTerminal;
+import org.jline.utils.InfoCmp;
+import org.jline.utils.InfoCmp.Capability;
+import org.jline.utils.NonBlockingReader;
 
-public class KarafTerminal extends TerminalSupport implements Terminal2 {
+public class KarafTerminal extends AbstractTerminal implements org.jline.terminal.Terminal {
 
     private final Terminal terminal;
-    private Set<String> bools = new HashSet<>();
-    private Map<String, Integer> ints = new HashMap<>();
-    private Map<String, String> strings = new HashMap<>();
 
-    public KarafTerminal(Terminal terminal) {
-        super(true);
+    public KarafTerminal(Terminal terminal) throws IOException {
+        super("Karaf", terminal.getType());
         this.terminal = terminal;
 
         String type = terminal.getType();
@@ -47,7 +51,7 @@ public class KarafTerminal extends TerminalSupport implements Terminal2 {
         try {
             caps = InfoCmp.getInfoCmp(type);
         } catch (Exception e) {
-            caps = InfoCmp.getAnsiCaps();
+            caps = InfoCmp.ANSI_CAPS;
         }
         try {
             InfoCmp.parseInfoCmp(caps, bools, ints, strings);
@@ -57,41 +61,49 @@ public class KarafTerminal extends TerminalSupport implements Terminal2 {
     }
 
     @Override
-    public synchronized boolean isAnsiSupported() {
-        return terminal.isAnsiSupported();
+    public NonBlockingReader reader() {
+        return null;
     }
 
     @Override
-    public int getWidth() {
-        return terminal.getWidth();
+    public PrintWriter writer() {
+        return null;
     }
 
     @Override
-    public int getHeight() {
-        return terminal.getHeight();
+    public InputStream input() {
+        return null;
     }
 
     @Override
-    public synchronized boolean isEchoEnabled() {
-        return false;
+    public OutputStream output() {
+        return null;
     }
 
     @Override
-    public synchronized void setEchoEnabled(boolean enabled) {
+    public Attributes getAttributes() {
+        return null;
     }
 
     @Override
-    public boolean getBooleanCapability(String capability) {
-        return bools.contains(capability);
+    public void setAttributes(Attributes attr) {
+
     }
 
     @Override
-    public Integer getNumericCapability(String capability) {
-        return ints.get(capability);
+    public Size getSize() {
+        int h = terminal.getHeight();
+        int w = terminal.getWidth();
+        return new Size(w, h);
     }
 
     @Override
-    public String getStringCapability(String capability) {
-        return strings.get(capability);
+    public void setSize(Size size) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void close() throws IOException {
     }
 }
+

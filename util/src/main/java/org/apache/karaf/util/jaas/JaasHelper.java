@@ -73,6 +73,14 @@ public class JaasHelper {
         return false;
     }
 
+    public static void runAs(final Subject subject,
+                             final Runnable action) {
+        if (action == null) {
+            throw new NullPointerException();
+        }
+        doAs(subject, (PrivilegedAction<Object>)(() -> { action.run(); return null; } ));
+    }
+
     public static <T> T doAs(final Subject subject,
                              final PrivilegedAction<T> action) {
         if (action == null) {

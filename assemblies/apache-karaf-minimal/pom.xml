@@ -139,6 +139,7 @@
                         <feature>service</feature>
                         <feature>system</feature>
                     </bootFeatures>
+                    <javase>1.8</javase>
                 </configuration>
             </plugin>
 

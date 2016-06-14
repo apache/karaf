@@ -26,7 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jline.TerminalSupport;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.ProfileService;
@@ -37,10 +36,6 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Terminal;
-import org.jledit.ConsoleEditor;
-import org.jledit.ContentManager;
-import org.jledit.EditorFactory;
-import org.jledit.simple.SimpleConsoleEditor;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -131,15 +126,7 @@ public class ProfileEdit implements Action {
     private ConfigurationAdmin configurationAdmin;
 
     @Reference
-    private EditorFactory editorFactory;
-
-    @Reference
     Terminal terminal;
-
-    public void init() {
-        // TODO: Karaf 2.4 has a bug to lookup this class, so we bind it manually - Karaf 2.4.1 should have this fixed
-        this.editorFactory.bind("simple", SimpleConsoleEditor.class);
-    }
 
     @Override
     public Object execute() throws Exception {
@@ -425,12 +412,14 @@ public class ProfileEdit implements Action {
         String id = profile.getId();
         String location = id + " " + resource;
         //Call the editor
+        /* TODO:JLINE
         ConsoleEditor editor = editorFactory.create("simple", getTerminal());
         editor.setTitle("Profile");
         editor.setOpenEnabled(false);
         editor.setContentManager(new DatastoreContentManager(profileService));
         editor.open(location, id);
         editor.start();
+        */
     }
 
     public void updatedDelimitedList(Map<String, String> map, String key, String value, String delimiter, boolean set, boolean delete, boolean append, boolean remove) {
@@ -515,8 +504,6 @@ public class ProfileEdit implements Action {
     }
 
     /**
-     * Gets the {@link jline.Terminal} from the current session.
-     */
     private jline.Terminal getTerminal() throws Exception {
         try {
             return (jline.Terminal) terminal.getClass().getMethod("getTerminal").invoke(terminal);
@@ -535,10 +522,6 @@ public class ProfileEdit implements Action {
         }
     }
 
-    private Map<String, String> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
-        return builder.getConfiguration(pid);
-    }
-
     static class DatastoreContentManager implements ContentManager {
 
         private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -549,9 +532,6 @@ public class ProfileEdit implements Action {
             this.profileService = profileService;
         }
 
-        /**
-         * Loads content from the specified location.
-         */
         @Override
         public String load(String location) throws IOException {
             try {
@@ -569,9 +549,6 @@ public class ProfileEdit implements Action {
             }
         }
 
-        /**
-         * Saves content to the specified location.
-         */
         @Override
         public boolean save(String content, String location) {
             try {
@@ -591,20 +568,20 @@ public class ProfileEdit implements Action {
             return true;
         }
 
-        /**
-         * Saves the {@link String} content to the specified location using the specified {@link java.nio.charset.Charset}.
-         */
         @Override
         public boolean save(String content, Charset charset, String location) {
             return save(content, location);
         }
 
-        /**
-         * Detect the Charset of the content in the specified location.
-         */
         @Override
         public Charset detectCharset(String location) {
             return UTF_8;
         }
     }
+        */
+
+    private Map<String, String> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
+        return builder.getConfiguration(pid);
+    }
+
 }

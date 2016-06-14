@@ -16,23 +16,52 @@
  */
 package org.apache.karaf.webconsole.gogo;
 
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.io.OutputStream;
+ import java.util.EnumSet;
+
+ import org.apache.karaf.shell.api.console.Signal;
+ import org.apache.karaf.shell.api.console.SignalListener;
  import org.apache.karaf.shell.api.console.Terminal;
- import org.apache.karaf.shell.support.terminal.SignalSupport;
+ import org.jline.terminal.impl.ExternalTerminal;
 
-public class WebTerminal extends SignalSupport implements Terminal {
+public class WebTerminal extends ExternalTerminal implements Terminal {
 
-    private int width;
-    private int height;
-    private boolean echo = true;
-
-    public WebTerminal(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public WebTerminal(int width, int height, InputStream input, OutputStream output) throws IOException {
+        super("Karaf Web Terminal", "ansi", input, output, "UTF-8");
+        size.setColumns(width);
+        size.setRows(height);
     }
 
     @Override
-    public String getType() {
-        return "ansi";
+    public int getWidth() {
+        return size.getColumns();
+    }
+
+    @Override
+    public int getHeight() {
+        return size.getRows();
+    }
+
+    @Override
+    public void addSignalListener(SignalListener listener) {
+        // TODO:JLINE
+    }
+
+    @Override
+    public void addSignalListener(SignalListener listener, org.apache.karaf.shell.api.console.Signal... signal) {
+        // TODO:JLINE
+    }
+
+    @Override
+    public void addSignalListener(SignalListener listener, EnumSet<org.apache.karaf.shell.api.console.Signal> signals) {
+        // TODO:JLINE
+    }
+
+    @Override
+    public void removeSignalListener(SignalListener listener) {
+        // TODO:JLINE
     }
 
     @Override
@@ -42,20 +71,12 @@ public class WebTerminal extends SignalSupport implements Terminal {
 
     @Override
     public boolean isEchoEnabled() {
-        return echo;
+        return echo();
     }
 
     @Override
     public void setEchoEnabled(boolean enabled) {
-        echo = enabled;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
+        echo(enabled);
     }
 
 }

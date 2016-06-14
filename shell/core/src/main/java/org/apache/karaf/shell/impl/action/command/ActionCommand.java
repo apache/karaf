@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Parsing;
+import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
@@ -114,6 +115,14 @@ public class ActionCommand implements org.apache.karaf.shell.api.console.Command
                 return ((Completer) service).complete(session, commandLine, candidates);
             }
             return -1;
+        }
+
+        @Override
+        public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
+            Object service = session.getRegistry().getService(clazz);
+            if (service instanceof Completer) {
+                ((Completer) service).completeCandidates(session, commandLine, candidates);
+            }
         }
     }
 

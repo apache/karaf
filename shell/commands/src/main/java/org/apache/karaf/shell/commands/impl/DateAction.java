@@ -49,56 +49,83 @@ public class DateAction implements Action {
             }
         }
         if (format == null) {
-            System.out.println(d);
-        } else {
-            // transform Unix format to Java SimpleDateFormat (if required)
-            format = format.replaceAll("%a","EEE");
-            format = format.replaceAll("%A", "EEEEEEE");
-            format = format.replaceAll("%b", "MMM");
-            format = format.replaceAll("%B", "MMMMMMM");
-            format = format.replaceAll("%c", "MMM EEE d HH:mm:ss yyyy");
-            format = format.replaceAll("%C","yy");
-            format = format.replaceAll("%d", "dd");
-            format = format.replaceAll("%D", "MM/dd/yy");
-            format = format.replaceAll("%e", "dd");
-            format = format.replaceAll("%F", "yyyy-MM-dd");
-            format = format.replaceAll("%g", "YY");
-            format = format.replaceAll("%G", "YYYY");
-            format = format.replaceAll("%h", "MMM");
-            format = format.replaceAll("%H", "HH");
-            format = format.replaceAll("%I", "hh");
-            format = format.replaceAll("%j", "DDD");
-            format = format.replaceAll("%k", "HH");
-            format = format.replaceAll("%l", "hh");
-            format = format.replaceAll("%m", "MM");
-            format = format.replaceAll("%M", "mm");
-            format = format.replaceAll("%n", "\n");
-            format = format.replaceAll("%N", "S");
-            format = format.replaceAll("%p", "aa");
-            format = format.replaceAll("%P", "aa");
-            format = format.replaceAll("%r", "hh:mm:ss aa");
-            format = format.replaceAll("%R", "HH:mm");
-            format = format.replaceAll("%s", "S");
-            format = format.replaceAll("%S", "ss");
-            format = format.replaceAll("%t", "\t");
-            format = format.replaceAll("%T", "HH:mm:ss");
-            format = format.replaceAll("%u", "u");
-            format = format.replaceAll("%U", "w");
-            format = format.replaceAll("%V", "W");
-            format = format.replaceAll("%w", "u");
-            format = format.replaceAll("%W", "w");
-            format = format.replaceAll("%x", "MM/dd/yy");
-            format = format.replaceAll("%X", "HH:mm:ss");
-            format = format.replaceAll("%y", "yy");
-            format = format.replaceAll("%Y", "yyyy");
-            format = format.replaceAll("%z", "X");
-            format = format.replaceAll("%:z", "XXX");
-            format = format.replaceAll("%::z", "XXXX");
-            format = format.replaceAll("%:::z", "XXXX");
-            format = format.replaceAll("%Z", "z");
-            DateFormat df = new SimpleDateFormat(format);
-            System.out.println(df.format(d));
+            format = "%+";
         }
+        // transform Unix format to Java SimpleDateFormat (if required)
+        StringBuilder sb = new StringBuilder();
+        boolean quote = false;
+        for (int i = 0; i < format.length(); i++) {
+            char c = format.charAt(i);
+            if (c == '%') {
+                if (i + 1 < format.length()) {
+                    if (quote) {
+                        sb.append('\'');
+                        quote = false;
+                    }
+                    c = format.charAt(++i);
+                    switch (c) {
+                        case '+':
+                        case 'A': sb.append("MMM EEE d HH:mm:ss yyyy"); break;
+                        case 'a': sb.append("EEE"); break;
+                        case 'B': sb.append("MMMMMMM"); break;
+                        case 'b': sb.append("MMM"); break;
+                        case 'C': sb.append("yy"); break;
+                        case 'c': sb.append("MMM EEE d HH:mm:ss yyyy"); break;
+                        case 'D': sb.append("MM/dd/yy"); break;
+                        case 'd': sb.append("dd"); break;
+                        case 'e': sb.append("dd"); break;
+                        case 'F': sb.append("yyyy-MM-dd"); break;
+                        case 'G': sb.append("YYYY"); break;
+                        case 'g': sb.append("YY"); break;
+                        case 'H': sb.append("HH"); break;
+                        case 'h': sb.append("MMM"); break;
+                        case 'I': sb.append("hh"); break;
+                        case 'j': sb.append("DDD"); break;
+                        case 'k': sb.append("HH"); break;
+                        case 'l': sb.append("hh"); break;
+                        case 'M': sb.append("mm"); break;
+                        case 'm': sb.append("MM"); break;
+                        case 'N': sb.append("S"); break;
+                        case 'n': sb.append("\n"); break;
+                        case 'P': sb.append("aa"); break;
+                        case 'p': sb.append("aa"); break;
+                        case 'r': sb.append("hh:mm:ss aa"); break;
+                        case 'R': sb.append("HH:mm"); break;
+                        case 'S': sb.append("ss"); break;
+                        case 's': sb.append("S"); break;
+                        case 'T': sb.append("HH:mm:ss"); break;
+                        case 't': sb.append("\t"); break;
+                        case 'U': sb.append("w"); break;
+                        case 'u': sb.append("u"); break;
+                        case 'V': sb.append("W"); break;
+                        case 'v': sb.append("dd-MMM-yyyy"); break;
+                        case 'W': sb.append("w"); break;
+                        case 'w': sb.append("u"); break;
+                        case 'X': sb.append("HH:mm:ss"); break;
+                        case 'x': sb.append("MM/dd/yy"); break;
+                        case 'Y': sb.append("yyyy"); break;
+                        case 'y': sb.append("yy"); break;
+                        case 'Z': sb.append("z"); break;
+                        case 'z': sb.append("X"); break;
+                        case '%': sb.append("%"); break;
+                    }
+                } else {
+                    if (!quote) {
+                        sb.append('\'');
+                    }
+                    sb.append(c);
+                    sb.append('\'');
+                }
+            } else {
+                if ((c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z') && !quote) {
+                    sb.append('\'');
+                    quote = true;
+                }
+                sb.append(c);
+            }
+        }
+        DateFormat df = new SimpleDateFormat(sb.toString());
+        System.out.println(df.format(d));
         return null;
     }
 

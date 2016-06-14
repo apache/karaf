@@ -21,12 +21,9 @@ import java.util.Collection;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
-
-import static org.fusesource.jansi.Ansi.Attribute.INTENSITY_BOLD;
-import static org.fusesource.jansi.Ansi.Attribute.RESET;
-import static org.fusesource.jansi.Ansi.ansi;
 
 @Command(scope = "bundle", name = "classes", description = "Displays a list of classes/resources contained in the bundle")
 @Service
@@ -53,7 +50,7 @@ public class Classes extends BundlesCommand {
             }
             for (String resource:resources){
                 if (localResources.contains(resource)) {
-                    System.out.println(ansi().a(INTENSITY_BOLD).a(resource).a(RESET));
+                    System.out.println(SimpleAnsi.INTENSITY_BOLD + resource + SimpleAnsi.INTENSITY_NORMAL);
                 } else {
                     System.out.println(resource);
                 }

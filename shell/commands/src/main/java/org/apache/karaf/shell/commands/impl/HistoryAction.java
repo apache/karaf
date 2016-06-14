@@ -19,10 +19,10 @@ package org.apache.karaf.shell.commands.impl;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
-import org.apache.karaf.shell.api.console.History;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.api.console.History;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 
 /**
  * History command
@@ -39,19 +39,15 @@ public class HistoryAction implements Action {
 
     @Override
     public Object execute() throws Exception {
-        if (history != null && clear) {
-            history.clear();
-        }
-        
-        if (!clear) {
-            for (int index = history.first(); index <= history.last(); index++) {
-                System.out.println(
-                    Ansi.ansi()
-                        .a("  ")
-                        .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", index).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
-                        .a("  ")
-                        .a(history.get(index))
-                        .toString());
+        if (history != null) {
+            if (clear) {
+                history.clear();
+            } else {
+                for (int index = history.first(); index <= history.last(); index++) {
+                    System.out.println(
+                            "  " + SimpleAnsi.INTENSITY_BOLD + String.format("%3d", index) + SimpleAnsi.INTENSITY_NORMAL
+                                    + "  " + history.get(index));
+                }
             }
         }
         return null;

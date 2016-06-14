@@ -41,7 +41,7 @@ import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -214,9 +214,9 @@ public class InfoAction implements Action {
     }
 
     void printValue(String name, int pad, String value) {
-        System.out.println(Ansi.ansi().a("  ")
-                .a(Ansi.Attribute.INTENSITY_BOLD).a(name).a(spaces(pad - name.length())).a(Ansi.Attribute.RESET)
-                .a("   ").a(value).toString());
+        System.out.println(
+                "  " + SimpleAnsi.INTENSITY_BOLD + name + SimpleAnsi.INTENSITY_NORMAL
+                        + spaces(pad - name.length()) + "   ");
     }
 
     String spaces(int nb) {

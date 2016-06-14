@@ -22,9 +22,9 @@ import org.apache.karaf.shell.api.console.History;
 
 public class HistoryWrapper implements History {
 
-    private final jline.console.history.History history;
+    private final org.jline.reader.History history;
 
-    public HistoryWrapper(jline.console.history.History history) {
+    public HistoryWrapper(org.jline.reader.History history) {
         this.history = history;
     }
 

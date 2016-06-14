@@ -99,7 +99,7 @@ public class FeatureTest extends KarafTestSupport {
     public void repoAddRemoveCommandWithRegex() throws Exception {
         System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features"));
         assertContains("apache-karaf-cellar", executeCommand("feature:repo-list"));
-        System.out.println(executeCommand("feature:repo-remove .*apache-karaf-cellar.*"));
+        System.out.println(executeCommand("feature:repo-remove '.*apache-karaf-cellar.*'"));
         assertContainsNot("apache-karaf-cellar", executeCommand("feature:repo-list"));
     }
 
@@ -121,7 +121,7 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void repoRefreshCommand() throws Exception {
-        String refreshedRepo = executeCommand("feature:repo-refresh .*pax.*");
+        String refreshedRepo = executeCommand("feature:repo-refresh '.*pax.*'");
         assertContains("pax-cdi", refreshedRepo);
         assertContains("pax-web", refreshedRepo);
     }

@@ -22,6 +22,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.karaf.shell.api.console.Signal;
@@ -29,11 +30,7 @@ import org.apache.karaf.shell.api.console.SignalListener;
 
 public class SignalSupport {
 
-    private final Map<Signal, Set<SignalListener>> listeners;
-
-    public SignalSupport() {
-        listeners = new ConcurrentHashMap<>(3);
-    }
+    protected final ConcurrentMap<Signal, Set<SignalListener>> listeners = new ConcurrentHashMap<>(3);
 
     public void addSignalListener(SignalListener listener, Signal... signals) {
         if (signals == null) {
@@ -80,17 +77,6 @@ public class SignalSupport {
     }
 
     protected Set<SignalListener> getSignalListeners(Signal signal, boolean create) {
-        Set<SignalListener> ls = listeners.get(signal);
-        if (ls == null && create) {
-            synchronized (listeners) {
-                ls = listeners.get(signal);
-                if (ls == null) {
-                    ls = new CopyOnWriteArraySet<>();
-                    listeners.put(signal, ls);
-                }
-            }
-        }
-        // may be null in case create=false
-        return ls;
+        return listeners.compute(signal, (sig, lst) -> lst != null ? lst : create ? new CopyOnWriteArraySet<>() : null);
     }
 }

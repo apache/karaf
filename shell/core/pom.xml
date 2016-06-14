@@ -69,6 +69,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.gogo.jline</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -131,6 +136,8 @@
                         <Import-Package>
                             org.osgi.service.event;resolution:=optional,
                             org.apache.karaf.branding;resolution:=optional,
+                            !org.apache.felix.gogo.jline*,
+                            !org.apache.sshd.*,
                             *
                         </Import-Package>
                         <Export-Package>
@@ -147,6 +154,7 @@
                             org.apache.felix.utils.extender,
                             org.apache.felix.utils.manifest,
                             org.apache.felix.gogo.api,
+                            org.apache.felix.gogo.jline,
                             org.apache.felix.gogo.runtime,
                             org.apache.felix.gogo.runtime.threadio,
                             org.apache.felix.service.command,

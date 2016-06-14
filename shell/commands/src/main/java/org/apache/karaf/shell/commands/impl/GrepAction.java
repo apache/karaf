@@ -31,7 +31,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 
 
 @Command(scope = "shell", name="grep", description="Prints lines matching the given pattern.", detailedDescription="classpath:grep.txt")
@@ -128,20 +128,15 @@ public class GrepAction implements Action {
                         if (!invertMatch && color != ColorOption.never) {
                             int index = matcher2.start(0);
                             String prefix = line.substring(0,index);
-                            matcher2.appendReplacement(sb, Ansi.ansi()
-                                .bg(Ansi.Color.YELLOW)
-                                .fg(Ansi.Color.BLACK)
-                                .a(matcher2.group())
-                                 .reset()
-                                .a(lastEscapeSequence(prefix))
-                                .toString());
+                            matcher2.appendReplacement(sb,
+                                    "\u001b[33;40m" + matcher2.group() + "\u001b[39;49m" + lastEscapeSequence(prefix));
                         } else {
                             matcher2.appendReplacement(sb, matcher2.group());
                         }
                         nb++;
                     }
                     matcher2.appendTail(sb);
-                    sb.append(Ansi.ansi().reset().toString());
+                    sb.append(SimpleAnsi.RESET);
                     if (!count && lineNumber) {
                         lines.add(String.format("%6d  ", lineno) + sb.toString());
                     } else {
@@ -199,7 +194,7 @@ public class GrepAction implements Action {
      * @return
      */
     private String lastEscapeSequence(String str) {
-        String escapeSequence=Ansi.ansi().reset().toString();
+        String escapeSequence = SimpleAnsi.RESET;
         String escapePattern = "(\\\u001B\\[[0-9;]*[0-9]+m)+";
         Pattern pattern =  Pattern.compile(escapePattern);
         Matcher matcher = pattern.matcher(str);

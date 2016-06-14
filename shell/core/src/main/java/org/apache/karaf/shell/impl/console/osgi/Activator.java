@@ -27,7 +27,6 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.action.command.ManagerImpl;
 import org.apache.karaf.shell.impl.action.osgi.CommandExtender;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
-import org.apache.karaf.shell.impl.console.TerminalFactory;
 import org.apache.karaf.shell.impl.console.osgi.secured.SecuredSessionFactoryImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -49,7 +48,6 @@ public class Activator implements BundleActivator {
 
     private Closeable eventAdminListener;
 
-    private TerminalFactory terminalFactory;
     private LocalConsoleManager localConsoleManager;
 
     ServiceTracker<CommandLoggingFilter, CommandLoggingFilter> filterTracker;
@@ -64,7 +62,7 @@ public class Activator implements BundleActivator {
         sessionFactory.getCommandProcessor().addConstant(".context", context.getBundle(0).getBundleContext());
 
         final CopyOnWriteArraySet<CommandLoggingFilter> listeners = new CopyOnWriteArraySet<>();
-        filterTracker = new ServiceTracker<CommandLoggingFilter, CommandLoggingFilter>(
+        filterTracker = new ServiceTracker<>(
                 context, CommandLoggingFilter.class, new ServiceTrackerCustomizer<CommandLoggingFilter, CommandLoggingFilter>() {
             @Override
             public CommandLoggingFilter addingService(ServiceReference<CommandLoggingFilter> reference) {
@@ -104,8 +102,7 @@ public class Activator implements BundleActivator {
         actionExtender.start(context);
 
         if (Boolean.parseBoolean(context.getProperty(START_CONSOLE))) {
-            terminalFactory = new TerminalFactory();
-            localConsoleManager = new LocalConsoleManager(context, terminalFactory, sessionFactory);
+            localConsoleManager = new LocalConsoleManager(context, sessionFactory);
             localConsoleManager.start();
         }
     }
@@ -116,7 +113,6 @@ public class Activator implements BundleActivator {
         sessionFactoryRegistration.unregister();
         if (localConsoleManager != null) {
             localConsoleManager.stop();
-            terminalFactory.destroy();
         }
         sessionFactory.stop();
         actionExtender.stop(context);

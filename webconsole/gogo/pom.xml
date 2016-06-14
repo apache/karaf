@@ -83,6 +83,10 @@
             <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
         <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
@@ -122,7 +126,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            jline;version="[${jline.version}, ${jline.version}]",
 			                org.apache.felix.webconsole*;version="[3,5)",
                             *
                         </Import-Package>
