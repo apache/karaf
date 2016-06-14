@@ -22,11 +22,13 @@
 
   Changelog
   ---------
-
 ** Bug
     * [KARAF-4348] - [RBAC] Wildcard PIDs chosen before more specific ones
     * [KARAF-4429] - JaxB marshalling failure due to endorsed java.lang.Exception
     * [KARAF-4479] - Incorrect syntax in wrapper launch script karaf-service
+    * [KARAF-4502] - REGRESSION: using OpenJDK on CentOS 7 causes bin/client to fail with "Unable to negotiate key exchange for kex algorithms"
+    * [KARAF-4564] -  Can't start karaf using symbolic link
+    * [KARAF-4566] -  "karaf" script invokes /bin/sh but requires /bin/bash functions
 
 ** Dependency upgrade
     * [KARAF-4343] - Upgrade to Xalan 2.7.2_3
@@ -45,6 +47,8 @@
     * [KARAF-4523] - JMXSecurityMBean bulk canInvoke should be robust even if bulkQuery contains duplicate operations
     * [KARAF-4557] - Add config:property-get and getProperty operation on the ConfigMBean
 
+** Task
+    * [KARAF-4363] - ssh:sshd command shows default values twice
 
                     Apache Karaf 3.0.6
                     ==================
