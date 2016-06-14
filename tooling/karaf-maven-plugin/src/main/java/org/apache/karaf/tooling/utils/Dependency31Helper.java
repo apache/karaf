@@ -272,6 +272,16 @@ public class Dependency31Helper implements DependencyHelper {
     public boolean isArtifactAFeature(Object artifact) {
         return Dependency31Helper.isFeature((Artifact) artifact);
     }
+    
+	@Override
+	public String getBaseVersion(Object artifact) {
+		return ((Artifact) artifact).getBaseVersion();
+	}
+
+	@Override
+	public String getGroupId(Object artifact) {
+		return ((Artifact) artifact).getGroupId();
+	}
 
     @Override
     public String getArtifactId(Object artifact) {
@@ -335,21 +345,21 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     @Override
-    public String artifactToMvn(org.apache.maven.artifact.Artifact artifact) throws MojoExecutionException {
-        return this.artifactToMvn(toArtifact(artifact));
+    public String artifactToMvn(org.apache.maven.artifact.Artifact artifact, String versionOrRange) throws MojoExecutionException {
+        return this.artifactToMvn(toArtifact(artifact), versionOrRange);
     }
 
     @Override
-    public String artifactToMvn(Object _artifact) {
+    public String artifactToMvn(Object _artifact, String versionOrRange) {
         Artifact artifact = (Artifact) _artifact;
         String bundleName;
         if (artifact.getExtension().equals("jar") && MavenUtil.isEmpty(artifact.getClassifier())) {
-            bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
+            bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), versionOrRange);
         } else {
             if (MavenUtil.isEmpty(artifact.getClassifier())) {
-                bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getExtension());
+                bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), versionOrRange, artifact.getExtension());
             } else {
-                bundleName = String.format("mvn:%s/%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getExtension(), artifact.getClassifier());
+                bundleName = String.format("mvn:%s/%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), versionOrRange, artifact.getExtension(), artifact.getClassifier());
             }
         }
         return bundleName;

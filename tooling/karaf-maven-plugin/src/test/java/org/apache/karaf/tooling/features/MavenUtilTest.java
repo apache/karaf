@@ -83,17 +83,32 @@ public class MavenUtilTest {
     @Test
     public void testSonatypeArtifactToMvn() throws Exception {
         Dependency30Helper helper = new Dependency30Helper(null, null, null);
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT")));
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT")));
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT")));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT"), "1.0-SNAPSHOT"));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT"), "1.0-SNAPSHOT"));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT"), "1.0-SNAPSHOT"));
     }
 
     @Test
     public void testEclipseArtifactToMvn() throws Exception {
         Dependency31Helper helper = new Dependency31Helper(null, null, null);
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT")));
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT")));
-        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT")));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT"), "1.0-SNAPSHOT"));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/kar", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT"), "1.0-SNAPSHOT"));
+        assertEquals("mvn:org.foo/org.foo.bar/1.0-SNAPSHOT/xml/features", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT"), "1.0-SNAPSHOT"));
     }
 
+    @Test
+    public void testSonatypeArtifactToMvnWithRange() throws Exception {
+        Dependency30Helper helper = new Dependency30Helper(null, null, null);
+        assertEquals("mvn:org.foo/org.foo.bar/[1.0,2.0)", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT"), "[1.0,2.0)"));
+        assertEquals("mvn:org.foo/org.foo.bar/[1.0,2.0)/kar", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT"), "[1.0,2.0)"));
+        assertEquals("mvn:org.foo/org.foo.bar/[1.0,2.0)/xml/features", helper.artifactToMvn(new org.sonatype.aether.util.artifact.DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT"), "[1.0,2.0)"));
+    }
+
+    @Test
+    public void testEclipseArtifactToMvnWithRange() throws Exception {
+        Dependency31Helper helper = new Dependency31Helper(null, null, null);
+        assertEquals("mvn:org.foo/org.foo.bar/[1.0,2.0)", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:1.0-SNAPSHOT"), "[1.0,2.0)"));
+        assertEquals("mvn:org.foo/org.foo.bar/[1.0,2.0)/kar", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:kar:1.0-SNAPSHOT"), "[1.0,2.0)"));
+        assertEquals("mvn:org.foo/org.foo.bar/[1.0,2.0)/xml/features", helper.artifactToMvn(new org.eclipse.aether.artifact.DefaultArtifact("org.foo:org.foo.bar:xml:features:1.0-SNAPSHOT"), "[1.0,2.0)"));
+    }
 }

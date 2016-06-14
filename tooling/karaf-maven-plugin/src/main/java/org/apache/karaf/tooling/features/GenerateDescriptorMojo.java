@@ -221,6 +221,13 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
     @Parameter(defaultValue = "${project.artifactId}")
     private String primaryFeatureName;
+    
+    /**
+     * Flag indicating whether bundles should use the version range declared in the POM. If <code>false</code>,
+     * the actual version of the resolved artifacts will be used.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean useVersionRange;
 
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
@@ -277,6 +284,20 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
     }
 
+    private String getVersionOrRange(Object artifact) {
+    	String versionOrRange = dependencyHelper.getBaseVersion(artifact);
+    	if (useVersionRange) {
+    		for (final org.apache.maven.model.Dependency dependency : project.getDependencies()) {
+    			if (dependency.getGroupId().equals(dependencyHelper.getGroupId(artifact)) && 
+    					dependency.getArtifactId().equals(dependencyHelper.getArtifactId(artifact))) {
+    				versionOrRange = dependency.getVersion();
+    				break;
+    			}
+    		}
+    	}
+    	return versionOrRange;
+    }
+    
     /*
      * Write all project dependencies as feature
      */
@@ -323,7 +344,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
         if (includeProjectArtifact) {
             Bundle bundle = objectFactory.createBundle();
-            bundle.setLocation(this.dependencyHelper.artifactToMvn(project.getArtifact()));
+            bundle.setLocation(this.dependencyHelper.artifactToMvn(project.getArtifact(), project.getVersion()));
             if (startLevel != null) {
                 bundle.setStartLevel(startLevel);
             }
@@ -348,7 +369,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     features.getFeature().addAll(includedFeatures.getFeature());
                 }
             } else if (addBundlesToPrimaryFeature) {
-                String bundleName = this.dependencyHelper.artifactToMvn(artifact);
+                String bundleName = this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(artifact));
                 File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
                 Manifest manifest = getManifest(bundleFile);
 

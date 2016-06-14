@@ -45,6 +45,10 @@ public interface DependencyHelper {
 
     public abstract String getArtifactId(Object artifact);
 
+	public abstract String getBaseVersion(Object artifact);
+
+	public abstract String getGroupId(Object artifact);
+    
     public abstract String getClassifier(Object artifact);
 
     public abstract File resolve(Object artifact, Log log);
@@ -58,7 +62,7 @@ public interface DependencyHelper {
      * @return The corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier)
      * @throws MojoExecutionException If the plugin execution fails.
      */
-    public String artifactToMvn(Artifact artifact) throws MojoExecutionException;
+    public String artifactToMvn(Artifact artifact, String versionOrRange) throws MojoExecutionException;
 
     /**
      * Convert an Aether (Sonatype or Eclipse) artifact into a PAX URL mvn format.
@@ -67,7 +71,7 @@ public interface DependencyHelper {
      * @return The corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier).
      * @throws MojoExecutionException If the plugin execution fails.
      */
-    public String artifactToMvn(Object object) throws MojoExecutionException;
+    public String artifactToMvn(Object object, String versionOrRange) throws MojoExecutionException;
 
     public Artifact mvnToArtifact(String name) throws MojoExecutionException;
 
@@ -88,5 +92,4 @@ public interface DependencyHelper {
      * @throws MojoExecutionException If the plugin execution fails.
      */
     public String pathFromAether(String name) throws MojoExecutionException;
-
 }
