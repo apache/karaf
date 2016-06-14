@@ -20,10 +20,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -47,6 +44,7 @@ import org.apache.sshd.common.KeyExchange;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
+import org.apache.sshd.common.util.SecurityUtils;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
 
@@ -229,15 +227,7 @@ public class Main {
         int exitStatus = 0;
         try {
             SshBuilder.ClientBuilder clientBuilder = SshBuilder.client();
-            clientBuilder.keyExchangeFactories(Arrays.<NamedFactory<KeyExchange>>asList(
-                     new ECDHP256.Factory(),
-                     new ECDHP256.Factory(),
-                     new ECDHP384.Factory(),
-                     new ECDHP384.Factory(),
-                     new ECDHP521.Factory(),
-                     new ECDHP521.Factory()
-                     )
-                );
+            clientBuilder.keyExchangeFactories(getKexFactories());
 
             client = (SshClient)clientBuilder.build();
             setupAgent(user, client, keyFile);
@@ -343,6 +333,20 @@ public class Main {
             }
         }
         System.exit(exitStatus);
+    }
+
+    private static List<NamedFactory<KeyExchange>> getKexFactories() {
+        List<NamedFactory<KeyExchange>> list = new ArrayList<NamedFactory<KeyExchange>>();
+        if (SecurityUtils.hasEcc()) {
+            list.add(new org.apache.sshd.client.kex.ECDHP521.Factory());
+            list.add(new org.apache.sshd.client.kex.ECDHP384.Factory());
+            list.add(new org.apache.sshd.client.kex.ECDHP256.Factory());
+        }
+        list.add(new org.apache.sshd.client.kex.FixedDHGEX256.Factory());
+        list.add(new org.apache.sshd.client.kex.FixedDHGEX.Factory());
+        list.add(new org.apache.sshd.client.kex.DHG14.Factory());
+        list.add(new org.apache.sshd.client.kex.DHG1.Factory());
+        return list;
     }
 
     // tries a very basic variable substitution

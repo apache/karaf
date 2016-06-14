@@ -79,6 +79,7 @@
                             org.slf4j.spi;-split-package:=merge-first,
                             org.slf4j.helpers;-split-package:=merge-first,
                             org.slf4j.impl;-split-package:=merge-first,
+                            org.apache.sshd.client.kex;-split-package:=merge-first,
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Include-Resource>
