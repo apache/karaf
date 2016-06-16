@@ -49,6 +49,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
+import org.eclipse.aether.artifact.DefaultArtifact;
 import org.xml.sax.SAXException;
 
 import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
@@ -338,57 +339,82 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             }
             feature.getBundle().add(bundle);
         }
-        for (Map.Entry<?, String> entry : localDependencies.entrySet()) {
-            Object artifact = entry.getKey();
 
+        // First pass to look for features
+        // Track other features we depend on and their repositories (we track repositories instead of building them from
+        // the feature's Maven artifact to allow for multi-feature repositories)
+        // TODO Initialise the repositories from the existing feature file if any
+        Map<Dependency, Feature> otherFeatures = new HashMap<Dependency, Feature>();
+        Map<Feature, String> featureRepositories = new HashMap<Feature, String>();
+        for (Object artifact : localDependencies.keySet()) {
             if (excludedArtifactIds.contains(this.dependencyHelper.getArtifactId(artifact))) {
                 continue;
             }
 
-            if (this.dependencyHelper.isArtifactAFeature(artifact)) {
-                if (aggregateFeatures && FEATURE_CLASSIFIER.equals(this.dependencyHelper.getClassifier(artifact))) {
-                    File featuresFile = this.dependencyHelper.resolve(artifact, getLog());
-                    if (featuresFile == null || !featuresFile.exists()) {
-                        throw new MojoExecutionException("Cannot locate file for feature: " + artifact + " at " + featuresFile);
-                    }
-                    Features includedFeatures = readFeaturesFile(featuresFile);
-                    //TODO check for duplicates?
-                    features.getFeature().addAll(includedFeatures.getFeature());
-                }
-            } else if (addBundlesToPrimaryFeature) {
-                String bundleName = this.dependencyHelper.artifactToMvn(artifact);
-                File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
-                Manifest manifest = getManifest(bundleFile);
+            processFeatureArtifact(features, feature, otherFeatures, featureRepositories, artifact, true);
+        }
 
-                if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
-                    bundleName = "wrap:" + bundleName;
+        // Second pass to look for bundles
+        if (addBundlesToPrimaryFeature) {
+            for (Map.Entry<?, String> entry : localDependencies.entrySet()) {
+                Object artifact = entry.getKey();
+
+                if (excludedArtifactIds.contains(this.dependencyHelper.getArtifactId(artifact))) {
+                    continue;
                 }
 
-                Bundle bundle = null;
-                for (Bundle b : feature.getBundle()) {
-                    if (bundleName.equals(b.getLocation())) {
-                        bundle = b;
-                        break;
+                if (!this.dependencyHelper.isArtifactAFeature(artifact)) {
+                    String bundleName = this.dependencyHelper.artifactToMvn(artifact);
+                    File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
+                    Manifest manifest = getManifest(bundleFile);
+
+                    if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
+                        bundleName = "wrap:" + bundleName;
                     }
-                }
-                if (bundle == null) {
-                    bundle = objectFactory.createBundle();
-                    bundle.setLocation(bundleName);
-                    if (!"provided".equals(entry.getValue()) || !ignoreScopeProvided) {
-                        feature.getBundle().add(bundle);
+
+                    Bundle bundle = null;
+                    for (Bundle b : feature.getBundle()) {
+                        if (bundleName.equals(b.getLocation())) {
+                            bundle = b;
+                            break;
+                        }
                     }
-                }
-                if ("runtime".equals(entry.getValue())) {
-                    bundle.setDependency(true);
-                }
-                if (startLevel != null && bundle.getStartLevel() == 0) {
-                    bundle.setStartLevel(startLevel);
+                    if (bundle == null) {
+                        bundle = objectFactory.createBundle();
+                        bundle.setLocation(bundleName);
+                        // Check the features this feature depends on don't already contain the dependency
+                        // TODO Perhaps only for transitive dependencies?
+                        boolean includedTransitively =
+                                isBundleIncludedTransitively(feature, otherFeatures, bundle);
+                        if (!includedTransitively && (!"provided".equals(entry.getValue()) || !ignoreScopeProvided)) {
+                            feature.getBundle().add(bundle);
+                        }
+                    }
+                    if ("runtime".equals(entry.getValue())) {
+                        bundle.setDependency(true);
+                    }
+                    if (startLevel != null && bundle.getStartLevel() == 0) {
+                        bundle.setStartLevel(startLevel);
+                    }
                 }
             }
         }
 
         if ((!feature.getBundle().isEmpty() || !feature.getFeature().isEmpty()) && !features.getFeature().contains(feature)) {
             features.getFeature().add(feature);
+        }
+
+        // Add any missing repositories for the included features
+        for (Feature includedFeature : features.getFeature()) {
+            for (Dependency dependency : includedFeature.getFeature()) {
+                Feature dependedFeature = otherFeatures.get(dependency);
+                if (dependedFeature != null && !features.getFeature().contains(dependedFeature)) {
+                    String repository = featureRepositories.get(dependedFeature);
+                    if (repository != null && !features.getRepository().contains(repository)) {
+                        features.getRepository().add(repository);
+                    }
+                }
+            }
         }
 
         JaxbUtil.marshal(features, out);
@@ -398,6 +424,54 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             throw new MojoExecutionException("Features contents have changed", e);
         }
         getLogger().info("...done!");
+    }
+
+    private void processFeatureArtifact(Features features, Feature feature, Map<Dependency, Feature> otherFeatures,
+                                        Map<Feature, String> featureRepositories, Object artifact, boolean add)
+            throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
+        if (this.dependencyHelper.isArtifactAFeature(artifact) && FEATURE_CLASSIFIER.equals(
+                this.dependencyHelper.getClassifier(artifact))) {
+            File featuresFile = this.dependencyHelper.resolve(artifact, getLog());
+            if (featuresFile == null || !featuresFile.exists()) {
+                throw new MojoExecutionException(
+                        "Cannot locate file for feature: " + artifact + " at " + featuresFile);
+            }
+            Features includedFeatures = readFeaturesFile(featuresFile);
+            for (String repository : includedFeatures.getRepository()) {
+                processFeatureArtifact(features, feature, otherFeatures, featureRepositories,
+                        new DefaultArtifact(MavenUtil.mvnToAether(repository)), false);
+            }
+            for (Feature includedFeature : includedFeatures.getFeature()) {
+                Dependency dependency = new Dependency(includedFeature.getName(), includedFeature.getVersion());
+                // We musn't de-duplicate here, we may have seen a feature in !add mode
+                otherFeatures.put(dependency, includedFeature);
+                if (add) {
+                    if (!feature.getFeature().contains(dependency)) {
+                        feature.getFeature().add(dependency);
+                    }
+                    if (aggregateFeatures) {
+                        features.getFeature().add(includedFeature);
+                    }
+                }
+                if (!featureRepositories.containsKey(includedFeature)) {
+                    featureRepositories.put(includedFeature, this.dependencyHelper.artifactToMvn(artifact));
+                }
+            }
+        }
+    }
+
+    private boolean isBundleIncludedTransitively(Feature feature, Map<Dependency, Feature> otherFeatures,
+                                                 Bundle bundle) {
+        for (Dependency dependency : feature.getFeature()) {
+            Feature otherFeature = otherFeatures.get(dependency);
+            if (otherFeature != null) {
+                if (isBundleIncludedTransitively(otherFeature, otherFeatures,
+                        bundle) || otherFeature.getBundle().contains(bundle)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
