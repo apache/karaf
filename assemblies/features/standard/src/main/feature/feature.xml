@@ -542,6 +542,10 @@
             <condition>shell</condition>
             <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.command/${project.version}</bundle>
         </conditional>
+        <conditional>
+            <condition>bundle</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.state/${project.version}</bundle>
+        </conditional>
         <capability>
             osgi.service;effective:=active;objectClass=org.apache.felix.scr.ScrService,
             osgi.extender;osgi.extender="osgi.component";uses:="org.osgi.service.component";version:Version="1.2.1"

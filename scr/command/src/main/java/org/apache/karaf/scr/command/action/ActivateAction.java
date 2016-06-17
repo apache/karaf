@@ -16,15 +16,14 @@
  */
 package org.apache.karaf.scr.command.action;
 
-import org.apache.karaf.scr.command.completer.ActivateCompleter;
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
-import org.apache.karaf.scr.command.ScrUtils;
+import org.apache.karaf.scr.command.completer.ActivateCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
 /**
  * Activates the given component by supplying its component name.
@@ -38,12 +37,13 @@ public class ActivateAction extends ScrActionSupport {
     String name;
 
     @Override
-    protected Object doScrAction(ScrService scrService) throws Exception {
+    protected Object doScrAction(ServiceComponentRuntime serviceComponentRuntime) throws Exception {
         logger.debug("Activate Action");
         logger.debug("  Activating the Component: " + name);
-        Component[] components = scrService.getComponents(name);
-        for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
-            component.enable();
+        for (ComponentDescriptionDTO component : serviceComponentRuntime.getComponentDescriptionDTOs()) {
+            if (name.equals(component.name)) {
+                serviceComponentRuntime.enableComponent(component);
+            }
         }
         return null;
     }

@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.scr.command.completer;
 
-import org.apache.felix.scr.Component;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
 
 @Service
 public class DetailsCompleter extends ScrCompleterSupport {
@@ -26,10 +26,10 @@ public class DetailsCompleter extends ScrCompleterSupport {
      * Overrides the super method noted below. See super documentation for
      * details.
      * 
-     * @see org.apache.karaf.scr.command.completer.ScrCompleterSupport#availableComponent(org.apache.felix.scr.Component)
+     * @see org.apache.karaf.scr.command.completer.ScrCompleterSupport#availableComponent(ComponentConfigurationDTO)
      */
     @Override
-    public boolean availableComponent(Component component) throws Exception {
+    public boolean availableComponent(ComponentConfigurationDTO component) throws Exception {
         return (component != null);
     }
 

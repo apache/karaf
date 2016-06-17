@@ -16,9 +16,9 @@
  */
 package org.apache.karaf.scr.command.action;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.Reference;
-import org.apache.felix.scr.ScrService;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
 import org.apache.karaf.scr.command.completer.DetailsCompleter;
@@ -28,13 +28,14 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.dto.ServiceReferenceDTO;
 import org.osgi.service.component.ComponentConstants;
-
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
+import org.osgi.service.component.runtime.dto.ReferenceDTO;
+import org.osgi.service.component.runtime.dto.SatisfiedReferenceDTO;
+import org.osgi.service.component.runtime.dto.UnsatisfiedReferenceDTO;
 
 /**
  * Display the details associated with a given component by supplying its component name.
@@ -49,62 +50,76 @@ public class DetailsAction extends ScrActionSupport {
 
     @SuppressWarnings("rawtypes")
 	@Override
-    protected Object doScrAction(ScrService scrService) throws Exception {
+    protected Object doScrAction(ServiceComponentRuntime serviceComponentRuntime) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Executing the Details Action");
         }
         System.out.println(SimpleAnsi.INTENSITY_BOLD + "Component Details" + SimpleAnsi.INTENSITY_NORMAL);
-        Component[] components = scrService.getComponents(name);
-        for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
-            printDetail("  Name                : ", component.getName());
-            printDetail("  State               : ", ScrUtils.getState(component.getState()));
+        for (ComponentDescriptionDTO component : serviceComponentRuntime.getComponentDescriptionDTOs()) {
+            for (ComponentConfigurationDTO config : serviceComponentRuntime.getComponentConfigurationDTOs(component)) {
+                if (name.equals(component.name)) {
+                    printDetail("  Name                : ", component.name);
+                    printDetail("  State               : ", ScrUtils.getState(config.state));
 
-            Hashtable props = (Hashtable)component.getProperties();
-            Map map = new TreeMap(props);
-            if (!map.isEmpty()) {
-                System.out.println(SimpleAnsi.INTENSITY_BOLD + "  Properties          : " + SimpleAnsi.INTENSITY_NORMAL);
-                for (Object key : map.keySet()) {
-                    Object value = map.get(key);
-                    printDetail("    ", key + "=" + value);
-                }
-            }
-            Reference[] references = component.getReferences();
-            System.out.println(SimpleAnsi.INTENSITY_BOLD + "References" + SimpleAnsi.INTENSITY_NORMAL);
-
-            for (Reference reference : ScrUtils.emptyIfNull(Reference.class, references)) {
-                printDetail("  Reference           : ", reference.getName());
-                printDetail("    State             : ", (reference.isSatisfied()) ? "satisfied" : "unsatisfied");
-                printDetail("    Multiple          : ", (reference.isMultiple() ? "multiple" : "single" ));
-                printDetail("    Optional          : ", (reference.isOptional() ? "optional" : "mandatory" ));
-                printDetail("    Policy            : ", (reference.isStatic() ?  "static" : "dynamic" ));
-
-                // list bound services
-				ServiceReference[] boundRefs = reference.getServiceReferences();
-                for (ServiceReference serviceReference : ScrUtils.emptyIfNull(ServiceReference.class, boundRefs)) {
-                    final StringBuffer b = new StringBuffer();
-                    b.append("Bound Service ID ");
-                    b.append(serviceReference.getProperty(Constants.SERVICE_ID));
-
-                    String componentName = (String) serviceReference.getProperty(ComponentConstants.COMPONENT_NAME);
-                    if (componentName == null) {
-                        componentName = (String) serviceReference.getProperty(Constants.SERVICE_PID);
-                        if (componentName == null) {
-                            componentName = (String) serviceReference.getProperty(Constants.SERVICE_DESCRIPTION);
+                    Map<String, Object> map = new TreeMap<>(component.properties);
+                    if (!map.isEmpty()) {
+                        System.out.println(SimpleAnsi.INTENSITY_BOLD + "  Properties          : " + SimpleAnsi.INTENSITY_NORMAL);
+                        for (Object key : map.keySet()) {
+                            Object value = map.get(key);
+                            printDetail("    ", key + "=" + value);
                         }
                     }
-                    if (componentName != null) {
-                        b.append(" (");
-                        b.append(componentName);
-                        b.append(")");
+                    ReferenceDTO[] references = component.references;
+                    System.out.println(SimpleAnsi.INTENSITY_BOLD + "References" + SimpleAnsi.INTENSITY_NORMAL);
+
+                    for (ReferenceDTO reference : ScrUtils.emptyIfNull(ReferenceDTO.class, references)) {
+                        ServiceReferenceDTO[] boundServices = null;
+                        boolean satisfied = true;
+                        for (SatisfiedReferenceDTO satRef : config.satisfiedReferences) {
+                            if (satRef.name.equals(reference.name)) {
+                                boundServices = satRef.boundServices;
+                                satisfied = true;
+                            }
+                        }
+                        for (UnsatisfiedReferenceDTO satRef : config.unsatisfiedReferences) {
+                            if (satRef.name.equals(reference.name)) {
+                                boundServices = satRef.targetServices;
+                                satisfied = false;
+                            }
+                        }
+                        printDetail("  Reference           : ", reference.name);
+                        printDetail("    State             : ", satisfied ? "satisfied" : "unsatisfied");
+                        printDetail("    Cardinality       : ", reference.cardinality);
+                        printDetail("    Policy            : ", reference.policy);
+                        printDetail("    PolicyOption      : ", reference.policyOption);
+
+                        // list bound services
+                        for (ServiceReferenceDTO serviceReference : ScrUtils.emptyIfNull(ServiceReferenceDTO.class, boundServices)) {
+                            final StringBuffer b = new StringBuffer();
+                            b.append("Bound Service ID ");
+                            b.append(serviceReference.properties.get(Constants.SERVICE_ID));
+
+                            String componentName = (String) serviceReference.properties.get(ComponentConstants.COMPONENT_NAME);
+                            if (componentName == null) {
+                                componentName = (String) serviceReference.properties.get(Constants.SERVICE_PID);
+                                if (componentName == null) {
+                                    componentName = (String) serviceReference.properties.get(Constants.SERVICE_DESCRIPTION);
+                                }
+                            }
+                            if (componentName != null) {
+                                b.append(" (");
+                                b.append(componentName);
+                                b.append(")");
+                            }
+                            printDetail("    Service Reference : ", b.toString());
+                        }
+
+                        if (ScrUtils.emptyIfNull(ServiceReferenceDTO.class, boundServices).length == 0) {
+                            printDetail("    Service Reference : ", "No Services bound");
+                        }
                     }
-                    printDetail("    Service Reference : ", b.toString());
-                }
-                
-                if (ScrUtils.emptyIfNull(ServiceReference.class, boundRefs).length == 0) {
-                    printDetail("    Service Reference : ", "No Services bound");
                 }
             }
-
         }
     
         return null;

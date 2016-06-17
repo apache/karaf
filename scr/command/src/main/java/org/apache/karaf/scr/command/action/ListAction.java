@@ -16,16 +16,19 @@
  */
 package org.apache.karaf.scr.command.action;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
 import org.apache.karaf.scr.command.support.IdComparator;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
-
-import java.util.Arrays;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
 /**
  * List all the components currently installed.
@@ -37,18 +40,21 @@ public class ListAction extends ScrActionSupport {
     private final IdComparator idComparator = new IdComparator();
 
     @Override
-    protected Object doScrAction(ScrService scrService) throws Exception {
+    protected Object doScrAction(ServiceComponentRuntime serviceComponentRuntime) throws Exception {
         ShellTable table = new ShellTable();
         table.column("ID");
         table.column("State");
         table.column("Component Name");
 
-        Component[] components = scrService.getComponents();
-        Arrays.sort(components, idComparator);
-        for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
+        List<ComponentConfigurationDTO> configs = new ArrayList<>();
+        for (ComponentDescriptionDTO component : serviceComponentRuntime.getComponentDescriptionDTOs()) {
+            configs.addAll(serviceComponentRuntime.getComponentConfigurationDTOs(component));
+        }
+        Collections.sort(configs, idComparator);
+        for (ComponentConfigurationDTO config : configs) {
             // Display only non hidden components, or all if showHidden is true
-            if (showHidden || !ScrActionSupport.isHiddenComponent(component)) {
-                table.addRow().addContent(component.getId(), ScrUtils.getState(component.getState()), component.getName());
+            if (showHidden || !ScrActionSupport.isHiddenComponent(config)) {
+                table.addRow().addContent(config.id, ScrUtils.getState(config.state), config.description.name);
             }
         }
         table.print(System.out);
