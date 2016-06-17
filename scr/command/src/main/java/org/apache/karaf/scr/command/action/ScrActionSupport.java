@@ -17,18 +17,16 @@
 package org.apache.karaf.scr.command.action;
 
 import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.List;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Session;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +41,7 @@ public abstract class ScrActionSupport implements Action {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Reference
-    private ScrService scrService;
+    private ServiceComponentRuntime serviceComponentRuntime;
 
     @Reference
     BundleContext bundleContext;
@@ -53,24 +51,19 @@ public abstract class ScrActionSupport implements Action {
 
     @Override
     public Object execute() throws Exception {
-        if (scrService == null) {
-            String msg = "ScrService is unavailable";
+        if (serviceComponentRuntime == null) {
+            String msg = "ServiceComponentRuntime is unavailable";
             System.out.println(msg);
             logger.warn(msg);
         } else {
-            doScrAction(scrService);
+            doScrAction(serviceComponentRuntime);
         }
         return null;
     }
 
-    protected abstract Object doScrAction(ScrService scrService) throws Exception;
+    protected abstract Object doScrAction(ServiceComponentRuntime serviceComponentRuntime) throws Exception;
 
-    protected boolean isActionable(Component component) {
-        boolean answer = true;
-        return answer;
-    }
-
-    public static boolean showHiddenComponent(CommandLine commandLine, Component component) {
+    public static boolean showHiddenComponent(CommandLine commandLine) {
         // first look to see if the show all option is there
         // if it is we set showAllFlag to true so the next section will be skipped
         List<String> arguments = Arrays.asList(commandLine.getArguments());
@@ -78,11 +71,10 @@ public abstract class ScrActionSupport implements Action {
     }
 
     @SuppressWarnings("rawtypes")
-    public static boolean isHiddenComponent(Component component) {
+    public static boolean isHiddenComponent(ComponentConfigurationDTO config) {
         boolean answer = false;
-        Dictionary properties = component.getProperties();
-        if (properties != null) {
-            String value = (String) properties.get(ScrCommandConstants.HIDDEN_COMPONENT_KEY);
+        if (config.properties != null) {
+            String value = (String) config.properties.get(ScrCommandConstants.HIDDEN_COMPONENT_KEY);
             // if the value is false, show the hidden
             // then someone wants us to display the name of a hidden component
             answer = Boolean.parseBoolean(value);
@@ -101,22 +93,22 @@ public abstract class ScrActionSupport implements Action {
     }
 
     /**
-     * Get the scrService Object associated with this instance of
+     * Get the ServiceComponentRuntime Object associated with this instance of
      * ScrActionSupport.
      * 
-     * @return the scrService
+     * @return the ServiceComponentRuntime
      */
-    public ScrService getScrService() {
-        return scrService;
+    public ServiceComponentRuntime getServiceComponentRuntime() {
+        return serviceComponentRuntime;
     }
 
     /**
-     * Sets the scrService Object for this ScrActionSupport instance.
+     * Sets the ServiceComponentRuntime Object for this ScrActionSupport instance.
      * 
-     * @param scrService the scrService to set
+     * @param serviceComponentRuntime the ServiceComponentRuntime to set
      */
-    public void setScrService(ScrService scrService) {
-        this.scrService = scrService;
+    public void setServiceComponentRuntime(ServiceComponentRuntime serviceComponentRuntime) {
+        this.serviceComponentRuntime = serviceComponentRuntime;
     }
 
 }

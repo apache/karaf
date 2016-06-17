@@ -14,21 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.scr.command.support;
+package org.apache.karaf.scr.state;
 
-import java.util.Comparator;
+import org.apache.karaf.bundle.core.BundleStateService;
+import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.RequireService;
+import org.apache.karaf.util.tracker.annotation.Services;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
 
-import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
+@Services(requires = @RequireService(ServiceComponentRuntime.class),
+          provides = @ProvideService(BundleStateService.class))
+public class Activator extends BaseActivator {
 
-public class IdComparator implements Comparator<ComponentConfigurationDTO> {
     @Override
-    public int compare(ComponentConfigurationDTO left, ComponentConfigurationDTO right) {
-        if (left.id < right.id) {
-            return -1;
-        } else if (left.id == right.id) {
-            return 0;
-        } else {
-            return 1;
+    protected void doStart() throws Exception {
+        ServiceComponentRuntime scr = getTrackedService(ServiceComponentRuntime.class);
+        if (scr != null) {
+            register(BundleStateService.class, new ScrBundleStateService(scr));
         }
     }
+
 }

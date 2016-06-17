@@ -18,7 +18,7 @@ package org.apache.karaf.scr.command;
 
 import java.lang.reflect.Array;
 
-import org.apache.felix.scr.Component;
+import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
 
 public class ScrUtils {
     
@@ -31,37 +31,14 @@ public class ScrUtils {
         String retVal = null;
 
         switch (componentState) {
-        case Component.STATE_ACTIVE:
+        case ComponentConfigurationDTO.ACTIVE:
             retVal = "ACTIVE";
             break;
-        case Component.STATE_ACTIVATING:
-            retVal = "ACTIVATING";
+        case ComponentConfigurationDTO.SATISFIED:
+            retVal = "SATISFIED";
             break;
-        case Component.STATE_DEACTIVATING:
-            retVal = "DEACTIVATING";
-            break;
-        case Component.STATE_DISABLED:
-            retVal = "DISABLED";
-            break;
-        case Component.STATE_DISABLING:
-            retVal = "DISABLING";
-            break;
-        case Component.STATE_DISPOSED:
-            retVal = "DISPOSED";
-            break;
-        case Component.STATE_DISPOSING:
-            retVal = "DISPOSING";
-            break;
-        case Component.STATE_ENABLING:
-            retVal = "ENABLING";
-            break;
-        case Component.STATE_FACTORY:
-            retVal = "FACTORY";
-            break;
-        case Component.STATE_REGISTERED:
-            retVal = "REGISTERED";
-            break;
-        case Component.STATE_UNSATISFIED:
+        case ComponentConfigurationDTO.UNSATISFIED_CONFIGURATION:
+        case ComponentConfigurationDTO.UNSATISFIED_REFERENCE:
             retVal = "UNSATISFIED";
             break;
 

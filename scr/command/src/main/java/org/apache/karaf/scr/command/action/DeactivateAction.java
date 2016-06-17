@@ -16,14 +16,14 @@
  */
 package org.apache.karaf.scr.command.action;
 
-import org.apache.karaf.scr.command.completer.DeactivateCompleter;
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
+import org.apache.karaf.scr.command.completer.DeactivateCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
 /**
  * Deactivates the given component by supplying its component name.
@@ -37,13 +37,12 @@ public class DeactivateAction extends ScrActionSupport {
     String name;
 
     @Override
-    protected Object doScrAction(ScrService scrService) throws Exception {
+    protected Object doScrAction(ServiceComponentRuntime serviceComponentRuntime) throws Exception {
         logger.debug("Deactivate Action");
         logger.debug("  Deactivating the Component: " + name);
-        Component[] components = scrService.getComponents(name);
-        if (components != null && components.length > 0) {
-            for (int i = 0; i < components.length; i++) {
-                components[i].disable();
+        for (ComponentDescriptionDTO component : serviceComponentRuntime.getComponentDescriptionDTOs()) {
+            if (name.equals(component.name)) {
+                serviceComponentRuntime.disableComponent(component);
             }
         }
         return null;

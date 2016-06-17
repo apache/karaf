@@ -16,16 +16,18 @@
  */
 package org.apache.karaf.scr.command.completer;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.action.ScrActionSupport;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,7 @@ public abstract class ScrCompleterSupport implements Completer {
     protected final transient Logger logger = LoggerFactory.getLogger(ScrCompleterSupport.class);
 
     @Reference
-    private ScrService scrService;
+    private ServiceComponentRuntime serviceComponentRuntime;
 
     /**
      * Overrides the super method noted below. See super documentation for
@@ -46,14 +48,18 @@ public abstract class ScrCompleterSupport implements Completer {
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
-            for (Component component : scrService.getComponents()) {
+            List<ComponentConfigurationDTO> configs = new ArrayList<>();
+            for (ComponentDescriptionDTO component : serviceComponentRuntime.getComponentDescriptionDTOs()) {
+                configs.addAll(serviceComponentRuntime.getComponentConfigurationDTOs(component));
+            }
+            for (ComponentConfigurationDTO component : configs) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Component Name to work on: " + component.getName());
+                    logger.debug("Component Name to work on: " + component.description.name);
                 }
-                if (ScrActionSupport.showHiddenComponent(commandLine, component)) {
+                if (ScrActionSupport.showHiddenComponent(commandLine)) {
                     // we display all because we are overridden
                     if (availableComponent(component)) {
-                        delegate.getStrings().add(component.getName());
+                        delegate.getStrings().add(component.description.name);
                     }
                 } else {
                     if (ScrActionSupport.isHiddenComponent(component)) {
@@ -61,7 +67,7 @@ public abstract class ScrCompleterSupport implements Completer {
                     } else {
                         // we aren't hidden so print it
                         if (availableComponent(component)) {
-                            delegate.getStrings().add(component.getName());
+                            delegate.getStrings().add(component.description.name);
                         }
                     }
                 }
@@ -72,7 +78,7 @@ public abstract class ScrCompleterSupport implements Completer {
         return delegate.complete(session, commandLine, candidates);
     }
 
-    public abstract boolean availableComponent(Component component) throws Exception;
+    public abstract boolean availableComponent(ComponentConfigurationDTO component) throws Exception;
 
     /**
      * Get the scrService Object associated with this instance of
@@ -80,17 +86,17 @@ public abstract class ScrCompleterSupport implements Completer {
      *
      * @return the scrService
      */
-    public ScrService getScrService() {
-        return scrService;
+    public ServiceComponentRuntime getServiceComponentRuntime() {
+        return serviceComponentRuntime;
     }
 
     /**
      * Sets the scrService Object for this ScrCompleterSupport instance.
      *
-     * @param scrService the scrService to set
+     * @param serviceComponentRuntime the ServiceComponentRuntime to set
      */
-    public void setScrService(ScrService scrService) {
-        this.scrService = scrService;
+    public void setSServiceComponentRuntime(ServiceComponentRuntime serviceComponentRuntime) {
+        this.serviceComponentRuntime = serviceComponentRuntime;
     }
 
 }
