@@ -449,10 +449,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void addRepository(URI uri, boolean install) throws Exception {
-        if (install) {
-            // TODO: implement
-            throw new UnsupportedOperationException();
-        }
         Repository repository = loadRepository(uri);
         synchronized (lock) {
             // Clean cache
@@ -465,6 +461,14 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             saveState();
         }
         callListeners(new RepositoryEvent(repository, RepositoryEvent.EventType.RepositoryAdded, false));
+        // install the features in the repo
+        if (install) {
+            HashSet<String> features = new HashSet<>();
+            for (Feature feature : repository.getFeatures()) {
+                features.add(feature.getName() + "/" + feature.getVersion());
+            }
+            installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
+        }
     }
 
     @Override
@@ -500,6 +504,14 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             repo = new RepositoryImpl(uri, blacklisted);
         }
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
+        // uninstall the features from the repository
+        if (uninstall) {
+            HashSet<String> features = new HashSet<>();
+            for (Feature feature : repo.getFeatures()) {
+                features.add(feature.getName() + "/" + feature.getVersion());
+            }
+            uninstallFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
+        }
     }
 
     @Override
