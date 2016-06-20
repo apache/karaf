@@ -19,13 +19,14 @@
 package org.apache.karaf.tooling.utils;
 
 import java.io.File;
-import java.util.Map;
+import java.util.Collection;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingRequest;
 
 /**
  * <p>An interface for accessing available Aether subsystem (Sonatype for Maven 3.0.x or Eclipse for Maven 3.1.x)</p>
@@ -35,7 +36,7 @@ import org.apache.maven.project.MavenProject;
  */
 public interface DependencyHelper {
 
-    public abstract Map<?, String> getLocalDependencies();
+    public abstract Collection<LocalDependency> getLocalDependencies();
 
     public abstract String getTreeListing();
 
@@ -55,6 +56,8 @@ public interface DependencyHelper {
 
     public abstract File resolveById(String id, Log log) throws MojoFailureException;
 
+    public abstract void setRepositorySession(ProjectBuildingRequest request) throws MojoExecutionException;
+    
     /**
      * Convert a Maven <code>Artifact</code> into a PAX URL mvn format.
      *

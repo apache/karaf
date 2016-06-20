@@ -17,6 +17,9 @@
  */
 package org.apache.karaf.tooling.features;
 
+import static java.lang.String.format;
+import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -32,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +54,10 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.model.ObjectFactory;
 import org.apache.karaf.tooling.utils.DependencyHelper;
 import org.apache.karaf.tooling.utils.DependencyHelperFactory;
+import org.apache.karaf.tooling.utils.LocalDependency;
 import org.apache.karaf.tooling.utils.ManifestUtils;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -63,6 +69,12 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesExecution;
@@ -71,8 +83,6 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.xml.sax.SAXException;
-
-import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
 /**
  * Generates the features XML file starting with an optional source feature.xml and adding
@@ -228,6 +238,16 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
     @Parameter(defaultValue = "false")
     private boolean useVersionRange;
+    
+    /**
+     * Flag indicating whether the plugin should determine whether transitive dependencies are declared with
+     * a version range. If this flag is set to <code>true</code> and a transitive dependency has been found
+     * which had been declared with a version range, that version range will be used to build the appropriate
+     * bundle element instead of the newest version. This flag has only an effect when {@link #useVersionRange}
+     * is <code>true</code>
+     */
+    @Parameter(defaultValue = "false")
+    private boolean includeTransitiveVersionRanges;
 
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
@@ -239,15 +259,21 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
     @Component
     private PlexusContainer container;
+    
+    @Component
+    private RepositorySystem repoSystem;
 
     @Component
     protected MavenResourcesFiltering mavenResourcesFiltering;
 
     @Component
     protected MavenFileFilter mavenFileFilter;
+    
+	@Component
+	private ProjectBuilder mavenProjectBuilder;
 
     // dependencies we are interested in
-    protected Map<?, String> localDependencies;
+    protected Collection<LocalDependency> localDependencies;
 
     // log of what happened during search
     protected String treeListing;
@@ -257,6 +283,10 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
     // maven log
     private Log log;
+    
+    // If useVersionRange is true, this map will be used to cache
+    // resolved MavenProjects
+    private final Map<Artifact, MavenProject> resolvedProjects = new HashMap<>();
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -284,19 +314,46 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
     }
 
-    private String getVersionOrRange(Object artifact) {
-    	String versionOrRange = dependencyHelper.getBaseVersion(artifact);
-    	if (useVersionRange) {
-    		for (final org.apache.maven.model.Dependency dependency : project.getDependencies()) {
-    			if (dependency.getGroupId().equals(dependencyHelper.getGroupId(artifact)) && 
-    					dependency.getArtifactId().equals(dependencyHelper.getArtifactId(artifact))) {
-    				versionOrRange = dependency.getVersion();
-    				break;
-    			}
-    		}
-    	}
-    	return versionOrRange;
-    }
+	private MavenProject resolveProject(final Object artifact) throws MojoExecutionException {
+		MavenProject resolvedProject = project;
+		if (includeTransitiveVersionRanges) {
+			resolvedProject = resolvedProjects.get(artifact);
+			if (resolvedProject == null) {
+				final ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
+				request.setResolveDependencies(true);
+				request.setRemoteRepositories(project.getPluginArtifactRepositories());
+				request.setLocalRepository(localRepo);
+				request.setProfiles(new ArrayList<>(mavenSession.getRequest().getProfiles()));
+				request.setActiveProfileIds(new ArrayList<>(mavenSession.getRequest().getActiveProfiles()));
+				dependencyHelper.setRepositorySession(request);
+				final Artifact pomArtifact = repoSystem.createArtifact(dependencyHelper.getGroupId(artifact),
+						dependencyHelper.getArtifactId(artifact), dependencyHelper.getBaseVersion(artifact), "pom");
+				try {
+					resolvedProject = mavenProjectBuilder.build(pomArtifact, request).getProject();
+					resolvedProjects.put(pomArtifact, resolvedProject);
+				} catch (final ProjectBuildingException e) {
+					throw new MojoExecutionException(
+							format("Maven-project could not be built for artifact %", pomArtifact), e);
+				}
+			}
+		}
+		return resolvedProject;
+	}
+
+	private String getVersionOrRange(final Object parent, final Object artifact) throws MojoExecutionException {
+		String versionOrRange = dependencyHelper.getBaseVersion(artifact);
+		if (useVersionRange) {
+			for (final org.apache.maven.model.Dependency dependency : resolveProject(parent).getDependencies()) {
+
+				if (dependency.getGroupId().equals(dependencyHelper.getGroupId(artifact))
+						&& dependency.getArtifactId().equals(dependencyHelper.getArtifactId(artifact))) {
+					versionOrRange = dependency.getVersion();
+					break;
+				}
+			}
+		}
+		return versionOrRange;
+	}
     
     /*
      * Write all project dependencies as feature
@@ -351,8 +408,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
             feature.getBundle().add(bundle);
         }
         boolean needWrap = false;
-        for (Map.Entry<?, String> entry : localDependencies.entrySet()) {
-            Object artifact = entry.getKey();
+        for (final LocalDependency entry : localDependencies) {
+            Object artifact = entry.getArtifact();
 
             if (excludedArtifactIds.contains(this.dependencyHelper.getArtifactId(artifact))) {
                 continue;
@@ -369,7 +426,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     features.getFeature().addAll(includedFeatures.getFeature());
                 }
             } else if (addBundlesToPrimaryFeature) {
-                String bundleName = this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(artifact));
+                String bundleName = this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(entry.getParent(), artifact));
                 File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
                 Manifest manifest = getManifest(bundleFile);
 
@@ -388,11 +445,11 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 if (bundle == null) {
                     bundle = objectFactory.createBundle();
                     bundle.setLocation(bundleName);
-                    if (!"provided".equals(entry.getValue()) || !ignoreScopeProvided) {
+                    if (!"provided".equals(entry.getScope()) || !ignoreScopeProvided) {
                         feature.getBundle().add(bundle);
                     }
                 }
-                if ("runtime".equals(entry.getValue())) {
+                if ("runtime".equals(entry.getScope())) {
                     bundle.setDependency(true);
                 }
                 if (startLevel != null && bundle.getStartLevel() == 0) {
