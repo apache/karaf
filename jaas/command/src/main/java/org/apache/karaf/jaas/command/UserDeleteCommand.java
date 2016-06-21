@@ -20,7 +20,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "jaas", name = "user-delete", description = "Delete a usergit s")
+@Command(scope = "jaas", name = "user-delete", description = "Delete a user")
 @Service
 public class UserDeleteCommand extends JaasCommandSupport {
 
