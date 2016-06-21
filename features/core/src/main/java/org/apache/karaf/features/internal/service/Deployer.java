@@ -710,6 +710,7 @@ public class Deployer {
         }
         if (hasToInstall) {
             print("Installing bundles:", verbose);
+            Map<Bundle, Integer> customStartLevels = new HashMap<Bundle, Integer>();
             for (Map.Entry<String, Deployer.RegionDeployment> entry : deployment.regions.entrySet()) {
                 String name = entry.getKey();
                 Deployer.RegionDeployment regionDeployment = entry.getValue();
@@ -733,7 +734,7 @@ public class Deployer {
                     }
                     Integer startLevel = startLevels.get(resource);
                     if (startLevel != null && startLevel != dstate.initialBundleStartLevel) {
-                        callback.setBundleStartLevel(bundle, startLevel);
+                        customStartLevels.put(bundle, startLevel);
                     }
                     FeatureState reqState = states.get(resource);
                     if (reqState == null) {
@@ -749,6 +750,11 @@ public class Deployer {
                         break;
                     }
                 }
+            }
+            
+            // Set start levels after install to avoid starting before all bundles are installed
+            for (Bundle bundle : customStartLevels.keySet()) {
+                callback.setBundleStartLevel(bundle, customStartLevels.get(bundle));
             }
         }
 
