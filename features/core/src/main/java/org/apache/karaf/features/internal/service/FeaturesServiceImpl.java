@@ -267,7 +267,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         checkResolve();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+     "unchecked", "rawtypes"
+    })
     private void checkResolve() {
         if (bundle == null) {
             return; // Most certainly in unit tests
@@ -824,7 +826,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void installFeature(Feature feature, EnumSet<Option> options) throws Exception {
-        installFeature(feature.getId());
+        installFeature(feature.getId(), options);
     }
 
     @Override
