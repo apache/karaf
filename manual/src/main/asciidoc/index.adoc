@@ -44,7 +44,7 @@ include::user-guide/remote.adoc[]
 
 include::user-guide/log.adoc[]
 
-include::user-guide/configugration.adoc[]
+include::user-guide/configuration.adoc[]
 
 include::user-guide/urls.adoc[]
 
