@@ -333,7 +333,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
 					resolvedProjects.put(pomArtifact, resolvedProject);
 				} catch (final ProjectBuildingException e) {
 					throw new MojoExecutionException(
-							format("Maven-project could not be built for artifact %", pomArtifact), e);
+							format("Maven-project could not be built for artifact %s", pomArtifact), e);
 				}
 			}
 		}
