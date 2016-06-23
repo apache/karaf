@@ -19,13 +19,14 @@
 package org.apache.karaf.tooling.utils;
 
 import java.io.File;
-import java.util.Map;
+import java.util.Collection;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingRequest;
 
 /**
  * <p>An interface for accessing available Aether subsystem (Sonatype for Maven 3.0.x or Eclipse for Maven 3.1.x)</p>
@@ -35,7 +36,7 @@ import org.apache.maven.project.MavenProject;
  */
 public interface DependencyHelper {
 
-    public abstract Map<?, String> getLocalDependencies();
+    public abstract Collection<LocalDependency> getLocalDependencies();
 
     public abstract String getTreeListing();
 
@@ -45,12 +46,18 @@ public interface DependencyHelper {
 
     public abstract String getArtifactId(Object artifact);
 
+	public abstract String getBaseVersion(Object artifact);
+
+	public abstract String getGroupId(Object artifact);
+    
     public abstract String getClassifier(Object artifact);
 
     public abstract File resolve(Object artifact, Log log);
 
     public abstract File resolveById(String id, Log log) throws MojoFailureException;
 
+    public abstract void setRepositorySession(ProjectBuildingRequest request) throws MojoExecutionException;
+    
     /**
      * Convert a Maven <code>Artifact</code> into a PAX URL mvn format.
      *
@@ -58,7 +65,7 @@ public interface DependencyHelper {
      * @return The corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier)
      * @throws MojoExecutionException If the plugin execution fails.
      */
-    public String artifactToMvn(Artifact artifact) throws MojoExecutionException;
+    public String artifactToMvn(Artifact artifact, String versionOrRange) throws MojoExecutionException;
 
     /**
      * Convert an Aether (Sonatype or Eclipse) artifact into a PAX URL mvn format.
@@ -67,7 +74,7 @@ public interface DependencyHelper {
      * @return The corresponding PAX URL mvn format (mvn:groupId/artifactId/version/type/classifier).
      * @throws MojoExecutionException If the plugin execution fails.
      */
-    public String artifactToMvn(Object object) throws MojoExecutionException;
+    public String artifactToMvn(Object object, String versionOrRange) throws MojoExecutionException;
 
     public Artifact mvnToArtifact(String name) throws MojoExecutionException;
 
@@ -88,5 +95,4 @@ public interface DependencyHelper {
      * @throws MojoExecutionException If the plugin execution fails.
      */
     public String pathFromAether(String name) throws MojoExecutionException;
-
 }
