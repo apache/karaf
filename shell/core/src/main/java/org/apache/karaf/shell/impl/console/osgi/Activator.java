@@ -35,10 +35,13 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator implements BundleActivator {
 
     private static final String START_CONSOLE = "karaf.startLocalConsole";
+    private static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
 
     private ThreadIOImpl threadIO;
 
@@ -107,6 +110,8 @@ public class Activator implements BundleActivator {
             terminalFactory = new TerminalFactory();
             localConsoleManager = new LocalConsoleManager(context, terminalFactory, sessionFactory);
             localConsoleManager.start();
+        } else {
+            LOGGER.info("Not starting local console. To activate set " + START_CONSOLE + "=true");
         }
     }
 
