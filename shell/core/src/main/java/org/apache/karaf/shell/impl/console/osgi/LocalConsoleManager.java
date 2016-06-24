@@ -36,7 +36,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 public class LocalConsoleManager {
-
+    
+    private static final String INPUT_ENCODING = "input.encoding";
+    private static final String KARAF_DELAY_CONSOLE = "karaf.delay.console";
+    private static final String KARAF_LOCAL_USER = "karaf.local.user";
+    private static final String KARAF_LOCAL_ROLES = "karaf.local.roles";
+    
     private SessionFactory sessionFactory;
     private BundleContext bundleContext;
     private Session session;
@@ -77,7 +82,7 @@ public class LocalConsoleManager {
                                       callback);
                 registration = bundleContext.registerService(Session.class, session, null);
                 String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
-                boolean delayconsole = Boolean.parseBoolean(System.getProperty("karaf.delay.console"));
+                boolean delayconsole = Boolean.parseBoolean(System.getProperty(KARAF_DELAY_CONSOLE));
                 if (delayconsole) {
                     DelayedStarted watcher = new DelayedStarted(session, name, bundleContext, System.in);
                     new Thread(watcher).start();
@@ -104,7 +109,7 @@ public class LocalConsoleManager {
         if (envEncoding != null) {
             return envEncoding;
         }
-        return System.getProperty("input.encoding", Charset.defaultCharset().name());
+        return System.getProperty(INPUT_ENCODING, Charset.defaultCharset().name());
     }
 
     /**
@@ -128,7 +133,7 @@ public class LocalConsoleManager {
 
     private Subject createLocalKarafSubject() {
 
-        String userName = System.getProperty("karaf.local.user");
+        String userName = System.getProperty(KARAF_LOCAL_USER);
         if (userName == null) {
             userName = "karaf";
         }
@@ -136,7 +141,7 @@ public class LocalConsoleManager {
         final Subject subject = new Subject();
         subject.getPrincipals().add(new UserPrincipal(userName));
 
-        String roles = System.getProperty("karaf.local.roles");
+        String roles = System.getProperty(KARAF_LOCAL_ROLES);
         if (roles != null) {
             for (String role : roles.split("[,]")) {
                 subject.getPrincipals().add(new RolePrincipal(role.trim()));

@@ -33,9 +33,11 @@ package org.apache.karaf.shell.support.converter;
  * <em>reify</em> the different Java 5 <code>Type</code> instances into the
  * reified form. That is, a form where the raw Class is available with its optional type arguments as Reified Types.
  */
+@SuppressWarnings("rawtypes")
 public class ReifiedType {
 	final static ReifiedType ALL = new ReifiedType(Object.class);
 
+	
 	private final Class clazz;
 
 	/**

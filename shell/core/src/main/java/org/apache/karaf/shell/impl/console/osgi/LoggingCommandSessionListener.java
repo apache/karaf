@@ -20,7 +20,6 @@ package org.apache.karaf.shell.impl.console.osgi;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.felix.gogo.api.CommandSessionListener;
 import org.apache.felix.service.command.CommandSession;

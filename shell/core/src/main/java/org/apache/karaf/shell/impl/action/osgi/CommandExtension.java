@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Commands extension
  */
+@SuppressWarnings("rawtypes")
 public class CommandExtension implements Extension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandExtension.class);
@@ -125,6 +126,7 @@ public class CommandExtension implements Extension {
         tracker.close();
     }
 
+    @SuppressWarnings("unchecked")
     private synchronized void updateState(AggregateServiceTracker.State state) {
         boolean wasSatisfied = manager != null;
         boolean isSatisfied = state != null && state.isSatisfied();
@@ -196,6 +198,7 @@ public class CommandExtension implements Extension {
         classes.add(clazz);
     }
 
+    @SuppressWarnings("unchecked")
     protected void track(final GenericType type) {
         if (type.getRawClass() == List.class) {
             final Class clazzRef = type.getActualTypeArgument(0).getRawClass();
