@@ -19,11 +19,10 @@
 package org.apache.karaf.main.util;
 
 import java.io.File;
-import org.apache.felix.utils.properties.Properties;
 import java.util.logging.Handler;
 
-import junit.framework.Assert;
-
+import org.apache.felix.utils.properties.Properties;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class BootstrapLogManagerTest {

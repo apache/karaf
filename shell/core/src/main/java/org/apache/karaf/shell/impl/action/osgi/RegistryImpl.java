@@ -107,12 +107,12 @@ public class RegistryImpl implements Registry {
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             try {
-                                Object value = ((Factory) service).callable.call();
+                                Object value = ((Factory<?>) service).callable.call();
                                 if (value instanceof List) {
-                                    for (Object v : (List) value) {
+                                    for (Object v : (List<?>) value) {
                                         return clazz.cast(v);
                                     }
                                 } else {
@@ -142,12 +142,12 @@ public class RegistryImpl implements Registry {
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             try {
-                                Object value = ((Factory) service).callable.call();
+                                Object value = ((Factory<?>) service).callable.call();
                                 if (value instanceof List) {
-                                    for (Object v : (List) value) {
+                                    for (Object v : (List<?>) value) {
                                         list.add(clazz.cast(v));
                                     }
                                 } else {
@@ -176,7 +176,7 @@ public class RegistryImpl implements Registry {
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             return true;
                         }

@@ -35,9 +35,11 @@ package org.apache.karaf.shell.support.converter;
  *
  * @Immutable
  */
+@SuppressWarnings("rawtypes")
 public class ReifiedType {
 	final static ReifiedType ALL = new ReifiedType(Object.class);
 
+	
 	private final Class clazz;
 
 	/**

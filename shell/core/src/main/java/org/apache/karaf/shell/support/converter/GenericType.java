@@ -29,9 +29,10 @@ import java.util.Map;
 
 import org.osgi.framework.Bundle;
 
+@SuppressWarnings("rawtypes")
 public class GenericType extends ReifiedType {
 
-	private static final GenericType[] EMPTY = new GenericType[0];
+    private static final GenericType[] EMPTY = new GenericType[0];
 
     private static final Map<String, Class> primitiveClasses = new HashMap<String, Class>();
 

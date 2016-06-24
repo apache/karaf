@@ -46,7 +46,7 @@ public class Activator implements BundleActivator {
     private ThreadIOImpl threadIO;
 
     private SessionFactoryImpl sessionFactory;
-    private ServiceRegistration sessionFactoryRegistration;
+    private ServiceRegistration<SessionFactory> sessionFactoryRegistration;
 
     private CommandExtender actionExtender;
 
@@ -101,7 +101,7 @@ public class Activator implements BundleActivator {
 
         sessionFactory.register(new ManagerImpl(sessionFactory, sessionFactory));
 
-        sessionFactoryRegistration = context.registerService(SessionFactory.class.getName(), sessionFactory, null);
+        sessionFactoryRegistration = context.registerService(SessionFactory.class, sessionFactory, null);
 
         actionExtender = new CommandExtender(sessionFactory);
         actionExtender.start(context);

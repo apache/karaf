@@ -18,8 +18,6 @@
  */
 package org.apache.karaf.shell.support.parsing;
 
-import java.util.List;
-
 import org.apache.karaf.shell.api.console.CommandLine;
 
 /**

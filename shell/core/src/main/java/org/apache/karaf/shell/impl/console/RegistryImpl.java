@@ -107,10 +107,10 @@ public class RegistryImpl implements Registry {
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             try {
-                                return clazz.cast(((Factory) service).callable.call());
+                                return clazz.cast(((Factory<?>) service).callable.call());
                             } catch (Exception e) {
                                 // TODO: log exception
                             }
@@ -135,10 +135,10 @@ public class RegistryImpl implements Registry {
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             try {
-                                list.add(clazz.cast(((Factory) service).callable.call()));
+                                list.add(clazz.cast(((Factory<?>) service).callable.call()));
                             } catch (Exception e) {
                                 // TODO: log exception
                             }
@@ -162,7 +162,7 @@ public class RegistryImpl implements Registry {
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             return true;
                         }

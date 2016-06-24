@@ -30,6 +30,7 @@ import org.osgi.framework.BundleContext;
 /**
  * Track multiple services by their type
  */
+@SuppressWarnings("rawtypes")
 public abstract class AggregateServiceTracker {
 
     private final BundleContext bundleContext;
@@ -42,7 +43,6 @@ public abstract class AggregateServiceTracker {
         this.bundleContext = bundleContext;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> void track(final Class<T> service, final boolean multiple) {
         if (multiple) {
             if (multiTrackers.get(service) == null) {
@@ -67,6 +67,7 @@ public abstract class AggregateServiceTracker {
         }
     }
 
+    
     public State open() {
         for (SingleServiceTracker tracker : singleTrackers.values()) {
             tracker.open();

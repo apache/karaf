@@ -84,6 +84,7 @@ public abstract class MultiServiceTracker<T> {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public void close() {
         if (open.compareAndSet(true, false)) {
             ctx.removeServiceListener(listener);
