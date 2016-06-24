@@ -22,9 +22,8 @@ import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 import java.io.File;
 
-import junit.framework.Assert;
-
 import org.apache.karaf.main.util.Utils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;

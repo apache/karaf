@@ -60,7 +60,7 @@ public class ArgumentCompleter implements Completer {
     final Map<String, Option> options = new HashMap<>();
     final Map<Integer, Field> arguments = new HashMap<>();
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("rawtypes")
     public ArgumentCompleter(ActionCommand command, boolean scoped) {
         this.command = command;
         Class<?> actionClass = command.getActionClass();
@@ -174,7 +174,9 @@ public class ArgumentCompleter implements Completer {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+     "unchecked", "rawtypes"
+    })
     private Completer getDefaultCompleter(Field field, boolean multi) {
         Completer completer = null;
         Class<?> type = field.getType();

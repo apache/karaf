@@ -123,6 +123,7 @@ public class ManagerImpl implements Manager {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void register(Class<?> clazz) {
         if (!allowCustomServices) {

@@ -77,7 +77,6 @@ public class StringsCompleter
         return strings;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         // buffer could be null
         assert candidates != null;

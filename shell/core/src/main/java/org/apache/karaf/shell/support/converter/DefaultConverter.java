@@ -51,6 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultConverter
 {
 

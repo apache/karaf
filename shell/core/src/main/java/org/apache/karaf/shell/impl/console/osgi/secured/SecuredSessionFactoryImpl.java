@@ -60,7 +60,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private BundleContext bundleContext;
     private Map<String, Dictionary<String, Object>> scopes = new HashMap<String, Dictionary<String, Object>>();
     private SingleServiceTracker<ConfigurationAdmin> configAdminTracker;
-    private ServiceRegistration registration;
+    private ServiceRegistration<ConfigurationListener> registration;
 
     public SecuredSessionFactoryImpl(BundleContext bundleContext, ThreadIO threadIO) throws InvalidSyntaxException {
         super(threadIO);

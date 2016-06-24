@@ -93,7 +93,6 @@ public abstract class SingleServiceTracker<T> {
         boolean clear = true;
         ServiceReference<T> ref = ctx.getServiceReference(clazz);
         if (ref != null) {
-            @SuppressWarnings("unchecked")
             T service = ctx.getService(ref);
             if (service != null) {
                 clear = false;
@@ -139,7 +138,7 @@ public abstract class SingleServiceTracker<T> {
         return result;
     }
 
-    public Class getTrackedClass() {
+    public Class<?> getTrackedClass() {
         return clazz;
     }
 
