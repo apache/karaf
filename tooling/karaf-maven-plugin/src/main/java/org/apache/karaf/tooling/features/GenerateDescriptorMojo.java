@@ -343,7 +343,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 
         // First pass to look for features
         // Track other features we depend on
-        Map<Dependency, Feature> otherFeatures = new HashMap<>();
+        Map<Dependency, Feature> otherFeatures = new HashMap<Dependency, Feature>();
         for (final Map.Entry<?, String> entry : localDependencies.entrySet()) {
             Object artifact = entry.getKey();
 
