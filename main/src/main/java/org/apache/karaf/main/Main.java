@@ -251,11 +251,46 @@ public class Main {
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
         framework = factory.newFramework(config.props);
 
-        /*
-         * KARAF-3706: disable the logger related code to avoid the exception
-         * It needs to be revisited when the FELIX-4871 is fixed.
-         */
-        // Hack to set felix logger
+        setLogger();
+
+        framework.init();
+        framework.getBundleContext().addFrameworkListener(lockCallback);
+        framework.start();
+
+        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
+        sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
+
+        // If we have a clean state, install everything
+        if (framework.getBundleContext().getBundles().length == 1) {
+
+            LOG.info("Installing and starting initial bundles");
+            File startupPropsFile = new File(config.karafEtc, STARTUP_PROPERTIES_FILE_NAME);
+            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
+            installAndStartBundles(resolver, framework.getBundleContext(), bundles);
+            LOG.info("All initial bundles installed and set to start");
+        }
+
+        ServerInfo serverInfo = new ServerInfoImpl(args, config);
+        framework.getBundleContext().registerService(ServerInfo.class, serverInfo, null);
+
+        activatorManager = new KarafActivatorManager(classLoader, framework);
+        activatorManager.startKarafActivators();
+        
+        setStartLevel(config.lockStartLevel);
+        // Progress bar
+        if (config.delayConsoleStart) {
+            new StartupListener(LOG, framework.getBundleContext());
+        }
+        monitor();
+        registerSignalHandler();
+    }
+
+    /*
+     * Hack to set felix logger
+     * KARAF-3706: disable the logger related code to avoid the exception
+     * It needs to be revisited when the FELIX-4871 is fixed.
+     */
+    private void setLogger() {
         try {
             if (framework.getClass().getName().startsWith("org.apache.felix.")) {
                 Field field = framework.getClass().getDeclaredField("m_logger");
@@ -290,37 +325,6 @@ public class Main {
         } catch (Throwable t) {
             t.printStackTrace();
         }
-
-        framework.init();
-        framework.getBundleContext().addFrameworkListener(lockCallback);
-        framework.start();
-
-        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
-        sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
-
-        // If we have a clean state, install everything
-        if (framework.getBundleContext().getBundles().length == 1) {
-
-            LOG.info("Installing and starting initial bundles");
-            File startupPropsFile = new File(config.karafEtc, STARTUP_PROPERTIES_FILE_NAME);
-            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
-            installAndStartBundles(resolver, framework.getBundleContext(), bundles);
-            LOG.info("All initial bundles installed and set to start");
-        }
-
-        ServerInfo serverInfo = new ServerInfoImpl(args, config);
-        framework.getBundleContext().registerService(ServerInfo.class, serverInfo, null);
-
-        activatorManager = new KarafActivatorManager(classLoader, framework);
-        activatorManager.startKarafActivators();
-        
-        setStartLevel(config.lockStartLevel);
-        // Progress bar
-        if (config.delayConsoleStart) {
-            new StartupListener(LOG, framework.getBundleContext());
-        }
-        monitor();
-        registerSignalHandler();
     }
 
     private void registerSignalHandler() {
