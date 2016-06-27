@@ -26,6 +26,8 @@ import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+
 import org.apache.felix.utils.properties.Properties;
 
 import org.junit.Before;
@@ -59,6 +61,11 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
             @Override
             long getCurrentTimeMillis() {
                 return 1;
+            }
+            
+            @Override
+            public void log(Level level, String msg, Exception e) {
+                // Suppress log
             }
         };
     }
