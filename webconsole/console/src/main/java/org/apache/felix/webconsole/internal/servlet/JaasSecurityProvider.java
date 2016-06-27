@@ -75,6 +75,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         this.role = role;
     }
 
+    @Override
     public Object authenticate(final String username, final String password) {
         return doAuthenticate( username, password );
     }
@@ -152,6 +153,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         return true;
     }
 
+    @Override
     public boolean authenticate( HttpServletRequest request, HttpServletResponse response )
     {
         // Return immediately if the header is missing
@@ -198,29 +200,28 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
                     }
                     catch ( Exception e )
                     {
-                        // Ignore
+                        LOG.warn("Error during authentication", e);
                     }
                 }
             }
         }
 
-        // request authentication
-        try
-        {
-            response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
-            response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
-            response.setContentLength( 0 );
-            response.flushBuffer();
-        }
-        catch ( IOException ioe )
-        {
-            // failed sending the response ... cannot do anything about it
-        }
+        requireAuthentication(response);
 
         // inform HttpService that authentication failed
         return false;
     }
 
+    private void requireAuthentication(HttpServletResponse response) {
+        response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
+        response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
+        response.setContentLength( 0 );
+        try {
+            response.flushBuffer();
+        } catch (IOException e) {
+            LOG.debug("Error flushing after sending auth required", e);
+        }
+    }
 
     private static String base64Decode( String srcString )
     {
