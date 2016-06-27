@@ -422,7 +422,7 @@ start() {
         exec $COMMAND_LINE
     else
         echo "$APP_LONG_NAME is already running."
-        exit 1
+        exit 0
     fi
 }
 
