@@ -40,6 +40,7 @@ public class LocalConsoleManager {
     private static final String KARAF_DELAY_CONSOLE = "karaf.delay.console";
     private static final String KARAF_LOCAL_USER = "karaf.local.user";
     private static final String KARAF_LOCAL_ROLES = "karaf.local.roles";
+    private static final String KARAF_LOCAL_ROLES_DEFAULT = "admin,manager,viewer,systembundles";
     
     private SessionFactory sessionFactory;
     private BundleContext bundleContext;
@@ -143,7 +144,7 @@ public class LocalConsoleManager {
         final Subject subject = new Subject();
         subject.getPrincipals().add(new UserPrincipal(userName));
 
-        String roles = System.getProperty(KARAF_LOCAL_ROLES);
+        String roles = System.getProperty(KARAF_LOCAL_ROLES, KARAF_LOCAL_ROLES_DEFAULT);
         if (roles != null) {
             for (String role : roles.split("[,]")) {
                 subject.getPrincipals().add(new RolePrincipal(role.trim()));
