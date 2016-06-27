@@ -179,6 +179,7 @@
                             org.apache.wss4j.dom.message.token;resolution:=optional,
                             !net.sf.ehcache*,
                             !net.spy.memcached*,
+                            com.sun.security.auth.module;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>
