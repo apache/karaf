@@ -21,6 +21,8 @@ package org.apache.karaf.main.lock;
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
+import java.util.logging.Level;
+
 import org.apache.felix.utils.properties.Properties;
 
 import org.junit.Before;
@@ -54,6 +56,11 @@ public class DerbyJDBCLockTest extends BaseJDBCLockTest {
             long getCurrentTimeMillis() {
                 return 1;
             }
+            
+            @Override
+            public void log(Level level, String msg, Exception e) {
+                // Suppress log
+            }
         };
     }
     
@@ -62,6 +69,11 @@ public class DerbyJDBCLockTest extends BaseJDBCLockTest {
         props.put("karaf.lock.jdbc.url", this.url + ";dataEncryption=false");
         
         lock = new DerbyJDBCLock(props) {
+            @Override
+            boolean schemaExists() {
+                return true;
+            }
+            
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);

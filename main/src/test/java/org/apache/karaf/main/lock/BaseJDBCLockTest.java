@@ -68,7 +68,7 @@ public abstract class BaseJDBCLockTest {
     
     @Before
     public void setUp() throws Exception {
-        connection = EasyMock.createMock(Connection.class);
+        connection = EasyMock.createNiceMock(Connection.class);
         metaData = EasyMock.createMock(DatabaseMetaData.class);
         resultSet = EasyMock.createMock(ResultSet.class);
         preparedStatement = EasyMock.createMock(PreparedStatement.class);
@@ -88,12 +88,13 @@ public abstract class BaseJDBCLockTest {
     public void initShouldCreateTheSchemaIfItNotExists() throws Exception {
         expect(connection.isClosed()).andReturn(false);
         connection.setAutoCommit(false);
-        expect(connection.getMetaData()).andReturn(metaData);
+        expect(connection.getMetaData()).andReturn(metaData).anyTimes();
         expect(metaData.getTables((String) isNull(), (String) isNull(), anyString(), aryEq(new String[]{"TABLE"}))).andReturn(resultSet);
         expect(metaData.getTables((String) isNull(), (String) isNull(), anyString(), aryEq(new String[]{"TABLE"}))).andReturn(resultSet);
         expect(resultSet.next()).andReturn(false);
         expect(resultSet.next()).andReturn(false);
         resultSet.close();
+        expectLastCall().atLeastOnce();
         expect(connection.isClosed()).andReturn(false);
         expect(connection.createStatement()).andReturn(statement);
         expect(statement.execute("CREATE TABLE " + tableName + " (MOMENT " + momentDatatype + ", NODE " + nodeDatatype + ")" + createTableStmtSuffix)).andReturn(false);
@@ -115,7 +116,7 @@ public abstract class BaseJDBCLockTest {
         expect(metaData.getTables((String) isNull(), (String) isNull(), anyString(), aryEq(new String[]{"TABLE"}))).andReturn(resultSet);
         expect(resultSet.next()).andReturn(true);
         resultSet.close();
-        
+        expectLastCall().atLeastOnce();
         replay(connection, metaData, statement, preparedStatement, resultSet);
         
         lock = createLock(props);

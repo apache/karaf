@@ -63,8 +63,6 @@ public class MainLockingTest {
         
         bundle.start();       
         
-        Thread.sleep(2000);
-        
         FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
         
         MockLock lock = (MockLock) main.getLock();
