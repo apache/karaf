@@ -23,6 +23,8 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+
 import org.apache.felix.utils.properties.Properties;
 
 import static org.easymock.EasyMock.*;
@@ -58,6 +60,11 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
             long getCurrentTimeMillis() {
                 return 1;
             }
+            
+            @Override
+            public void log(Level level, String msg, Exception e) {
+                // Suppress log
+            }
         };
     }
     
@@ -66,6 +73,11 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
         props.put("karaf.lock.jdbc.url", this.url + ";dataEncryption=false");
         
         lock = new PostgreSQLJDBCLock(props) {
+            @Override
+            boolean schemaExists() {
+                return true;
+            }
+            
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);

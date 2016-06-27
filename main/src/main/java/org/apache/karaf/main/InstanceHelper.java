@@ -152,7 +152,9 @@ public class InstanceHelper {
                     port = shutdownSocket.getLocalPort();
                 }
                 if (portFile != null) {
-                    Writer w = new OutputStreamWriter(new FileOutputStream(portFile));
+                    File portF = new File(portFile);
+                    portF.getParentFile().mkdirs();
+                    Writer w = new OutputStreamWriter(new FileOutputStream(portF));
                     w.write(Integer.toString(port));
                     w.close();
                 }

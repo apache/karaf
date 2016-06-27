@@ -152,30 +152,20 @@ public class DefaultJDBCLock implements Lock {
      * @return true, if the table exists else false
      */
     boolean schemaExist(String tableName) {
-        ResultSet rs = null;
-        boolean schemaExists = false;
         try {
             DatabaseMetaData metadata = getConnection().getMetaData();
-            rs = metadata.getTables(null, null, tableName, new String[] {"TABLE"});
-            schemaExists = rs.next();
-            if (schemaExists == false) {
-                // try table name in lower case
-                rs = metadata.getTables(null, null, tableName.toLowerCase(), new String[] {"TABLE"});
-                schemaExists = rs.next();
-            }
-            /*
-            if (schemaExists == false) {
-                // try table name in upper case
-                rs = getConnection().getMetaData().getTables(null, null, tableName.toUpperCase(), new String[] {"TABLE"});
-                schemaExists = rs.next();
-            }
-            */
+            return metadata != null && (checkTableExists(tableName.toLowerCase(), metadata) //
+                || checkTableExists(tableName.toLowerCase(), metadata));
         } catch (Exception ignore) {
-            LOG.log(Level.SEVERE, "Error testing for db table", ignore);
-        } finally {
-            closeSafely(rs);
+            return false;
+            //throw new RuntimeException("Error testing for db table", ignore);
         }
-        return schemaExists;
+    }
+
+    private boolean checkTableExists(String tableName, DatabaseMetaData metadata) throws SQLException {
+        try (ResultSet rs = metadata.getTables(null, null, tableName, new String[] {"TABLE"})) {
+            return rs.next();
+        }
     }
 
     /*
@@ -203,7 +193,7 @@ public class DefaultJDBCLock implements Lock {
             lockAquired = preparedStatement.execute();
         } catch (Exception e) {
             // Do we want to display this message everytime???
-            LOG.log(Level.WARNING, "Failed to acquire database lock", e);
+            log(Level.WARNING, "Failed to acquire database lock", e);
         } finally {
             closeSafely(preparedStatement);
         }
@@ -222,12 +212,19 @@ public class DefaultJDBCLock implements Lock {
             int rows = preparedStatement.executeUpdate();
             lockUpdated = (rows == 1);
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "Failed to update database lock", e);
+            log(Level.WARNING, "Failed to update database lock", e);
         } finally {
             closeSafely(preparedStatement);
         }
         
         return lockUpdated;
+    }
+    
+    /**
+     * Can be overridden to suppress logs in tests
+     */
+    public void log(Level level, String msg, Exception e) {
+        LOG.log(level, msg, e);
     }
 
     /*
