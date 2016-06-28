@@ -131,6 +131,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-kerberos-test</artifactId>
+            <version>${directory-version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>${derby-version}</version>
@@ -172,6 +179,7 @@
                             org.apache.wss4j.dom.message.token;resolution:=optional,
                             !net.sf.ehcache*,
                             !net.spy.memcached*,
+                            com.sun.security.auth.module;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>
