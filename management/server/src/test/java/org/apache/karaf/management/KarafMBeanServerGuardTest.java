@@ -352,6 +352,27 @@ public class KarafMBeanServerGuardTest extends TestCase {
                 guard.getRequiredRoles(on3, "foo", new Object[]{}, new String[]{}));
     }
 
+    public void testRequiredRolesHierarchyCanonical() throws Exception {
+        Dictionary<String, Object> conf = new Hashtable<String, Object>();
+        conf.put("foo", "viewer");
+        conf.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test.AAA.BBB");
+        ConfigurationAdmin ca = getMockConfigAdmin2(conf);
+
+        KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
+        guard.setConfigAdmin(ca);
+
+        // Canonical object name
+        ObjectName on1 = ObjectName.getInstance("foo.bar:prop1=AAA,prop2=BBB,type=Test");
+        assertEquals("Canonical ObjectName should work",
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on1, "foo", new String[]{}));
+        // Non-canonical object name
+        ObjectName on2 = ObjectName.getInstance("foo.bar:type=Test,prop2=BBB,prop1=AAA");
+        assertEquals("Non-canonical ObjectName should also work",
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on2, "foo", new String[]{}));
+    }
+
     public void testRequiredRolesMethodNameWildcard() throws Exception {
         Dictionary<String, Object> configuration = new Hashtable<String, Object>();
         configuration.put("getFoo", "viewer");
