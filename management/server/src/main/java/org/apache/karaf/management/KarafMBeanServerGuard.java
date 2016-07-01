@@ -410,7 +410,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         segments.add(objectName.getDomain());
         // TODO can an ObjectName property contain a comma as key or value ?
         // TODO support quoting as described in http://docs.oracle.com/javaee/1.4/api/javax/management/ObjectName.html
-        for (String s : objectName.getCanonicalKeyPropertyListString().split("[,]")) {
+        for (String s : objectName.getKeyPropertyListString().split("[,]")) {
             int index = s.indexOf('=');
             if (index < 0) {
                 continue;
@@ -422,7 +422,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                 segments.add(key);
             }
         }
-
+        
         return segments;
     }
 
