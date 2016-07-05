@@ -18,20 +18,19 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.ansi.SimpleAnsi;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 @Command(scope = "shell", name="grep", description="Prints lines matching the given pattern.", detailedDescription="classpath:grep.txt")
 @Service
@@ -81,6 +80,9 @@ public class GrepAction implements Action {
     @Option(name = "-C", aliases = { "--context" }, description = "Print NUM lines of output context.  Places a line containing -- between contiguous groups of matches.", required = false, multiValued = false)
     private int context = 0;
 
+    @Option(name = "-o", aliases = { "--only-matching"}, description = "Print only the matching section of a line", required = false, multiValued = false)
+    private boolean onlyMatching;
+
     @Override
     public Object execute() throws Exception {
         if (after < 0) {
@@ -89,7 +91,7 @@ public class GrepAction implements Action {
         if (before < 0) {
             before = context;
         }
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
 
         String regexp = regex;
         if (wordRegexp) {
@@ -109,99 +111,118 @@ public class GrepAction implements Action {
             p = Pattern.compile(regexp);
             p2 = Pattern.compile(regex);
         }
-        try {
-            boolean firstPrint = true;
-            int nb = 0;
-            int lineno = 1;
-            String line;
-            int lineMatch = 0;
-            BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
-            while ((line = r.readLine()) != null) {
-                if (line.length() == 1 && line.charAt(0) == '\n') {
-                    break;
-                }
-                if (p.matcher(line).matches() ^ invertMatch) {
-                    Matcher matcher2 = p2.matcher(line);
-                    StringBuffer sb = new StringBuffer();
-                    while (matcher2.find()) {
-                        if (!invertMatch && color != ColorOption.never) {
-                            int index = matcher2.start(0);
-                            String prefix = line.substring(0,index);
-                            matcher2.appendReplacement(sb,
-                                    "\u001b[33;40m" + matcher2.group() + "\u001b[39;49m" + lastEscapeSequence(prefix));
-                        } else {
-                            matcher2.appendReplacement(sb, matcher2.group());
-                        }
-                        nb++;
-                    }
-                    matcher2.appendTail(sb);
-                    if(color != ColorOption.never) {
-                        sb.append(SimpleAnsi.RESET);
-                    }
-                    if (!count && lineNumber) {
-                        lines.add(String.format("%6d  ", lineno) + sb.toString());
-                    } else {
-                        lines.add(sb.toString());
-                    }
-					lineMatch = lines.size();
-                } else {
-                    if (lineMatch != 0 & lineMatch + after + before <= lines.size()) {
-                        if (!count) {
-                            if (!firstPrint && before + after > 0) {
-                                System.out.println("--");
-                            } else {
-                                firstPrint = false;
-                            }
-                            for (int i = 0; i < lineMatch + after; i++) {
-                                System.out.println(lines.get(i));
-                            }
-                        }
-                        while (lines.size() > before) {
-                            lines.remove(0);
-                        }
-                        lineMatch = 0;
-                    }
-                    lines.add(line);
-                    while (lineMatch == 0 && lines.size() > before) {
-                        lines.remove(0);
-                    }
-                }
-                lineno++;
-            }
-            if (!count && lineMatch > 0) {
-                if (!firstPrint && before + after > 0) {
-                    System.out.println("--");
-                } else {
-                    firstPrint = false;
-                }
-                for (int i = 0; i < lineMatch + after && i < lines.size(); i++) {
-                    System.out.println(lines.get(i));
-                }
-            }
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(System.in))) {
             if (count) {
-                System.out.println(nb);
+                printNumberOfLines(p, r.lines());
+            } else {
+                boolean firstPrint = true;
+                int lineno = 1;
+                String line;
+                int lineMatch = 0;
+                while ((line = r.readLine()) != null) {
+                    if (line.length() >= 1 && line.charAt(0) != '\n') {
+                        if (p.matcher(line).matches() ^ invertMatch) {
+                            lines.add(matchXorInvertedMatch(line, p2, lineno));
+                            lineMatch = lines.size();
+                        } else {
+                            if (lineMatch != 0 & lineMatch + after + before <= lines.size()) {
+                                if (!firstPrint && before + after > 0) {
+                                    System.out.println("--");
+                                } else {
+                                    firstPrint = false;
+                                }
+                                for (int i = 0; i < lineMatch + after; i++) {
+                                    System.out.println(lines.get(i));
+                                }
+                                while (lines.size() > before) {
+                                    lines.remove(0);
+                                }
+                                lineMatch = 0;
+                            }
+                            lines.add(line);
+                            while (lineMatch == 0 && lines.size() > before) {
+                                lines.remove(0);
+                            }
+                        }
+                        lineno++;
+                    }
+                }
+                if (lineMatch > 0) {
+                    if (!firstPrint && before + after > 0) {
+                        System.out.println("--");
+                    }
+                    for (int i = 0; i < lineMatch + after && i < lines.size(); i++) {
+                        System.out.println(lines.get(i));
+                    }
+                }
             }
-        } catch (IOException e) {
         }
         return null;
     }
 
-
-    /**
-     * Returns the last escape pattern found inside the String.
-     * This method is used to restore the formating after highliting the grep pattern.
-     * If no pattern is found just returns the reset String.
-     * @param str
-     * @return
-     */
-    private String lastEscapeSequence(String str) {
-        String escapeSequence = SimpleAnsi.RESET;
-        String escapePattern = "(\\\u001B\\[[0-9;]*[0-9]+m)+";
-        Pattern pattern =  Pattern.compile(escapePattern);
-        Matcher matcher = pattern.matcher(str);
-        while(matcher.find()) {
-            escapeSequence = matcher.group();
+    private String matchXorInvertedMatch(final String line, final Pattern p2, final int lineno) {
+        final String result;
+        if (!invertMatch && color != ColorOption.never) {
+            result = grepColoured(line, p2);
+        } else {
+            result = grepNotColoured(line, p2);
         }
-        return escapeSequence;
+        return lineNumber ? String.format("%d:%s", lineno, result) : result;
     }
+
+    private String grepColoured(final String line, final Pattern p2) {
+        Matcher matcher2 = p2.matcher(line);
+        StringBuffer sb = new StringBuffer();
+        while (matcher2.find()) {
+            if (!invertMatch && color != ColorOption.never) {
+                matcher2.appendReplacement(sb, "\u001b[33;40m"
+					   + matcher2.group()
+					   + "\u001b[39;49m");
+            } else {
+                matcher2.appendReplacement(sb, matcher2.group());
+            }
+        }
+        matcher2.appendTail(sb);
+        return sb.toString();
+    }
+
+    private String grepNotColoured(final String line, final Pattern p2) {
+        Matcher matcher2 = p2.matcher(line);
+        StringBuffer sb = new StringBuffer();
+        if (!onlyMatching) {
+            while (matcher2.find()) {
+                matcher2.appendReplacement(sb, matcher2.group());
+            }
+        } else if (!invertMatch) {
+            int start = 0;
+            int end = 0;
+            boolean found = false;
+            if (matcher2.find()) {
+                found = true;
+                start = matcher2.start();
+                end = matcher2.end();
+            }
+            while (matcher2.find()) {
+                end = matcher2.end();
+            }
+            if (found) {
+                final String only = line.substring(start, end);
+                sb.append(only);
+            }
+        }
+        if (!onlyMatching) {
+            matcher2.appendTail(sb);
+        }
+        return sb.toString();
+    }
+
+    private void printNumberOfLines(Pattern p, final Stream<String> lines) {
+        final long numberOfLines = lines
+            .filter(line -> line.length() > 1
+                || line.length() == 1 && line.charAt(0) != '\n')
+            .filter(line -> p.matcher(line).matches() ^ invertMatch)
+            .count();
+        System.out.println(numberOfLines);
+    }
+
 }
