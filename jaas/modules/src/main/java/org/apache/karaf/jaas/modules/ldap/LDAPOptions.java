@@ -166,7 +166,7 @@ public class LDAPOptions {
             SSLSocketFactory factory = manager.createSSLFactory(
                     getSslProvider(), getSslProtocol(), getSslAlgorithm(), getSslKeystore(),
                     getSslKeyAlias(), getSslTrustStore(), getSslTimeout());
-            ManagedSSLSocketFactory.setSocketFactory(factory);
+            ManagedSSLSocketFactory.setSocketFactory(new ManagedSSLSocketFactory(factory));
             Thread.currentThread().setContextClassLoader(ManagedSSLSocketFactory.class.getClassLoader());
         } catch (Exception e) {
             throw new NamingException("Unable to setup SSL support for LDAP: " + e.getMessage());
