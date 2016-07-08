@@ -18,23 +18,17 @@
  */
 package org.apache.karaf.shell.impl.console;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
+import org.apache.karaf.shell.api.console.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.karaf.shell.api.console.Terminal;
+import java.io.*;
+import java.util.Properties;
 
 
 public final class Branding {
-   
     static final Logger LOGGER = LoggerFactory.getLogger(Branding.class);
-     
+
     private Branding() { }
 
     public static Properties loadBrandingProperties() {
@@ -47,15 +41,16 @@ public final class Branding {
     public static Properties loadBrandingProperties(Terminal terminal) {
         Properties props = new Properties();
         if (terminal != null && terminal.getClass().getName().endsWith("SshTerminal")) {
-            //it's a ssh client, so load branding seperately
             loadProps(props, "org/apache/karaf/shell/console/branding-ssh.properties");
+            return loadEtcBrandingFile("branding-ssh.properties",props);
         } else {
             loadProps(props, "org/apache/karaf/shell/console/branding.properties");
+            return loadEtcBrandingFile("branding.properties",props);
         }
+    }
 
-        loadProps(props, "org/apache/karaf/branding/branding.properties");
-        // load branding from etc/branding.properties
-        File etcBranding = new File(System.getProperty("karaf.etc"), "branding.properties");
+    private static Properties loadEtcBrandingFile(String fileName, Properties props){
+        File etcBranding = new File(System.getProperty("karaf.etc"), fileName);
         if (etcBranding.exists()) {
             FileInputStream etcBrandingIs = null;
             try {
@@ -65,28 +60,12 @@ public final class Branding {
             }
             loadProps(props, etcBrandingIs);
         }
-
         return props;
     }
-    
+
     protected static void loadProps(Properties props, String resource) {
-        InputStream is = null;
-        try {
-            is = Branding.class.getClassLoader().getResourceAsStream(resource);
-            if (is != null) {
-                props.load(is);
-            }
-        } catch (IOException e) {
-            // ignore
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-        }
+        InputStream is = Branding.class.getClassLoader().getResourceAsStream(resource);
+        loadProps(props, is);
     }
 
     protected static void loadProps(Properties props, InputStream is) {
