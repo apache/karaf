@@ -322,6 +322,11 @@ public class GenerateDescriptorMojo extends MojoSupport {
 			resolvedProject = resolvedProjects.get(artifact);
 			if (resolvedProject == null) {
 				final ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
+				
+				// Fixes KARAF-4626; if the system properties are not transferred to the request, 
+				// test-feature-use-version-range-transfer-properties will fail
+				request.setSystemProperties(System.getProperties());
+				
 				request.setResolveDependencies(true);
 				request.setRemoteRepositories(project.getPluginArtifactRepositories());
 				request.setLocalRepository(localRepo);
