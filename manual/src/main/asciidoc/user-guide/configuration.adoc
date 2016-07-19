@@ -33,8 +33,20 @@ A configuration file is a properties file containing key/value pairs:
 property=value
 ----
 
-Environment variables can be referenced inside configuration files using the syntax `${env:<variable_name>}` (e.g.
-`property=${env:FOO}` will set "property" to the value of the enviroment variable "FOO").
+Properties can be referenced inside configuration files using the syntax `${<name>}`. Default and alternate
+values can be specified using `${<name>:-<default_value>}` and `${<name>:+<alternate_value>}` syntaxes respectively.
+
+----
+existing_property=baz
+property1=${missing_property:-foo}   # "foo"
+property2=${missing_property:+foo}   # empty string
+property3=${existing_property:-bar}  # "baz"
+property4=${existing_property:+bar}  # "bar"
+----
+
+Environment variables can be referenced inside configuration files using the syntax `${env:<name>}` (e.g.
+`property=${env:FOO}` will set "property" to the value of the enviroment variable "FOO"). Default and alternate
+values can be defined for them as well using the same syntax as above.
 
 In Apache Karaf, a configuration is PID with a set of properties attached.
 
