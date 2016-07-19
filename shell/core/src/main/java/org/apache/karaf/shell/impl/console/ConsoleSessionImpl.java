@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
+import jline.console.completer.CandidateListCompletionHandler;
 import jline.console.history.MemoryHistory;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.service.command.CommandProcessor;
@@ -121,6 +122,9 @@ public class ConsoleSessionImpl implements Session {
                     out,
                     terminal instanceof JLineTerminal ? ((JLineTerminal) terminal).getTerminal() : new KarafTerminal(terminal),
                     encoding);
+            CandidateListCompletionHandler handler = new CandidateListCompletionHandler();
+            handler.setPrintSpaceAfterFullCompletion(false);
+            reader.setCompletionHandler(handler);
         } catch (IOException e) {
             throw new RuntimeException("Error opening console reader", e);
         }
