@@ -38,9 +38,13 @@ public interface Completer {
 
     default void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
         List<String> strings = new ArrayList<>();
-        complete(session, commandLine, strings);
+        int idx = complete(session, commandLine, strings);
+        String word = "";
+        if (idx > commandLine.getBufferPosition() - commandLine.getArgumentPosition()) {
+            word = commandLine.getBuffer().substring(commandLine.getBufferPosition() - commandLine.getArgumentPosition(), idx);
+        }
         for (String string : strings) {
-            candidates.add(new Candidate(string));
+            candidates.add(new Candidate(word + string));
         }
     }
 }
