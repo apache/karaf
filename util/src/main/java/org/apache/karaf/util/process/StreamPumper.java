@@ -31,9 +31,9 @@ public class StreamPumper implements Runnable {
 
     private OutputStream out;
 
-    private volatile boolean finish;
+    private volatile boolean finish = false;
 
-    private volatile boolean finished;
+    private volatile boolean finished = false;
 
     private boolean closeWhenExhausted;
 
@@ -109,8 +109,6 @@ public class StreamPumper implements Runnable {
     public void run() {
         synchronized (this) {
             started = true;
-            finished = false;
-            finish = false;
             thread = Thread.currentThread();
         }
 
