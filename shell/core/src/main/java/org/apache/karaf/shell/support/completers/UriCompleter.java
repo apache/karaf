@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
@@ -32,18 +33,22 @@ public class UriCompleter implements Completer {
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
         String arg = commandLine.getCursorArgument();
         if (arg != null) {
             if (arg.startsWith("mvn:")) {
-                return maven(session, commandLine, candidates);
+                maven(session, commandLine, candidates);
             } else if (arg.startsWith("file:")) {
-                return file(session, commandLine, candidates);
+                file(session, commandLine, candidates);
             }
         }
-        return 0;
     }
 
-    private int file(Session session, CommandLine commandLine, List<String> candidates) {
+    private void file(Session session, CommandLine commandLine, List<Candidate> candidates) {
         String buffer = commandLine.getCursorArgument();
         String path = buffer.substring("file:".length(), commandLine.getArgumentPosition());
 
@@ -53,7 +58,7 @@ public class UriCompleter implements Completer {
             Path dir;
             if (path.length() == 0) {
                 for (Path root : FileSystems.getDefault().getRootDirectories()) {
-                    candidates.add(root.toString());
+                    candidates.add(new Candidate(root.toString(), false));
                 }
                 dir = Paths.get(".");
             } else {
@@ -70,24 +75,18 @@ public class UriCompleter implements Completer {
                 try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
                     for (Path child : paths) {
                         String name = encode(child.getFileName().toString());
-                        if (Files.isDirectory(child)) {
+                        boolean isDir = Files.isDirectory(child);
+                        if (isDir) {
                             name += "/";
                         }
-                        candidates.add(name);
+                        String dirstr = dir.endsWith(File.separator) ? dir.toString() : dir.toString() + File.separator;
+                        candidates.add(new Candidate("file:" + dirstr + name, !isDir));
                     }
                 }
             }
         } catch (Exception e) {
             // Ignore
         }
-
-        if (candidates.size() == 1) {
-            String cand = candidates.get(0);
-            if (!cand.endsWith("/")) {
-                candidates.set(0, cand + " ");
-            }
-        }
-        return candidates.isEmpty() ? -1 : commandLine.getBufferPosition() - rem.length();
     }
 
     private String encode(String s) {
@@ -98,7 +97,7 @@ public class UriCompleter implements Completer {
         return s.replaceAll("%20", " ");
     }
 
-    private int maven(Session session, CommandLine commandLine, List<String> candidates) {
+    private void maven(Session session, CommandLine commandLine, List<Candidate> candidates) {
         String repo = System.getProperty("user.home") + "/.m2/repository";
         String buffer = commandLine.getCursorArgument();
         String mvn = buffer.substring("mvn:".length(), commandLine.getArgumentPosition());
@@ -123,12 +122,13 @@ public class UriCompleter implements Completer {
                     }
                     rem = dirs[dirs.length - 1];
                 }
-                Path dir = Paths.get(repo + File.separator + known);
+                Path rep = Paths.get(repo);
+                Path dir = rep.resolve(known);
                 try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
                     for (Path path : paths) {
                         if (Files.isDirectory(path)) {
                             String name = path.getFileName().toString();
-                            candidates.add(group + name);
+                            candidates.add(new Candidate("mvn:" + group + name, false));
                         }
                     }
                 }
@@ -140,7 +140,7 @@ public class UriCompleter implements Completer {
                     for (Path path : paths) {
                         if (Files.isDirectory(path)) {
                             String name = path.getFileName().toString();
-                            candidates.add(name);
+                            candidates.add(new Candidate("mvn:" + parts[0] + "/" + name, false));
                         }
                     }
                 }
@@ -151,7 +151,7 @@ public class UriCompleter implements Completer {
                     for (Path path : paths) {
                         if (Files.isDirectory(path)) {
                             String name = path.getFileName().toString();
-                            candidates.add(name);
+                            candidates.add(new Candidate("mvn:" + parts[0] + "/" + parts[1] + "/" + name, true));
                         }
                     }
                 }
@@ -159,14 +159,6 @@ public class UriCompleter implements Completer {
         } catch (Exception e) {
             // Ignore
         }
-
-        if (candidates.size() == 1) {
-            String cand = candidates.get(0);
-            if (cand.split("/").length == 3) {
-                candidates.set(0, candidates.get(0) + " ");
-            }
-        }
-        return candidates.isEmpty() ? -1 : commandLine.getBufferPosition() - rem.length();
     }
 
 }

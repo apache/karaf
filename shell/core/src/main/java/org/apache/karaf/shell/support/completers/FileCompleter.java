@@ -20,6 +20,7 @@ package org.apache.karaf.shell.support.completers;
 import java.io.File;
 import java.util.List;
 
+import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
@@ -57,9 +58,13 @@ public class FileCompleter implements Completer
     }
 
     public int complete(final Session session, CommandLine commandLine, final List<String> candidates) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void completeCandidates(final Session session, CommandLine commandLine, final List<Candidate> candidates) {
         // buffer can be null
         if (candidates == null) {
-            return 0;
+            return;
         }
 
         String buffer = commandLine.getCursorArgument();
@@ -97,7 +102,7 @@ public class FileCompleter implements Completer
 
         File[] entries = dir == null ? new File[0] : dir.listFiles();
 
-        return matchFiles(buffer, translated, entries, candidates) + commandLine.getBufferPosition() - commandLine.getArgumentPosition();
+        matchFiles(buffer, translated, entries, candidates);
     }
 
     protected String separator() {
@@ -112,7 +117,7 @@ public class FileCompleter implements Completer
         return new File(".");
     }
 
-    protected int matchFiles(final String buffer, final String translated, final File[] files, final List<String> candidates) {
+    protected int matchFiles(final String buffer, final String translated, final File[] files, final List<Candidate> candidates) {
         if (files == null) {
             return -1;
         }
@@ -127,8 +132,8 @@ public class FileCompleter implements Completer
         }
         for (File file : files) {
             if (file.getAbsolutePath().startsWith(translated)) {
-                CharSequence name = file.getName() + (matches == 1 && file.isDirectory() ? separator() : " ");
-                candidates.add(render(file, name).toString());
+                boolean dir = file.isDirectory();
+                candidates.add(new Candidate(render(file, dir ? file.toString() + "/" : file.toString()).toString(), !dir));
             }
         }
 
