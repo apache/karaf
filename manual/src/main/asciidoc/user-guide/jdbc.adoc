@@ -92,7 +92,7 @@ OPTIONS
 For instance, to create an embedded Apache Derby database in Apache Karaf, you can do:
 
 ----
-karaf@root()> jdbc:ds-create -dn derby -dbName test -url jdbc:derby:test test
+karaf@root()> jdbc:ds-create -dn derby -url "jdbc:derby:test;create=true" test
 ----
 
 We can see that this command created a configuration PID containing the datasource properties.
