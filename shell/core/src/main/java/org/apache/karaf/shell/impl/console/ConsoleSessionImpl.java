@@ -44,6 +44,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.impl.console.parsing.CommandLineParser;
+import org.apache.karaf.shell.impl.console.parsing.KarafParser;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
@@ -187,7 +188,7 @@ public class ConsoleSessionImpl implements Session {
         session.currentDir(null);
 
         reader.setHighlighter(new org.apache.felix.gogo.jline.Highlighter(session));
-        reader.setParser(new org.apache.felix.gogo.jline.Parser());
+        reader.setParser(new KarafParser(this));
 
     }
 

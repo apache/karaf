@@ -44,7 +44,7 @@ import org.jline.reader.ParsedLine;
 /**
  * Overall command line completer.
  */
-public class CommandsCompleter implements org.jline.reader.Completer {
+public class CommandsCompleter extends org.apache.karaf.shell.support.completers.CommandsCompleter implements org.jline.reader.Completer {
 
     private final SessionFactory factory;
     private final Session session;
