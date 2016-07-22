@@ -376,7 +376,8 @@ public class Subsystem extends ResourceImpl {
         if (FeaturesService.SERVICE_REQUIREMENTS_DISABLE.equals(serviceRequirements)) {
             removeServiceRequirements = true;
         } else if (feature != null && FeaturesService.SERVICE_REQUIREMENTS_DEFAULT.equals(serviceRequirements)) {
-            removeServiceRequirements = !FeaturesNamespaces.URI_1_3_0.equals(feature.getNamespace());
+            removeServiceRequirements = !FeaturesNamespaces.URI_1_3_0.equals(feature.getNamespace())
+                                     && !FeaturesNamespaces.URI_1_4_0.equals(feature.getNamespace());
         } else {
             removeServiceRequirements = false;
         }
