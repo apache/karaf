@@ -27,7 +27,7 @@ import java.util.Set;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Slf4jResolverLog;
+import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.junit.Test;

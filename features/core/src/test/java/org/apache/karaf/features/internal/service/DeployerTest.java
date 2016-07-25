@@ -33,7 +33,7 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Slf4jResolverLog;
+import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.support.TestBundle;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.easymock.EasyMock;

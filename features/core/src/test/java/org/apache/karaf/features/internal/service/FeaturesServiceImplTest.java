@@ -25,7 +25,7 @@ import java.util.Map;
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.TestBase;
-import org.apache.karaf.features.Slf4jResolverLog;
+import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.resolver.Resolver;

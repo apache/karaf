@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.felix.resolver.ResolverImpl;
+import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.easymock.EasyMock;

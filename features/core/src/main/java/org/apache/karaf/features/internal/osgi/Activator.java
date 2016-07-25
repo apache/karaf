@@ -29,7 +29,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.FeaturesListener;
@@ -39,6 +38,7 @@ import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.repository.AggregateRepository;
 import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
+import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
 import org.apache.karaf.features.internal.service.EventAdminListener;
 import org.apache.karaf.features.internal.service.FeatureFinder;
@@ -63,6 +63,7 @@ import org.osgi.service.resolver.Resolver;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.LoggerFactory;
 
 @Services(
     requires = {
@@ -114,15 +115,12 @@ public class Activator extends BaseActivator {
 
     protected void doStart() throws Exception {
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_INFO));
+        Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class)));
         URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
 
         if (configurationAdmin == null || mvnUrlHandler == null) {
             return;
         }
-
-        // Resolver
-//        register(Resolver.class, new ResolverImpl(new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class))));
 
         // RegionDigraph
         digraph = DigraphHelper.loadDigraph(bundleContext);
