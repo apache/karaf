@@ -118,10 +118,22 @@ public class ArchiveMojo extends MojoSupport {
     }
 
     @SuppressWarnings("deprecation")
-	private void archive(String type) throws IOException {
+    private void archive(String type) throws IOException {
         Artifact artifact1 = factory.createArtifactWithClassifier(project.getArtifact().getGroupId(), project.getArtifact().getArtifactId(), project.getArtifact().getVersion(), type, "bin");
         File target1 = archive(targetServerDirectory, destDir, artifact1);
-        projectHelper.attachArtifact( project, artifact1.getType(), null, target1 );
+
+        // artifact1 is created with explicit classifier "bin", which is dropped below when attachArtifact is called
+        // which means we can't use artifact1.equals(artifact) directly with artifact1
+        Artifact artifact2 = factory.createArtifact(artifact1.getGroupId(), artifact1.getArtifactId(), artifact1.getVersion(), artifact1.getScope(), artifact1.getType());
+        for (Artifact artifact : project.getAttachedArtifacts()) {
+            if (artifact2.equals(artifact))
+            {
+                getLog().debug("Artifact " + artifact2 + " already attached");
+                return;
+            }
+        }
+
+        projectHelper.attachArtifact(project, artifact1.getType(), null, target1);
     }
 
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
