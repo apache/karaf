@@ -80,6 +80,11 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         // valid password (because if authentication = none, the password could be any 
         // value - it is ignored).
         LDAPOptions options = new LDAPOptions(this.options);
+        if(options.isUsernameTrim()){
+            if(user != null){
+                user = user.trim();
+            }
+        }
         String authentication = options.getAuthentication();
         if ("none".equals(authentication) && (user != null || tmpPassword != null)) {
             logger.debug("Changing from authentication = none to simple since user or password was specified.");
