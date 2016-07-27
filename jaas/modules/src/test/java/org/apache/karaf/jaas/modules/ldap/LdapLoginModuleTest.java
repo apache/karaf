@@ -184,6 +184,50 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
     }
 
     @Test
+    public void testTrimmedUsernameLogin() throws Exception {
+        final String USERNAME_WITH_SPACES = "cheese    ";
+        Properties options = new Properties(new File("src/test/resources/org/apache/karaf/jaas/modules/ldap/ldap_username_trim.properties"));
+        LDAPLoginModule module = new LDAPLoginModule();
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName(USERNAME_WITH_SPACES);
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("foodie".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertTrue(module.login());
+        assertTrue(module.commit());
+
+        assertEquals(1, subject.getPrincipals().size());
+
+        boolean foundUser = false;
+        boolean foundRole = false;
+        for (Principal pr : subject.getPrincipals()) {
+            if (pr instanceof UserPrincipal) {
+                assertEquals("cheese", pr.getName());
+                foundUser = true;
+            } else if (pr instanceof RolePrincipal) {
+                assertEquals("admin", pr.getName());
+                foundRole = true;
+            }
+        }
+        assertTrue(foundUser);
+        // cheese is not an admin so no roles should be returned
+        assertFalse(foundRole);
+
+        assertTrue(module.logout());
+        assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
+    }
+
+    @Test
     public void testBadPassword() throws Exception {
         Properties options = ldapLoginModuleOptions();
         LDAPLoginModule module = new LDAPLoginModule();

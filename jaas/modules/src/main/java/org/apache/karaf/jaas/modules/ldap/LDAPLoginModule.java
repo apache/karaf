@@ -73,6 +73,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
 
         user = ((NameCallback) callbacks[0]).getName();
 
+
         char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
 
         // If either a username or password is specified don't allow authentication = "none".
@@ -80,6 +81,11 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         // valid password (because if authentication = none, the password could be any 
         // value - it is ignored).
         LDAPOptions options = new LDAPOptions(this.options);
+        if(options.isUsernameTrim()){
+            if(user != null){
+                user = user.trim();
+            }
+        }
         String authentication = options.getAuthentication();
         if ("none".equals(authentication) && (user != null || tmpPassword != null)) {
             logger.debug("Changing from authentication = none to simple since user or password was specified.");
