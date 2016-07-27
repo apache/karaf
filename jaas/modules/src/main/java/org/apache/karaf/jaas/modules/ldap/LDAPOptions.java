@@ -55,6 +55,7 @@ public class LDAPOptions {
     public static final String SSL_KEYALIAS = "ssl.keyalias";
     public static final String SSL_TRUSTSTORE = "ssl.truststore";
     public static final String SSL_TIMEOUT = "ssl.timeout";
+    public static final String USERNAMES_TRIM = "usernames.trim";
     public static final String DEFAULT_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
     public static final String DEFAULT_AUTHENTICATION = "simple";
     public static final int DEFAULT_SSL_TIMEOUT = 10;
@@ -79,6 +80,10 @@ public class LDAPOptions {
     @Override
     public int hashCode() {
         return options.hashCode();
+    }
+
+    public boolean isUsernameTrim() {
+        return Boolean.parseBoolean((String) options.get(USERNAMES_TRIM));
     }
 
     public String getUserFilter() {
