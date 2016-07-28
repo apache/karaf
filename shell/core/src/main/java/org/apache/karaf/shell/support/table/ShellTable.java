@@ -26,7 +26,7 @@ public class ShellTable {
     private List<Col> cols = new ArrayList<Col>();
     private List<Row> rows = new ArrayList<Row>();
     boolean showHeaders = true;
-    private String separator = " | ";
+    private String separator = " │ ";
     private int size;
     private String emptyTableText;
 
@@ -97,15 +97,21 @@ public class ShellTable {
         if (format && showHeaders) {
             String headerLine = headerRow.getContent(cols, separator);
             out.println(headerLine);
+            int iCol = 0;
             for (Col col : cols) {
-                out.print(underline(col.getSize()));
+                if (iCol++ == 0) {
+                    out.print(underline(col.getSize(), false));
+                } else {
+                    out.print(underline(col.getSize() + 3, true));
+                }
+                iCol++;
             }
-            out.println(underline((cols.size() - 1) * 3));
+            out.println();
         }
 
         for (Row row : rows) {
             if (!format) {
-                if (separator == null || separator.equals(" | "))
+                if (separator == null || separator.equals(" │ "))
                     out.println(row.getContent(cols, "\t"));
                 else out.println(row.getContent(cols, separator));
             } else {
@@ -136,9 +142,12 @@ public class ShellTable {
 
     }
 
-    private String underline(int length) {
+    private String underline(int length, boolean crossAtBeg) {
         char[] exmarks = new char[length];
-        Arrays.fill(exmarks, '-');
+        Arrays.fill(exmarks, '─');
+        if (crossAtBeg) {
+            exmarks[1] = '┼';
+        }
         return new String(exmarks);
     }
 
