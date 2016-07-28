@@ -216,7 +216,7 @@ public class InfoAction implements Action {
     void printValue(String name, int pad, String value) {
         System.out.println(
                 "  " + SimpleAnsi.INTENSITY_BOLD + name + SimpleAnsi.INTENSITY_NORMAL
-                        + spaces(pad - name.length()) + "   ");
+                        + spaces(pad - name.length()) + "   " + value);
     }
 
     String spaces(int nb) {
