@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.gogo.api.Job;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
@@ -54,6 +55,7 @@ import org.jline.reader.UserInterruptException;
 import org.jline.reader.impl.LineReaderImpl;
 import org.jline.reader.impl.history.history.FileHistory;
 import org.jline.reader.impl.history.history.MemoryHistory;
+import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -258,6 +260,13 @@ public class ConsoleSessionImpl implements Session {
             Properties brandingProps = Branding.loadBrandingProperties(terminal);
             welcome(brandingProps);
             setSessionProperties(brandingProps);
+            jlineTerminal.handle(Signal.INT, s -> {
+                Job current = session.foregroundJob();
+                if (current != null) {
+                    current.interrupt();
+                }
+            });
+
             String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
             executeScript(scriptFileName);
             while (running) {
