@@ -21,12 +21,19 @@ package org.apache.karaf.shell.impl.console;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 
+import org.apache.felix.gogo.jline.Builtin;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.api.console.Command;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
@@ -48,6 +55,9 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         commandProcessor = new CommandProcessorImpl(threadIO);
         register(new ExitCommand());
         new HelpCommand(this);
+        register(new JobCommand("jobs", "List shell jobs", (session, args) -> new Builtin().jobs(session, args)));
+        register(new JobCommand("fg", "Put job in foreground", (session, args) -> new Builtin().fg(session, args)));
+        register(new JobCommand("bg", "Put job in background", (session, args) -> new Builtin().bg(session, args)));
     }
 
     public CommandProcessorImpl getCommandProcessor() {
@@ -134,6 +144,54 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         synchronized (commandProcessor) {
             closed = true;
             commandProcessor.stop();
+        }
+    }
+
+    private class JobCommand implements Command {
+        private final String name;
+        private final String desc;
+        private final BiConsumer<CommandSession, String[]> consumer;
+
+        public JobCommand(String name, String desc, BiConsumer<CommandSession, String[]> consumer) {
+            this.name = name;
+            this.desc = desc;
+            this.consumer = consumer;
+        }
+
+        @Override
+        public String getScope() {
+            return "shell";
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getDescription() {
+            return desc;
+        }
+
+        @Override
+        public Completer getCompleter(boolean scoped) {
+            return null;
+        }
+
+        @Override
+        public Parser getParser() {
+            return null;
+        }
+
+        @Override
+        public Object execute(Session session, List<Object> arguments) throws Exception {
+            CommandSession cmdSession = (CommandSession) session.get(".commandSession");
+            String[] args = new String[arguments.size()];
+            for (int i = 0; i < args.length; i++) {
+                args[i] = Objects.toString(arguments.get(i));
+            }
+            consumer.accept(cmdSession, args);
+            return null;
         }
     }
 

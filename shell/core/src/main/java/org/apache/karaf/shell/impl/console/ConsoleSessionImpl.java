@@ -29,10 +29,12 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.felix.gogo.api.Job;
+import org.apache.felix.gogo.api.Job.Status;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
@@ -260,6 +262,28 @@ public class ConsoleSessionImpl implements Session {
             Properties brandingProps = Branding.loadBrandingProperties(terminal);
             welcome(brandingProps);
             setSessionProperties(brandingProps);
+
+            AtomicBoolean reading = new AtomicBoolean();
+
+            session.setJobListener((job, previous, current) -> {
+                if (previous == Status.Background || current == Status.Background
+                        || previous == Status.Suspended || current == Status.Suspended) {
+                    int width = terminal.getWidth();
+                    String status = current.name().toLowerCase();
+                    jlineTerminal.writer().write(getStatusLine(job, width, status));
+                    jlineTerminal.flush();
+                    if (reading.get()) {
+                        reader.redrawLine();
+                        reader.redisplay();
+                    }
+                }
+            });
+            jlineTerminal.handle(Signal.TSTP, s -> {
+                Job current = session.foregroundJob();
+                if (current != null) {
+                    current.suspend();
+                }
+            });
             jlineTerminal.handle(Signal.INT, s -> {
                 Job current = session.foregroundJob();
                 if (current != null) {
@@ -271,7 +295,13 @@ public class ConsoleSessionImpl implements Session {
             executeScript(scriptFileName);
             while (running) {
                 try {
-                    String command = reader.readLine(getPrompt());
+                    reading.set(true);
+                    String command;
+                    try {
+                        command = reader.readLine(getPrompt());
+                    } finally {
+                        reading.set(false);
+                    }
                     Object result = session.execute(command);
                     if (result != null) {
                         session.getConsole().println(session.format(result, Converter.INSPECT));
@@ -292,6 +322,21 @@ public class ConsoleSessionImpl implements Session {
                 // Ignore
             }
         }
+    }
+
+    private String getStatusLine(Job job, int width, String status) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < width - 1; i++) {
+            sb.append(' ');
+        }
+        sb.append('\r');
+        sb.append("[").append(job.id()).append("]  ");
+        sb.append(status);
+        for (int i = status.length(); i < "background".length(); i++) {
+            sb.append(' ');
+        }
+        sb.append("  ").append(job.command()).append("\n");
+        return sb.toString();
     }
 
     @Override
