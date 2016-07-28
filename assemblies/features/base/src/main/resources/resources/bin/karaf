@@ -510,8 +510,14 @@ run() {
     done
 }
 
+nothing() {
+   # nothing to do here
+   a=a
+}
+
 main() {
     init
+    trap 'nothing' SIGTSTP
     run "$@"
 }
 
