@@ -42,7 +42,6 @@
             <groupId>test</groupId>
             <artifactId>dependency-bundle-b</artifactId>
             <version>${project.version}</version>
-            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
