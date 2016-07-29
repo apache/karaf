@@ -16,17 +16,25 @@
  */
 package org.apache.karaf.features.internal;
 
-import static java.util.Arrays.asList;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService.Option;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
-import org.junit.Assert;
 import org.junit.Test;
+
+import static java.util.Arrays.asList;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
 
 public class BootFeaturesInstallerTest extends TestBase {
 
@@ -34,11 +42,20 @@ public class BootFeaturesInstallerTest extends TestBase {
     @SuppressWarnings("unchecked")
     public void testParser() {
         BootFeaturesInstaller installer = new BootFeaturesInstaller(null, null, "", false);
-        Assert.assertEquals(asList(setOf("test1", "test2"), setOf("test3")), installer.parseBootFeatures(" ( test1 , test2 ) , test3 "));
-        Assert.assertEquals(asList(setOf("test1", "test2", "test3")), installer.parseBootFeatures(" test1 , test2, test3"));
-        Assert.assertEquals(asList(setOf("test1"), setOf("test2"), setOf("test3")), installer.parseBootFeatures("(test1), (test2), test3"));
+
+        assertEquals(asList(orderedSet("test1", "test2"), orderedSet("test3")), installer.parseBootFeatures(" ( test1 , test2 ) , test3 "));
+        assertEquals(asList(orderedSet("test1", "test2", "test3")), installer.parseBootFeatures(" test1 , test2, test3"));
+        assertEquals(asList(orderedSet("test1"), orderedSet("test2"), orderedSet("test3")), installer.parseBootFeatures("(test1), (test2), test3"));
     }
-    
+
+    private <T> Set<T> orderedSet(T... elements) {
+        Set<T> set = new LinkedHashSet<T>();
+        for (T element : elements) {
+            set.add(element);
+        }
+        return set;
+    }
+
     @Test
     public void testDefaultBootFeatures() throws Exception  {
         FeaturesServiceImpl impl = EasyMock.createMock(FeaturesServiceImpl.class);
@@ -49,14 +66,18 @@ public class BootFeaturesInstallerTest extends TestBase {
         expect(impl.getFeature("config", "0.0.0")).andReturn(configFeature);
         expect(impl.getFeature("standard", "0.0.0")).andReturn(standardFeature);
         expect(impl.getFeature("region", "0.0.0")).andReturn(regionFeature);
-
-        impl.installFeatures(setOf(configFeature, standardFeature, regionFeature), EnumSet.of(Option.NoAutoRefreshBundles, Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+        Capture<Set<Feature>> featuresCapture = EasyMock.newCapture();
+        impl.installFeatures(capture(featuresCapture), eq(EnumSet.of(Option.NoAutoRefreshBundles, Option.NoCleanIfFailure, Option.ContinueBatchOnFailure)));
         EasyMock.expectLastCall();
         
         replay(impl);
         BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, "config,standard,region", false);
         bootFeatures.installBootFeatures();
-        EasyMock.verify(impl);        
+        EasyMock.verify(impl);
+        List<Feature> installedFeatures = new LinkedList<Feature>(featuresCapture.getValue());
+        assertEquals(3, installedFeatures.size());
+        assertEquals(Arrays.asList(configFeature, standardFeature, regionFeature), installedFeatures);
+
     }
 
     /**

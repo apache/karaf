@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -99,7 +100,7 @@ public class BootFeaturesInstaller {
 	private List<Set<Feature>> toFeatureSetList(List<Set<String>> stagedFeatures) {
 	    ArrayList<Set<Feature>> result = new ArrayList<Set<Feature>>();
 	    for (Set<String> features : stagedFeatures) {
-	        HashSet<Feature> featureSet = new HashSet<Feature>();
+	        HashSet<Feature> featureSet = new LinkedHashSet<Feature>();
             for (String featureName : features) {
                 try {
                     Feature feature = getFeature(featureName);
@@ -152,7 +153,7 @@ public class BootFeaturesInstaller {
     }
 
     private Set<String> parseFeatureList(String group) {
-        HashSet<String> features = new HashSet<String>();
+        HashSet<String> features = new LinkedHashSet<String>();
         for (String feature : Arrays.asList(group.trim().split("\\s*,\\s*"))) {
             if (feature.length() > 0) {
                 features.add(feature);
