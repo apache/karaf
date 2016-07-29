@@ -16,10 +16,20 @@
 #    limitations under the License.
 #
 
-REALNAME=`readlink -e "$0" > /dev/null 2>&1`
-if [ $? != 0 ]; then
-    REALNAME=$0
-fi
+realpath() {
+  OURPWD=${PWD}
+  cd "$(dirname "${1}")"
+  LINK=$(readlink "$(basename "${1}")")
+  while [ "${LINK}" ]; do
+    cd "$(dirname "${LINK}")"
+    LINK=$(readlink "$(basename "${1}")")
+  done
+  REALPATH="${PWD}/$(basename "${1}")"
+  cd "${OURPWD}"
+  echo "${REALPATH}"
+}
+
+REALNAME=$(realpath "$0")
 DIRNAME=$(dirname "${REALNAME}")
 PROGNAME=$(basename "${REALNAME}")
 
