@@ -255,6 +255,7 @@
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
+        <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
         <org.json.version>20150729</org.json.version>
