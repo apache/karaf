@@ -94,20 +94,10 @@
         <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.1</bundle>
     </feature>
     
-    <feature name="persistence-api" description="Persistence API" version="2.0.0">
-        <details>Persistence API</details>
-        <bundle>mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
-    </feature>
-    
-    <feature name="persistence-api" description="Persistence API" version="2.1.0">
-        <details>Persistence API</details>
-        <bundle>mvn:org.eclipse.persistence/javax.persistence/2.1.0</bundle>
-    </feature>
-    
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.container.context.version}">
         <details>JPA implementation provided by Apache Aries JPA 1.x. NB: this feature doesn"t provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <feature version="[1.1,2)">transaction-api</feature>
-        <feature version="[2.0.0,2.2.0)">persistence-api</feature>
+	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.api.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.container.version}</bundle>
@@ -121,9 +111,10 @@
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}">
         <details>JPA implementation provided by Apache Aries JPA 2.x. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <feature version="[1.1,2)">transaction-api</feature>
-        <feature version="[2.0.0,2.2.0)">persistence-api</feature>
+	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
-	    <bundle dependency="true">mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
+        <bundle dependency="true">mvn:org.osgi/org.osgi.service.jpa/${org.osgi.service.jpa.version}</bundle>
+        <bundle dependency="true">mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.support/${aries.jpa.version}</bundle>
@@ -137,7 +128,7 @@
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature>jndi</feature>
         <feature version="[1.1,1.2)">transaction-api</feature>
-        <feature version="[2.0.0,2.1.0)">persistence-api</feature>
+	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/1.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-el_1.0_spec/1.0.1</bundle>
@@ -155,7 +146,7 @@
     <feature name="openjpa" description="Apache OpenJPA 2.3.x persistence engine support" version="2.3.0">
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature version="[1.1,1.2)">transaction-api</feature>
-        <feature version="[2.0.0,2.1.0)">persistence-api</feature>
+	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/1.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-el_1.0_spec/1.0.1</bundle>
@@ -175,7 +166,7 @@
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature>jndi</feature>
         <feature version="[1.2,1.3)">transaction-api</feature>
-        <feature version="[2.0.0,2.1.0)">persistence-api</feature>
+	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/1.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-el_1.0_spec/1.0.1</bundle>
@@ -193,7 +184,7 @@
     <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}">
         <details>Enable Hibernate 3.x as persistence engine.</details>
         <feature>jndi</feature>
-        <feature version="[2.0.0,2.1.0)">persistence-api</feature>
+	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
         <bundle dependency="true">mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/${commons-dbcp.version}</bundle>
@@ -210,7 +201,7 @@
 
     <feature name="hibernate" description="Hibernate 4.2.x JPA persistence engine support" version="${hibernate42.version}">
         <details>Enable Hibernate 4.2.x as persistence engine.</details>
-        <feature version="[2.0.0,2.1.0)">persistence-api</feature>
+	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <feature>http</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.bundle.version}</bundle>
@@ -236,7 +227,7 @@
     <feature name="hibernate" description="Hibernate 4.3.x JPA persistence engine support" version="${hibernate43.version}">
         <details>Enable Hibernate 4.3.x as persistence engine.</details>
         <feature>http</feature>
-        <feature version="[2.1.0,2.2.0)">persistence-api</feature>
+        <bundle dependency="true">mvn:org.eclipse.persistence/javax.persistence/2.1.0</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
@@ -269,7 +260,7 @@
 
     <feature name="eclipselink" description="Eclipselink JPA persistence engine support" version="${eclipselink.version}">
         <details>Eclipselink persistence engine.</details>
-        <feature version="[2.1.0,2.2.0)">persistence-api</feature>
+        <bundle dependency="true">mvn:org.eclipse.persistence/javax.persistence/2.1.0</bundle>
         <feature version="[2,3)">transaction</feature>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa/${eclipselink.version}</bundle>
