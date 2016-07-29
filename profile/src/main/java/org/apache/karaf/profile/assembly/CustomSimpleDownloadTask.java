@@ -76,7 +76,7 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
         if(url.contains("\\")){
             url = url.replace("\\","/");
         }
-        String scheme = new URI(url).getScheme();
+        String scheme = url.substring(0, url.indexOf(':'));
         switch (scheme) {
         case WRAP_URI_PREFIX:
             return new org.ops4j.pax.url.wrap.Handler();
