@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -31,16 +32,29 @@ public final class JsonWriter {
     }
 
     public static void write(OutputStream stream, Object value) throws IOException {
+        write(stream, value, false);
+    }
+
+    public static void write(OutputStream stream, Object value, boolean format) throws IOException {
         Writer writer = new OutputStreamWriter(stream);
-        write(writer, value);
+        write(writer, value, format);
         writer.flush();
     }
 
     public static void write(Writer writer, Object value) throws IOException {
+        write(writer, value, false);
+    }
+
+    public static void write(Writer writer, Object value, boolean format) throws IOException {
+        int indent = format ? 0 : -1;
+        write(writer, value, indent);
+    }
+
+    private static void write(Writer writer, Object value, int indent) throws IOException {
         if (value instanceof Map) {
-            writeObject(writer, (Map) value);
+            writeObject(writer, (Map) value, indent);
         } else if (value instanceof Collection) {
-            writeArray(writer, (Collection) value);
+            writeArray(writer, (Collection) value, indent);
         } else if (value instanceof Number) {
             writeNumber(writer, (Number) value);
         } else if (value instanceof String) {
@@ -54,7 +68,7 @@ public final class JsonWriter {
         }
     }
 
-    private static void writeObject(Writer writer, Map<?, ?> value) throws IOException {
+    private static void writeObject(Writer writer, Map<?, ?> value, int indent) throws IOException {
         writer.append('{');
         boolean first = true;
         for (Map.Entry entry : value.entrySet()) {
@@ -63,9 +77,21 @@ public final class JsonWriter {
             } else {
                 first = false;
             }
+            if (indent >= 0) {
+                indent(writer, indent + 1);
+            }
             writeString(writer, (String) entry.getKey());
+            if (indent >= 0) {
+                writer.append(' ');
+            }
             writer.append(':');
-            write(writer, entry.getValue());
+            if (indent >= 0) {
+                writer.append(' ');
+            }
+            write(writer, entry.getValue(), indent + 1);
+        }
+        if (indent >= 0) {
+            indent(writer, indent);
         }
         writer.append('}');
     }
@@ -122,7 +148,7 @@ public final class JsonWriter {
         writer.append(Boolean.toString(value));
     }
 
-    private static void writeArray(Writer writer, Collection<?> value) throws IOException {
+    private static void writeArray(Writer writer, Collection<?> value, int indent) throws IOException {
         writer.append('[');
         boolean first = true;
         for (Object obj : value) {
@@ -131,12 +157,34 @@ public final class JsonWriter {
             } else {
                 first = false;
             }
-            write(writer, obj);
+            if (indent >= 0) {
+                indent(writer, indent + 1);
+            }
+            write(writer, obj, indent + 1);
+        }
+        if (indent >= 0) {
+            indent(writer, indent);
         }
         writer.append(']');
     }
 
     private static void writeNull(Writer writer) throws IOException {
         writer.append("null");
+    }
+
+    static char[] INDENT;
+    static {
+        INDENT = new char[1];
+        Arrays.fill(INDENT, '\t');
+    }
+
+    private static void indent(Writer writer, int indent) throws IOException {
+        writer.write("\n");
+        while (indent > INDENT.length) {
+            char[] a = new char[INDENT.length * 2];
+            Arrays.fill(a, '\t');
+            INDENT = a;
+        }
+        writer.write(INDENT, 0, indent);
     }
 }

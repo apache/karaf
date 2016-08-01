@@ -50,6 +50,15 @@ public class RequirementRemove extends FeaturesCommandSupport {
     @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only")
     boolean simulate;
 
+    @Option(name = "--store", description = "Store the resolution into the given file and result for offline analysis")
+    String outputFile;
+
+    @Option(name = "--features-wiring", description = "Print the wiring between features")
+    boolean featuresWiring;
+
+    @Option(name = "--all-wiring", description = "Print the full wiring")
+    boolean allWiring;
+
     @Option(name = "-g", aliases = "--region", description = "Region to apply to")
     String region = FeaturesService.ROOT_REGION;
 
@@ -60,8 +69,11 @@ public class RequirementRemove extends FeaturesCommandSupport {
         addOption(FeaturesService.Option.NoAutoRefreshBundles, noRefresh);
         addOption(FeaturesService.Option.NoAutoManageBundles, noManage);
         addOption(FeaturesService.Option.Verbose, verbose);
+        addOption(FeaturesService.Option.DisplayFeaturesWiring, featuresWiring);
+        addOption(FeaturesService.Option.DisplayAllWiring, allWiring);
         Map<String, Set<String>> reqs = new HashMap<>();
         reqs.put(region, new HashSet<>(requirements));
+        featuresService.setResolutionOutputFile(outputFile);
         featuresService.removeRequirements(reqs, options);
     }
 
