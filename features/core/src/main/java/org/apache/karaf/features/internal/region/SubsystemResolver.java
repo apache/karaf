@@ -209,7 +209,7 @@ public class SubsystemResolver {
                         Paths.get(outputFile),
                         StandardCharsets.UTF_8,
                         StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-                    JsonWriter.write(writer, json);
+                    JsonWriter.write(writer, json, true);
                 }
             }
         } else {
