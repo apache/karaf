@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -58,7 +59,7 @@ public class BootFeaturesInstaller {
      * The system separator character.
      */
     private static final char SYSTEM_SEPARATOR = File.separatorChar;
-
+    
     public BootFeaturesInstaller(BundleContext bundleContext,
                                  FeaturesServiceImpl featuresService,
                                  String repositories,
@@ -138,7 +139,7 @@ public class BootFeaturesInstaller {
     }
 
     protected Set<String> parseFeatureList(String group) {
-        HashSet<String> features = new HashSet<>();
+        HashSet<String> features = new LinkedHashSet<>();
         for (String feature : Arrays.asList(group.trim().split("\\s*,\\s*"))) {
             if (feature.length() > 0) {
                 features.add(feature);

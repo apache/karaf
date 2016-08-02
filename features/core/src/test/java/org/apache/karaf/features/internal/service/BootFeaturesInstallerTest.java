@@ -16,20 +16,27 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import static java.util.Arrays.asList;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.junit.Assert.fail;
-
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
-import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService.Option;
 import org.apache.karaf.features.TestBase;
-import org.easymock.EasyMock;
+import org.easymock.Capture;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static java.util.Arrays.asList;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createStrictMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.newCapture;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 public class BootFeaturesInstallerTest extends TestBase {
 
@@ -44,51 +51,57 @@ public class BootFeaturesInstallerTest extends TestBase {
     
     @Test
     public void testDefaultBootFeatures() throws Exception  {
-        FeaturesServiceImpl impl = EasyMock.createMock(FeaturesServiceImpl.class);
+        FeaturesServiceImpl impl = createMock(FeaturesServiceImpl.class);
 
-        impl.installFeatures(setOf("config", "standard", "region"), EnumSet.of(Option.NoFailOnFeatureNotFound));
-        EasyMock.expectLastCall();
+        Capture<Set<String>> featuresCapture = newCapture();
+        impl.installFeatures(capture(featuresCapture), eq(EnumSet.of(Option.NoFailOnFeatureNotFound)));
+        expectLastCall();
 
         impl.bootDone();
-        EasyMock.expectLastCall();
+        expectLastCall();
 
         replay(impl);
         BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, "", "config,standard,region", false);
         bootFeatures.installBootFeatures();
-        EasyMock.verify(impl);        
+        verify(impl);
+
+        List<String> features = new ArrayList<String>(featuresCapture.getValue());
+        Assert.assertEquals("config", features.get(0));
+        Assert.assertEquals("standard", features.get(1));
+        Assert.assertEquals("region", features.get(2));
     }
 
     @Test
     public void testStagedBoot() throws Exception  {
-        FeaturesServiceImpl impl = EasyMock.createStrictMock(FeaturesServiceImpl.class);
+        FeaturesServiceImpl impl = createStrictMock(FeaturesServiceImpl.class);
 
         impl.installFeatures(setOf("transaction"), EnumSet.of(Option.NoFailOnFeatureNotFound));
-        EasyMock.expectLastCall();
+        expectLastCall();
         impl.installFeatures(setOf("ssh"), EnumSet.of(Option.NoFailOnFeatureNotFound));
-        EasyMock.expectLastCall();
+        expectLastCall();
 
         impl.bootDone();
-        EasyMock.expectLastCall();
+        expectLastCall();
 
         replay(impl);
         BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl , "", "(transaction), ssh", false);
         bootFeatures.installBootFeatures();
-        EasyMock.verify(impl);        
+        verify(impl);
     }
 
     @Test
     public void testStartDoesNotFailWithOneInvalidUri() throws Exception {
-        FeaturesServiceImpl impl = EasyMock.createStrictMock(FeaturesServiceImpl.class);
+        FeaturesServiceImpl impl = createStrictMock(FeaturesServiceImpl.class);
         impl.addRepository(URI.create("mvn:inexistent/features/1.0/xml/features"));
-        EasyMock.expectLastCall().andThrow(new IllegalArgumentException());
+        expectLastCall().andThrow(new IllegalArgumentException());
 
         impl.bootDone();
-        EasyMock.expectLastCall();
+        expectLastCall();
 
         replay(impl);
         BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, "mvn:inexistent/features/1.0/xml/features", "", false);
         bootFeatures.installBootFeatures();
-        EasyMock.verify(impl);
+        verify(impl);
     }
 
 }
