@@ -34,7 +34,6 @@
     <name>Apache Karaf :: Features</name>
 
 	<modules>
-		<module>activemq-cf</module>
 		<module>core</module>
 	</modules>
 </project>
