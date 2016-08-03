@@ -127,7 +127,7 @@ public class ArchiveMojo extends MojoSupport {
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
             IOException {
         String serverName = null;
-        if (targetFile != null && project.getPackaging().equals("karaf-assembly")) {
+        if (targetFile != null) {
             serverName = targetFile.getName();
         } else {
            serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
