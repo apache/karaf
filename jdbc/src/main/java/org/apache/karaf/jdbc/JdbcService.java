@@ -34,9 +34,10 @@ public interface JdbcService {
      * @param url The JDBC URL.
      * @param user The database user name.
      * @param password The database password.
+     * @param databaseType The database type (ConnectionPoolDataSource, XADataSource or DataSource).
      * @throws Exception If the service fails.
      */
-    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws Exception;
+    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws Exception;
 
     /**
      * Delete a JDBC datasource identified by a name. Works only

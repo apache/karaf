@@ -54,7 +54,7 @@ public class JdbcServiceImpl implements JdbcService {
     private ConfigurationAdmin configAdmin;
     
     @Override
-    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws Exception {
+    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws Exception {
         if (driverName == null && driverClass == null) {
             throw new IllegalStateException("No driverName or driverClass supplied");
         }
@@ -80,6 +80,9 @@ public class JdbcServiceImpl implements JdbcService {
         }
         if (password != null) {
             properties.put(DataSourceFactory.JDBC_PASSWORD, password);
+        }
+        if (databaseType != null) {
+            properties.put("dataSourceType", databaseType);
         }
         Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.datasource", null);
         config.update(properties);
