@@ -61,7 +61,12 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
         kmf.init(ks, "123456".toCharArray());
         tmf.init(ks);
 
-        sslContext = SSLContext.getInstance("TLSv1.2");
+        String javaVendor = System.getProperty("java.vendor");
+        if (javaVendor.contains("IBM")) {
+        	sslContext = SSLContext.getInstance("SSL_TLSv2","IBMJSSE2");
+        } else {
+            sslContext = SSLContext.getInstance("TLSv1.2");
+        }
         sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
     }
 
