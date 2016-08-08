@@ -15,6 +15,28 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 3.0.8
+                    ==================
+
+  This is an update patch for Apache Karaf 3.0.x, containing many bug fixes, dependency updates, and some improvements.
+
+  Changelog
+  ---------
+** Bug
+    * [KARAF-4599] - KARAF-4564 impact: karaf startup command now only works when invoked from current directoy, no longer via absolute path
+    * [KARAF-4607] - ldap connection pool not created when using ssl (ldaps)
+    * [KARAF-4628] - Can not start karaf on linux
+    * [KARAF-4642] - featuresBoot order is not honored
+
+** Dependency upgrade
+    * [KARAF-4622] - Upgrade to Spring 3.2.17
+
+** Improvement
+    * [KARAF-884] - karaf-maven-plugin should more closely map to POMs
+
+** Test
+    * [KARAF-4646] - LdapPoolingTest fails with IBM JDK
+
                     Apache Karaf 3.0.7
                     ==================
 
