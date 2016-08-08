@@ -18,21 +18,6 @@
  */
 package org.apache.karaf.tooling;
 
-import org.apache.karaf.profile.assembly.Builder;
-import org.apache.karaf.tooling.utils.IoUtils;
-import org.apache.karaf.tooling.utils.MavenUtil;
-import org.apache.karaf.tooling.utils.MojoSupport;
-import org.apache.karaf.tools.utils.KarafPropertiesEditor;
-import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
-import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -42,6 +27,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.karaf.profile.assembly.Builder;
+import org.apache.karaf.tooling.utils.IoUtils;
+import org.apache.karaf.tooling.utils.MavenUtil;
+import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
+import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a customized Karaf distribution by installing features and setting up
@@ -144,7 +143,7 @@ public class AssemblyMojo extends MojoSupport {
     private List<String> blacklistedProfiles;
 
     @Parameter
-    private Builder.BlacklistPolicy blacklistPolicy;
+    private Builder.BlacklistPolicy blacklistPolicy = Builder.BlacklistPolicy.Discard;
 
     /**
      * Ignore the dependency attribute (dependency="[true|false]") on bundle
