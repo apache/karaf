@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.jdbc</groupId>
         <artifactId>jdbc</artifactId>
-        <version>3.0.8-SNAPSHOT</version>
+        <version>3.0.8</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
