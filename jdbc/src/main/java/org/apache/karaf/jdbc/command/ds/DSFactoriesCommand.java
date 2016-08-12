@@ -17,9 +17,6 @@
 package org.apache.karaf.jdbc.command.ds;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.karaf.jdbc.command.JdbcCommandSupport;
 import org.apache.karaf.shell.api.action.Command;
