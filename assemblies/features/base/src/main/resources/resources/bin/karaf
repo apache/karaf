@@ -456,7 +456,8 @@ run() {
                 ;;
         esac
     done
-
+   
+    JAVA_ENDORSED_DIRS="${JAVA_HOME}/jre/lib/endorsed:${JAVA_HOME}/lib/endorsed:${KARAF_HOME}/lib/endorsed"
     JAVA_EXT_DIRS="${JAVA_HOME}/jre/lib/ext:${JAVA_HOME}/lib/ext:${KARAF_HOME}/lib/ext"
     if ${cygwin}; then
         KARAF_HOME=$(cygpath --path --windows "${KARAF_HOME}")
