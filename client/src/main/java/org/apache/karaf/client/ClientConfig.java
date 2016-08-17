@@ -46,6 +46,7 @@ public class ClientConfig {
     private String file = null;
     private String keyFile = null;
     private String command;
+    private boolean interactiveMode = false;
 
     public ClientConfig(String[] args) throws IOException {
         Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
@@ -98,6 +99,8 @@ public class ClientConfig {
                         System.exit(1);
                     } else {
                         user = args[i];
+                        interactiveMode = true;
+                        password = null;//get chance to input the password with interactive way
                     }
                 } else if (args[i].equals("-v")) {
                     level++;
@@ -180,9 +183,13 @@ public class ClientConfig {
                     user = (String) users.iterator().next();
                 }
             }
-            password = (String) usersCfg.getProperty(user);
-            if (password != null && password.contains(ROLE_DELIMITER)) {
-                password = password.substring(0, password.indexOf(ROLE_DELIMITER));
+            if (interactiveMode) {
+                password = null;
+            } else {
+                password = (String) usersCfg.getProperty(user);
+                if (password != null && password.contains(ROLE_DELIMITER)) {
+                    password = password.substring(0, password.indexOf(ROLE_DELIMITER));
+                }
             }
         }
 
