@@ -18,6 +18,8 @@ package org.apache.karaf.service.guard.tools;
 
 import java.util.*;
 
+import org.apache.karaf.service.guard.impl.GuardProxyCatalog;
+
 public class ACLConfigurationParser {
 
     // note that the order of the enums is important. Needs to be from most specific to least specific.
@@ -29,6 +31,12 @@ public class ACLConfigurationParser {
         NO_MATCH
     };
 
+    static String compulsoryRoles;
+    
+    static {
+        compulsoryRoles = System.getProperty(GuardProxyCatalog.KARAF_SECURED_COMMAND_COMPULSORY_ROLES_PROPERTY);
+    }
+    
     /**
      * <p>Returns the roles that can invoke the given operation. This is determined by matching the
      * operation details against configuration provided.</p>
@@ -93,9 +101,13 @@ public class ACLConfigurationParser {
         if (roles != null) {
             addToRoles.addAll(roles);
             return Specificity.WILDCARD_MATCH;
+        } else if (compulsoryRoles != null){
+            addToRoles.addAll(ACLConfigurationParser.parseRoles(compulsoryRoles));
+            return Specificity.NAME_MATCH;
         } else {
             return Specificity.NO_MATCH;
         }
+            
     }
 
     private static Specificity getRolesBasedOnSignature(String methodName, Object[] params, String[] signature,
