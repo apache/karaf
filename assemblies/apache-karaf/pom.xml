@@ -203,6 +203,9 @@
 
                         <library>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activator/${servicemix.specs.version};type:=default;export:=true</library>
                         <library>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.locator/${servicemix.specs.version};type:=default;export:=true</library>
+
+                        <library>mvn:net.java.dev.jna/jna/${jna.version};type:=boot;export:=false</library>
+                        <library>mvn:net.java.dev.jna/jna-platform/${jna.version};type:=boot;export:=false</library>
                     </libraries>
                     <javase>1.8</javase>
                 </configuration>
