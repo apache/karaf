@@ -45,6 +45,7 @@ public class LDAPOptions {
     public static final String ROLE_MAPPING = "role.mapping";
     public static final String AUTHENTICATION = "authentication";
     public static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
+    public static final String DISABLE_CACHE = "disableCache";
     public static final String INITIAL_CONTEXT_FACTORY = "initial.context.factory";
     public static final String CONTEXT_PREFIX = "context.";
     public static final String SSL = "ssl";
@@ -265,4 +266,9 @@ public class LDAPOptions {
     public boolean getAllowEmptyPasswords() {
         return Boolean.parseBoolean((String) options.get(ALLOW_EMPTY_PASSWORDS));
     }
+
+    public boolean getDisableCache() {
+        return Boolean.parseBoolean((String) options.get(DISABLE_CACHE));
+    }
+
 }
