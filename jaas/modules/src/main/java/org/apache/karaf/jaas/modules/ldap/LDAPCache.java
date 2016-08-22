@@ -117,17 +117,19 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         final SearchControls constraints = new SearchControls();
         constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-        String filter = options.getUserFilter();
-        filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
-        filter = filter.replace("\\", "\\\\");
-        eventContext.addNamingListener(options.getUserBaseDn(), filter, constraints, this);
+        if (!options.getDisableCache()) {
+            String filter = options.getUserFilter();
+            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
+            filter = filter.replace("\\", "\\\\");
+            eventContext.addNamingListener(options.getUserBaseDn(), filter, constraints, this);
 
-        filter = options.getRoleFilter();
-        filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
-        filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement("*"));
-        filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement("*"));
-        filter = filter.replace("\\", "\\\\");
-        eventContext.addNamingListener(options.getRoleBaseDn(), filter, constraints, this);
+            filter = options.getRoleFilter();
+            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
+            filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement("*"));
+            filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement("*"));
+            filter = filter.replace("\\", "\\\\");
+            eventContext.addNamingListener(options.getRoleBaseDn(), filter, constraints, this);
+        }
 
         return context;
     }
@@ -136,7 +138,7 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         String[] result = userDnAndNamespace.get(user);
         if (result == null) {
             result = doGetUserDnAndNamespace(user);
-            if (result != null) {
+            if (result != null && !options.getDisableCache()) {
                 userDnAndNamespace.put(user, result);
             }
         }
@@ -201,7 +203,9 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         String[] result = userRoles.get(userDn);
         if (result == null) {
             result = doGetUserRoles(user, userDn, userDnNamespace);
-            userRoles.put(userDn, result);
+            if (!options.getDisableCache()) {
+                userRoles.put(userDn, result);
+            }
         }
         return result;
     }
