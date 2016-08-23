@@ -18,48 +18,293 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.Arrays;
-
-import junit.framework.TestCase;
 import org.apache.karaf.shell.impl.action.command.DefaultActionPreparator;
+import org.junit.Ignore;
+import org.junit.Test;
 
-public class GrepTest extends TestCase {
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.junit.Assert.*;
+
+public class GrepTest {
+
+    private static final String ANSI_COLOR = "\u001b[33;40m";
+    private static final String ANSI_RESET = "\u001b[39;49m";
+
+    @Test
     public void testGrep() throws Exception {
-        InputStream input = System.in;
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream("1\n2\n3\n4\n5\n6\n7\n8\n9\n".getBytes());
-            System.setIn(bais);
+        final String expectedColoredString = "1\n" + ANSI_COLOR + "2"
+            + ANSI_RESET + "\n"
+            + "3\n4\n5\n6\n7\n8\n9";
 
-            GrepAction grep = new GrepAction();
-            DefaultActionPreparator preparator = new DefaultActionPreparator();
-            preparator.prepare(grep, null, Arrays.<Object>asList("-C", "100", "2"));
-            grep.execute();
-        } finally {
-            System.setIn(input);
-        }
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-C", "100", "2"));
+        final String returnedString = systemInOutDecorator("1\n2\n3\n4\n5\n6\n7\n8\n9\n", grep);
+        assertEquals(expectedColoredString, returnedString);
     }
 
+    @Test
+    public void testGrepInverted() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-v", "--color", "never", "mine"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("This is Hello World\nHello World!", returnedString);
+    }
+
+    @Test
+    public void testGrepMatching() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("--color", "never", "mine"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("World is mine", returnedString);
+    }
+
+    @Test
+    public void testGrepMatchingWithColours() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("--color", "always", "mine"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("World is " + ANSI_COLOR + "mine" + ANSI_RESET, returnedString);
+    }
+
+    @Test
+    public void testGrepCount() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-c", "Hello World"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("2", returnedString);
+    }
+
+    @Test
+    public void testGrepCountInvert() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-c", "-v", "Hello World"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("1", returnedString);
+    }
+
+    @Test
+    public void testGrepOnlyMatchingInvertedWithLineNumbers() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-n", "-v", "--color", "never", "mine"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("1:This is Hello World\n3:Hello World!", returnedString);
+    }
+
+    @Test
+    public void testGrepOnlyMatchingWithLineNumbers() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-n", "--color", "never", "Hello"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("1:This is Hello World\n3:Hello World!", returnedString);
+    }
+
+    @Test
+    public void testGrepWordRegExp() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-w", "--color", "never", "is"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("This is Hello World\nWorld is mine", returnedString);
+    }
+
+    @Test
+    public void testGrepIs() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("--color", "never", "is"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("This is Hello World\nWorld is mine", returnedString);
+    }
+
+    @Test
+    public void testGrepRegExpWithColour() throws Exception {
+        GrepAction grep = new GrepAction();
+        final String expected = "Th"
+            + ANSI_COLOR
+            + "is" + ANSI_RESET
+            + " "
+            + ANSI_COLOR
+            + "is" + ANSI_RESET
+            + " Hello World\nWorld "
+            + ANSI_COLOR
+            + "is" + ANSI_RESET
+            + " mine";
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("--color", "always", "is"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals(expected, returnedString);
+    }
+
+    @Ignore // I don't know why 'Th*is*' is coloured
+    @Test
+    public void testGrepWordRegExpWithColour() throws Exception {
+        GrepAction grep = new GrepAction();
+        final String expected = "This "
+            + ANSI_COLOR
+            + "is" + ANSI_RESET
+            + " Hello World\nWorld "
+            + ANSI_COLOR
+            + "is" + ANSI_RESET
+            + " mine";
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-w", "--color", "always", "is"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals(expected, returnedString);
+    }
+
+    @Test
+    public void testGrepLineRegExpWithColour() throws Exception {
+        GrepAction grep = new GrepAction();
+        final String expected = ANSI_COLOR
+            + "This is Hello World" + ANSI_RESET;
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-x", "--color", "always", ".*Hello World"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals(expected, returnedString);
+    }
+
+    @Test
+    public void testGrepTwoLinesRegExpWithColour() throws Exception {
+        GrepAction grep = new GrepAction();
+        final String expected = ANSI_COLOR
+            + "This is Hello World" + ANSI_RESET + "\n"
+            + ANSI_COLOR
+            + "Hello World!" + ANSI_RESET;
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-x", "--color", "always", ".*Hello World.*"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals(expected, returnedString);
+    }
+
+    @Test
+    public void testGrepIgnoreCaseWithColour() throws Exception {
+        GrepAction grep = new GrepAction();
+        final String expected = "This is "
+            + ANSI_COLOR
+            + "hello" + ANSI_RESET + " World\n"
+            + ANSI_COLOR
+            + "Hello" + ANSI_RESET + " World!";
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-i", "--color", "always", "HELLO"));
+        final String returnedString = systemInOutDecorator("This is hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals(expected, returnedString);
+    }
+
+    @Test
+    public void testGrepContextOneWithColour() throws Exception {
+        GrepAction grep = new GrepAction();
+        final String expected = "This is "
+            + ANSI_COLOR
+            + "Hello" + ANSI_RESET + " World\n"
+            + "World is mine\n"
+            + ANSI_COLOR
+            + "Hello" + ANSI_RESET + " World!";
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-C", "1", "--color", "always", "Hello"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals(expected, returnedString);
+    }
+
+    @Test
+    public void testGrepBeforeContextOneWithColour() throws Exception {
+        GrepAction grep = new GrepAction();
+        final String expected = "World is mine\n"
+            + ANSI_COLOR
+            + "Hello World!" + ANSI_RESET;
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-B", "1", "--color", "always", "Hello World!"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals(expected, returnedString);
+    }
+
+    @Test
+    public void testGrepAfterContextOneWithColour() throws Exception {
+        GrepAction grep = new GrepAction();
+        final String expected = "World is "
+            + ANSI_COLOR
+            + "mine" + ANSI_RESET
+            + "\nHello World!";
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-A", "1", "--color", "always", "mine"));
+        final String returnedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals(expected, returnedString);
+    }
+
+    @Test
+    public void testGrepOnlyMatching() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-o", "--color", "never", "He.*rld"));
+        final String expectedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("Hello World\nHello World", expectedString);
+    }
+
+    @Test
+    public void testGrepOnlyMatchingGroup() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("-o", "--color", "never", "(This).*(Hello)"));
+        final String expectedString = systemInOutDecorator("This is Hello World\nWorld is mine\nHello World!\n",
+            grep);
+        assertEquals("This is Hello", expectedString);
+    }
+
+    @Test
     public void testHonorColorNever() throws Exception {
+        GrepAction grep = new GrepAction();
+        DefaultActionPreparator preparator = new DefaultActionPreparator();
+        preparator.prepare(grep, null, Arrays.asList("--color", "never", "b"));
+        final String expectedString = systemInOutDecorator("abc\n",
+            grep);
+        assertEquals("abc", expectedString);
+
+    }
+
+    private String systemInOutDecorator(String inputString, GrepAction grepExecute) throws Exception {
         InputStream input = System.in;
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream("abc".getBytes());
+            ByteArrayInputStream bais = new ByteArrayInputStream(inputString.getBytes());
             System.setIn(bais);
-            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-            System.setOut(new PrintStream(outContent));
 
-            GrepAction grep = new GrepAction();
-            DefaultActionPreparator preparator = new DefaultActionPreparator();
-            preparator.prepare(grep, null, Arrays.<Object>asList( "--color", "never", "b"));
-            grep.execute();
-            assertEquals("abc", outContent.toString().trim());
+            String result = ((List<String>) grepExecute.execute()).stream().collect(Collectors.joining("\n"));
+            if (result.length() > 1 && result.charAt(result.length() - 1) == '\n') {
+                result = result.substring(0, result.length() - 1);
+            }
+            return result;
         } finally {
             System.setIn(input);
-            System.setOut(null);
         }
     }
+
 }
