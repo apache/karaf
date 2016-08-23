@@ -184,6 +184,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private Map<String, Map<String, Feature>> featureCache;
 
     public FeaturesServiceImpl(Bundle bundle,
+                               BundleContext bundleContext,
                                BundleContext systemBundleContext,
                                StateStorage storage,
                                FeatureFinder featureFinder,
@@ -202,6 +203,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                int scheduleMaxRun,
                                String blacklisted) {
         this.bundle = bundle;
+        this.bundleContext = bundleContext;
         this.systemBundleContext = systemBundleContext;
         this.storage = storage;
         this.featureFinder = featureFinder;
@@ -227,6 +229,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     public FeaturesServiceImpl(Bundle bundle,
+                               BundleContext bundleContext,
                                BundleContext systemBundleContext,
                                StateStorage storage,
                                FeatureFinder featureFinder,
@@ -246,6 +249,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                String blacklisted,
                                boolean configCfgStore) {
         this.bundle = bundle;
+        this.bundleContext = bundleContext;
         this.systemBundleContext = systemBundleContext;
         this.storage = storage;
         this.featureFinder = featureFinder;
@@ -279,10 +283,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void checkResolve() {
-        if (bundle == null) {
+        if (bundleContext == null) {
             return; // Most certainly in unit tests
         }
-        File resolveFile = bundle.getBundleContext().getDataFile("resolve");
+        File resolveFile = bundleContext.getDataFile("resolve");
         if (!resolveFile.exists()) {
             return;
         }
@@ -311,7 +315,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     private void writeResolve(Map<String, Set<String>> requestedFeatures, EnumSet<Option> options) throws IOException {
-        File resolveFile = bundle.getBundleContext().getDataFile("resolve");
+        File resolveFile = bundleContext.getDataFile("resolve");
         Map<String, Object> request = new HashMap<>();
         List<String> opts = new ArrayList<>();
         for (Option opt : options) {
@@ -350,8 +354,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     state.bundleChecksums.clear();
                 }
                 storage.save(state);
-                if (bundle != null) { // For tests, this should never happen at runtime
-                    DigraphHelper.saveDigraph(bundle.getBundleContext(), digraph);
+                if (bundleContext != null) { // For tests, this should never happen at runtime
+                    DigraphHelper.saveDigraph(bundleContext, digraph);
                 }
             }
         } catch (IOException e) {
