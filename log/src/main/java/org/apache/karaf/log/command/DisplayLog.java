@@ -82,10 +82,7 @@ public class DisplayLog implements Action {
 
         Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
         for (PaxLoggingEvent event : le) {
-            int sl = event.getLevel().getSyslogEquivalent();
-            if (sl <= minLevel) {
-                printEvent(out, event);
-            }
+            printEvent(out, event, minLevel);
         }
         out.println();
         return null;
@@ -95,19 +92,28 @@ public class DisplayLog implements Action {
     	return event.getLoggerName().contains(logger);
     }
 
-    protected void printEvent(final PrintStream out, PaxLoggingEvent event) {
+    protected void printEvent(PrintStream out, PaxLoggingEvent event, int minLevel) {
         try {
-            if ((logger != null) &&
-                    (event != null) &&
-                    (checkIfFromRequestedLog(event))) {
-                out.append(formatter.format(event, overridenPattern, noColor));
-            } else if ((event != null) && (logger == null)) {
-                out.append(formatter.format(event, overridenPattern, noColor));
+            if (event != null) {
+                int sl = event.getLevel().getSyslogEquivalent();
+                if (sl <= minLevel) {
+                    printEvent(out, event);
+                }
             }
         } catch (NoClassDefFoundError e) {
             // KARAF-3350: Ignore NoClassDefFoundError exceptions
             // Those exceptions may happen if the underlying pax-logging service
             // bundle has been refreshed somehow.
+        }
+    }
+
+    protected void printEvent(final PrintStream out, PaxLoggingEvent event) {
+        if ((logger != null) &&
+                (event != null) &&
+                (checkIfFromRequestedLog(event))) {
+            out.append(formatter.format(event, overridenPattern, noColor));
+        } else if ((event != null) && (logger == null)) {
+            out.append(formatter.format(event, overridenPattern, noColor));
         }
     }
 }

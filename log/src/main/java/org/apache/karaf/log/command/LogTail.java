@@ -106,12 +106,7 @@ public class LogTail extends DisplayLog {
             }
             Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
             for (PaxLoggingEvent event : le) {
-                if (event != null) {
-                    int sl = event.getLevel().getSyslogEquivalent();
-                    if (sl <= minLevel) {
-                        printEvent(out, event);
-                    }
-                }
+                printEvent(out, event, minLevel);
             }
             // Tail
             final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
