@@ -68,9 +68,9 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     public TabularData getBundles() throws MBeanException {
         try {
             CompositeType bundleType = new CompositeType("Bundle", "OSGi Bundle",
-                    new String[]{"ID", "Name", "Version", "Start Level", "State"},
-                    new String[]{"ID of the Bundle", "Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle"},
-                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING});
+                    new String[]{"ID", "Name", "Symbolic Name", "Version", "Start Level", "State", "Update Location"},
+                    new String[]{"ID of the Bundle", "Name of the Bundle", "Symbolic Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle", "Update location of the Bundle"},
+                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING});
             TabularType tableType = new TabularType("Bundles", "Tables of all bundles", bundleType, new String[]{"ID"});
             TabularData table = new TabularDataSupport(tableType);
 
@@ -82,8 +82,8 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                     BundleInfo info = bundleService.getInfo(bundle);
                     String bundleStateString = info.getState().toString();
                     CompositeData data = new CompositeDataSupport(bundleType,
-                            new String[]{"ID", "Name", "Version", "Start Level", "State"},
-                            new Object[]{info.getBundleId(), info.getSymbolicName(), info.getVersion(), info.getStartLevel(), bundleStateString});
+                            new String[]{"ID", "Name", "Symbolic Name", "Version", "Start Level", "State", "Update Location"},
+                            new Object[]{info.getBundleId(), info.getName(), info.getSymbolicName(), info.getVersion(), info.getStartLevel(), bundleStateString, info.getUpdateLocation()});
                     table.put(data);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
