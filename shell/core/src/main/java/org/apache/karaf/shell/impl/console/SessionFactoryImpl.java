@@ -28,6 +28,7 @@ import java.util.function.BiConsumer;
 
 import org.apache.felix.gogo.jline.Builtin;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
@@ -58,6 +59,9 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         register(new JobCommand("jobs", "List shell jobs", (session, args) -> new Builtin().jobs(session, args)));
         register(new JobCommand("fg", "Put job in foreground", (session, args) -> new Builtin().fg(session, args)));
         register(new JobCommand("bg", "Put job in background", (session, args) -> new Builtin().bg(session, args)));
+        register(new ProcessorCommand("addCommand", "Add a command"));
+        register(new ProcessorCommand("removeCommand", "Remove a command"));
+        register(new ProcessorCommand("eval", "Evaluate"));
     }
 
     public CommandProcessorImpl getCommandProcessor() {
@@ -193,6 +197,49 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
             consumer.accept(cmdSession, args);
             return null;
         }
+    }
+
+    private class ProcessorCommand implements Command {
+
+        private final String name;
+        private final String desc;
+
+        public ProcessorCommand(String name, String desc) {
+            this.name = name;
+            this.desc = desc;
+        }
+
+        @Override
+        public String getScope() {
+            return "shell";
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getDescription() {
+            return desc;
+        }
+
+        @Override
+        public Completer getCompleter(boolean scoped) {
+            return null;
+        }
+
+        @Override
+        public Parser getParser() {
+            return null;
+        }
+
+        @Override
+        public Object execute(Session session, List<Object> arguments) throws Exception {
+            CommandSession cmdSession = (CommandSession) session.get(".commandSession");
+            return new CommandProxy(commandProcessor, name).execute(cmdSession, arguments);
+        }
+
     }
 
 }
