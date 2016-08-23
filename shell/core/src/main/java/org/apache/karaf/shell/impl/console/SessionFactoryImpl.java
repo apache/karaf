@@ -21,12 +21,17 @@ package org.apache.karaf.shell.impl.console;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandProxy;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.api.console.Command;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
@@ -48,6 +53,9 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         commandProcessor = new CommandProcessorImpl(threadIO);
         register(new ExitCommand());
         new HelpCommand(this);
+        register(new ProcessorCommand("addCommand", "Add a command"));
+        register(new ProcessorCommand("removeCommand", "Remove a command"));
+        register(new ProcessorCommand("eval", "Evaluate"));
     }
 
     public CommandProcessorImpl getCommandProcessor() {
@@ -135,6 +143,49 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
             closed = true;
             commandProcessor.stop();
         }
+    }
+
+    private class ProcessorCommand implements Command {
+
+        private final String name;
+        private final String desc;
+
+        public ProcessorCommand(String name, String desc) {
+            this.name = name;
+            this.desc = desc;
+        }
+
+        @Override
+        public String getScope() {
+            return "shell";
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getDescription() {
+            return desc;
+        }
+
+        @Override
+        public Completer getCompleter(boolean scoped) {
+            return null;
+        }
+
+        @Override
+        public Parser getParser() {
+            return null;
+        }
+
+        @Override
+        public Object execute(Session session, List<Object> arguments) throws Exception {
+            CommandSession cmdSession = (CommandSession) session.get(".commandSession");
+            return new CommandProxy(commandProcessor, name).execute(cmdSession, arguments);
+        }
+
     }
 
 }
