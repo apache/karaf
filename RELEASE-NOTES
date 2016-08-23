@@ -15,6 +15,115 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.6
+                    ==================
+
+ This is an update patch for Apache Karaf 4.0.x, containing many bug fixes, dependency updates, and improvements. It is recommended that users update their deployment after reviewing the changelog below.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-1583] - karaf-maven-plugin ignores dependency on feature
+    * [KARAF-3798] - FeaturesServiceImpl not threadsafe
+    * [KARAF-3938] - NPE in Felix when installing camel-spark-rest feature
+    * [KARAF-4158] - Unexpected behavior on first startup
+    * [KARAF-4202] - Password Management: Hardcoded Password
+    * [KARAF-4207] - Poor Error Handling: Empty Catch Block
+    * [KARAF-4322] - feature:repo-remove / cluster:feature-repo-remove -u flag has no effect
+    * [KARAF-4372] - Content assist for paths does not work correctly
+    * [KARAF-4408] - FileCompleter does not work correctly
+    * [KARAF-4444] - service:get --help throws an error
+    * [KARAF-4499] - Can't start a crashed server on Windows
+    * [KARAF-4500] - Refresh of the pax-logging-service cause log:* commands errors
+    * [KARAF-4502] - REGRESSION: using OpenJDK on CentOS 7 causes bin/client to fail with "Unable to negotiate key exchange for kex algorithms"
+    * [KARAF-4509] - Windows: if KARAF_DATA folder doesn't exist lets create it
+    * [KARAF-4510] - Initial instance.properties file root location uses karaf.home instead of karaf.base
+    * [KARAF-4511] - grep leaves around Ansi reset char sequence
+    * [KARAF-4519] - If an action does not have a @Command annotation, fallback to calling a description() method via reflection to get an Action's description
+    * [KARAF-4527] - The number in "Display all n possibilities?" differs from the actual number of commands listed
+    * [KARAF-4547] - Embed resolver in features.core to avoid errors in bundle resolution when installing CXF as boot feature
+    * [KARAF-4551] - wrapper:install on solaris lacks instructions to symlink scripts
+    * [KARAF-4554] - Completion of the 'watch' command hangs Karaf
+    * [KARAF-4564] -  Can't start karaf using symbolic link
+    * [KARAF-4566] -  "karaf" script invokes /bin/sh but requires /bin/bash functions
+    * [KARAF-4575] - Re-add "install all" and "uninstall all" features repository options
+    * [KARAF-4581] - There is a typo in the description of the UserDeleteCommand
+    * [KARAF-4588] - Features service lost install options
+    * [KARAF-4591] - UnknownFormatConversionException when version range determination fails during feature creation
+    * [KARAF-4598] - Wrapper karaf-service should return 0 if the service is already running
+    * [KARAF-4599] - KARAF-4564 impact: karaf startup command now only works when invoked from current directoy, no longer via absolute path
+    * [KARAF-4606] - Align jetty and pax-jetty version
+    * [KARAF-4607] - ldap connection pool not created when using ssl (ldaps)
+    * [KARAF-4615] - Cannot get OpenJPA 2.4.1 to work due to JPA 2.1 being installed
+    * [KARAF-4620] - ACL default configuration for feature:start/stop missing
+    * [KARAF-4621] - Instance check doesn't check if pid exists
+    * [KARAF-4626] - Feature build fails when version-ranges are enabled and a transitive dependency needs system properties
+    * [KARAF-4630] - Race condition in StreamPumper causes an infinite loop in it's deamon thread which prevents shell command from terminating
+    * [KARAF-4632] - Default serviceRequirements should handle 1.4.0 schema
+    * [KARAF-4636] - karaf.secured.command.compulsory.roles does not work
+    * [KARAF-4641] - Possible problems with wrap jars in profiles
+    * [KARAF-4642] - featuresBoot order is not honored
+    * [KARAF-4648] - Feature service-wrapper creates invalid SERVICENAME-wrapper.conf file
+    * [KARAF-4649] - AssemblyMojo : blacklistPolicy set to null if not defined in pom
+    * [KARAF-4650] - Can't authenticate to Web Container in non root instance
+    * [KARAF-4652] - ConcurrentModificationException and NullPointerException when starting Karaf
+    * [KARAF-4657] - karaf-maven-plugin attach artifact multiple times
+    * [KARAF-4659] - Ability to disable ldap listeners
+    * [KARAF-4660] - Fix typo in the wrapper:install output message
+
+** Dependency upgrade
+    * [KARAF-4504] - Upgrade Pax Exam to version 4.9.0
+    * [KARAF-4508] - Upgrade to Pax Exam 4.9.1
+    * [KARAF-4512] - Upgrade to Aries Blueprint Core 1.6.2
+    * [KARAF-4555] - Update to jline 2.14.2
+    * [KARAF-4563] - Upgrade Cglib to version 3.2.2
+    * [KARAF-4583] - Upgrade to equinox 3.10.101.v20150820-1432
+    * [KARAF-4584] - Update Exec Maven Plugin to version 1.5.0
+    * [KARAF-4592] - Upgrade to Aries JDBC Transaction 2.1.2
+    * [KARAF-4616] - Upgrade to Felix SCR 2.0.6, SCR Compat 1.0.4, SCR Annotations 1.11.0
+    * [KARAF-4622] - Upgrade to Spring 3.2.17
+    * [KARAF-4656] - Upgrade to Pax Web 4.2.8
+
+** Documentation
+    * [KARAF-4590] - Document environment variable reference from configuration files
+
+** Improvement
+    * [KARAF-884] - karaf-maven-plugin should more closely map to POMs
+    * [KARAF-3859] - bin/client script should go in interactive way to prompt the password when the "-u" option is used
+    * [KARAF-4084] - Only one flag could be used in list command
+    * [KARAF-4442] - Improve slightly misleading message after SNAPSHOT feature installation
+    * [KARAF-4505] - Add dataSourceType option to jdbc:ds-create command.
+    * [KARAF-4520] - Add  DigestPasswordLoginModule so PasswordDigest can work with Karaf JAAS realm
+    * [KARAF-4523] - JMXSecurityMBean bulk canInvoke should be robust even if bulkQuery contains duplicate operations
+    * [KARAF-4524] - SCTP class from JDK missing in jre.properties
+    * [KARAF-4526] - System scripts : Solaris SMS sevice not started if path contains spaces
+    * [KARAF-4533] - Adds Kerberos support
+    * [KARAF-4548] - Avoid extensive spifly logging
+    * [KARAF-4557] - Add config:property-get and getProperty operation on the ConfigMBean
+    * [KARAF-4569] - OSGi framework is not shut-down gracefully on SIGTERM
+    * [KARAF-4571] - karaf-maven-plugin should respect version ranges when generating features repos
+    * [KARAF-4589] - Add bundle location in BundleMBean
+    * [KARAF-4595] - Log when shell startup is suppressed
+    * [KARAF-4635] - Upgrade Pax JDBC to version 0.9.0
+    * [KARAF-4637] - LDAPLoginModule - add "trim usernames" option
+    * [KARAF-4644] - Pin Build to CXF 3.1.7
+    * [KARAF-4651] - Update tooling to use wagon-http to 2.10
+    * [KARAF-4658] - Allow defaultTargetFile to be overridden for any kind of packaging
+
+** New Feature
+    * [KARAF-4188] - Add support for Systemd's watchdog
+    * [KARAF-4462] - Allow control of attachment of generated assembly artifacts
+    * [KARAF-4493] - Add the option to specify customized branding for SSH
+    * [KARAF-4624] - Create Karaf component to create Activemq connection factories
+
+** Question
+    * [KARAF-4654] - Karaf shell command
+
+** Test
+    * [KARAF-4597] - Avoid npe and exception logging in main module tests
+    * [KARAF-4646] - LdapPoolingTest fails with IBM JDK
+
                     Apache Karaf 4.0.5
                     ==================
 
