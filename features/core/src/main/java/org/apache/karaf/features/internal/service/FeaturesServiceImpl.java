@@ -110,10 +110,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private static final String FEATURE_OSGI_REQUIREMENT_PREFIX = "feature:";
 
     /**
-     * Our bundle.
+     * Our bundle and corresponding bundle context.
      * We use it to check bundle operations affecting our own bundle.
      */
     private final Bundle bundle;
+    private final BundleContext bundleContext;
 
     /**
      * The system bundle context.
