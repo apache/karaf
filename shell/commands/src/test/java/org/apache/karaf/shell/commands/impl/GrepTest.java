@@ -19,7 +19,9 @@
 package org.apache.karaf.shell.commands.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
@@ -39,6 +41,25 @@ public class GrepTest extends TestCase {
             grep.execute();
         } finally {
             System.setIn(input);
+        }
+    }
+
+    public void testHonorColorNever() throws Exception {
+        InputStream input = System.in;
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream("abc".getBytes());
+            System.setIn(bais);
+            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+
+            GrepAction grep = new GrepAction();
+            DefaultActionPreparator preparator = new DefaultActionPreparator();
+            preparator.prepare(grep, null, Arrays.<Object>asList( "--color", "never", "b"));
+            grep.execute();
+            assertEquals("abc", outContent.toString().trim());
+        } finally {
+            System.setIn(input);
+            System.setOut(null);
         }
     }
 }
