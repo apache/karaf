@@ -123,16 +123,16 @@ public class Activator extends BaseActivator {
         }
 
         // RegionDigraph
-        digraph = DigraphHelper.loadDigraph(bundleContext);
-        register(ResolverHookFactory.class, digraph.getResolverHookFactory());
-        register(CollisionHook.class, CollisionHookHelper.getCollisionHook(digraph));
-        register(org.osgi.framework.hooks.bundle.FindHook.class, digraph.getBundleFindHook());
-        register(org.osgi.framework.hooks.bundle.EventHook.class, digraph.getBundleEventHook());
-        register(org.osgi.framework.hooks.service.FindHook.class, digraph.getServiceFindHook());
-        register(org.osgi.framework.hooks.service.EventHook.class, digraph.getServiceEventHook());
-        register(RegionDigraph.class, digraph);
-        digraphMBean = new StandardManageableRegionDigraph(digraph, "org.apache.karaf", bundleContext);
-        digraphMBean.registerMBean();
+        StandardRegionDigraph dg = digraph = DigraphHelper.loadDigraph(bundleContext);
+        register(ResolverHookFactory.class, dg.getResolverHookFactory());
+        register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
+        register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook());
+        register(org.osgi.framework.hooks.bundle.EventHook.class, dg.getBundleEventHook());
+        register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook());
+        register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook());
+        register(RegionDigraph.class, dg);
+        StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
+        dgmb.registerMBean();
 
 
         FeatureFinder featureFinder = new FeatureFinder();
@@ -204,13 +204,14 @@ public class Activator extends BaseActivator {
         }
         featuresService = new FeaturesServiceImpl(
                 bundleContext.getBundle(),
+                bundleContext,
                 bundleContext.getBundle(0).getBundleContext(),
                 stateStorage,
                 featureFinder,
                 eventAdminListener,
                 configurationAdmin,
                 resolver,
-                digraph,
+                dg,
                 overrides,
                 featureResolutionRange,
                 bundleUpdateRange,

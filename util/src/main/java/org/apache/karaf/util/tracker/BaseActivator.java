@@ -25,6 +25,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -50,7 +52,7 @@ public class BaseActivator implements BundleActivator, Runnable {
 
     private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
 
-    private List<ServiceRegistration> registrations;
+    private final Queue<ServiceRegistration> registrations = new ConcurrentLinkedQueue<>();
     private Map<String, SingleServiceTracker> trackers = new HashMap<>();
     private ServiceRegistration managedServiceRegistration;
     private Dictionary<String, ?> configuration;
@@ -120,11 +122,12 @@ public class BaseActivator implements BundleActivator, Runnable {
     }
 
     protected void doStop() {
-        if (registrations != null) {
-            for (ServiceRegistration reg : registrations) {
-                reg.unregister();
+        while (true) {
+            ServiceRegistration reg = registrations.poll();
+            if (reg == null) {
+                break;
             }
-            registrations = null;
+            reg.unregister();
         }
     }
 
@@ -357,9 +360,6 @@ public class BaseActivator implements BundleActivator, Runnable {
     }
 
     private void trackRegistration(ServiceRegistration registration) {
-        if (registrations == null) {
-            registrations = new ArrayList<>();
-        }
         registrations.add(registration);
     }
 
