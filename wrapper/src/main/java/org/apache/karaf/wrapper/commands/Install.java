@@ -134,7 +134,7 @@ public class Install implements Action {
                 System.out.println("");
                 System.out.println("  To uninstall the service :");
                 System.out.println("    $ chkconfig " + serviceFile.getName() + " --del");
-                System.out.println("    $ rm /etc/init.d/" + serviceFile.getPath());
+                System.out.println("    $ rm /etc/init.d/" + serviceFile.getName());
             } else if (debianVersion.exists()) {
                 System.out.println("");
                 System.out.println(INTENSITY_BOLD + "Ubuntu/Debian Linux system detected (SystemV):" + INTENSITY_NORMAL);
