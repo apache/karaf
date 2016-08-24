@@ -516,6 +516,81 @@ performed directly on the LDAP backend.
 
 The Kerberos login module uses the Oracle JVM Krb5 internal login module.
 
+Here is a simple configuration :
+----
+<jaas:config name="krb5" rank="1">
+  <jaas:module className="org.apache.karaf.jaas.modules.krb5.Krb5LoginModule">
+    refreshKrb5Config = true
+    password-stacking = storePass
+    doNotPrompt = false
+    useTicketCache = true
+  </jaas:module>
+</jaas:config>
+----
+
+You must specify a krb5 configuration file through the "java.security.krb5.conf" system property.
+Here is a simple example of a krb5 configuration file :
+----
+[libdefaults]
+ default_realm = EXAMPLE.COM
+ dns_lookup_realm = false
+ dns_lookup_kdc = false
+ ticket_lifetime = 24h
+ renew_lifetime = 365d
+ forwardable = true
+
+[realms]
+
+ EXAMPLE.COM = {
+  kdc = kdc.example.com
+  admin_server = kdc.example.com
+  default_domain = example.com
+ }
+
+[domain_realm]
+ .example.com = EXAMPLE.COM
+ example.com = EXAMPLE.COM
+----
+
+===== GSSAPILdapLoginModule
+
+|===
+|LoginModule |BackendEngineFactory
+
+|org.apache.karaf.jaas.modules.ldap.GSSAPILdapLoginModule
+|
+|===
+
+The GSSAPI module uses the GSSAPI mechanism to handle authentication to a LDAP server.
+Typical use is using this and a Kerberos Login Module to connect to an ActiveDirectory Server, or any other LDAP server that needs a Kerberos tickets for authentication.
+
+Here is a simple configuration, that use as Kerberos login module as authentication backend :
+----
+<jaas:config name="ldap" rank="1">
+  <jaas:module className="org.apache.karaf.jaas.modules.ldap.GSSAPILdapLoginModule"flags="required">
+    gssapiRealm=krb5
+    initialContextFactory=com.sun.jndi.ldap.LdapCtxFactory
+    connection.url=ldap://activedirectory_host:389
+    user.base.dn=ou=Users,ou=there,DC=local
+    user.filter=(sAMAccountName=%u)
+    user.search.subtree=true
+    role.base.dn=ou=Groups,ou=there,DC=local
+    role.name.attribute=cn
+    role.filter=(member=%fqdn)
+    role.search.subtree=true
+  </jaas:module>
+</jaas:config>
+<jaas:config name="krb5" rank="1">
+  <jaas:module className="org.apache.karaf.jaas.modules.krb5.Krb5LoginModule">
+    refreshKrb5Config = true
+    password-stacking = storePass
+    doNotPrompt = false
+    useTicketCache = true
+  </jaas:module>
+</jaas:config>
+----
+Note the 'gssapiRealm' property of the LDAP login module that match the name of the Kerberos Configuration.
+
 ===== SyncopeLoginModule
 
 |===
