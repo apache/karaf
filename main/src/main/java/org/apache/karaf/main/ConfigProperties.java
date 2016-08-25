@@ -130,6 +130,8 @@ public class ConfigProperties {
     private static final String KARAF_SHUTDOWN_COMMAND = "karaf.shutdown.command";
 
     private static final String KARAF_SHUTDOWN_PID_FILE = "karaf.shutdown.pid.file";
+
+    private static final String KARAF_PID_FILE = "karaf.pid.file";
     
     private static final String KARAF_STARTUP_MESSAGE = "karaf.startup.message";
     
@@ -217,7 +219,7 @@ public class ConfigProperties {
         this.defaultRepo = System.getProperty(DEFAULT_REPO, "system");
         this.bundleLocations = props.getProperty(BUNDLE_LOCATIONS);
         this.defaultBundleStartlevel = getDefaultBundleStartLevel(60);
-        this.pidFile = props.getProperty(KARAF_SHUTDOWN_PID_FILE);
+        this.pidFile = props.getProperty(KARAF_PID_FILE, props.getProperty(KARAF_SHUTDOWN_PID_FILE));
         this.shutdownPort = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
         this.shutdownHost = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
         this.portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
