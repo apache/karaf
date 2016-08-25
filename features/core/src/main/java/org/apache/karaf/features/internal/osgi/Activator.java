@@ -34,6 +34,7 @@ import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.RegionDigraphPersistence;
 import org.apache.karaf.features.internal.management.FeaturesServiceMBeanImpl;
 import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.repository.AggregateRepository;
@@ -71,7 +72,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
     },
     provides = {
             @ProvideService(FeaturesService.class),
-            @ProvideService(RegionDigraph.class)
+            @ProvideService(RegionDigraph.class),
+            @ProvideService(RegionDigraphPersistence.class)
     }
 )
 public class Activator extends BaseActivator {
@@ -133,6 +135,7 @@ public class Activator extends BaseActivator {
         register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook());
         register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook());
         register(RegionDigraph.class, dg);
+        register(RegionDigraphPersistence.class, createRegionDigraphPersister());
         StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
         dgmb.registerMBean();
 
@@ -280,13 +283,28 @@ public class Activator extends BaseActivator {
             featuresService = null;
         }
         if (digraph != null) {
+            doPersistRegionDigraph();
+            digraph = null;
+        }
+    }
+
+    private void doPersistRegionDigraph() {
+        if (digraph != null) {
             try {
                 DigraphHelper.saveDigraph(bundleContext, digraph);
             } catch (Exception e) {
                 // Ignore
             }
-            digraph = null;
         }
+    }
+
+    private RegionDigraphPersistence createRegionDigraphPersister() {
+        return new RegionDigraphPersistence() {
+            @Override
+            public void persistRegionDigraph() throws IOException {
+                doPersistRegionDigraph();
+            }
+        };
     }
 
 }
