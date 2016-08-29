@@ -357,26 +357,11 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
     }
 
     protected Properties ldapLoginModuleOptions() throws IOException {
-        Properties props = new Properties();
-
-        props.setProperty("debug", "true");
-        props.setProperty("connection.url", "ldap://127.0.0.1:" + super.getLdapServer().getPort());
-        props.setProperty("connection.username", "uid=admin,ou=system");
-        props.setProperty("connection.password", "secret");
-        props.setProperty("connection.protocol=", "");
-        props.setProperty("authentication", "simple");
-
-        props.setProperty("user.base.dn", "ou=people,dc=example,dc=com");
-        props.setProperty("user.filter", "(uid=%u)");
-        props.setProperty("user.search.subtree", "true");
-
-        props.setProperty("role.base.dn", "ou=groups,dc=example,dc=com");
-        props.setProperty("role.name.attribute", "cn");
-        props.setProperty("role.filter", "(member=%fqdn)");
-        props.setProperty("role.search.subtree", "true");
-
-        props.setProperty("initialContextFactory", "com.sun.jndi.ldap.LdapCtxFactory");
-
-        return props;
+        String basedir = System.getProperty("basedir");
+        if (basedir == null) {
+            basedir = new File(".").getCanonicalPath();
+        }
+        File file = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
+        return new Properties(file);
     }
 }
