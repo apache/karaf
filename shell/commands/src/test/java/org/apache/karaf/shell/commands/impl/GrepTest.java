@@ -46,6 +46,7 @@ public class GrepTest extends TestCase {
 
     public void testHonorColorNever() throws Exception {
         InputStream input = System.in;
+        PrintStream output = System.out;
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream("abc".getBytes());
             System.setIn(bais);
@@ -59,7 +60,7 @@ public class GrepTest extends TestCase {
             assertEquals("abc", outContent.toString().trim());
         } finally {
             System.setIn(input);
-            System.setOut(null);
+            System.setOut(output);
         }
     }
 }
