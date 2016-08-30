@@ -302,6 +302,9 @@ public class ConsoleSessionImpl implements Session {
                     } finally {
                         reading.set(false);
                     }
+                    if (command == null) {
+                        break;
+                    }
                     Object result = session.execute(command);
                     if (result != null) {
                         session.getConsole().println(session.format(result, Converter.INSPECT));
