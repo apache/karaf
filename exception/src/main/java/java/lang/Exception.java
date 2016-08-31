@@ -18,6 +18,8 @@
 package java.lang;
 
 import java.lang.reflect.Field;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -34,13 +36,14 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Exception extends Throwable {
     private static final long serialVersionUID = -3387516993124229948L;
 
-    private transient Class[] classContext = SecurityManagerEx.getInstance().getThrowableContext(this);
+    private transient Reference<Class<?>>[] classContext;
 
     /**
      * Constructs a new {@code Exception} that includes the current stack trace.
      */
     public Exception() {
         super();
+        initClassContext();
     }
 
     /**
@@ -52,6 +55,7 @@ public class Exception extends Throwable {
      */
     public Exception(String detailMessage) {
         super(detailMessage);
+        initClassContext();
     }
 
     /**
@@ -65,6 +69,7 @@ public class Exception extends Throwable {
      */
     public Exception(String detailMessage, Throwable throwable) {
         super(detailMessage, throwable);
+        initClassContext();
     }
 
     /**
@@ -76,6 +81,7 @@ public class Exception extends Throwable {
      */
     public Exception(Throwable throwable) {
         super(throwable);
+        initClassContext();
     }
 
     /**
@@ -115,17 +121,36 @@ public class Exception extends Throwable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        initClassContext();
     }
  
     @XmlTransient
     @Deprecated
     public Class[] getClassContext() {
-        return classContext;
+        Class<?>[] context = new Class<?>[classContext.length];
+        for (int i = 0; i < classContext.length; i++) {
+            Class<?> c = classContext[i].get();
+            context[i] = c == null ? Object.class : c;
+        }
+        return context;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initClassContext() {
+        Class[] context = SecurityManagerEx.getInstance().getThrowableContext(this);
+        classContext = new Reference[context.length];
+        for (int i = 0; i < context.length; i++) {
+            classContext[i] = new WeakReference<Class<?>>(context[i]);
+        }
     }
     
     protected Class[] classContext() {
-      return classContext;
+        Class<?>[] context = new Class<?>[classContext.length];
+        for (int i = 0; i < classContext.length; i++) {
+            Class<?> c = classContext[i].get();
+            context[i] = c == null ? Object.class : c;
+        }
+        return context;
     }
 
     private static class SecurityManagerEx extends SecurityManager
