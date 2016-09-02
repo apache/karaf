@@ -221,9 +221,11 @@ It's possible to define a version range for a dependent feature:
 
 The feature with the highest version available in the range will be installed.
 
-If a single version is specified, this version will be chosen.
+If a single version is specified, the range will be considered open-ended.
 
 If nothing is specified, the highest available will be installed.
+
+To specify an exact version, use a closed range such as `[3.1,3.1]`.
 
 ===== Feature prerequisites
 
