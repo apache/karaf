@@ -19,6 +19,7 @@ package org.apache.karaf.shell.commands.impl;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -85,15 +86,15 @@ public class LessAction implements Action {
         less.tabs = tabs;
         less.printLineNumbers = printLineNumbers;
         List<Source> sources = new ArrayList<>();
-        if (files.isEmpty()) {
-            files.add("-");
+        if (files == null || files.isEmpty()) {
+            files = Collections.singletonList("-");
         }
         Path pwd = Paths.get(System.getProperty("karaf.home"));
         for (String arg : files) {
             if ("-".equals(arg)) {
                 sources.add(new StdInSource());
             } else {
-                sources.add(new URLSource(pwd.resolve(arg).toUri().toURL(), arg));
+                sources.add(new URLSource(pwd.toUri().resolve(arg).toURL(), arg));
             }
         }
         less.run(sources);
