@@ -158,7 +158,7 @@ public class GenericType extends ReifiedType {
         if ( type instanceof GenericArrayType ) {
             return new GenericType[] { new GenericType(((GenericArrayType) type).getGenericComponentType()) };
         }
-        throw new IllegalStateException();
+        return EMPTY;
 	}
 
 	static Class<?> getConcreteClass(Type type) {
