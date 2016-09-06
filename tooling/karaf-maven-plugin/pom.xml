@@ -298,14 +298,37 @@
     </reporting>
     <profiles>
         <profile>
-	    <id>java9</id>
-	    <properties>
+	        <id>java9</id>
+	        <properties>
                 <mvn.opts>-XaddExports:java.base/sun.net.www.protocol.http=ALL-UNNAMED -XaddExports:java.base/sun.net.www.protocol.https=ALL-UNNAMED -XaddExports:java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED -XaddExports:jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED -addmods java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
-	    </properties>
-	    <activation>
-        	<jdk>9</jdk>
+	        </properties>
+	        <activation>
+        	    <jdk>9</jdk>
             </activation>
-	</profile>
+	    </profile>
+        <profile>
+            <id>skiptests</id>
+            <properties>
+                <invoker.skip>true</invoker.skip>
+            </properties>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>skiptests2</id>
+            <properties>
+                <invoker.skip>true</invoker.skip>
+            </properties>
+            <activation>
+                <property>
+                    <name>maven.test.skip</name>
+                    <value>true</value>
+                </property>
+            </activation>
+        </profile>
     </profiles>
 
 
