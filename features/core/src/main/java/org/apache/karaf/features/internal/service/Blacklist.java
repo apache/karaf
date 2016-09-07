@@ -17,6 +17,7 @@
 package org.apache.karaf.features.internal.service;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -128,8 +129,10 @@ public class Blacklist {
                     }
                 }
             }
+        } catch (FileNotFoundException e) {
+            LOGGER.debug("Unable to load blacklist bundles list", e.toString());
         } catch (Exception e) {
-            LOGGER.debug("Unable to load overrides bundles list", e);
+            LOGGER.debug("Unable to load blacklist bundles list", e);
         }
         return blacklist;
     }
