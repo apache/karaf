@@ -33,6 +33,8 @@ import org.apache.karaf.shell.support.MultiException;
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.startlevel.BundleStartLevel;
 
 @Command(scope = "bundle", name = "install", description = "Installs one or more bundles.")
@@ -50,6 +52,9 @@ public class Install implements Action {
     
     @Option(name = "--force", aliases = {"-f"}, description = "Forces the command to execute", required = false, multiValued = false)
     boolean force;
+
+    @Option(name = "--r3-bundles", description = "Allow OSGi R3 bundles")
+    boolean allowR3;
     
     @Reference
     Session session;
@@ -71,13 +76,26 @@ public class Install implements Action {
             }
         }
         // install the bundles
+        boolean r3warned = false;
         List<Exception> exceptions = new ArrayList<>();
         List<Bundle> bundles = new ArrayList<>();
         for (URI url : urls) {
             try {
-                bundles.add(bundleContext.installBundle(url.toString(), null));
+                Bundle bundle = bundleContext.installBundle(url.toString(), null);
+                if (!"2".equals(bundle.getHeaders().get(Constants.BUNDLE_MANIFESTVERSION))) {
+                    if (allowR3) {
+                        if (!r3warned) {
+                            System.err.println("WARNING: use of OSGi r3 bundles is discouraged");
+                            r3warned = true;
+                        }
+                    } else {
+                        bundle.uninstall();
+                        throw new BundleException("OSGi R3 bundle not supported");
+                    }
+                }
+                bundles.add(bundle);
             } catch (Exception e) {
-                exceptions.add(new Exception("Unable to install bundle " + url, e));
+                exceptions.add(new Exception("Unable to install bundle " + url + ": " + e.toString(), e));
             }
         }
         // optionally set start level
@@ -86,7 +104,7 @@ public class Install implements Action {
                 try {
                     bundle.adapt(BundleStartLevel.class).setStartLevel(level);
                 } catch (Exception e) {
-                    exceptions.add(new Exception("Unable to set bundle start level " + bundle.getLocation(), e));
+                    exceptions.add(new Exception("Unable to set bundle start level " + bundle.getLocation() + ": " + e.toString(), e));
                 }
             }
         }
@@ -96,7 +114,7 @@ public class Install implements Action {
                 try {
                     bundle.start();
                 } catch (Exception e) {
-                    exceptions.add(new Exception("Unable to start bundle " + bundle.getLocation(), e));
+                    exceptions.add(new Exception("Unable to start bundle " + bundle.getLocation() + ": " + e.toString(), e));
                 }
             }
         }
