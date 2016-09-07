@@ -18,20 +18,32 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.ansi.SimpleAnsi;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
+import org.jline.builtins.Source;
+import org.jline.builtins.Source.StdInSource;
+import org.jline.builtins.Source.URLSource;
+import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Command(scope = "shell", name="grep", description="Prints lines matching the given pattern.", detailedDescription="classpath:grep.txt")
 @Service
@@ -45,6 +57,10 @@ public class GrepAction implements Action {
 
     @Argument(index = 0, name = "pattern", description = "Regular expression", required = true, multiValued = false)
     private String regex;
+
+    @Argument(index = 1, multiValued = true)
+    @Completion(FileOrUriCompleter.class)
+    List<String> files;
 
     @Option(name = "-n", aliases = { "--line-number" }, description = "Prefixes each line of output with the line number within its input file.", required = false, multiValued = false)
     private boolean lineNumber;
@@ -81,6 +97,12 @@ public class GrepAction implements Action {
     @Option(name = "-C", aliases = { "--context" }, description = "Print NUM lines of output context.  Places a line containing -- between contiguous groups of matches.", required = false, multiValued = false)
     private int context = 0;
 
+    @Option(name = "-o", aliases = { "--only-matching"}, description = "Print only the matching section of a line", required = false, multiValued = false)
+    private boolean onlyMatching;
+
+    @Reference
+    Session session;
+
     @Override
     public Object execute() throws Exception {
         if (after < 0) {
@@ -89,11 +111,10 @@ public class GrepAction implements Action {
         if (before < 0) {
             before = context;
         }
-        List<String> lines = new ArrayList<String>();
 
         String regexp = regex;
         if (wordRegexp) {
-            regexp = "\\b" + regexp + "\\b";
+            regex = regexp = "\\b" + regexp + "\\b";
         }
         if (lineRegexp) {
             regexp = "^" + regexp + "$";
@@ -109,99 +130,127 @@ public class GrepAction implements Action {
             p = Pattern.compile(regexp);
             p2 = Pattern.compile(regex);
         }
-        try {
+
+        List<Source> sources = new ArrayList<>();
+        if (files == null || files.isEmpty()) {
+            files = Collections.singletonList("-");
+        }
+        Path pwd = Paths.get(System.getProperty("karaf.home", System.getProperty("user.dir")));
+        for (String arg : files) {
+            if ("-".equals(arg)) {
+                sources.add(new StdInSource());
+            } else {
+                sources.add(new URLSource(pwd.toUri().resolve(arg).toURL(), arg));
+            }
+        }
+
+        Terminal terminal = session != null ? (Terminal) session.get(".jline.terminal") : null;
+        List<Object> output = new ArrayList<>();
+        for (Source source : sources) {
             boolean firstPrint = true;
             int nb = 0;
             int lineno = 1;
             String line;
             int lineMatch = 0;
-            BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
-            while ((line = r.readLine()) != null) {
-                if (line.length() == 1 && line.charAt(0) == '\n') {
-                    break;
-                }
-                if (p.matcher(line).matches() ^ invertMatch) {
-                    Matcher matcher2 = p2.matcher(line);
-                    StringBuffer sb = new StringBuffer();
-                    while (matcher2.find()) {
+            List<String> lines = new ArrayList<>();
+            try (BufferedReader r = new BufferedReader(new InputStreamReader(source.read()))) {
+                while ((line = r.readLine()) != null) {
+                    if (line.length() == 1 && line.charAt(0) == '\n') {
+                        break;
+                    }
+                    if (p.matcher(line).matches() ^ invertMatch) {
+                        AttributedStringBuilder sbl = new AttributedStringBuilder();
+                        if (color != ColorOption.never) {
+                            sbl.style(getSourceStyle());
+                        }
+                        if (!count && sources.size() > 1) {
+                            sbl.append(source.getName());
+                            sbl.append(":");
+                        }
+                        if (!count && lineNumber) {
+                            sbl.append(String.format("%6d  ", lineno));
+                        }
+                        sbl.style(AttributedStyle.DEFAULT);
+                        Matcher matcher2 = p2.matcher(line);
+                        AttributedString aLine = AttributedString.fromAnsi(line);
+                        AttributedStyle style;
                         if (!invertMatch && color != ColorOption.never) {
-                            int index = matcher2.start(0);
-                            String prefix = line.substring(0,index);
-                            matcher2.appendReplacement(sb,
-                                    "\u001b[33;40m" + matcher2.group() + "\u001b[39;49m" + lastEscapeSequence(prefix));
+                            style = getMatchingStyle();
                         } else {
-                            matcher2.appendReplacement(sb, matcher2.group());
+                            style = AttributedStyle.DEFAULT;
                         }
-                        nb++;
-                    }
-                    matcher2.appendTail(sb);
-                    if(color != ColorOption.never) {
-                        sb.append(SimpleAnsi.RESET);
-                    }
-                    if (!count && lineNumber) {
-                        lines.add(String.format("%6d  ", lineno) + sb.toString());
+                        if (invertMatch) {
+                            nb++;
+                            sbl.append(aLine);
+                        } else if (onlyMatching) {
+                            while (matcher2.find()) {
+                                int index = matcher2.start(0);
+                                int cur = matcher2.end();
+                                sbl.append(aLine.subSequence(index, cur), style);
+                                nb++;
+                            }
+                        } else {
+                            int cur = 0;
+                            while (matcher2.find()) {
+                                int index = matcher2.start(0);
+                                AttributedString prefix = aLine.subSequence(cur, index);
+                                sbl.append(prefix);
+                                cur = matcher2.end();
+                                sbl.append(aLine.subSequence(index, cur), style);
+                                nb++;
+                            }
+                            sbl.append(aLine.subSequence(cur, aLine.length()));
+                        }
+                        lines.add(sbl.toAnsi(terminal));
+                        lineMatch = lines.size();
                     } else {
-                        lines.add(sb.toString());
-                    }
-					lineMatch = lines.size();
-                } else {
-                    if (lineMatch != 0 & lineMatch + after + before <= lines.size()) {
-                        if (!count) {
-                            if (!firstPrint && before + after > 0) {
-                                System.out.println("--");
-                            } else {
-                                firstPrint = false;
+                        if (lineMatch != 0 & lineMatch + after + before <= lines.size()) {
+                            if (!count) {
+                                if (!firstPrint && before + after > 0) {
+                                    output.add("--");
+                                } else {
+                                    firstPrint = false;
+                                }
+                                for (int i = 0; i < lineMatch + after; i++) {
+                                    output.add(lines.get(i));
+                                }
                             }
-                            for (int i = 0; i < lineMatch + after; i++) {
-                                System.out.println(lines.get(i));
+                            while (lines.size() > before) {
+                                lines.remove(0);
                             }
+                            lineMatch = 0;
                         }
-                        while (lines.size() > before) {
+                        lines.add(line);
+                        while (lineMatch == 0 && lines.size() > before) {
                             lines.remove(0);
                         }
-                        lineMatch = 0;
                     }
-                    lines.add(line);
-                    while (lineMatch == 0 && lines.size() > before) {
-                        lines.remove(0);
+                    lineno++;
+                }
+                if (!count && lineMatch > 0) {
+                    if (!firstPrint && before + after > 0) {
+                        output.add("--");
+                    } else {
+                        firstPrint = false;
+                    }
+                    for (int i = 0; i < lineMatch + after && i < lines.size(); i++) {
+                        output.add(lines.get(i));
                     }
                 }
-                lineno++;
-            }
-            if (!count && lineMatch > 0) {
-                if (!firstPrint && before + after > 0) {
-                    System.out.println("--");
-                } else {
-                    firstPrint = false;
-                }
-                for (int i = 0; i < lineMatch + after && i < lines.size(); i++) {
-                    System.out.println(lines.get(i));
+                if (count) {
+                    output.add(nb);
                 }
             }
-            if (count) {
-                System.out.println(nb);
-            }
-        } catch (IOException e) {
         }
-        return null;
+        return output;
     }
 
-
-    /**
-     * Returns the last escape pattern found inside the String.
-     * This method is used to restore the formating after highliting the grep pattern.
-     * If no pattern is found just returns the reset String.
-     * @param str
-     * @return
-     */
-    private String lastEscapeSequence(String str) {
-        String escapeSequence = SimpleAnsi.RESET;
-        String escapePattern = "(\\\u001B\\[[0-9;]*[0-9]+m)+";
-        Pattern pattern =  Pattern.compile(escapePattern);
-        Matcher matcher = pattern.matcher(str);
-        while(matcher.find()) {
-            escapeSequence = matcher.group();
-        }
-        return escapeSequence;
+    private AttributedStyle getSourceStyle() {
+        return AttributedStyle.DEFAULT.foreground(AttributedStyle.BLACK + AttributedStyle.BRIGHT);
     }
+
+    private AttributedStyle getMatchingStyle() {
+        return AttributedStyle.DEFAULT.bold().foreground(AttributedStyle.RED);
+    }
+
 }

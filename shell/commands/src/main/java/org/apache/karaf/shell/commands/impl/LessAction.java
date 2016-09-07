@@ -89,7 +89,7 @@ public class LessAction implements Action {
         if (files == null || files.isEmpty()) {
             files = Collections.singletonList("-");
         }
-        Path pwd = Paths.get(System.getProperty("karaf.home"));
+        Path pwd = Paths.get(System.getProperty("karaf.home", System.getProperty("user.dir")));
         for (String arg : files) {
             if ("-".equals(arg)) {
                 sources.add(new StdInSource());
