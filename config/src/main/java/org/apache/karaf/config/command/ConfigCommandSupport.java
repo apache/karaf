@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.config.command;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 
 import org.apache.karaf.config.core.ConfigRepository;
@@ -59,5 +60,15 @@ public abstract class ConfigCommandSupport implements Action {
 
     public void setSession(Session session) {
         this.session = session;
+    }
+
+    protected String displayValue(Object value) {
+        if (value == null) {
+            return "<null>";
+        }
+        if (value.getClass().isArray()) {
+            return Arrays.toString((Object[]) value);
+        }
+        return value.toString();
     }
 }

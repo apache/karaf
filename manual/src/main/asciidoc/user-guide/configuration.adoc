@@ -62,7 +62,7 @@ You can configure the behaviour of the configuration files using some dedicated 
 #
 felix.fileinstall.enableConfigSave = true
 felix.fileinstall.dir    = ${karaf.etc}
-felix.fileinstall.filter = .*\\.cfg
+felix.fileinstall.filter = .*\\.(cfg|config)
 felix.fileinstall.poll   = 1000
 felix.fileinstall.noInitialDelay = true
 felix.fileinstall.log.level = 3
@@ -76,7 +76,7 @@ persisted back in the configuration false. Default is `true`.
 * `felix.fileinstall.dir` is the directory where Apache Karaf is looking for configuration files. Default is `${karaf.etc`}
 meaning the value of the `KARAF_ETC` variable.
 * `felix.fileinstall.filter` is the file name pattern used to load only some configuration files. Only files matching
-the pattern will be loaded. Default value is `.*\\.cfg` meaning *.cfg files.
+the pattern will be loaded. Default value is `.*\\.(cfg|config)` meaning *.cfg and *.config files.
 * `felix.fileinstall.poll` is the polling interval (in milliseconds). Default value is `1000` meaning that Apache
 Karaf "re-loads" the configuration files every second.
 * `felix.fileinstall.noInitialDelay` is a flag indicating if the configuration file polling starts as soon as Apache

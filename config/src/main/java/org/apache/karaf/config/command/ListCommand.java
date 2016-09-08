@@ -58,7 +58,7 @@ public class ListCommand extends ConfigCommandSupport {
                         sortedProps.put(key.toString(), props.get(key));
                     }
                     for (String key : sortedProps.keySet()) {
-                        System.out.println("   " + key + " = " + sortedProps.get(key));
+                        System.out.println("   " + key + " = " + displayValue(sortedProps.get(key)));
                     }
                 }
             }
