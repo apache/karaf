@@ -143,6 +143,7 @@
                         <Export-Package>
                             org.apache.karaf.shell.api.*;version=${project.version},
                             org.apache.karaf.shell.support.*;version=${project.version},
+                            org.apache.felix.gogo.api
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.service.guard.tools,
@@ -153,7 +154,6 @@
                             org.apache.felix.utils.properties,
                             org.apache.felix.utils.extender,
                             org.apache.felix.utils.manifest,
-                            org.apache.felix.gogo.api,
                             org.apache.felix.gogo.jline,
                             org.apache.felix.gogo.runtime,
                             org.apache.felix.gogo.runtime.threadio,

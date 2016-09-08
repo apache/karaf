@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
+import org.apache.felix.gogo.api.Process;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -105,6 +106,9 @@ public class GrepAction implements Action {
 
     @Override
     public Object execute() throws Exception {
+        if (color == ColorOption.auto && !Process.current().isTty(1)) {
+            color = ColorOption.never;
+        }
         if (after < 0) {
             after = context;
         }
