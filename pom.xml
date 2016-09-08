@@ -314,7 +314,7 @@
         <repository>
             <id>apache-snapshots</id>
             <name>Apache Snapshots Repository</name>
-            <url>http://repository.apache.org/content/groups/snapshots-group</url>
+            <url>https://repository.apache.org/content/groups/snapshots-group</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -326,7 +326,7 @@
         <repository>
             <id>servicemix</id>
             <name>Apache ServiceMix Repository</name>
-            <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
+            <url>https://svn.apache.org/repos/asf/servicemix/m2-repo</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -337,7 +337,7 @@
         <repository>
             <id>sonatype</id>
             <name>sonatype</name>
-            <url>http://repository.sonatype.org/content/groups/sonatype-public-grid</url>
+            <url>https://repository.sonatype.org/content/groups/sonatype-public-grid</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -423,7 +423,7 @@
         <pluginRepository>
             <id>apache-snapshots</id>
             <name>Apache Snapshots Repository</name>
-            <url>http://repository.apache.org/content/groups/snapshots-group</url>
+            <url>https://repository.apache.org/content/groups/snapshots-group</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
