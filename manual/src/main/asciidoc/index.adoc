@@ -36,7 +36,7 @@ include::user-guide/directory-structure.adoc[]
 
 include::user-guide/start-stop.adoc[]
 
-include::user-guide/wrapper.adoc[]
+include::user-guide/os-integration.adoc[]
 
 include::user-guide/console.adoc[]
 
