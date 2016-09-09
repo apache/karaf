@@ -12,16 +12,21 @@
 // limitations under the License.
 //
 
-=== Integration in the operating system: the Service Wrapper
+=== Integration in the operating system
 
 In the previous chapter, we saw the different scripts and commands to start, stop, restart Apache Karaf.
 
-Instead of using these commands and scripts, you can integrate Apache Karaf directly in your operating system service control.
+Instead of using these commands and scripts, you can integrate Apache Karaf directly in your operating system service control using:
 
-Apache Karaf provides the "Service Wrapper". The service wrapper allows you to directly integrate Apache Karaf:
+* <<Service Wrapper>>
+* <<Service Script Templates>>
+
+The above methods allow you to directly integrate Apache Karaf:
 
 * like a native Windows Service
 * like a Unix daemon process
+
+===== Service Wrapper
 
 The "Service Wrapper" correctly handles "user's log outs" under Windows, service dependencies, and the ability to run services which interact with the desktop.
 
@@ -29,7 +34,7 @@ It also includes advanced fault detection software which monitors an application
 The "Service Wrapper" is able to detect crashes, freezes, out of memory and other exception events, then automatically react by restarting Apache Karaf with a minimum of delay.
 It guarantees the maximum possible uptime of Apache Karaf.
 
-==== Supported platforms
+====== Supported platforms
 
 * Windows 8, 7, 2008 R2, 2003, Vista (32 and 64 bits architecture)
 * Linux RedHat Enterprise Linux, Debian, CentOS, Fedora, Ubuntu (32 and 64 bits architecture)
@@ -40,7 +45,7 @@ It guarantees the maximum possible uptime of Apache Karaf.
 * SGI Irix
 * MacOS X
 
-==== Installation
+====== Installation
 
 Apache Karaf Service Wrapper is an optional feature. You have to install the "Service Wrapper" installer first.
 
@@ -74,42 +79,6 @@ OPTIONS
         -n, --name
                 The service name that will be used when installing the service. (Default: karaf)
                 (defaults to karaf)
-        -D, --description
-                The description of the service.
-                (defaults to )
-----
-
-==== Installation
-
-Karaf Wrapper is an optional feature. To install it, simply type:
-
-----
-karaf@root> feature:install wrapper
-----
-
-Once installed, wrapper feature will provide `wrapper:install` new command in the Karaf shell:
-
-----
-karaf@root> wrapper:install --help
-DESCRIPTION
-        wrapper:install
-
-        Install the container as a system service in the OS.
-
-SYNTAX
-        wrapper:install [options]
-
-OPTIONS
-        -s, --start-type
-                Mode in which the service is installed. AUTO_START or DEMAND_START (Default: AUTO_START)
-                (defaults to AUTO_START)
-        --help
-                Display this help message
-        -n, --name
-                The service name that will be used when installing the service. (Default: karaf)
-                (defaults to karaf)
-        -d, --display
-                The display name of the service.
         -D, --description
                 The description of the service.
                 (defaults to )
@@ -177,7 +146,7 @@ systemctl enable /opt/apache-karaf-4.0.2/bin/karaf.service
 
 This will enable Karaf at system boot.
 
-==== Uninstall
+===== Uninstall
 
 The `wrapper:install` provides the system commands to perform to uninstall the service/daemon).
 
@@ -199,7 +168,7 @@ You can remove the "Wrapper Service" installer after that:
 karaf@root()> feature:uninstall service-wrapper
 ----
 
-==== Note for MacOS users
+===== Note for MacOS users
 
 On MacOS you can install the service for an user or for the system.
 
@@ -238,7 +207,7 @@ If you want to remove the service call:
 launchctl remove org.apache.karaf.KARAF
 ----
 
-==== Configuration
+===== Configuration
 
 When using scripts in the Apache Karaf `bin` folder, you can using `bin/setenv` Unix script (`bin\setenv.bat` on Windows) as described in the [Start, stop, restart, connect|start-stop] section of the documentation.
 
@@ -407,3 +376,130 @@ wrapper.ntservice.starttype=AUTO_START
 # Allow the service to interact with the desktop.
 wrapper.ntservice.interactive=false
 ----
+
+===== Service Script Templates
+
+By using the "Service Script Templates", you can run Apache Karaf with the help of operating system specific init scripts.
+
+[NOTE]
+====
+As opposite of Service Wrapper, the templates targeting Unix system do not rely on a 3th party binaries
+====
+
+You can find these templates under the bin/contrib directory.
+
+{nbsp} +
+
+====== Unix
+
+The karaf-service.sh utility helps you to customize the templates.
+This utility will automatically identify the operating system and the default init system and generates ready to use init scripts.
+
+[NOTE]
+====
+You may still need to customize the generated scripts to adapt them to your environment.
+====
+
+The karaf-service.sh can be customized by define an environment variable or by passing command line options:
+
+,===
+Command line option, Environment variable, Description
+-k, KARAF_SERVICE_PATH       , Karaf installation path (mandatory)
+-d, KARAF_SERVICE_DATA       , Karaf data path (default to ${KARAF_SERVICE_PATH}/data)
+-c, KARAF_SERVICE_CONF       , Karaf configuration file (default to ${KARAF_SERVICE_PATH/etc/${KARAF_SERVICE_NAME}.conf
+-t, KARAF_SERVICE_ETC        , Karaf etc path (default to ${KARAF_SERVICE_PATH/etc}
+-p, KARAF_SERVICE_PIDFILE    , Karaf pid path (default to ${KARAF_SERVICE_DATA}/${KARAF_SERVICE_NAME}.pid)
+-n, KARAF_SERVICE_NAME       , Karaf service name (default karaf)
+-e, KARAF_ENV                , Karaf environment variable (can be repeated)
+-u, KARAF_SERVICE_USER       , Karaf user
+-g, KARAF_SERVICE_GROUP      , Karaf group (default ${KARAF_SERVICE_USER)
+-l, KARAF_SERVICE_LOG        , Karaf console log (default to ${KARAF_SERVICE_DATA}/log/${KARAF_SERVICE_NAME}-console.log)
+-f, KARAF_SERVICE_TEMPLATE   , Template file to use
+-x, KARAF_SERVICE_EXECUTABLE , Karaf executable name (defaul karaf, should support daemon and stop commands)
+,===
+
+{nbsp} +
+
+====== Systemd
+
+When karaf-service.sh detect Systemd, it generates two files:
+
+- a systemd unit file to manage the root Apache Karaf container
+- a systemd environment file with variables used by the root Apache Karaf container
+- a systemd template unit file to manage Apache Karaf child containers
+
+.Example
+....
+$ ./karaf-service.sh -k /opt/karaf-4 -n karaf-4
+Writing service file "/opt/karaf-4/bin/contrib/karaf-4.service"
+Writing service configuration file ""/opt/karaf-4/etc/karaf-4.conf"
+Writing service file "/opt/karaf-4/bin/contrib/karaf-4@.service"
+
+$ cp /opt/karaf-4/bin/contrib/karaf-4.service /etc/systemd/system
+$ cp /opt/karaf-4/bin/contrib/karaf-4@.service /etc/systemd/system
+
+$ systemctl enable karaf-4.service
+....
+
+{nbsp} +
+
+====== SysV
+
+When karaf-service.sh detect a SysV system, it generates two files:
+
+- an init script to manage the root Apache Karaf container
+- an environment file with variables used by the root Apache Karaf container
+
+.Example
+....
+$ ./karaf-service.sh -k /opt/karaf-4 -n karaf-4
+Writing service file "/opt/karaf-4/bin/contrib/karaf-4"
+Writing service configuration file "/opt/karaf-4/etc/karaf-4.conf"
+
+$ ln -s /opt/karaf-4/bin/contrib/karaf-4 /etc/init.d/
+$ chkconfig karaf-4 on
+....
+
+[NOTE]
+====
+To enable service startup upon boot, please consult your operating system init guide
+====
+
+{nbsp} +
+
+====== Solaris SMF
+
+When karaf-service.sh detect a Solaris system, it generates a single file:
+
+.Example
+....
+$ ./karaf-service.sh -k /opt/karaf-4 -n karaf-4 -u lburgazz -g lburgazz
+Writing service file "/opt/karaf-4/bin/contrib/karaf-4.xml"
+
+$ svccfg validate /opt/karaf-4/bin/contrib/karaf-4.xml
+$ svccfg import /opt/karaf-4/bin/contrib/karaf-4.xml
+....
+
+[NOTE]
+====
+The generated SMF descriptor is defined as transient so the start method is executed only once
+====
+
+{nbsp} +
+
+====== Windows
+
+Installation of Apache Karaf as windows service is supported through https://github.com/kohsuke/winsw[winsw].
+
+Steps:
+
+- Rename karaf-service-win.exe to the service name i.e karaf-4.exe
+- Rename karaf-service-win.xml to match the service name i.e. karaf-4.xml
+- Customize the service descriptor to fit your needs
+- Use the service executable to install/star/stop the service
+
+.Example
+....
+C:\opt\apache-karaf-4\bin\contrib> karaf-4.exe install
+C:\opt\apache-karaf-4\bin\contrib> karaf-4.exe start
+....
