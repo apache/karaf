@@ -29,6 +29,7 @@ import javax.management.openmbean.TabularData;
 import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -72,6 +73,7 @@ public class PackageTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore
     public void duplicatePackageTest() throws Exception {
         // Leaving out version to make test easier to manage
         // We currently expect no duplicate package exports
