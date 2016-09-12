@@ -42,9 +42,11 @@ public final class Branding {
         Properties props = new Properties();
         if (terminal != null && terminal.getClass().getName().endsWith("SshTerminal")) {
             loadProps(props, "org/apache/karaf/shell/console/branding-ssh.properties");
+            loadProps(props, "org/apache/karaf/branding/branding.properties");
             return loadEtcBrandingFile("branding-ssh.properties",props);
         } else {
             loadProps(props, "org/apache/karaf/shell/console/branding.properties");
+            loadProps(props, "org/apache/karaf/branding/branding.properties");
             return loadEtcBrandingFile("branding.properties",props);
         }
     }
