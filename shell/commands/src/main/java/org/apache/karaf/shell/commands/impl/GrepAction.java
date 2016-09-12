@@ -106,7 +106,7 @@ public class GrepAction implements Action {
 
     @Override
     public Object execute() throws Exception {
-        if (color == ColorOption.auto && !Process.current().isTty(1)) {
+        if (color == ColorOption.auto && (Process.current() == null || !Process.current().isTty(1))) {
             color = ColorOption.never;
         }
         if (after < 0) {

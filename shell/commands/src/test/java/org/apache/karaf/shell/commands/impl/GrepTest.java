@@ -43,7 +43,7 @@ public class GrepTest {
 
         GrepAction grep = new GrepAction();
         DefaultActionPreparator preparator = new DefaultActionPreparator();
-        preparator.prepare(grep, null, Arrays.asList("-C", "100", "2"));
+        preparator.prepare(grep, null, Arrays.asList("--color", "always", "-C", "100", "2"));
         final String returnedString = systemInOutDecorator("1\n2\n3\n4\n5\n6\n7\n8\n9\n", grep);
         assertEquals(expectedColoredString, returnedString);
     }
