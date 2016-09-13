@@ -933,7 +933,12 @@ public class Deployer {
             for (Resource res : resolution.keySet()) {
                 for (Wire wire : resolution.get(res)) {
                     if (HOST_NAMESPACE.equals(wire.getCapability().getNamespace())) {
-                        Bundle bundle = resources.get(wire.getProvider());
+                        Bundle bundle;
+                        if (wire.getProvider() instanceof BundleRevision) {
+                            bundle = ((BundleRevision) wire.getProvider()).getBundle();
+                        } else {
+                            bundle = resources.get(wire.getProvider());
+                        }
                         if (bundle != null) {
                             Bundle b = resources.get(wire.getRequirer());
                             Resource r = b != null ? b.adapt(BundleRevision.class) : wire.getRequirer();
