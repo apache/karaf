@@ -252,6 +252,11 @@ public class Activator extends BaseActivator {
         );
         featuresListenerTracker.open();
 
+        FeaturesServiceMBeanImpl featuresServiceMBean = new FeaturesServiceMBeanImpl();
+        featuresServiceMBean.setBundleContext(bundleContext);
+        featuresServiceMBean.setFeaturesService(featuresService);
+        registerMBean(featuresServiceMBean, "type=feature");
+
         String featuresRepositories = getString("featuresRepositories", "");
         String featuresBoot = getString("featuresBoot", "");
         boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
@@ -259,11 +264,6 @@ public class Activator extends BaseActivator {
                 bundleContext, featuresService,
                 featuresRepositories, featuresBoot, featuresBootAsynchronous);
         bootFeaturesInstaller.start();
-
-        FeaturesServiceMBeanImpl featuresServiceMBean = new FeaturesServiceMBeanImpl();
-        featuresServiceMBean.setBundleContext(bundleContext);
-        featuresServiceMBean.setFeaturesService(featuresService);
-        registerMBean(featuresServiceMBean, "type=feature");
     }
 
     protected void doStop() {
