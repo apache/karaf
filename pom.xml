@@ -2354,7 +2354,7 @@
         <profile>
 	    <id>java9</id>
 	    <properties>
-                <surefire.argLine>-addmods java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws</surefire.argLine>
+                <surefire.argLine>--add-modules java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws</surefire.argLine>
 	    </properties>
 	    <activation>
         	<jdk>9</jdk>

@@ -496,7 +496,7 @@ run() {
         if [ "${ROOT_INSTANCE_RUNNING}" = "false" ] || [ "${CHECK_ROOT_INSTANCE_RUNNING}" = "false" ] ; then
             if [ "${VERSION}" -gt "80" ]; then
                 $KARAF_EXEC "$JAVA" $JAVA_OPTS \
-                    -XaddExports:java.base/sun.net.www.protocol.http=ALL-UNNAMED -XaddExports:java.base/sun.net.www.protocol.https=ALL-UNNAMED -XaddExports:java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED -XaddExports:jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED -XaddExports:jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED \
+                    --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED \
                     -Dkaraf.instances="${KARAF_HOME}/instances" \
                     -Dkaraf.home="$KARAF_HOME" \
                     -Dkaraf.base="$KARAF_BASE" \
@@ -506,7 +506,7 @@ run() {
                     -Djava.io.tmpdir="$KARAF_DATA/tmp" \
                     -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" \
                     -Dorg.apache.servicemix.specs.debug=true \
-                    -addmods java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws,jdk.xml.bind \
+                    --add-modules java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws,jdk.xml.bind \
                     $KARAF_SYSTEM_OPTS \
                     $KARAF_OPTS \
                     $OPTS \

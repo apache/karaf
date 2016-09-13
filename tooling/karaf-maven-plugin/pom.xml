@@ -300,7 +300,7 @@
         <profile>
 	        <id>java9</id>
 	        <properties>
-                <mvn.opts>-XaddExports:java.base/sun.net.www.protocol.http=ALL-UNNAMED -XaddExports:java.base/sun.net.www.protocol.https=ALL-UNNAMED -XaddExports:java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED -XaddExports:jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED -addmods java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
+                <mvn.opts>--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED --add-modules java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
 	        </properties>
 	        <activation>
         	    <jdk>9</jdk>
