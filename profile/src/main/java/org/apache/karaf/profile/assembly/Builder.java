@@ -45,6 +45,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -52,6 +53,8 @@ import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Library;
 import org.apache.karaf.features.internal.download.DownloadCallback;
@@ -83,6 +86,7 @@ import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Resource;
 import org.osgi.service.resolver.Resolver;
@@ -754,7 +758,7 @@ public class Builder {
         // Add boot features for search
         allInstalledFeatures.addAll(allBootFeatures);
         for (String feature : installedEffective.getFeatures()) {
-            addFeatures(installedFeatures, allInstalledFeatures, feature);
+            addFeatures(allInstalledFeatures, feature, installedFeatures, true);
         }
         for (Feature feature : installedFeatures) {
             for (Bundle bundle : feature.getBundle()) {
@@ -820,7 +824,7 @@ public class Builder {
 
         // Compute startup feature dependencies
         Set<Feature> bootFeatures = new HashSet<>();
-        addFeatures(bootFeatures, allBootFeatures, generated.getName());
+        addFeatures(allBootFeatures, generated.getName(), bootFeatures, true);
         for (Feature feature : bootFeatures) {
             // the feature is a startup feature, updating startup.properties file
             LOGGER.info("Feature " + feature.getName() + " is defined as a boot feature");
@@ -1074,41 +1078,35 @@ public class Builder {
         }
     }
 
-    private void addFeatures(Set<Feature> startupFeatures, Set<Feature> features, String featureSt) {
-        int nbFound = 0;
-        Dependency featureRef = createDependency(featureSt);
-        for (Feature f : features) {
-            if (matches(f, featureRef)) {
-                for (Dependency dep : f.getFeature()) {
-                    addFeatures(startupFeatures, features, getFeatureSt(dep));
-                }
-                startupFeatures.add(f);
-                nbFound++;
+    private void addFeatures(Set<Feature> allFeatures, String feature, Set<Feature> features, boolean mandatory) {
+        String name;
+        VersionRange range;
+        int idx = feature.indexOf('/');
+        if (idx > 0) {
+            name = feature.substring(0, idx);
+            String version = feature.substring(idx + 1);
+            version = version.trim();
+            if (version.equals(org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)) {
+                range = new VersionRange(Version.emptyVersion);
+            } else {
+                range = new VersionRange(version, true, true);
+            }
+        } else {
+            name = feature;
+            range = new VersionRange(Version.emptyVersion);
+        }
+        Set<Feature> set = allFeatures.stream()
+                .filter(f -> f.getName().equals(name) && range.contains(VersionTable.getVersion(f.getVersion())))
+                .collect(Collectors.toSet());
+        if (mandatory && set.isEmpty()) {
+            throw new IllegalStateException("Could not find matching feature for " + feature);
+        }
+        for (Feature f : set) {
+            features.add(f);
+            for (Dependency dep : f.getFeature()) {
+                addFeatures(allFeatures, dep.toString(), features, !dep.isDependency() && !dep.isPrerequisite());
             }
         }
-        if (nbFound == 0) {
-            throw new IllegalStateException("Could not find matching feature for " + featureSt);
-        }
-    }
-
-    private String getFeatureSt(Dependency dep) {
-        String version = dep.getVersion() == null || "0.0.0".equals(dep.getVersion()) ? "" : "/" + dep.getVersion();
-        return dep.getName() + version;
-    }
-
-    /**
-     * Checks if a given feature f matches the featureRef.
-     * TODO Need to also check for version ranges. Currently ranges are ignored and all features matching the name
-     * are copied in that case.
-     *  
-     * @param f
-     * @param featureRef
-     * @return
-     */
-    private boolean matches(Feature f, Dependency featureRef) {
-        String version = featureRef.getVersion();
-        return f.getName().equals(featureRef.getName()) 
-            && (version == null || version.equals("0.0.0")|| version.startsWith("[") || f.getVersion().equals(version));
     }
 
     private List<String> getStaged(Stage stage, Map<String, Stage> data) {
