@@ -54,21 +54,10 @@
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.fileinstall</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -82,24 +71,12 @@
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.api</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
         </dependency>
-
+ 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -107,22 +84,12 @@
             <version>4.3.5</version>
         </dependency>
 
+        <!-- Test dependencies -->
         <dependency>
-            <groupId>org.apache.wss4j</groupId>
-            <artifactId>wss4j-ws-security-dom</artifactId>
-            <version>2.0.3</version>
-            <scope>provided</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
         </dependency>
-
-
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-core</artifactId>
-            <version>3.1.7</version>
-            <scope>provided</scope>
-        </dependency>
-
-
         <dependency>
             <groupId>org.apache.directory.server</groupId>
             <artifactId>apacheds-core-integ</artifactId>
@@ -180,8 +147,6 @@
                             javax.net,
                             org.apache.karaf.jaas.config,
                             org.osgi.service.event;resolution:=optional,
-                            org.apache.cxf.interceptor.security;resolution:=optional,
-                            org.apache.wss4j.dom.message.token;resolution:=optional,
                             !net.sf.ehcache*,
                             !net.spy.memcached*,
                             com.sun.security.auth.module;resolution:=optional,

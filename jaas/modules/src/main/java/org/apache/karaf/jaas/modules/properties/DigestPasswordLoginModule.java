@@ -19,6 +19,7 @@ package org.apache.karaf.jaas.modules.properties;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,13 +32,12 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
-import org.apache.cxf.interceptor.security.NameDigestPasswordCallbackHandler;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
-import org.apache.wss4j.dom.message.token.UsernameToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +50,8 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
 
     static final String USER_FILE = "users";
 
+    private MessageDigest digest;
+
     private String usersFile;
     
 
@@ -58,6 +60,58 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
         usersFile = (String) options.get(USER_FILE);
         if (debug) {
             LOGGER.debug("Initialized debug={} usersFile={}", debug, usersFile);
+        }
+    }
+    
+    public String doPasswordDigest(String nonce, String created, String password) {
+        String passwdDigest = null;
+        try {
+            passwdDigest = doPasswordDigest(nonce, created, password.getBytes("UTF-8"));
+        } catch (Exception e) {
+                LOGGER.debug(e.getMessage(), e);
+        }
+        return passwdDigest;
+    }
+    
+    public String doPasswordDigest(String nonce, String created, byte[] password) {
+        String passwdDigest = null;
+        try {
+            byte[] b1 = nonce != null ? new Base64().decode(nonce) : new byte[0];
+            byte[] b2 = created != null ? created.getBytes("UTF-8") : new byte[0];
+            byte[] b3 = password;
+            byte[] b4 = new byte[b1.length + b2.length + b3.length];
+            int offset = 0;
+            System.arraycopy(b1, 0, b4, offset, b1.length);
+            offset += b1.length;
+            
+            System.arraycopy(b2, 0, b4, offset, b2.length);
+            offset += b2.length;
+
+            System.arraycopy(b3, 0, b4, offset, b3.length);
+            
+            byte[] digestBytes = generateDigest(b4);
+            passwdDigest = new String(new Base64().encodeBase64(digestBytes));
+        } catch (Exception e) {
+            LOGGER.debug(e.getMessage(), e);
+        }
+        return passwdDigest;
+    }
+    
+    /**
+     * Generate a (SHA1) digest of the input bytes. The MessageDigest instance that backs this
+     * method is cached for efficiency.  
+     * @param inputBytes the bytes to digest
+     * @return the digest of the input bytes
+     * @throws WSSecurityException
+     */
+    public synchronized byte[] generateDigest(byte[] inputBytes) {
+        try {
+            if (digest == null) {
+                digest = MessageDigest.getInstance("SHA-1");
+            }
+            return digest.digest(inputBytes);
+        } catch (Exception e) {
+            throw new RuntimeException("Error in generating digest", e);
         }
     }
 
@@ -137,7 +191,7 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
 
         if (myCallbackHandler instanceof NameDigestPasswordCallbackHandler) {
             NameDigestPasswordCallbackHandler digestCallbackHandler = (NameDigestPasswordCallbackHandler)myCallbackHandler;
-            storedPassword = UsernameToken.doPasswordDigest(digestCallbackHandler.getNonce(), 
+            storedPassword = doPasswordDigest(digestCallbackHandler.getNonce(), 
                                                             digestCallbackHandler.getCreatedTime(), 
                                                             storedPassword);
         }
