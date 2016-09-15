@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Exception extends Throwable {
     private static final long serialVersionUID = -3387516993124229948L;
 
-    private transient Reference<Class<?>>[] classContext;
+    private transient Reference<Class<?>>[] classContext = null;
 
     /**
      * Constructs a new {@code Exception} that includes the current stack trace.
@@ -127,10 +127,13 @@ public class Exception extends Throwable {
     @XmlTransient
     @Deprecated
     public Class[] getClassContext() {
-        Class<?>[] context = new Class<?>[classContext.length];
-        for (int i = 0; i < classContext.length; i++) {
-            Class<?> c = classContext[i].get();
-            context[i] = c == null ? Object.class : c;
+        Class<?>[] context = null;
+        if (classContext != null) {
+            context = new Class<?>[classContext.length];
+            for (int i = 0; i < classContext.length; i++) {
+                Class<?> c = classContext[i].get();
+                context[i] = c == null ? Object.class : c;
+            }
         }
         return context;
     }
@@ -138,9 +141,11 @@ public class Exception extends Throwable {
     @SuppressWarnings("unchecked")
     private void initClassContext() {
         Class[] context = SecurityManagerEx.getInstance().getThrowableContext(this);
-        classContext = new Reference[context.length];
-        for (int i = 0; i < context.length; i++) {
-            classContext[i] = new WeakReference<Class<?>>(context[i]);
+        if (context != null) {
+            classContext = new Reference[context.length];
+            for (int i = 0; i < context.length; i++) {
+                classContext[i] = new WeakReference<Class<?>>(context[i]);
+            }
         }
     }
     
