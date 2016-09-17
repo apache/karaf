@@ -31,6 +31,7 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.console.JLineTerminal;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.util.jaas.JaasHelper;
+import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -56,20 +57,11 @@ public class LocalConsoleManager {
     }
 
     public void start() throws Exception {
-        final org.jline.terminal.Terminal terminal = TerminalBuilder.terminal();
-        final Runnable callback = new Runnable() {
-            public void run() {
-                try {
-                    if (!closing) {
-                        bundleContext.getBundle(0).stop();
-                    }
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
-        };
+        final Terminal terminal = TerminalBuilder.builder()
+                .nativeSignals(true)
+                .signalHandler(Terminal.SignalHandler.SIG_IGN)
+                .build();
 
-        
         final Subject subject = createLocalKarafSubject();    
         this.session = JaasHelper.doAs(subject, new PrivilegedAction<Session>() {
             public Session run() {
@@ -80,7 +72,7 @@ public class LocalConsoleManager {
                                       new PrintStream(terminal.output()),
                                       new JLineTerminal(terminal),
                                       encoding, 
-                                      callback);
+                                      LocalConsoleManager.this::close);
                 registration = bundleContext.registerService(Session.class, session, null);
                 String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
                 boolean delayconsole = Boolean.parseBoolean(System.getProperty(KARAF_DELAY_CONSOLE));
@@ -161,6 +153,16 @@ public class LocalConsoleManager {
         // osgi framework isn't stopped
         if (session != null) {
             session.close();
+        }
+    }
+
+    protected void close() {
+        try {
+            if (!closing) {
+                bundleContext.getBundle(0).stop();
+            }
+        } catch (Exception e) {
+            // Ignore
         }
     }
 

@@ -82,7 +82,7 @@
 
         <!-- Client deps -->
         <dependency>
-            <groupId>jline</groupId>
+            <groupId>org.jline</groupId>
             <artifactId>jline</artifactId>
         </dependency>
 
@@ -232,9 +232,9 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>jline</groupId>
+                                    <groupId>org.jline</groupId>
                                     <artifactId>jline</artifactId>
-                                    <outputDirectory>target/classes/resources/system/jline/jline/${jline.version}</outputDirectory>
+                                    <outputDirectory>target/classes/resources/system/org/jline/jline/${jline.version}</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.slf4j</groupId>

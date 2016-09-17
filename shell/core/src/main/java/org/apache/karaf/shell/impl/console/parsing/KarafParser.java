@@ -43,7 +43,8 @@ public class KarafParser implements org.jline.reader.Parser {
         this.session = session;
     }
 
-    public ParsedLine parse(String line, int cursor) throws org.jline.reader.SyntaxError {
+    @Override
+    public ParsedLine parse(String line, int cursor, ParseContext parseContext) throws SyntaxError {
         try {
             return doParse(line, cursor);
         } catch (EOFError e) {

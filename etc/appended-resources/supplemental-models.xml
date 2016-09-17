@@ -888,7 +888,7 @@
   </supplement>
   <supplement>
     <project>
-      <groupId>jline</groupId>
+      <groupId>org.jline</groupId>
       <artifactId>jline</artifactId>
       <name>JLine</name>
       <url>http://jline.sourceforge.net</url>
