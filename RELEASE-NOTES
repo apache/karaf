@@ -15,6 +15,34 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.7
+                    ==================
+
+ This is an update patch for Apache Karaf 4.0.x, containing bug fixes.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-3997] - Provide a RegionDigraphPersistence service
+    * [KARAF-4411] - FeatureResolver: spring-dm-web feature installs Spring ver 3.1.4 and 3.2.14 at the same time
+    * [KARAF-4677] - Karaf branding doesn't work anymore using branding bundle
+    * [KARAF-4686] - ClassLoader leak with RmiRegistryFactory and sun.rmi.transport.tcp.TCPEndpoint
+    * [KARAF-4687] - ClassLoader leak with java.lang.Exception and karaf.exception library
+    * [KARAF-4688] - jre.properties should export all JavaFX packages for JRE 1.8+
+    * [KARAF-4693] - shell:new issue with class wildcards
+    * [KARAF-4696] - Upgrade to Pax-Web 4.3.0
+    * [KARAF-4703] - system-script: document bin/contrib
+    * [KARAF-4710] - The feature service may not finish properly and leave bundles in the wrong state during boot install
+    * [KARAF-4712] - Karaf assembly builder does not handle versions correctly
+    * [KARAF-4717] - Update webconsole.css to the latest one
+
+** Improvement
+    * [KARAF-4520] - Add  DigestPasswordLoginModule so PasswordDigest can work with Karaf JAAS realm
+
+** Test
+    * [KARAF-4681] - System.setOut(null) in GrepTest cause other tests failure which need use System.out
+
                     Apache Karaf 4.0.6
                     ==================
 
