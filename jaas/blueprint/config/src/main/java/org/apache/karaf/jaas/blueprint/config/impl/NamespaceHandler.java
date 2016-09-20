@@ -47,11 +47,16 @@ import org.w3c.dom.NodeList;
 
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
 
+    public static final String KARAF_JAAS_NAMESPACE_1_0_0 = "http://karaf.apache.org/xmlns/jaas/v1.0.0";
+    public static final String KARAF_JAAS_NAMESPACE_1_1_0 = "http://karaf.apache.org/xmlns/jaas/v1.1.0";
+
     public URL getSchemaLocation(String namespace) {
-        if ("http://karaf.apache.org/xmlns/jaas/v1.0.0".equals(namespace)) {
+        if (KARAF_JAAS_NAMESPACE_1_0_0.equals(namespace)) {
             return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.0.0.xsd");
-        } else {
+        } else if (KARAF_JAAS_NAMESPACE_1_1_0.equals(namespace)) {
             return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.1.0.xsd");
+        } else {
+            return null;
         }
     }
 
