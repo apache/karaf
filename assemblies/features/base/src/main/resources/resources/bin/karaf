@@ -477,7 +477,6 @@ run() {
         KARAF_EXEC=""
     fi
 
-    echo $CLASSPATH
     while true; do
         # When users want to update the lib version of, they just need to create
         # a lib.next directory and on the new restart, it will replace the current lib directory.
@@ -495,41 +494,31 @@ run() {
 
         if [ "${ROOT_INSTANCE_RUNNING}" = "false" ] || [ "${CHECK_ROOT_INSTANCE_RUNNING}" = "false" ] ; then
             if [ "${VERSION}" -gt "80" ]; then
-                $KARAF_EXEC "$JAVA" $JAVA_OPTS \
-                    --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED \
-                    -Dkaraf.instances="${KARAF_HOME}/instances" \
-                    -Dkaraf.home="$KARAF_HOME" \
-                    -Dkaraf.base="$KARAF_BASE" \
-                    -Dkaraf.data="$KARAF_DATA" \
-                    -Dkaraf.etc="$KARAF_ETC" \
-                    -Dkaraf.restart.jvm.supported=true \
-                    -Djava.io.tmpdir="$KARAF_DATA/tmp" \
-                    -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" \
-                    -Dorg.apache.servicemix.specs.debug=true \
-                    --add-modules java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws,jdk.xml.bind \
-                    $KARAF_SYSTEM_OPTS \
-                    $KARAF_OPTS \
-                    $OPTS \
-                    -classpath "$CLASSPATH" \
-                    $MAIN "$@"
+                JDK_89_OPTS="--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED"
+                JDK_89_OPTS="${JDK_89_OPTS} --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED"
+                JDK_89_OPTS="${JDK_89_OPTS} --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED"
+                JDK_89_OPTS="${JDK_89_OPTS} --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED"
+                JDK_89_OPTS="${JDK_89_OPTS} --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED"
+                JDK_89_OPTS="${JDK_89_OPTS} --add-modules java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws,jdk.xml.bind"
             else
-                ${KARAF_EXEC} "${JAVA}" ${JAVA_OPTS} \
-                    -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" \
-                    -Djava.ext.dirs="${JAVA_EXT_DIRS}" \
-                    -Dkaraf.instances="${KARAF_HOME}/instances" \
-                    -Dkaraf.home="${KARAF_HOME}" \
-                    -Dkaraf.base="${KARAF_BASE}" \
-                    -Dkaraf.data="${KARAF_DATA}" \
-                    -Dkaraf.etc="${KARAF_ETC}" \
-                    -Dkaraf.restart.jvm.supported=true \
-                    -Djava.io.tmpdir="${KARAF_DATA}/tmp" \
-                    -Djava.util.logging.config.file="${KARAF_BASE}/etc/java.util.logging.properties" \
-                    ${KARAF_SYSTEM_OPTS} \
-                    ${KARAF_OPTS} \
-                    ${OPTS} \
-                    -classpath "${CLASSPATH}" \
-                    ${MAIN} "$@"
+                JDK_89_OPTS="-Djava.endorsed.dirs=${JAVA_ENDORSED_DIRS}"
+                JDK_89_OPTS="${JDK_89_OPTS} -Djava.ext.dirs=${JAVA_EXT_DIRS}"
             fi
+            ${KARAF_EXEC} "${JAVA}" ${JAVA_OPTS} \
+                ${JDK_89_OPTS} \
+                -Dkaraf.instances="${KARAF_HOME}/instances" \
+                -Dkaraf.home="${KARAF_HOME}" \
+                -Dkaraf.base="${KARAF_BASE}" \
+                -Dkaraf.data="${KARAF_DATA}" \
+                -Dkaraf.etc="${KARAF_ETC}" \
+                -Dkaraf.restart.jvm.supported=true \
+                -Djava.io.tmpdir="${KARAF_DATA}/tmp" \
+                -Djava.util.logging.config.file="${KARAF_BASE}/etc/java.util.logging.properties" \
+                ${KARAF_SYSTEM_OPTS} \
+                ${KARAF_OPTS} \
+                ${OPTS} \
+                -classpath "${CLASSPATH}" \
+                ${MAIN} "$@"
         else
             die "There is a Root instance already running with name ${ROOT_INSTANCE_NAME} and pid ${ROOT_INSTANCE_PID}"
         fi
