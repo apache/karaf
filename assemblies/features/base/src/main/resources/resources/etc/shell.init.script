@@ -22,7 +22,7 @@
 //
 ld = { log:display $args } ;
 lde = { log:exception-display $args } ;
-la = { bundle:list -t 0 $args } ;
+la = { if { $argv contains "-l" } { bundle:list -t 0 --no-name $args } { bundle:list -t -0 $args } } ;
 ls = { service:list $args } ;
 cl = { config:list "(service.pid=$args)" } ;
 halt = { system:shutdown -h -f $args } ;
