@@ -156,6 +156,8 @@ public class Builder {
     boolean offline;
     String localRepository;
     String mavenRepositories;
+    Map<String, String> config = new LinkedHashMap<>();
+    Map<String, String> system = new LinkedHashMap<>();
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
@@ -378,6 +380,16 @@ public class Builder {
         return this;
     }
 
+    public Builder config(String key, String value) {
+        this.config.put(key, value);
+        return this;
+    }
+
+    public Builder system(String key, String value) {
+        this.system.put(key, value);
+        return this;
+    }
+
     public List<String> getBlacklistedProfiles() {
         return blacklistedProfiles;
     }
@@ -516,8 +528,11 @@ public class Builder {
         //
         // Compute overall profile
         //
-        Profile overallProfile = ProfileBuilder.Factory.create(UUID.randomUUID().toString())
-                .setParents(Arrays.asList(startupProfile.getId(), bootProfile.getId(), installedProfile.getId()))
+        ProfileBuilder builder = ProfileBuilder.Factory.create(UUID.randomUUID().toString())
+                .setParents(Arrays.asList(startupProfile.getId(), bootProfile.getId(), installedProfile.getId()));
+        config.forEach((k ,v) -> builder.addConfiguration(Profile.INTERNAL_PID, Profile.CONFIG_PREFIX + k, v));
+        system.forEach((k ,v) -> builder.addConfiguration(Profile.INTERNAL_PID, Profile.SYSTEM_PREFIX + k, v));
+        Profile overallProfile = builder
                 .getProfile();
         Profile overallOverlay = Profiles.getOverlay(overallProfile, allProfiles, environment);
         Profile overallEffective = Profiles.getEffective(overallOverlay, false);

@@ -230,6 +230,12 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     protected Map<String, String> translatedUrls;
 
+    @Parameter
+    protected Map<String, String> config;
+
+    @Parameter
+    protected Map<String, String> system;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -294,6 +300,14 @@ public class AssemblyMojo extends MojoSupport {
         builder.localRepository(localRepo.getBasedir());
         builder.mavenRepositories(remote.toString());
         builder.javase(javase);
+
+        // Set up config and system props
+        if (config != null) {
+            config.forEach(builder::config);
+        }
+        if (system != null) {
+            system.forEach(builder::system);
+        }
 
         // Set up blacklisted items
         builder.blacklistBundles(blacklistedBundles);
