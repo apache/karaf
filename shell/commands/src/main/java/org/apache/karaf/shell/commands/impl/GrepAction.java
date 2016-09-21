@@ -175,9 +175,9 @@ public class GrepAction implements Action {
                             sbl.append(String.format("%6d  ", lineno));
                         }
                         sbl.style(AttributedStyle.DEFAULT);
-                        Matcher matcher2 = p2.matcher(line);
                         AttributedString aLine = AttributedString.fromAnsi(line);
                         AttributedStyle style;
+                        Matcher matcher2 = p2.matcher(aLine.toString());
                         if (!invertMatch && color != ColorOption.never) {
                             style = getMatchingStyle();
                         } else {
