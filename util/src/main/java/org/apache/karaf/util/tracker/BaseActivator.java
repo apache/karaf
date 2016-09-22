@@ -71,7 +71,9 @@ public class BaseActivator implements BundleActivator, Runnable {
         scheduled.set(true);
         doOpen();
         scheduled.set(false);
-        if (managedServiceRegistration == null && trackers.isEmpty()) {
+        if (managedServiceRegistration == null
+                && trackers.values().stream()
+                    .allMatch(t -> t.getService() != null)) {
             try {
                 doStart();
             } catch (Exception e) {
