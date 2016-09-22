@@ -71,7 +71,17 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
         scheduled.set(true);
         doOpen();
         scheduled.set(false);
-        if (managedServiceRegistration == null && trackers.isEmpty()) {
+        boolean doStart = false;
+        if (managedServiceRegistration == null) {
+            doStart = true;
+            for (SingleServiceTracker s : trackers.values()) {
+                if (s.getService() == null) {
+                    doStart = false;
+                    break;
+                }
+            }
+        }
+        if (doStart) {
             try {
                 doStart();
             } catch (Exception e) {
