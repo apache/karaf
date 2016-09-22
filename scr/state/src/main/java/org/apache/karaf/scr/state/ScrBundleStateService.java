@@ -42,7 +42,8 @@ public class ScrBundleStateService implements BundleStateService {
         StringBuilder sb = new StringBuilder();
         for (ComponentDescriptionDTO desc : scr.getComponentDescriptionDTOs(bundle)) {
             for (ComponentConfigurationDTO cfg : scr.getComponentConfigurationDTOs(desc)) {
-                if (cfg.state != ComponentConfigurationDTO.ACTIVE) {
+                if (cfg.state != ComponentConfigurationDTO.ACTIVE
+                        && cfg.state != ComponentConfigurationDTO.SATISFIED) {
                     sb.append(cfg.description.name).append(" (").append(cfg.id).append(")\n");
                     if ((cfg.state & ComponentConfigurationDTO.UNSATISFIED_CONFIGURATION) != 0) {
                         sb.append("  missing configurations: ");
@@ -79,7 +80,8 @@ public class ScrBundleStateService implements BundleStateService {
         if (bundle.getState() == Bundle.ACTIVE) {
             for (ComponentDescriptionDTO desc : scr.getComponentDescriptionDTOs(bundle)) {
                 for (ComponentConfigurationDTO cfg : scr.getComponentConfigurationDTOs(desc)) {
-                    if (cfg.state != ComponentConfigurationDTO.ACTIVE) {
+                    if (cfg.state != ComponentConfigurationDTO.ACTIVE
+                            && cfg.state != ComponentConfigurationDTO.SATISFIED) {
                         return BundleState.Waiting;
                     }
                 }
