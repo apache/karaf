@@ -185,7 +185,7 @@
         <felix.connect.version>0.1.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.fileinstall.version>3.5.4</felix.fileinstall.version>
-        <felix.framework.version>5.5.0-SNAPSHOT</felix.framework.version>
+        <felix.framework.version>5.6.0</felix.framework.version>
         <felix.framework.security.version>2.4.0</felix.framework.security.version>
         <felix.gogo.runtime.version>0.17.0-SNAPSHOT</felix.gogo.runtime.version>
         <felix.gogo.jline.version>0.1.0-SNAPSHOT</felix.gogo.jline.version>
@@ -202,7 +202,7 @@
         <felix.scr.compat.version>1.0.4</felix.scr.compat.version>
         <felix.scr.webconsole.plugin.version>2.0.2</felix.scr.webconsole.plugin.version>
         <felix.scr.annotation.version>1.11.0</felix.scr.annotation.version>
-        <felix.resolver.version>1.9.0-SNAPSHOT</felix.resolver.version>
+        <felix.resolver.version>1.10.0</felix.resolver.version>
 
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
