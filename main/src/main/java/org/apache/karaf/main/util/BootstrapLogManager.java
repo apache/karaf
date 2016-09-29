@@ -28,10 +28,10 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.properties.InterpolationHelper;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
@@ -104,11 +104,10 @@ public class BootstrapLogManager {
 	}
 
     private List<Handler> getDefaultHandlersInternal() {
-        if (Boolean.getBoolean("karaf.log.console")) {
-            return Arrays.asList(new ConsoleHandler(), getDefaultHandlerInternal());
-        } else {
-            return Collections.singletonList(getDefaultHandlerInternal());
-        }
+        String consoleLevel = System.getProperty("karaf.log.console", "OFF");
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.parse(consoleLevel));
+        return Arrays.asList(handler, getDefaultHandlerInternal());
     }
 
 	private Properties loadPaxLoggingConfig() {

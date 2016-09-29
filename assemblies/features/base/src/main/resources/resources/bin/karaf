@@ -437,7 +437,7 @@ run() {
                 shift
                 ;;
             'run')
-                OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true -Dkaraf.log.console=true"
+                OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true -Dkaraf.log.console=ALL"
                 shift
                 ;;
             'daemon')
