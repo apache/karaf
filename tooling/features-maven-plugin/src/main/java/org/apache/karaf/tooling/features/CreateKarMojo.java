@@ -154,6 +154,7 @@ public class CreateKarMojo extends MojoSupport {
 
         MavenArchiver archiver = new MavenArchiver();
         MavenArchiveConfiguration configuration = new MavenArchiveConfiguration();
+        configuration.addManifestEntries(archive.getManifestEntries());
         archiver.setArchiver(jarArchiver);
         archiver.setOutputFile(archiveFile);
 
