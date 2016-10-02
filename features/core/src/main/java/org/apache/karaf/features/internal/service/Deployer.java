@@ -437,10 +437,16 @@ public class Deployer {
                 propagateState(states, feature, FeatureState.Started, resolver);
             }
         }
-        // Put default Started state for other bundles
+        // Put default Started state for other bundles if start attribute is true
         for (Resource resource : resolver.getBundles().keySet()) {
-            if (!states.containsKey(resource)) {
+            BundleInfo bundleInfo = null;
+            for (Map.Entry<String, Map<String, BundleInfo>> bis : resolver.getBundleInfos().entrySet()) {
+                bundleInfo = bis.getValue().get(getUri(resource));
+            }
+            if (bundleInfo != null && bundleInfo.isStart()) {
                 states.put(resource, FeatureState.Started);
+            } else {
+                states.put(resource, FeatureState.Resolved);
             }
         }
         // Only keep bundles resources
