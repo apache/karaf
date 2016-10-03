@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 
 import org.apache.felix.gogo.api.Job;
 import org.apache.felix.gogo.api.Job.Status;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
@@ -125,14 +126,16 @@ public class ConsoleSessionImpl implements Session {
             }
         }
 
+        // Create session
+        session = processor.createSession(jlineTerminal.input(),
+                jlineTerminal.output(),
+                jlineTerminal.output());
+
         // Console reader
-        try {
-            reader = new LineReaderImpl(
-                    jlineTerminal,
-                    "karaf");
-        } catch (IOException e) {
-            throw new RuntimeException("Error opening console reader", e);
-        }
+        reader = new LineReaderImpl(
+                jlineTerminal,
+                "karaf",
+                ((CommandSessionImpl) session).getVariables());
 
         // History
         final File file = getHistoryFile();
@@ -168,9 +171,6 @@ public class ConsoleSessionImpl implements Session {
         registry.register(new FileOrUriCompleter());
 
         // Session
-        session = processor.createSession(jlineTerminal.input(),
-                                          jlineTerminal.output(),
-                                          jlineTerminal.output());
         Properties sysProps = System.getProperties();
         for (Object key : sysProps.keySet()) {
             session.put(key.toString(), sysProps.get(key));
