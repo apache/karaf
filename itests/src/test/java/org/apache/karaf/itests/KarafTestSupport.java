@@ -152,7 +152,7 @@ public class KarafTestSupport {
                         LOG.debug(t.getMessage(), t);
                         if (retry && !(t instanceof org.junit.AssumptionViolatedException)) {
                             retry = false;
-                            throw new RerunTestException("rerun this test pls");
+                            throw new RerunTestException("rerun this test pls", t);
                         } else {
                             throw t;
                         }
