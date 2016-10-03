@@ -208,8 +208,12 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
         List<ServletDetails> result = new ArrayList<ServletDetails>(events.size());
 
         for (ServletEvent event : events) {
-            String servletClassName = event.getServletClassName();
-            servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1, servletClassName.length());
+            Servlet servlet = event.getServlet();
+            String servletClassName = " ";
+            if (servlet != null) {
+                servletClassName = servlet.getClass().getName();
+                servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1, servletClassName.length());
+            }
             String servletName = event.getServletName() != null ? event.getServletName() : " ";
             if (servletName.contains(".")) {
                 servletName = servletName.substring(servletName.lastIndexOf(".") + 1, servletName.length());
@@ -220,7 +224,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             String[] urls = (String[]) (event.getUrlParameter() != null ? event.getUrlParameter() : new String[]{""});
 
             ServletDetails details = new ServletDetails();
-            details.setId(event.getBundleId());
+            details.setId(event.getBundle().getBundleId());
             details.setAlias(alias);
             details.setServlet(servletClassName);
             details.setServletName(servletName);
@@ -239,9 +243,9 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
         for (WebEvent event : bundleEvents.values()) {
 
             WebDetail webDetail = new WebDetail();
-            webDetail.setBundleId(event.getBundleId());
+            webDetail.setBundleId(event.getBundle().getBundleId());
             webDetail.setContextPath(event.getContextPath().trim().concat("/"));
-            int state = bundleContext.getBundle(event.getBundleId()).getState();
+            int state = bundleContext.getBundle(event.getBundle().getBundleId()).getState();
             String stateStr;
             if (state == Bundle.ACTIVE) {
                 stateStr = "Active";

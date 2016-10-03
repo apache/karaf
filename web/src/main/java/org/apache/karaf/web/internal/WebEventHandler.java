@@ -34,7 +34,7 @@ public class WebEventHandler implements WebListener {
     }
 
     public void webEvent(WebEvent event) {
-        getBundleEvents().put(event.getBundleId(), event);
+        getBundleEvents().put(event.getBundle().getBundleId(), event);
     }
 
 }
