@@ -130,7 +130,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
         try {
             return (componentState(componentName) == Component.STATE_ACTIVE) ? true : false;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

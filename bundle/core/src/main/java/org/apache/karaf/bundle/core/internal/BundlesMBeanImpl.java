@@ -91,7 +91,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             }
             return table;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -105,7 +105,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
             return getBundleStartLevel(bundles.get(0)).getStartLevel();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -117,7 +117,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 getBundleStartLevel(bundle).setStartLevel(bundleStartLevel);
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -138,7 +138,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 getFrameworkWiring().refreshBundles(bundles);
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -164,7 +164,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             InputStream is = new URL(location).openStream();
             bundles.get(0).update(is);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -177,7 +177,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             List<Bundle> bundles = selectBundles(bundleId);
             getFrameworkWiring().resolveBundles(bundles);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -194,7 +194,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 bundle.start();
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -210,7 +210,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             }
             return bundle.getBundleId();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -222,7 +222,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 bundle.start();
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -234,7 +234,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 bundle.stop();
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -246,7 +246,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 bundle.uninstall();
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -282,7 +282,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
             return table;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -300,7 +300,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         try {
             return bundleService.getStatus(bundleId);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

@@ -72,7 +72,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             }
             return pids;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -81,7 +81,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         try {
             configRepo.update(pid, new Hashtable());
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -89,7 +89,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         try {
             this.configRepo.delete(pid);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -106,7 +106,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             }
             return propertiesMap;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -117,7 +117,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             dictionary.remove(key);
             configRepo.update(pid, dictionary);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -135,7 +135,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             }
             configRepo.update(pid, dictionary);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -146,7 +146,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             dictionary.put(key, value);
             configRepo.update(pid, dictionary);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -159,7 +159,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             }
             return null;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -171,7 +171,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             Dictionary<String, String> dictionary = toDictionary(properties);
             configRepo.update(pid, dictionary);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

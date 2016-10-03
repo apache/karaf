@@ -90,7 +90,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
 
             return table;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -98,7 +98,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         try {
             repositoryAdmin.addRepository(url);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -110,7 +110,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         try {
             repositoryAdmin.addRepository(url);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -118,7 +118,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         try {
             deployBundle(bundle, false, false);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -142,7 +142,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
                 }
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

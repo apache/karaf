@@ -37,7 +37,7 @@ public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
         try {
             return karService.list();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -49,7 +49,7 @@ public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
         try {
             karService.install(new URI(url));
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -57,7 +57,7 @@ public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
         try {
             karService.uninstall(name);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

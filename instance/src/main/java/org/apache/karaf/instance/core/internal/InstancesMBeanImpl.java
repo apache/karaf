@@ -73,7 +73,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
                 return -1;
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -81,7 +81,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).changeSshPort(port);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -89,7 +89,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).changeSshHost(host);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -97,7 +97,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).changeRmiRegistryPort(port);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -105,7 +105,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).changeRmiServerPort(port);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -113,7 +113,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).changeJavaOpts(javaOpts);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -121,7 +121,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).destroy();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -129,7 +129,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).start(null);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -137,7 +137,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).start(opts);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -169,7 +169,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
                 child.start(opts);
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -177,7 +177,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             getExistingInstance(name).stop();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -185,7 +185,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             instanceService.renameInstance(originalName, newName, false);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -193,7 +193,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         try {
             instanceService.renameInstance(originalName, newName, verbose);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -210,7 +210,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
 
             instanceService.cloneInstance(name, cloneName, settings, false);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

@@ -52,7 +52,7 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
         try {
             return getServices(-1, false);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -60,7 +60,7 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
         try {
             return getServices(-1, inUse);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -68,7 +68,7 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
         try {
             return getServices(bundleId, false);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -115,7 +115,7 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
             }
             return table;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

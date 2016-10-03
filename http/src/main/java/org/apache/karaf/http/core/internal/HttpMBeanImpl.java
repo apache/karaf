@@ -65,7 +65,7 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
             }
             return table;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

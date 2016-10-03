@@ -58,7 +58,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         try {
             systemService.halt();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -66,7 +66,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         try {
             systemService.halt(time);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -74,7 +74,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         try {
             systemService.reboot();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -82,7 +82,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         try {
             systemService.reboot(time, SystemService.Swipe.NONE);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -90,7 +90,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         try {
             systemService.reboot(time, SystemService.Swipe.CACHE);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -98,7 +98,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         try {
             systemService.reboot(time, SystemService.Swipe.ALL);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -106,7 +106,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         try {
             systemService.setStartLevel(startLevel);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -114,7 +114,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         try {
             return systemService.getStartLevel();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -205,7 +205,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
 
             return result;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
