@@ -197,6 +197,7 @@ public class KarafTestSupport {
             keepRuntimeFolder(),
             logLevel(LogLevel.INFO),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
+            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "updateSnapshots", "none"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", httpPort),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),

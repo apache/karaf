@@ -658,7 +658,9 @@ public class Main {
                 }
                 FrameworkEvent event = framework.waitForStop(step);
                 if (event.getType() != FrameworkEvent.WAIT_TIMEDOUT) {
-                    activatorManager.stopKarafActivators();
+                    if (activatorManager != null) {
+                        activatorManager.stopKarafActivators();
+                    }
                     return true;
                 }
             }

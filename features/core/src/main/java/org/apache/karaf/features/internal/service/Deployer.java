@@ -1003,7 +1003,7 @@ public class Deployer {
                         oldFragments.add(wire.getRequirer());
                     }
                 }
-                if (!oldFragments.equals(newFragments.get(bundle))) {
+                if (!oldFragments.containsAll(newFragments.get(bundle))) {
                     toRefresh.put(bundle, "Attached fragments changed: " + new ArrayList<>(newFragments.get(bundle)));
                     break;
                 }

@@ -203,30 +203,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                long scheduleDelay,
                                int scheduleMaxRun,
                                String blacklisted) {
-        this.bundle = bundle;
-        this.bundleContext = bundleContext;
-        this.systemBundleContext = systemBundleContext;
-        this.storage = storage;
-        this.featureFinder = featureFinder;
-        this.eventAdminListener = eventAdminListener;
-        this.configurationAdmin = configurationAdmin;
-        this.resolver = resolver;
-        this.configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, FeaturesService.DEFAULT_CONFIG_CFG_STORE) : null;
-        this.digraph = digraph;
-        this.overrides = overrides;
-        this.featureResolutionRange = featureResolutionRange;
-        this.bundleUpdateRange = bundleUpdateRange;
-        this.updateSnaphots = updateSnaphots;
-        this.serviceRequirements = serviceRequirements;
-        this.globalRepository = globalRepository;
-        this.downloadThreads = downloadThreads > 0 ? downloadThreads : 1;
-        this.scheduleDelay = scheduleDelay;
-        this.scheduleMaxRun = scheduleMaxRun;
-        this.blacklisted = blacklisted;
-        this.configCfgStore = FeaturesService.DEFAULT_CONFIG_CFG_STORE;
-        this.executor = Executors.newSingleThreadExecutor();
-        loadState();
-        checkResolve();
+        this(bundle, bundleContext,systemBundleContext, storage, featureFinder, eventAdminListener, configurationAdmin,
+                resolver, digraph, overrides, featureResolutionRange, bundleUpdateRange, updateSnaphots,
+                serviceRequirements, globalRepository, downloadThreads, scheduleDelay, scheduleMaxRun, blacklisted,
+                FeaturesService.DEFAULT_CONFIG_CFG_STORE);
     }
 
     public FeaturesServiceImpl(Bundle bundle,

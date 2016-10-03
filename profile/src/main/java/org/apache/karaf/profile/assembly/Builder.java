@@ -39,6 +39,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -1044,7 +1045,7 @@ public class Builder {
         Properties startup = new Properties();
         startup.setHeader(Collections.singletonList("# Bundles to be started on startup, with startlevel"));
         Map<Integer, Set<String>> invertedStartupBundles = MapUtils.invert(bundles);
-        for (Map.Entry<Integer, Set<String>> entry : invertedStartupBundles.entrySet()) {
+        for (Map.Entry<Integer, Set<String>> entry : new TreeMap<>(invertedStartupBundles).entrySet()) {
             String startLevel = Integer.toString(entry.getKey());
             for (String location : new TreeSet<>(entry.getValue())) {
                 if (useReferenceUrls) {

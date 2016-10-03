@@ -34,6 +34,7 @@
     <name>Apache Karaf :: Features</name>
 
     <modules>
+        <module>extension</module>
         <module>core</module>
         <module>command</module>
     </modules>
