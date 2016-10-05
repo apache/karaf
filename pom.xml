@@ -250,7 +250,7 @@
         <hibernate42.version>4.2.15.Final</hibernate42.version>
         <hibernate43.version>4.3.6.Final</hibernate43.version>
         <hibernate.validator.version>5.2.4.Final</hibernate.validator.version>
-        <jansi.version>1.12</jansi.version>
+        <jansi.version>1.14</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
         <jline.version>3.0.0.M2</jline.version>
         <jsw.version>3.2.3</jsw.version>
