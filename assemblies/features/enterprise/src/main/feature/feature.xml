@@ -20,6 +20,7 @@
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
+    <repository>mvn:org.hibernate/hibernate-validator-osgi-karaf-features/${hibernate.validator.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
@@ -247,15 +248,6 @@
         <details>Enable Hibernate Envers 4.3.x</details>
         <feature version="${hibernate43.version}">hibernate</feature>
         <bundle>mvn:org.hibernate/hibernate-envers/${hibernate43.version}</bundle>
-    </feature>
-
-    <feature name="hibernate-validator" description="Hibernate Validator support" version="${hibernate.validator.version}">
-        <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
-        <bundle dependency="true">mvn:com.fasterxml/classmate/1.1.0</bundle>
-        <bundle dependency="true">mvn:javax.el/javax.el-api/2.2.4</bundle>
-        <bundle dependency="true">mvn:org.glassfish.web/javax.el/2.2.4</bundle>
-        <bundle dependency="true">mvn:org.jboss.logging/jboss-logging/3.1.4.GA</bundle>
-        <bundle>mvn:org.hibernate/hibernate-validator/${hibernate.validator.version}</bundle>
     </feature>
 
     <feature name="eclipselink" description="Eclipselink JPA persistence engine support" version="${eclipselink.version}">
