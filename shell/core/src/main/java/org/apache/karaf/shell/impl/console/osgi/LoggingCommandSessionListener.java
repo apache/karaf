@@ -21,8 +21,8 @@ package org.apache.karaf.shell.impl.console.osgi;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.felix.gogo.api.CommandSessionListener;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.CommandSessionListener;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

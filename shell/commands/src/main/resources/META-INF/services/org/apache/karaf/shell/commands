@@ -14,33 +14,14 @@
 ##  See the License for the specific language governing permissions and
 ##  limitations under the License.
 ##---------------------------------------------------------------------------
-org.apache.karaf.shell.commands.impl.AliasAction
-org.apache.karaf.shell.commands.impl.CatAction
-org.apache.karaf.shell.commands.impl.ClearAction
 org.apache.karaf.shell.commands.impl.CompletionAction
-org.apache.karaf.shell.commands.impl.DateAction
-org.apache.karaf.shell.commands.impl.EachAction
-org.apache.karaf.shell.commands.impl.EchoAction
-org.apache.karaf.shell.commands.impl.EditAction
-org.apache.karaf.shell.commands.impl.EnvAction
 org.apache.karaf.shell.commands.impl.ExecuteAction
-org.apache.karaf.shell.commands.impl.GrepAction
-org.apache.karaf.shell.commands.impl.HeadAction
-org.apache.karaf.shell.commands.impl.HistoryAction
-org.apache.karaf.shell.commands.impl.IfAction
 org.apache.karaf.shell.commands.impl.InfoAction
 org.apache.karaf.shell.commands.impl.JavaAction
 org.apache.karaf.shell.commands.impl.LogoutAction
-org.apache.karaf.shell.commands.impl.MoreAction
-org.apache.karaf.shell.commands.impl.NewAction
 org.apache.karaf.shell.commands.impl.PrintfAction
 org.apache.karaf.shell.commands.impl.PrintStackTracesAction
-org.apache.karaf.shell.commands.impl.SleepAction
-org.apache.karaf.shell.commands.impl.SortAction
 org.apache.karaf.shell.commands.impl.SourceAction
-org.apache.karaf.shell.commands.impl.TacAction
-org.apache.karaf.shell.commands.impl.TailAction
 org.apache.karaf.shell.commands.impl.ThreadsAction
 org.apache.karaf.shell.commands.impl.TTopAction
 org.apache.karaf.shell.commands.impl.WatchAction
-org.apache.karaf.shell.commands.impl.WcAction

@@ -175,9 +175,10 @@
                             org.apache.karaf.shell.inject;version=${project.version};-noimport:=true,
                         	org.apache.karaf.shell.util;version=${project.version};-noimport:=true,
                             org.apache.karaf.shell.util;version=2.3.0;-noimport:=true,
-                            org.apache.felix.gogo*;version=${felix.gogo.runtime.version};-noimport:=true,
-                            org.apache.felix.service.command;version=${felix.gogo.runtime.version};-noimport:=true,
-                            org.apache.felix.service.threadio;version=${felix.gogo.runtime.version};status=provisional;mandatory:=status;-noimport:=true
+                            org.apache.felix.gogo.api;version=0.17.0;status=provisional;-noimport:=true,
+                            org.apache.felix.gogo.commands.*;version=0.17.0;-noimport:=true,
+                            org.apache.felix.service.command;version=0.17.0;status=provisional;-noimport:=true,
+                            org.apache.felix.service.threadio;version=0.17.0;status=provisional;-noimport:=true
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.commands.ansi,

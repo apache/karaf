@@ -16,11 +16,11 @@
  */
 package org.apache.karaf.shell.security.impl;
 
-import org.apache.felix.gogo.api.CommandSessionListener;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.activator.Activator;
 import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSessionListener;
 import org.apache.felix.service.command.Converter;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
@@ -34,7 +34,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import javax.security.auth.Subject;
 
-import java.nio.file.attribute.UserPrincipal;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.ArrayList;
@@ -175,10 +174,10 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
     }
 
     private ServiceTracker<CommandSessionListener, CommandSessionListener> trackListeners(BundleContext context) {
-        return new ServiceTracker<CommandSessionListener, CommandSessionListener>(context, CommandSessionListener.class.getName(), null) {
+        return new ServiceTracker<CommandSessionListener, CommandSessionListener>(context, CommandSessionListener.class, null) {
             @Override
             public CommandSessionListener addingService(ServiceReference<CommandSessionListener> reference) {
-                CommandSessionListener listener = super.addingService(reference);
+                CommandSessionListener listener = context.getService(reference);
                 addListener(listener);
                 return listener;
             }
@@ -186,7 +185,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
             @Override
             public void removedService(ServiceReference<CommandSessionListener> reference, CommandSessionListener service) {
                 removeListener(service);
-                super.removedService(reference, service);
+                context.ungetService(reference);
             }
         };
     }

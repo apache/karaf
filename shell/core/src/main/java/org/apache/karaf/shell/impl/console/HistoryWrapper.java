@@ -30,7 +30,7 @@ public class HistoryWrapper implements History {
 
     @Override
     public void clear() {
-        history.clear();
+        history.purge();
     }
 
     public int first() {

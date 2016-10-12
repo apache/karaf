@@ -76,16 +76,32 @@ public class SecuredCommand implements Command, Function {
             Object v = arguments.get(i);
             if (v instanceof Closure) {
                 final Closure closure = (Closure) v;
-                arguments.set(i, new org.apache.karaf.shell.api.console.Function() {
-                    @Override
-                    public Object execute(Session session, List<Object> arguments) throws Exception {
-                        return closure.execute(commandSession, arguments);
-                    }
-                });
+                arguments.set(i, new VersatileFunction(closure));
             }
         }
         return execute(session, arguments);
     }
 
+    static class VersatileFunction implements org.apache.felix.service.command.Function,
+            org.apache.karaf.shell.api.console.Function {
+
+        private final Closure closure;
+
+        VersatileFunction(Closure closure) {
+            this.closure = closure;
+        }
+
+
+        @Override
+        public Object execute(CommandSession commandSession, List<Object> list) throws Exception {
+            return closure.execute(commandSession, list);
+        }
+
+        @Override
+        public Object execute(Session session, List<Object> arguments) throws Exception {
+            CommandSession commandSession = (CommandSession) session.get(".commandSession");
+            return closure.execute(commandSession, arguments);
+        }
+    }
 
 }

@@ -33,22 +33,25 @@ import java.nio.file.Paths;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.apache.felix.gogo.api.Job;
-import org.apache.felix.gogo.api.Job.Status;
+import org.apache.felix.gogo.jline.Shell;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
 import org.apache.felix.service.command.Function;
+import org.apache.felix.service.command.Job;
+import org.apache.felix.service.command.Job.Status;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.History;
@@ -62,11 +65,9 @@ import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.support.completers.UriCompleter;
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.UserInterruptException;
+import org.jline.builtins.Completers;
+import org.jline.reader.*;
 import org.jline.reader.impl.LineReaderImpl;
-import org.jline.reader.impl.history.history.FileHistory;
-import org.jline.reader.impl.history.history.MemoryHistory;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.slf4j.Logger;
@@ -78,6 +79,8 @@ public class ConsoleSessionImpl implements Session {
     public static final String SHELL_HISTORY_MAXSIZE = "karaf.shell.history.maxSize";
     public static final String PROMPT = "PROMPT";
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}(${SUBSHELL})> ";
+    public static final String RPROMPT = "RPROMPT";
+    public static final String DEFAULT_RPROMPT = null;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleSessionImpl.class);
 
@@ -147,18 +150,11 @@ public class ConsoleSessionImpl implements Session {
                 ((CommandSessionImpl) session).getVariables());
 
         // History
-        final File file = getHistoryFile();
-        try {
-            file.getParentFile().mkdirs();
-            reader.setHistory(new FileHistory(file));
-        } catch (Exception e) {
-            LOGGER.error("Can not read history from file " + file + ". Using in memory history", e);
-        }
-        if (reader.getHistory() instanceof MemoryHistory) {
-            String maxSizeStr = System.getProperty(SHELL_HISTORY_MAXSIZE);
-            if (maxSizeStr != null) {
-                ((MemoryHistory) this.reader.getHistory()).setMaxSize(Integer.parseInt(maxSizeStr));
-            }
+        final Path file = getHistoryFile();
+        reader.setVariable(LineReader.HISTORY_FILE, file);
+        String maxSizeStr = System.getProperty(SHELL_HISTORY_MAXSIZE);
+        if (maxSizeStr != null) {
+            reader.setVariable(LineReader.HISTORY_SIZE, Integer.parseInt(maxSizeStr));
         }
         history = new HistoryWrapper(reader.getHistory());
 
@@ -171,9 +167,37 @@ public class ConsoleSessionImpl implements Session {
         registry.register(history);
 
         // Completers
-        CommandsCompleter completer = new CommandsCompleter(factory, this);
-        reader.setCompleter(completer);
-        registry.register(completer);
+        Completers.CompletionEnvironment env = new Completers.CompletionEnvironment() {
+            @Override
+            public Map<String, List<Completers.CompletionData>> getCompletions() {
+                return Shell.getCompletions(session);
+            }
+            @Override
+            public Set<String> getCommands() {
+                return Shell.getCommands(session);
+            }
+            @Override
+            public String resolveCommand(String command) {
+                return Shell.resolve(session, command);
+            }
+            @Override
+            public String commandName(String command) {
+                int idx = command.indexOf(':');
+                return idx >= 0 ? command.substring(idx + 1) : command;
+            }
+            @Override
+            public Object evaluate(LineReader reader, ParsedLine line, String func) throws Exception {
+                session.put(Shell.VAR_COMMAND_LINE, line);
+                return session.execute(func);
+            }
+        };
+        Completer builtinCompleter = new org.jline.builtins.Completers.Completer(env);
+        CommandsCompleter commandsCompleter = new CommandsCompleter(factory, this);
+        reader.setCompleter((rdr, line, candidates) -> {
+            builtinCompleter.complete(rdr, line, candidates);
+            commandsCompleter.complete(rdr, line, candidates);
+        });
+        registry.register(commandsCompleter);
         registry.register(new CommandNamesCompleter());
         registry.register(new FileCompleter());
         registry.register(new UriCompleter());
@@ -198,7 +222,11 @@ public class ConsoleSessionImpl implements Session {
         session.put("#LINES", (Function) (session, arguments) -> Integer.toString(terminal.getHeight()));
         session.put("#COLUMNS", (Function) (session, arguments) -> Integer.toString(terminal.getWidth()));
         session.put("pid", getPid());
-        session.currentDir(null);
+        session.put(Shell.VAR_COMPLETIONS, new HashMap<>());
+        session.put(Shell.VAR_READER, reader);
+        session.put(Shell.VAR_TERMINAL, reader.getTerminal());
+        session.put(CommandSession.OPTION_NO_GLOB, Boolean.TRUE);
+        session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
 
         reader.setHighlighter(new org.apache.felix.gogo.jline.Highlighter(session));
         reader.setParser(new KarafParser(this));
@@ -210,9 +238,9 @@ public class ConsoleSessionImpl implements Session {
      *
      * @return the history file
      */
-    protected File getHistoryFile() {
-        String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();
-        return new File(System.getProperty("karaf.history", defaultHistoryPath));
+    protected Path getHistoryFile() {
+        String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf41.history").toString();
+        return Paths.get(System.getProperty("karaf.history", defaultHistoryPath));
     }
 
     @Override
@@ -239,11 +267,7 @@ public class ConsoleSessionImpl implements Session {
             return;
         }
 //        out.println();
-        try {
-            reader.getHistory().flush();
-        } catch (IOException e) {
-            // ignore
-        }
+        reader.getHistory().save();
 
         running = false;
         if (thread != Thread.currentThread()) {
@@ -307,7 +331,7 @@ public class ConsoleSessionImpl implements Session {
                     reading.set(true);
                     String command;
                     try {
-                        command = reader.readLine(getPrompt());
+                        command = reader.readLine(getPrompt(), getRPrompt(), null, null);
                     } finally {
                         reading.set(false);
                     }
@@ -554,25 +578,39 @@ public class ConsoleSessionImpl implements Session {
     }
 
     protected String getPrompt() {
+        return doGetPrompt(PROMPT, DEFAULT_PROMPT);
+    }
+
+    protected String getRPrompt() {
+        return doGetPrompt(RPROMPT, DEFAULT_RPROMPT);
+    }
+
+    protected String doGetPrompt(String var, String def) {
         try {
             String prompt;
             try {
-                Object p = session.get(PROMPT);
+                Object p = session.get(var);
                 if (p != null) {
                     prompt = p.toString();
                 } else {
-                    Properties properties = Branding.loadBrandingProperties(terminal);
-                    if (properties.getProperty("prompt") != null) {
-                        prompt = properties.getProperty("prompt");
-                        // we put the PROMPT in ConsoleSession to avoid to read
-                        // the properties file each time.
-                        session.put(PROMPT, prompt);
+                    var = var.toLowerCase();
+                    p = session.get(var);
+                    if (p != null) {
+                        prompt = p.toString();
                     } else {
-                        prompt = DEFAULT_PROMPT;
+                        Properties properties = Branding.loadBrandingProperties(terminal);
+                        if (properties.getProperty(var) != null) {
+                            prompt = properties.getProperty(var);
+                            // we put the PROMPT in ConsoleSession to avoid to read
+                            // the properties file each time.
+                            session.put(var, prompt);
+                        } else {
+                            prompt = def;
+                        }
                     }
                 }
             } catch (Throwable t) {
-                prompt = DEFAULT_PROMPT;
+                prompt = def;
             }
             Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(prompt);
             while (matcher.find()) {

@@ -19,6 +19,8 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
+import static org.jline.keymap.KeyMap.ctrl;
+
 /**
  * This test exercises the Shell Command ACL for the shell scope commands as defined in
  * /framework/src/main/resources/resources/etc/org.apache.karaf.command.acl.shell.cfg
@@ -35,13 +37,13 @@ public class ShellCommandSecurityTest extends SshCommandTestBase {
         addViewer(vieweruser);
 
         assertCommand(vieweruser, "shell:date", Result.OK);
-        assertCommand(vieweruser, "shell:edit", Result.NOT_FOUND);
+        assertCommand(vieweruser, "shell:nano", Result.NOT_FOUND);
         assertCommand(vieweruser, "shell:exec", Result.NOT_FOUND);
         assertCommand(vieweruser, "shell:new", Result.NOT_FOUND);
         assertCommand(vieweruser, "shell:java", Result.NOT_FOUND);
 
         assertCommand("karaf", "shell:date", Result.OK);
-        assertCommand("karaf", "shell:edit", Result.OK);
+        assertCommand("karaf", "shell:nano\n" + ctrl('X'), Result.OK);
         assertCommand("karaf", "shell:exec", Result.OK);
         assertCommand("karaf", "shell:new", Result.OK);
         assertCommand("karaf", "shell:java", Result.OK);

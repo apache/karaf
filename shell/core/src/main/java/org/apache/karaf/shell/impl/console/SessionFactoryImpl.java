@@ -24,11 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 
 import org.apache.felix.gogo.jline.Builtin;
+import org.apache.felix.gogo.jline.Posix;
+import org.apache.felix.gogo.jline.Procedural;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
-import org.apache.felix.gogo.runtime.CommandProxy;
+import org.apache.felix.gogo.runtime.Reflective;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
@@ -47,7 +48,7 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     final CommandProcessorImpl commandProcessor;
     final ThreadIO threadIO;
-    final Map<String, SubShellCommand> subshells = new HashMap<String, SubShellCommand>();
+    final Map<String, SubShellCommand> subshells = new HashMap<>();
     boolean closed;
 
     public SessionFactoryImpl(ThreadIO threadIO) {
@@ -56,12 +57,24 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         commandProcessor = new CommandProcessorImpl(threadIO);
         register(new ExitCommand());
         new HelpCommand(this);
-        register(new JobCommand("jobs", "List shell jobs", (session, args) -> new Builtin().jobs(session, args)));
-        register(new JobCommand("fg", "Put job in foreground", (session, args) -> new Builtin().fg(session, args)));
-        register(new JobCommand("bg", "Put job in background", (session, args) -> new Builtin().bg(session, args)));
-        register(new ProcessorCommand("addCommand", "Add a command"));
-        register(new ProcessorCommand("removeCommand", "Remove a command"));
-        register(new ProcessorCommand("eval", "Evaluate"));
+        register(new ShellCommand("addCommand", "Add a command", commandProcessor, "addCommand"));
+        register(new ShellCommand("removeCommand", "Remove a command", commandProcessor, "removeCommand"));
+        register(new ShellCommand("eval", "Evaluate", commandProcessor, "eval"));
+
+        Builtin builtin = new Builtin();
+        for (String name : new String[]{"format", "getopt", "new", "set", "tac", "type", "jobs", "fg", "bg", "keymap", "setopt", "unsetopt", "complete", "history", "widget", "__files", "__directories", "__usage_completion"}) {
+            register(new ShellCommand(name, null, builtin, name));
+        }
+
+        Procedural procedural = new Procedural();
+        for (String name : new String[]{"each", "if", "not", "throw", "try", "until", "while", "break", "continue"}) {
+            register(new ShellCommand(name, null, procedural, name));
+        }
+
+        Posix posix = new Posix(commandProcessor);
+        for (String name : new String[]{"cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "watch", "nano", "head", "tail", "clear", "wc", "date"}) {
+            register(new ShellCommand(name, null, posix, name));
+        }
     }
 
     public CommandProcessorImpl getCommandProcessor() {
@@ -151,62 +164,50 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         }
     }
 
-    private class JobCommand implements Command {
+    private static class ShellCommand implements Command {
         private final String name;
         private final String desc;
-        private final BiConsumer<CommandSession, String[]> consumer;
+        private final Executable consumer;
 
-        public JobCommand(String name, String desc, BiConsumer<CommandSession, String[]> consumer) {
+        interface Executable {
+            Object execute(CommandSession session, List<Object> args) throws Exception;
+        }
+
+        interface ExecutableStr {
+            void execute(CommandSession session, String[] args) throws Exception;
+        }
+
+        public ShellCommand(String name, String desc, Executable consumer) {
             this.name = name;
             this.desc = desc;
             this.consumer = consumer;
         }
 
-        @Override
-        public String getScope() {
-            return "shell";
+        public ShellCommand(String name, String desc, ExecutableStr consumer) {
+            this(name, desc, wrap(consumer));
         }
 
-        @Override
-        public String getName() {
-            return name;
+        public ShellCommand(String name, String desc, Object target, String method) {
+            this(name, desc, wrap(target, method));
         }
 
-        @Override
-        public String getDescription() {
-            return desc;
+        private static Executable wrap(Object target, String name) {
+            return (session, args) -> Reflective.invoke(session, target, name, args);
         }
 
-        @Override
-        public Completer getCompleter(boolean scoped) {
-            return null;
+        private static Executable wrap(ExecutableStr command) {
+            return (session, args) -> {
+                command.execute(session, asStringArray(args));
+                return null;
+            };
         }
 
-        @Override
-        public Parser getParser() {
-            return null;
-        }
-
-        @Override
-        public Object execute(Session session, List<Object> arguments) throws Exception {
-            CommandSession cmdSession = (CommandSession) session.get(".commandSession");
-            String[] args = new String[arguments.size()];
-            for (int i = 0; i < args.length; i++) {
-                args[i] = Objects.toString(arguments.get(i));
+        private static String[] asStringArray(List<Object> args) {
+            String[] argv = new String[args.size()];
+            for (int i = 0; i < argv.length; i++) {
+                argv[i] = Objects.toString(args.get(i));
             }
-            consumer.accept(cmdSession, args);
-            return null;
-        }
-    }
-
-    private class ProcessorCommand implements Command {
-
-        private final String name;
-        private final String desc;
-
-        public ProcessorCommand(String name, String desc) {
-            this.name = name;
-            this.desc = desc;
+            return argv;
         }
 
         @Override
@@ -237,9 +238,8 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         @Override
         public Object execute(Session session, List<Object> arguments) throws Exception {
             CommandSession cmdSession = (CommandSession) session.get(".commandSession");
-            return new CommandProxy(commandProcessor, name).execute(cmdSession, arguments);
+            return consumer.execute(cmdSession, arguments);
         }
-
     }
 
 }

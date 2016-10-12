@@ -55,6 +55,8 @@ public class Activator implements BundleActivator {
 
     ServiceTracker<CommandLoggingFilter, CommandLoggingFilter> filterTracker;
 
+    CommandTracker commandTracker;
+
     @Override
     public void start(final BundleContext context) throws Exception {
         threadIO = new ThreadIOImpl();
@@ -104,6 +106,9 @@ public class Activator implements BundleActivator {
         actionExtender = new CommandExtender(sessionFactory);
         actionExtender.start(context);
 
+        commandTracker = new CommandTracker(sessionFactory, context);
+        commandTracker.open();
+
         if (Boolean.parseBoolean(context.getProperty(START_CONSOLE))) {
             localConsoleManager = new LocalConsoleManager(context, sessionFactory);
             localConsoleManager.start();
@@ -121,6 +126,7 @@ public class Activator implements BundleActivator {
         }
         sessionFactory.stop();
         actionExtender.stop(context);
+        commandTracker.close();
         threadIO.stop();
         if (eventAdminListener != null) {
             eventAdminListener.close();
