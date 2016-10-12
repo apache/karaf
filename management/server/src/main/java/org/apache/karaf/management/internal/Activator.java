@@ -88,20 +88,23 @@ public class Activator extends BaseActivator implements ManagedService {
         String keyStore = getString("keyStore", "karaf.ks");
         String keyAlias = getString("keyAlias", "karaf");
         String trustStore = getString("trustStore", "karaf.ts");
+        boolean createRmiRegistry = getBoolean("createRmiRegistry", true);
+        boolean locateRmiRegistry = getBoolean("locateRmiRegistry", true);
+        boolean locateExistingMBeanServerIfPossible = getBoolean("locateExistingMBeanServerIfPossible", true);
 
         KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
         guard.setConfigAdmin(configurationAdmin);
 
         rmiRegistryFactory = new RmiRegistryFactory();
-        rmiRegistryFactory.setCreate(true);
-        rmiRegistryFactory.setLocate(true);
+        rmiRegistryFactory.setCreate(createRmiRegistry);
+        rmiRegistryFactory.setLocate(locateRmiRegistry);
         rmiRegistryFactory.setHost(rmiRegistryHost);
         rmiRegistryFactory.setPort(rmiRegistryPort);
         rmiRegistryFactory.setBundleContext(bundleContext);
         rmiRegistryFactory.init();
 
         mbeanServerFactory = new MBeanServerFactory();
-        mbeanServerFactory.setLocateExistingServerIfPossible(true);
+        mbeanServerFactory.setLocateExistingServerIfPossible(locateExistingMBeanServerIfPossible);
         mbeanServerFactory.init();
 
         MBeanServer mbeanServer = mbeanServerFactory.getServer();

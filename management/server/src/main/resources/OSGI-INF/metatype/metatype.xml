@@ -27,6 +27,12 @@
             description="%rmiServerHost.description"/>
         <AD id="rmiServerPort" type="Integer" default="44444" name="%rmiServerPort.name"
             description="%rmiServerPort.description"/>
+        <AD id="createRmiRegistry" type="Boolean" default="true" name="%createRmiRegistry.name"
+            description="%createRmiRegistry.description"/>
+        <AD id="locateRmiRegistry" type="Boolean" default="true" name="%locateRmiRegistry.name"
+            description="%locateRmiRegistry.description"/>
+        <AD id="locateExistingMBeanServerIfPossible" type="Boolean" default="true" name="%locateExistingMBeanServerIfPossible.name"
+            description="%locateExistingMBeanServerIfPossible.description"/>
         <AD id="jmxRealm" type="String" default="karaf" name="%jmxRealm.name"
             description="%jmxRealm.description"/>
         <AD id="serviceUrl" type="String" default="service:jmx:rmi://localhost:44444/jndi/rmi://localhost:1099/jmxrmi" name="%serviceUrl.name"
