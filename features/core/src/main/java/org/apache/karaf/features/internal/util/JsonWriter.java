@@ -88,7 +88,7 @@ public final class JsonWriter {
             if (indent >= 0) {
                 writer.append(' ');
             }
-            write(writer, entry.getValue(), indent + 1);
+            write(writer, entry.getValue(), indent >= 0 ? indent + 1 : -1);
         }
         if (indent >= 0) {
             indent(writer, indent);
