@@ -35,7 +35,7 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     
     @Test
     public void installTransaction130Feature() throws Exception {
-        installAssertAndUninstallFeature("transaction", "1.3.0");
+        installAssertAndUninstallFeature("transaction", "1.3.1");
     }
 
     @Test
