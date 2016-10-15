@@ -392,15 +392,14 @@ You can find these templates under the bin/contrib directory.
 
 ====== Unix
 
-The karaf-service.sh utility helps you to customize the templates.
-This utility will automatically identify the operating system and the default init system and generates ready to use init scripts.
+The karaf-service.sh utility helps you to generate ready to use scripts by automatically identify the operating system, the default init system and the template to use.
 
 [NOTE]
 ====
-You may still need to customize the generated scripts to adapt them to your environment.
+You may still need to customize the generated files to adapt them to your environment.
 ====
 
-The karaf-service.sh can be customized by define an environment variable or by passing command line options:
+The utility karaf-service.sh can be configured by defining environment variables or by passing command line options:
 
 ,===
 Command line option, Environment variable, Description
@@ -422,7 +421,7 @@ Command line option, Environment variable, Description
 
 ====== Systemd
 
-When karaf-service.sh detect Systemd, it generates two files:
+When karaf-service.sh detect Systemd, it generates three files:
 
 - a systemd unit file to manage the root Apache Karaf container
 - a systemd environment file with variables used by the root Apache Karaf container
@@ -482,7 +481,7 @@ $ svccfg import /opt/karaf-4/bin/contrib/karaf-4.xml
 
 [NOTE]
 ====
-The generated SMF descriptor is defined as transient so the start method is executed only once
+The generated SMF descriptor is defined as transient so the start method is executed once
 ====
 
 {nbsp} +
