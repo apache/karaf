@@ -21,6 +21,8 @@ package org.apache.karaf.main;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -135,6 +137,8 @@ public class ConfigProperties {
     
     private static final String KARAF_DELAY_CONSOLE = "karaf.delay.console";
 
+    private static final String KARAF_THREAD_MONITORING = "karaf.thread.monitoring";
+
     private static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
     private static final String SECURITY_PROVIDERS = "org.apache.karaf.security.providers";
@@ -175,6 +179,7 @@ public class ConfigProperties {
     String shutdownCommand;
     String startupMessage;
     boolean delayConsoleStart;
+    boolean threadMonitoring;
     
     public ConfigProperties() throws Exception {
         this.karafHome = Utils.getKarafHome(ConfigProperties.class, PROP_KARAF_HOME, ENV_KARAF_HOME);
@@ -222,7 +227,8 @@ public class ConfigProperties {
         this.shutdownCommand = props.getProperty(KARAF_SHUTDOWN_COMMAND);
         this.startupMessage = props.getProperty(KARAF_STARTUP_MESSAGE, "Apache Karaf starting up. Press Enter to open the shell now...");
         this.delayConsoleStart = Boolean.parseBoolean(props.getProperty(KARAF_DELAY_CONSOLE, "false"));
-        System.setProperty(KARAF_DELAY_CONSOLE, new Boolean(this.delayConsoleStart).toString());
+        this.threadMonitoring = Boolean.parseBoolean(props.getProperty(KARAF_THREAD_MONITORING, "false"));
+        System.setProperty(KARAF_DELAY_CONSOLE, Boolean.toString(this.delayConsoleStart));
     }
 
     public void performInit() throws Exception {
@@ -263,6 +269,15 @@ public class ConfigProperties {
                 temp.save();
             } catch (IOException ioException) {
                 System.err.println("WARN: can't update etc/config.properties with the generated command shutdown. We advise to manually add the karaf.shutdown.command property.");
+            }
+        }
+        if (threadMonitoring) {
+            ThreadMXBean threadsBean = ManagementFactory.getThreadMXBean();
+            if (threadsBean.isThreadCpuTimeSupported()) {
+                threadsBean.setThreadCpuTimeEnabled(true);
+            }
+            if (threadsBean.isThreadContentionMonitoringSupported()) {
+                threadsBean.setThreadContentionMonitoringEnabled(true);
             }
         }
     }

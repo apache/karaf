@@ -41,5 +41,6 @@ org.apache.karaf.shell.commands.impl.SourceAction
 org.apache.karaf.shell.commands.impl.TacAction
 org.apache.karaf.shell.commands.impl.TailAction
 org.apache.karaf.shell.commands.impl.ThreadsAction
+org.apache.karaf.shell.commands.impl.TTopAction
 org.apache.karaf.shell.commands.impl.WatchAction
 org.apache.karaf.shell.commands.impl.WcAction
