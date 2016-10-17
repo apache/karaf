@@ -187,7 +187,7 @@ public class MavenTest /*extends KarafTestSupport*/ {
     }
 
     @Test
-    public void timeoutTest() throws Exception {
+    public void smartRetriesTest() throws Exception {
         karafTestSupport.bundleContext = bundleContext;
         final ConfigurationAdmin cm = karafTestSupport.getOsgiService(ConfigurationAdmin.class, 3000);
 
