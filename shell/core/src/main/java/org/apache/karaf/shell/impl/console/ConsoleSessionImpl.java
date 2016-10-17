@@ -24,14 +24,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
+import java.nio.file.FileVisitor;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.PathMatcher;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.apache.felix.gogo.api.Job;
 import org.apache.felix.gogo.api.Job.Status;
@@ -408,17 +417,124 @@ public class ConsoleSessionImpl implements Session {
         return mode;
     }
 
-    private void executeScript(String scriptFileName) {
-        if (scriptFileName != null) {
-            try {
-                String script = String.join("\n",
-                        Files.readAllLines(Paths.get(scriptFileName)));
-                session.execute(script);
-            } catch (Exception e) {
-                LOGGER.debug("Error in initialization script", e);
-                System.err.println("Error in initialization script: " + e.getMessage());
+    private void executeScript(String names) {
+        generateFiles(names).forEach(this::doExecuteScript);
+    }
+
+    private void doExecuteScript(Path scriptFileName) {
+        try {
+            String script = String.join("\n",
+                    Files.readAllLines(scriptFileName));
+            session.execute(script);
+        } catch (Exception e) {
+            LOGGER.debug("Error in initialization script {}", scriptFileName, e);
+            System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
+        }
+    }
+
+    private Stream<Path> generateFiles(String scriptFileName) {
+        if (scriptFileName == null) {
+            return Stream.empty();
+        }
+        List<String> files = new ArrayList<>();
+        List<String> generators = new ArrayList<>();
+        StringBuilder buf = new StringBuilder(scriptFileName.length());
+        boolean hasUnescapedReserved = false;
+        boolean escaped = false;
+        for (int i = 0; i < scriptFileName.length(); i++) {
+            char c = scriptFileName.charAt(i);
+            if (escaped) {
+                buf.append(c);
+                escaped = false;
+            } else if (c == '\\') {
+                escaped = true;
+            } else if (c == ',') {
+                if (hasUnescapedReserved) {
+                    generators.add(buf.toString());
+                } else {
+                    files.add(buf.toString());
+                }
+                hasUnescapedReserved = false;
+                buf.setLength(0);
+            } else if ("*?{[".indexOf(c) >= 0) {
+                hasUnescapedReserved = true;
+                buf.append(c);
+            } else {
+                buf.append(c);
             }
         }
+        if (buf.length() > 0) {
+            if (hasUnescapedReserved) {
+                generators.add(buf.toString());
+            } else {
+                files.add(buf.toString());
+            }
+        }
+        Path cur = Paths.get(System.getProperty("karaf.base"));
+        return Stream.concat(
+                files.stream().map(cur::resolve),
+                generators.stream().flatMap(s -> files(cur, s)));
+    }
+
+    private Stream<Path> files(Path cur, String glob) {
+        String prefix;
+        String rem;
+        int idx = glob.lastIndexOf('/');
+        if (idx >= 0) {
+            prefix = glob.substring(0, idx + 1);
+            rem = glob.substring(idx + 1);
+        } else {
+            prefix = "";
+            rem = glob;
+        }
+        Path dir = cur.resolve(prefix);
+        final PathMatcher matcher = dir.getFileSystem().getPathMatcher("glob:" + rem);
+        Stream.Builder<Path> stream = Stream.builder();
+        try {
+            Files.walkFileTree(dir,
+                    EnumSet.of(FileVisitOption.FOLLOW_LINKS),
+                    Integer.MAX_VALUE,
+                    new FileVisitor<Path>() {
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path file, BasicFileAttributes attrs) throws IOException {
+                            if (file.equals(dir)) {
+                                return FileVisitResult.CONTINUE;
+                            }
+                            if (Files.isHidden(file)) {
+                                return FileVisitResult.SKIP_SUBTREE;
+                            }
+                            Path r = dir.relativize(file);
+                            if (matcher.matches(r)) {
+                                stream.add(file);
+                            }
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            if (!Files.isHidden(file)) {
+                                Path r = dir.relativize(file);
+                                if (matcher.matches(r)) {
+                                    stream.add(file);
+                                }
+                            }
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                            return FileVisitResult.CONTINUE;
+                        }
+                    });
+        } catch (IOException e) {
+            LOGGER.warn("Error generating filenames", e);
+        }
+        return stream.build();
     }
 
     protected void welcome(Properties brandingProps) {
