@@ -35,6 +35,7 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
+        <jetty.version>9.3.12.v20160915</jetty.version>
     </properties>
 
     <dependencies>
@@ -48,10 +49,10 @@
             <scope>test</scope>
             <type>tar.gz</type>
             <exclusions>
-            	<exclusion>
-            		<artifactId>org.apache.karaf.client</artifactId>
-            		<groupId>org.apache.karaf</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>org.apache.karaf.client</artifactId>
+                    <groupId>org.apache.karaf</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -117,6 +118,13 @@
             <version>16.0.1</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -145,20 +153,20 @@
                     </execution>
                 </executions>
             </plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<systemPropertyVariables>
-						<org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
                         <spring31.version>${spring31.version}</spring31.version>
                         <spring32.version>${spring32.version}</spring32.version>
                         <spring40.version>${spring40.version}</spring40.version>
                         <spring41.version>${spring41.version}</spring41.version>
                         <spring42.version>${spring42.version}</spring42.version>
-					</systemPropertyVariables>
-				</configuration>
-			</plugin>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     
@@ -179,12 +187,12 @@
                             <!-- when the local repo location has been specified, we need to pass on this information to PAX mvn url -->
                             <argLine>-Dorg.ops4j.pax.url.mvn.localRepository=${maven.repo.local}</argLine>
                             <systemPropertyVariables>
-		                        <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
+                                <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
                                 <spring31.version>${spring31.version}</spring31.version>
                                 <spring32.version>${spring32.version}</spring32.version>
                                 <spring40.version>${spring40.version}</spring40.version>
                                 <spring41.version>${spring41.version}</spring41.version>
-                    		</systemPropertyVariables>
+                            </systemPropertyVariables>
                         </configuration>
                     </plugin>
                 </plugins>
