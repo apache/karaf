@@ -97,10 +97,10 @@ public class ShellFactoryImpl implements Factory<Command> {
             try {
                 final Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session
                         .getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
-                final PrintStream pout = out instanceof PrintStream ? (PrintStream) out : new PrintStream(out);
-                final PrintStream perr = err instanceof PrintStream ? (PrintStream) err : out == err ? pout : new PrintStream(err);
+                String encoding = getEncoding(env);
+                final PrintStream pout = out instanceof PrintStream ? (PrintStream) out : new PrintStream(out, false, encoding);
+                final PrintStream perr = err instanceof PrintStream ? (PrintStream) err : out == err ? pout : new PrintStream(err, false, encoding);
                 terminal = new SshTerminal(env, in, pout);
-                String encoding = getEncoding();
                 shell = sessionFactory.create(in,
                         pout, perr, terminal, encoding, this::destroy);
                 for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
@@ -130,9 +130,10 @@ public class ShellFactoryImpl implements Factory<Command> {
      *
      * @return The default encoding to use when none is specified.
      */
-    public static String getEncoding() {
+    public static String getEncoding(Environment env) {
         // LC_CTYPE is usually in the form en_US.UTF-8
-        String envEncoding = extractEncodingFromCtype(System.getenv("LC_CTYPE"));
+        String ctype = env.getEnv().getOrDefault("LC_TYPE", System.getenv("LC_CTYPE"));
+        String envEncoding = extractEncodingFromCtype(ctype);
         if (envEncoding != null) {
             return envEncoding;
         }
