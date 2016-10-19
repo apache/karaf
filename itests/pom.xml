@@ -54,6 +54,25 @@
             	</exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>apache-karaf-minimal</artifactId>
+            <scope>test</scope>
+            <type>tar.gz</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.apache.karaf.client</artifactId>
+                    <groupId>org.apache.karaf</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.cdi</groupId>
+            <artifactId>pax-cdi-features</artifactId>
+            <version>${pax.cdi.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.felix</groupId>
