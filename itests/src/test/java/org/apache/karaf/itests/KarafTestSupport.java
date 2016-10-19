@@ -563,21 +563,21 @@ public class KarafTestSupport {
 
     protected void installAssertAndUninstallFeatures(String... feature) throws Exception {
         boolean success = false;
+        Set<String> features = new HashSet<>(Arrays.asList(feature));
     	try {
+            System.out.println("Installing " + features);
+            featureService.installFeatures(features, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 			for (String curFeature : feature) {
-				featureService.installFeature(curFeature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 			    assertFeatureInstalled(curFeature);
 			}
             success = true;
 		} finally {
-            for (String curFeature : feature) {
-                System.out.println("Uninstalling " + curFeature);
-                try {
-                    featureService.uninstallFeature(curFeature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-                } catch (Exception e) {
-                    if (success) {
-                        throw e;
-                    }
+            System.out.println("Uninstalling " + features);
+            try {
+                featureService.uninstallFeatures(features, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+            } catch (Exception e) {
+                if (success) {
+                    throw e;
                 }
             }
 		}
@@ -590,20 +590,20 @@ public class KarafTestSupport {
      * @param featuresBefore
      * @throws Exception
      */
-	protected void uninstallNewFeatures(Set<Feature> featuresBefore)
-			throws Exception {
+	protected void uninstallNewFeatures(Set<Feature> featuresBefore) throws Exception {
 		Feature[] features = featureService.listInstalledFeatures();
+        Set<String> uninstall = new HashSet<>();
         for (Feature curFeature : features) {
 			if (!featuresBefore.contains(curFeature)) {
-				try {
-					System.out.println("Uninstalling " + curFeature.getName());
-					featureService.uninstallFeature(curFeature.getName(), curFeature.getVersion(),
-                                                    EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-				} catch (Exception e) {
-					LOG.error(e.getMessage(), e);
-				}
+                uninstall.add(curFeature.getId());
 			}
 		}
+        try {
+            System.out.println("Uninstalling " + uninstall);
+            featureService.uninstallFeatures(uninstall, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
 	}
 
     protected void close(Closeable closeAble) {
