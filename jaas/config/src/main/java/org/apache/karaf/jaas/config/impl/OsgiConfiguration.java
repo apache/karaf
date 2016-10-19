@@ -23,12 +23,23 @@ import javax.security.auth.login.Configuration;
 
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OsgiConfiguration extends Configuration {
+    
+    private final Logger logger = LoggerFactory.getLogger(OsgiConfiguration.class);
 
     private final List<JaasRealm> realms = new CopyOnWriteArrayIdentityList<JaasRealm>();
+    
+    private Configuration defaultConfiguration;
 
     public void init() {
+        try {
+            defaultConfiguration = Configuration.getConfiguration();
+        } catch (RuntimeException ex) {
+            logger.warn("Default configuration for fallback could not be retrieved", ex);
+        }        
         Configuration.setConfiguration(this);
     }
 
@@ -60,11 +71,15 @@ public class OsgiConfiguration extends Configuration {
         }
         if (realm != null) {
             return realm.getEntries();
-        }
+        } else if (defaultConfiguration != null) {
+            return defaultConfiguration.getAppConfigurationEntry(name);
+         }
         return null;
     }
 
     public void refresh() {
-        // Nothing to do, as we auto-update the configuration
+        if (defaultConfiguration != null) {
+            defaultConfiguration.refresh();
+        }
     }
 }
