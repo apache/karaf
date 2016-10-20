@@ -411,7 +411,7 @@ public class SubsystemResolver {
         for (Map.Entry<Resource, List<Wire>> entry : wiring.entrySet()) {
             final Resource resource = entry.getKey();
             final Requirement requirement = getSubsystemRequirement(resource);
-            if (ResolverUtil.isFragment(resource)) {
+            if (ResolverUtil.isFragment(resource) && requirement != null) {
                 List<Wire> wires = entry.getValue();
                 final Resource host = wires.get(0).getProvider();
                 final Wire wire = findMatchingWire(sf, wiring.get(host));
