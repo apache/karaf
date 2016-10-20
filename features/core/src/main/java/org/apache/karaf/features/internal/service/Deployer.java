@@ -130,6 +130,19 @@ public class Deployer {
         void replaceDigraph(Map<String, Map<String,Map<String,Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException;
     }
 
+    public static class CircularPrerequisiteException extends Exception {
+        private final Set<String> prereqs;
+
+        public CircularPrerequisiteException(Set<String> prereqs) {
+            super(prereqs.toString());
+            this.prereqs = prereqs;
+        }
+
+        public Set<String> getPrereqs() {
+            return prereqs;
+        }
+    }
+
     public static class PartialDeploymentException extends Exception {
         private final Set<String> missing;
 
@@ -249,6 +262,9 @@ public class Deployer {
             }
         }
         if (!prereqs.isEmpty()) {
+            if (request.requirements.get(ROOT_REGION).containsAll(prereqs)) {
+                throw new CircularPrerequisiteException(prereqs);
+            }
             DeploymentRequest newRequest = new DeploymentRequest();
             newRequest.bundleUpdateRange = request.bundleUpdateRange;
             newRequest.featureResolutionRange = request.featureResolutionRange;
