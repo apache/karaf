@@ -308,8 +308,19 @@ public class BaseActivator implements BundleActivator, Runnable {
      * @param type The MBean type to register.
      */
     protected void registerMBean(Object mbean, String type) {
+        String name = "org.apache.karaf:" + type + ",name=" + System.getProperty("karaf.name");
+        registerMBeanWithName(mbean, name);
+    }
+
+    /**
+     * Called in {@link #doStart()}.
+     *
+     * @param mbean The MBean to register.
+     * @param name The MBean name.
+     */
+    protected void registerMBeanWithName(Object mbean, String name) {
         Hashtable<String, Object> props = new Hashtable<>();
-        props.put("jmx.objectname", "org.apache.karaf:" + type + ",name=" + System.getProperty("karaf.name"));
+        props.put("jmx.objectname", name);
         trackRegistration(bundleContext.registerService(getInterfaceNames(mbean), mbean, props));
     }
 
