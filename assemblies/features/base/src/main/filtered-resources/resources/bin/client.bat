@@ -115,10 +115,10 @@ if "%EXTRA_JAVA_OPTS%" == "" goto :KARAF_EXTRA_JAVA_OPTS_END
     set JAVA_OPTS=%JAVA_OPTS% %EXTRA_JAVA_OPTS%
 :KARAF_EXTRA_JAVA_OPTS_END
 
-set CLASSPATH=%KARAF_HOME%\system\org\apache\karaf\org.apache.karaf.client\${project.version}\org.apache.karaf.client-${project.version}.jar
-set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\sshd\sshd-core\${sshd.version}\sshd-core-${sshd.version}.jar
-set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\jline\jline\${jline.version}\jline-${jline.version}.jar
-set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\slf4j\slf4j-api\${slf4j.version}\slf4j-api-${slf4j.version}.jar
+set CLASSPATH=%KARAF_HOME%\system\org\apache\karaf\org.apache.karaf.client\@@project.version@@\org.apache.karaf.client-@@project.version@@.jar
+set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\sshd\sshd-core\@@sshd.version@@\sshd-core-@@sshd.version@@.jar
+set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\jline\jline\@@jline.version@@\jline-@@jline.version@@.jar
+set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\slf4j\slf4j-api\@@slf4j.version@@\slf4j-api-@@slf4j.version@@.jar
 
 :EXECUTE
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8 %9

@@ -270,10 +270,10 @@ setupDefaults() {
     fi
 
     # Add the jars in the lib dir
-    CLASSPATH="$KARAF_HOME/system/org/apache/karaf/org.apache.karaf.client/${project.version}/org.apache.karaf.client-${project.version}.jar"
-    CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/apache/sshd/sshd-core/${sshd.version}/sshd-core-${sshd.version}.jar"
-    CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/jline/jline/${jline.version}/jline-${jline.version}.jar"
-    CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/slf4j/slf4j-api/${slf4j.version}/slf4j-api-${slf4j.version}.jar"
+    CLASSPATH="$KARAF_HOME/system/org/apache/karaf/org.apache.karaf.client/@@project.version@@/org.apache.karaf.client-@@project.version@@.jar"
+    CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/apache/sshd/sshd-core/@@sshd.version@@/sshd-core-@@sshd.version@@.jar"
+    CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/jline/jline/@@jline.version@@/jline-@@jline.version@@.jar"
+    CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/slf4j/slf4j-api/@@slf4j.version@@/slf4j-api-@@slf4j.version@@.jar"
 
 }
 
