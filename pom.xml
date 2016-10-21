@@ -1346,10 +1346,6 @@
                         <groupId>commons-httpclient</groupId>
                         <artifactId>commons-httpclient</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>org.ops4j.pax.url</groupId>
-                        <artifactId>pax-url-aether-support</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
