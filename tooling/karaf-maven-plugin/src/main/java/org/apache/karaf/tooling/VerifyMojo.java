@@ -132,6 +132,9 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(property = "dist-dir")
     protected String distDir;
 
+    @Parameter(property = "karaf-version")
+    protected String karafVersion;
+
     @Parameter(property = "additional-metadata")
     protected File additionalMetadata;
 
@@ -157,6 +160,17 @@ public class VerifyMojo extends MojoSupport {
         if (skip) {
             return;
         }
+
+        if (karafVersion == null) {
+            Properties versions = new Properties();
+            try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
+                versions.load(is);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+            karafVersion = versions.getProperty("karaf-version");
+        }
+
         Hashtable<String, String> config = new Hashtable<>();
         StringBuilder remote = new StringBuilder();
         for (Object obj : project.getRemoteProjectRepositories()) {
@@ -179,6 +193,22 @@ public class VerifyMojo extends MojoSupport {
         // TODO: add more configuration bits ?
         resolver = MavenResolvers.createMavenResolver(config, "maven");
         doExecute();
+    }
+
+    private String getVersion(String id, String def) {
+        String v = getVersion(id);
+        return v != null ? v : def;
+    }
+
+    private String getVersion(String id) {
+        Artifact artifact = project.getArtifactMap().get(id);
+        if (artifact != null) {
+            return artifact.getBaseVersion();
+        } else if (id.startsWith("org.apache.karaf")) {
+            return karafVersion;
+        } else {
+            return null;
+        }
     }
 
     private Object invoke(Object object, String getter) throws MojoExecutionException {
@@ -218,6 +248,21 @@ public class VerifyMojo extends MojoSupport {
                 }
             } catch (IOException e) {
                 throw new MojoExecutionException("Unable to load additional metadata from " + additionalMetadata, e);
+            }
+        }
+
+        if (descriptors == null) {
+            if (framework == null) {
+                framework = Collections.singleton("framework");
+            }
+            descriptors = new LinkedHashSet<>();
+            if (framework.contains("framework")) {
+                descriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
+            }
+            descriptors.add("file:" + project.getBuild().getDirectory() + "/feature/feature.xml");
+        } else {
+            if (framework != null && framework.contains("framework")) {
+                descriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
             }
         }
 
@@ -455,17 +500,26 @@ public class VerifyMojo extends MojoSupport {
             configPropURL = new URL(configuration);
         } else {
             Artifact karafDistro = project.getArtifactMap().get(distribution);
-            if (karafDistro == null) {
-                throw new MojoFailureException("The karaf distribution " + distribution + " is not a dependency");
+            if (karafDistro != null) {
+                String dir = distDir;
+                if ("kar".equals(karafDistro.getType()) && dir == null) {
+                    dir = "resources";
+                }
+                if (dir == null) {
+                    dir = karafDistro.getArtifactId() + "-" + karafDistro.getBaseVersion();
+                }
+                configPropURL = new URL("jar:file:" + karafDistro.getFile() + "!/" + dir + "/etc/config.properties");
+            } else {
+                String version = getVersion(distribution, "RELEASE");
+                String[] dist = distribution.split(":");
+                File distFile = resolver.resolve(dist[0], dist[1], null, "zip", version);
+                String resolvedVersion = distFile.getName().substring(dist[1].length() + 1, distFile.getName().length() - 4);
+                String dir = distDir;
+                if (dir == null) {
+                    dir = dist[1] + "-" + resolvedVersion;
+                }
+                configPropURL = new URL("jar:file:" + distFile + "!/" + dir + "/etc/config.properties");
             }
-            if ("kar".equals(karafDistro.getType()) && distDir == null) {
-                distDir = "resources";
-            }
-            String dir = distDir;
-            if (dir == null) {
-                dir = karafDistro.getArtifactId() + "-" + karafDistro.getBaseVersion();
-            }
-            configPropURL = new URL("jar:file:" + karafDistro.getFile() + "!/" + dir + "/etc/config.properties");
         }
         org.apache.felix.utils.properties.Properties configProps = PropertiesLoader.loadPropertiesFile(configPropURL, true);
 //        copySystemProperties(configProps);
