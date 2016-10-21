@@ -30,7 +30,8 @@
                         <id>default</id>
                         <phases>
                             <compile>
-                                org.apache.karaf.tooling:karaf-maven-plugin:features-generate-descriptor
+                                org.apache.karaf.tooling:karaf-maven-plugin:features-generate-descriptor,
+                                org.apache.karaf.tooling:karaf-maven-plugin:verify
                             </compile>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
@@ -69,7 +70,8 @@
                                 org.apache.maven.plugins:maven-resources-plugin:resources
                             </process-resources>
                             <compile>
-                                org.apache.karaf.tooling:karaf-maven-plugin:features-generate-descriptor
+                                org.apache.karaf.tooling:karaf-maven-plugin:features-generate-descriptor,
+                                org.apache.karaf.tooling:karaf-maven-plugin:verify
                             </compile>
                             <package>
                                 org.apache.karaf.tooling:karaf-maven-plugin:kar

@@ -42,6 +42,7 @@
                 <version>@pom.version@</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <enableGeneration>true</enableGeneration>
                 	<useVersionRange>true</useVersionRange>
                 	<includeTransitiveVersionRanges>true</includeTransitiveVersionRanges>
                 </configuration>

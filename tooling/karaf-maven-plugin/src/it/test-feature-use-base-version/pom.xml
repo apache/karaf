@@ -41,6 +41,9 @@
                 <artifactId>karaf-maven-plugin</artifactId>
                 <version>@pom.version@</version>
                 <extensions>true</extensions>
+                <configuration>
+                    <enableGeneration>true</enableGeneration>
+                </configuration>
             </plugin>
         </plugins>
     </build>

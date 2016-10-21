@@ -59,6 +59,9 @@
                         <goals>
                             <goal>features-generate-descriptor</goal>
                         </goals>
+                        <configuration>
+                            <enableGeneration>true</enableGeneration>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

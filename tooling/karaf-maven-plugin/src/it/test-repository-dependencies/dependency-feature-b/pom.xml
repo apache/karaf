@@ -52,15 +52,9 @@
                 <artifactId>karaf-maven-plugin</artifactId>
                 <version>@pom.version@</version>
                 <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>generate-features-file</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>features-generate-descriptor</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <configuration>
+                    <enableGeneration>true</enableGeneration>
+                </configuration>
             </plugin>
         </plugins>
     </build>

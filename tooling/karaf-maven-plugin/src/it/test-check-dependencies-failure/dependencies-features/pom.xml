@@ -76,19 +76,11 @@
                 <artifactId>karaf-maven-plugin</artifactId>
                 <version>@pom.version@</version>
                 <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>generate-features-file</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>features-generate-descriptor</goal>
-                        </goals>
-                        <configuration>
-                            <aggregateFeatures>true</aggregateFeatures>
-                            <checkDependencyChange>true</checkDependencyChange>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <enableGeneration>true</enableGeneration>
+                    <aggregateFeatures>true</aggregateFeatures>
+                    <checkDependencyChange>true</checkDependencyChange>
+                </configuration>
             </plugin>
         </plugins>
     </build>

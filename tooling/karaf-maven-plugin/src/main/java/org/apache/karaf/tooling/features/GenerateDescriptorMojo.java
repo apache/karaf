@@ -251,6 +251,9 @@ public class GenerateDescriptorMojo extends MojoSupport {
     @Parameter(defaultValue = "false")
     private boolean includeTransitiveVersionRanges;
 
+    @Parameter
+    private Boolean enableGeneration;
+
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
     // *************************************************
@@ -292,6 +295,23 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
+            if (enableGeneration == null) {
+                String packaging = this.project.getPackaging();
+                enableGeneration = !"feature".equals(packaging) && !"feature".equals(packaging);
+            }
+
+            if (!enableGeneration) {
+                if (inputFile.exists()) {
+                    File dir = outputFile.getParentFile();
+                    if (!dir.isDirectory() && !dir.mkdirs()) {
+                        throw new MojoExecutionException("Could not create directory for features file: " + dir);
+                    }
+                    filter(inputFile, outputFile);
+                    projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                }
+                return;
+            }
+
             this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
             this.dependencyHelper.getDependencies(project, includeTransitiveDependency);
             this.localDependencies = dependencyHelper.getLocalDependencies();
