@@ -164,24 +164,29 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/feature</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/feature</targetPath>
+            </resource>
+        </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                <configuration>
-                    <startLevel>30</startLevel>
-                </configuration>
                 <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>features-generate-descriptor</goal>
-                        </goals>
-                        <configuration>
-                            <addBundlesToPrimaryFeature>false</addBundlesToPrimaryFeature>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>verify</id>
                         <phase>process-resources</phase>

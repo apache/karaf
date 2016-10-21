@@ -64,6 +64,11 @@
     <build>
         <resources>
             <resource>
+                <directory>${project.basedir}/src/main/feature</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/feature</targetPath>
+            </resource>
+            <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>false</filtering>
                 <includes>
@@ -140,30 +145,7 @@
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
                 <version>${project.version}</version>
-                <configuration>
-                    <startLevel>30</startLevel>
-                    <!--<checkDependencyChange>true</checkDependencyChange>-->
-                    <!--<overwriteChangedDependencies>true</overwriteChangedDependencies>-->
-                    <!--<failOnDependencyChange>false</failOnDependencyChange>-->
-                </configuration>
                 <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>features-generate-descriptor</goal>
-                        </goals>
-                        <configuration>
-                            <excludedArtifactIds>
-                                <excludedArtifactId>slf4j-api</excludedArtifactId>
-                                <excludedArtifactId>sshd-core</excludedArtifactId>
-                                <excludedArtifactId>jline</excludedArtifactId>
-                                <excludedArtifactId>core</excludedArtifactId>
-                                <excludedArtifactId>org.apache.karaf.region.core</excludedArtifactId>
-                                <excludedArtifactId>org.eclipse.equinox.region</excludedArtifactId>
-                            </excludedArtifactIds>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>package</id>
                         <goals>
