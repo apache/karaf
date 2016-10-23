@@ -73,7 +73,7 @@ felix.fileinstall.log.default = jul
 * `felix.fileinstall.enableConfigSave` flush back in the configuration file the changes performed directly on the
 configuration service (ConfigAdmin). If `true`, any change (using `config:*` commands, MBeans, OSGi service) is
 persisted back in the configuration false. Default is `true`.
-* `felix.fileinstall.dir` is the directory where Apache Karaf is looking for configuration files. Default is `${karaf.etc`}
+* `felix.fileinstall.dir` is the directory where Apache Karaf is looking for configuration files. Default is `${karaf.etc}`
 meaning the value of the `KARAF_ETC` variable.
 * `felix.fileinstall.filter` is the file name pattern used to load only some configuration files. Only files matching
 the pattern will be loaded. Default value is `.*\\.(cfg|config)` meaning *.cfg and *.config files.
@@ -89,6 +89,10 @@ this value is high, more verbose the configuration service is.
 You can change the configuration at runtime by directly editing the configuration file.
 
 You can also do the same using the `config:*` commands or the ConfigMBean.
+
+Apache Karaf persists configuration using own persistence manager in case of when available persistence managers do not support that.
+Configuration files are placed by default in `KARAF_ETC`, but it could be overridden via variable `storage` in `etc/org.apache.karaf.config.cfg`.
+If you want to disable karaf persistence manager, set storage variable to empty string (`storage=`).
 
 ==== `config:*` commands
 
