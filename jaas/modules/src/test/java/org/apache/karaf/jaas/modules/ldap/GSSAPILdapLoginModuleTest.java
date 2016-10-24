@@ -21,6 +21,7 @@ import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.directory.server.core.kerberos.KeyDerivationInterceptor;
 import org.apache.directory.server.kerberos.kdc.AbstractKerberosITest;
 import org.apache.directory.server.kerberos.kdc.KerberosTestUtils;
+import org.apache.directory.server.ldap.LdapServer;
 import org.apache.directory.server.ldap.handlers.sasl.cramMD5.CramMd5MechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.digestMD5.DigestMd5MechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.gssapi.GssapiMechanismHandler;
@@ -28,6 +29,7 @@ import org.apache.directory.server.ldap.handlers.sasl.ntlm.NtlmMechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.plain.PlainMechanismHandler;
 import org.apache.directory.server.protocol.shared.transport.TcpTransport;
 import org.apache.directory.server.protocol.shared.transport.Transport;
+import org.apache.directory.server.protocol.shared.transport.UdpTransport;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
 import org.apache.felix.utils.properties.Properties;
@@ -114,7 +116,7 @@ import static org.junit.Assert.assertTrue;
 })
 public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
 
-    private static boolean portUpdated;
+    private static boolean loginConfigUpdated;
 
     @Before
     public void setUp() throws Exception {
@@ -140,7 +142,7 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
     }
 
     public void updatePort() throws Exception {
-        if (!portUpdated) {
+        if (!loginConfigUpdated) {
             String basedir = System.getProperty("basedir");
             if (basedir == null) {
                 basedir = new File(".").getCanonicalPath();
@@ -153,12 +155,13 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
             String content = IOUtils.toString(inputStream, "UTF-8");
             inputStream.close();
             content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
+            content = content.replaceAll("address", "" + super.getLdapServer().getSaslHost());
 
             File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
             FileOutputStream outputStream = new FileOutputStream(f2);
             IOUtils.write(content, outputStream, "UTF-8");
             outputStream.close();
-            portUpdated = true;
+            loginConfigUpdated = true;
         }
 
     }
