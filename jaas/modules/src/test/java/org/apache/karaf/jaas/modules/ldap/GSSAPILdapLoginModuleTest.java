@@ -173,7 +173,6 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
     public void testSuccess() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
-        options.setProperty(GSSAPILdapLoginModule.REALM_PROPERTY, "krb5TestRealm");
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
         CallbackHandler cb = new CallbackHandler() {
