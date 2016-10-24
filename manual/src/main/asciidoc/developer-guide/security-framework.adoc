@@ -561,10 +561,10 @@ Here is a simple example of a krb5 configuration file :
 |
 |===
 
-The GSSAPI module uses the Oracle JVM GSSAPI mechanism to handle authentication to a LDAP server.
+The GSSAPI module uses the GSSAPI mechanism to handle authentication to a LDAP server.
 Typical use is using this and a Kerberos Login Module to connect to an ActiveDirectory Server, or any other LDAP server that needs a Kerberos tickets for authentication.
 
-Here is a simple configuration, that use as Kerberos login module as authentication backend and a LDAP server:
+Here is a simple configuration, that use as Kerberos login module as authentication backend :
 ----
 <jaas:config name="ldap" rank="1">
   <jaas:module className="org.apache.karaf.jaas.modules.ldap.GSSAPILdapLoginModule"flags="required">
