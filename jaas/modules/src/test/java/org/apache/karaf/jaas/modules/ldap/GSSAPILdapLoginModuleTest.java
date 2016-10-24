@@ -213,7 +213,6 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
     public void testUsernameFailure() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
-        options.setProperty(GSSAPILdapLoginModule.REALM_PROPERTY, "propertiesTestRealm");
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
         CallbackHandler cb = new CallbackHandler() {
@@ -238,7 +237,6 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
     public void testPasswordFailure() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
-        options.setProperty(GSSAPILdapLoginModule.REALM_PROPERTY, "propertiesTestRealm");
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
         CallbackHandler cb = new CallbackHandler() {
@@ -263,7 +261,6 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
     public void testUserNotFound() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
-        options.setProperty(GSSAPILdapLoginModule.REALM_PROPERTY, "propertiesTestRealm");
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
         CallbackHandler cb = new CallbackHandler() {
@@ -282,6 +279,31 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertFalse(module.login());
+    }
+
+    @Test(expected = LoginException.class)
+    public void testNoRealm() throws Exception {
+
+        Properties options = ldapLoginModuleOptions();
+        options.remove(GSSAPILdapLoginModule.REALM_PROPERTY);
+        GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
+
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("hnelson0");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertTrue(module.login()); // should throw LoginException
     }
 
     protected void setupEnv(Class<? extends Transport> transport, EncryptionType encryptionType,
