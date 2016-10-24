@@ -10,6 +10,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
@@ -118,6 +119,13 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
     @Override
     public boolean abort() throws LoginException {
         return true;
+    }
+
+    @Override
+    public boolean commit() throws LoginException {
+        boolean ret = super.commit();
+        principals.addAll(subject.getPrincipals(KerberosPrincipal.class));
+        return ret;
     }
 
     @Override
