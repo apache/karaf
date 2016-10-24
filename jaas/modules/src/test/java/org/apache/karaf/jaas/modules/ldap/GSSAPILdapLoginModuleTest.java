@@ -8,7 +8,6 @@ import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.util.Strings;
-import org.apache.directory.ldap.client.api.Krb5LoginConfiguration;
 import org.apache.directory.server.annotations.CreateKdcServer;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
@@ -32,7 +31,6 @@ import org.apache.directory.server.protocol.shared.transport.Transport;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
 import org.apache.felix.utils.properties.Properties;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +43,6 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -108,11 +105,16 @@ import static org.junit.Assert.assertTrue;
         "dn: ou=users,dc=example,dc=com",
         "objectClass: top",
         "objectClass: organizationalUnit",
-        "ou: users"
+        "ou: users",
+
+        "dn: ou=groups,dc=example,dc=com",
+        "objectClass: top",
+        "objectClass: organizationalUnit",
+        "ou: groups"
 })
 public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
-    private static boolean portUpdated;
 
+    private static boolean portUpdated;
 
     @Before
     public void setUp() throws Exception {
@@ -200,18 +202,14 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
             if (pr instanceof UserPrincipal) {
                 assertEquals("hnelson", pr.getName());
                 foundUser = true;
-            } else if (pr instanceof RolePrincipal) {
-                assertEquals("admin", pr.getName());
-                foundRole = true;
             }
         }
         assertTrue(foundUser);
-        assertTrue(foundRole);
 
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
     }
-/*
+
     @Test(expected = LoginException.class)
     public void testUsernameFailure() throws Exception {
 
@@ -286,7 +284,7 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertFalse(module.login());
     }
-*/
+
     protected void setupEnv(Class<? extends Transport> transport, EncryptionType encryptionType,
                             ChecksumType checksumType)
             throws Exception {
@@ -298,7 +296,7 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         kdcServer.getConfig().setEncryptionTypes(Collections.singleton(encryptionType));
 
         // create principals
-        createPrincipal("uid=" + USER_UID, "Last", "First Last",
+        createPrincipal("uid=" + USER_UID, "Last", "admin",
                 USER_UID, USER_PASSWORD, USER_UID + "@" + REALM);
 
         createPrincipal("uid=krbtgt", "KDC Service", "KDC Service",
