@@ -691,7 +691,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     synchronized (lock) {
                         repositoryCache.put(uri, repo);
                     }
-                    for (URI u : repo.getRepositories()) {
+                }
+                for (URI u : repo.getRepositories()) {
+                    if (!toLoad.contains(u.toString())) {
                         toLoad.add(u.toString());
                     }
                 }
