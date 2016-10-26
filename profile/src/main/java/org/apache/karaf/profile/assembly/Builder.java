@@ -753,6 +753,10 @@ public class Builder {
                     installArtifact(downloader, bundle.getLocation().trim());
                 }
             }
+            // Install config files
+            for (ConfigFile configFile : feature.getConfigfile()) {
+                installArtifact(downloader, configFile.getLocation().trim());
+            }
             for (Conditional cond : feature.getConditional()) {
                 for (Bundle bundle : cond.getBundle()) {
                     if (!ignoreDependencyFlag || !bundle.isDependency()) {
