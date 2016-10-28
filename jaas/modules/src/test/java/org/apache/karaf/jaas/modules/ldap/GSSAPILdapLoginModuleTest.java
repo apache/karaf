@@ -33,6 +33,7 @@ import org.apache.directory.server.protocol.shared.transport.UdpTransport;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
 import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.junit.After;
 import org.junit.Before;
@@ -45,6 +46,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.kerberos.KerberosPrincipal;
+import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -112,7 +115,13 @@ import static org.junit.Assert.assertTrue;
         "dn: ou=groups,dc=example,dc=com",
         "objectClass: top",
         "objectClass: organizationalUnit",
-        "ou: groups"
+        "ou: groups",
+
+        "dn: cn=admin,ou=groups,dc=example,dc=com",
+        "objectClass: top",
+        "objectClass: groupOfNames",
+        "cn: admin",
+        "member: uid=hnelson,ou=users,dc=example,dc=com"
 })
 public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
 
@@ -196,17 +205,37 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         assertTrue(module.login());
         assertTrue(module.commit());
 
-        assertEquals(2, subject.getPrincipals().size());
+        assertEquals(3, subject.getPrincipals().size());
 
+        boolean foundKrb5User = false;
         boolean foundUser = false;
         boolean foundRole = false;
         for (Principal pr : subject.getPrincipals()) {
-            if (pr instanceof UserPrincipal) {
+            if (pr instanceof KerberosPrincipal) {
+                assertEquals("hnelson@EXAMPLE.COM", pr.getName());
+                foundKrb5User = true;
+            } else if (pr instanceof UserPrincipal) {
                 assertEquals("hnelson", pr.getName());
                 foundUser = true;
+            } else if (pr instanceof RolePrincipal) {
+                assertEquals("admin", pr.getName());
+                foundRole = true;
             }
         }
+        assertTrue(foundKrb5User);
         assertTrue(foundUser);
+        assertTrue(foundRole);
+
+        boolean foundToken = false;
+        for (Object crd : subject.getPrivateCredentials()) {
+            if (crd instanceof KerberosTicket) {
+                assertEquals("hnelson@EXAMPLE.COM", ((KerberosTicket) crd).getClient().getName());
+                assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ((KerberosTicket) crd).getServer().getName());
+                foundToken = true;
+                break;
+            }
+        }
+        assertTrue(foundToken);
 
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
