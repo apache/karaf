@@ -21,7 +21,6 @@ import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.directory.server.core.kerberos.KeyDerivationInterceptor;
 import org.apache.directory.server.kerberos.kdc.AbstractKerberosITest;
 import org.apache.directory.server.kerberos.kdc.KerberosTestUtils;
-import org.apache.directory.server.ldap.LdapServer;
 import org.apache.directory.server.ldap.handlers.sasl.cramMD5.CramMd5MechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.digestMD5.DigestMd5MechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.gssapi.GssapiMechanismHandler;
@@ -29,7 +28,6 @@ import org.apache.directory.server.ldap.handlers.sasl.ntlm.NtlmMechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.plain.PlainMechanismHandler;
 import org.apache.directory.server.protocol.shared.transport.TcpTransport;
 import org.apache.directory.server.protocol.shared.transport.Transport;
-import org.apache.directory.server.protocol.shared.transport.UdpTransport;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
 import org.apache.felix.utils.properties.Properties;
@@ -210,6 +208,8 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         boolean foundKrb5User = false;
         boolean foundUser = false;
         boolean foundRole = false;
+        boolean foundTicket = false;
+
         for (Principal pr : subject.getPrincipals()) {
             if (pr instanceof KerberosPrincipal) {
                 assertEquals("hnelson@EXAMPLE.COM", pr.getName());
@@ -222,11 +222,6 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
                 foundRole = true;
             }
         }
-        assertTrue("Principals should contains kerberos user", foundKrb5User);
-        assertTrue("Principals should contains ldap user", foundUser);
-        assertTrue("Principals should contains ldap role", foundRole);
-
-        boolean foundTicket = false;
         for (Object crd : subject.getPrivateCredentials()) {
             if (crd instanceof KerberosTicket) {
                 assertEquals("hnelson@EXAMPLE.COM", ((KerberosTicket) crd).getClient().getName());
@@ -235,8 +230,11 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
                 break;
             }
         }
+
+        assertTrue("Principals should contains kerberos user", foundKrb5User);
+        assertTrue("Principals should contains ldap user", foundUser);
+        assertTrue("Principals should contains ldap role", foundRole);
         assertTrue("PricatePrincipals should contains kerberos ticket", foundTicket);
-        assertTrue(foundTicket);
 
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
