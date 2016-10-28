@@ -222,20 +222,21 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
                 foundRole = true;
             }
         }
-        assertTrue(foundKrb5User);
-        assertTrue(foundUser);
-        assertTrue(foundRole);
+        assertTrue("Principals should contains kerberos user", foundKrb5User);
+        assertTrue("Principals should contains ldap user", foundUser);
+        assertTrue("Principals should contains ldap role", foundRole);
 
-        boolean foundToken = false;
+        boolean foundTicket = false;
         for (Object crd : subject.getPrivateCredentials()) {
             if (crd instanceof KerberosTicket) {
                 assertEquals("hnelson@EXAMPLE.COM", ((KerberosTicket) crd).getClient().getName());
                 assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ((KerberosTicket) crd).getServer().getName());
-                foundToken = true;
+                foundTicket = true;
                 break;
             }
         }
-        assertTrue(foundToken);
+        assertTrue("PricatePrincipals should contains kerberos ticket", foundTicket);
+        assertTrue(foundTicket);
 
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
