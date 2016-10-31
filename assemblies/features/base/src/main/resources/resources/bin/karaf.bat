@@ -419,4 +419,4 @@ endlocal
 if not "%PAUSE%" == "" pause
 
 :END_NO_PAUSE
-
+    EXIT /B %ERRORLEVEL%
