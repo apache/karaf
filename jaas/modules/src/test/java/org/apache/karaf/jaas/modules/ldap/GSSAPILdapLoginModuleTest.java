@@ -162,7 +162,8 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
             String content = IOUtils.toString(inputStream, "UTF-8");
             inputStream.close();
             content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
-            content = content.replaceAll("address", "" + super.getLdapServer().getSaslHost());
+            //content = content.replaceAll("address", "" + super.getLdapServer().getSaslHost());
+            content = content.replaceAll("address", "" + super.getLdapServer().getTransports()[0].getAddress());
 
             File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
             FileOutputStream outputStream = new FileOutputStream(f2);
