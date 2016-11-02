@@ -148,8 +148,9 @@ public class Activator extends BaseActivator implements ManagedService {
         String authMethods    = getString("authMethods", "keyboard-interactive,password,publickey");
         int keySize           = getInt("keySize", 4096);
         String algorithm      = getString("algorithm", "RSA");
-        String macs           = getString("macs", "hmac-sha1");
-        String ciphers        = getString("ciphers", "aes256-ctr,aes192-ctr,aes128-ctr,arcfour256");
+        String macs           = getString("macs", "hmac-sha2-512,hmac-sha2-256,hmac-sha1");
+        String ciphers        = getString("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
+        String kexAlgorithms  = getString("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
         String welcomeBanner  = getString("welcomeBanner", null);
 
         AbstractGeneratorHostKeyProvider keyPairProvider;
@@ -181,6 +182,7 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setHost(sshHost);
         server.setMacFactories(SshUtils.buildMacs(macs));
         server.setCipherFactories(SshUtils.buildCiphers(ciphers));
+        server.setKeyExchangeFactories(SshUtils.buildKexAlgorithms(kexAlgorithms));
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
         server.setCommandFactory(new ScpCommandFactory(new ShellCommandFactory(sessionFactory)));
         server.setSubsystemFactories(Arrays.<NamedFactory<org.apache.sshd.server.Command>>asList(new SftpSubsystem.Factory()));

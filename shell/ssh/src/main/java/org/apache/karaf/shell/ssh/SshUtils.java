@@ -18,82 +18,113 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.sshd.common.Cipher;
-import org.apache.sshd.common.Mac;
+import org.apache.sshd.SshBuilder;
+import org.apache.sshd.SshServer;
 import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.common.cipher.AES128CBC;
-import org.apache.sshd.common.cipher.AES128CTR;
-import org.apache.sshd.common.cipher.AES192CBC;
-import org.apache.sshd.common.cipher.AES256CBC;
-import org.apache.sshd.common.cipher.AES256CTR;
-import org.apache.sshd.common.cipher.ARCFOUR128;
-import org.apache.sshd.common.cipher.ARCFOUR256;
-import org.apache.sshd.common.cipher.BlowfishCBC;
-import org.apache.sshd.common.cipher.TripleDESCBC;
-import org.apache.sshd.common.mac.HMACMD5;
-import org.apache.sshd.common.mac.HMACMD596;
-import org.apache.sshd.common.mac.HMACSHA1;
-import org.apache.sshd.common.mac.HMACSHA196;
+import org.apache.sshd.common.Cipher;
+import org.apache.sshd.common.Compression;
+import org.apache.sshd.common.KeyExchange;
+import org.apache.sshd.common.Mac;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SshUtils {
 
-    public static <S> List<NamedFactory<S>> filter(Collection<NamedFactory<S>> factories, String names) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SshUtils.class);
+
+    public static <S> List<NamedFactory<S>> filter(Class<S> type,
+            Collection<NamedFactory<S>> factories, String names) {
         List<NamedFactory<S>> list = new ArrayList<NamedFactory<S>>();
         for (String name : names.split(",")) {
+            name = name.trim();
+            boolean found = false;
             for (NamedFactory<S> factory : factories) {
                 if (factory.getName().equals(name)) {
                     list.add(factory);
+                    found = true;
+                    break;
                 }
+            }
+            if (!found) {
+                LOGGER.warn("Configured " + type.getSimpleName().toLowerCase()
+                        + " '" + name + "' not available");
             }
         }
         return list;
     }
 
     public static List<NamedFactory<Mac>> buildMacs(String names) {
-        return filter(Arrays.<NamedFactory<Mac>>asList(
-                        new HMACMD5.Factory(),
-                        new HMACSHA1.Factory(),
-                        new HMACMD596.Factory(),
-                        new HMACSHA196.Factory()),
-                names);
+        return filter(Mac.class, new ServerConfig().getMacFactories(), names);
     }
 
+
     public static List<NamedFactory<Cipher>> buildCiphers(String names) {
-        List<NamedFactory<Cipher>> avail = new LinkedList<NamedFactory<Cipher>>();
-        avail.add(new AES128CTR.Factory());
-        avail.add(new AES256CTR.Factory());
-        avail.add(new ARCFOUR128.Factory());
-        avail.add(new ARCFOUR256.Factory());
-        avail.add(new AES128CBC.Factory());
-        avail.add(new TripleDESCBC.Factory());
-        avail.add(new BlowfishCBC.Factory());
-        avail.add(new AES192CBC.Factory());
-        avail.add(new AES256CBC.Factory());
+        ServerConfig defaults = new ServerConfig();
+        List<NamedFactory<Cipher>> avail = defaults.getCipherFactories();
+        return filter(Cipher.class, avail, names);
+    }
 
-        avail = filter(avail, names);
+    public static List<NamedFactory<KeyExchange>> buildKexAlgorithms(String names) {
+        ServerConfig defaults = new ServerConfig();
+        List<NamedFactory<KeyExchange>> avail = defaults.getKeyExchangeFactories();
 
-        for (Iterator<NamedFactory<Cipher>> i = avail.iterator(); i.hasNext();) {
-            final NamedFactory<Cipher> f = i.next();
-            try {
-                final Cipher c = f.create();
-                final byte[] key = new byte[c.getBlockSize()];
-                final byte[] iv = new byte[c.getIVSize()];
-                c.init(Cipher.Mode.Encrypt, key, iv);
-            } catch (InvalidKeyException e) {
-                i.remove();
-            } catch (Exception e) {
-                i.remove();
-            }
+        return filter(KeyExchange.class, avail, names);
+    }
+
+    /**
+     * Simple helper class to avoid duplicating available configuration entries.
+     */
+    private static final class ServerConfig extends SshBuilder.ServerBuilder {
+
+        public ServerConfig() {
+            this.build();
         }
-        return avail;
+
+        /**
+         * Just initializes the default configuration - does not create a
+         * server instance.
+         *
+         * @return always <code>null</code>
+         */
+        @Override
+        public SshServer build() {
+            return this.build(true);
+        }
+
+        /**
+         * Just initializes the default configuration - does not create a
+         * server instance.
+         *
+         * @return always <code>null</code>
+         */
+        @Override
+        public SshServer build(boolean isFillWithDefaultValues) {
+            if (isFillWithDefaultValues) {
+                this.fillWithDefaultValues();
+             }
+            return null;
+        }
+
+        public List<NamedFactory<KeyExchange>> getKeyExchangeFactories() {
+            return keyExchangeFactories;
+         }
+ 
+        public List<NamedFactory<Cipher>> getCipherFactories() {
+            return cipherFactories;
+        }
+
+        public List<NamedFactory<Compression>> getCompressionFactories() {
+            return compressionFactories;
+        }
+
+        public List<NamedFactory<Mac>> getMacFactories() {
+            return macFactories;
+        }
     }
 
 }
