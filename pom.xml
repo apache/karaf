@@ -185,7 +185,7 @@
         <felix.connect.version>0.1.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.fileinstall.version>3.5.6</felix.fileinstall.version>
-        <felix.framework.version>5.6.0</felix.framework.version>
+        <felix.framework.version>5.6.1</felix.framework.version>
         <felix.framework.security.version>2.6.0</felix.framework.security.version>
         <felix.gogo.runtime.version>1.0.0</felix.gogo.runtime.version>
         <felix.gogo.jline.version>1.0.0</felix.gogo.jline.version>
