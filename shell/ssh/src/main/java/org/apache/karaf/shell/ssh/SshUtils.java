@@ -18,71 +18,113 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.sshd.server.ServerBuilder;
+import org.apache.sshd.server.SshServer;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.cipher.BuiltinCiphers;
 import org.apache.sshd.common.cipher.Cipher;
-import org.apache.sshd.common.mac.BuiltinMacs;
+import org.apache.sshd.common.compression.Compression;
+import org.apache.sshd.common.kex.KeyExchange;
 import org.apache.sshd.common.mac.Mac;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SshUtils {
 
-    public static <S> List<NamedFactory<S>> filter(Collection<NamedFactory<S>> factories, String names) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SshUtils.class);
+
+    public static <S> List<NamedFactory<S>> filter(Class<S> type,
+            Collection<NamedFactory<S>> factories, String names) {
         List<NamedFactory<S>> list = new ArrayList<NamedFactory<S>>();
         for (String name : names.split(",")) {
+            name = name.trim();
+            boolean found = false;
             for (NamedFactory<S> factory : factories) {
                 if (factory.getName().equals(name)) {
                     list.add(factory);
+                    found = true;
+                    break;
                 }
+            }
+            if (!found) {
+                LOGGER.warn("Configured " + type.getSimpleName().toLowerCase()
+                        + " '" + name + "' not available");
             }
         }
         return list;
     }
 
     public static List<NamedFactory<Mac>> buildMacs(String names) {
-        return filter(Arrays.<NamedFactory<Mac>>asList(
-                        BuiltinMacs.hmacmd5,
-                        BuiltinMacs.hmacsha1,
-                        BuiltinMacs.hmacmd596,
-                        BuiltinMacs.hmacsha196),
-                names);
+        return filter(Mac.class, new ServerConfig().getMacFactories(), names);
     }
 
     public static List<NamedFactory<Cipher>> buildCiphers(String names) {
-        List<NamedFactory<Cipher>> avail = new LinkedList<NamedFactory<Cipher>>();
-        avail.add(BuiltinCiphers.aes128ctr);
-        avail.add(BuiltinCiphers.aes256ctr);
-        avail.add(BuiltinCiphers.arcfour128);
-        avail.add(BuiltinCiphers.arcfour256);
-        avail.add(BuiltinCiphers.aes128cbc);
-        avail.add(BuiltinCiphers.tripledescbc);
-        avail.add(BuiltinCiphers.blowfishcbc);
-        avail.add(BuiltinCiphers.aes192cbc);
-        avail.add(BuiltinCiphers.aes256cbc);
+        ServerConfig defaults = new ServerConfig();
+        List<NamedFactory<Cipher>> avail = defaults.getCipherFactories();
+        return filter(Cipher.class, avail, names);
+    }
 
-        avail = filter(avail, names);
+    public static List<NamedFactory<KeyExchange>> buildKexAlgorithms(String names) {
+        ServerConfig defaults = new ServerConfig();
+        List<NamedFactory<KeyExchange>> avail = defaults.getKeyExchangeFactories();
 
-        for (Iterator<NamedFactory<Cipher>> i = avail.iterator(); i.hasNext();) {
-            final NamedFactory<Cipher> f = i.next();
-            try {
-                final Cipher c = f.create();
-                final byte[] key = new byte[c.getBlockSize()];
-                final byte[] iv = new byte[c.getIVSize()];
-                c.init(Cipher.Mode.Encrypt, key, iv);
-            } catch (InvalidKeyException e) {
-                i.remove();
-            } catch (Exception e) {
-                i.remove();
-            }
+        return filter(KeyExchange.class, avail, names);
+    }
+
+    /**
+     * Simple helper class to avoid duplicating available configuration entries.
+     */
+    private static final class ServerConfig extends ServerBuilder {
+
+        public ServerConfig() {
+            this.build();
         }
-        return avail;
+
+        /**
+         * Just initializes the default configuration - does not create a
+         * server instance.
+         *
+         * @return always <code>null</code>
+         */
+        @Override
+        public SshServer build() {
+            return this.build(true);
+        }
+
+        /**
+         * Just initializes the default configuration - does not create a
+         * server instance.
+         *
+         * @return always <code>null</code>
+         */
+        @Override
+        public SshServer build(boolean isFillWithDefaultValues) {
+            if (isFillWithDefaultValues) {
+                this.fillWithDefaultValues();
+             }
+            return null;
+        }
+
+        public List<NamedFactory<KeyExchange>> getKeyExchangeFactories() {
+            return keyExchangeFactories;
+         }
+ 
+        public List<NamedFactory<Cipher>> getCipherFactories() {
+            return cipherFactories;
+        }
+
+        public List<NamedFactory<Compression>> getCompressionFactories() {
+            return compressionFactories;
+        }
+
+        public List<NamedFactory<Mac>> getMacFactories() {
+            return macFactories;
+        }
     }
 
 }
