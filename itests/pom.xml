@@ -124,6 +124,16 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf.bundle</groupId>
+            <artifactId>org.apache.karaf.bundle.core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework.security</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.not-yet-commons-ssl</artifactId>
             <version>0.3.11_1</version>
