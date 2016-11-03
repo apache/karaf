@@ -473,8 +473,27 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void removeRepository(URI uri, boolean uninstall) throws Exception {
-        // TODO: check we don't have any feature installed from this repository
-        Repository repo;
+        Repository repo = getRepository(uri);
+        if (repo == null) {
+            return;
+        }
+
+        Set<String> features = new HashSet<>();
+        synchronized (lock) {
+            for (Feature feature : repo.getFeatures()) {
+                if (isRequired(feature)) {
+                    features.add(feature.getId());
+                }
+            }
+        }
+        if (!features.isEmpty()) {
+            if (uninstall) {
+                uninstallFeatures(features, EnumSet.noneOf(Option.class));
+            } else {
+                throw new IllegalStateException("The following features are required from the repository: " + String.join(", ", features));
+            }
+        }
+
         synchronized (lock) {
             // Remove repo
             if (!state.repositories.remove(uri.toString())) {
@@ -495,18 +514,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
             saveState();
         }
-        if (repo == null) {
-            repo = new RepositoryImpl(uri, blacklisted);
-        }
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
-        // uninstall the features from the repository
-        if (uninstall) {
-            HashSet<String> features = new HashSet<>();
-            for (Feature feature : repo.getFeatures()) {
-                features.add(feature.getName() + "/" + feature.getVersion());
-            }
-            uninstallFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
-        }
     }
 
     @Override
