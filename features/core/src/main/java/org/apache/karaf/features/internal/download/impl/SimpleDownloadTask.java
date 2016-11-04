@@ -46,7 +46,7 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
     }
 
     @Override
-    protected File download() throws Exception {
+    protected File download(Exception previousExceptionNotUsed) throws Exception {
         LOG.trace("Downloading [" + url + "]");
 
         if (url.startsWith(BLUEPRINT_PREFIX) || url.startsWith(SPRING_PREFIX)) {
@@ -114,4 +114,11 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
         }
         return tmpFile;
     }
+
+    @Override
+    protected Retry isRetryable(IOException e) {
+        // TODO: check http errors, etc.
+        return super.isRetryable(e);
+    }
+
 }
