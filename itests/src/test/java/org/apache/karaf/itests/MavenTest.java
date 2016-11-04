@@ -236,7 +236,7 @@ public class MavenTest /*extends KarafTestSupport*/ {
      * Invoke config admin task and await reregistration of {@link MavenResolver} service
      */
     private void awaitMavenResolver(Runnable task) throws Exception {
-        CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(2);
         ServiceListener listener = new ServiceListener() {
             @Override
             public void serviceChanged(ServiceEvent event) {
