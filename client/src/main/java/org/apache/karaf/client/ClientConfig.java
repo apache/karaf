@@ -62,6 +62,9 @@ public class ClientConfig {
         if (host.contains("${")) {
             host = replaceVariable(host, "localhost", customCfg);
         }
+        if (host.contains("0.0.0.0")) {
+            host = "localhost";
+        }
         if (portString.contains("${")) {
             portString = replaceVariable(portString, "8101", customCfg);
         }
