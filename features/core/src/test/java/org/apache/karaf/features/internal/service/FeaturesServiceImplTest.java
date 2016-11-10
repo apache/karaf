@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.net.*;
 import java.util.Map;
 
 import org.apache.felix.resolver.ResolverImpl;
@@ -100,6 +102,25 @@ public class FeaturesServiceImplTest extends TestBase {
         };
         assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
         assertEquals("2.0.0", impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0].getVersion());
+    }
+
+    @Test
+    public void testCyclicFeatures() throws Exception {
+        URL.setURLStreamHandlerFactory(protocol -> protocol.equals("custom") ? new URLStreamHandler() {
+            @Override
+            protected URLConnection openConnection(URL u) throws IOException {
+                return getClass().getResource(u.getPath()).openConnection();
+            }
+        } : null);
+        try {
+            final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null);
+            impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
+            impl.getFeatures();
+        } finally {
+            Field field = URL.class.getDeclaredField("factory");
+            field.setAccessible(true);
+            field.set(null, null);
+        }
     }
 
     /**

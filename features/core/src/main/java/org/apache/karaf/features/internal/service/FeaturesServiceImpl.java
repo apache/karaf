@@ -684,6 +684,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Map<String, Map<String, Feature>> map = new HashMap<>();
         // Two phase load:
         // * first load dependent repositories
+        Set<String> loaded = new HashSet<>();
         List<String> toLoad = new ArrayList<>(uris);
         while (!toLoad.isEmpty()) {
             String uri = toLoad.remove(0);
@@ -700,8 +701,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                         repositoryCache.put(uri, repo);
                     }
                 }
-                for (URI u : repo.getRepositories()) {
-                    if (!toLoad.contains(u.toString())) {
+                if (loaded.add(uri)) {
+                    for (URI u : repo.getRepositories()) {
                         toLoad.add(u.toString());
                     }
                 }

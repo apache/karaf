@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" name="a-references-b">
+    <repository>custom:cycle/b-references-c.xml</repository>
+    <feature name="a-references-b" description="a-references-b" version="1.0.0.SNAPSHOT">
+        <feature>b-references-c</feature>
+    </feature>
+</features>
