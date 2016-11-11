@@ -153,6 +153,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String ciphers        = getString("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
         String kexAlgorithms  = getString("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
         String welcomeBanner  = getString("welcomeBanner", null);
+        String moduliUrl      = getString("moduli-url", null);
 
         AbstractGeneratorHostKeyProvider keyPairProvider;
         if ("simple".equalsIgnoreCase(hostKeyFormat)) {
@@ -194,6 +195,9 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setUserAuthFactories(authFactoriesFactory.getFactories());
         server.setAgentFactory(agentFactory);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
+        if (moduliUrl != null) {
+            server.getProperties().put(SshServer.MODULI_URL, moduliUrl);
+        }
         if (welcomeBanner != null) {
             server.getProperties().put(SshServer.WELCOME_BANNER, welcomeBanner);
         } 
