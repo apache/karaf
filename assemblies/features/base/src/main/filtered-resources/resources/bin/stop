@@ -145,7 +145,7 @@ run() {
         KARAF_BASE=`cygpath --path --windows "$KARAF_BASE"`
         KARAF_DATA=`cygpath --path --windows "$KARAF_DATA"`
         KARAF_ETC=`cygpath --path --windows "$KARAF_ETC"`
-        if [ ! -z "$CLASSPATH" ]; then
+        if [ ! -z "$CLASSPATH" ]; then
             CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
         fi
     fi
