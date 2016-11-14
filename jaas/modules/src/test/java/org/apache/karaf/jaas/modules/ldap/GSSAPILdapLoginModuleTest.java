@@ -162,7 +162,8 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
             String content = IOUtils.toString(inputStream, "UTF-8");
             inputStream.close();
             content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
-            content = content.replaceAll("address", "localhost");
+            content = content.replaceAll("address", KerberosTestUtils.getHostName());
+            //content = content.replaceAll("address", "localhost");
             //content = content.replaceAll("address", "" + super.getLdapServer().getSaslHost());
             //content = content.replaceAll("address", "" + super.getLdapServer().getTransports()[0].getAddress());
 
