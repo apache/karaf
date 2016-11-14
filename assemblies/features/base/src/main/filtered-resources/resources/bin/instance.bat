@@ -142,7 +142,7 @@ goto :EOF
 set CLASSPATH=%KARAF_HOME%\system\org\apache\karaf\instance\org.apache.karaf.instance.core\@@project.version@@\org.apache.karaf.instance.core-@@project.version@@.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.karaf.shell.core\@@project.version@@\org.apache.karaf.shell.core-@@project.version@@.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\@@pax.logging.version@@\pax-logging-api-@@pax.logging.version@@.jar
-set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\jline\jline\@@jline.version@@\jline-@@jline.version@@.jar
+set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\jline\jline\@@jline.version@@\jline-@@jline.version@@.jar
 
 :EXECUTE
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
