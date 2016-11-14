@@ -891,15 +891,15 @@
       <groupId>org.jline</groupId>
       <artifactId>jline</artifactId>
       <name>JLine</name>
-      <url>http://jline.sourceforge.net</url>
+      <url>https://github.com/jline/</url>
       <organization>
         <name>JLine</name>
-        <url>http://jline.sourceforge.net</url>
+        <url>https://github.com/jline/</url>
       </organization>
       <licenses>
         <license>
           <name>The BSD License</name>
-          <url>http://jline.sourceforge.net/license.html</url>
+          <url>http://www.opensource.org/licenses/bsd-license.php</url>
         </license>
       </licenses>
     </project>
