@@ -342,7 +342,7 @@ public class Subsystem extends ResourceImpl {
         for (Subsystem child : children) {
             child.doCollectPrerequisites(prereqs);
         }
-        if (feature != null) {
+        if (feature != null && !prereqs.contains(feature.getId())) {
             for (Dependency dep : feature.getDependencies()) {
                 if (dep.isPrerequisite()) {
                     prereqs.add(dep.toString());
