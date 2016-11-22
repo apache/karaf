@@ -80,7 +80,6 @@ import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.impl.Profiles;
 import org.apache.karaf.tools.utils.KarafPropertiesEditor;
-import org.apache.karaf.tools.utils.model.KarafPropertyEdit;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.maven.Parser;
@@ -111,16 +110,16 @@ public class Builder {
     private static final String LIBRARY_CLAUSE_DELEGATE = "delegate";
     public static final String ORG_OPS4J_PAX_URL_MVN_PID = "org.ops4j.pax.url.mvn";
 
-    public static enum Stage {
+    public enum Stage {
         Startup, Boot, Installed
     }
 
-    public static enum KarafVersion {
+    public enum KarafVersion {
         v24, v3x, v4x
     }
 
 
-    public static enum BlacklistPolicy {
+    public enum BlacklistPolicy {
         Discard,
         Fail
     }
@@ -503,7 +502,7 @@ public class Builder {
                 profilePath = Paths.get(profileURI);
             } catch (FileSystemNotFoundException e) {
                 // file system does not exist, try to create it
-                FileSystem fs = FileSystems.newFileSystem(profileURI, new HashMap<String, Object>(), Builder.class.getClassLoader());
+                FileSystem fs = FileSystems.newFileSystem(profileURI, new HashMap<>(), Builder.class.getClassLoader());
                 profilePath = fs.provider().getPath(profileURI);
             }
             allProfiles.putAll(Profiles.loadProfiles(profilePath));
@@ -543,14 +542,7 @@ public class Builder {
         Hashtable<String, String> agentProps = new Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
         final Map<String, String> properties = new HashMap<>();
         properties.put("karaf.default.repository", "system");
-        InterpolationHelper.performSubstitution(agentProps, new InterpolationHelper.SubstitutionCallback() {
-            @Override
-            public String getValue(String key) {
-                return properties.get(key);
-            }
-        }, false, false, true);
-
-        Map<String, List<KarafPropertyEdit>> editsByFile = new HashMap<>();
+        InterpolationHelper.performSubstitution(agentProps, properties::get, false, false, true);
 
         //
         // Write config and system properties
@@ -671,7 +663,7 @@ public class Builder {
         }
     }
 
-    protected void downloadLibraries(Downloader downloader, final Properties config, Collection<String> libraries) throws MalformedURLException {
+    void downloadLibraries(Downloader downloader, final Properties config, Collection<String> libraries) throws MalformedURLException {
         Clause[] clauses = org.apache.felix.utils.manifest.Parser.parseClauses(libraries.toArray(new String[libraries.size()]));
         for (final Clause clause : clauses) {
             final String filename;
@@ -692,9 +684,7 @@ public class Builder {
             case Library.TYPE_BOOT:      path = "lib/boot"; break;
             default:                     path = "lib"; break;
             }
-            downloader.download(library, new DownloadCallback() {
-                @Override
-                public void downloaded(final StreamProvider provider) throws Exception {
+            downloader.download(library, provider -> {
                     synchronized (provider) {
                         Path input = provider.getFile().toPath();
                         String name = filename != null ? filename : input.getFileName().toString();
@@ -732,24 +722,23 @@ public class Builder {
                         Map<String, String> headers = getHeaders(provider);
                         String packages = headers.get(Constants.EXPORT_PACKAGE);
                         if (packages != null) {
-                            Clause[] clauses = org.apache.felix.utils.manifest.Parser.parseHeader(packages);
+                            Clause[] clauses1 = org.apache.felix.utils.manifest.Parser.parseHeader(packages);
                             if (export) {
                                 String val = config.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
-                                for (Clause clause : clauses) {
-                                    val += "," + clause.toString();
+                                for (Clause clause1 : clauses1) {
+                                    val += "," + clause1.toString();
                                 }
                                 config.setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, val);
                             }
                             if (delegate) {
                                 String val = config.getProperty(Constants.FRAMEWORK_BOOTDELEGATION);
-                                for (Clause clause : clauses) {
-                                    val += "," + clause.getName();
+                                for (Clause clause1 : clauses1) {
+                                    val += "," + clause1.getName();
                                 }
                                 config.setProperty(Constants.FRAMEWORK_BOOTDELEGATION, val);
                             }
                         }
                     }
-                }
             });
         }
     }
@@ -1219,14 +1208,11 @@ public class Builder {
         final List<Resource> resources = new ArrayList<>();
         Downloader downloader = manager.createDownloader();
         for (String optional : optionals) {
-            downloader.download(optional, new DownloadCallback() {
-                @Override
-                public void downloaded(StreamProvider provider) throws Exception {
+            downloader.download(optional, provider -> {
                     Resource resource = ResourceBuilder.build(provider.getUrl(), getHeaders(provider));
                     synchronized (resources) {
                         resources.add(resource);
                     }
-                }
             });
         }
         downloader.await();
@@ -1293,10 +1279,10 @@ public class Builder {
             headers.put(attr.getKey().toString(), attr.getValue().toString());
         }
 
-        return new FakeBundleRevision(headers, "system-bundle", 0l);
+        return new FakeBundleRevision(headers, "system-bundle", 0L);
     }
 
-    Map<String, String> getHeaders(StreamProvider provider) throws IOException {
+    private Map<String, String> getHeaders(StreamProvider provider) throws IOException {
         try (
                 InputStream is = provider.open()
         ) {
