@@ -110,7 +110,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                         cfgFile = new File(new URL((String) val).toURI());
                     }
                 } catch (Exception e) {
-                    throw (IOException) new IOException(e.getMessage()).initCause(e);
+                    throw new IOException(e.getMessage(), e);
                 }
             }
             LOGGER.trace("Update {}", cfgFile.getName());

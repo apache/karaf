@@ -355,7 +355,8 @@ public class Subsystem extends ResourceImpl {
     public void downloadBundles(DownloadManager manager,
                                 Set<String> overrides,
                                 String featureResolutionRange,
-                                final String serviceRequirements, RepositoryManager repos) throws Exception {
+                                final String serviceRequirements,
+                                RepositoryManager repos) throws Exception {
         for (Subsystem child : children) {
             child.downloadBundles(manager, overrides, featureResolutionRange, serviceRequirements, repos);
         }
