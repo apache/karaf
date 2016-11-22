@@ -68,6 +68,7 @@ import org.apache.karaf.shell.support.completers.UriCompleter;
 import org.jline.builtins.Completers;
 import org.jline.reader.*;
 import org.jline.reader.impl.LineReaderImpl;
+import org.jline.reader.impl.history.DefaultHistory;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.slf4j.Logger;
@@ -420,7 +421,12 @@ public class ConsoleSessionImpl implements Session {
 
     @Override
     public String readLine(String prompt, Character mask) throws IOException {
-        return reader.readLine(prompt, mask);
+        try {
+            reader.getVariables().put(LineReader.DISABLE_HISTORY, Boolean.TRUE);
+            return reader.readLine(prompt, mask);
+        } finally {
+            reader.getVariables().remove(LineReader.DISABLE_HISTORY);
+        }
     }
 
     private String loadCompletionMode() {
