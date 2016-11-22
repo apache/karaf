@@ -342,10 +342,21 @@ public class Subsystem extends ResourceImpl {
         for (Subsystem child : children) {
             child.doCollectPrerequisites(prereqs);
         }
-        if (feature != null && !prereqs.contains(feature.getId())) {
-            for (Dependency dep : feature.getDependencies()) {
-                if (dep.isPrerequisite()) {
-                    prereqs.add(dep.toString());
+        if (feature != null) {
+            boolean match = false;
+            for (String prereq : prereqs) {
+                String[] p = prereq.split("/");
+                if (feature.getName().equals(p[0])
+                        && VersionRange.parseVersionRange(p[1]).contains(Version.parseVersion(feature.getVersion()))) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) {
+                for (Dependency dep : feature.getDependencies()) {
+                    if (dep.isPrerequisite()) {
+                        prereqs.add(dep.toString());
+                    }
                 }
             }
         }

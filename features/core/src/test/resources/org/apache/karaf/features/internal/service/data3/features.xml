@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<features name="karaf" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0">
+    <feature name="demo-1-a">
+        <bundle>a100</bundle>
+    </feature>
+    <feature name="demo-1-b">
+        <feature prerequisite="true">demo-1-a</feature>
+        <bundle>b100</bundle>
+    </feature>
+    <feature name="demo-1-c">
+        <feature prerequisite="true">demo-1-b</feature>
+        <bundle>c100</bundle>
+    </feature>
+
+    <feature name="demo-2-a" version="2.1.0">
+        <bundle>a100</bundle>
+    </feature>
+    <feature name="demo-2-b" version="2.1.0">
+        <feature prerequisite="true">demo-2-a</feature>
+        <bundle>b100</bundle>
+    </feature>
+    <feature name="demo-2-c" version="2.1.0">
+        <feature prerequisite="true" version="2.1.0">demo-2-b</feature>
+        <bundle>c100</bundle>
+    </feature>
+
+    <feature name="demo-3-a" version="2.1.0">
+        <bundle>a100</bundle>
+    </feature>
+    <feature name="demo-3-b" version="2.1.0">
+        <feature prerequisite="true">demo-3-a</feature>
+        <bundle>b100</bundle>
+    </feature>
+    <feature name="demo-3-c" version="2.1.0">
+        <feature prerequisite="true">demo-3-b</feature>
+        <bundle>c100</bundle>
+    </feature>
+
+    <feature name="demo-4-a" version="2.1.0">
+        <bundle>a100</bundle>
+    </feature>
+    <feature name="demo-4-b" version="2.1.0-SNAPSHOT">
+        <feature prerequisite="true">demo-4-a</feature>
+        <bundle>b100</bundle>
+    </feature>
+    <feature name="demo-4-c" version="2.1.0">
+        <feature prerequisite="true" version="2.1.0-SNAPSHOT">demo-4-b</feature>
+        <bundle>c100</bundle>
+    </feature>
+</features>
+

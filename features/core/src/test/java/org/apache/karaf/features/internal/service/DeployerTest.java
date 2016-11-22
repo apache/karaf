@@ -19,9 +19,11 @@ package org.apache.karaf.features.internal.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +41,11 @@ import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IArgumentMatcher;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.resolver.Resolver;
@@ -306,8 +310,8 @@ public class DeployerTest {
         callback.installFeature(f1);
         EasyMock.expectLastCall();
         callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
-                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
-                                EasyMock.<Map<Resource, Bundle>>anyObject());
+                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
+                EasyMock.<Map<Resource, Bundle>>anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(EasyMock.<FeatureEvent>anyObject());
         EasyMock.expectLastCall();
@@ -358,8 +362,8 @@ public class DeployerTest {
         callback.installFeature(f2);
         EasyMock.expectLastCall();
         callback.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
-                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
-                                EasyMock.<Map<Resource, Bundle>>anyObject());
+                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
+                EasyMock.<Map<Resource, Bundle>>anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(EasyMock.<FeatureEvent>anyObject());
         EasyMock.expectLastCall();
@@ -395,6 +399,81 @@ public class DeployerTest {
         deployer.deploy(dstate, request);
 
         EasyMock.verify(callback);
+    }
+
+    @Test
+    public void testPrereqOnPrereq1() throws Exception {
+        doTestPrereqOnPrereq(1);
+    }
+
+    @Test
+    public void testPrereqOnPrereq2() throws Exception {
+        doTestPrereqOnPrereq(2);
+    }
+
+    @Test
+    public void testPrereqOnPrereq3() throws Exception {
+        doTestPrereqOnPrereq(3);
+    }
+
+    @Test
+    public void testPrereqOnPrereq4() throws Exception {
+        doTestPrereqOnPrereq(4);
+    }
+
+    private void doTestPrereqOnPrereq(int scenario) throws Exception {
+        String dataDir = "data3";
+
+        TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
+
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
+        repo.load(true);
+
+        Map<String, Bundle> bundles = new HashMap<>();
+        bundles.put("a100", createTestBundle(1, Bundle.ACTIVE, dataDir, "a100"));
+        bundles.put("b100", createTestBundle(2, Bundle.ACTIVE, dataDir, "b100"));
+        bundles.put("c100", createTestBundle(3, Bundle.ACTIVE, dataDir, "c100"));
+
+        Deployer.DeploymentState dstate = new Deployer.DeploymentState();
+        dstate.state = new State();
+        dstate.bundles = new HashMap<>();
+        dstate.bundlesPerRegion = new HashMap<>();
+        dstate.features = new HashMap<>();
+        for (Feature f : repo.getFeatures()) {
+            dstate.features.put(f.getId(), f);
+        }
+        dstate.filtersPerRegion = new HashMap<>();
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
+
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
+        request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
+        request.globalRepository = null;
+        request.options = EnumSet.noneOf(Option.class);
+        request.overrides = Collections.emptySet();
+        request.stateChanges = Collections.emptyMap();
+        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+
+        MyDeployCallback callback = new MyDeployCallback(dstate, bundles);
+        Deployer deployer = new Deployer(manager, resolver, callback);
+
+        for (int i = 1; i <= 4; i++) {
+            request.requirements = new HashMap<>();
+            addToMapSet(request.requirements, ROOT_REGION, "demo-" + scenario + "-c");
+            Set<String> prereqs = new HashSet<>();
+            while (true) {
+                try {
+                    deployer.deploy(callback.dstate, request);
+                    break;
+                } catch (Deployer.PartialDeploymentException e) {
+                    if (!prereqs.containsAll(e.getMissing())) {
+                        prereqs.addAll(e.getMissing());
+                    } else {
+                        throw new Exception("Deployment aborted due to loop in missing prerequisites: " + e.getMissing());
+                    }
+                }
+            }
+        }
     }
 
     private TestBundle createTestBundle(long bundleId, int state, String dir, String name) throws IOException, BundleException {
@@ -434,4 +513,71 @@ public class DeployerTest {
         }
     }
 
+    private static class MyDeployCallback implements Deployer.DeployCallback {
+        final Deployer.DeploymentState dstate;
+        final Map<String, Bundle> bundles;
+
+        public MyDeployCallback(Deployer.DeploymentState dstate, Map<String, Bundle> bundles) {
+            this.dstate = dstate;
+            this.bundles = bundles;
+        }
+
+        @Override
+        public void print(String message, boolean verbose) {
+        }
+
+        @Override
+        public void saveState(State state) {
+            this.dstate.state.replace(state);
+        }
+
+        @Override
+        public void persistResolveRequest(Deployer.DeploymentRequest request) throws IOException {
+        }
+
+        @Override
+        public void installFeature(Feature feature) throws IOException, InvalidSyntaxException {
+        }
+
+        @Override
+        public void callListeners(FeatureEvent featureEvent) {
+        }
+
+        @Override
+        public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+            return bundles.get(uri);
+        }
+
+        @Override
+        public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
+        }
+
+        @Override
+        public void uninstall(Bundle bundle) throws BundleException {
+        }
+
+        @Override
+        public void startBundle(Bundle bundle) throws BundleException {
+        }
+
+        @Override
+        public void stopBundle(Bundle bundle, int options) throws BundleException {
+        }
+
+        @Override
+        public void setBundleStartLevel(Bundle bundle, int startLevel) {
+        }
+
+        @Override
+        public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
+        }
+
+        @Override
+        public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
+        }
+
+        @Override
+        public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
+        }
+    }
 }
