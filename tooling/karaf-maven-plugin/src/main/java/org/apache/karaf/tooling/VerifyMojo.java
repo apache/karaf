@@ -251,18 +251,20 @@ public class VerifyMojo extends MojoSupport {
             }
         }
 
+        Set<String> allDescriptors = new LinkedHashSet<>();
         if (descriptors == null) {
             if (framework == null) {
                 framework = Collections.singleton("framework");
             }
             descriptors = new LinkedHashSet<>();
             if (framework.contains("framework")) {
-                descriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
+                allDescriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
             }
-            descriptors.add("file:" + project.getBuild().getDirectory() + "/feature/feature.xml");
+            allDescriptors.add("file:" + project.getBuild().getDirectory() + "/feature/feature.xml");
         } else {
+            allDescriptors.addAll(descriptors);
             if (framework != null && framework.contains("framework")) {
-                descriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
+                allDescriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
             }
         }
 
@@ -272,7 +274,7 @@ public class VerifyMojo extends MojoSupport {
         final Map<String, Features> repositories;
         Map<String, List<Feature>> allFeatures = new HashMap<>();
         try {
-            repositories = loadRepositories(manager, descriptors);
+            repositories = loadRepositories(manager, allDescriptors);
             for (String repoUri : repositories.keySet()) {
                 List<Feature> features = repositories.get(repoUri).getFeature();
                 // Ack features to inline configuration files urls

@@ -169,7 +169,6 @@
                         <feature>eventadmin</feature>
                     </startupFeatures>
                     <bootFeatures>
-                        <feature>framework</feature>
                         <feature>wrap</feature>
                         <feature>aries-blueprint</feature>
                         <feature>shell</feature>

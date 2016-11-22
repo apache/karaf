@@ -20,6 +20,7 @@ package org.apache.karaf.tooling;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
@@ -183,6 +185,13 @@ public class AssemblyMojo extends MojoSupport {
      */
     @Parameter(defaultValue = "1.8")
     protected String javase;
+
+    /**
+     * Specify which framework to use
+     * (one of framework, framework-logback, static-framework, static-framework-logback).
+     */
+    @Parameter
+    protected String framework;
 
     /**
      * Specify an XML file that instructs this goal to apply edits to
@@ -414,6 +423,50 @@ public class AssemblyMojo extends MojoSupport {
             builder.libraries(libraries.toArray(new String[libraries.size()]));
         }
         // Startup
+        boolean hasFrameworkKar = false;
+        for (String kar : startupKars) {
+            if (kar.startsWith("mvn:org.apache.karaf.features/framework/")
+                    || kar.startsWith("mvn:org.apache.karaf.features/static/")) {
+                hasFrameworkKar = true;
+                startupKars.remove(kar);
+                if (framework == null) {
+                    framework = kar.startsWith("mvn:org.apache.karaf.features/framework/")
+                            ? "framework" : "static-framework";
+                }
+                builder.kars(Builder.Stage.Startup, false, kar);
+                break;
+            }
+        }
+        if (!hasFrameworkKar) {
+            Properties versions = new Properties();
+            try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
+                versions.load(is);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+            String realKarafVersion = versions.getProperty("karaf-version");
+            String kar;
+            switch (framework) {
+                case "framework":
+                    kar = "mvn:org.apache.karaf.features/framework/" + realKarafVersion + "/xml/features";
+                    break;
+                case "framework-logback":
+                    kar = "mvn:org.apache.karaf.features/framework/" + realKarafVersion + "/xml/features";
+                    break;
+                case "static-framework":
+                    kar = "mvn:org.apache.karaf.features/static/" + realKarafVersion + "/xml/features";
+                    break;
+                case "static-framework-logback":
+                    kar = "mvn:org.apache.karaf.features/static/" + realKarafVersion + "/xml/features";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported framework: " + framework);
+            }
+            builder.kars(Builder.Stage.Startup, false, kar);
+        }
+        if (!startupFeatures.contains(framework)) {
+            builder.features(Builder.Stage.Startup, framework);
+        }
         builder.defaultStage(Builder.Stage.Startup)
                .kars(toArray(startupKars))
                .repositories(startupFeatures.isEmpty() && startupProfiles.isEmpty() && installAllFeaturesByDefault, toArray(startupRepositories))

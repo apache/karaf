@@ -122,7 +122,6 @@
                         <feature>wrapper</feature>
                     </installedFeatures>
                     <bootFeatures>
-                        <feature>framework</feature>
                         <feature>jaas</feature>
                         <feature>shell</feature>
                         <feature>feature</feature>

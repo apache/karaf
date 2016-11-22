@@ -522,6 +522,7 @@ public class Builder {
 
         // Generate profiles
         Profile startupProfile = generateProfile(Stage.Startup, profiles, repositories, features, bundles);
+        profiles.put(startupProfile.getId(), Stage.Boot);
         Profile bootProfile = generateProfile(Stage.Boot, profiles, repositories, features, bundles);
         Profile installedProfile = generateProfile(Stage.Installed, profiles, repositories, features, bundles);
 
