@@ -1283,7 +1283,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void startBundle(Bundle bundle) throws BundleException {
-        bundle.start();
+        if (bundle != this.bundle || bundle.getState() != Bundle.STARTING) {
+            bundle.start();
+        }
     }
 
     @Override

@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal.service;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -104,4 +105,26 @@ public class BootFeaturesInstallerTest extends TestBase {
         verify(impl);
     }
 
+    @Test
+    public void testParseBootFeatures() throws Exception {
+        String features = "foo, jim, (ssh, shell, jaas, feature, framework), (system, bundle, management, service), (instance, package, log, deployer, diagnostic, config, kar), bar, zad";
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, null, null, null, false);
+        List<Set<String>> stages = bootFeatures.parseBootFeatures(features);
+        Assert.assertEquals(5, stages.size());
+        for (String f : Arrays.asList("foo", "jim")) {
+            Assert.assertTrue("Should contain '" + f + "'", stages.get(0).contains(f));
+        }
+        for (String f : Arrays.asList("ssh", "shell", "jaas", "feature", "framework")) {
+            Assert.assertTrue("Should contain '" + f + "'", stages.get(1).contains(f));
+        }
+        for (String f : Arrays.asList("system", "bundle", "management", "service")) {
+            Assert.assertTrue("Should contain '" + f + "'", stages.get(2).contains(f));
+        }
+        for (String f : Arrays.asList("instance", "package", "log", "deployer", "diagnostic", "config", "kar")) {
+            Assert.assertTrue("Should contain '" + f + "'", stages.get(3).contains(f));
+        }
+        for (String f : Arrays.asList("bar", "zad")) {
+            Assert.assertTrue("Should contain '" + f + "'", stages.get(4).contains(f));
+        }
+    }
 }

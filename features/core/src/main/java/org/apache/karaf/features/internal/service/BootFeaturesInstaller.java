@@ -19,15 +19,12 @@ package org.apache.karaf.features.internal.service;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.StringTokenizer;
 
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
@@ -131,24 +128,40 @@ public class BootFeaturesInstaller {
     }
 
     protected List<Set<String>> parseBootFeatures(String bootFeatures) {
-        Pattern pattern = Pattern.compile("(\\s*\\(([^)]+))\\s*\\)\\s*,\\s*|.+");
-        Matcher matcher = pattern.matcher(bootFeatures);
-        List<Set<String>> result = new ArrayList<>();
-        while (matcher.find()) {
-            String group = matcher.group(2) != null ? matcher.group(2) : matcher.group();
-            result.add(parseFeatureList(group));
-        }
-        return result;
-    }
-
-    protected Set<String> parseFeatureList(String group) {
-        HashSet<String> features = new LinkedHashSet<>();
-        for (String feature : Arrays.asList(group.trim().split("\\s*,\\s*"))) {
-            if (feature.length() > 0) {
-                features.add(feature);
+        List<Set<String>> stages = new ArrayList<>();
+        StringTokenizer tokenizer = new StringTokenizer(bootFeatures, " \t\r\n,()", true);
+        int paren = 0;
+        Set<String> stage = new HashSet<>();
+        while (tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+            if (token.equals("(")) {
+                if (paren == 0) {
+                    if (!stage.isEmpty()) {
+                        stages.add(stage);
+                        stage = new HashSet<>();
+                    }
+                    paren++;
+                } else {
+                    throw new IllegalArgumentException("Bad syntax in boot features: '" + bootFeatures + "'");
+                }
+            } else if (token.equals(")")) {
+                if (paren == 1) {
+                    if (!stage.isEmpty()) {
+                        stages.add(stage);
+                        stage = new HashSet<>();
+                    }
+                    paren--;
+                } else {
+                    throw new IllegalArgumentException("Bad syntax in boot features: '" + bootFeatures + "'");
+                }
+            } else if (!token.matches("[ \t\r\n]+|,")) { // ignore spaces and commas
+                stage.add(token);
             }
         }
-        return features;
+        if (!stage.isEmpty()) {
+            stages.add(stage);
+        }
+        return stages;
     }
 
     private void publishBootFinished() {
