@@ -20,8 +20,8 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -131,14 +131,14 @@ public class BootFeaturesInstaller {
         List<Set<String>> stages = new ArrayList<>();
         StringTokenizer tokenizer = new StringTokenizer(bootFeatures, " \t\r\n,()", true);
         int paren = 0;
-        Set<String> stage = new HashSet<>();
+        Set<String> stage = new LinkedHashSet<>();
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
             if (token.equals("(")) {
                 if (paren == 0) {
                     if (!stage.isEmpty()) {
                         stages.add(stage);
-                        stage = new HashSet<>();
+                        stage = new LinkedHashSet<>();
                     }
                     paren++;
                 } else {
@@ -148,7 +148,7 @@ public class BootFeaturesInstaller {
                 if (paren == 1) {
                     if (!stage.isEmpty()) {
                         stages.add(stage);
-                        stage = new HashSet<>();
+                        stage = new LinkedHashSet<>();
                     }
                     paren--;
                 } else {
