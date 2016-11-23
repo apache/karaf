@@ -338,8 +338,19 @@
     </feature>
 
     <feature name="http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
+        <feature dependency="true">pax-http-service</feature>
+        <requirement>http-service</requirement>
+    </feature>
+
+    <feature name="httplite" version="${project.version}" description="Felix Httplite OSGi HTTP Service">
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.httplite.complete/${felix.httplite.version}</bundle>
+        <capability>http-service;provider:=felix-httplite</capability>
+    </feature>
+
+    <feature name="pax-http-service" description="Pax-Web OSGi HTTP Service">
         <feature>pax-http</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
+        <capability>http-service;provider:=pax-http</capability>
     </feature>
 
     <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
