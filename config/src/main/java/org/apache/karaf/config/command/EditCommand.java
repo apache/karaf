@@ -40,6 +40,10 @@ public class EditCommand extends ConfigCommandSupport {
     @Option(name = "--factory", aliases = {}, description = "Define this config as a factory config. Will be crearted on calling update", required = false, multiValued = false)
     boolean factory;
 
+    @Option(name = "--alias", aliases = {}, description = "Specifies the alias used for this factory config.", required = false, multiValued = false)
+    String alias;
+
+    @Override
     @SuppressWarnings("rawtypes")
     protected Object doExecute() throws Exception {
         String oldPid = (String) this.session.get(PROPERTY_CONFIG_PID);
@@ -63,10 +67,17 @@ public class EditCommand extends ConfigCommandSupport {
         	System.out.println("Editing config " + pid);
         }
 
+        if (!factory && alias != null) {
+            System.err.println("The --alias only works in case of a factory configuration. Add the --factory option.");
+        }
+
         Dictionary props = this.configRepository.getConfigProperties(pid);
         this.session.put(PROPERTY_CONFIG_PID, pid);
         this.session.put(PROPERTY_FACTORY, factory);
         this.session.put(PROPERTY_CONFIG_PROPS, props);
+        if (alias != null) {
+            this.session.put(PROPERTY_ALIAS, alias);
+        }
         return null;
     }
 

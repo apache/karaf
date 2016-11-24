@@ -35,6 +35,7 @@ public abstract class ConfigCommandSupport implements Action {
     public static final String PROPERTY_CONFIG_PID = "ConfigCommand.PID";
     public static final String PROPERTY_CONFIG_PROPS = "ConfigCommand.Props";
     public static final String PROPERTY_FACTORY = "ConfigCommand.Factory";
+    public static final String PROPERTY_ALIAS = "ConfigCommand.Alias";
 
     @Reference
     protected ConfigRepository configRepository;

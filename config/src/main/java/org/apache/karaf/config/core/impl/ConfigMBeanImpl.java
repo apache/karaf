@@ -49,13 +49,13 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         return configuration;
     }
 
-    @SuppressWarnings("rawtypes")
-    private Dictionary getConfigProperties(String pid) throws IOException {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private Dictionary<String, Object> getConfigProperties(String pid) throws IOException {
         Configuration configuration = getConfiguration(pid);
 
-        Dictionary dictionary = configuration.getProperties();
+        Dictionary<String, Object> dictionary = configuration.getProperties();
         if (dictionary == null) {
-            dictionary = new java.util.Properties();
+            dictionary = new Hashtable(new java.util.Properties());
         }
         return dictionary;
     }
@@ -63,10 +63,11 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     /**
      * Get all config pids
      */
+    @Override
     public List<String> getConfigs() throws MBeanException {
         try {
             Configuration[] configurations = this.configRepo.getConfigAdmin().listConfigurations(null);
-            List<String> pids = new ArrayList<String>();
+            List<String> pids = new ArrayList<>();
             for (int i = 0; i < configurations.length; i++) {
                 pids.add(configurations[i].getPid());
             }
@@ -76,15 +77,16 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    @Override
     public void create(String pid) throws MBeanException {
         try {
-            configRepo.update(pid, new Hashtable());
+            configRepo.update(pid, new Hashtable<>());
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
     }
 
+    @Override
     public void delete(String pid) throws MBeanException {
         try {
             this.configRepo.delete(pid);
@@ -93,12 +95,13 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
+    @Override
     @SuppressWarnings("rawtypes")
     public Map<String, String> listProperties(String pid) throws MBeanException {
         try {
             Dictionary dictionary = getConfigProperties(pid);
 
-            Map<String, String> propertiesMap = new HashMap<String, String>();
+            Map<String, String> propertiesMap = new HashMap<>();
             for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
                 Object key = e.nextElement();
                 Object value = dictionary.get(key);
@@ -110,10 +113,10 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    @Override
     public void deleteProperty(String pid, String key) throws MBeanException {
         try {
-            Dictionary dictionary = getConfigProperties(pid);
+            Dictionary<String, Object> dictionary = getConfigProperties(pid);
             dictionary.remove(key);
             configRepo.update(pid, dictionary);
         } catch (Exception e) {
@@ -121,10 +124,10 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Override
     public void appendProperty(String pid, String key, String value) throws MBeanException {
         try {
-            Dictionary dictionary = getConfigProperties(pid);
+            Dictionary<String, Object> dictionary = getConfigProperties(pid);
             Object currentValue = dictionary.get(key);
             if (currentValue == null) {
                 dictionary.put(key, value);
@@ -139,10 +142,10 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Override
     public void setProperty(String pid, String key, String value) throws MBeanException {
         try {
-            Dictionary dictionary = getConfigProperties(pid);
+            Dictionary<String, Object> dictionary = getConfigProperties(pid);
             dictionary.put(key, value);
             configRepo.update(pid, dictionary);
         } catch (Exception e) {
@@ -150,9 +153,10 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
+    @Override
     public String getProperty(String pid, String key) throws MBeanException {
         try {
-            Dictionary dictionary = getConfigProperties(pid);
+            Dictionary<String, Object> dictionary = getConfigProperties(pid);
             Object value = dictionary.get(key);
             if (value != null) {
                 return value.toString();
@@ -163,21 +167,22 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
+    @Override
     public void update(String pid, Map<String, String> properties) throws MBeanException {
         try {
             if (properties == null) {
-                properties = new HashMap<String, String>();
+                properties = new HashMap<>();
             }
-            Dictionary<String, String> dictionary = toDictionary(properties);
+            Dictionary<String, Object> dictionary = toDictionary(properties);
             configRepo.update(pid, dictionary);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
     }
 
-	private Dictionary<String, String> toDictionary(
+	private Dictionary<String, Object> toDictionary(
 			Map<String, String> properties) {
-		Dictionary<String, String> dictionary = new Hashtable<String, String>();
+		Dictionary<String, Object> dictionary = new Hashtable<>();
 		for (String key : properties.keySet()) {
 		    dictionary.put(key, properties.get(key));
 		}
@@ -192,7 +197,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
 	@Override
 	public String createFactoryConfiguration(String factoryPid,
 			Map<String, String> properties) throws MBeanException {
-		Dictionary<String, String> dict = toDictionary(properties);
+		Dictionary<String, Object> dict = toDictionary(properties);
 		return configRepo.createFactoryConfiguration(factoryPid, dict);
 	}
 

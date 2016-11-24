@@ -25,6 +25,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class UpdateCommand extends ConfigCommandSupport {
 
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Object doExecute() throws Exception {
         Dictionary props = getEditedProps();
@@ -36,13 +37,17 @@ public class UpdateCommand extends ConfigCommandSupport {
         String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
         boolean isFactory = this.session.get(PROPERTY_FACTORY) != null && (Boolean) this.session.get(PROPERTY_FACTORY);
         if (isFactory) {
-        	this.configRepository.createFactoryConfiguration(pid, props);
+            String alias = (String) this.session.get(PROPERTY_ALIAS);
+            this.configRepository.createFactoryConfiguration(pid, alias, props);
         } else {
         	this.configRepository.update(pid, props);
         }
         this.session.put(PROPERTY_CONFIG_PID, null);
         this.session.put(PROPERTY_FACTORY, null);
         this.session.put(PROPERTY_CONFIG_PROPS, null);
+        if (this.session.get(PROPERTY_ALIAS) != null) {
+            this.session.put(PROPERTY_ALIAS, null);
+        }
         return null;
     }
 }
