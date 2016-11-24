@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import org.apache.felix.utils.properties.Properties;
-
 import org.apache.karaf.main.lock.SimpleFileLock;
 import org.apache.karaf.main.util.Utils;
 import org.apache.karaf.util.config.PropertiesLoader;
@@ -103,7 +102,7 @@ public class ConfigProperties {
      * Config property which identifies directories which contain bundles to be loaded by SMX
      */
     private static final String BUNDLE_LOCATIONS = "bundle.locations";
-    
+
     /**
      * The lock implementation
      */
@@ -116,7 +115,7 @@ public class ConfigProperties {
     private static final String PROPERTY_LOCK_SLAVE_BLOCK = "karaf.lock.slave.block";
 
     private static final String DEFAULT_REPO = "karaf.default.repository";
-    
+
     private static final String KARAF_FRAMEWORK = "karaf.framework";
 
     private static final String KARAF_FRAMEWORK_FACTORY = "karaf.framework.factory";
@@ -132,9 +131,9 @@ public class ConfigProperties {
     private static final String KARAF_SHUTDOWN_COMMAND = "karaf.shutdown.command";
 
     private static final String KARAF_SHUTDOWN_PID_FILE = "karaf.shutdown.pid.file";
-    
+
     private static final String KARAF_STARTUP_MESSAGE = "karaf.startup.message";
-    
+
     private static final String KARAF_DELAY_CONSOLE = "karaf.delay.console";
 
     private static final String KARAF_THREAD_MONITORING = "karaf.thread.monitoring";
@@ -156,7 +155,7 @@ public class ConfigProperties {
     File karafData;
     File karafEtc;
     File karafInstances;
-    
+
     Properties props;
     String[] securityProviders;
     int defaultStartLevel = 100;
@@ -180,7 +179,7 @@ public class ConfigProperties {
     String startupMessage;
     boolean delayConsoleStart;
     boolean threadMonitoring;
-    
+
     public ConfigProperties() throws Exception {
         this.karafHome = Utils.getKarafHome(ConfigProperties.class, PROP_KARAF_HOME, ENV_KARAF_HOME);
         this.karafBase = Utils.getKarafDirectory(PROP_KARAF_BASE, ENV_KARAF_BASE, karafHome, false, true);
@@ -196,6 +195,7 @@ public class ConfigProperties {
         System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());
+        System.setProperty(PROP_KARAF_ETC, karafEtc.getPath());
         System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
 
         if (!karafEtc.exists()) {
@@ -256,7 +256,7 @@ public class ConfigProperties {
             try {
                 storage.mkdirs();
             } catch (SecurityException se) {
-                throw new Exception(se.getMessage()); 
+                throw new Exception(se.getMessage());
             }
             props.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
         }
@@ -281,7 +281,7 @@ public class ConfigProperties {
             }
         }
     }
-    
+
     private String getPropertyOrFail(String propertyName) {
         String value = props.getProperty(propertyName);
         if (value == null) {
@@ -311,5 +311,5 @@ public class ConfigProperties {
         }
         return ibsl;
     }
-    
+
 }
