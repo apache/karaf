@@ -31,13 +31,11 @@ public interface ConfigRepository {
      * @param props the dictionary used to update the configuration.
      * @throws IOException in case of update failure.
      */
-    @SuppressWarnings("rawtypes")
-    void update(String pid, Dictionary props) throws IOException;
+    void update(String pid, Dictionary<String, Object> props) throws IOException;
 
     void delete(String pid) throws Exception;
 
-    @SuppressWarnings("rawtypes")
-    Dictionary getConfigProperties(String pid) throws IOException, InvalidSyntaxException;
+    Dictionary<String, Object> getConfigProperties(String pid) throws IOException, InvalidSyntaxException;
 
     ConfigurationAdmin getConfigAdmin();
 
@@ -48,5 +46,7 @@ public interface ConfigRepository {
      * @param properties the new properties to set in the configuration.
      * @return the created configuration PID.
      */
-	String createFactoryConfiguration(String factoryPid, Dictionary<String, ?> properties);
+    String createFactoryConfiguration(String factoryPid, Dictionary<String, Object> properties);
+
+    String createFactoryConfiguration(String factoryPid, String alias, Dictionary<String, Object> properties);
 }

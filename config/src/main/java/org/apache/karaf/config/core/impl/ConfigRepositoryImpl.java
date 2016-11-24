@@ -18,12 +18,16 @@ package org.apache.karaf.config.core.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.UUID;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.config.core.ConfigRepository;
@@ -44,7 +48,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     private File storage;
 
     public ConfigRepositoryImpl(ConfigurationAdmin configAdmin) {
-        this.configAdmin = configAdmin;
+        this(configAdmin, null);
     }
 
     public ConfigRepositoryImpl(ConfigurationAdmin configAdmin, File storage) {
@@ -56,10 +60,9 @@ public class ConfigRepositoryImpl implements ConfigRepository {
      * @see org.apache.karaf.shell.config.impl.ConfigRepository#update(java.lang.String, java.util.Dictionary, boolean)
      */
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void update(String pid, Dictionary props) throws IOException {
+    public void update(String pid, Dictionary<String, Object> props) throws IOException {
         LOGGER.trace("Update configuration {}", pid);
-        Configuration cfg = this.configAdmin.getConfiguration(pid, null);
+        Configuration cfg = configAdmin.getConfiguration(pid, null);
         cfg.update(props);
         try {
             updateStorage(pid, props);
@@ -74,7 +77,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @Override
     public void delete(String pid) throws Exception {
         LOGGER.trace("Delete configuration {}", pid);
-        Configuration configuration = this.configAdmin.getConfiguration(pid, null);
+        Configuration configuration = configAdmin.getConfiguration(pid, null);
         configuration.delete();
         try {
             deleteStorage(pid);
@@ -82,7 +85,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             LOGGER.warn("Can't delete cfg file", e);
         }
     }
-    
+
     protected void deleteStorage(String pid) throws Exception {
         if (storage != null) {
             File cfgFile = new File(storage, pid + ".cfg");
@@ -91,26 +94,40 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         }
     }
 
-    protected void updateStorage(String pid, Dictionary props) throws IOException {
+    private File getCfgFileFromProperties(Dictionary<String, Object> properties) throws URISyntaxException, MalformedURLException {
+        File cfgFile = null;
+        if (properties != null) {
+            Object val = properties.get(FILEINSTALL_FILE_NAME);
+            if (val instanceof URL) {
+                cfgFile = new File(((URL) val).toURI());
+            }
+            if (val instanceof URI) {
+                cfgFile = new File((URI) val);
+            }
+            if (val instanceof String) {
+                cfgFile = new File(new URL((String) val).toURI());
+            }
+        }
+        return cfgFile;
+    }
+
+    protected void updateStorage(String pid, Dictionary<String, Object> props) throws IOException {
         if (storage != null) {
-            // get the cfg file
-            File cfgFile = new File(storage, pid + ".cfg");
             Configuration cfg = configAdmin.getConfiguration(pid, null);
-            // update the cfg file depending of the configuration
-            if (cfg != null && cfg.getProperties() != null) {
-                Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
-                try {
-                    if (val instanceof URL) {
-                        cfgFile = new File(((URL) val).toURI());
+            // Initialize cfgFile with default location. Value gets overwritten when the existing configuration references a correct location.
+            File cfgFile = new File(storage, pid + ".cfg");
+            if (cfg != null) {
+                Dictionary<String, Object> oldProps = cfg.getProperties();
+                if (oldProps != null && oldProps.get(FILEINSTALL_FILE_NAME) != null) {
+                    try {
+                        cfgFile = getCfgFileFromProperties(oldProps);
+                        if (cfgFile == null) {
+                            throw new IOException("The configuration value '" + oldProps.get(FILEINSTALL_FILE_NAME)
+                                    + "' for ' + FILEINSTALL_FILE_NAME + ' does not represent a valid file location.");
+                        }
+                    } catch (URISyntaxException | MalformedURLException e) {
+                        throw new IOException(e);
                     }
-                    if (val instanceof URI) {
-                        cfgFile = new File((URI) val);
-                    }
-                    if (val instanceof String) {
-                        cfgFile = new File(new URL((String) val).toURI());
-                    }
-                } catch (Exception e) {
-                    throw new IOException(e.getMessage(), e);
                 }
             }
             LOGGER.trace("Update {}", cfgFile.getName());
@@ -149,31 +166,54 @@ public class ConfigRepositoryImpl implements ConfigRepository {
      * @see org.apache.karaf.shell.config.impl.ConfigRepository#getConfigProperties(java.lang.String)
      */
     @Override
-    @SuppressWarnings("rawtypes")
-    public Dictionary getConfigProperties(String pid) throws IOException, InvalidSyntaxException {
+    public Dictionary<String, Object> getConfigProperties(String pid) throws IOException, InvalidSyntaxException {
         if (pid != null && configAdmin != null) {
-            Configuration configuration = this.configAdmin.getConfiguration(pid, null);
-            if(configuration != null) {
-                Dictionary props = configuration.getProperties();
-                return (props != null) ? props : new Hashtable<String, String>();
+            Configuration configuration = configAdmin.getConfiguration(pid, null);
+            if (configuration != null) {
+                Dictionary<String, Object> props = configuration.getProperties();
+                return (props != null) ? props : new Hashtable<>();
             }
         }
         return null;
     }
 
+    @Override
     public ConfigurationAdmin getConfigAdmin() {
-        return this.configAdmin;
+        return configAdmin;
     }
 
-	@Override
-	public String createFactoryConfiguration(String factoryPid, Dictionary<String, ?> properties) {
-		try {
-			Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
-			config.update(properties);
-			return config.getPid();
-		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
+    @Override
+    public String createFactoryConfiguration(String factoryPid, Dictionary<String, Object> properties) {
+        return createFactoryConfiguration(factoryPid, null, properties);
+    }
+
+    @Override
+    public String createFactoryConfiguration(String factoryPid, String alias, Dictionary<String, Object> properties) {
+        try {
+            Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
+            if (storage != null) {
+                // Check, whether a file location is already provided.
+                if (properties.get(FILEINSTALL_FILE_NAME) == null) {
+                    // Create a synthetic unique alias for the factory
+                    // configuration when it is unspecified.
+                    if (alias == null) {
+                        // Felix Fileinstall uses the hyphen as separator
+                        // between factoryPid and alias. For safety reasons, all
+                        // hyphens are removed from the generated UUID.
+                        alias = UUID.randomUUID().toString().replaceAll("-", "");
+                    }
+                    String cfgFileName = new StringBuilder(factoryPid).append("-").append(alias).append(".cfg").toString();
+                    File cfgFile = new File(storage, cfgFileName);
+                    properties.put(FILEINSTALL_FILE_NAME, cfgFile.getCanonicalFile().toURI().toString());
+                }
+            }
+            config.update(properties);
+            String pid = config.getPid();
+            updateStorage(pid, properties);
+            return pid;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 
 }
