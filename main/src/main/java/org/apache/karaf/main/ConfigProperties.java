@@ -196,6 +196,7 @@ public class ConfigProperties {
         System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());
+        System.setProperty(PROP_KARAF_ETC, karafEtc.getPath());
         System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
 
         if (!karafEtc.exists()) {
