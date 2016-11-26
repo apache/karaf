@@ -2150,6 +2150,7 @@
             <properties>
               <maven.test.skip>true</maven.test.skip>
               <invoker.skip>true</invoker.skip>
+              <archetype.test.skip>true</archetype.test.skip>
             </properties>
         </profile>
         <profile>
