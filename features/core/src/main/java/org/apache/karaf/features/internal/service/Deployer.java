@@ -443,10 +443,18 @@ public class Deployer {
             for (Map.Entry<String, Map<String, BundleInfo>> bis : resolver.getBundleInfos().entrySet()) {
                 bundleInfo = bis.getValue().get(getUri(resource));
             }
-            if (bundleInfo != null && bundleInfo.isStart()) {
-                states.put(resource, FeatureState.Started);
+            Bundle bundle = deployment.resToBnd.get(resource);
+            if (bundle == null) {
+                // bundle is not present, it's provided by feature
+                // we are using bundleInfo and start flag
+                if (bundleInfo != null && bundleInfo.isStart()) {
+                    states.put(resource, FeatureState.Started);
+                } else {
+                    states.put(resource, FeatureState.Resolved);
+                }
             } else {
-                states.put(resource, FeatureState.Resolved);
+                // if the bundle is already there, just ignore changing state by feature
+                states.remove(resource);
             }
         }
         // Only keep bundles resources
