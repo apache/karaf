@@ -69,7 +69,7 @@ public class ClientConfig {
             portString = replaceVariable(portString, "8101", customCfg);
         }
         port = Integer.parseInt(portString);
-        level = Integer.parseInt(shellCfg.getProperty("logLevel", "1"));
+        level = Integer.parseInt(shellCfg.getProperty("logLevel", "0"));
         retryAttempts = 0;
         retryDelay = 2;
         idleTimeout = Long.parseLong(shellCfg.getProperty("sshIdleTimeout", "1800000"));
