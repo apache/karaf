@@ -18,10 +18,8 @@ package org.apache.karaf.features.internal.model;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -111,31 +109,18 @@ public class Config implements ConfigInfo {
 	}
 
 	public Properties getProperties() {
-		StringReader propStream = new StringReader(getValue());
 		Properties props = new Properties();
 		try {
-			props.load(propStream);
+			org.apache.felix.utils.properties.Properties properties
+					= new org.apache.felix.utils.properties.Properties();
+			properties.load(new StringReader(value));
+			for (Map.Entry<String, String> e : properties.entrySet()) {
+				props.put(e.getKey(), e.getValue());
+			}
 		} catch (IOException e) {
 			// ignore??
 		}
-		interpolation(props);
 		return props;
 	}
 
-	@SuppressWarnings("rawtypes")
-	private void interpolation(Properties properties) {
-		for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
-			String key = (String) e.nextElement();
-			String val = properties.getProperty(key);
-			Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);
-			while (matcher.find()) {
-				String rep = System.getProperty(matcher.group(1));
-				if (rep != null) {
-					val = val.replace(matcher.group(0), rep);
-					matcher.reset(val);
-				}
-			}
-			properties.put(key, val);
-		}
-	}
 }

@@ -120,6 +120,13 @@
                                     <artifactId>base</artifactId>
                                 </artifactItem>
                             </artifactItems>
+                            <excludes>
+                                resources/bin/contrib,resources/bin/contrib/*,
+                                resources/bin/instance*,resources/bin/client*,
+                                resources/deploy,resources/deploy/*,
+                                resources/instances,resources/instances/*,
+                                resources/etc/system.properties
+                            </excludes>
                             <outputDirectory>target/classes</outputDirectory>
                         </configuration>
                     </execution>

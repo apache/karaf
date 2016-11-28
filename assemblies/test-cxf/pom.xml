@@ -29,7 +29,7 @@
     </parent>
 
     <groupId>org.apache.karaf</groupId>
-    <artifactId>apache-karaf-minimal</artifactId>
+    <artifactId>test-cxf</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Minimal Distribution</name>
 
@@ -40,29 +40,34 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
-            <artifactId>framework</artifactId>
+            <artifactId>static</artifactId>
             <type>kar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>framework</artifactId>
-            <classifier>features</classifier>
-            <type>xml</type>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>standard</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
-            <artifactId>spring</artifactId>
+            <artifactId>enterprise</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
-            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf.karaf</groupId>
+            <artifactId>apache-cxf</artifactId>
+			<version>3.1.8</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-features</artifactId>
+			<version>4.4.0</version>
+            <classifier>features</classifier>
+            <type>xml</type>
         </dependency>
     </dependencies>
 
@@ -118,32 +123,20 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <installedFeatures>
-                        <feature>wrapper</feature>
-                    </installedFeatures>
-                    <bootFeatures>
-                        <feature>jaas</feature>
+                    <startupFeatures>
+                        <feature>cxf-jaxws</feature>
+                        <feature>cxf-jaxrs</feature>
+                        <feature>httplite</feature>
                         <feature>shell</feature>
-                        <feature>feature</feature>
-                        <feature>ssh</feature>
-                        <feature>management</feature>
                         <feature>bundle</feature>
-                        <feature>config</feature>
-                        <feature>deployer</feature>
-                        <feature>diagnostic</feature>
-                        <feature>instance</feature>
-                        <feature>kar</feature>
-                        <feature>log</feature>
-                        <feature>package</feature>
-                        <feature>service</feature>
-                        <feature>system</feature>
-                    </bootFeatures>
-                    <pidsToExtract>
-                        !jmx.acl.*,
-                        !org.apache.karaf.command.acl.*,
-                        *
-                    </pidsToExtract>
+                    </startupFeatures>
                     <javase>1.8</javase>
+					<blacklistedBundles>
+						<bundle>mvn:javax.mail/mail/1.4.4</bundle>
+						<bundle>mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+						<bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-impl/2.2.11_1</bundle>
+						<bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-xjc/2.2.11_1</bundle>
+					</blacklistedBundles>
                 </configuration>
             </plugin>
 

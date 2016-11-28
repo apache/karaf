@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,6 +233,13 @@ public class AssemblyMojo extends MojoSupport {
     protected String propertyFileEdits;
 
     /**
+     * Glob specifying which configuration pids in the selected boot features
+     * should be extracted to the etc directory.
+     */
+    @Parameter
+    protected List<String> pidsToExtract = Collections.singletonList("*");
+
+    /**
      * Specify a set of translated urls to use instead of downloading the artifacts
      * from their original locations.  The given set will be extended with already
      * built artifacts from the maven project.
@@ -335,6 +343,7 @@ public class AssemblyMojo extends MojoSupport {
                 builder.propertyEdits(edits);
             }
         }
+        builder.pidsToExtract(pidsToExtract);
 
         Map<String, String> urls = new HashMap<>();
         List<Artifact> artifacts = new ArrayList<>(project.getAttachedArtifacts());

@@ -72,6 +72,41 @@
     <feature name="feature" description="Features Support" version="${project.version}">
         <bundle start-level="1">mvn:org.apache.karaf.features/org.apache.karaf.features.extension/${project.version}</bundle>
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
+        <config name="org.apache.karaf.features.repos">
+            #
+            # This file describes the features repository URL
+            # It could be directly installed using feature:repo-add command
+            #
+            enterprise=mvn:org.apache.karaf.features/enterprise/${karaf.version}/xml/features
+            spring=mvn:org.apache.karaf.features/spring/${karaf.version}/xml/features
+            cellar=mvn:org.apache.karaf.cellar/apache-karaf-cellar/RELEASE/xml/features
+            cave=mvn:org.apache.karaf.cave/apache-karaf-cave/RELEASE/xml/features
+            camel=mvn:org.apache.camel.karaf/apache-camel/RELEASE/xml/features
+            camel-extras=mvn:org.apache-extras.camel-extra.karaf/camel-extra/RELEASE/xml/features
+            cxf=mvn:org.apache.cxf.karaf/apache-cxf/RELEASE/xml/features
+            cxf-dosgi=mvn:org.apache.cxf.dosgi/cxf-dosgi/RELEASE/xml/features
+            cxf-dosgi-samples=mvn:org.apache.cxf.dosgi/cxf-dosgi-samples/RELEASE/xml/features
+            cxf-xkms=mvn:org.apache.cxf.services.xkms/cxf-services-xkms-features/RELEASE/xml
+            activemq=mvn:org.apache.activemq/activemq-karaf/RELEASE/xml/features
+            jclouds=mvn:org.apache.jclouds.karaf/jclouds-karaf/RELEASE/xml/features
+            openejb=mvn:org.apache.openejb/openejb-feature/RELEASE/xml/features
+            wicket=mvn:org.ops4j.pax.wicket/features/RELEASE/xml/features
+            hawtio=mvn:io.hawt/hawtio-karaf/RELEASE/xml/features
+            pax-cdi=mvn:org.ops4j.pax.cdi/pax-cdi-features/RELEASE/xml/features
+            pax-jdbc=mvn:org.ops4j.pax.jdbc/pax-jdbc-features/RELEASE/xml/features
+            pax-jpa=mvn:org.ops4j.pax.jpa/pax-jpa-features/RELEASE/xml/features
+            pax-web=mvn:org.ops4j.pax.web/pax-web-features/RELEASE/xml/features
+            pax-wicket=mvn:org.ops4j.pax.wicket/pax-wicket-features/RELEASE/xml/features
+            ecf=http://download.eclipse.org/rt/ecf/RELEASE/site.p2/karaf-features.xml
+            decanter=mvn:org.apache.karaf.decanter/apache-karaf-decanter/RELEASE/xml/features
+            eclipsesource-jaxrs=mvn:com.eclipsesource.jaxrs/features/RELEASE/xml/features
+            aries-jpa=mvn:org.apache.aries.jpa/jpa-features/RELEASE/xml/features
+            aries-rsa=mvn:org.apache.aries.rsa/rsa-features/RELEASE/xml/features
+            hibernate=mvn:org.hibernate/hibernate-osgi/RELEASE/xml/karaf
+            ignite=mvn:org.apache.ignite/ignite-osgi-karaf/RELEASE/xml/features
+            openjpa=mvn:org.apache.openjpa/openjpa-features/RELEASE/xml/features
+            artemis=mvn:org.apache.activemq/artemis-features/RELEASE/xml/features
+        </config>
         <conditional>
             <condition>shell</condition>
             <config name="org.apache.karaf.command.acl.feature">
@@ -80,6 +115,9 @@
                 #
                 install = admin
                 uninstall = admin
+                start = admin
+                stop = admin
+                update = admin
             </config>
             <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/${project.version}</bundle>
         </conditional>
@@ -97,10 +135,128 @@
             #
             # This configuration file defines the ACLs for commands in the shell subshell
             #
-            edit = admin
+            nano = admin
             exec = admin
             new = admin
             java = admin
+        </config>
+        <config name="org.apache.karaf.command.acl.scope_bundle">
+            #
+            # This configuration file defines the ACLs for scope bundles
+            # 
+            features=org.apache.karaf.features.command
+            jaas=org.apache.karaf.jaas.command
+            admin=org.apache.karaf.admin.command
+            osgi=org.apache.karaf.shell.osgi
+            log=org.apache.karaf.shell.log
+            packages=org.apache.karaf.shell.packages
+            config=org.apache.karaf.shell.config
+            ssh=org.apache.karaf.shell.ssh
+            shell=org.apache.karaf.shell.commands
+        </config>
+        <config name="org.apache.karaf.shell">
+            #
+            # These properties are used to configure Karaf's ssh shell.
+            #
+
+            #
+            # Via sshPort and sshHost you define the address you can login into Karaf.
+            #
+            sshPort = 8101
+            sshHost = 0.0.0.0
+
+            #
+            # The sshIdleTimeout defines the inactivity timeout to logout the SSH session.
+            # The sshIdleTimeout is in milliseconds, and the default is set to 30 minutes.
+            #
+            sshIdleTimeout = 1800000
+
+            #
+            # sshRealm defines which JAAS domain to use for password authentication.
+            #
+            sshRealm = karaf
+
+            #
+            # The location of the hostKey file defines where the private/public key of the server
+            # is located. If no file is at the defined location it will be ignored.
+            #
+            hostKey = ${karaf.etc}/host.key
+
+            #
+            # The format used for hostKey.
+            # Possible values are simple (Karaf internal), or PEM (OpenSSH format)
+            #
+            hostKeyFormat = simple
+
+            #
+            # Role name used for SSH access authorization
+            # If not set, this defaults to the ${karaf.admin.role} configured in etc/system.properties
+            #
+            # sshRole = admin
+
+            #
+            # Self defined key size in 1024, 2048, 3072, or 4096
+            # If not set, this defaults to 4096.
+            #
+            # keySize = 4096
+
+            #
+            # Specify host key algorithm, defaults to RSA
+            #
+            # algorithm = RSA
+
+            #
+            # Specify the client log level (default is WARN)
+            # 0: ERROR
+            # 1: WARN
+            # 2: INFO
+            # 3: DEBUG
+            # 4: TRACE
+            #
+            #logLevel=1
+
+            #
+            # Specify an additional welcome banner to be displayed when a user logs into the server.
+            #
+            # welcomeBanner =
+
+            #
+            # Defines the completion mode on the Karaf shell console. The possible values are:
+            # - GLOBAL: it's the same behavior as in previous Karaf releases. The completion displays all commands and all aliases
+            #           ignoring if you are in a subshell or not.
+            # - FIRST: the completion displays all commands and all aliases only when you are not in a subshell. When you are
+            #          in a subshell, the completion displays only the commands local to the subshell.
+            # - SUBSHELL: the completion displays only the subshells on the root level. When you are in a subshell, the completion
+            #             displays only the commands local to the subshell.
+            # This property define the default value when you use the Karaf shell console.
+            # You can change the completion mode directly in the shell console, using shell:completion command.
+            #
+
+            #
+            # Override allowed SSH cipher algorithms.
+            # Default: aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc
+            #
+            # ciphers = aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc
+
+            #
+            # Override allowed SSH HMAC algorithms.
+            # Default: hmac-sha2-512,hmac-sha2-256,hmac-sha1
+            #
+            # macs = hmac-sha2-512,hmac-sha2-256,hmac-sha1
+
+            #
+            # Override allowed SSH key exchange algorithms.
+            # Default: diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1
+            #
+            # kexAlgorithms = diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1
+
+            #
+            # Override moduli-url.
+            # Default: moduli-url not specified to use the internal one from SSHD
+            #
+            # moduli-url = external moduli-url users wanna use
+
+            completionMode = GLOBAL
         </config>
         <bundle dependency="true" start-level="30">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.jline/jline/${jline.version}</bundle>
@@ -288,6 +444,50 @@
     </feature>
 
     <feature name="jaas" description="Provide JAAS support" version="${project.version}">
+        <config name="org.apache.karaf.jaas">
+            #
+            # Boolean enabling / disabling encrypted passwords
+            #
+            encryption.enabled = false
+
+            #
+            # Encryption Service name
+            #   the default one is 'basic'
+            #   a more powerful one named 'jasypt' is available
+            #       when installing the encryption feature
+            #
+            encryption.name =
+
+            #
+            # Encryption prefix
+            #
+            encryption.prefix = {CRYPT}
+
+            #
+            # Encryption suffix
+            #
+            encryption.suffix = {CRYPT}
+
+            #
+            # Set the encryption algorithm to use in Karaf JAAS login module
+            # Supported encryption algorithms follow:
+            #   MD2
+            #   MD5
+            #   SHA-1
+            #   SHA-256
+            #   SHA-384
+            #   SHA-512
+            #
+            encryption.algorithm = MD5
+
+            #
+            # Encoding of the encrypted password.
+            # Can be:
+            #   hexadecimal
+            #   base64
+            #
+            encryption.encoding = hexadecimal
+        </config>
         <feature>jaas-boot</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/${project.version}</bundle>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/${project.version}</bundle>
@@ -308,6 +508,25 @@
     </feature>
 
     <feature name="log" description="Provide Log support" version="${project.version}">
+        <config name="org.apache.karaf.log">
+            #
+            # This configuration file is used to configure the default values for the log:display
+            # and log:exception-display commands.
+            #
+
+            #
+            # The number of log statements to be displayed using log:display. It also defines the number
+            # of lines searched for exceptions using log:exception-display. You can override this value
+            # at runtime using -n in log:display.
+            #
+            size = 500
+
+            #
+            # The pattern used to format the log statement when using log:display. This pattern is according
+            # to the log4j layout. You can override this parameter at runtime using log:display with -p.
+            #
+            pattern = %d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n
+        </config>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.log/org.apache.karaf.log.core/${project.version}</bundle>
     </feature>
 
@@ -327,7 +546,6 @@
                 #
                 # This configuration file defines the ACLs for commands in the system subshell
                 #
-                update = admin
                 property = admin
                 shutdown = admin
                 start-level[/.*[0-9][0-9][0-9]+.*/] = manager # manager can set startlevels above 100
@@ -433,6 +651,62 @@
     </feature>
 
     <feature name="management" description="Provide a JMX MBeanServer and a set of MBeans in Karaf" version="${project.version}">
+        <config name="jmx.acl">
+            #
+            # Generic JMX ACL
+            #
+            # This file defines the roles required for MBean operations for MBeans that 
+            # do not have this defined explicitly.
+            #
+            # The definition of ACLs for JMX operations works as follows:
+            #
+            # The required roles for JMX operations are defined in configuration files
+            # read via OSGi ConfigAdmin.
+            #
+            # JMX RBAC-related configuration is prefixed with jmx.acl and based on the
+            # JMX ObjectName that it applies to. For example specific configuration for
+            # an MBean with the following objectName: foo.bar:type=Test can be placed in
+            # a configuration file called jmx.acl.foo.bar.Test.cfg. More generic
+            # configuration can be placed in the domain (e.g. jmx.acl.foo.bar.cfg) or
+            # at the top level (jmx.acl.cfg). A simple configuration file looks like
+            # this:
+            #   test : admin
+            #   getVal : manager, viewer
+            #   
+            # The system looks for required roles using the following process:
+            # The most specific configuration file/pid is tried first. E.g. in the
+            # above example the jmx.acl.foo.bar.Test.cfg is looked at first. In this
+            # configuration, the system looks for a:
+            #   1. Specific match for the current invocation, e.g. test(int)["17"] : role1
+            #   2. Reg exp match for the current invocation, e.g. test(int)[/[0-9]/] : role2
+            #   In both cases the passed argument is converted to a String for the
+            # comparison.
+            #   If any of the above match all the roles with matching definitions
+            # are collected and allowed. If no matches are found the following is tried:
+            #   3. Signature match for the invocation, e.g. test(int) : role3. If
+            # matched the associated roles are used.
+            #   4. Method name match for the invocation, e.g. test : role4. If matched
+            # the associated roles are used.
+            #   5. A method name wildcard match, e.g. te* : role5. For all the
+            # wildcard matches found in the current configuration file, the roles
+            # associated with the longest match are used. So if you have te* and * and
+            # the method invoked is 'test', then the roles defined with te* are used,
+            # not the ones defined with *.
+            # If no matching definition is found in the current configuration file, a 
+            # more general configuration file is looked for. So jmx.acl.foo.bar.cfg is 
+            # tried next, this matches the domain of the MBean. If there is no match 
+            # found in the domain the most generic configuration file is consulted
+            # (jmx.acl.cfg).
+            # If a matching definition is found, this is used and the process will not
+            # look for any other matching definitions. So the most specific definition
+            # always takes precedence.
+            #
+            list* = viewer
+            get* = viewer
+            is* = viewer
+            set* = admin
+            * = admin
+        </config>
         <config name="jmx.acl.org.apache.karaf.security.jmx">
             #
             # JMX ACL specific to the org.apache.karaf:type=security,area=jmx MBean which
@@ -486,6 +760,62 @@
             updateForLocation(java.lang.String,java.lang.String,javax.management.openmbean.TabularData)[/org[.]apache[.]karaf[.]command[.]acl[.].+/,/.*/,/.*/] = admin
             updateForLocation(java.lang.String,java.lang.String,javax.management.openmbean.TabularData)[/org[.]apache[.]karaf[.]service[.]acl[.].+/,/.*/,/.*/] = admin
             updateForLocation(java.lang.String,java.lang.String,javax.management.openmbean.TabularData) = manager
+        </config>
+        <config name="org.apache.karaf.management">
+            #
+            # The properties in this file define the configuration of Apache Karaf's JMX Management
+            #
+
+            #
+            # Port number for RMI registry connection
+            #
+            rmiRegistryPort = 1099
+
+            #
+            # Host for RMI registry
+            #
+            rmiRegistryHost = 127.0.0.1
+
+            #
+            # Port number for RMI server connection
+            #
+            rmiServerPort = 44444
+
+            #
+            # Host for RMI server
+            #
+            rmiServerHost = 127.0.0.1
+
+            #
+            # Name of the JAAS realm used for authentication
+            #
+            jmxRealm = karaf
+
+            #
+            # The service URL for the JMXConnectorServer
+            #
+            serviceUrl = service:jmx:rmi://${rmiServerHost}:${rmiServerPort}/jndi/rmi://${rmiRegistryHost}:${rmiRegistryPort}/karaf-${karaf.name}
+
+            #
+            # Whether any threads started for the JMXConnectorServer should be started as daemon threads
+            #
+            daemon = true
+
+            #
+            # Whether the JMXConnectorServer should be started in a separate thread
+            #
+            threaded = true
+
+            #
+            # The ObjectName used to register the JMXConnectorServer
+            #
+            objectName = connector:name=rmi
+
+            #
+            # Role name used for JMX access authorization
+            # If not set, this defaults to the ${karaf.admin.role} configured in etc/system.properties
+            #
+            # jmxRole=admin
         </config>
         <feature>jaas</feature>
         <bundle dependency="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>

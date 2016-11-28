@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -430,6 +432,15 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         if (conditional != null) {
             for (Conditional c : conditional) {
                 c.setOwner(this);
+            }
+        }
+        if (config != null) {
+            for (Config c : config) {
+                String v = c.getValue();
+                v = Stream.of(v.split("\n"))
+                        .map(String::trim)
+                        .collect(Collectors.joining("\n", "", "\n"));
+                c.setValue(v);
             }
         }
     }

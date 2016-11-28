@@ -46,6 +46,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -65,6 +66,7 @@ import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.download.impl.DownloadManagerHelper;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Conditional;
+import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
@@ -158,6 +160,7 @@ public class Builder {
     String mavenRepositories;
     Map<String, String> config = new LinkedHashMap<>();
     Map<String, String> system = new LinkedHashMap<>();
+    List<String> pidsToExtract;
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
@@ -369,6 +372,11 @@ public class Builder {
         return this;
     }
 
+    public Builder pidsToExtract(List<String> pidsToExtract) {
+        this.pidsToExtract = pidsToExtract;
+        return this;
+    }
+
     /**
      * Specify a set of url mappings to use instead of
      * downloading from the original urls.
@@ -404,6 +412,10 @@ public class Builder {
 
     public BlacklistPolicy getBlacklistPolicy() {
         return blacklistPolicy;
+    }
+
+    public List<String> getPidsToExtract() {
+        return pidsToExtract;
     }
 
     public void generateAssembly() throws Exception {
@@ -885,6 +897,19 @@ public class Builder {
                     installArtifact(downloader, configFile.getLocation().trim());
                 }
             }
+            // Extract configs
+            for (Config config : feature.getConfig()) {
+                if (pidMatching(config.getName())) {
+                    Files.write(etcDirectory.resolve(config.getName() + ".cfg"), config.getValue().getBytes());
+                }
+            }
+            for (Conditional cond : feature.getConditional()) {
+                for (Config config : cond.getConfig()) {
+                    if (pidMatching(config.getName())) {
+                        Files.write(etcDirectory.resolve(config.getName() + ".cfg"), config.getValue().getBytes());
+                    }
+                }
+            }
             // Install libraries
             List<String> libraries = new ArrayList<>();
             for (Library library : feature.getLibraries()) {
@@ -951,6 +976,113 @@ public class Builder {
         }
         downloader.await();
         return allBootFeatures;
+    }
+
+    private boolean pidMatching(String name) {
+        if (pidsToExtract == null) {
+            return true;
+        }
+        for (String p : pidsToExtract) {
+            boolean negated = false;
+            if (p.startsWith("!")) {
+                negated = true;
+                p = p.substring(1);
+            }
+            String r = globToRegex(p);
+            if (Pattern.matches(r, name)) {
+                return !negated;
+            }
+        }
+        return false;
+    }
+
+    private String globToRegex(String pattern) {
+        StringBuilder sb = new StringBuilder(pattern.length());
+        int inGroup = 0;
+        int inClass = 0;
+        int firstIndexInClass = -1;
+        char[] arr = pattern.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            char ch = arr[i];
+            switch (ch) {
+                case '\\':
+                    if (++i >= arr.length) {
+                        sb.append('\\');
+                    } else {
+                        char next = arr[i];
+                        switch (next) {
+                            case ',':
+                                // escape not needed
+                                break;
+                            case 'Q':
+                            case 'E':
+                                // extra escape needed
+                                sb.append('\\');
+                            default:
+                                sb.append('\\');
+                        }
+                        sb.append(next);
+                    }
+                    break;
+                case '*':
+                    if (inClass == 0)
+                        sb.append(".*");
+                    else
+                        sb.append('*');
+                    break;
+                case '?':
+                    if (inClass == 0)
+                        sb.append('.');
+                    else
+                        sb.append('?');
+                    break;
+                case '[':
+                    inClass++;
+                    firstIndexInClass = i + 1;
+                    sb.append('[');
+                    break;
+                case ']':
+                    inClass--;
+                    sb.append(']');
+                    break;
+                case '.':
+                case '(':
+                case ')':
+                case '+':
+                case '|':
+                case '^':
+                case '$':
+                case '@':
+                case '%':
+                    if (inClass == 0 || (firstIndexInClass == i && ch == '^'))
+                        sb.append('\\');
+                    sb.append(ch);
+                    break;
+                case '!':
+                    if (firstIndexInClass == i)
+                        sb.append('^');
+                    else
+                        sb.append('!');
+                    break;
+                case '{':
+                    inGroup++;
+                    sb.append('(');
+                    break;
+                case '}':
+                    inGroup--;
+                    sb.append(')');
+                    break;
+                case ',':
+                    if (inGroup > 0)
+                        sb.append('|');
+                    else
+                        sb.append(',');
+                    break;
+                default:
+                    sb.append(ch);
+            }
+        }
+        return sb.toString();
     }
 
     private String getRepos(Features rep) {

@@ -26,8 +26,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.InterpolationHelper.SubstitutionCallback;
@@ -102,7 +100,8 @@ public class FeatureConfigInstaller {
 
     public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
     	for (ConfigInfo config : feature.getConfigurations()) {
-			Properties props = config.getProperties();
+            org.apache.felix.utils.properties.Properties props = new org.apache.felix.utils.properties.Properties();
+            props.load(new StringReader(config.getValue()));
 			String[] pid = parsePid(config.getName());
 			Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
 			if (cfg == null) {
@@ -112,14 +111,14 @@ public class FeatureConfigInstaller {
 				cfgProps.put(CONFIG_KEY, key);
 				cfg.update(cfgProps);
                 try {
-                    updateStorage(pid[0], pid[1], props);
+                    updateStorage(pid[0], pid[1], props, false);
                 } catch (Exception e) {
                     LOGGER.warn("Can't update cfg file", e);
                 }
 			} else if (config.isAppend()) {
                 boolean update = false;
 				Dictionary<String,Object> properties = cfg.getProperties();
-                for (String key : props.stringPropertyNames()) {
+                for (String key : props.keySet()) {
                     if (properties.get(key) == null) {
                         properties.put(key, props.getProperty(key));
                         update = true;
@@ -128,7 +127,7 @@ public class FeatureConfigInstaller {
                 if (update) {
                     cfg.update(properties);
                     try {
-                        updateStorage(pid[0], pid[1], properties);
+                        updateStorage(pid[0], pid[1], props, true);
                     } catch (Exception e) {
                         LOGGER.warn("Can't update cfg file", e);
                     }
@@ -140,14 +139,11 @@ public class FeatureConfigInstaller {
         }
     }
 
-	private Dictionary<String, String> convertToDict(Properties props) {
+	private Dictionary<String, String> convertToDict(Map<String, String> props) {
 		Dictionary<String, String> cfgProps = new Hashtable<String, String>();
-		for (@SuppressWarnings("rawtypes")
-		Enumeration e = props.propertyNames(); e.hasMoreElements();) {
-			String key = (String) e.nextElement();
-			String val = props.getProperty(key);
-			cfgProps.put(key, val);
-		}
+        for (Map.Entry<String, String> e : props.entrySet()) {
+            cfgProps.put(e.getKey(), e.getValue());
+        }
 		return cfgProps;
 	}
 
@@ -244,7 +240,7 @@ public class FeatureConfigInstaller {
         }
     }
 
-    protected void updateStorage(String pid, String factoryPid, Dictionary props) throws Exception {
+    protected void updateStorage(String pid, String factoryPid, org.apache.felix.utils.properties.Properties props, boolean append) throws Exception {
         if (storage != null && configCfgStore) {
             // get the cfg file
             File cfgFile;
@@ -268,39 +264,50 @@ public class FeatureConfigInstaller {
                         cfgFile = new File(new URL((String) val).toURI());
                     }
                 } catch (Exception e) {
-                    throw (IOException) new IOException(e.getMessage()).initCause(e);
+                    throw new IOException(e.getMessage(), e);
                 }
             }
             LOGGER.trace("Update {}", cfgFile.getName());
             // update the cfg file
-            org.apache.felix.utils.properties.Properties properties = new org.apache.felix.utils.properties.Properties(cfgFile);
-            for (Enumeration<String> keys = props.keys(); keys.hasMoreElements(); ) {
-                String key = keys.nextElement();
-                if (!Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FILEINSTALL_FILE_NAME.equals(key)) {
-                    if (props.get(key) != null) {
-                        properties.put(key, props.get(key).toString());
+            if (!cfgFile.exists()) {
+                props.save(cfgFile);
+            } else {
+                org.apache.felix.utils.properties.Properties properties = new org.apache.felix.utils.properties.Properties(cfgFile);
+                for (String key : props.keySet()) {
+                    if (!Constants.SERVICE_PID.equals(key)
+                            && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                            && !FILEINSTALL_FILE_NAME.equals(key)) {
+                        List<String> comments = props.getComments(key);
+                        List<String> value = props.getRaw(key);
+                        if (!properties.containsKey(key)) {
+                            properties.put(key, comments, value);
+                        } else if (!append) {
+                            if (comments.isEmpty()) {
+                                comments = properties.getComments(key);
+                            }
+                            properties.put(key, comments, value);
+                        }
                     }
                 }
-            }
-            // remove "removed" properties from the cfg file
-            ArrayList<String> propertiesToRemove = new ArrayList<>();
-            for (String key : properties.keySet()) {
-                if (props.get(key) == null
-                        && !Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FILEINSTALL_FILE_NAME.equals(key)) {
-                    propertiesToRemove.add(key);
+                if (!append) {
+                    // remove "removed" properties from the cfg file
+                    ArrayList<String> propertiesToRemove = new ArrayList<>();
+                    for (String key : properties.keySet()) {
+                        if (!props.containsKey(key)
+                                && !Constants.SERVICE_PID.equals(key)
+                                && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                                && !FILEINSTALL_FILE_NAME.equals(key)) {
+                            propertiesToRemove.add(key);
+                        }
+                    }
+                    for (String key : propertiesToRemove) {
+                        properties.remove(key);
+                    }
                 }
+                // save the cfg file
+                storage.mkdirs();
+                properties.save();
             }
-            for (String key : propertiesToRemove) {
-                properties.remove(key);
-            }
-
-            // save the cfg file
-            storage.mkdirs();
-            properties.save();
         }
     }
 
