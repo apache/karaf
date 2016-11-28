@@ -140,8 +140,8 @@ public class Activator extends BaseActivator implements ManagedService {
     }
 
     protected SshServer createSshServer(SessionFactory sessionFactory) {
-        int sshPort           = getInt("sshPort", 8181);
-        String sshHost        = getString("sshHost", "0.0.0.0");
+        int sshPort           = getInt("sshPort", 8101);
+        String sshHost        = getString("sshHost", "127.0.0.1");
         long sshIdleTimeout   = getLong("sshIdleTimeout", 1800000);
         String sshRealm       = getString("sshRealm", "karaf");
         String hostKey        = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
