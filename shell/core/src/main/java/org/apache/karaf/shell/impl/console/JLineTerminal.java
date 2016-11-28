@@ -27,10 +27,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.IntConsumer;
 
 import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.jline.terminal.Attributes;
+import org.jline.terminal.Cursor;
+import org.jline.terminal.MouseEvent;
 import org.jline.terminal.Size;
 import org.jline.utils.InfoCmp.Capability;
 import org.jline.utils.NonBlockingReader;
@@ -210,6 +213,26 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
                 ls.remove(listener);
             }
         }
+    }
+
+    @Override
+    public Cursor getCursorPosition(IntConsumer discarded) {
+        return terminal.getCursorPosition(discarded);
+    }
+
+    @Override
+    public boolean hasMouseSupport() {
+        return terminal.hasMouseSupport();
+    }
+
+    @Override
+    public boolean trackMouse(MouseTracking tracking) {
+        return terminal.trackMouse(tracking);
+    }
+
+    @Override
+    public MouseEvent readMouseEvent() {
+        return terminal.readMouseEvent();
     }
 
     private Signal signal(org.apache.karaf.shell.api.console.Signal sig) {
