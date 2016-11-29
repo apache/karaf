@@ -201,6 +201,8 @@ public class ConfigProperties {
         if (!karafEtc.exists()) {
             throw new FileNotFoundException("Karaf etc folder not found: " + karafEtc.getAbsolutePath());
         }
+
+        configureSAAJForIBMJVM();
         PropertiesLoader.loadSystemProperties(new File(karafEtc, SYSTEM_PROPERTIES_FILE_NAME));
 
         this.props = PropertiesLoader.loadConfigProperties(new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME));
@@ -311,5 +313,20 @@ public class ConfigProperties {
         }
         return ibsl;
     }
+
+    private void configureSAAJForIBMJVM() {
+        if (System.getProperty("java.vendor").equals("IBM Corporation"))  {
+            System.setProperty("javax.xml.soap.MessageFactory",
+                               "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl");
+            System.setProperty("javax.xml.soap.SOAPFactory",
+                               "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPFactory1_1Impl");
+            System.setProperty("javax.xml.soap.SOAPConnectionFactory",
+                               "com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnectionFactory");
+            System.setProperty("javax.xml.soap.MetaFactory",
+                               "com.sun.xml.internal.messaging.saaj.soap.SAAJMetaFactoryImpl");
+        }
+
+    }
+
     
 }
