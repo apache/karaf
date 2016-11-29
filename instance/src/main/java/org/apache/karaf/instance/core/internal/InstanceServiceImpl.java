@@ -1085,7 +1085,11 @@ public class InstanceServiceImpl implements InstanceService {
                 InputStream is = getResourceStream(resource, resources);
                 OutputStream os = new FileOutputStream(outFile)
             ) {
-                copyStream(is, os);
+                if (is == null) {
+                    logInfo("\tWARNING: unable to find %s", true, resource);
+                } else {
+                    copyStream(is, os);
+                }
             }
         }
     }
