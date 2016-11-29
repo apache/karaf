@@ -19,8 +19,12 @@
 package org.apache.karaf.shell.support.table;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.PrintStream;
 
+import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -66,4 +70,41 @@ public class ShellTableTest {
                 "                     |quite long"), baos.toString());
     }
 
+    @Test
+    public void testCP1252() throws Exception {
+        testNonUtf8("cp1252");
+    }
+
+    @Test
+    public void testANSI() throws Exception {
+        testNonUtf8("ANSI_X3.4-1968");
+    }
+
+    private void testNonUtf8(String encoding)  throws Exception {
+        ShellTable table = new ShellTable();
+        table.column("col1");
+        table.column("col2").maxSize(-1).wrap();
+        table.addRow().addContent("my first column value", "my second column value is quite long");
+        table.size(50);
+
+        ThreadIO tio = new ThreadIOImpl();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos, false, encoding);
+        table.print(ps, true);
+        tio.setStreams(new FileInputStream(FileDescriptor.in), ps, ps);
+
+        table.print(System.out);
+
+        assertEquals(
+                "col1                  | col2\n" +
+                "----------------------+---------------------------\n" +
+                "my first column value | my second column value is\n" +
+                "                      | quite long\n" +
+                "col1                  | col2\n" +
+                "----------------------+---------------------------\n" +
+                "my first column value | my second column value is\n" +
+                "                      | quite long\n",
+                baos.toString());
+
+    }
 }
