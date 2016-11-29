@@ -6,7 +6,11 @@ The command above will also create a file etc/org.apache.karaf.sample.pid which 
   
 Create a factory config by factory pid:
   > config:edit --factory myfactorypid
-In this case the config is created with a pid like myfactorypid.<generated id>. This config is not written to a file.
+In this case the config is created with a pid like myfactorypid.<generated id>. The file name is myfactorypid-<generated alias>.cfg.
+
+Create a factory config by factory pid and alias:
+  > config:edit --factory myfactorypid --alias myalias
+In this case the config is created with a pid like myfactorypid.<generated id>. The file name is myfactorypid-myalias.cfg.
 
 Edit a config specified by an ldap query
   > config:edit '(myattribute=myvalue)'
