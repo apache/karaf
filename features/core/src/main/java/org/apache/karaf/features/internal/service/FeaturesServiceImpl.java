@@ -1065,12 +1065,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         try {
             final String outputFile = this.outputFile.get();
             this.outputFile.set(null);
-            executor.submit(new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    doProvision(requirements, stateChanges, state, options, outputFile);
-                    return null;
-                }
+            executor.submit(() -> {
+                doProvision(requirements, stateChanges, state, options, outputFile);
+                return null;
             }).get();
         } catch (ExecutionException e) {
             Throwable t = e.getCause();

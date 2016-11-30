@@ -201,7 +201,9 @@ public class SubsystemResolver {
             try {
                 wiring = resolver.resolve(context);
                 json.put("success", "true");
+                json.put("wiring", toJson(wiring));
             } catch (Exception e) {
+                json.put("success", "false");
                 json.put("exception", e.toString());
                 throw e;
             } finally {
@@ -233,6 +235,37 @@ public class SubsystemResolver {
         associateFragments();
 
         return wiring;
+    }
+
+    private Object toJson(Map<Resource, List<Wire>> wiring) {
+        Map<String, List<Map<String, Object>>> wires = new HashMap<>();
+        for (Map.Entry<Resource, List<Wire>> reswiring : wiring.entrySet()) {
+            Resource resource = reswiring.getKey();
+            String id = toString(resource);
+            List<Map<String, Object>> reswires = new ArrayList<>();
+            for (Wire w : reswiring.getValue()) {
+                Map<String, Object> rw = new LinkedHashMap<>();
+                rw.put("requirement", toString(w.getRequirement()));
+                rw.put("capability", toString(w.getCapability()));
+                rw.put("requirer", toString(w.getRequirer()));
+                rw.put("provider", toString(w.getProvider()));
+                reswires.add(rw);
+            }
+            wires.put(id, reswires);
+        }
+        return wires;
+    }
+
+    private String toString(Resource r) {
+        return toString(r.getCapabilities(IDENTITY_NAMESPACE).get(0));
+    }
+
+    private String toString(Requirement r) {
+        return BaseClause.toString(null, r.getNamespace(), r.getAttributes(), r.getDirectives());
+    }
+
+    private String toString(Capability c) {
+        return BaseClause.toString(null, c.getNamespace(), c.getAttributes(), c.getDirectives());
     }
 
     private Object toJson(Repository repository) {
