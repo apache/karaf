@@ -36,7 +36,7 @@ public class EditCommand extends ConfigCommandSupport {
 
     @Option(name = "--force", aliases = {}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)
     boolean force;
-    
+
     @Option(name = "--factory", aliases = {}, description = "Define this config as a factory config. Will be crearted on calling update", required = false, multiValued = false)
     boolean factory;
 
@@ -51,7 +51,7 @@ public class EditCommand extends ConfigCommandSupport {
             System.err.println("Another config is being edited.  Cancel / update first, or use the --force option");
             return null;
         }
-        
+
         if (pid.startsWith("(")) {
         	Configuration[] configs = this.configRepository.getConfigAdmin().listConfigurations(pid);
             if (configs == null) {

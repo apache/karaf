@@ -54,7 +54,7 @@ public abstract class ConfigCommandSupport implements Action {
     protected Dictionary getEditedProps() throws Exception {
         return (Dictionary) this.session.get(PROPERTY_CONFIG_PROPS);
     }
-    
+
     public void setConfigRepository(ConfigRepository configRepository) {
         this.configRepository = configRepository;
     }

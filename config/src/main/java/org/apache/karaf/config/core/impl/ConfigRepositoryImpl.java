@@ -85,7 +85,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             LOGGER.warn("Can't delete cfg file", e);
         }
     }
-    
+
     protected void deleteStorage(String pid) throws Exception {
         if (storage != null) {
             File cfgFile = new File(storage, pid + ".cfg");
