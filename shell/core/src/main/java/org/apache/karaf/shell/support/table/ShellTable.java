@@ -45,6 +45,7 @@ public class ShellTable {
     private String separator = DEFAULT_SEPARATOR;
     private int size;
     private String emptyTableText;
+    private boolean forceAscii;
 
     public ShellTable() {
 
@@ -81,6 +82,11 @@ public class ShellTable {
         rows.add(row);
         return row;
     }
+    
+    public ShellTable forceAscii() {
+        forceAscii = true;
+        return this;
+    }
 
     /**
      * Set text to display if there are no rows in the table.
@@ -98,15 +104,8 @@ public class ShellTable {
     }
 
     public void print(PrintStream out, boolean format)  {
-        boolean supported = false;
-        String encoding = getEncoding(out);
-        if (encoding != null) {
-            CharsetEncoder encoder = Charset.forName(encoding).newEncoder();
-            supported = encoder.canEncode(separator)
-                    && encoder.canEncode(SEP_HORIZONTAL)
-                    && encoder.canEncode(SEP_CROSS);
-        }
-        String separator = supported ? this.separator : DEFAULT_SEPARATOR_ASCII;
+        boolean unicode = supportsUnicode(out);
+        String separator = unicode ? this.separator : DEFAULT_SEPARATOR_ASCII;
 
         // "normal" table rendering, with borders
         Row headerRow = new Row(cols);
@@ -125,9 +124,9 @@ public class ShellTable {
             int iCol = 0;
             for (Col col : cols) {
                 if (iCol++ == 0) {
-                    out.print(underline(col.getSize(), false, supported));
+                    out.print(underline(col.getSize(), false, unicode));
                 } else {
-                    out.print(underline(col.getSize() + 3, true, supported));
+                    out.print(underline(col.getSize() + 3, true, unicode));
                 }
                 iCol++;
             }
@@ -147,6 +146,20 @@ public class ShellTable {
         if (format && rows.size() == 0 && emptyTableText != null) {
             out.println(emptyTableText);
         }
+    }
+
+    private boolean supportsUnicode(PrintStream out) {
+        if (forceAscii) {
+            return false;
+        }
+        String encoding = getEncoding(out);
+        if (encoding == null) {
+            return false;
+        }
+        CharsetEncoder encoder = Charset.forName(encoding).newEncoder();
+        return encoder.canEncode(separator) 
+            && encoder.canEncode(SEP_HORIZONTAL)
+            && encoder.canEncode(SEP_CROSS);
     }
 
     private String getEncoding(PrintStream ps) {

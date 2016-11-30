@@ -33,19 +33,19 @@ public class ShellTableTest {
 
     @Test
     public void testLongValueFull() {
-        ShellTable table = new ShellTable();
+        ShellTable table = new ShellTable().forceAscii();
         table.separator("|");
         table.column("col1");
         table.column("col2").maxSize(-1);
         table.addRow().addContent("my first column value", "my second column value is quite long");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%s%n","my first column value|my second column value is quite long"), baos.toString());
+        assertEquals(String.format("%s%n","my first column value | my second column value is quite long"), baos.toString());
     }
 
     @Test
     public void testLongValueCut() {
-        ShellTable table = new ShellTable();
+        ShellTable table = new ShellTable().forceAscii();
         table.separator("|");
         table.column("col1");
         table.column("col2").maxSize(-1);
@@ -53,12 +53,12 @@ public class ShellTableTest {
         table.size(50);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%s%n","my first column value|my second column value is q"), baos.toString());
+        assertEquals(String.format("%s%n","my first column value | my second column value is q"), baos.toString());
     }
 
     @Test
     public void testLongValueMultiline() {
-        ShellTable table = new ShellTable();
+        ShellTable table = new ShellTable().forceAscii();
         table.separator("|");
         table.column("col1");
         table.column("col2").maxSize(-1).wrap();
@@ -66,8 +66,8 @@ public class ShellTableTest {
         table.size(50);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%1$s\n%2$s%n","my first column value|my second column value is",
-                "                     |quite long"), baos.toString());
+        assertEquals(String.format("%1$s\n%2$s%n","my first column value | my second column value is",
+                "                      | quite long"), baos.toString());
     }
 
     @Test
