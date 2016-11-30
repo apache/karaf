@@ -397,9 +397,6 @@ public class GenerateDescriptorMojo extends MojoSupport {
         if (feature.getDescription() == null) {
             feature.setDescription(project.getName());
         }
-        if (resolver != null) {
-            feature.setResolver(resolver);
-        }
         if (installMode != null) {
             feature.setInstall(installMode);
         }
