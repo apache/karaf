@@ -189,7 +189,7 @@
         <felix.framework.security.version>2.6.0</felix.framework.security.version>
         <felix.gogo.runtime.version>1.0.0</felix.gogo.runtime.version>
         <felix.gogo.jline.version>1.0.0</felix.gogo.jline.version>
-        <felix.httplite.version>0.1.4</felix.httplite.version>
+        <felix.httplite.version>0.1.5</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
         <felix.plugin.version>3.2.0</felix.plugin.version>
         <felix.utils.version>1.8.2</felix.utils.version>
@@ -1014,6 +1014,11 @@
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.httplite.complete</artifactId>
+                <version>${felix.httplite.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

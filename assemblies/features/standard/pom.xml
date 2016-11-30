@@ -175,6 +175,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- httplite deps -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.httplite.complete</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- package deps -->
         <dependency>
             <groupId>org.apache.karaf.package</groupId>

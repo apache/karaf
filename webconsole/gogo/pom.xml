@@ -127,6 +127,7 @@
                     <instructions>
                         <Import-Package>
 			                org.apache.felix.webconsole*;version="[3,5)",
+                            javax.servlet*;version=2.4,
                             *
                         </Import-Package>
                     </instructions>
