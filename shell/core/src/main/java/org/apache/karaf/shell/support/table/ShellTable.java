@@ -28,7 +28,7 @@ import java.util.List;
 public class ShellTable {
 
     private static final char SEP_HORIZONTAL = '─';
-    private static final char SEP_VERTICAL = '|';
+    private static final char SEP_VERTICAL = '│';
     private static final char SEP_CROSS = '┼';
 
     private static final char SEP_HORIZONTAL_ASCII = '-';
