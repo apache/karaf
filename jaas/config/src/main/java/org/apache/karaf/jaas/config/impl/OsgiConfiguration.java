@@ -23,18 +23,26 @@ import javax.security.auth.login.Configuration;
 
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
+import org.slf4j.LoggerFactory;
 
 public class OsgiConfiguration extends Configuration {
 
     private final List<JaasRealm> realms = new CopyOnWriteArrayIdentityList<JaasRealm>();
+    private Configuration defaultConfiguration;
 
     public void init() {
+        try {
+            defaultConfiguration = Configuration.getConfiguration();
+        } catch (Throwable ex) {
+            // default configuration for fallback could not be retrieved
+            LoggerFactory.getLogger(OsgiConfiguration.class).warn("Unable to retrieve default configuration", ex);
+        }
         Configuration.setConfiguration(this);
     }
 
     public void close() {
         realms.clear();
-        Configuration.setConfiguration(null);
+        Configuration.setConfiguration(defaultConfiguration);
     }
 
     public void register(JaasRealm realm, Map<String,?> properties) {
@@ -60,6 +68,8 @@ public class OsgiConfiguration extends Configuration {
         }
         if (realm != null) {
             return realm.getEntries();
+        } else if (defaultConfiguration != null) {
+            return defaultConfiguration.getAppConfigurationEntry(name);
         }
         return null;
     }
