@@ -75,6 +75,8 @@ public class OsgiConfiguration extends Configuration {
     }
 
     public void refresh() {
-        // Nothing to do, as we auto-update the configuration
+        if (defaultConfiguration != null) {
+            defaultConfiguration.refresh();
+        }
     }
 }
