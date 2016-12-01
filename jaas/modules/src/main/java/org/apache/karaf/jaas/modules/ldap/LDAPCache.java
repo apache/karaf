@@ -124,11 +124,13 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
             eventContext.addNamingListener(options.getUserBaseDn(), filter, constraints, this);
 
             filter = options.getRoleFilter();
-            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
-            filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement("*"));
-            filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement("*"));
-            filter = filter.replace("\\", "\\\\");
-            eventContext.addNamingListener(options.getRoleBaseDn(), filter, constraints, this);
+            if (filter != null) {
+                filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
+                filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement("*"));
+                filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement("*"));
+                filter = filter.replace("\\", "\\\\");
+                eventContext.addNamingListener(options.getRoleBaseDn(), filter, constraints, this);
+            }
         }
 
         return context;
@@ -238,50 +240,55 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         }
 
         String filter = options.getRoleFilter();
-        filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
-        filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDn));
-        filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDnNamespace));
-        filter = filter.replace("\\", "\\\\");
+        if (filter != null) {
+            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
+            filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDn));
+            filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDnNamespace));
+            filter = filter.replace("\\", "\\\\");
 
-        LOGGER.debug("Looking for the user roles in LDAP with ");
-        LOGGER.debug("  base DN: " + options.getRoleBaseDn());
-        LOGGER.debug("  filter: " + filter);
+            LOGGER.debug("Looking for the user roles in LDAP with ");
+            LOGGER.debug("  base DN: " + options.getRoleBaseDn());
+            LOGGER.debug("  filter: " + filter);
 
-        NamingEnumeration namingEnumeration = context.search(options.getRoleBaseDn(), filter, controls);
-        try {
-            List<String> rolesList = new ArrayList<>();
-            while (namingEnumeration.hasMore()) {
-                SearchResult result = (SearchResult) namingEnumeration.next();
-                Attributes attributes = result.getAttributes();
-                Attribute roles1 = attributes.get(options.getRoleNameAttribute());
-                if (roles1 != null) {
-                    for (int i = 0; i < roles1.size(); i++) {
-                        String role = (String) roles1.get(i);
-                        if (role != null) {
-                            LOGGER.debug("User {} is a member of role {}", user, role);
-                            // handle role mapping
-                            Set<String> roleMappings = tryMappingRole(role);
-                            if (roleMappings.isEmpty()) {
-                                rolesList.add(role);
-                            } else {
-                                for (String roleMapped : roleMappings) {
-                                    rolesList.add(roleMapped);
+            NamingEnumeration namingEnumeration = context.search(options.getRoleBaseDn(), filter, controls);
+            try {
+                List<String> rolesList = new ArrayList<>();
+                while (namingEnumeration.hasMore()) {
+                    SearchResult result = (SearchResult) namingEnumeration.next();
+                    Attributes attributes = result.getAttributes();
+                    Attribute roles1 = attributes.get(options.getRoleNameAttribute());
+                    if (roles1 != null) {
+                        for (int i = 0; i < roles1.size(); i++) {
+                            String role = (String) roles1.get(i);
+                            if (role != null) {
+                                LOGGER.debug("User {} is a member of role {}", user, role);
+                                // handle role mapping
+                                Set<String> roleMappings = tryMappingRole(role);
+                                if (roleMappings.isEmpty()) {
+                                    rolesList.add(role);
+                                } else {
+                                    for (String roleMapped : roleMappings) {
+                                        rolesList.add(roleMapped);
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-            }
-            return rolesList.toArray(new String[rolesList.size()]);
-        } finally {
-            if (namingEnumeration != null) {
-                try {
-                    namingEnumeration.close();
-                } catch (NamingException e) {
-                    // Ignore
+                }
+                return rolesList.toArray(new String[rolesList.size()]);
+            } finally {
+                if (namingEnumeration != null) {
+                    try {
+                        namingEnumeration.close();
+                    } catch (NamingException e) {
+                        // Ignore
+                    }
                 }
             }
+        } else {
+            LOGGER.debug("The user role filter is null so no roles are retrieved");
+            return new String[] {};
         }
     }
 
