@@ -496,6 +496,7 @@ run() {
             if [ "${VERSION}" -gt "80" ]; then
                 JDK_89_OPTS="--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED"
                 JDK_89_OPTS="${JDK_89_OPTS} --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED"
+                JDK_89_OPTS="${JDK_89_OPTS} --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED"
                 JDK_89_OPTS="${JDK_89_OPTS} --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED"
                 JDK_89_OPTS="${JDK_89_OPTS} --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED"
                 JDK_89_OPTS="${JDK_89_OPTS} --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED"
