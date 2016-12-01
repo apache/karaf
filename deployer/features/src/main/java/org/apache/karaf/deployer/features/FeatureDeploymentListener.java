@@ -212,10 +212,14 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                                     Set<String> autoInstallFeatures = new HashSet<String>();
                                     for(Feature feature:features) {
                                         if(feature.getInstall() != null && feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
-                                            autoInstallFeatures.add(feature.getId());
+                                            if (!featuresService.isInstalled(feature)) {
+                                                autoInstallFeatures.add(feature.getId());
+                                            }
                                         }
                                     }
-                                    featuresService.installFeatures(autoInstallFeatures, EnumSet.noneOf(FeaturesService.Option.class));
+                                    if (!autoInstallFeatures.isEmpty()) {
+                                        featuresService.installFeatures(autoInstallFeatures, EnumSet.noneOf(FeaturesService.Option.class));
+                                    }
                                 } else {
                                     //remove older out-of-data feature repo
                                     if (repo.getURI().toString().contains(FEATURE_PATH)) {
