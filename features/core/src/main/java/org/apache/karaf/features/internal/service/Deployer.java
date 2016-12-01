@@ -1188,7 +1188,7 @@ public class Deployer {
                                     // corresponding jar url and use that one to compute the checksum of the bundle.
                                     oldCrc = 0l;
                                     try {
-                                        URL url = bundle.getResource("META-INF/MANIFEST.MF");
+                                        URL url = bundle.getEntry("META-INF/MANIFEST.MF");
                                         URLConnection con = url.openConnection();
                                         Method method = con.getClass().getDeclaredMethod("getLocalURL");
                                         method.setAccessible(true);
