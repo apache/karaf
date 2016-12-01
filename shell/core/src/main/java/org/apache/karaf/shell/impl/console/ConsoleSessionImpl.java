@@ -328,25 +328,26 @@ public class ConsoleSessionImpl implements Session {
             String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
             executeScript(scriptFileName);
             while (running) {
+                String command = null;
+                reading.set(true);
                 try {
-                    reading.set(true);
-                    String command;
-                    try {
-                        command = reader.readLine(getPrompt(), getRPrompt(), null, null);
-                    } finally {
-                        reading.set(false);
-                    }
-                    if (command == null) {
-                        break;
-                    }
+                    command = reader.readLine(getPrompt(), getRPrompt(), null, null);
+                } catch (UserInterruptException e) {
+                    // Ignore, loop again
+                    continue;
+                } catch (Throwable t) {
+                    ShellUtil.logException(this, t);
+                } finally {
+                    reading.set(false);
+                }
+                if (command == null) {
+                    break;
+                }
+                try {
                     Object result = session.execute(command);
                     if (result != null) {
                         session.getConsole().println(session.format(result, Converter.INSPECT));
                     }
-                } catch (UserInterruptException e) {
-                    // Ignore, loop again
-                } catch (EndOfFileException e) {
-                    break;
                 } catch (Throwable t) {
                     ShellUtil.logException(this, t);
                 }
