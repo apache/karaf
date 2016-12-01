@@ -89,7 +89,7 @@ public class List extends BundlesCommand {
         }
 
         ShellTable table = new ShellTable();
-        if (!noEllipsis && showLocation && terminal != null && terminal.getWidth() > 0) {
+        if (!noEllipsis && terminal != null && terminal.getWidth() > 0) {
             table.size(terminal.getWidth());
         }
         table.column("ID").alignRight();
