@@ -18,14 +18,14 @@
 
 realpath() {
   OURPWD=${PWD}
-  cd "$(dirname "${1}")"
+  cd "$(dirname "${1}")" || exit 2
   LINK=$(readlink "$(basename "${1}")")
   while [ "${LINK}" ]; do
-    cd "$(dirname "${LINK}")"
+    cd "$(dirname "${LINK}")" || exit 2
     LINK=$(readlink "$(basename "${1}")")
   done
   REALPATH="${PWD}/$(basename "${1}")"
-  cd "${OURPWD}"
+  cd "${OURPWD}" || exit 2
   echo "${REALPATH}"
 }
 
@@ -105,7 +105,7 @@ unlimitFD() {
 
     # Increase the maximum file descriptors if we can
     if [ "${os400}" = "false" ] && [ "${cygwin}" = "false" ]; then
-        if [ "${MAX_FD}" = "maximum" -o "${MAX_FD}" = "max" ]; then
+        if [ "${MAX_FD}" = "maximum" ] || [ "${MAX_FD}" = "max" ]; then
             MAX_FD_LIMIT=$(ulimit -H -n)
             if [ $? -eq 0 ]; then
                 # use the system max
@@ -128,7 +128,7 @@ locateHome() {
         # In POSIX shells, CDPATH may cause cd to write to stdout
         (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
         # KARAF_HOME is not provided, fall back to default
-        KARAF_HOME=$(cd "${DIRNAME}/.."; pwd)
+        KARAF_HOME=$(cd "${DIRNAME}/.." || exit 2; pwd)
     fi
 
     if [ ! -d "${KARAF_HOME}" ]; then
@@ -456,7 +456,7 @@ run() {
                 ;;
         esac
     done
-   
+
     JAVA_ENDORSED_DIRS="${JAVA_HOME}/jre/lib/endorsed:${JAVA_HOME}/lib/endorsed:${KARAF_HOME}/lib/endorsed"
     JAVA_EXT_DIRS="${JAVA_HOME}/jre/lib/ext:${JAVA_HOME}/lib/ext:${KARAF_HOME}/lib/ext"
     if ${cygwin}; then
@@ -471,7 +471,7 @@ run() {
         JAVA_ENDORSED_DIRS=$(cygpath --path --windows "${JAVA_ENDORSED_DIRS}")
         JAVA_EXT_DIRS=$(cygpath --path --windows "${JAVA_EXT_DIRS}")
     fi
-    cd "${KARAF_BASE}"
+    cd "${KARAF_BASE}" || exit 2
 
     if [ -z "${KARAF_EXEC}" ]; then
         KARAF_EXEC=""
