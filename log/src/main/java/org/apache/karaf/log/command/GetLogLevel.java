@@ -34,7 +34,7 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class GetLogLevel implements Action {
 
-    @Argument(index = 0, name = "logger", description = "The name of the logger, ALL or ROOT (default)", required = false, multiValued = false)
+    @Argument(index = 0, name = "logger", description = "The name of the logger or ALL (default)", required = false, multiValued = false)
     String logger;
 
     @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
@@ -45,18 +45,20 @@ public class GetLogLevel implements Action {
 
     @Override
     public Object execute() throws Exception {
-        Map<String, String> loggers = logService.getLevel(logger);
-
-        ShellTable table = new ShellTable();
-        table.column("Logger");
-        table.column("Level");
-
-        for (String logger : loggers.keySet()) {
-            table.addRow().addContent(logger, loggers.get(logger));
+        if (logger == null) {
+            Map<String, String> loggers = logService.getLevel("ALL");
+            ShellTable table = new ShellTable();
+            table.column("Logger");
+            table.column("Level");
+            loggers.forEach((n, l) -> table.addRow().addContent(n, l));
+            table.print(System.out, !noFormat);
         }
-
-        table.print(System.out, !noFormat);
-
+        else
+        {
+            Map<String, String> loggers = logService.getLevel( logger );
+            String level = loggers.get( logger );
+            System.out.println( level );
+        }
         return null;
     }
 

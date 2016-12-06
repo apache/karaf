@@ -21,21 +21,23 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.felix.utils.collections.DictionaryAsMap;
 import org.apache.karaf.log.core.Level;
 
 public class LogServiceLog4j2Impl implements LogServiceInternal {
 
     static final String ROOT_LOGGER_LEVEL = "log4j2.rootLogger.level";
-    static final String LOGGERS = "log4j2.loggers";
     static final String LOGGER_PREFIX = "log4j2.logger.";
     static final String NAME_SUFFIX = ".name";
     static final String LEVEL_SUFFIX = ".level";
 
-    private final Dictionary<String, Object> config;
+    private final Map<String, Object> config;
 
     public LogServiceLog4j2Impl(Dictionary<String, Object> config) {
-        this.config = config;
+        this.config = new DictionaryAsMap<>(config);
     }
 
     public Map<String, String> getLevel(String logger) {
@@ -47,18 +49,20 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
             return loggers;
         }
 
-        String ids = (String) config.get(LOGGERS);
-        if (ids != null) {
-            for (String id : ids.split(",")) {
-                id = id.trim();
-                if (!id.equalsIgnoreCase(ROOT_LOGGER)) {
-                    String name = (String) config.get(name(id));
-                    String level = (String) config.get(level(id));
-                    if (name != null && level != null) {
-                        loggers.put(name, level);
-                    }
-                }
+        Map<String, String> names = new HashMap<>();
+        Map<String, String> levels = new HashMap<>();
+        for (String key : config.keySet()) {
+            Matcher matcher = Pattern.compile("log4j2\\.logger\\.([a-zA-Z_]+)\\.name").matcher(key);
+            if (matcher.matches()) {
+                names.put(matcher.group(1), config.get(key).toString());
             }
+            matcher = Pattern.compile("log4j2\\.logger\\.([a-zA-Z_]+)\\.level").matcher(key);
+            if (matcher.matches()) {
+                levels.put(matcher.group(1), config.get(key).toString());
+            }
+        }
+        for (Map.Entry<String, String> e : names.entrySet()) {
+            loggers.put(e.getValue(), levels.get(e.getKey()));
         }
         if (ALL_LOGGER.equalsIgnoreCase(logger)) {
             return loggers;
@@ -84,39 +88,28 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
         if (logger == null || LogServiceInternal.ROOT_LOGGER.equalsIgnoreCase(logger)) {
             config.put(ROOT_LOGGER_LEVEL, level);
         } else {
-            Map<String, String> names = new HashMap<>();
-            String ids = (String) config.get(LOGGERS);
-            if (ids != null) {
-                for (String id : ids.split(",")) {
-                    id = id.trim();
-                    if (!id.equalsIgnoreCase(ROOT_LOGGER)) {
-                        String name = (String) config.get(name(id));
-                        if (name != null) {
-                            names.put(name, id);
-                        }
+            String loggerKey = null;
+            for (String key : config.keySet()) {
+                Matcher matcher = Pattern.compile("\\Q" + LOGGER_PREFIX + "\\E([a-zA-Z_]+)\\Q" + NAME_SUFFIX + "\\E").matcher(key);
+                if (matcher.matches()) {
+                    String name = config.get(key).toString();
+                    if (name.matches(logger)) {
+                        loggerKey = matcher.group(1);
+                        break;
                     }
                 }
             }
 
-            if (Level.isDefault(level)) {
-                if (names.containsKey(logger)) {
-                    config.remove(level(names.get(logger)));
+            if (loggerKey != null) {
+                if (Level.isDefault(level)) {
+                    config.remove(level(loggerKey));
+                } else {
+                    config.put(level(loggerKey), level);
                 }
-            }
-            else {
-                if (names.containsKey(logger)) {
-                    config.put(level(names.get(logger)), level);
-                }
-                else {
-                    String id = logger.toLowerCase().replace('.', '_').replace('$', '_');
-                    config.put(name(id), logger);
-                    if (ids != null) {
-                        config.put(LOGGERS, ids + "," + id);
-                    } else {
-                        config.put(LOGGERS, id);
-                    }
-                    config.put(level(id), level);
-                }
+            } else {
+                loggerKey = logger.replace('.', '_').toLowerCase();
+                config.put(name(loggerKey), logger);
+                config.put(level(loggerKey), level);
             }
         }
     }

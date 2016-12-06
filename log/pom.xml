@@ -109,6 +109,7 @@
                             org.apache.karaf.log.core.internal,
                             org.apache.karaf.log.core.internal.layout,
                             org.apache.karaf.log.core.internal.osgi,
+                            org.apache.felix.utils.collections
                         </Private-Package>
                     </instructions>
                 </configuration>
