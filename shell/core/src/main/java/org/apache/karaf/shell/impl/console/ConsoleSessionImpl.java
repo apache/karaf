@@ -332,6 +332,8 @@ public class ConsoleSessionImpl implements Session {
                 reading.set(true);
                 try {
                     command = reader.readLine(getPrompt(), getRPrompt(), null, null);
+                } catch (EndOfFileException e) {
+                    break;
                 } catch (UserInterruptException e) {
                     // Ignore, loop again
                     continue;
