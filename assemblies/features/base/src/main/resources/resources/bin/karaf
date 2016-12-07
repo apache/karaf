@@ -71,6 +71,14 @@ die() {
     exit 1
 }
 
+forceNoRoot() {
+    # If configured, prevent execution as root
+	 if [ "${KARAF_NOROOT}" ] && [ "$(id -u)" -eq 0 ]; then
+        echo "Do not run as root!"
+        exit 2
+    fi
+}
+
 detectOS() {
     # OS specific support (must be 'true' or 'false').
     cygwin=false;
@@ -359,6 +367,9 @@ checkRootInstance() {
 }
 
 init() {
+    # Prevent root execution if configured
+	 forceNoRoot
+
     # Determine if there is special OS handling we must perform
     detectOS
 
