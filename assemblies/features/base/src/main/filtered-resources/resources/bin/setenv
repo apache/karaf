@@ -20,7 +20,7 @@
 # handle specific scripts; the SCRIPT_NAME is exactly the name of the Karaf
 # script: client, instance, shell, start, status, stop, karaf
 #
-# if [ "$KARAF_SCRIPT" == "SCRIPT_NAME" ]; then
+# if [ "${KARAF_SCRIPT}" == "SCRIPT_NAME" ]; then
 #   Actions go here...
 # fi
 
