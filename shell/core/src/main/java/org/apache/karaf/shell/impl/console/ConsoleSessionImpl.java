@@ -621,12 +621,14 @@ public class ConsoleSessionImpl implements Session {
             } catch (Throwable t) {
                 prompt = def;
             }
-            Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(prompt);
-            while (matcher.find()) {
-                Object rep = session.get(matcher.group(1));
-                if (rep != null) {
-                    prompt = prompt.replace(matcher.group(0), rep.toString());
-                    matcher.reset(prompt);
+            if (prompt != null) {
+                Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(prompt);
+                while (matcher.find()) {
+                    Object rep = session.get(matcher.group(1));
+                    if (rep != null) {
+                        prompt = prompt.replace(matcher.group(0), rep.toString());
+                        matcher.reset(prompt);
+                    }
                 }
             }
             return prompt;
