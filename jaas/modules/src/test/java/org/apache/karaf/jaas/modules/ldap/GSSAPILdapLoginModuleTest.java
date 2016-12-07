@@ -1,0 +1,431 @@
+/*
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+package org.apache.karaf.jaas.modules.ldap;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
+import org.apache.directory.api.ldap.model.constants.SupportedSaslMechanisms;
+import org.apache.directory.api.ldap.model.entry.DefaultEntry;
+import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.api.util.Strings;
+import org.apache.directory.server.annotations.CreateKdcServer;
+import org.apache.directory.server.annotations.CreateLdapServer;
+import org.apache.directory.server.annotations.CreateTransport;
+import org.apache.directory.server.annotations.SaslMechanism;
+import org.apache.directory.server.core.annotations.ApplyLdifs;
+import org.apache.directory.server.core.annotations.ContextEntry;
+import org.apache.directory.server.core.annotations.CreateDS;
+import org.apache.directory.server.core.annotations.CreateIndex;
+import org.apache.directory.server.core.annotations.CreatePartition;
+import org.apache.directory.server.core.integ.FrameworkRunner;
+import org.apache.directory.server.core.kerberos.KeyDerivationInterceptor;
+import org.apache.directory.server.kerberos.kdc.AbstractKerberosITest;
+import org.apache.directory.server.kerberos.kdc.KerberosTestUtils;
+import org.apache.directory.server.ldap.handlers.sasl.cramMD5.CramMd5MechanismHandler;
+import org.apache.directory.server.ldap.handlers.sasl.digestMD5.DigestMd5MechanismHandler;
+import org.apache.directory.server.ldap.handlers.sasl.gssapi.GssapiMechanismHandler;
+import org.apache.directory.server.ldap.handlers.sasl.ntlm.NtlmMechanismHandler;
+import org.apache.directory.server.ldap.handlers.sasl.plain.PlainMechanismHandler;
+import org.apache.directory.server.protocol.shared.transport.TcpTransport;
+import org.apache.directory.server.protocol.shared.transport.Transport;
+import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
+import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
+import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import javax.security.auth.Subject;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.kerberos.KerberosPrincipal;
+import javax.security.auth.kerberos.KerberosTicket;
+import javax.security.auth.login.LoginException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(FrameworkRunner.class)
+@CreateDS(name = "GSSAPILdapLoginModuleTest-class",
+        partitions =
+                {
+                        @CreatePartition(
+                                name = "example",
+                                suffix = "dc=example,dc=com",
+                                contextEntry = @ContextEntry(
+                                        entryLdif =
+                                                "dn: dc=example,dc=com\n" +
+                                                        "dc: example\n" +
+                                                        "objectClass: top\n" +
+                                                        "objectClass: domain\n\n"),
+                                indexes =
+                                        {
+                                                @CreateIndex(attribute = "objectClass"),
+                                                @CreateIndex(attribute = "dc"),
+                                                @CreateIndex(attribute = "ou")
+                                        })
+                },
+        additionalInterceptors =
+                {
+                        KeyDerivationInterceptor.class
+                })
+@CreateLdapServer(
+        transports =
+                {
+                        @CreateTransport(protocol = "LDAP")
+                },
+        saslHost = "localhost",
+        saslPrincipal = "ldap/localhost@EXAMPLE.COM",
+        saslMechanisms =
+                {
+                        @SaslMechanism(name = SupportedSaslMechanisms.PLAIN, implClass = PlainMechanismHandler.class),
+                        @SaslMechanism(name = SupportedSaslMechanisms.CRAM_MD5, implClass = CramMd5MechanismHandler.class),
+                        @SaslMechanism(name = SupportedSaslMechanisms.DIGEST_MD5, implClass = DigestMd5MechanismHandler.class),
+                        @SaslMechanism(name = SupportedSaslMechanisms.GSSAPI, implClass = GssapiMechanismHandler.class),
+                        @SaslMechanism(name = SupportedSaslMechanisms.NTLM, implClass = NtlmMechanismHandler.class),
+                        @SaslMechanism(name = SupportedSaslMechanisms.GSS_SPNEGO, implClass = NtlmMechanismHandler.class)
+                })
+@CreateKdcServer(
+        transports =
+                {
+                        @CreateTransport(protocol = "UDP", port = 6088),
+                        @CreateTransport(protocol = "TCP", port = 6088)
+                })
+@ApplyLdifs({
+        "dn: ou=users,dc=example,dc=com",
+        "objectClass: top",
+        "objectClass: organizationalUnit",
+        "ou: users",
+
+        "dn: ou=groups,dc=example,dc=com",
+        "objectClass: top",
+        "objectClass: organizationalUnit",
+        "ou: groups",
+
+        "dn: cn=admin,ou=groups,dc=example,dc=com",
+        "objectClass: top",
+        "objectClass: groupOfNames",
+        "cn: admin",
+        "member: uid=hnelson,ou=users,dc=example,dc=com"
+})
+public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
+
+    private static boolean loginConfigUpdated;
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+
+        // Set up a partition for EXAMPLE.COM and add user and service principals to test authentication with.
+        KerberosTestUtils.fixServicePrincipalName(
+                "ldap/" + KerberosTestUtils.getHostName() + "@EXAMPLE.COM", null, getLdapServer());
+        setupEnv(TcpTransport.class,
+                EncryptionType.AES128_CTS_HMAC_SHA1_96, ChecksumType.HMAC_SHA1_96_AES128);
+
+        kdcServer.getConfig().setPaEncTimestampRequired(false);
+
+        String basedir = System.getProperty("basedir");
+        if (basedir == null) {
+            basedir = new File(".").getCanonicalPath();
+        }
+        File config = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.login.config");
+
+        System.setProperty("java.security.auth.login.config", config.toString());
+
+        updatePort();
+    }
+
+    public void updatePort() throws Exception {
+        if (!loginConfigUpdated) {
+            String basedir = System.getProperty("basedir");
+            if (basedir == null) {
+                basedir = new File(".").getCanonicalPath();
+            }
+
+            // Read in ldap.properties and substitute in the correct port
+            File f = new File(basedir + "/src/test/resources/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
+
+            FileInputStream inputStream = new FileInputStream(f);
+            String content = IOUtils.toString(inputStream, "UTF-8");
+            inputStream.close();
+            content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
+            content = content.replaceAll("address", KerberosTestUtils.getHostName());
+
+            File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
+            FileOutputStream outputStream = new FileOutputStream(f2);
+            IOUtils.write(content, outputStream, "UTF-8");
+            outputStream.close();
+            loginConfigUpdated = true;
+        }
+
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LDAPCache.clear();
+        super.tearDown();
+    }
+
+    @Test
+    public void testSuccess() throws Exception {
+
+        Properties options = ldapLoginModuleOptions();
+        GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
+
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("hnelson");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertTrue(module.login());
+        assertTrue(module.commit());
+
+        assertEquals(3, subject.getPrincipals().size());
+
+        boolean foundKrb5User = false;
+        boolean foundUser = false;
+        boolean foundRole = false;
+        boolean foundTicket = false;
+
+        for (Principal pr : subject.getPrincipals()) {
+            if (pr instanceof KerberosPrincipal) {
+                assertEquals("hnelson@EXAMPLE.COM", pr.getName());
+                foundKrb5User = true;
+            } else if (pr instanceof UserPrincipal) {
+                assertEquals("hnelson", pr.getName());
+                foundUser = true;
+            } else if (pr instanceof RolePrincipal) {
+                assertEquals("admin", pr.getName());
+                foundRole = true;
+            }
+        }
+        for (Object crd : subject.getPrivateCredentials()) {
+            if (crd instanceof KerberosTicket) {
+                assertEquals("hnelson@EXAMPLE.COM", ((KerberosTicket) crd).getClient().getName());
+                assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ((KerberosTicket) crd).getServer().getName());
+                foundTicket = true;
+                break;
+            }
+        }
+
+        assertTrue("Principals should contains kerberos user", foundKrb5User);
+        assertTrue("Principals should contains ldap user", foundUser);
+        assertTrue("Principals should contains ldap role", foundRole);
+        assertTrue("PricatePrincipals should contains kerberos ticket", foundTicket);
+
+        assertTrue(module.logout());
+        assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
+    }
+
+    @Test(expected = LoginException.class)
+    public void testUsernameFailure() throws Exception {
+
+        Properties options = ldapLoginModuleOptions();
+        GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
+
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("hnelson0");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertTrue(module.login()); // should throw LoginException
+    }
+
+    @Test(expected = LoginException.class)
+    public void testPasswordFailure() throws Exception {
+
+        Properties options = ldapLoginModuleOptions();
+        GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
+
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("hnelson");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("secret0".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertTrue(module.login());
+    }
+
+    @Test(expected = LoginException.class)
+    public void testUserNotFound() throws Exception {
+
+        Properties options = ldapLoginModuleOptions();
+        GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
+
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("test");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("test".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertFalse(module.login());
+    }
+
+    @Test(expected = LoginException.class)
+    public void testNoRealm() throws Exception {
+
+        Properties options = ldapLoginModuleOptions();
+        options.remove(GSSAPILdapLoginModule.REALM_PROPERTY);
+        GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
+
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("hnelson0");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertTrue(module.login()); // should throw LoginException
+    }
+
+    protected void setupEnv(Class<? extends Transport> transport, EncryptionType encryptionType,
+                            ChecksumType checksumType)
+            throws Exception {
+        // create krb5.conf with proper encryption type
+        String krb5confPath = createKrb5Conf(checksumType, encryptionType, transport == TcpTransport.class);
+        System.setProperty("java.security.krb5.conf", krb5confPath);
+
+        // change encryption type in KDC
+        kdcServer.getConfig().setEncryptionTypes(Collections.singleton(encryptionType));
+
+        // create principals
+        createPrincipal("uid=" + USER_UID, "Last", "admin",
+                USER_UID, USER_PASSWORD, USER_UID + "@" + REALM);
+
+        createPrincipal("uid=krbtgt", "KDC Service", "KDC Service",
+                "krbtgt", "secret", "krbtgt/" + REALM + "@" + REALM);
+
+        String servicePrincipal = LDAP_SERVICE_NAME + "/" + HOSTNAME + "@" + REALM;
+        createPrincipal("uid=ldap", "Service", "LDAP Service",
+                "ldap", "randall", servicePrincipal);
+    }
+
+    private String createKrb5Conf(ChecksumType checksumType, EncryptionType encryptionType, boolean isTcp) throws IOException {
+        File file = folder.newFile("krb5.conf");
+
+        String data = "";
+
+        data += "[libdefaults]" + SystemUtils.LINE_SEPARATOR;
+        data += "default_realm = " + REALM + SystemUtils.LINE_SEPARATOR;
+        data += "default_tkt_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
+        data += "default_tgs_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
+        data += "permitted_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
+        //        data += "default_checksum = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
+        //        data += "ap_req_checksum_type = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
+        data += "default-checksum_type = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
+
+        if (isTcp) {
+            data += "udp_preference_limit = 1" + SystemUtils.LINE_SEPARATOR;
+        }
+
+
+        data += "[realms]" + SystemUtils.LINE_SEPARATOR;
+        data += REALM + " = {" + SystemUtils.LINE_SEPARATOR;
+        data += "kdc = " + HOSTNAME + ":" + kdcServer.getTransports()[0].getPort() + SystemUtils.LINE_SEPARATOR;
+        data += "}" + SystemUtils.LINE_SEPARATOR;
+
+        data += "[domain_realm]" + SystemUtils.LINE_SEPARATOR;
+        data += "." + Strings.lowerCaseAscii(REALM) + " = " + REALM + SystemUtils.LINE_SEPARATOR;
+        data += Strings.lowerCaseAscii(REALM) + " = " + REALM + SystemUtils.LINE_SEPARATOR;
+
+        FileUtils.writeStringToFile(file, data);
+
+        return file.getAbsolutePath();
+    }
+
+    private void createPrincipal(String rdn, String sn, String cn,
+                                 String uid, String userPassword, String principalName) throws LdapException {
+        Entry entry = new DefaultEntry();
+        entry.setDn(rdn + "," + USERS_DN);
+        entry.add("objectClass", "top", "person", "inetOrgPerson", "krb5principal", "krb5kdcentry");
+        entry.add("cn", cn);
+        entry.add("sn", sn);
+        entry.add("uid", uid);
+        entry.add("userPassword", userPassword);
+        entry.add("krb5PrincipalName", principalName);
+        entry.add("krb5KeyVersionNumber", "0");
+        conn.add(entry);
+    }
+
+    protected Properties ldapLoginModuleOptions() throws IOException {
+        String basedir = System.getProperty("basedir");
+        if (basedir == null) {
+            basedir = new File(".").getCanonicalPath();
+        }
+        File file = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
+        return new Properties(file);
+    }
+}

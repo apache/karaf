@@ -59,6 +59,8 @@ Apache Karaf provides additional login modules (see the developer guide for deta
 * LDAPLoginModule uses a LDAP server as backend
 * SyncopeLoginModule uses Apache Syncope as backend
 * OsgiConfigLoginModule uses a configuration as backend
+* Krb5LoginModule uses a Kerberos Server as backend
+* GSSAPILdapLoginModule uses a LDAP server as backend but delegate LDAP server authentication to an other backend (typically Krb5LoginModule)
 
 You can manage an existing realm, login module, or create your own realm using the `jaas:realm-manage` command.
 
