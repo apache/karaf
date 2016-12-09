@@ -61,7 +61,12 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
         context.login();
 
         try {
-            return Subject.doAs(context.getSubject(), (PrivilegedExceptionAction<Boolean>) () -> doLogin());
+            return Subject.doAs(context.getSubject(), new PrivilegedExceptionAction<Boolean>() {
+                @Override
+                public Boolean run() throws Exception {
+                    return doLogin();
+                }
+            });
         } catch (PrivilegedActionException pExcp) {
             logger.error("error with delegated authentication", pExcp);
             throw new LoginException(pExcp.getMessage());
