@@ -210,7 +210,7 @@ public class KarafTestSupport {
         };
     }
 
-    private int getAvailablePort(int min, int max) {
+    protected int getAvailablePort(int min, int max) {
         for (int i = min; i <= max; i++) {
             try {
                 ServerSocket socket = new ServerSocket(i);
