@@ -106,6 +106,7 @@
             ignite=mvn:org.apache.ignite/ignite-osgi-karaf/RELEASE/xml/features
             openjpa=mvn:org.apache.openjpa/openjpa-features/RELEASE/xml/features
             artemis=mvn:org.apache.activemq/artemis-features/RELEASE/xml/features
+            brave=mvn:io.zipkin.brave.karaf/brave-features/RELEASE/xml/features
         </config>
         <conditional>
             <condition>shell</condition>
