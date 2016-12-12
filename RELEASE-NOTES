@@ -15,6 +15,89 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.8
+                    ==================
+
+ This is an update patch for Apache Karaf 4.0.x, containing bug fixes.
+
+ ChangeLog:
+ ----------
+
+** Sub-task
+    * [KARAF-4672] - Make karaf.shutdown.pid.file active by default
+    * [KARAF-4673] - Rename karaf.shutdown.pid.file to karaf.pid.file
+
+** Bug
+    * [KARAF-3400] - Enabling Java System Security and OSGi security leaves Karaf in unusable state
+    * [KARAF-4192] - java.lang.ClassCastException in org.apache.karaf.features.internal.region.CandidateComparator
+    * [KARAF-4498] - Fileinstall polls too early on clean start
+    * [KARAF-4517] - bin/client ends with "Failed to get the session"
+    * [KARAF-4564] -  Can't start karaf using symbolic link
+    * [KARAF-4578] - Fileinstaller does not install bundle to root region after clean start
+    * [KARAF-4695] - Unable to use http://karaf.apache.org/xmlns/shell/v1.0.0
+    * [KARAF-4714] - shell (so also ssh) not working anymore on ARM
+    * [KARAF-4720] - NamespaceHandler implementations hijack namespaces
+    * [KARAF-4723] - Karaf sometimes will prioritize bundles in deploy folder at first start regardless of run level
+    * [KARAF-4726] - Improve os-integration doc
+    * [KARAF-4737] - Bundle start attribute in features XML is ignored
+    * [KARAF-4805] - configfiles are not copied to system directory
+    * [KARAF-4806] - Some shell scripts include bashisms but use a /bin/sh shebang
+    * [KARAF-4810] - karaf.bat / status.bat do not exit with a proper exit code
+    * [KARAF-4814] - Special character in stop script
+    * [KARAF-4815] - karaf script fail to locate KARAF_HOME.
+    * [KARAF-4830] - Karaf does not start with staged features in etc/org.apache.karaf.features.cfg
+    * [KARAF-4839] - Infinite System bundle restart on feature deployment
+    * [KARAF-4842] - Karaf Maven Plugin builds features with invalid configuration
+    * [KARAF-4849] - Corrupt EventAdmin file in etc
+    * [KARAF-4865] - Karaf startup no longer works on platforms without "readlink"
+    * [KARAF-4871] - LDAPLoginModule NPEs if no role filter is specified
+    * [KARAF-4876] - Allow an empty role.query for the JDBCLoginModule
+    * [KARAF-4892] - Encode username in LDAPLoginModule to avoid "code" injection
+
+** Dependency upgrade
+    * [KARAF-4405] - Upgrade to Felix Framework 5.6.1
+    * [KARAF-4623] - Upgrade to Spring 4.1.9.RELEASE
+    * [KARAF-4716] - Upgrade to Aries Blueprint Core 1.7.0 and Aries Blueprint CM 1.0.9
+    * [KARAF-4731] - Upgrade Felix Framework 5.6.0 and Resolver 1.10.0
+    * [KARAF-4743] - Upgrade Cglib to version 3.2.4
+    * [KARAF-4751] - Upgrade to jansi 1.14
+    * [KARAF-4758] - Upgrade to Aries Transaction Manager 1.3.1
+    * [KARAF-4760] - Upgrade to Felix FileInstall 3.5.6
+    * [KARAF-4762] - Upgrade to PaxUrl 2.5.1
+    * [KARAF-4786] - Upgrade to Aries Blueprint Core 1.7.1
+    * [KARAF-4788] - Upgrade to Aries JXM Core 1.1.7
+    * [KARAF-4790] - Upgrade to felix framework security 2.6.0
+    * [KARAF-4812] - Upgrade to Felix ConfigAdmin 1.8.12
+    * [KARAF-4816] - Upgrade to Eclipselink 2.6.4
+    * [KARAF-4855] - Upgrade to commons-compress 1.12
+    * [KARAF-4856] - Upgrade to maven-bundle-plugin 3.2.0
+    * [KARAF-4857] - Upgrade to Felix EventAdmin 1.4.8
+    * [KARAF-4858] - Upgrade to Felix Resolver 1.10.1
+    * [KARAF-4859] - Upgrade to Felix Utils 1.8.4
+    * [KARAF-4860] - Upgrade to Felix WebConsole 4.2.16
+    * [KARAF-4890] - Upgrade to Spring 4.2.8.RELEASE
+
+** Improvement
+    * [KARAF-3622] - Enhance SSH configuration mechanism
+    * [KARAF-4487] - LDAPLoginModule and GSSAPI
+    * [KARAF-4548] - Avoid extensive spifly logging
+    * [KARAF-4666] - Have karaf write pid file by default
+    * [KARAF-4764] - Provide ability to configure RmiRegistryFactory create and locate options
+    * [KARAF-4770] - Update etc/org.apache.karaf.management.cfg
+    * [KARAF-4773] - Leverage smart download retries from pax-url-aether 2.5.0
+    * [KARAF-4795] - Expose timeout related options for pax-url-aether 2.5.0
+    * [KARAF-4821] - enable to configure the external moduli-url for the sshd server
+    * [KARAF-4853] - Option to prevent execution as root
+    * [KARAF-4854] - Enable archetype.test.skip on fastinstall profile
+    * [KARAF-4866] - detect JVM vendor and ensure correct saaj factories is picked up when it's IBM JDK
+
+** Task
+    * [KARAF-4864] - Change the default Karaf client log Level to 0
+
+** Test
+    * [KARAF-4761] - EnterpriseFeaturesTest installTransaction130Feature test fails during full build
+
+
                     Apache Karaf 4.0.7
                     ==================
 
