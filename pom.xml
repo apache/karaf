@@ -144,9 +144,7 @@
         <asm.springsource.version>1.5.3</asm.springsource.version>
         <cglib.bundle.version>3.2.4_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
-        
-        <jna.version>4.2.2</jna.version>
-        
+
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-codec.version>1.10</commons-codec.version>
         <commons-compress.version>1.12</commons-compress.version>
@@ -1037,16 +1035,6 @@
                 <version>${felix.connect.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>net.java.dev.jna</groupId>
-                <artifactId>jna</artifactId>
-                <version>${jna.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.java.dev.jna</groupId>
-                <artifactId>jna-platform</artifactId>
-                <version>${jna.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.ow2.asm</groupId>
