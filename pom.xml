@@ -2327,13 +2327,13 @@
             </properties>
         </profile>
         <profile>
-	    <id>java9</id>
-	    <properties>
+            <id>java9</id>
+            <properties>
                 <surefire.argLine>--add-modules java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws</surefire.argLine>
-	    </properties>
-	    <activation>
-        	<jdk>9</jdk>
+            </properties>
+            <activation>
+                <jdk>9</jdk>
             </activation>
-	</profile>
+        </profile>
     </profiles>
 </project>
