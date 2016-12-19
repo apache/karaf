@@ -32,7 +32,9 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     @Completion(ConfigurationCompleter.class)
     protected String pid;
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({
+     "rawtypes", "unchecked"
+    })
     protected Object doExecute() throws Exception {
         Dictionary props = getEditedProps();
         if (props == null && pid == null) {

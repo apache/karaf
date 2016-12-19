@@ -53,7 +53,6 @@ public class ConfigurationPropertyCompleter implements Completer {
     @Reference
     private ConfigurationAdmin configAdmin;
 
-    @SuppressWarnings("rawtypes")
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         StringsCompleter strings = new StringsCompleter();
         if (session != null) {

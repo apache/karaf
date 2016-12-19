@@ -33,6 +33,7 @@ public class PropGetCommand extends ConfigPropertyCommandSupport {
     @Completion(ConfigurationPropertyCompleter.class)
     String prop;
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void propertyAction(Dictionary props) {
         System.out.println(props.get(prop));

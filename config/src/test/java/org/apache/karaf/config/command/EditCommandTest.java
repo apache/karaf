@@ -17,12 +17,11 @@
 package org.apache.karaf.config.command;
 
 import java.util.Dictionary;
-import java.util.Properties;
+import java.util.Hashtable;
 
 import junit.framework.TestCase;
 import org.apache.karaf.config.core.impl.ConfigRepositoryImpl;
 import org.apache.karaf.shell.api.console.Session;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -38,7 +37,6 @@ public class EditCommandTest extends TestCase {
     private static final String PID = "my.test.persistent.id";
 
     private EditCommand command;
-    private BundleContext context;
     private ConfigurationAdmin admin;
     private Session session;
 
@@ -59,7 +57,7 @@ public class EditCommandTest extends TestCase {
         replay(admin);
         
         // the ConfigAdmin service returns a Dictionary for an existing PID
-        Dictionary props = new Properties();
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
         expect(config.getProperties()).andReturn(props);
         replay(config);
         
