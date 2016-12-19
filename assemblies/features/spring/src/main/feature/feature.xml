@@ -435,18 +435,6 @@
         <bundle start-level="30">mvn:org.springframework.security/spring-security-taglibs/${spring.security31.version}</bundle>
     </feature>
 
-    <!-- Gemini Blueprint support -->
-
-    <feature name="gemini-blueprint" description="Gemini Blueprint Extender" version="${gemini.blueprint.version}">
-        <feature version="[3,4)">spring</feature>
-        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.io/${gemini.blueprint.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.core/${gemini.blueprint.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.gemini/org.eclipse.gemini.blueprint.extender/${gemini.blueprint.version}</bundle>
-        <capability>
-            osgi.extender; osgi.extender="osgi.blueprint";uses:="org.osgi.service.blueprint.container,org.osgi.service.blueprint.reflect";version:Version="1.0"
-        </capability>
-    </feature>
-
     <!-- Aries Blueprint Spring support -->
 
     <feature name="aries-blueprint-spring">

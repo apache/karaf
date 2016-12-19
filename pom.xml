@@ -242,7 +242,6 @@
         <aries.util.version>1.1.3</aries.util.version>
 
         <narayana.version>5.3.5.Final</narayana.version>
-        <gemini.blueprint.version>1.0.2.RELEASE</gemini.blueprint.version>
         <hibernate.annotations.common.version>3.3.0.ga</hibernate.annotations.common.version>
         <hibernate.annotations.version>3.4.0.GA</hibernate.annotations.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
@@ -355,29 +354,6 @@
             </releases>
             <snapshots>
                 <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <!-- Gemini Blueprint repository -->
-        <repository>
-            <id>zodiac-repository</id>
-            <name>Zodiac Release Repository</name>
-            <url>http://repository.springsource.com/maven/bundles/release</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>spring-ebr-repository</id>
-            <name>Spring EBR Repository</name>
-            <url>http://repository.springsource.com/maven/bundles/external</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
             </snapshots>
         </repository>
         <!-- OSSRH snapshots -->
@@ -1185,22 +1161,6 @@
                 <artifactId>org.eclipse.equinox.coordinator</artifactId>
                 <version>${equinox.coordinator.version}</version>
                 <scope>provided</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.gemini</groupId>
-                <artifactId>org.eclipse.gemini.blueprint.extender</artifactId>
-                <version>${gemini.blueprint.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.gemini</groupId>
-                <artifactId>org.eclipse.gemini.blueprint.core</artifactId>
-                <version>${gemini.blueprint.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.gemini</groupId>
-                <artifactId>org.eclipse.gemini.blueprint.io</artifactId>
-                <version>${gemini.blueprint.version}</version>
             </dependency>
 
             <dependency>
