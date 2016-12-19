@@ -182,24 +182,6 @@
         <bundle>mvn:org.apache.openjpa/openjpa/2.4.1</bundle>
     </feature>
 
-    <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}">
-        <details>Enable Hibernate 3.x as persistence engine.</details>
-        <feature>jndi</feature>
-	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
-        <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
-        <bundle dependency="true">mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/${commons-dbcp.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
-        <bundle dependency="true">mvn:org.objectweb.asm/com.springsource.org.objectweb.asm/${asm.springsource.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
-        <bundle dependency="true">mvn:net.sourceforge.cglib/com.springsource.net.sf.cglib/${cglib2.version}</bundle>
-        <bundle dependency="true">mvn:org.jboss.javassist/com.springsource.javassist/${javassist.version}</bundle>
-        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.annotations.common/${hibernate.annotations.common.version}</bundle>
-        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.annotations/${hibernate.annotations.version}</bundle>
-        <bundle>mvn:org.hibernate/com.springsource.org.hibernate.ejb/${hibernate.ejb.version}</bundle>
-        <bundle>mvn:org.hibernate/com.springsource.org.hibernate/${hibernate3.version}</bundle>
-    </feature>
-
     <feature name="hibernate" description="Hibernate 4.2.x JPA persistence engine support" version="${hibernate42.version}">
         <details>Enable Hibernate 4.2.x as persistence engine.</details>
 	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>

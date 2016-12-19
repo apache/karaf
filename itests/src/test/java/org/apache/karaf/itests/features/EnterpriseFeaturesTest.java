@@ -70,11 +70,6 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
     }
 
     @Test
-    public void installHibernate332GAFeature() throws Exception {
-        installAssertAndUninstallFeature("hibernate", "3.3.2.GA");
-    }
-
-    @Test
     public void installHibernate4215FinalFeature() throws Exception {
         installAssertAndUninstallFeature("hibernate", "4.2.15.Final");
     }
