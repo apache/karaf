@@ -206,7 +206,10 @@ run() {
         esac
     done
 
-    if [ ${debug} ] && [ ! ${nodebug} ]; then
+    if ${nodebug}; then
+        debug=false
+    fi
+    if ${debug}; then
         if [ "x${JAVA_DEBUG_OPTS}" = "x" ]; then
             JAVA_DEBUG_OPTS="${DEFAULT_JAVA_DEBUG_OPTS}"
         fi
