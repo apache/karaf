@@ -232,7 +232,7 @@
         <aries.jndi.api.version>1.1.0</aries.jndi.api.version>
         <aries.jndi.core.version>1.0.2</aries.jndi.core.version>
         <aries.jndi.url.version>1.1.0</aries.jndi.url.version>
-        <aries.proxy.version>1.0.6-SNAPSHOT</aries.proxy.version>
+        <aries.proxy.version>1.0.7-SNAPSHOT</aries.proxy.version>
         <aries.proxy.api.version>1.0.1</aries.proxy.api.version>
         <aries.subsystem.api.version>2.0.8</aries.subsystem.api.version>
         <aries.subsystem.core.version>2.0.8</aries.subsystem.core.version>
@@ -262,7 +262,7 @@
         <org.json.version>20150729</org.json.version>
 
         <pax.cdi.version>1.0.0.RC2</pax.cdi.version>
-        <pax.exam.version>4.9.2</pax.exam.version>
+        <pax.exam.version>4.10.0-SNAPSHOT</pax.exam.version>
         <pax.logging.version>1.9.1</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
         <pax.url.version>2.5.2</pax.url.version>
@@ -2022,7 +2022,7 @@
                                     <version>[3.3.9,4)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>[1.8,1.9)</version>
+                                    <version>[1.8,9]</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -2329,7 +2329,11 @@
         <profile>
             <id>java9</id>
             <properties>
-                <surefire.argLine>--add-modules java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws</surefire.argLine>
+                <surefire.argLine>--add-opens java.base/java.security=ALL-UNNAMED
+                                  --add-opens java.base/java.net=ALL-UNNAMED 
+                                  --add-opens java.base/java.lang=ALL-UNNAMED
+                                  --add-opens java.base/java.util=ALL-UNNAMED
+                                  --add-modules java.activation,java.annotations.common,java.corba,java.transaction,java.xml.bind,java.xml.ws</surefire.argLine>
             </properties>
             <activation>
                 <jdk>9</jdk>

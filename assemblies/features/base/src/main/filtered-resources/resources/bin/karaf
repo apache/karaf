@@ -237,6 +237,10 @@ run() {
         if [ "${ROOT_INSTANCE_RUNNING}" = "false" ] || [ "${CHECK_ROOT_INSTANCE_RUNNING}" = "false" ] ; then
             if [ "${VERSION}" -gt "80" ]; then
                 ${KARAF_EXEC} "${JAVA}" ${JAVA_OPTS} \
+                    --add-opens java.base/java.security=ALL-UNNAMED \
+                    --add-opens java.base/java.net=ALL-UNNAMED \
+                    --add-opens java.base/java.lang=ALL-UNNAMED \
+                    --add-opens java.base/java.util=ALL-UNNAMED \
                     --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED \
                     --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED \
                     --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
