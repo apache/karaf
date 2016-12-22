@@ -105,6 +105,22 @@ public class InstanceServiceImpl implements InstanceService {
         int defaultRmiRegistryPortStart = 1099;
         int defaultRmiServerPortStart = 44444;
         Map<String, InstanceState> instances;
+        public State() {
+            //read port start value from the root instance configuration
+            try {
+                Properties shellProperty = new Properties();
+                shellProperty.load(new FileInputStream(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg")));
+                defaultSshPortStart = Integer.valueOf((String)shellProperty.getOrDefault("sshPort", 8101));
+                Properties managementProperty = new Properties();
+                managementProperty.load(new FileInputStream(new File(System.getProperty("karaf.etc"), "org.apache.karaf.management.cfg")));
+                defaultRmiRegistryPortStart = Integer.valueOf((String)managementProperty.getOrDefault("rmiRegistryPort", 1099));
+                defaultRmiServerPortStart = Integer.valueOf((String)managementProperty.getOrDefault("rmiServerPort", 1099));
+            } catch (Exception e) {
+                LOGGER.debug("Could not read port start value from the root instance configuration.", e);
+            }
+        }
+        
+        
     }
 
     public InstanceServiceImpl() {
