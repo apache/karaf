@@ -538,14 +538,16 @@ public class Main {
 
     private List<File> getBundleRepos() {
         List<File> bundleDirs = new ArrayList<File>();
-        File baseSystemRepo = new File(config.karafHome, config.defaultRepo);
-        if (!baseSystemRepo.exists() && baseSystemRepo.isDirectory()) {
-            throw new RuntimeException("system repo folder not found: " + baseSystemRepo.getAbsolutePath());
-        }
-        bundleDirs.add(baseSystemRepo);
-
         File homeSystemRepo = new File(config.karafHome, config.defaultRepo);
+        if (!homeSystemRepo.isDirectory()) {
+            throw new RuntimeException("system repo folder not found: " + homeSystemRepo.getAbsolutePath());
+        }
         bundleDirs.add(homeSystemRepo);
+
+        File baseSystemRepo = new File(config.karafBase, config.defaultRepo);
+        if (baseSystemRepo.isDirectory() && !baseSystemRepo.equals(homeSystemRepo)) {
+            bundleDirs.add(baseSystemRepo);
+        }
 
         String locations = config.bundleLocations;
         if (locations != null) {
