@@ -58,7 +58,7 @@ public class Install implements Action {
 
     @Override
 	public Object execute() throws Exception {
-        File[] wrapperPaths = wrapperService.install(name, displayName, description, startType);
+        File[] wrapperPaths = wrapperService.install(name, displayName, description, startType, envs, includes);
 
         String os = System.getProperty("os.name", "Unknown");
         File wrapperConf = wrapperPaths[0];
