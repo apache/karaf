@@ -431,6 +431,38 @@ public class KarafMBeanServerGuardTest extends TestCase {
                 guard.getRequiredRoles(on, "test", new Object[]{new Long(17)}, new String[]{"java.lang.Long"}));
     }
 
+    public void testRequiredRolesDynamic() throws Exception {
+        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        configuration.put("foo", "test");
+        ConfigurationAdmin ca = getMockDynamicConfigAdmin(configuration);
+
+        KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
+        guard.setConfigAdmin(ca);
+
+        ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
+        assertEquals(Collections.singletonList("test"),
+                guard.getRequiredRoles(on, "foo", new Object[]{"a"}, new String[]{"java.lang.String"}));
+    }
+
+    private ConfigurationAdmin getMockDynamicConfigAdmin(Dictionary<String, Object> configuration) throws IOException, InvalidSyntaxException {
+        configuration.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
+
+        Configuration conf = EasyMock.createMock(Configuration.class);
+        EasyMock.expect(conf.getPid()).andReturn("jmx.acl.foo.bar.Test.631a5424-7f36-494c-9b59-999afdbfacb2").anyTimes();
+        EasyMock.expect(conf.getProperties()).andReturn(configuration).anyTimes();
+        EasyMock.replay(conf);
+
+        ConfigurationAdmin ca = EasyMock.createMock(ConfigurationAdmin.class);
+        EasyMock.expect(ca.getConfiguration(conf.getPid(), null)).andReturn(conf).anyTimes();
+
+        EasyMock.expect(ca.listConfigurations(EasyMock.eq("(service.pid=jmx.acl*)"))).andReturn(
+                new Configuration[]{conf}).anyTimes();
+        EasyMock.expect(ca.listConfigurations(EasyMock.eq("(service.pid=jmx.acl.whitelist)"))).andReturn(
+                new Configuration[]{conf}).anyTimes();
+        EasyMock.replay(ca);
+        return ca;
+    }
+
     @SuppressWarnings("unchecked")
     private ConfigurationAdmin getMockConfigAdmin(Dictionary<String, Object> configuration) throws IOException, InvalidSyntaxException {
         configuration.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
