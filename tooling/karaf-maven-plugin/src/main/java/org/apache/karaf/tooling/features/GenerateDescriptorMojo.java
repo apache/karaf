@@ -254,6 +254,14 @@ public class GenerateDescriptorMojo extends MojoSupport {
     @Parameter
     private Boolean enableGeneration;
 
+    /**
+     * Flag indicating whether the plugin should simplify bundle dependencies. If the flag is set to {@code true}
+     * and a bundle dependency is determined to be included in a feature dependency, the bundle dependency is
+     * dropped.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean simplifyBundleDependencies;
+
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
     // *************************************************
@@ -479,7 +487,11 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     if (bundle == null) {
                         bundle = objectFactory.createBundle();
                         bundle.setLocation(bundleName);
-                        if (!"provided".equals(entry.getScope()) || !ignoreScopeProvided) {
+                        // Check the features this feature depends on don't already contain the dependency
+                        // TODO Perhaps only for transitive dependencies?
+                        boolean includedTransitively =
+                            simplifyBundleDependencies && isBundleIncludedTransitively(feature, otherFeatures, bundle);
+                        if (!includedTransitively && (!"provided".equals(entry.getScope()) || !ignoreScopeProvided)) {
                             feature.getBundle().add(bundle);
                         }
                     }
@@ -561,6 +573,20 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 }
             }
         }
+    }
+
+    private boolean isBundleIncludedTransitively(Feature feature, Map<Dependency, Feature> otherFeatures,
+                                                 Bundle bundle) {
+        for (Dependency dependency : feature.getFeature()) {
+            Feature otherFeature = otherFeatures.get(dependency);
+            if (otherFeature != null) {
+                if (otherFeature.getBundle().contains(bundle) || isBundleIncludedTransitively(otherFeature,
+                    otherFeatures, bundle)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
