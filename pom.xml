@@ -232,7 +232,7 @@
         <aries.jndi.api.version>1.1.0</aries.jndi.api.version>
         <aries.jndi.core.version>1.0.2</aries.jndi.core.version>
         <aries.jndi.url.version>1.1.0</aries.jndi.url.version>
-        <aries.proxy.version>1.0.7-SNAPSHOT</aries.proxy.version>
+        <aries.proxy.version>1.0.6</aries.proxy.version>
         <aries.proxy.api.version>1.0.1</aries.proxy.api.version>
         <aries.subsystem.api.version>2.0.8</aries.subsystem.api.version>
         <aries.subsystem.core.version>2.0.8</aries.subsystem.core.version>
