@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.shell.support.completers;
 
-import java.io.File;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -79,7 +78,7 @@ public class UriCompleter implements Completer {
                         if (isDir) {
                             name += "/";
                         }
-                        String dirstr = dir.endsWith(File.separator) ? dir.toString() : dir.toString() + File.separator;
+                        String dirstr = dir.endsWith("/") ? dir.toString() : dir.toString() + "/";
                         candidates.add(new Candidate("file:" + dirstr + name, !isDir));
                     }
                 }
@@ -112,12 +111,12 @@ public class UriCompleter implements Completer {
                 String[] dirs = parts.length > 0 ? parts[0].split("\\.") : new String[] { "" };
                 if (parts.length > 0 && parts[0].endsWith(".")) {
                     for (int i = 0; i < dirs.length; i++) {
-                        known += dirs[i] + File.separator;
+                        known += dirs[i] + "/";
                         group += dirs[i] + ".";
                     }
                 } else {
                     for (int i = 0; i < dirs.length - 1; i++) {
-                        known += dirs[i] + File.separator;
+                        known += dirs[i] + "/";
                         group += dirs[i] + ".";
                     }
                     rem = dirs[dirs.length - 1];
@@ -135,7 +134,7 @@ public class UriCompleter implements Completer {
                 rem = group + rem;
             } else if (parts.length == 1 || parts.length == 2 && !mvn.endsWith("/")) {
                 rem = parts.length > 1 ? parts[1] : "";
-                Path dir = Paths.get(repo + File.separator + parts[0].replace(".", "/"));
+                Path dir = Paths.get(repo + "/" + parts[0].replace(".", "/"));
                 try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
                     for (Path path : paths) {
                         if (Files.isDirectory(path)) {
@@ -146,7 +145,7 @@ public class UriCompleter implements Completer {
                 }
             } else if (parts.length == 2 || parts.length == 3 && !mvn.endsWith("/")) {
                 rem = parts.length > 2 ? parts[2] : "";
-                Path dir = Paths.get(repo + File.separator + parts[0].replace(".", "/") + File.separator + parts[1]);
+                Path dir = Paths.get(repo + "/" + parts[0].replace(".", "/") + "/" + parts[1]);
                 try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
                     for (Path path : paths) {
                         if (Files.isDirectory(path)) {
