@@ -264,24 +264,22 @@ public class ConsoleSessionImpl implements Session {
     }
 
     public void close() {
-        if (!running) {
-            return;
-        }
-//        out.println();
-        reader.getHistory().save();
+        if (running) {
+            reader.getHistory().save();
 
-        running = false;
-        if (thread != Thread.currentThread()) {
-            thread.interrupt();
-        }
-        if (closeCallback != null) {
-            closeCallback.run();
-        }
-        if (terminal instanceof AutoCloseable) {
-            try {
-                ((AutoCloseable) terminal).close();
-            } catch (Exception e) {
-                // Ignore
+            running = false;
+            if (thread != Thread.currentThread()) {
+                thread.interrupt();
+            }
+            if (closeCallback != null) {
+                closeCallback.run();
+            }
+            if (terminal instanceof AutoCloseable) {
+                try {
+                    ((AutoCloseable) terminal).close();
+                } catch (Exception e) {
+                    // Ignore
+                }
             }
         }
         if (session != null)

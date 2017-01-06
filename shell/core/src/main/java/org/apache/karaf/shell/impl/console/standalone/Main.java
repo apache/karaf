@@ -140,26 +140,27 @@ public class Main {
 
         try (org.jline.terminal.Terminal jlineTerminal = TerminalBuilder.terminal()) {
             final Terminal terminal = new JLineTerminal(jlineTerminal);
-            Session session = createSession(sessionFactory, command.length() > 0 ? null : in, out, err, terminal);
-            session.put("USER", user);
-            session.put("APPLICATION", application);
+            try (Session session = createSession(sessionFactory, command.length() > 0 ? null : in, out, err, terminal)) {
+                session.put("USER", user);
+                session.put("APPLICATION", application);
 
-            discoverCommands(session, cl, getDiscoveryResource());
+                discoverCommands(session, cl, getDiscoveryResource());
 
-            if (command.length() > 0) {
-                // Shell is directly executing a sub/command, we don't setup a console
-                // in this case, this avoids us reading from stdin un-necessarily.
-                session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
-                session.put(Session.PRINT_STACK_TRACES, "execution");
-                try {
-                    session.execute(command);
-                } catch (Throwable t) {
-                    ShellUtil.logException(session, t);
+                if (command.length() > 0) {
+                    // Shell is directly executing a sub/command, we don't setup a console
+                    // in this case, this avoids us reading from stdin un-necessarily.
+                    session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
+                    session.put(Session.PRINT_STACK_TRACES, "execution");
+                    try {
+                        session.execute(command);
+                    } catch (Throwable t) {
+                        ShellUtil.logException(session, t);
+                    }
+
+                } else {
+                    // We are going into full blown interactive shell mode.
+                    session.run();
                 }
-
-            } else {
-                // We are going into full blown interactive shell mode.
-                session.run();
             }
         }
     }
