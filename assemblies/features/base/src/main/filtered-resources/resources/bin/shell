@@ -106,7 +106,7 @@ run() {
         ${KARAF_OPTS} \
         ${OPTS} \
         -classpath "${CLASSPATH}" \
-        org.apache.karaf.shell.impl.console.standalone.Main "$@"
+        org.apache.karaf.shell.impl.console.standalone.Main --classpath="$KARAF_HOME/system" "$@"
 }
 
 main() {
