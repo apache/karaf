@@ -45,6 +45,9 @@ public class Blacklist {
 
     protected static final String BLACKLIST_URL = "url";
     protected static final String BLACKLIST_RANGE = "range";
+    protected static final String BLACKLIST_TYPE = "type";
+    protected static final String TYPE_FEATURE = "feature";
+    protected static final String TYPE_BUNDLE = "bundle";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Blacklist.class);
 
@@ -83,7 +86,10 @@ public class Blacklist {
                     range = new VersionRange(vr, true);
                 }
                 if (range.contains(VersionTable.getVersion(feature.getVersion()))) {
-                    return true;
+                    String type = clause.getAttribute(BLACKLIST_TYPE);
+                    if (type == null || TYPE_FEATURE.equals(type)) {
+                        return true;
+                    }
                 }
             }
             // Check bundles
@@ -105,8 +111,11 @@ public class Blacklist {
                     url = clause.getAttribute(BLACKLIST_URL);
                 }
                 if (info.getLocation().equals(url)) {
-                    iterator.remove();
-                    break;
+                    String type = clause.getAttribute(BLACKLIST_TYPE);
+                    if (type == null || TYPE_BUNDLE.equals(type)) {
+                        iterator.remove();
+                        break;
+                    }
                 }
             }
         }
@@ -148,7 +157,10 @@ public class Blacklist {
                     range = new VersionRange(vr, true);
                 }
                 if (range.contains(VersionTable.getVersion(version))) {
-                    return true;
+                    String type = clause.getAttribute(BLACKLIST_TYPE);
+                    if (type == null || TYPE_FEATURE.equals(type)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -163,7 +175,10 @@ public class Blacklist {
                 url = clause.getAttribute(BLACKLIST_URL);
             }
             if (uri.equals(url)) {
-                return true;
+                String type = clause.getAttribute(BLACKLIST_TYPE);
+                if (type == null || TYPE_BUNDLE.equals(type)) {
+                    return true;
+                }
             }
         }
         return false;
