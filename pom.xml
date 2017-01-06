@@ -266,7 +266,7 @@
         <pax.logging.version>1.9.1</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
         <pax.url.version>2.5.2</pax.url.version>
-        <pax.web.version>6.0.1-SNAPSHOT</pax.web.version>
+        <pax.web.version>6.0.1</pax.web.version>
         <pax.tinybundle.version>2.1.1</pax.tinybundle.version>
         <pax.jdbc.version>0.9.0</pax.jdbc.version>
 
