@@ -109,18 +109,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- aries-annotation deps -->
-        <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.annotation.impl</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-all</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- wrapper deps -->
         <dependency>
             <groupId>org.apache.karaf.wrapper</groupId>

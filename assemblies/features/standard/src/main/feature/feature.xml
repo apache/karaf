@@ -44,7 +44,6 @@
         <feature>aries-proxy</feature>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/${aries.blueprint.api.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.cm.version}</bundle>
-        <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core.compatibility/${aries.blueprint.core.compatibility.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/${aries.blueprint.core.version}</bundle>
         <conditional>
             <condition>bundle</condition>
@@ -54,19 +53,6 @@
             osgi.service;effective:=active;objectClass=org.apache.aries.blueprint.services.ParserService,
             osgi.extender; osgi.extender="osgi.blueprint";uses:="org.osgi.service.blueprint.container,org.osgi.service.blueprint.reflect";version:Version="1.0"
         </capability>
-    </feature>
-
-    <feature name="aries-annotation" description="Aries Annotations" version="${project.version}">
-        <feature>aries-blueprint</feature>
-        <bundle dependency="true" start-level="20">mvn:org.apache.commons/commons-jexl/${commons-jexl.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-bundleutils/${xbean.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-asm5-shaded/${xbean.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-reflect/${xbean.version}</bundle>
-        <bundle dependency="true" start-level="20">mvn:org.apache.xbean/xbean-finder-shaded/${xbean.version}</bundle>
-        <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.api/${aries.blueprint.annotation.api.version}</bundle>
-        <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.impl/${aries.blueprint.annotation.version}</bundle>
-        <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.jexl.evaluator/${aries.blueprint.jexl.evaluator.version}</bundle>
     </feature>
 
     <feature name="feature" description="Features Support" version="${project.version}">

@@ -208,13 +208,10 @@
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
         <aries.application.management.version>1.0.0</aries.application.management.version>
-        <aries.blueprint.annotation.version>1.0.1</aries.blueprint.annotation.version>
-        <aries.blueprint.annotation.api.version>1.0.1</aries.blueprint.annotation.api.version>
         <aries.blueprint.api.version>1.0.1</aries.blueprint.api.version>
         <aries.blueprint.core.version>1.7.1</aries.blueprint.core.version>
         <aries.blueprint.core.compatibility.version>1.0.0</aries.blueprint.core.compatibility.version>
         <aries.blueprint.cm.version>1.0.9</aries.blueprint.cm.version>
-        <aries.blueprint.jexl.evaluator.version>1.0.0</aries.blueprint.jexl.evaluator.version>
         <aries.blueprint.web.version>1.0.1</aries.blueprint.web.version>
         <aries.blueprint.spring.version>0.2.0</aries.blueprint.spring.version>
         <aries.blueprint.spring.extender.version>0.2.0</aries.blueprint.spring.extender.version>
@@ -1454,22 +1451,6 @@
 
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
-                <artifactId>org.apache.aries.blueprint.annotation.api</artifactId>
-                <version>${aries.blueprint.annotation.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.blueprint</groupId>
-                <artifactId>org.apache.aries.blueprint.annotation.impl</artifactId>
-                <version>${aries.blueprint.annotation.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.api</artifactId>
                 <version>${aries.blueprint.api.version}</version>
             </dependency>
@@ -1487,17 +1468,6 @@
                 <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.core</artifactId>
                 <version>${aries.blueprint.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.blueprint</groupId>
-                <artifactId>org.apache.aries.blueprint.jexl.evaluator</artifactId>
-                <version>${aries.blueprint.jexl.evaluator.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.proxy</groupId>

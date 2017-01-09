@@ -51,18 +51,6 @@ public class StandardFeaturesTest extends KarafTestSupport {
     }
 	
     @Test
-    /**
-     * Regression test for https://issues.apache.org/jira/browse/KARAF-2566
-     * 
-     * @throws Exception
-     */
-    public void checkInteractionOfHttpAndAriesAnnotationFeature() throws Exception {
-        System.out.println("====>checkInteractionOfHttpAndAriesAnnotationFeature");
-        installAssertAndUninstallFeatures("aries-annotation", "pax-http");
-        installAssertAndUninstallFeatures("pax-http", "aries-annotation");
-    }
-
-    @Test
     public void installFrameworkSecurityFeature() throws Exception {
         installAssertAndUninstallFeatures("framework-security");
     }
@@ -70,11 +58,6 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void installServiceSecurityFeature() throws Exception {
         System.out.println("===>installServiceSecurityFeature");
         installAssertAndUninstallFeatures("service-security");
-    }
-
-    @Test
-    public void installAriesAnnotationFeature() throws Exception {
-        installAssertAndUninstallFeatures("aries-annotation");
     }
 
     @Test
