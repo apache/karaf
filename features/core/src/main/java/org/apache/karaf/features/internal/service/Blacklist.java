@@ -21,11 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
@@ -43,11 +39,12 @@ import org.slf4j.LoggerFactory;
  */
 public class Blacklist {
 
-    protected static final String BLACKLIST_URL = "url";
-    protected static final String BLACKLIST_RANGE = "range";
-    protected static final String BLACKLIST_TYPE = "type";
-    protected static final String TYPE_FEATURE = "feature";
-    protected static final String TYPE_BUNDLE = "bundle";
+    public static final String BLACKLIST_URL = "url";
+    public static final String BLACKLIST_RANGE = "range";
+    public static final String BLACKLIST_TYPE = "type";
+    public static final String TYPE_FEATURE = "feature";
+    public static final String TYPE_BUNDLE = "bundle";
+    public static final String TYPE_REPOSITORY = "repository";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Blacklist.class);
 
@@ -168,7 +165,15 @@ public class Blacklist {
     }
 
     public static boolean isBundleBlacklisted(List<String> blacklist, String uri) {
+        return isBlacklisted(blacklist, uri, TYPE_BUNDLE);
+    }
+
+    public static boolean isBlacklisted(List<String> blacklist, String uri, String btype) {
         Clause[] clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
+        return isBlacklisted(clauses, uri, btype);
+    }
+
+    public static boolean isBlacklisted(Clause[] clauses, String uri, String btype) {
         for (Clause clause : clauses) {
             String url = clause.getName();
             if (clause.getAttribute(BLACKLIST_URL) != null) {
@@ -176,7 +181,7 @@ public class Blacklist {
             }
             if (uri.equals(url)) {
                 String type = clause.getAttribute(BLACKLIST_TYPE);
-                if (type == null || TYPE_BUNDLE.equals(type)) {
+                if (type == null || btype.equals(type)) {
                     return true;
                 }
             }

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
 
 public class MavenDownloadTask extends AbstractRetryableDownloadTask {
@@ -29,6 +30,16 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
     public MavenDownloadTask(ScheduledExecutorService executor, MavenResolver resolver, String url) {
         super(executor, url);
         this.resolver = resolver;
+    }
+
+    @Override
+    public String getUrl() {
+        try {
+            // This ensures the version of the artifact is resolved in the returned url
+            return Parser.pathToMaven(Parser.pathFromMaven(url, getFile().toString()));
+        } catch (IOException e) {
+            return super.getUrl();
+        }
     }
 
     @Override

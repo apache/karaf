@@ -156,10 +156,28 @@ public class Parser
      * @throws MalformedURLException in case of "bad" provided URL/URI.
      */
     public static String pathFromMaven(String uri) throws MalformedURLException {
+        return pathFromMaven(uri, null);
+    }
+
+    public static String pathFromMaven(String uri, String resolved) throws MalformedURLException {
         if (!uri.startsWith("mvn:")) {
             return uri;
         }
-        return new Parser(uri.substring("mvn:".length())).getArtifactPath();
+        Parser parser = new Parser(uri.substring("mvn:".length()));
+        if (resolved != null) {
+            String grp = FILE_SEPARATOR
+                    + parser.getGroup().replaceAll(GROUP_SEPARATOR, FILE_SEPARATOR)
+                    + FILE_SEPARATOR
+                    + parser.getArtifact()
+                    + FILE_SEPARATOR;
+            int idx = resolved.indexOf(grp);
+            if (idx >= 0) {
+                String version = resolved.substring(idx + grp.length(), resolved.indexOf('/', idx + grp.length()));
+                return parser.getArtifactPath(version);
+            }
+
+        }
+        return parser.getArtifactPath();
     }
 
     public static String pathToMaven(String location, Map parts) {

@@ -100,6 +100,9 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     private List<String> installedRepositories;
 
+    @Parameter
+    private List<String> blacklistedRepositories;
+
     /**
      * List of features from runtime-scope features xml and kars to be installed into system and listed in startup.properties.
      */
@@ -282,6 +285,7 @@ public class AssemblyMojo extends MojoSupport {
         bootProfiles = nonNullList(bootProfiles);
         installedProfiles = nonNullList(installedProfiles);
         blacklistedProfiles = nonNullList(blacklistedProfiles);
+        blacklistedRepositories = nonNullList(blacklistedRepositories);
 
         if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
             if (profilesUri == null) {
@@ -330,6 +334,7 @@ public class AssemblyMojo extends MojoSupport {
         builder.blacklistBundles(blacklistedBundles);
         builder.blacklistFeatures(blacklistedFeatures);
         builder.blacklistProfiles(blacklistedProfiles);
+        builder.blacklistRepositories(blacklistedRepositories);
         builder.blacklistPolicy(blacklistPolicy);
 
         if (propertyFileEdits != null) {

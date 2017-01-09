@@ -96,6 +96,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
+import static org.apache.karaf.features.internal.service.Blacklist.TYPE_REPOSITORY;
 import static org.apache.karaf.profile.assembly.Builder.Stage.Startup;
 
 public class Builder {
@@ -146,6 +147,7 @@ public class Builder {
     List<String> blacklistedProfiles = new ArrayList<>();
     List<String> blacklistedFeatures = new ArrayList<>();
     List<String> blacklistedBundles = new ArrayList<>();
+    List<String> blacklistedRepositories = new ArrayList<>();
     BlacklistPolicy blacklistPolicy = BlacklistPolicy.Discard;
     List<String> libraries = new ArrayList<>();
     String javase = "1.7";
@@ -357,6 +359,11 @@ public class Builder {
         return this;
     }
 
+    public Builder blacklistRepositories(Collection<String> repositories) {
+        this.blacklistedRepositories.addAll(repositories);
+        return this;
+    }
+
     public Builder blacklistPolicy(BlacklistPolicy policy) {
         this.blacklistPolicy = policy;
         return this;
@@ -408,6 +415,10 @@ public class Builder {
 
     public List<String> getBlacklistedBundles() {
         return blacklistedBundles;
+    }
+
+    public List<String> getBlacklistedRepositories() {
+        return blacklistedRepositories;
     }
 
     public BlacklistPolicy getBlacklistPolicy() {
@@ -1279,20 +1290,27 @@ public class Builder {
         final List<String> blacklist = new ArrayList<>();
         blacklist.addAll(blacklistedBundles);
         blacklist.addAll(blacklistedFeatures);
+        final List<String> blacklistRepos = new ArrayList<>();
+        blacklistRepos.addAll(blacklistedRepositories);
         final Clause[] clauses = org.apache.felix.utils.manifest.Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
+        final Clause[] clausesRepos = org.apache.felix.utils.manifest.Parser.parseClauses(blacklistRepos.toArray(new String[blacklistRepos.size()]));
         for (String repository : repositories) {
             downloader.download(repository, new DownloadCallback() {
                 @Override
                 public void downloaded(final StreamProvider provider) throws Exception {
+                    String url = provider.getUrl();
+                    if (Blacklist.isBlacklisted(clausesRepos, url, TYPE_REPOSITORY)) {
+                        return;
+                    }
                     if (install) {
                         synchronized (provider) {
-                            Path path = systemDirectory.resolve(pathFromProviderUrl(provider.getUrl()));
+                            Path path = systemDirectory.resolve(pathFromProviderUrl(url));
                             Files.createDirectories(path.getParent());
                             Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
                         }
                     }
                     try (InputStream is = provider.open()) {
-                        Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
+                        Features featuresModel = JaxbUtil.unmarshal(url, is, false);
                         if (blacklistPolicy == BlacklistPolicy.Discard) {
                             Blacklist.blacklist(featuresModel, clauses);
                         }
