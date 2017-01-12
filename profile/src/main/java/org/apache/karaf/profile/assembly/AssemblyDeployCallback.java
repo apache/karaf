@@ -151,7 +151,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
                     Path input = provider.getFile().toPath();
-                    String path = configFile.getFinalname();
+                    String path = substFinalName(configFile.getFinalname());
                     if (path.startsWith("/")) {
                         path = path.substring(1);
                     }
@@ -265,5 +265,24 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
 
     @Override
     public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
+    }
+    
+    private String substFinalName(String finalname) {
+        final String markerVarBeg = "${";
+        final String markerVarEnd = "}";
+
+        boolean startsWithVariable = finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
+        if (startsWithVariable) {
+            String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd) - 1);
+            switch (marker) {
+            case "karaf.base":
+                return this.homeDirectory + "/" + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
+            case "karaf.etc":
+                return this.etcDirectory + "/" + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
+            default:
+                break;
+            }
+        }
+        return finalname;
     }
 }
