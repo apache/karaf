@@ -136,9 +136,9 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             }
         }
         // Install
-        LOGGER.info("Installing feature config for " + feature.getId());
         for (Config config : ((Feature) feature).getConfig()) {
-            Path configFile = etcDirectory.resolve(config.getName());
+            Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
+            LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
             if (!Files.exists(configFile)) {
                 Files.write(configFile, config.getValue().getBytes());
             } else if (config.isAppend()) {
@@ -156,6 +156,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                         path = path.substring(1);
                     }
                     Path output = homeDirectory.resolve(path);
+                    LOGGER.info("      adding config file: {}", path);
                     Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
                 }
             });
@@ -171,7 +172,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
         if (!libraries.isEmpty()) {
             Path configPropertiesPath = etcDirectory.resolve("config.properties");
             Properties configProperties = new Properties(configPropertiesPath.toFile());
-            builder.downloadLibraries(downloader, configProperties, libraries);
+            builder.downloadLibraries(downloader, configProperties, libraries, "   ");
         }
         try {
             downloader.await();
@@ -193,7 +194,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             }
         }
         // Install
-        LOGGER.info("Installing bundle " + uri);
+        LOGGER.info("      adding maven artifact: " + uri);
         try {
             String regUri;
             String path;
