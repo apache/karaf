@@ -1358,7 +1358,7 @@ public class Deployer {
         if (!bundlesToDestroy.isEmpty()) {
             Collections.sort(bundlesToDestroy, new Comparator<Bundle>() {
                 public int compare(Bundle b1, Bundle b2) {
-                    return (int) (b2.getLastModified() - b1.getLastModified());
+                    return Long.compare(b2.getLastModified(), b1.getLastModified());
                 }
             });
             LOGGER.debug("Selected bundles {} for destroy (no services in use)", bundlesToDestroy);
