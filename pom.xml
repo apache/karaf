@@ -199,10 +199,10 @@
         <felix.eventadmin.version>1.4.8</felix.eventadmin.version>
         <felix.eventadmin.webconsole.plugin.version>1.1.4</felix.eventadmin.webconsole.plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
-        <felix.scr.version>2.0.6</felix.scr.version>
+        <felix.scr.version>2.0.8</felix.scr.version>
         <felix.scr.compat.version>1.0.4</felix.scr.compat.version>
-        <felix.scr.webconsole.plugin.version>2.0.2</felix.scr.webconsole.plugin.version>
-        <felix.scr.annotation.version>1.11.0</felix.scr.annotation.version>
+        <felix.scr.webconsole.plugin.version>2.0.4</felix.scr.webconsole.plugin.version>
+        <felix.scr.annotation.version>1.12.0</felix.scr.annotation.version>
         <felix.resolver.version>1.10.1</felix.resolver.version>
 
         <aries.application.version>1.0.0</aries.application.version>
