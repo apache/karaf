@@ -151,10 +151,11 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                 @Override
                 public void downloaded(StreamProvider provider) throws Exception {
                     Path input = provider.getFile().toPath();
-                    String path = substFinalName(configFile.getFinalname());
+                    String path = configFile.getFinalname();
                     if (path.startsWith("/")) {
                         path = path.substring(1);
                     }
+                    path = substFinalName(path);
                     Path output = homeDirectory.resolve(path);
                     LOGGER.info("      adding config file: {}", path);
                     Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
@@ -274,12 +275,12 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
 
         boolean startsWithVariable = finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
         if (startsWithVariable) {
-            String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd) - 1);
+            String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd));
             switch (marker) {
             case "karaf.base":
-                return this.homeDirectory + "/" + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
+                return this.homeDirectory + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
             case "karaf.etc":
-                return this.etcDirectory + "/" + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
+                return this.etcDirectory + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
             default:
                 break;
             }
