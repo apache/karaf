@@ -33,9 +33,9 @@
     <name>Apache Karaf :: Demos :: Profiles :: Registry</name>
 
     <properties>
-        <activemq.version>5.11.1</activemq.version>
-        <camel.version>2.16.2</camel.version>
-        <cxf.version>3.1.0</cxf.version>
+        <activemq.version>5.14.3</activemq.version>
+        <camel.version>2.18.1</camel.version>
+        <cxf.version>3.1.9</cxf.version>
     </properties>
 
 

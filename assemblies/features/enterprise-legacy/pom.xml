@@ -29,9 +29,9 @@
     </parent>
 
     <groupId>org.apache.karaf.features</groupId>
-    <artifactId>enterprise</artifactId>
+    <artifactId>enterprise-legacy</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Assemblies :: Features :: Enterprise</name>
+    <name>Apache Karaf :: Assemblies :: Features :: Enterprise Legacy</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
@@ -184,12 +184,6 @@
             <classifier>features</classifier>
             <type>xml</type>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-osgi</artifactId>
-            <version>5.2.6.Final</version>
         </dependency>
     </dependencies>
 

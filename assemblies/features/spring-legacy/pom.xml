@@ -29,12 +29,13 @@
     </parent>
 
     <groupId>org.apache.karaf.features</groupId>
-    <artifactId>enterprise</artifactId>
+    <artifactId>spring-legacy</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Assemblies :: Features :: Enterprise</name>
+    <name>Apache Karaf :: Assemblies :: Features :: Spring Legacy</name>
+    <description>Spring Support</description>
 
     <properties>
-        <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${basedir}/../../../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
@@ -47,72 +48,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- transaction deps -->
-        <dependency>
-            <groupId>org.apache.aries.transaction</groupId>
-            <artifactId>org.apache.aries.transaction.blueprint</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.transaction</groupId>
-            <artifactId>org.apache.aries.transaction.manager</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- jpa deps -->
-        <dependency>
-            <groupId>org.apache.aries</groupId>
-            <artifactId>org.apache.aries.util</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jpa</groupId>
-            <artifactId>org.apache.aries.jpa.api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jpa</groupId>
-            <artifactId>org.apache.aries.jpa.blueprint.aries</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jpa</groupId>
-            <artifactId>org.apache.aries.jpa.container</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jpa</groupId>
-            <artifactId>org.apache.aries.jpa.container.context</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- jndi deps -->
-        <dependency>
-            <groupId>org.apache.aries.jndi</groupId>
-            <artifactId>org.apache.aries.jndi.api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jndi</groupId>
-            <artifactId>org.apache.aries.jndi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jndi</groupId>
-            <artifactId>org.apache.aries.jndi.rmi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jndi</groupId>
-            <artifactId>org.apache.aries.jndi.url</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jndi</groupId>
-            <artifactId>org.apache.aries.jndi.legacy.support</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- application-without-isolation deps -->
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>standard</artifactId>
@@ -120,76 +55,58 @@
             <type>xml</type>
             <scope>provided</scope>
         </dependency>
+
+        <!-- spring-dm deps -->
         <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.resolver.obr</artifactId>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-io</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.install</artifactId>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.api</artifactId>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-extender</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.management</artifactId>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-annotation</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.utils</artifactId>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.spring</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.modeller</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.default.local.platform</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.deployment.management</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- without isolation -->
-        <dependency>
-            <groupId>org.apache.aries.application</groupId>
-            <artifactId>org.apache.aries.application.runtime</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- subsystems -->
-        <dependency>
-            <groupId>org.apache.karaf.services</groupId>
-            <artifactId>org.apache.karaf.services.coordinator</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.subsystem</groupId>
-            <artifactId>org.apache.karaf.subsystem.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.cdi</groupId>
-            <artifactId>pax-cdi-features</artifactId>
-            <version>${pax.cdi.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
+            <groupId>org.apache.karaf.bundle</groupId>
+            <artifactId>org.apache.karaf.bundle.springstate</artifactId>
             <scope>provided</scope>
         </dependency>
 
+        <!-- spring-dm-web deps -->
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-osgi</artifactId>
-            <version>5.2.6.Final</version>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-web</artifactId>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>org.springframework.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>com.springsource.javax.servlet</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.aopalliance</groupId>
+                    <artifactId>com.springsource.org.aopalliance</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
