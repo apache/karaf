@@ -37,8 +37,8 @@ import java.util.ArrayList;
 @Service
 public class List extends BundlesCommand {
 
-    @Option(name = "--no-name", description = "Don't show bundle name", required = false, multiValued = false)
-    boolean dontShowName;
+    @Option(name = "-name", aliases="-n",  description = "Show bundle name", required = false, multiValued = false)
+    boolean showName;
 
     @Option(name = "-l", aliases = {}, description = "Show the locations", required = false, multiValued = false)
     boolean showLocation;
@@ -97,7 +97,9 @@ public class List extends BundlesCommand {
         table.column("Lvl").alignRight();
         table.column("Version");
 
-        if (!dontShowName) {
+        boolean effectiveShowName = showName || (!showLocation && !showSymbolic && !showUpdate && !showRevisions); 
+        
+        if (effectiveShowName) {
             table.column("Name");
         }
 
@@ -143,7 +145,7 @@ public class List extends BundlesCommand {
                 rowData.add(getStateString(info.getState()));
                 rowData.add(info.getStartLevel());
                 rowData.add(version);
-                if (!dontShowName) {
+                if (effectiveShowName) {
                     String bundleName = (info.getName() == null) ? info.getSymbolicName() : info.getName();
                     bundleName = (bundleName == null) ? info.getUpdateLocation() : bundleName;
                     String name = bundleName + printFragments(info) + printHosts(info);
