@@ -82,6 +82,7 @@
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}">
         <details>JPA implementation provided by Apache Aries JPA 2.x. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <feature version="[1.1,2)">transaction-api</feature>
+        <feature dependency="true">openjpa</feature>
 	<bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle dependency="true">mvn:org.osgi/org.osgi.service.jpa/${org.osgi.service.jpa.version}</bundle>
@@ -150,6 +151,9 @@
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.xbean/xbean-asm5-shaded/4.3</bundle>
         <bundle>mvn:org.apache.openjpa/openjpa/2.4.1</bundle>
+        <capability>
+            osgi.service;effective:=active;objectClass=javax.persistence.spi.PersistenceProvider
+        </capability>
     </feature>
 
     <feature name="hibernate" description="Hibernate 3.x JPA persistence engine support" version="${hibernate3.version}">
@@ -212,6 +216,9 @@
         <bundle>mvn:org.hibernate/hibernate-core/${hibernate43.version}</bundle>
         <bundle>mvn:org.hibernate/hibernate-entitymanager/${hibernate43.version}</bundle>
         <bundle>mvn:org.hibernate/hibernate-osgi/${hibernate43.version}</bundle>
+        <capability>
+            osgi.service;effective:=active;objectClass=javax.persistence.spi.PersistenceProvider
+        </capability>
     </feature>
 
     <feature name="hibernate-envers" description="Hibernate Envers 4.3.x" version="${hibernate43.version}">
@@ -240,6 +247,9 @@
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa.jpql/${eclipselink.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.eclipselink.adapter/${aries.jpa.version}</bundle>
+        <capability>
+            osgi.service;effective:=active;objectClass=javax.persistence.spi.PersistenceProvider
+        </capability>
     </feature>
 
     <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}">
