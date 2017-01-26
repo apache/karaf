@@ -209,6 +209,7 @@
                         <spring40.version>${spring40.version}</spring40.version>
                         <spring41.version>${spring41.version}</spring41.version>
                         <spring42.version>${spring42.version}</spring42.version>
+                        <spring43.version>${spring43.version}</spring43.version>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>
