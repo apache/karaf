@@ -79,7 +79,7 @@ public class LruList implements PaxAppender {
                 full = false;
             }
         }
-        elements[end++] = element;
+        elements[end++] = new KarafLogEvent(element);
         if (end >= maxElements) {
             end = 0;
         }
