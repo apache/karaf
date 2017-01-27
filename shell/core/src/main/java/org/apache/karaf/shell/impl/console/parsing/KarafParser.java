@@ -74,7 +74,7 @@ public class KarafParser implements org.jline.reader.Parser {
                 break;
             }
         }
-        if (statement != null) {
+        if (statement != null && statement.tokens() != null && !statement.tokens().isEmpty()) {
             String cmdName = session.resolveCommand(statement.tokens().get(0).toString());
             String[] parts = cmdName.split(":");
             Command cmd = parts.length == 2 ? session.getRegistry().getCommand(parts[0], parts[1]) : null;
