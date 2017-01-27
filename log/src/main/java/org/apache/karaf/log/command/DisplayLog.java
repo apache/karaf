@@ -67,15 +67,7 @@ public class DisplayLog implements Action {
     @Override
     public Object execute() throws Exception {
 
-        int minLevel = Integer.MAX_VALUE;
-        if (level != null) {
-            switch (level.toLowerCase()) {
-            case "debug": minLevel = DEBUG_INT; break;
-            case "info":  minLevel = INFO_INT; break;
-            case "warn":  minLevel = WARN_INT; break;
-            case "error": minLevel = ERROR_INT; break;
-            }
-        }
+        int minLevel = getMinLevel(level);
 
 
         final PrintStream out = System.out;
@@ -86,6 +78,19 @@ public class DisplayLog implements Action {
         }
         out.println();
         return null;
+    }
+
+    protected static int getMinLevel(String levelSt) {
+        int minLevel = Integer.MAX_VALUE;
+        if (levelSt != null) {
+            switch (levelSt.toLowerCase()) {
+            case "debug": minLevel = DEBUG_INT; break;
+            case "info":  minLevel = INFO_INT; break;
+            case "warn":  minLevel = WARN_INT; break;
+            case "error": minLevel = ERROR_INT; break;
+            }
+        }
+        return minLevel;
     }
         
     protected boolean checkIfFromRequestedLog(PaxLoggingEvent event) {

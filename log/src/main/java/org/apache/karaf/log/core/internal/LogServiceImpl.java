@@ -72,7 +72,6 @@ public class LogServiceImpl implements LogService {
         setLevel(LogServiceInternal.ROOT_LOGGER, level);
     }
 
-    @SuppressWarnings("unchecked")
     public void setLevel(String logger, String level) {
         // make sure both uppercase and lowercase levels are supported
         level = level.toUpperCase();

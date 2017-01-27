@@ -35,9 +35,13 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
     static final String LEVEL_SUFFIX = ".level";
 
     private final Map<String, Object> config;
+    private Pattern namePattern;
+    private Pattern levelPattern;
 
     public LogServiceLog4j2Impl(Dictionary<String, Object> config) {
         this.config = new DictionaryAsMap<>(config);
+        namePattern = Pattern.compile("log4j2\\.logger\\.([a-zA-Z_]+)\\.name");
+        levelPattern = Pattern.compile("log4j2\\.logger\\.([a-zA-Z_]+)\\.level");
     }
 
     public Map<String, String> getLevel(String logger) {
@@ -52,13 +56,14 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
         Map<String, String> names = new HashMap<>();
         Map<String, String> levels = new HashMap<>();
         for (String key : config.keySet()) {
-            Matcher matcher = Pattern.compile("log4j2\\.logger\\.([a-zA-Z_]+)\\.name").matcher(key);
-            if (matcher.matches()) {
-                names.put(matcher.group(1), config.get(key).toString());
+            String loggerName = getMatching(namePattern, key);
+            if (loggerName != null) {
+                names.put(loggerName, config.get(key).toString());
             }
-            matcher = Pattern.compile("log4j2\\.logger\\.([a-zA-Z_]+)\\.level").matcher(key);
-            if (matcher.matches()) {
-                levels.put(matcher.group(1), config.get(key).toString());
+            
+            loggerName  = getMatching(namePattern, key);levelPattern.matcher(key);
+            if (loggerName != null) {
+                levels.put(loggerName, config.get(key).toString());
             }
         }
         for (Map.Entry<String, String> e : names.entrySet()) {
@@ -82,6 +87,11 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
                 l = l.substring(0, idx);
             }
         }
+    }
+
+    private String getMatching(Pattern pattern, String key) {
+        Matcher matcher = pattern.matcher(key);
+        return (matcher.matches()) ? matcher.group(1) : null;
     }
 
     public void setLevel(String logger, String level) {
