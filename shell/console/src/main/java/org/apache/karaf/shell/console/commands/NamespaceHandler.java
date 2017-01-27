@@ -84,7 +84,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         } else if(SHELL_NAMESPACE_1_1_0.equals(namespace)) {
             return getClass().getResource("karaf-shell-1.1.0.xsd");
         }
-        return getClass().getResource("karaf-shell-1.1.0.xsd");
+        return null;
     }
 
 	public Set<Class> getManagedClasses() {
