@@ -41,10 +41,11 @@ public class Activator extends BaseActivator implements ManagedService {
         }
 
         boolean noAutoRefreshBundles = getBoolean("noAutoRefreshBundles", false);
+        String karStorage = getString("karStorage", System.getProperty("karaf.data") + "/kar");
 
         KarServiceImpl karService = new KarServiceImpl(
                 System.getProperty("karaf.base"),
-                System.getProperty("karaf.data"),
+                karStorage,
                 featuresService
         );
         karService.setNoAutoRefreshBundles(noAutoRefreshBundles);
