@@ -64,7 +64,9 @@
             # It could be directly installed using feature:repo-add command
             #
             enterprise=mvn:org.apache.karaf.features/enterprise/${karaf.version}/xml/features
+            enterprise-legacy=mvn:org.apache.karaf.features/enterprise-legacy/${karaf.version}/xml/features
             spring=mvn:org.apache.karaf.features/spring/${karaf.version}/xml/features
+            spring-legacy=mvn:org.apache.karaf.features/spring-legacy/${karaf.version}/xml/features
             cellar=mvn:org.apache.karaf.cellar/apache-karaf-cellar/RELEASE/xml/features
             cave=mvn:org.apache.karaf.cave/apache-karaf-cave/RELEASE/xml/features
             camel=mvn:org.apache.camel.karaf/apache-camel/RELEASE/xml/features
