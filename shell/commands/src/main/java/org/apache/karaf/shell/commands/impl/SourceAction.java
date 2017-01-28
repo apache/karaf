@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class SourceAction implements Action {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Argument(index = 0, name = "script", description = "A URI pointing to the script", required = true, multiValued = false)
-    private String script;
+    private URI script;
 
     @Argument(index = 1, name = "args", description = "Arguments for the script", required = false, multiValued = true)
     private List<Object> args;
@@ -60,15 +61,14 @@ public class SourceAction implements Action {
         BufferedReader reader = null;
         Object arg0 = session.get("0");
         try {
-            // First try a URL
             try {
-                URL url = new URL(script);
+                URL url = script.toURL();
                 log.info("Printing URL: " + url);
                 reader = new BufferedReader(new InputStreamReader(url.openStream()));
             }
             catch (MalformedURLException ignore) {
-                // They try a file
-                File file = new File(script);
+                // fallback to a file
+                File file = new File(script.getPath());
                 log.info("Printing file: " + file);
                 reader = new BufferedReader(new FileReader(file));
             }
