@@ -18,14 +18,15 @@
 
 realpath() {
   OURPWD=${PWD}
-  cd "$(dirname "${1}")"
-  LINK=$(readlink "$(basename "${1}")")
+  cd "$(dirname "${1}")" || exit 2
+  LINK=$(ls -l "$(basename "${1}")" | awk -F"-> " '{print $2}')
   while [ "${LINK}" ]; do
-    cd "$(dirname "${LINK}")"
-    LINK=$(readlink "$(basename "${1}")")
+	  echo "link: ${LINK}" >&2
+    cd "$(dirname "${LINK}")" || exit 2
+    LINK=$(ls -l "$(basename "${1}")" | awk -F"-> " '{print $2}')
   done
   REALPATH="${PWD}/$(basename "${1}")"
-  cd "${OURPWD}"
+  cd "${OURPWD}" || exit 2
   echo "${REALPATH}"
 }
 
