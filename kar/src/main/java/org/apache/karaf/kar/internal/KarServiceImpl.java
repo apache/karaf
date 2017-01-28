@@ -74,9 +74,9 @@ public class KarServiceImpl implements KarService {
     private AtomicBoolean busy;
     private DelayedDeployerThread delayedDeployerThread;
 
-    public KarServiceImpl(String karafBase, String karafData, FeaturesService featuresService) {
+    public KarServiceImpl(String karafBase, String karStorage, FeaturesService featuresService) {
         this.base = new File(karafBase);
-        this.storage = new File(new File(karafData), "kar");
+        this.storage = new File(karStorage);
         this.featuresService = featuresService;
         this.storage.mkdirs();
         if (!storage.isDirectory()) {
