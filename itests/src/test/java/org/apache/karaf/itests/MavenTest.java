@@ -40,6 +40,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -186,6 +187,7 @@ public class MavenTest /*extends KarafTestSupport*/ {
         return options.toArray(new Option[options.size()]);
     }
 
+    @Ignore("This test is systematically failing on Jenkins, probably due to the local Maven repository on Jenkins")
     @Test
     public void smartRetriesTest() throws Exception {
         karafTestSupport.bundleContext = bundleContext;
@@ -236,7 +238,7 @@ public class MavenTest /*extends KarafTestSupport*/ {
      * Invoke config admin task and await reregistration of {@link MavenResolver} service
      */
     private void awaitMavenResolver(Runnable task) throws Exception {
-        CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(2);
         ServiceListener listener = new ServiceListener() {
             @Override
             public void serviceChanged(ServiceEvent event) {
