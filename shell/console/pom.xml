@@ -178,7 +178,8 @@
                             org.apache.felix.gogo.api;version=0.17.0;status=provisional;-noimport:=true,
                             org.apache.felix.gogo.commands.*;version=0.17.0;-noimport:=true,
                             org.apache.felix.service.command;version=0.17.0;status=provisional;-noimport:=true,
-                            org.apache.felix.service.threadio;version=0.17.0;status=provisional;-noimport:=true
+                            org.apache.felix.service.threadio;version=0.17.0;status=provisional;-noimport:=true;
+                            jline.console.completer;version=2.14;-noimport:=true
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.commands.ansi,
@@ -186,7 +187,8 @@
                         	org.apache.karaf.shell.console.impl*,
                             org.apache.karaf.shell.security.impl*,
                             org.apache.karaf.shell.inject.impl*,
-                            org.apache.karaf.util.jaas
+                            org.apache.karaf.util.jaas,
+                            jline.internal
                         </Private-Package>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main
