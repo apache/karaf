@@ -246,7 +246,12 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
         module.initialize(subject, cb, null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
-        assertFalse(module.login());
+        try {
+            module.login();
+            fail("Should have thrown LoginException");
+        } catch (LoginException e) {
+            assertTrue(e.getMessage().startsWith("Authentication failed"));
+        }
     }
 
     @Test

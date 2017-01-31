@@ -138,7 +138,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             context.close();
         } catch (Exception e) {
             logger.warn("User " + user + " authentication failed.", e);
-            return false;
+            throw new LoginException("Authentication failed: " + e.getMessage());
         } finally {
             if (context != null) {
                 try {
