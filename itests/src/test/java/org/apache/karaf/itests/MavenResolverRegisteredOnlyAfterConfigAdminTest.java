@@ -17,6 +17,7 @@
 package org.apache.karaf.itests;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,7 +67,7 @@ public class MavenResolverRegisteredOnlyAfterConfigAdminTest extends KarafMinima
     public void mavenResolverAvailable() throws Exception {
         assertNotNull(bundleContext);
         ServiceReference<List> sr = bundleContext.getBundle(0L).getBundleContext().getServiceReference(List.class);
-        List<String> services = bundleContext.getService(sr);
+        List<String> services = new ArrayList<>(bundleContext.getService(sr));
         assertTrue("There should be only one MavenResolver registration - after non-INITIAL ConfigAdmin update", services.stream()
                 .filter(v -> v.equals("org.ops4j.pax.url.mvn.MavenResolver")).count() == 1L);
     }

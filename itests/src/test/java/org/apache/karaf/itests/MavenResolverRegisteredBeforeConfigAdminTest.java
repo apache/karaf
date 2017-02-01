@@ -17,6 +17,7 @@
 package org.apache.karaf.itests;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class MavenResolverRegisteredBeforeConfigAdminTest extends KarafMinimalMo
     public void mavenResolverAvailable() throws Exception {
         assertNotNull(bundleContext);
         ServiceReference<List> sr = bundleContext.getBundle(0L).getBundleContext().getServiceReference(List.class);
-        List<String> services = bundleContext.getService(sr);
+        List<String> services = new ArrayList<>(bundleContext.getService(sr));
         assertTrue("There should be two registrations/unregistrations of MavenResolver before final (ConfigAdmin based) registration", services.stream()
                 .filter(v -> v.equals("org.ops4j.pax.url.mvn.MavenResolver")).count() == 5L);
     }
