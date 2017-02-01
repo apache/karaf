@@ -218,6 +218,8 @@
     * [KARAF-4959] - Log messages duplicated in log:tail
     * [KARAF-4960] - Karaf exits when typing "la |"
     * [KARAF-4963] - "Old" shell commands doesn't work anymore
+    * [KARAF-4970] - Problem when restoring the wiring for bundles with attached fragments
+    * [KARAF-4972] - Commands using the shell-compatibility layer appear twice in the completion proposal
 
 ** Dependency upgrade
     * [KARAF-4107] - Upgrade Json to version 20150729
@@ -330,6 +332,7 @@
     * [KARAF-4954] - Upgrade to Aries JPA 2.5.0
     * [KARAF-4955] - Upgrade to Pax JDBC 1.0.0
     * [KARAF-4965] - Upgrade to Pax Exam 4.10.0
+    * [KARAF-4971] - Upgrade to jline 3.1.3
 
 ** Documentation
     * [KARAF-4056] - Developer-guide/extending: replace mvn archetype:create by generate
@@ -360,10 +363,10 @@
     * [KARAF-4376] - Make grep return the list of results rather than null
     * [KARAF-4412] - system scripts : first line in solaris smf template should not be empty
     * [KARAF-4414] - Add LogAuditLoginModule and replace FileAuditLoginModule by default
-    * [KARAF-4422] - Ability to show wiring between features or all resources after a resolution
+    * [KARAF-4422] - Ability to show wiring beten features or all resources after a resolution
     * [KARAF-4442] - Improve slightly misleading message after SNAPSHOT feature installation
     * [KARAF-4454] - Resolve scr:list conflict between gogo and Karaf
-    * [KARAF-4487] - LDAPLogModule and GSSAPI
+    * [KARAF-4487] - LDAPLoginModule and GSSAPI
     * [KARAF-4489] - Introduce a property in etc/org.apache.karaf.features.cfg to decide if <config/> should create cfg file or not
     * [KARAF-4505] - Add dataSourceType option to jdbc:ds-create command.
     * [KARAF-4520] - Add  DigestPasswordLoginModule so PasswordDigest can work with Karaf JAAS realm
