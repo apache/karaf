@@ -44,7 +44,12 @@ public interface Completer {
             word = commandLine.getBuffer().substring(commandLine.getBufferPosition() - commandLine.getArgumentPosition(), idx);
         }
         for (String string : strings) {
-            candidates.add(new Candidate(word + string));
+            String str = word + string;
+            if (str.endsWith(" ")) {
+                candidates.add(new Candidate(str.substring(0, str.length() - 1), true));
+            } else {
+                candidates.add(new Candidate(word + string, false));
+            }
         }
     }
 }
