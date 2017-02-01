@@ -115,7 +115,7 @@ public class Activator implements BundleActivator, ResolverHook, SynchronousBund
         for (Iterator<BundleCapability> candIter = candidates.iterator(); candIter.hasNext();) {
             BundleCapability cand = candIter.next();
             if (cap != null && !cap.equals(getCapabilityId(cand))
-                    || cap == null && cand.getRevision() != requirement.getRevision()) {
+                    || cap == null && cand.getRevision().getBundle().getBundleId() != sourceId) {
                 candIter.remove();
             }
         }
