@@ -101,9 +101,11 @@ public class ListServices implements Action {
             if (services != null) {
                 for (ServiceReference<?> serviceReference : services) {
                     String[] names = (String[])serviceReference.getProperty(Constants.OBJECTCLASS);
-                    for (String name : names) {
-                        int curCount = (serviceNames.containsKey(name)) ? serviceNames.get(name) : 0;
-                        serviceNames.put(name, curCount + 1);
+                    if (names != null) {
+                    	for (String name : names) {
+                    		int curCount = (serviceNames.containsKey(name)) ? serviceNames.get(name) : 0;
+                    		serviceNames.put(name, curCount + 1);
+                    	}
                     }
                 }
             }
@@ -152,13 +154,23 @@ public class ListServices implements Action {
     public final class ServiceClassComparator implements Comparator<ServiceReference<?>> {
         @Override
         public int compare(ServiceReference<?> o1, ServiceReference<?> o2) {
-            String[] classes1 = (String[])o1.getProperty(Constants.OBJECTCLASS);
-            String[] classes2 = (String[])o2.getProperty(Constants.OBJECTCLASS);
-            return classes1[0].compareTo(classes2[0]);
+        	String class1 = getObjectClass(o1);
+        	String class2 = getObjectClass(o2);
+            return class1.compareTo(class2);
         }
+
+		private String getObjectClass(ServiceReference<?> o1) {
+			Object value = o1.getProperty(Constants.OBJECTCLASS);
+			if (value == null || !(value instanceof String[])) {
+				return "";
+			}
+			String[] values = (String[]) value; 
+			return values.length == 0 ? "" : values[0];
+		}
     }
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
+
 }
