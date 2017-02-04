@@ -532,9 +532,8 @@ public class Subsystem extends ResourceImpl {
 
     Map<String, String> getMetadata(StreamProvider provider) throws IOException {
         try (
-                InputStream is = provider.open();
+                ZipInputStream zis = new ZipInputStream(provider.open())
         ) {
-            ZipInputStream zis = new ZipInputStream(is);
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (MANIFEST_NAME.equals(entry.getName())) {
