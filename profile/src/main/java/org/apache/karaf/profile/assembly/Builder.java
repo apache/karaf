@@ -1309,7 +1309,7 @@ public class Builder {
 
     Map<String, String> getHeaders(StreamProvider provider) throws IOException {
         try (
-                new ZipInputStream(InputStream is = provider.open())
+                ZipInputStream zis = new ZipInputStream(provider.open())
         ) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
