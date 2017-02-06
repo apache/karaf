@@ -100,7 +100,7 @@ public class TreeTest {
         Tree<String> tree = new Tree<String>("root");
         Node<String> child1 = tree.addChild("child1");
         child1.addChild("grandchild");
-        Node child2 = tree.addChild("child2");
+        Node<String> child2 = tree.addChild("child2");
         child2.addChild("grandchild");
 
         Set<String> elements = tree.flatten();
@@ -117,8 +117,8 @@ public class TreeTest {
         Tree<String> tree = new Tree<String>("root");
         Node<String> child1 = tree.addChild("child1");
         child1.addChild("grandchild");
-        Node child2 = tree.addChild("child2");
-        Node node = child2.addChild("grandchild2");
+        Node<String> child2 = tree.addChild("child2");
+        Node<String> node = child2.addChild("grandchild2");
 
         assertTrue(node.hasAncestor("child2"));
         assertTrue(node.hasAncestor("root"));

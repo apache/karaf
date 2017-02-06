@@ -67,8 +67,8 @@ public class Tree<T> extends Node<T> {
      * @param writer the writer where to write.
      */
     public void write(PrintWriter writer) {
-        write(writer, new Converter() {
-            public String toString(Node node) {
+        write(writer, new Converter<T>() {
+            public String toString(Node<T> node) {
                 return node.getValue().toString();
             }
         });

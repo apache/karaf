@@ -18,7 +18,6 @@ package org.apache.karaf.bundle.core.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -32,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundleWatcher;
 import org.apache.karaf.util.bundles.BundleUtils;
@@ -59,7 +57,6 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
     private List<String> watchURLs = new CopyOnWriteArrayList<String>();
     private AtomicInteger counter = new AtomicInteger(0);
 
-    @SuppressWarnings("deprecation")
     public BundleWatcherImpl(BundleContext bundleContext, MavenConfigService mavenConfigService, BundleService bundleService) {
         this.bundleContext = bundleContext;
 		this.localRepoDetector = mavenConfigService;

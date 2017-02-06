@@ -18,7 +18,6 @@ package org.apache.karaf.bundle.command;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.karaf.shell.api.action.Command;

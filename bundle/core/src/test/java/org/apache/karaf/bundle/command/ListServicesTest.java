@@ -27,7 +27,6 @@ public class ListServicesTest {
     private BundleContext bundleContext;
     private Services listServices;
 
-    @SuppressWarnings("unchecked")
     public ListServicesTest() {
         listServices = new Services();
         bundleContext = new TestBundleFactory().createBundleContext();
