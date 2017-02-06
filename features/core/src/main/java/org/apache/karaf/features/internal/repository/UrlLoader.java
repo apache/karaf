@@ -76,22 +76,26 @@ public abstract class UrlLoader {
                 lastChecked = time;
                 return false;
             }
-            try (
-                    BufferedInputStream bis = new BufferedInputStream(connection.getInputStream())
-            ) {
+            InputStream is = null;
+            try {
+                is = new BufferedInputStream(connection.getInputStream());
                 // Auto-detect gzipped streams
-                InputStream is = bis;
-                bis.mark(512);
-                int b0 = bis.read();
-                int b1 = bis.read();
-                bis.reset();
+                is.mark(512);
+                int b0 = is.read();
+                int b1 = is.read();
+                is.reset();
                 if (b0 == 0x1f && b1 == 0x8b) {
-                    is = new GZIPInputStream(bis);
+                    is = new GZIPInputStream(is);
                 }
                 boolean r = doRead(is);
                 lastModified = lm;
                 lastChecked = time;
                 return r;
+            } finally {
+                // cannot be use try-with-resources, as it would not close GZIPInpuStream
+                if (is != null) {
+                    is.close();
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -89,33 +89,37 @@ public final class StaxParser {
 
     public static void write(XmlRepository repository, Writer os) throws XMLStreamException {
         XMLStreamWriter writer = getOutputFactory().createXMLStreamWriter(os);
-        writer.writeStartDocument();
-        writer.setDefaultNamespace(REPOSITORY_NAMESPACE);
-        // repository element
-        writer.writeStartElement(REPOSITORY_NAMESPACE, REPOSITORY);
-        writer.writeAttribute("xmlns", REPOSITORY_NAMESPACE);
-        writer.writeAttribute(REPO_NAME, repository.name);
-        writer.writeAttribute(INCREMENT, Long.toString(repository.increment));
-        // referrals
-        for (Referral referral : repository.referrals) {
-            writer.writeStartElement(REPOSITORY_NAMESPACE, REFERRAL);
-            writer.writeAttribute(DEPTH, Integer.toString(referral.depth));
-            writer.writeAttribute(URL, referral.url);
-            writer.writeEndElement();
-        }
-        // resources
-        for (Resource resource : repository.resources) {
-            writer.writeStartElement(REPOSITORY_NAMESPACE, RESOURCE);
-            for (Capability cap : resource.getCapabilities(null)) {
-                writeClause(writer, CAPABILITY, cap.getNamespace(), cap.getDirectives(), cap.getAttributes());
+        try {
+            writer.writeStartDocument();
+            writer.setDefaultNamespace(REPOSITORY_NAMESPACE);
+            // repository element
+            writer.writeStartElement(REPOSITORY_NAMESPACE, REPOSITORY);
+            writer.writeAttribute("xmlns", REPOSITORY_NAMESPACE);
+            writer.writeAttribute(REPO_NAME, repository.name);
+            writer.writeAttribute(INCREMENT, Long.toString(repository.increment));
+            // referrals
+            for (Referral referral : repository.referrals) {
+                writer.writeStartElement(REPOSITORY_NAMESPACE, REFERRAL);
+                writer.writeAttribute(DEPTH, Integer.toString(referral.depth));
+                writer.writeAttribute(URL, referral.url);
+                writer.writeEndElement();
             }
-            for (Requirement req : resource.getRequirements(null)) {
-                writeClause(writer, REQUIREMENT, req.getNamespace(), req.getDirectives(), req.getAttributes());
+            // resources
+            for (Resource resource : repository.resources) {
+                writer.writeStartElement(REPOSITORY_NAMESPACE, RESOURCE);
+                for (Capability cap : resource.getCapabilities(null)) {
+                    writeClause(writer, CAPABILITY, cap.getNamespace(), cap.getDirectives(), cap.getAttributes());
+                }
+                for (Requirement req : resource.getRequirements(null)) {
+                    writeClause(writer, REQUIREMENT, req.getNamespace(), req.getDirectives(), req.getAttributes());
+                }
+                writer.writeEndElement();
             }
-            writer.writeEndElement();
+            writer.writeEndDocument();
+            writer.flush();
+        } finally {
+            writer.close();
         }
-        writer.writeEndDocument();
-        writer.flush();
     }
 
     private static void writeClause(XMLStreamWriter writer, String element, String namespace, Map<String, String> directives, Map<String, Object> attributes) throws XMLStreamException {
@@ -189,63 +193,67 @@ public final class StaxParser {
 
     public static XmlRepository parse(URI repositoryUrl, InputStream is, XmlRepository previous) throws XMLStreamException {
         XMLStreamReader reader = getInputFactory().createXMLStreamReader(is);
-        int event = reader.nextTag();
-        if (event != START_ELEMENT || !REPOSITORY.equals(reader.getLocalName())) {
-            throw new IllegalStateException("Expected element 'repository' at the root of the document");
-        }
-        XmlRepository repo = new XmlRepository();
-        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
-            String attrName = reader.getAttributeLocalName(i);
-            String attrValue = reader.getAttributeValue(i);
-            switch (attrName) {
-            case REPO_NAME:
-                repo.name = attrValue;
-                break;
-            case INCREMENT:
-                repo.increment = Long.parseLong(attrValue);
-                break;
-            default:
-                throw new IllegalStateException("Unexpected attribute '" + attrName + "'");
+        try {
+            int event = reader.nextTag();
+            if (event != START_ELEMENT || !REPOSITORY.equals(reader.getLocalName())) {
+                throw new IllegalStateException("Expected element 'repository' at the root of the document");
             }
-        }
-        if (previous != null && repo.increment == previous.increment) {
-            return previous;
-        }
-        while ((event = reader.nextTag()) == START_ELEMENT) {
-            String element = reader.getLocalName();
-            switch (element) {
-            case REFERRAL:
-                Referral referral = new Referral();
-                for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
-                    String attrName = reader.getAttributeLocalName(i);
-                    String attrValue = reader.getAttributeValue(i);
-                    switch (attrName) {
-                    case DEPTH:
-                        referral.depth = Integer.parseInt(attrValue);
-                        break;
-                    case URL:
-                        referral.url = attrValue;
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected attribute '" + attrName + "'");
+            XmlRepository repo = new XmlRepository();
+            for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
+                String attrName = reader.getAttributeLocalName(i);
+                String attrValue = reader.getAttributeValue(i);
+                switch (attrName) {
+                case REPO_NAME:
+                    repo.name = attrValue;
+                    break;
+                case INCREMENT:
+                    repo.increment = Long.parseLong(attrValue);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected attribute '" + attrName + "'");
+                }
+            }
+            if (previous != null && repo.increment == previous.increment) {
+                return previous;
+            }
+            while ((event = reader.nextTag()) == START_ELEMENT) {
+                String element = reader.getLocalName();
+                switch (element) {
+                case REFERRAL:
+                    Referral referral = new Referral();
+                    for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
+                        String attrName = reader.getAttributeLocalName(i);
+                        String attrValue = reader.getAttributeValue(i);
+                        switch (attrName) {
+                        case DEPTH:
+                            referral.depth = Integer.parseInt(attrValue);
+                            break;
+                        case URL:
+                            referral.url = attrValue;
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected attribute '" + attrName + "'");
+                        }
                     }
+                    if (referral.url == null) {
+                        throw new IllegalStateException("Expected attribute '" + URL + "'");
+                    }
+                    repo.referrals.add(referral);
+                    sanityCheckEndElement(reader, reader.nextTag(), REFERRAL);
+                    break;
+                case RESOURCE:
+                    repo.resources.add(parseResource(repositoryUrl, reader));
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported element '" + element + "'. Expected 'referral' or 'resource'");
                 }
-                if (referral.url == null) {
-                    throw new IllegalStateException("Expected attribute '" + URL + "'");
-                }
-                repo.referrals.add(referral);
-                sanityCheckEndElement(reader, reader.nextTag(), REFERRAL);
-                break;
-            case RESOURCE:
-                repo.resources.add(parseResource(repositoryUrl, reader));
-                break;
-            default:
-                throw new IllegalStateException("Unsupported element '" + element + "'. Expected 'referral' or 'resource'");
             }
+            // Sanity check
+            sanityCheckEndElement(reader, event, REPOSITORY);
+            return repo;
+        } finally {
+            reader.close();
         }
-        // Sanity check
-        sanityCheckEndElement(reader, event, REPOSITORY);
-        return repo;
     }
 
     private static void sanityCheckEndElement(XMLStreamReader reader, int event, String element) {
