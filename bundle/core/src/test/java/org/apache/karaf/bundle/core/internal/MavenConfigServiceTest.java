@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.bundle.core.internal;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 import org.junit.Test;
