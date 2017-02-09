@@ -213,8 +213,8 @@
         <aries.blueprint.core.compatibility.version>1.0.0</aries.blueprint.core.compatibility.version>
         <aries.blueprint.cm.version>1.0.9</aries.blueprint.cm.version>
         <aries.blueprint.web.version>1.0.1</aries.blueprint.web.version>
-        <aries.blueprint.spring.version>0.2.0</aries.blueprint.spring.version>
-        <aries.blueprint.spring.extender.version>0.2.0</aries.blueprint.spring.extender.version>
+        <aries.blueprint.spring.version>0.3.0</aries.blueprint.spring.version>
+        <aries.blueprint.spring.extender.version>0.3.0</aries.blueprint.spring.extender.version>
         <aries.jmx.api.version>1.1.5</aries.jmx.api.version>
         <aries.jmx.core.version>1.1.7</aries.jmx.core.version>
         <aries.jmx.blueprint.api.version>1.1.5</aries.jmx.blueprint.api.version>
