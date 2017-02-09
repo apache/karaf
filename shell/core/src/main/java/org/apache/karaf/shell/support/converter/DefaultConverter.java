@@ -26,6 +26,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -200,9 +201,19 @@ public class DefaultConverter
             return Byte.valueOf(value);
         } else if (Enum.class.isAssignableFrom(toType)) {
             return Enum.valueOf((Class<Enum>) toType, value);
+        } else if (URI.class == toType) {
+            return createUri(value);
         } else {
             return createObject(value, toType);
         }
+    }
+
+    /**
+     * Escape quote marks in order to allow bnd instructions that require it.
+     * <p>See jira issue KARAF-4964</p>
+     */
+    private static URI createUri(String value) throws Exception {
+        return URI.create(value.replaceAll("\"", "%22"));
     }
 
     private static Object createObject(String value, Class type) throws Exception {
