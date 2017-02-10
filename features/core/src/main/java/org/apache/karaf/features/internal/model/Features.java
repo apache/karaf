@@ -18,7 +18,6 @@ package org.apache.karaf.features.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -177,16 +176,6 @@ public class Features {
                 f.postUnmarshall();
             }
         }
-        if (repository != null) {
-            repository = trim(repository);
-        }
-        if (resourceRepository != null) {
-            resourceRepository = trim(resourceRepository);
-        }
-    }
-
-    private static List<String> trim(List<String> list) {
-        return list.stream().map(String::trim).collect(Collectors.toList());
     }
 
     public void setNamespace(String namespace) {
