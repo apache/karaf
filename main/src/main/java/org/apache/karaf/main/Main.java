@@ -230,7 +230,9 @@ public class Main {
     }
 
     public void launch() throws Exception {
-        config = new ConfigProperties();
+        if (config == null) {
+            config = new ConfigProperties();
+        }
         config.performInit();
         if (config.delayConsoleStart) {
             System.out.println(config.startupMessage);
@@ -601,6 +603,14 @@ public class Main {
 
     protected void setStartLevel(int level) {
         framework.adapt(FrameworkStartLevel.class).setStartLevel(level);
+    }
+
+    public ConfigProperties getConfig() {
+        return config;
+    }
+
+    public void setConfig(ConfigProperties config) {
+        this.config = config;
     }
 
     public void awaitShutdown() throws Exception {
