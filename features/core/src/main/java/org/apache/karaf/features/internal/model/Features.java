@@ -179,6 +179,20 @@ public class Features {
                 f.postUnmarshall();
             }
         }
+        if (repository != null) {
+            repository = trim(repository);
+        }
+        if (resourceRepository != null) {
+            resourceRepository = trim(resourceRepository);
+        }
+    }
+
+    private static List<String> trim(List<String> list) {
+        List<String> nlist = new ArrayList<>();
+        for (String l : list) {
+            nlist.add(l.trim());
+        }
+        return nlist;
     }
 
     public void setNamespace(String namespace) {

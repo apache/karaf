@@ -58,7 +58,6 @@ public class RepositoryImpl implements Repository {
         URI[] result = new URI[features.getRepository().size()];
         for (int i = 0; i < features.getRepository().size(); i++) {
             String uri = features.getRepository().get(i);
-            uri = uri.trim();
             result[i] = URI.create(uri);
         }
         return result;
@@ -69,7 +68,6 @@ public class RepositoryImpl implements Repository {
         URI[] result = new URI[features.getResourceRepository().size()];
         for (int i = 0; i < features.getResourceRepository().size(); i++) {
             String uri = features.getResourceRepository().get(i);
-            uri = uri.trim();
             result[i] = URI.create(uri);
         }
         return result;
