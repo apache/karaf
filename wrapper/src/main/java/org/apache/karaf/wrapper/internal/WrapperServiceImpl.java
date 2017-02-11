@@ -399,21 +399,11 @@ public class WrapperServiceImpl implements WrapperService {
         }
     }
 
-    private void safeClose(InputStream is) throws IOException {
-        if (is == null)
+    private void safeClose(Closeable c) throws IOException {
+        if (c == null)
             return;
         try {
-            is.close();
-        } catch (Throwable ignore) {
-            // nothing to do
-        }
-    }
-
-    private void safeClose(OutputStream is) throws IOException {
-        if (is == null)
-            return;
-        try {
-            is.close();
+            c.close();
         } catch (Throwable ignore) {
             // nothing to do
         }
@@ -447,8 +437,9 @@ public class WrapperServiceImpl implements WrapperService {
             if (is == null) {
                 throw new IllegalStateException("Resource " + resource + " not found!");
             }
+            JarOutputStream jar = null;
             try {
-                JarOutputStream jar = new JarOutputStream(new FileOutputStream(outFile));
+                jar = new JarOutputStream(new FileOutputStream(outFile));
                 int idx = resource.indexOf('/');
                 while (idx > 0) {
                     jar.putNextEntry(new ZipEntry(resource.substring(0, idx + 1)));
@@ -464,6 +455,7 @@ public class WrapperServiceImpl implements WrapperService {
                 jar.close();
             } finally {
                 safeClose(is);
+                safeClose(jar);
             }
         }
     }
