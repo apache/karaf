@@ -69,6 +69,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
      * @return possible object is
      * {@link String }
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -89,6 +90,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
      * @return possible object is
      * {@link String }
      */
+    @Override
     public String getVersion() {
         if (version == null) {
             return Feature.DEFAULT_VERSION;
@@ -105,6 +107,15 @@ public class Dependency implements org.apache.karaf.features.Dependency {
      */
     public void setVersion(String value) {
         this.version = value;
+    }
+
+    /**
+     * Since version has a default value ("0.0.0"), returns
+     * whether or not the version has been set.
+     */
+    @Override
+    public boolean hasVersion() {
+        return version != null;
     }
 
     @Override
