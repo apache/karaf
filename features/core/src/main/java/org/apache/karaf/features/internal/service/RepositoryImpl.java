@@ -55,29 +55,24 @@ public class RepositoryImpl implements Repository {
 
     public URI[] getRepositories() throws IOException {
         load();
-        URI[] result = new URI[features.getRepository().size()];
-        for (int i = 0; i < features.getRepository().size(); i++) {
-            String uri = features.getRepository().get(i);
-            uri = uri.trim();
-            result[i] = URI.create(uri);
-        }
-        return result;
+        return features.getRepository().stream()
+                .map(String::trim)
+                .map(URI::create)
+                .toArray(URI[]::new);
     }
 
     public URI[] getResourceRepositories() throws IOException {
         load();
-        URI[] result = new URI[features.getResourceRepository().size()];
-        for (int i = 0; i < features.getResourceRepository().size(); i++) {
-            String uri = features.getResourceRepository().get(i);
-            uri = uri.trim();
-            result[i] = URI.create(uri);
-        }
-        return result;
+        return features.getResourceRepository().stream()
+                .map(String::trim)
+                .map(URI::create)
+                .toArray(URI[]::new);
     }
 
     public org.apache.karaf.features.Feature[] getFeatures() throws IOException {
         load();
-        return features.getFeature().toArray(new org.apache.karaf.features.Feature[features.getFeature().size()]);
+        return features.getFeature()
+                .toArray(new org.apache.karaf.features.Feature[features.getFeature().size()]);
     }
 
 
@@ -93,7 +88,7 @@ public class RepositoryImpl implements Repository {
                 features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
                 Blacklist.blacklist(features, blacklisted);
             } catch (Exception e) {
-                throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+                throw new IOException(e.getMessage() + " : " + uri, e);
             }
         }
     }

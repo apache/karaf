@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -174,6 +175,16 @@ public class Features {
                 f.setNamespace(namespace);
                 f.setResourceRepositories(getResourceRepository());
                 f.postUnmarshall();
+            }
+        }
+        trim(repository);
+        trim(resourceRepository);
+    }
+
+    private static void trim(List<String> list) {
+        if (list != null) {
+            for (ListIterator<String> it = list.listIterator(); it.hasNext();) {
+                it.set(it.next().trim());
             }
         }
     }
