@@ -24,11 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.security.KeyPair;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -55,11 +53,8 @@ import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
-import org.apache.sshd.common.SshConstants;
 import org.apache.sshd.common.channel.PtyMode;
-import org.apache.sshd.common.keyprovider.AbstractFileKeyPairProvider;
-import org.apache.sshd.common.util.SecurityUtils;
-import org.apache.sshd.common.util.buffer.Buffer;
+import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.io.NoCloseInputStream;
 import org.apache.sshd.common.util.io.NoCloseOutputStream;
 import org.jline.terminal.Attributes;
@@ -329,8 +324,7 @@ public class SshAction implements Action {
             is.close();
             agent.addIdentity(keyPair, user);
             if (keyFile != null) {
-                AbstractFileKeyPairProvider fileKeyPairProvider = SecurityUtils.createFileKeyPairProvider();
-                fileKeyPairProvider.setPaths(Collections.singleton(Paths.get(keyFile)));
+                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(Paths.get(keyFile));
                 for (KeyPair key : fileKeyPairProvider.loadKeys()) {
                     agent.addIdentity(key, user);
                 }

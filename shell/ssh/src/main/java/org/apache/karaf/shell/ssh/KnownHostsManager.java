@@ -33,9 +33,9 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-import org.apache.sshd.common.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Base64;
 
 public class KnownHostsManager {
 	Logger LOG = LoggerFactory.getLogger(KnownHostsManager.class);
@@ -82,7 +82,7 @@ public class KnownHostsManager {
 			String serverAddress = lineParts[0];
 			String algorithm = lineParts[1];
 			if (checkServerAddress.equals(serverAddress) && checkAlgorithm.equals(algorithm)) {
-				byte[] key = Base64.decodeBase64(lineParts[2].getBytes());
+				byte[] key = Base64.getDecoder().decode(lineParts[2].getBytes());
 				KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
 				X509EncodedKeySpec keySpec = new X509EncodedKeySpec(key);
 				return keyFactory.generatePublic(keySpec);
@@ -115,7 +115,7 @@ public class KnownHostsManager {
 		bw.append(serverKey.getAlgorithm());
 		bw.append(" ");
 		serverKey.getEncoded();
-		bw.append(new String(Base64.encodeBase64(serverKey.getEncoded()), "UTF-8"));
+		bw.append(new String(Base64.getEncoder().encode(serverKey.getEncoded()), "UTF-8"));
         bw.append("\n");
 	}
 

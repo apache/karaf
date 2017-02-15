@@ -281,7 +281,7 @@
         <spring43.version>4.3.5.RELEASE_1</spring43.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
 
-        <sshd.version>1.2.0</sshd.version>
+        <sshd.version>1.4.0-SNAPSHOT</sshd.version>
         <derby-version>10.12.1.1</derby-version>
         <directory-version>2.0.0-M20</directory-version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>

@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
 import java.security.KeyPair;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,8 +33,7 @@ import org.apache.sshd.agent.SshAgentServer;
 import org.apache.sshd.agent.common.AgentDelegate;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.AgentServerProxy;
-import org.apache.sshd.agent.local.ChannelAgentForwarding;
-import org.apache.sshd.agent.local.ChannelAgentForwardingFactory;
+import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.channel.Channel;
@@ -47,11 +47,12 @@ public class KarafAgentFactory implements SshAgentFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KarafAgentFactory.class);
 
-    private final Map<String, AgentServerProxy> proxies = new ConcurrentHashMap<String, AgentServerProxy>();
-    private final Map<String, SshAgent> locals = new ConcurrentHashMap<String, SshAgent>();
+    private final Map<String, AgentServerProxy> proxies = new ConcurrentHashMap<>();
+    private final Map<String, SshAgent> locals = new ConcurrentHashMap<>();
 
-    public NamedFactory<Channel> getChannelForwardingFactory() {
-        return new ChannelAgentForwardingFactory();
+    @Override
+    public List<NamedFactory<Channel>> getChannelForwardingFactories(FactoryManager factoryManager) {
+        return LocalAgentFactory.DEFAULT_FORWARDING_CHANNELS;
     }
 
     public SshAgent createClient(FactoryManager manager) throws IOException {
