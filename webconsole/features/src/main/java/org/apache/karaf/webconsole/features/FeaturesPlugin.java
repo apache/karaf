@@ -224,8 +224,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
             this.log.error("Features service is not available");
         }
         try {
-            featuresService.removeRepository(new URI(url));
-            featuresService.addRepository(new URI(url));
+            featuresService.refreshRepository(new URI(url));
             success = true;
         } catch (Exception e) {
             this.log.error("Can't refresh features repository {}", url, e);
