@@ -125,9 +125,9 @@ public class LDAPOptions {
             LOGGER.debug("Parse role mapping {}", option);
             String[] mappings = option.split(";");
             for (String mapping : mappings) {
-                String[] map = mapping.split("=", 2);
-                String ldapRole = map[0].trim();
-                String[] karafRoles = map[1].split(",");
+                int index = mapping.lastIndexOf("=");
+                String ldapRole = mapping.substring(0,index).trim();
+                String[] karafRoles = mapping.substring(index+1).split(",");
                 if (roleMapping.get(ldapRole) == null) {
                     roleMapping.put(ldapRole, new HashSet<String>());
                 }
