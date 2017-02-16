@@ -438,5 +438,55 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
     }
+
+    @Test
+    public void testRoleMappingFqdn() throws Exception {
+        Properties options = ldapLoginModuleOptions();
+        options.put(LDAPOptions.ROLE_MAPPING, "cn=admin,ou=groups,dc=example,dc=com=karaf;cn=admin,ou=mygroups,dc=example,dc=com=another");
+        options.put(LDAPOptions.ROLE_BASE_DN, "ou=groups,dc=example,dc=com");
+        options.put(LDAPOptions.ROLE_SEARCH_SUBTREE, "true");
+        options.put(LDAPOptions.ROLE_FILTER, "(member=%fqdn)");
+        options.put(LDAPOptions.ROLE_NAME_ATTRIBUTE, "description");
+        LDAPLoginModule module = new LDAPLoginModule();
+        CallbackHandler cb = new CallbackHandler() {
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                for (Callback cb : callbacks) {
+                    if (cb instanceof NameCallback) {
+                        ((NameCallback) cb).setName("admin");
+                    } else if (cb instanceof PasswordCallback) {
+                        ((PasswordCallback) cb).setPassword("admin123".toCharArray());
+                    }
+                }
+            }
+        };
+        Subject subject = new Subject();
+        module.initialize(subject, cb, null, options);
+
+        assertEquals("Precondition", 0, subject.getPrincipals().size());
+        assertTrue(module.login());
+        assertTrue(module.commit());
+
+        assertEquals(2, subject.getPrincipals().size());
+
+        final List<String> roles = new ArrayList<String>(Arrays.asList("karaf"));
+
+        boolean foundUser = false;
+        boolean foundRole = false;
+        for (Principal principal : subject.getPrincipals()) {
+            if (principal instanceof UserPrincipal) {
+                assertEquals("admin", principal.getName());
+                foundUser = true;
+            } else if (principal instanceof RolePrincipal) {
+                assertTrue(roles.remove(principal.getName()));
+                foundRole = true;
+            }
+        }
+        assertTrue(foundUser);
+        assertTrue(foundRole);
+        assertTrue(roles.isEmpty());
+
+        assertTrue(module.logout());
+        assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
+    }
 }
             
