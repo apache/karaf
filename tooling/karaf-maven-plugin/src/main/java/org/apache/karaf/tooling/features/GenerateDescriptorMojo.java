@@ -47,6 +47,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
@@ -460,6 +461,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
         // Second pass to look for bundles
         if (addBundlesToPrimaryFeature) {
+            localDependency:
             for (final LocalDependency entry : localDependencies) {
                 Object artifact = entry.getArtifact();
 
@@ -471,6 +473,13 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     String bundleName = this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(entry.getParent(), artifact));
                     File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
                     Manifest manifest = getManifest(bundleFile);
+
+                    for (ConfigFile cf : feature.getConfigfile()) {
+                        if (bundleName.equals(cf.getLocation().replace('\n', ' ').trim())) {
+                            // The bundle matches a configfile, ignore it
+                            continue localDependency;
+                        }
+                    }
 
                     if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
                         bundleName = "wrap:" + bundleName;
