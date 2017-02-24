@@ -266,7 +266,8 @@ public class LDAPOptions {
     }
 
     public boolean getDisableCache() {
-        return Boolean.parseBoolean((String) options.get(DISABLE_CACHE));
+        final Object object = options.get(DISABLE_CACHE);
+        return object == null ? true : Boolean.parseBoolean((String) object);
     }
 
 }
