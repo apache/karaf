@@ -262,6 +262,18 @@ public class GenerateDescriptorMojo extends MojoSupport {
     @Parameter(defaultValue = "false")
     private boolean simplifyBundleDependencies;
 
+    /**
+     * Name of features which are prerequisites (they still need to be defined separately).
+     */
+    @Parameter
+    private List<String> prerequisiteFeatures = new ArrayList<>();
+
+    /**
+     * Name of features which are dependencies (they still need to be defined separately).
+     */
+    @Parameter
+    private List<String> dependencyFeatures = new ArrayList<>();
+
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
     // *************************************************
@@ -557,6 +569,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
             }
             for (Feature includedFeature : includedFeatures.getFeature()) {
                 Dependency dependency = new Dependency(includedFeature.getName(), includedFeature.getVersion());
+                dependency.setPrerequisite(prerequisiteFeatures.contains(dependency.getName()));
+                dependency.setDependency(dependencyFeatures.contains(dependency.getName()));
                 // We musn't de-duplicate here, we may have seen a feature in !add mode
                 otherFeatures.put(dependency, includedFeature);
                 if (add) {
