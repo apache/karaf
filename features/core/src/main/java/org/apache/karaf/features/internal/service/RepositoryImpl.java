@@ -55,18 +55,24 @@ public class RepositoryImpl implements Repository {
 
     public URI[] getRepositories() throws IOException {
         load();
-        return features.getRepository().stream()
-                .map(String::trim)
-                .map(URI::create)
-                .toArray(URI[]::new);
+        URI[] result = new URI[features.getRepository().size()];
+        for (int i = 0; i < features.getRepository().size(); i++) {
+            String uri = features.getRepository().get(i);
+            uri = uri.trim();
+            result[i] = URI.create(uri);
+        }
+        return result;
     }
 
     public URI[] getResourceRepositories() throws IOException {
         load();
-        return features.getResourceRepository().stream()
-                .map(String::trim)
-                .map(URI::create)
-                .toArray(URI[]::new);
+        URI[] result = new URI[features.getResourceRepository().size()];
+        for (int i = 0; i < features.getResourceRepository().size(); i++) {
+            String uri = features.getResourceRepository().get(i);
+            uri = uri.trim();
+            result[i] = URI.create(uri);
+        }
+        return result;
     }
 
     public org.apache.karaf.features.Feature[] getFeatures() throws IOException {
