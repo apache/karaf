@@ -348,7 +348,7 @@ public class AssemblyMojo extends MojoSupport {
                 case Boot:      bootKars.add(uri); break;
                 case Installed: installedKars.add(uri); break;
                 }
-            } else if ("features".equals(artifact.getClassifier())) {
+            } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
                 String uri = artifactToMvn(artifact);
                 switch (stage) {
                 case Startup:   startupRepositories.add(uri); break;
