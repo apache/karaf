@@ -18,6 +18,9 @@
  */
 package org.apache.karaf.tooling;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,7 +34,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.stream.Collectors;
+import java.util.zip.ZipFile;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
@@ -49,6 +55,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.eclipse.aether.repository.WorkspaceReader;
+import org.osgi.framework.Constants;
 
 /**
  * Creates a customized Karaf distribution by installing features and setting up
@@ -411,22 +418,21 @@ public class AssemblyMojo extends MojoSupport {
             default:
                 continue;
             }
-            if ("kar".equals(artifact.getType())) {
-                String uri = artifactToMvn(artifact);
+            String uri = artifactToMvn(artifact);
+            String type = getType(artifact);
+            if ("kar".equals(type)) {
                 switch (stage) {
                 case Startup:   startupKars.add(uri); break;
                 case Boot:      bootKars.add(uri); break;
                 case Installed: installedKars.add(uri); break;
                 }
-            } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
-                String uri = artifactToMvn(artifact);
+            } else if ("features".equals(type)) {
                 switch (stage) {
                 case Startup:   startupRepositories.add(uri); break;
                 case Boot:      bootRepositories.add(uri); break;
                 case Installed: installedRepositories.add(uri); break;
                 }
-            } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-                String uri = artifactToMvn(artifact);
+            } else if ("bundle".equals(type)) {
                 switch (stage) {
                 case Startup:   startupBundles.add(uri); break;
                 case Boot:      bootBundles.add(uri); break;
@@ -555,6 +561,59 @@ public class AssemblyMojo extends MojoSupport {
         } catch (Exception e) {
             throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
         }
+    }
+
+    private String getType(Artifact artifact) {
+        // Identify kars
+        if ("kar".equals(artifact.getType())) {
+            return "kar";
+        }
+        if ("zip".equals(artifact.getType())) {
+            try (ZipFile zip = new ZipFile(artifact.getFile())) {
+                if (zip.getEntry("META-INF/KARAF.MF") != null) {
+                    return "kar";
+                }
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+        // Identify features
+        if ("features".equals(artifact.getClassifier())) {
+            return "features";
+        }
+        if ("xml".equals(artifact.getType())) {
+            try (InputStream is = new FileInputStream(artifact.getFile())) {
+                XMLInputFactory xif = XMLInputFactory.newFactory();
+                xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
+                XMLStreamReader r = xif.createXMLStreamReader(is);
+                r.nextTag();
+                QName name = r.getName();
+                if (name.getLocalPart().equals("features")
+                        && (name.getNamespaceURI().isEmpty()
+                                || name.getNamespaceURI().startsWith("http://karaf.apache.org/xmlns/features/"))) {
+                    return "features";
+                }
+
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+        // Identify bundles
+        if ("bundle".equals(artifact.getType())) {
+            return "bundle";
+        }
+        if ("jar".equals(artifact.getType())) {
+            try (JarFile jar = new JarFile(artifact.getFile())) {
+                Manifest manifest = jar.getManifest();
+                if (manifest != null
+                        && manifest.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME) != null) {
+                    return "bundle";
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+        return "unknown";
     }
 
     private String artifactToMvn(Artifact artifact) throws MojoExecutionException {
