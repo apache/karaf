@@ -24,13 +24,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
-import java.nio.file.FileVisitor;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -38,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,9 +66,12 @@ import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.support.completers.UriCompleter;
 import org.jline.builtins.Completers;
-import org.jline.reader.*;
-import org.jline.reader.impl.LineReaderImpl;
-import org.jline.reader.impl.history.DefaultHistory;
+import org.jline.reader.Completer;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.ParsedLine;
+import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.slf4j.Logger;
@@ -100,7 +103,7 @@ public class ConsoleSessionImpl implements Session {
     final Terminal terminal;
     final org.jline.terminal.Terminal jlineTerminal;
     final History history;
-    final LineReaderImpl reader;
+    final LineReader reader;
 
     private Thread thread;
 
@@ -144,29 +147,6 @@ public class ConsoleSessionImpl implements Session {
                 jlineTerminal.output(),
                 jlineTerminal.output());
 
-        // Console reader
-        reader = new LineReaderImpl(
-                jlineTerminal,
-                "karaf",
-                ((CommandSessionImpl) session).getVariables());
-
-        // History
-        final Path file = getHistoryFile();
-        reader.setVariable(LineReader.HISTORY_FILE, file);
-        String maxSizeStr = System.getProperty(SHELL_HISTORY_MAXSIZE);
-        if (maxSizeStr != null) {
-            reader.setVariable(LineReader.HISTORY_SIZE, Integer.parseInt(maxSizeStr));
-        }
-        history = new HistoryWrapper(reader.getHistory());
-
-        // Registry
-        registry = new RegistryImpl(factory.getRegistry());
-        registry.register(factory);
-        registry.register(this);
-        registry.register(registry);
-        registry.register(terminal);
-        registry.register(history);
-
         // Completers
         Completers.CompletionEnvironment env = new Completers.CompletionEnvironment() {
             @Override
@@ -194,10 +174,37 @@ public class ConsoleSessionImpl implements Session {
         };
         Completer builtinCompleter = new org.jline.builtins.Completers.Completer(env);
         CommandsCompleter commandsCompleter = new CommandsCompleter(factory, this);
-        reader.setCompleter((rdr, line, candidates) -> {
-            builtinCompleter.complete(rdr, line, candidates);
-            commandsCompleter.complete(rdr, line, candidates);
-        });
+
+        // Console reader
+        reader = LineReaderBuilder.builder()
+                    .terminal(jlineTerminal)
+                    .appName("karaf")
+                    .variables(((CommandSessionImpl) session).getVariables())
+                    .highlighter(new org.apache.felix.gogo.jline.Highlighter(session))
+                    .parser(new KarafParser(this))
+                    .completer((rdr, line, candidates) -> {
+                        builtinCompleter.complete(rdr, line, candidates);
+                        commandsCompleter.complete(rdr, line, candidates);
+                    })
+                    .build();
+
+        // History
+        final Path file = getHistoryFile();
+        reader.setVariable(LineReader.HISTORY_FILE, file);
+        String maxSizeStr = System.getProperty(SHELL_HISTORY_MAXSIZE);
+        if (maxSizeStr != null) {
+            reader.setVariable(LineReader.HISTORY_SIZE, Integer.parseInt(maxSizeStr));
+        }
+        history = new HistoryWrapper(reader.getHistory());
+
+        // Registry
+        registry = new RegistryImpl(factory.getRegistry());
+        registry.register(factory);
+        registry.register(this);
+        registry.register(registry);
+        registry.register(terminal);
+        registry.register(history);
+
         registry.register(commandsCompleter);
         registry.register(new CommandNamesCompleter());
         registry.register(new FileCompleter());
@@ -229,8 +236,6 @@ public class ConsoleSessionImpl implements Session {
         session.put(CommandSession.OPTION_NO_GLOB, Boolean.TRUE);
         session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
 
-        reader.setHighlighter(new org.apache.felix.gogo.jline.Highlighter(session));
-        reader.setParser(new KarafParser(this));
 
     }
 
@@ -305,8 +310,8 @@ public class ConsoleSessionImpl implements Session {
                     jlineTerminal.writer().write(getStatusLine(job, width, status));
                     jlineTerminal.flush();
                     if (reading.get()) {
-                        reader.redrawLine();
-                        reader.redisplay();
+                        reader.callWidget("redraw-line");
+                        reader.callWidget("redisplay");
                     }
                 }
             });
