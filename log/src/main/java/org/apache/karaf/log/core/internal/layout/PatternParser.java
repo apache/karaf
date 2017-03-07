@@ -531,9 +531,12 @@ public class PatternParser {
 
     public
     String convert(PaxLoggingEvent event) {
-        if (key == null) {
+        Map properties = event.getProperties();
+        if (properties == null) {
+          return null;
+        }
+        else if (key == null) {
             StringBuffer buf = new StringBuffer("{");
-            Map properties = event.getProperties();
             if (properties.size() > 0) {
               Object[] keys = properties.keySet().toArray();
               Arrays.sort(keys);
@@ -548,7 +551,7 @@ public class PatternParser {
             buf.append('}');
             return buf.toString();
         } else {
-          Object val = event.getProperties().get(key);
+          Object val = properties.get(key);
           if(val == null) {
               return null;
           } else {
