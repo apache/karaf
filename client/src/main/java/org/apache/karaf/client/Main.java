@@ -46,6 +46,7 @@ import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.client.ClientBuilder;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.auth.keyboard.UserInteraction;
+import org.apache.sshd.client.channel.ChannelExec;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
@@ -55,6 +56,8 @@ import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.channel.PtyMode;
+import org.apache.sshd.common.config.keys.FilePasswordProvider;
+import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.io.NoCloseInputStream;
 import org.jline.terminal.Attributes;
@@ -97,10 +100,17 @@ public class Main {
 
         try (SshClient client = ClientBuilder.builder().build())
         {
-            setupAgent(config.getUser(), config.getKeyFile(), client);
-            client.getProperties().put(FactoryManager.IDLE_TIMEOUT, String.valueOf(config.getIdleTimeout()));
+            FilePasswordProvider passwordProvider = null;
             final Console console = System.console();
             if (console != null) {
+                passwordProvider = new FilePasswordProvider() {
+                    @Override
+                    public String getPassword(String resourceKey) throws IOException {
+                        char[] pwd = console.readPassword("Enter password for " + resourceKey + ": ");
+                        return new String(pwd);
+                    }
+                };
+                client.setFilePasswordProvider(passwordProvider);
                 client.setUserInteraction(new UserInteraction() {
                     @Override
                     public void welcome(ClientSession s, String banner, String lang) {
@@ -138,6 +148,10 @@ public class Main {
                     }
                 });
             }
+            setupAgent(config.getUser(), config.getKeyFile(), client, passwordProvider);
+            client.getProperties().put(FactoryManager.IDLE_TIMEOUT, String.valueOf(config.getIdleTimeout()));
+            // TODO: remove the line below when SSHD-732 is fixed
+            client.setKeyPairProvider(new FileKeyPairProvider());
             client.start();
             if (console != null) {
                 console.printf("Logging in as %s\n", config.getUser());
@@ -154,8 +168,10 @@ public class Main {
                 try {
                     ClientChannel channel;
                     if (config.getCommand().length() > 0) {
-                        channel = session.createChannel("exec", config.getCommand() + "\n");
+                        ChannelExec exec = session.createExecChannel(config.getCommand() + "\n");
+                        channel = exec;
                         channel.setIn(new ByteArrayInputStream(new byte[0]));
+                        exec.setAgentForwarding(true);
                     } else {
                         ChannelShell shell = session.createShellChannel();
                         channel = shell;
@@ -254,10 +270,10 @@ public class Main {
         return attributes.getLocalFlag(flag) ? 1 : 0;
     }
 
-    private static void setupAgent(String user, String keyFile, SshClient client) {
+    private static void setupAgent(String user, String keyFile, SshClient client, FilePasswordProvider passwordProvider) {
         SshAgent agent;
         URL builtInPrivateKey = Main.class.getClassLoader().getResource("karaf.key");
-        agent = startAgent(user, builtInPrivateKey, keyFile);
+        agent = startAgent(user, builtInPrivateKey, keyFile, passwordProvider);
         client.setAgentFactory(new LocalAgentFactory(agent));
         client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
     }
@@ -282,7 +298,7 @@ public class Main {
         return session;
     }
 
-    private static SshAgent startAgent(String user, URL privateKeyUrl, String keyFile) {
+    private static SshAgent startAgent(String user, URL privateKeyUrl, String keyFile, FilePasswordProvider passwordProvider) {
         InputStream is = null;
         try {
             SshAgent agent = new AgentImpl();
@@ -293,6 +309,7 @@ public class Main {
             agent.addIdentity(keyPair, user);
             if (keyFile != null) {
                 FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(Paths.get(keyFile));
+                fileKeyPairProvider.setPasswordFinder(passwordProvider);
                 for (KeyPair key : fileKeyPairProvider.loadKeys()) {
                     agent.addIdentity(key, user);                
                 }

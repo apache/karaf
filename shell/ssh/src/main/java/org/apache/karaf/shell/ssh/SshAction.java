@@ -22,11 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.security.KeyPair;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -43,8 +38,6 @@ import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.sshd.agent.SshAgent;
-import org.apache.sshd.agent.local.AgentImpl;
-import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
 import org.apache.sshd.client.SshClient;
@@ -123,10 +116,15 @@ public class SshAction implements Action {
         }
 
         SshClient client = SshClient.setUpDefaultClient();
-        setupAgent(username, keyFile, client);
+        if (this.session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME) != null) {
+            client.setAgentFactory(KarafAgentFactory.getInstance());
+            String agentSocket = this.session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME).toString();
+            client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentSocket);
+        }
         KnownHostsManager knownHostsManager = new KnownHostsManager(new File(System.getProperty("user.home"), ".sshkaraf/known_hosts"));
         ServerKeyVerifier serverKeyVerifier = new ServerKeyVerifierImpl(knownHostsManager, quiet);
         client.setServerKeyVerifier(serverKeyVerifier);
+        client.setKeyPairProvider(new FileKeyPairProvider());
         log.debug("Created client: {}", client);
         client.setUserInteraction(new UserInteraction() {
             @Override
@@ -304,37 +302,6 @@ public class SshAction implements Action {
     private int getTermHeight() {
         Terminal term = session.getTerminal();
         return term != null ? term.getHeight() : 25;
-    }
-
-    private void setupAgent(String user, String keyFile, SshClient client) {
-        SshAgent agent;
-        URL url = getClass().getClassLoader().getResource("karaf.key");
-        agent = startAgent(user, url, keyFile);
-        client.setAgentFactory(new LocalAgentFactory(agent));
-        client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
-    }
-
-    private SshAgent startAgent(String user, URL privateKeyUrl, String keyFile) {
-        InputStream is = null;
-        try {
-            SshAgent agent = new AgentImpl();
-            is = privateKeyUrl.openStream();
-            ObjectInputStream r = new ObjectInputStream(is);
-            KeyPair keyPair = (KeyPair) r.readObject();
-            is.close();
-            agent.addIdentity(keyPair, user);
-            if (keyFile != null) {
-                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(Paths.get(keyFile));
-                for (KeyPair key : fileKeyPairProvider.loadKeys()) {
-                    agent.addIdentity(key, user);
-                }
-            }
-            return agent;
-        } catch (Throwable e) {
-            close(is);
-            System.err.println("Error starting ssh agent for: " + e.getMessage());
-            return null;
-        }
     }
 
     private static ClientSession connectWithRetries(SshClient client, String username, String host, int port, int maxAttempts) throws Exception, InterruptedException {

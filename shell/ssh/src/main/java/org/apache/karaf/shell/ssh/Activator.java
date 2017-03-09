@@ -35,6 +35,7 @@ import org.apache.karaf.util.tracker.annotation.Services;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.forward.AcceptAllForwardingFilter;
 import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.scp.ScpCommandFactory;
@@ -57,26 +58,23 @@ public class Activator extends BaseActivator implements ManagedService {
     static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
 
     ServiceTracker<Session, Session> sessionTracker;
-    KarafAgentFactory agentFactory;
     SessionFactory sessionFactory;
     SshServer server;
 
     @Override
     protected void doOpen() throws Exception {
-        agentFactory = new KarafAgentFactory();
-
         super.doOpen();
 
         sessionTracker = new ServiceTracker<Session, Session>(bundleContext, Session.class, null) {
             @Override
             public Session addingService(ServiceReference<Session> reference) {
                 Session session = super.addingService(reference);
-                agentFactory.registerSession(session);
+                KarafAgentFactory.getInstance().registerSession(session);
                 return session;
             }
             @Override
             public void removedService(ServiceReference<Session> reference, Session session) {
-                agentFactory.unregisterSession(session);
+                KarafAgentFactory.getInstance().unregisterSession(session);
                 super.removedService(reference, session);
             }
         };
@@ -193,7 +191,8 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setPublickeyAuthenticator(authenticator);
         server.setFileSystemFactory(new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))));
         server.setUserAuthFactories(authFactoriesFactory.getFactories());
-        server.setAgentFactory(agentFactory);
+        server.setAgentFactory(KarafAgentFactory.getInstance());
+        server.setTcpipForwardingFilter(AcceptAllForwardingFilter.INSTANCE);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
         if (moduliUrl != null) {
             server.getProperties().put(SshServer.MODULI_URL, moduliUrl);

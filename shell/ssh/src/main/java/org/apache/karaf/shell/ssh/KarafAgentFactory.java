@@ -40,6 +40,7 @@ import org.apache.sshd.common.channel.Channel;
 import org.apache.sshd.common.session.ConnectionService;
 import org.apache.sshd.common.session.Session;
 import org.apache.sshd.server.session.ServerSession;
+import org.omg.PortableInterceptor.INACTIVE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,12 @@ public class KarafAgentFactory implements SshAgentFactory {
 
     private final Map<String, AgentServerProxy> proxies = new ConcurrentHashMap<>();
     private final Map<String, SshAgent> locals = new ConcurrentHashMap<>();
+
+    private static final KarafAgentFactory INSTANCE = new KarafAgentFactory();
+
+    public static KarafAgentFactory getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public List<NamedFactory<Channel>> getChannelForwardingFactories(FactoryManager factoryManager) {
