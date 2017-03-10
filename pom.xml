@@ -252,7 +252,8 @@
         <jline.version>3.3.0</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
-        <maven.version>2.0.9</maven.version>
+        <maven.version>3.0.3</maven.version>
+        <maven.wagon.version>2.10</maven.wagon.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <osgi.version>6.0.0</osgi.version>
@@ -1062,8 +1063,38 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.maven</groupId>
-                <artifactId>maven-project</artifactId>
+                <artifactId>maven-compat</artifactId>
                 <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-core</artifactId>
+                <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-artifact</artifactId>
+                <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-dependency-tree</artifactId>
+                <version>2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-provider-api</artifactId>
+                <version>${maven.wagon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-http</artifactId>
+                <version>${maven.wagon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-http-lightweight</artifactId>
+                <version>${maven.wagon.version}</version>
             </dependency>
             <dependency>
                 <groupId>xerces</groupId>
@@ -1175,11 +1206,6 @@
                 <groupId>org.jline</groupId>
                 <artifactId>jline</artifactId>
                 <version>${jline.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.maven.artifact</groupId>
-                <artifactId>maven-artifact</artifactId>
-                <version>3.0-alpha-1</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
