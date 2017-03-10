@@ -19,15 +19,13 @@ package org.apache.karaf.client;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.slf4j.impl.SimpleLogger;
 
 public class ClientConfig {
 
@@ -49,10 +47,10 @@ public class ClientConfig {
     private boolean interactiveMode = false;
 
     public ClientConfig(String[] args) throws IOException {
-        Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
-        Properties customCfg = loadProps(new File(System.getProperty("karaf.etc"), "custom.properties"));
+        Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"), null);
+        Properties customCfg = loadProps(new File(System.getProperty("karaf.etc"), "custom.properties"), null);
         
-        host = shellCfg.getProperty("sshHost", "localhost");        
+        host = shellCfg.getProperty("sshHost", "localhost");
         host = expandEnvVars(host);
         String portString = shellCfg.getProperty("sshPort", "8101");
         portString = expandEnvVars(portString);
@@ -173,23 +171,24 @@ public class ClientConfig {
         }
         command = commandBuilder.toString();
 
-        Properties usersCfg = loadProps(new File(System.getProperty("karaf.etc") + "/users.properties"));
+        Map<String, String> usersCfg = new LinkedHashMap<>();
+        loadProps(new File(System.getProperty("karaf.etc") + "/users.properties"), usersCfg);
         if (!usersCfg.isEmpty()) {
-            Set<String> users = new HashSet<>();
-            for (String user : usersCfg.stringPropertyNames()) {
+            Set<String> users = new LinkedHashSet<>();
+            for (String user : usersCfg.keySet()) {
                 if (!user.startsWith(GROUP_PREFIX)) {
                     users.add(user);
                 }
             }
             if (user == null) {
                 if (users.iterator().hasNext()) {
-                    user = (String) users.iterator().next();
+                    user = users.iterator().next();
                 }
             }
             if (interactiveMode) {
                 password = null;
             } else {
-                password = (String) usersCfg.getProperty(user);
+                password = usersCfg.get(user);
                 if (password != null && password.contains(ROLE_DELIMITER)) {
                     password = password.substring(0, password.indexOf(ROLE_DELIMITER));
                 }
@@ -230,14 +229,20 @@ public class ClientConfig {
         }
     }
 
-    private static Properties loadProps(File file) {
-        Properties props = new Properties();
+    private static Properties loadProps(File file, final Map<String, String> additionalStorage) {
+        Properties props = new Properties() {
+            @Override
+            public synchronized Object put(Object key, Object value) {
+                if (additionalStorage != null) {
+                    additionalStorage.put((String) key, (String) value);
+                }
+                return super.put(key, value);
+            }
+        };
         FileInputStream is = null;
         try {
             is = new FileInputStream(file);
-            if (is != null) {
-                props.load(is);
-            }
+            props.load(is);
 
         } catch (Exception e) {
                 System.err.println("Warning: could not load properties from: " + file + ", Reason: " + e.getMessage());
