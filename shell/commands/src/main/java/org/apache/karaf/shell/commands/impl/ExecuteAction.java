@@ -21,7 +21,9 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.util.process.PumpStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +40,13 @@ public class ExecuteAction implements Action {
     @Argument(index = 0, name = "command", description = "Execution command with arguments", required = true, multiValued = true)
     private List<String> args;
 
+    @Reference
+    Session session;
+
     @Override
     public Object execute() throws Exception {
-        ProcessBuilder builder = new ProcessBuilder(args);
+        ProcessBuilder builder = new ProcessBuilder(args)
+                .directory(session.currentDir().toFile());
 
         PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err, "Command" + args.toString());
 

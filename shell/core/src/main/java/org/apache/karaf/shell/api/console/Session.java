@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 
 /**
  * A <code>Session</code> can be used to execute commands.
@@ -157,6 +158,10 @@ public interface Session extends Runnable, Closeable {
      * @return the full qualified command name
      */
     String resolveCommand(String name);
+
+    Path currentDir();
+
+    void currentDir(Path path);
 
     /**
      * Close this session. After the session is closed, it will throw

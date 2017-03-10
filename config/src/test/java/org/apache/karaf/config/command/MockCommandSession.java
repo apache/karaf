@@ -19,6 +19,7 @@ package org.apache.karaf.config.command;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,6 +86,15 @@ class MockCommandSession implements Session {
     @Override
     public SessionFactory getFactory() {
         return null;
+    }
+
+    @Override
+    public Path currentDir() {
+        return null;
+    }
+
+    @Override
+    public void currentDir(Path path) {
     }
 
     @Override

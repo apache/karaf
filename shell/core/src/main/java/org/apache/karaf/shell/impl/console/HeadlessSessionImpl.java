@@ -21,6 +21,7 @@ package org.apache.karaf.shell.impl.console;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
@@ -138,6 +139,16 @@ public class HeadlessSessionImpl implements Session {
     @Override
     public SessionFactory getFactory() {
         return factory;
+    }
+
+    @Override
+    public Path currentDir() {
+        return session.currentDir();
+    }
+
+    @Override
+    public void currentDir(Path path) {
+        session.currentDir(path);
     }
 
     @Override

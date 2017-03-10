@@ -20,13 +20,13 @@ package org.apache.karaf.shell.commands.impl;
 
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -66,11 +66,11 @@ public class SourceAction implements Action {
                 log.info("Printing URL: " + url);
                 reader = new BufferedReader(new InputStreamReader(url.openStream()));
             }
-            catch (MalformedURLException ignore) {
+            catch (MalformedURLException | IllegalArgumentException ignore) {
                 // fallback to a file
-                File file = new File(script.getPath());
+                Path file = session.currentDir().resolve(script.getPath());
                 log.info("Printing file: " + file);
-                reader = new BufferedReader(new FileReader(file));
+                reader = new BufferedReader(Files.newBufferedReader(file));
             }
 
             CharArrayWriter w = new CharArrayWriter();

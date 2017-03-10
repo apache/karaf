@@ -268,6 +268,16 @@ public class ConsoleSessionImpl implements Session {
         return factory;
     }
 
+    @Override
+    public Path currentDir() {
+        return session.currentDir();
+    }
+
+    @Override
+    public void currentDir(Path path) {
+        session.currentDir(path);
+    }
+
     public void close() {
         if (running) {
             reader.getHistory().save();
