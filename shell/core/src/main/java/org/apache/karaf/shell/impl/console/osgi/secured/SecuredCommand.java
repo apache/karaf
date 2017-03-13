@@ -21,6 +21,7 @@ package org.apache.karaf.shell.impl.console.osgi.secured;
 import java.util.List;
 
 import org.apache.felix.gogo.runtime.Closure;
+import org.apache.felix.gogo.runtime.Token;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.api.console.Command;
@@ -77,6 +78,9 @@ public class SecuredCommand implements Command, Function {
             if (v instanceof Closure) {
                 final Closure closure = (Closure) v;
                 arguments.set(i, new VersatileFunction(closure));
+            }
+            if (v instanceof Token) {
+                arguments.set(i, v.toString());
             }
         }
         return execute(session, arguments);
