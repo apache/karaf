@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 
 import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
@@ -233,6 +234,11 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
     @Override
     public MouseEvent readMouseEvent() {
         return terminal.readMouseEvent();
+    }
+
+    @Override
+    public MouseEvent readMouseEvent(IntSupplier supplier) {
+        return terminal.readMouseEvent(supplier);
     }
 
     private Signal signal(org.apache.karaf.shell.api.console.Signal sig) {

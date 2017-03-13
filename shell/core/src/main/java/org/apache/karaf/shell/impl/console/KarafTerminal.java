@@ -51,7 +51,11 @@ public class KarafTerminal extends AbstractTerminal implements org.jline.termina
         try {
             caps = InfoCmp.getInfoCmp(type);
         } catch (Exception e) {
-            caps = InfoCmp.ANSI_CAPS;
+            try {
+                caps = InfoCmp.getInfoCmp("ansi");
+            } catch (InterruptedException e2) {
+                throw new UnsupportedOperationException(e2);
+            }
         }
         try {
             InfoCmp.parseInfoCmp(caps, bools, ints, strings);
