@@ -297,7 +297,7 @@
         <surefire.argLine />
 
         <!-- Further used maven plugin versions; e.g. in the docs -->
-        <plugin.depends.version>1.3.1</plugin.depends.version>
+        <plugin.depends.version>1.4.0</plugin.depends.version>
 
         <!-- General Settings -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
