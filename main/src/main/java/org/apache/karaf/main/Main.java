@@ -603,11 +603,13 @@ public class Main {
             return true;
         }
         try {
-            int step = 5000;
-
-            // Notify the callback asap
+            int timeout = config.shutdownTimeout;
+            if (config.shutdownTimeout <= 0) {
+                timeout = Integer.MAX_VALUE;
+            }
+            
             if (shutdownCallback != null) {
-                shutdownCallback.waitingForShutdown(step);
+                shutdownCallback.waitingForShutdown(timeout);
             }
 
             exiting = true;
@@ -624,15 +626,9 @@ public class Main {
                 }.start();
             }
 
-            int timeout = config.shutdownTimeout;
-            if (config.shutdownTimeout <= 0) {
-                timeout = Integer.MAX_VALUE;
-            }
+            int step = 5000;      
             while (timeout > 0) {
                 timeout -= step;
-                if (shutdownCallback != null) {
-                    shutdownCallback.waitingForShutdown(step * 2);
-                }
                 FrameworkEvent event = framework.waitForStop(step);
                 if (event.getType() != FrameworkEvent.WAIT_TIMEDOUT) {
                     activatorManager.stopKarafActivators();
