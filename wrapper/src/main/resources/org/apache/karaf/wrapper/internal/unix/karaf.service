@@ -23,7 +23,7 @@ Description=${displayName}
 
 [Service]
 Type=forking
-PIDFile=${karaf.data}/${name}.pid
+PIDFile=${karaf.base}/${name}.pid
 ExecStart=${karaf.base}/bin/${name}-service start
 ExecReload=${karaf.base}/bin/${name}-service restart
 ExecStop=${karaf.base}/bin/${name}-service stop
