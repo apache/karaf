@@ -22,7 +22,7 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.commands.impl.top.TTop;
+import org.jline.builtins.TTop;
 import org.jline.terminal.Terminal;
 
 import java.util.Arrays;
