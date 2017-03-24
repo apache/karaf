@@ -129,6 +129,9 @@ public class SshTerminal extends ExternalTerminal implements Terminal {
                     break;
             }
         }
+        int w = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
+        int h = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
+        setSize(new Size(w, h));
     }
 
     protected void handleSignal(org.apache.sshd.server.Signal signal) {
