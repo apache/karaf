@@ -312,8 +312,8 @@ public class ConsoleSessionImpl implements Session {
                     jlineTerminal.writer().write(getStatusLine(job, width, status));
                     jlineTerminal.flush();
                     if (reading.get()) {
-                        reader.callWidget("redraw-line");
-                        reader.callWidget("redisplay");
+                        reader.callWidget(LineReader.REDRAW_LINE);
+                        reader.callWidget(LineReader.REDISPLAY);
                     }
                 }
             });
