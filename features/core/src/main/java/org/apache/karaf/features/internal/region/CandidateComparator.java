@@ -28,6 +28,7 @@ import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
 public class CandidateComparator implements Comparator<Capability> {
@@ -79,9 +80,24 @@ public class CandidateComparator implements Comparator<Capability> {
         }
         if (c == 0) {
             // We just want to have a deterministic heuristic
-            String n1 = ResolverUtil.getSymbolicName(cap1.getResource());
-            String n2 = ResolverUtil.getSymbolicName(cap2.getResource());
+            final Resource resource1 = cap1.getResource();
+            final Resource resource2 = cap2.getResource();
+            String n1 = ResolverUtil.getSymbolicName(resource1);
+            String n2 = ResolverUtil.getSymbolicName(resource2);
             c = n1.compareTo(n2);
+            // Resources looks like identical, but it required by different features/subsystems/regions
+            // so use this difference for deterministic heuristic
+            if (c == 0) {
+                final List<Requirement> reqs1 = resource1.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE);
+                final List<Requirement> reqs2 = resource2.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE);
+                if (!reqs1.isEmpty() && !reqs2.isEmpty()) {
+                    Requirement identityReq1 = reqs1.get(0);
+                    Requirement identityReq2 = reqs2.get(0);
+                    Object identity1 = identityReq1.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE);
+                    Object identity2 = identityReq2.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE);
+                    c = String.valueOf(identity1).compareTo(String.valueOf(identity2));
+                }
+            }
         }
         return c;
     }
