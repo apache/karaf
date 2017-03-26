@@ -318,7 +318,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         try {
             if (enableGeneration == null) {
                 String packaging = this.project.getPackaging();
-                enableGeneration = !"feature".equals(packaging) && !"feature".equals(packaging);
+                enableGeneration = !"feature".equals(packaging);
             }
 
             if (!enableGeneration) {
