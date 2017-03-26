@@ -82,7 +82,7 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
                 }
                 
                 WebBundle webBundle = new WebBundle();
-                contextPath.trim();
+                contextPath = contextPath.trim();
                 
                 // get the bundle name
                 String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
