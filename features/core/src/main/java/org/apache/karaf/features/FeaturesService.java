@@ -48,6 +48,7 @@ public interface FeaturesService {
     long DEFAULT_REPOSITORY_EXPIRATION = 60000; // 1 minute
 
     boolean DEFAULT_CONFIG_CFG_STORE = true;
+    boolean DEFAULT_DIGRAPH_MBEAN = true;
 
     enum Option {
         NoFailOnFeatureNotFound,

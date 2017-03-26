@@ -134,9 +134,11 @@ public class Activator extends BaseActivator {
         register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook());
         register(RegionDigraph.class, dg);
         register(RegionDigraphPersistence.class, this::doPersistRegionDigraph);
-        StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
-        dgmb.registerMBean();
 
+        if (getBoolean("digraphMBean", FeaturesService.DEFAULT_DIGRAPH_MBEAN)) {
+            StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
+            dgmb.registerMBean();
+        }
 
         FeatureFinder featureFinder = new FeatureFinder();
         Hashtable<String, Object> props = new Hashtable<>();
