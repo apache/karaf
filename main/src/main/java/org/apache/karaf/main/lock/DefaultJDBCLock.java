@@ -154,8 +154,7 @@ public class DefaultJDBCLock implements Lock {
     boolean schemaExist(String tableName) {
         try {
             DatabaseMetaData metadata = getConnection().getMetaData();
-            return metadata != null && (checkTableExists(tableName.toLowerCase(), metadata) //
-                || checkTableExists(tableName.toLowerCase(), metadata));
+            return metadata != null && (checkTableExists(tableName.toLowerCase(), metadata));
         } catch (Exception ignore) {
             return false;
             //throw new RuntimeException("Error testing for db table", ignore);
