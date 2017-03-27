@@ -16,7 +16,10 @@
  */
 package org.apache.karaf.management;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+
 import java.io.IOException;
+import java.security.Principal;
 
 import javax.management.remote.JMXAuthenticator;
 import javax.security.auth.Subject;
@@ -68,9 +71,15 @@ public class JaasAuthenticator implements JMXAuthenticator {
             });
             loginContext.login();
 
-            if (subject.getPrincipals().size() == 0) {
-                // there must be some Principals, but which ones required are tested later
-                throw new FailedLoginException("User does not have the required role");
+            int roleCount = 0;
+            for (Principal principal : subject.getPrincipals()) {
+                if (principal instanceof RolePrincipal) {
+                    roleCount++;
+                }
+            }
+
+            if (roleCount == 0) {
+                throw new FailedLoginException("User doesn't have role defined");
             }
 
             return subject;
