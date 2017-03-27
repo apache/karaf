@@ -19,6 +19,7 @@
 package org.apache.karaf.shell.ssh;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.security.PublicKey;
 
 import javax.security.auth.Subject;
@@ -27,8 +28,10 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.modules.publickey.PublickeyCallback;
 import org.apache.sshd.common.session.Session;
 import org.apache.sshd.server.auth.password.PasswordAuthenticator;
@@ -77,6 +80,17 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
             });
             loginContext.login();
 
+            int roleCount = 0;
+            for (Principal principal : subject.getPrincipals()) {
+                if (principal instanceof RolePrincipal) {
+                    roleCount++;
+                }
+            }
+
+            if (roleCount == 0) {
+                throw new FailedLoginException("User doesn't have role defined");
+            }
+
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
         } catch (Exception e) {
@@ -102,6 +116,17 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
                 }
             });
             loginContext.login();
+
+            int roleCount = 0;
+            for (Principal principal : subject.getPrincipals()) {
+                if (principal instanceof RolePrincipal) {
+                    roleCount++;
+                }
+            }
+
+            if (roleCount == 0) {
+                throw new FailedLoginException("User doesn't have role defined");
+            }
 
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
