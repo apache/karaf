@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.shell.support.table;
 
+import org.apache.felix.gogo.runtime.threadio.ThreadPrintStream;
+
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -163,7 +165,7 @@ public class ShellTable {
     }
 
     private String getEncoding(PrintStream ps) {
-        if (ps.getClass().getName().equals("org.apache.felix.gogo.runtime.threadio.ThreadPrintStream")) {
+        if (ps.getClass() == ThreadPrintStream.class) {
             try {
                 ps = (PrintStream) ps.getClass().getMethod("getCurrent").invoke(ps);
             } catch (Throwable t) {
