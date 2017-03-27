@@ -134,7 +134,7 @@ fi
 
 # Process ID
 ANCHORFILE="$PIDDIR/$APP_NAME.anchor"
-PIDFILE="$PIDDIR/$APP_NAME.pid"
+PIDFILE="$PIDDIR/$APP_NAME.wrapper.pid"
 LOCKDIR="/var/lock/subsys"
 LOCKFILE="$LOCKDIR/$APP_NAME"
 pid=""
