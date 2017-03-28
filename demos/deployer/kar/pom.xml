@@ -24,13 +24,13 @@
     <parent>
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>org.apache.karaf.demos.deployer</artifactId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.1.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>org.apache.karaf.demos</groupId>
     <artifactId>my-kar</artifactId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.1</version>
     <packaging>pom</packaging>
     <!-- You can directly use the kar packaging -->
     <!-- <packaging>kar</packaging> -->
