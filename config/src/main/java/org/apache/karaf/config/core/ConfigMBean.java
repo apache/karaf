@@ -39,6 +39,16 @@ public interface ConfigMBean {
     void create(String pid) throws MBeanException;
 
     /**
+     * Install a cfg file.
+     *
+     * @param url The location of the cfg file.
+     * @param finalname The final name of the cfg file in the etc folder.
+     * @param override True to override the cfg file if it already exists, false else.
+     * @throws MBeanException in case of MBean failure.
+     */
+    void install(String url, String finalname, boolean override) throws MBeanException;
+
+    /**
      * Delete a configuration identified by the given PID.
      *
      * @param pid the configuration PID to delete.

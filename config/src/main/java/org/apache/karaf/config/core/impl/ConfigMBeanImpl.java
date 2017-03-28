@@ -13,7 +13,9 @@
  */
 package org.apache.karaf.config.core.impl;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -28,6 +30,7 @@ import javax.management.StandardMBean;
 
 import org.apache.karaf.config.core.ConfigMBean;
 import org.apache.karaf.config.core.ConfigRepository;
+import org.apache.karaf.util.StreamUtils;
 import org.osgi.service.cm.Configuration;
 
 /**
@@ -81,6 +84,36 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     public void create(String pid) throws MBeanException {
         try {
             configRepo.update(pid, new Hashtable<>());
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void install(String url, String finalname, boolean override) throws MBeanException {
+        try {
+            File etcFolder = new File(System.getProperty("karaf.etc"));
+            File file = new File(etcFolder, finalname);
+            if (file.exists()) {
+                if (!override) {
+                    throw new IllegalArgumentException("Configuration file {} already exists " + finalname);
+                }
+            }
+
+            try (InputStream is = new BufferedInputStream(new URL(url).openStream())) {
+                if (!file.exists()) {
+                    File parentFile = file.getParentFile();
+                    if (parentFile != null) {
+                        parentFile.mkdirs();
+                    }
+                    file.createNewFile();
+                }
+                try (FileOutputStream fop = new FileOutputStream(file)) {
+                    StreamUtils.copy(is, fop);
+                }
+            } catch (RuntimeException | MalformedURLException e) {
+                throw e;
+            }
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }

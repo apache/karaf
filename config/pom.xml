@@ -110,6 +110,7 @@
                         <Private-Package>
                             org.apache.karaf.config.core.impl,
                             org.apache.karaf.config.core.impl.osgi,
+                            org.apache.karaf.util,
                             org.apache.felix.utils.properties
                         </Private-Package>
                     </instructions>
