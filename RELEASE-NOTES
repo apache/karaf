@@ -55,6 +55,7 @@
     * [KARAF-5055] - Service wrapper shutdown timeout is not taken into account when Karaf's JVM is 'Stopped'
     * [KARAF-5059] - The terminal size is not set correctly when connecting through SSH
     * [KARAF-5067] - Add option not to register StandardManageableRegionDigraph
+    * [KARAF-5070] - Uninstall of asm causes bad refresh cascades
 
 ** Dependency upgrade
     * [KARAF-4861] - Upgrade to sshd 1.4.0
