@@ -102,68 +102,8 @@
                     <include>**/*</include>
                 </includes>
             </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.info</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${project.build.directory}/generated-resources</directory>
-                <includes>
-                    <include>**/*.*</include>
-                </includes>
-            </resource>
         </resources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/generated-resources/org/apache/karaf/instance/</outputDirectory>
-                            <useDefaultDelimiters>false</useDefaultDelimiters>
-                            <delimiters>
-                                <delimiter>@@</delimiter>
-                            </delimiters>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/../assemblies/features/base/src/main/resources</directory>
-                                    <excludes>
-                                        <exclude>**/org.apache.karaf.management.cfg</exclude>
-                                        <exclude>**/org.apache.karaf.shell.cfg</exclude>
-                                        <exclude>**/system.properties</exclude>
-                                        <exclude>**/README</exclude>
-                                    </excludes>
-                                </resource>
-                                <resource>
-                                    <directory>${project.basedir}/../assemblies/features/base/src/main/filtered-resources</directory>
-                                    <filtering>true</filtering>
-                                    <includes>
-                                        <include>**/*.properties</include>
-                                        <include>**/*.cfg</include>
-                                        <include>**/*.xml</include>
-                                        <include>**/*.info</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${project.basedir}/../assemblies/features/framework/src/main/resources</directory>
-                                    <includes>
-                                        <include>**/*.cfg</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-services-maven-plugin</artifactId>
