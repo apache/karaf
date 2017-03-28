@@ -15,6 +15,95 @@
  * limitations under the License.
  */
 
+		    Apache Karaf 4.1.1
+		    ==================
+ Apache Karaf 4.1.0 is a maintenance release on the 4.1.x series, bringing bug fixes and dependency
+ updates.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-4210] - Unreleased Resource: Streams
+    * [KARAF-4260] - Setting karaf.clean.all = true breaks service wrapper service script
+    * [KARAF-4275] - StaticConfigurationAdmin and NPE with spring dm
+    * [KARAF-4314] - karaf-maven-plugin issue when parsing feature xmls with <repository> entries that contain a newline and/or whitespaces
+    * [KARAF-4439] - Prevent user authentication (shell & JMX) if he doesn't have role
+    * [KARAF-4701] - Problem installing feature
+    * [KARAF-4964] - Can't convert wrap URL used in shell commands
+    * [KARAF-4968] - LDAPLoginModule does not correctly implement login method
+    * [KARAF-4974] - service:list does not work if the service property ObjectClass returns an empty array
+    * [KARAF-4978] - Features Subsystem leaks native memory
+    * [KARAF-4979] - Features StaxParser and UrlLoader leak resources
+    * [KARAF-4984] - Karaf exits when typing < or > in the shell
+    * [KARAF-4990] - Exception caused by Jetty Websocket server
+    * [KARAF-4993] - Unsecured access to gogo console over web
+    * [KARAF-4995] - Disable LDAP cache by default
+    * [KARAF-4996] - Missing packages in created instances 
+    * [KARAF-4997] - The generator doesn't merge common entries between feature.xml and POM
+    * [KARAF-4999] - Configfiles which are also POM dependencies end up duplicated
+    * [KARAF-5002] - Upgrade to Felix Configadmin 1.8.14
+    * [KARAF-5003] - Possible bugs in the source code
+    * [KARAF-5006] - Upgrade to Hibernate 5.2.8.Final
+    * [KARAF-5016] - Possible NPE while running "log:tail" in Karaf console
+    * [KARAF-5018] - Missing files in distribution created by instance:create
+    * [KARAF-5019] -  The source command doesn't work as before in karaf 4.1.0
+    * [KARAF-5022] - The repo defines an unnecessary dependency to pax web
+    * [KARAF-5026] - Set org.ops4j.pax.url.mvn.certificateCheck to true by default
+    * [KARAF-5027] - Missing jansi lib in the CLASSPATH of the client/client.bat
+    * [KARAF-5050] - Update maven prerequisite version to 3.0.5
+    * [KARAF-5055] - Service wrapper shutdown timeout is not taken into account when Karaf's JVM is 'Stopped'
+    * [KARAF-5059] - The terminal size is not set correctly when connecting through SSH
+    * [KARAF-5067] - Add option not to register StandardManageableRegionDigraph
+
+** Dependency upgrade
+    * [KARAF-4861] - Upgrade to sshd 1.4.0
+    * [KARAF-4967] - Upgrade to Felix Resolver 1.12.0
+    * [KARAF-4981] - Upgrade to Aries Blueprint Spring (and Extender) 0.3.0
+    * [KARAF-4991] - Upgrade to Narayana 5.5.2.Final
+    * [KARAF-5001] - Upgrade to Felix Framework 5.6.2
+    * [KARAF-5009] - Upgrade to JNA 4.3.0
+    * [KARAF-5010] - Upgrade to Aries JPA 2.6.0
+    * [KARAF-5011] - Upgrade to Aries Transaction Blueprint 2.1.0
+    * [KARAF-5012] - Upgrade to Felix Utils 1.9.0
+    * [KARAF-5013] - Upgrade to Felix WebConsole 4.3.0, DS Plugin 2.0.6, Event Plugin 1.1.6
+    * [KARAF-5021] - Downgrade to Jetty 9.3.14
+    * [KARAF-5024] - Upgrade to JLine 3.2.0
+    * [KARAF-5025] - Upgrade to Gogo 1.0.4
+    * [KARAF-5032] - Upgrade to Pax Web 6.0.3
+    * [KARAF-5035] - Upgrade pax web to 6.0.3
+    * [KARAF-5037] - Upgrade to Aries Blueprint Core 1.8.0 and Aries Blueprint CM 1.1.0
+    * [KARAF-5038] - Upgrade to maven-bundle-plugin 3.3.0
+    * [KARAF-5039] - Upgrade to maven-assembly-plugin 3.0.0
+    * [KARAF-5040] - Upgrade maven-compiler-plugin to 3.6.1
+    * [KARAF-5041] - Upgrade to maven-dependency-plugin 3.0.0
+    * [KARAF-5042] - Upgrade to maven-javadoc-plugin 2.10.4
+    * [KARAF-5043] - Upgrade to maven-resources-plugin 3.0.2
+    * [KARAF-5044] - Upgrade to maven-site-plugin 3.6
+    * [KARAF-5045] - Upgrade to maven-source-plugin 3.0.1
+    * [KARAF-5047] - Upgrade to ServiceMix depends-maven-plugin 1.4.0
+    * [KARAF-5048] - Upgrade to build-helper-maven-plugin 3.0.0
+    * [KARAF-5049] - Upgrade to exec-maven-plugin 1.6.0
+    * [KARAF-5061] - Upgrade to ServiceMix Specs 2.8.0
+    * [KARAF-5068] - Update pax-jdbc to 1.0.1
+
+** Improvement
+    * [KARAF-4973] - Refactoring of features extension
+    * [KARAF-4980] - OSGi framework capabilities: add all services
+    * [KARAF-4982] - Remove packages already provided by the assembly builder through libraries
+    * [KARAF-4983] - Improve osgi.ee capabilities
+    * [KARAF-4989] - Make LDAPLoginModule role.mapping option understand also fqdn
+    * [KARAF-4998] - Specify dependency/prerequisite features
+    * [KARAF-5017] - Random user used when running bin/client without -u option
+    * [KARAF-5028] - Set java.io.tmpdir when using the service wrapper
+    * [KARAF-5058] - Use ttop implementation from JLine
+
+** New Feature
+    * [KARAF-4514] - Add config:install command and MBean
+
+** Task
+    * [KARAF-5029] - ensure Karaf can build and pass all tests with JDK9 latest EA kit
+
 		    Apache Karaf 4.1.0
 		    ==================
  Apache Karaf 4.1.0 is the first release of the new 4.1.x serie.
