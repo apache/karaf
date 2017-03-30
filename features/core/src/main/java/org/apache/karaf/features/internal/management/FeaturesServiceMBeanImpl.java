@@ -26,7 +26,9 @@ import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.Notification;
+import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
+import javax.management.StandardEmitterMBean;
 import javax.management.openmbean.TabularData;
 
 import org.apache.karaf.features.Feature;
@@ -60,7 +62,8 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     private FeaturesService featuresService;
 
     public FeaturesServiceMBeanImpl() throws NotCompliantMBeanException {
-        super(FeaturesServiceMBean.class);
+        super(FeaturesServiceMBean.class,
+              new NotificationBroadcasterSupport(getBroadcastInfo()));
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
@@ -317,10 +320,6 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
             }
 
         };
-    }
-
-    public MBeanNotificationInfo[] getNotificationInfo() {
-        return getBroadcastInfo();
     }
 
     private static MBeanNotificationInfo[] getBroadcastInfo() {
