@@ -18,9 +18,14 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.junit.Test;
-
+import java.io.File;
+import java.math.BigInteger;
 import java.security.KeyPair;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.RSAPublicKey;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 public class OpenSSHGeneratorKeyFileProviderTest {
 
@@ -30,5 +35,28 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         prov.setOverwriteAllowed(false);
         KeyPair keys = prov.loadKeys().iterator().next();
         // how would we tell if they read 'correctly'? Well, the base class will throw if the key isn't reasonable.
+        Assert.assertNotNull(keys);
+        Assert.assertTrue("Loaded key is not RSA Key", keys.getPublic() instanceof RSAPublicKey);
+        Assert.assertEquals(65537, ((RSAPublicKey) keys.getPublic()).getPublicExponent().intValue());
+    }
+    
+    @Test
+    public void writeSshKey() throws Exception {
+    	// create a temporary file
+    	File temp = File.createTempFile(this.getClass().getCanonicalName(), ".pem");
+    	temp.deleteOnExit();
+    	OpenSSHGeneratorFileKeyProvider prov = new OpenSSHGeneratorFileKeyProvider(temp.getPath(), "RSA", 4096);
+    	KeyPair keys = prov.loadKeys().iterator().next();
+    	Assert.assertNotNull(keys);
+    	Assert.assertTrue(temp.exists());
+    	Assert.assertFalse(temp.length() == 0);
+    	BigInteger privateExponent = ((RSAPrivateCrtKey) keys.getPrivate()).getPrivateExponent();
+    	// read and check if correctly read
+    	prov = new OpenSSHGeneratorFileKeyProvider(temp.getPath());
+    	keys = prov.loadKeys().iterator().next();
+        Assert.assertNotNull(keys);
+        Assert.assertTrue("Loaded key is not RSA Key", keys.getPrivate() instanceof RSAPrivateCrtKey);
+        BigInteger privateExponent2 = ((RSAPrivateCrtKey) keys.getPrivate()).getPrivateExponent();
+        Assert.assertEquals(privateExponent, privateExponent2);
     }
 }

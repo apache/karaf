@@ -19,6 +19,7 @@
 
 package org.apache.karaf.shell.ssh;
 
+import org.apache.commons.ssl.PEMItem;
 import org.apache.commons.ssl.PEMUtil;
 import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
@@ -29,6 +30,7 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -72,10 +74,10 @@ public class OpenSSHGeneratorFileKeyProvider extends AbstractGeneratorHostKeyPro
     @Override
     protected void doWriteKeyPair(String resourceKey, KeyPair kp, OutputStream os) throws IOException, GeneralSecurityException {
         Collection<Object> items = new ArrayList<>();
-        items.add(kp.getPrivate());
-        items.add(kp.getPublic());
+        items.add(new PEMItem(kp.getPrivate().getEncoded(), "PRIVATE KEY"));
         byte[] bytes = PEMUtil.encode(items);
         os.write(bytes);
+        os.close();
     }
 
 }
