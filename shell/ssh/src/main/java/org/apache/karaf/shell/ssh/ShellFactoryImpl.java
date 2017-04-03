@@ -98,8 +98,8 @@ public class ShellFactoryImpl implements Factory<Command> {
                 final Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session
                         .getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
                 String encoding = getEncoding(env);
-                final PrintStream pout = out instanceof PrintStream ? (PrintStream) out : new PrintStream(out, false, encoding);
-                final PrintStream perr = err instanceof PrintStream ? (PrintStream) err : out == err ? pout : new PrintStream(err, false, encoding);
+                final PrintStream pout = out instanceof PrintStream ? (PrintStream) out : new PrintStream(out, true, encoding);
+                final PrintStream perr = err instanceof PrintStream ? (PrintStream) err : out == err ? pout : new PrintStream(err, true, encoding);
                 terminal = new SshTerminal(env, in, pout);
                 shell = sessionFactory.create(in,
                         pout, perr, terminal, encoding, this::destroy);

@@ -41,7 +41,7 @@ public class LogTail extends DisplayLog {
     @Reference
     LogService logService;
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private ExecutorService executorService = Executors.newFixedThreadPool(2);
 
     @Override
     public Object execute() throws Exception {
@@ -100,6 +100,7 @@ public class LogTail extends DisplayLog {
             for (PaxLoggingEvent event : le) {
                 printEvent(out, event, minLevel);
             }
+            out.flush();
             // Tail
             final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
             PaxAppender appender = new PaxAppender() {
@@ -111,6 +112,9 @@ public class LogTail extends DisplayLog {
                 logService.addAppender(appender);
                 while (doDisplay) {
                     printEvent(out, queue.take(), minLevel);
+                    if (queue.isEmpty()) {
+                        out.flush();
+                    }
                 }
             } catch (InterruptedException e) {
                 // Ignore
