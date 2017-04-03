@@ -15,6 +15,96 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 4.0.9
+                    ==================
+
+ This is an update patch for Apache Karaf 4.0.x, containing bug fixes.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-4105] - karaf-assembly fails when used Maven versions do not match derived OSGi versions
+    * [KARAF-4260] - Setting karaf.clean.all = true breaks service wrapper service script
+    * [KARAF-4275] - StaticConfigurationAdmin and NPE with spring dm
+    * [KARAF-4314] - karaf-maven-plugin issue when parsing feature xmls with <repository> entries that contain a newline and/or whitespaces
+    * [KARAF-4439] - Prevent user authentication (shell & JMX) if he doesn't have role
+    * [KARAF-4572] - NullPointer Exception when deploying EclipseLink model bundle
+    * [KARAF-4701] - Problem installing feature
+    * [KARAF-4802] - Auto Deploy does not release resource
+    * [KARAF-4820] - wrapper:install command does not use ---include and --env parameters
+    * [KARAF-4904] - instance:create should use next free ssh port
+    * [KARAF-4905] - o.a.k.main.util.SimpleMavenResolver uses duplicate system repo
+    * [KARAF-4907] - bin/status logging WARN every time
+    * [KARAF-4927] - NamespaceHandlers should return null for unknown namespaces
+    * [KARAF-4945] - ensure LDAPCache is cleared when jaas module bundle get reloaded
+    * [KARAF-4949] - Karaf 4.0.8 doesn't work on Solaris 11
+    * [KARAF-4951] - Incorrect Equals/HashCode implementation crashes Deployer
+    * [KARAF-4964] - Can't convert wrap URL used in shell commands
+    * [KARAF-4968] - LDAPLoginModule does not correctly implement login method
+    * [KARAF-4975] - karaf script uses #!/bin/bash instead of #!/usr/bin/env bash
+    * [KARAF-4978] - Features Subsystem leaks native memory
+    * [KARAF-4993] - Unsecured access to gogo console over web
+    * [KARAF-4995] - Disable LDAP cache by default
+    * [KARAF-4996] - Missing packages in created instances 
+    * [KARAF-4997] - The generator doesn't merge common entries between feature.xml and POM
+    * [KARAF-4999] - Configfiles which are also POM dependencies end up duplicated
+    * [KARAF-5002] - Upgrade to Felix Configadmin 1.8.14
+    * [KARAF-5003] - Possible bugs in the source code
+    * [KARAF-5007] - karaf:run doesn't work due to resolver upgrade
+    * [KARAF-5018] - Missing files in distribution created by instance:create
+    * [KARAF-5026] - Set org.ops4j.pax.url.mvn.certificateCheck to true by default
+    * [KARAF-5050] - Update maven prerequisite version to 3.0.5
+    * [KARAF-5055] - Service wrapper shutdown timeout is not taken into account when Karaf's JVM is 'Stopped'
+
+** Dependency upgrade
+    * [KARAF-4891] - Provide Spring 4.3.5.RELEASE feature
+    * [KARAF-4918] - Upgrade to Felix FileInstall 3.5.8
+    * [KARAF-4922] - Upgrade to Jolokia 1.3.5
+    * [KARAF-4946] - Upgrade to Spring 4.2.9.RELEASE
+    * [KARAF-4947] - Upgrade to Spring 3.2.18.RELEASE
+    * [KARAF-4948] - Upgrade to Felix SCR 2.0.8/SCR Annotations 1.12.0/DS WebConsole plugin 2.0.4
+    * [KARAF-4954] - Upgrade to Aries JPA 2.5.0
+    * [KARAF-4955] - Upgrade to Pax JDBC 1.0.0
+    * [KARAF-4967] - Upgrade to Felix Resolver 1.12.0
+    * [KARAF-5001] - Upgrade to Felix Framework 5.6.2
+    * [KARAF-5010] - Upgrade to Aries JPA 2.6.0
+    * [KARAF-5011] - Upgrade to Aries Transaction Blueprint 2.1.0
+    * [KARAF-5012] - Upgrade to Felix Utils 1.9.0
+    * [KARAF-5013] - Upgrade to Felix WebConsole 4.3.0, DS Plugin 2.0.6, Event Plugin 1.1.6
+    * [KARAF-5038] - Upgrade to maven-bundle-plugin 3.3.0
+    * [KARAF-5039] - Upgrade to maven-assembly-plugin 3.0.0
+    * [KARAF-5040] - Upgrade maven-compiler-plugin to 3.6.1
+    * [KARAF-5041] - Upgrade to maven-dependency-plugin 3.0.0
+    * [KARAF-5042] - Upgrade to maven-javadoc-plugin 2.10.4
+    * [KARAF-5043] - Upgrade to maven-resources-plugin 3.0.2
+    * [KARAF-5044] - Upgrade to maven-site-plugin 3.6
+    * [KARAF-5045] - Upgrade to maven-source-plugin 3.0.1
+    * [KARAF-5047] - Upgrade to ServiceMix depends-maven-plugin 1.4.0
+    * [KARAF-5048] - Upgrade to build-helper-maven-plugin 3.0.0
+    * [KARAF-5049] - Upgrade to exec-maven-plugin 1.6.0
+    * [KARAF-5061] - Upgrade to ServiceMix Specs 2.8.0
+    * [KARAF-5068] - Update pax-jdbc to 1.0.1
+
+** Improvement
+    * [KARAF-3779] - Be able to define the copied location of the kar files
+    * [KARAF-4361] - Allow dynamic config customization when embedding Karaf using the Main class
+    * [KARAF-4958] - bundle:list -s is too wide
+    * [KARAF-4989] - Make LDAPLoginModule role.mapping option understand also fqdn
+    * [KARAF-4998] - Specify dependency/prerequisite features
+    * [KARAF-5028] - Set java.io.tmpdir when using the service wrapper
+
+** New Feature
+    * [KARAF-4327] - Features for spring-security 3.2.x and 4.0.x
+    * [KARAF-4514] - Add config:install command and MBean
+    * [KARAF-4897] - Add an option to simplify bundle dependencies
+
+** Task
+    * [KARAF-4835] - Add content assist for paths in shell:source command
+
+** Test
+    * [KARAF-4962] - Karaf itests are flaky on Jenkins
+
                     Apache Karaf 4.0.8
                     ==================
 
