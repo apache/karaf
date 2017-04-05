@@ -51,7 +51,7 @@ public abstract class ConfigCommandSupport implements Action {
     protected abstract Object doExecute() throws Exception;
 
     @SuppressWarnings("rawtypes")
-    protected Dictionary getEditedProps() throws Exception {
+    protected Dictionary<String, Object> getEditedProps() throws Exception {
         return (Dictionary) this.session.get(PROPERTY_CONFIG_PROPS);
     }
 

@@ -29,6 +29,7 @@ import java.util.*;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.InterpolationHelper.SubstitutionCallback;
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
@@ -100,12 +101,14 @@ public class FeatureConfigInstaller {
 
     public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
     	for (ConfigInfo config : feature.getConfigurations()) {
-            org.apache.felix.utils.properties.Properties props = new org.apache.felix.utils.properties.Properties();
-            props.load(new StringReader(config.getValue()));
+            TypedProperties props = new TypedProperties();
+            // trim lines
+            String val = config.getValue().replaceAll("\n\\s+", "\n");
+            props.load(new StringReader(val));
 			String[] pid = parsePid(config.getName());
 			Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
 			if (cfg == null) {
-				Dictionary<String, String> cfgProps = convertToDict(props);
+				Dictionary<String, Object> cfgProps = convertToDict(props);
 				cfg = createConfiguration(configAdmin, pid[0], pid[1]);
 				String key = createConfigurationKey(pid[0], pid[1]);
 				cfgProps.put(CONFIG_KEY, key);
@@ -120,7 +123,7 @@ public class FeatureConfigInstaller {
 				Dictionary<String,Object> properties = cfg.getProperties();
                 for (String key : props.keySet()) {
                     if (properties.get(key) == null) {
-                        properties.put(key, props.getProperty(key));
+                        properties.put(key, props.get(key));
                         update = true;
                     }
                 }
@@ -139,9 +142,9 @@ public class FeatureConfigInstaller {
         }
     }
 
-	private Dictionary<String, String> convertToDict(Map<String, String> props) {
-		Dictionary<String, String> cfgProps = new Hashtable<String, String>();
-        for (Map.Entry<String, String> e : props.entrySet()) {
+	private Dictionary<String, Object> convertToDict(Map<String, Object> props) {
+		Dictionary<String, Object> cfgProps = new Hashtable<>();
+        for (Map.Entry<String, Object> e : props.entrySet()) {
             cfgProps.put(e.getKey(), e.getValue());
         }
 		return cfgProps;
@@ -240,7 +243,7 @@ public class FeatureConfigInstaller {
         }
     }
 
-    protected void updateStorage(String pid, String factoryPid, org.apache.felix.utils.properties.Properties props, boolean append) throws Exception {
+    protected void updateStorage(String pid, String factoryPid, TypedProperties props, boolean append) throws Exception {
         if (storage != null && configCfgStore) {
             // get the cfg file
             File cfgFile;
@@ -272,7 +275,8 @@ public class FeatureConfigInstaller {
             if (!cfgFile.exists()) {
                 props.save(cfgFile);
             } else {
-                org.apache.felix.utils.properties.Properties properties = new org.apache.felix.utils.properties.Properties(cfgFile);
+                TypedProperties properties = new TypedProperties();
+                properties.load( cfgFile );
                 for (String key : props.keySet()) {
                     if (!Constants.SERVICE_PID.equals(key)
                             && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
@@ -306,7 +310,7 @@ public class FeatureConfigInstaller {
                 }
                 // save the cfg file
                 storage.mkdirs();
-                properties.save();
+                properties.save( cfgFile );
             }
         }
     }

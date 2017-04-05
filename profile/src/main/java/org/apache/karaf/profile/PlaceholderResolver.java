@@ -27,7 +27,7 @@ public interface PlaceholderResolver {
      *
      * @return The placeholder scheme.
      */
-    public String getScheme();
+    String getScheme();
 
     /**
      * Resolve the placeholder found inside the value, for the specific key of the pid.
@@ -38,6 +38,6 @@ public interface PlaceholderResolver {
      * @param value The value with the placeholder.
      * @return The resolved value or EMPTY_STRING.
      */
-    public String resolve(Map<String, Map<String, String>> profile, String pid, String key, String value);
+    String resolve(Map<String, Map<String, String>> profile, String pid, String key, String value);
 
 }

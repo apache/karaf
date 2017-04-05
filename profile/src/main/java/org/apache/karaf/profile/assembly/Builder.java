@@ -564,10 +564,10 @@ public class Builder {
 
         manager = new CustomDownloadManager(resolver, executor, overallEffective, translatedUrls);
 
-        Hashtable<String, String> agentProps = new Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
-        final Map<String, String> properties = new HashMap<>();
-        properties.put("karaf.default.repository", "system");
-        InterpolationHelper.performSubstitution(agentProps, properties::get, false, false, true);
+//        Hashtable<String, String> agentProps = new Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
+//        final Map<String, String> properties = new HashMap<>();
+//        properties.put("karaf.default.repository", "system");
+//        InterpolationHelper.performSubstitution(agentProps, properties::get, false, false, true);
 
         //
         // Write config and system properties

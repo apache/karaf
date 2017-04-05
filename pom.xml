@@ -184,7 +184,7 @@
         <felix.configadmin.version>1.8.14</felix.configadmin.version>
         <felix.connect.version>0.1.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
-        <felix.fileinstall.version>3.5.8</felix.fileinstall.version>
+        <felix.fileinstall.version>3.6.0-SNAPSHOT</felix.fileinstall.version>
         <felix.framework.version>5.6.2</felix.framework.version>
         <felix.framework.security.version>2.6.0</felix.framework.security.version>
         <felix.gogo.runtime.version>1.0.4</felix.gogo.runtime.version>
@@ -192,7 +192,7 @@
         <felix.httplite.version>0.1.5</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
         <felix.plugin.version>3.3.0</felix.plugin.version>
-        <felix.utils.version>1.9.0</felix.utils.version>
+        <felix.utils.version>1.10.0-SNAPSHOT</felix.utils.version>
         <felix.webconsole.version>4.3.0</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
         <felix.metatype.version>1.1.2</felix.metatype.version>

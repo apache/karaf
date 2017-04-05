@@ -59,8 +59,8 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
 	@Override
     public List<String> getParents() {
-        Map<String, String> config = getConfigurationInternal(Profile.INTERNAL_PID);
-        String pspec = config.get(PARENTS_ATTRIBUTE_KEY);
+        Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
+        String pspec = (String) config.get(PARENTS_ATTRIBUTE_KEY);
         String[] parentIds = pspec != null ? pspec.split(" ") : new String[0];
         return Arrays.asList(parentIds);
     }
@@ -101,7 +101,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 	}
 
     private void updateParentsAttribute(Collection<String> parentIds) {
-        Map<String, String> config = getConfigurationInternal(Profile.INTERNAL_PID);
+        Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
         config.remove(PARENTS_ATTRIBUTE_KEY);
         if (parentIds.size() > 0) {
             config.put(PARENTS_ATTRIBUTE_KEY, parentsAttributeValue(parentIds));
@@ -110,14 +110,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     private String parentsAttributeValue(Collection<String> parentIds) {
-        String pspec = "";
-        if (parentIds.size() > 0) {
-            for (String parentId : parentIds) {
-                pspec += " " + parentId;
-            }
-            pspec = pspec.substring(1);
-        }
-        return pspec;
+	    return parentIds.isEmpty() ? "" : String.join(" ", parentIds);
     }
     
     @Override
@@ -149,25 +142,25 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
 	@Override
-	public ProfileBuilder setConfigurations(Map<String, Map<String, String>> configs) {
+	public ProfileBuilder setConfigurations(Map<String, Map<String, Object>> configs) {
 	    for (String pid : getConfigurationKeys()) {
 	        deleteConfiguration(pid);
 	    }
-		for (Entry<String, Map<String, String>> entry : configs.entrySet()) {
+		for (Entry<String, Map<String, Object>> entry : configs.entrySet()) {
 		    addConfiguration(entry.getKey(), new HashMap<>(entry.getValue()));
 		}
 		return this;
 	}
 
     @Override
-    public ProfileBuilder addConfiguration(String pid, Map<String, String> config) {
+    public ProfileBuilder addConfiguration(String pid, Map<String, Object> config) {
         fileMapping.put(pid + Profile.PROPERTIES_SUFFIX, Utils.toBytes(config));
         return this;
     }
 
     @Override
-    public ProfileBuilder addConfiguration(String pid, String key, String value) {
-        Map<String, String> config = getConfigurationInternal(pid);
+    public ProfileBuilder addConfiguration(String pid, String key, Object value) {
+        Map<String, Object> config = getConfigurationInternal(pid);
         config.put(key, value);
         return addConfiguration(pid, config);
     }
@@ -185,11 +178,11 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     @Override
-    public Map<String, String> getConfiguration(String pid) {
+    public Map<String, Object> getConfiguration(String pid) {
         return getConfigurationInternal(pid);
     }
 
-    private Map<String, String> getConfigurationInternal(String pid) {
+    private Map<String, Object> getConfigurationInternal(String pid) {
         byte[] bytes = fileMapping.get(pid + Profile.PROPERTIES_SUFFIX);
         return Utils.toProperties(bytes);
     }
@@ -261,7 +254,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     @Override
     public ProfileBuilder setAttributes(Map<String, String> attributes) {
-        Map<String, String> config = getConfigurationInternal(Profile.INTERNAL_PID);
+        Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
         for (String key : new ArrayList<>(config.keySet())) {
             if (key.startsWith(Profile.ATTRIBUTE_PREFIX)) {
                 config.remove(key);
@@ -276,7 +269,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     private void addAgentConfiguration(ConfigListType type, List<String> values) {
         String prefix = type + ".";
-        Map<String, String> config = getConfigurationInternal(Profile.INTERNAL_PID);
+        Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
         for (String key : new ArrayList<>(config.keySet())) {
             if (key.startsWith(prefix)) {
                 config.remove(key);
@@ -290,7 +283,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     private void addAgentConfiguration(ConfigListType type, String value) {
         String prefix = type + ".";
-        Map<String, String> config = getConfigurationInternal(Profile.INTERNAL_PID);
+        Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
         config.put(prefix + value, value);
         addConfiguration(Profile.INTERNAL_PID, config);
     }

@@ -60,15 +60,18 @@ public class ConfigRepositoryImpl implements ConfigRepository {
      * @see org.apache.karaf.shell.config.impl.ConfigRepository#update(java.lang.String, java.util.Dictionary, boolean)
      */
     @Override
-    public void update(String pid, Dictionary<String, Object> props) throws IOException {
+    public void update(String pid, Dictionary<String, Object> properties) throws IOException {
         LOGGER.trace("Update configuration {}", pid);
         Configuration cfg = configAdmin.getConfiguration(pid, null);
-        cfg.update(props);
-        try {
-            updateStorage(pid, props);
-        } catch (Exception e) {
-            LOGGER.warn("Can't update cfg file", e);
+        if (storage != null) {
+            // Check, whether a file location is already provided.
+            if (properties.get(FILEINSTALL_FILE_NAME) == null) {
+                String cfgFileName = pid + ".cfg";
+                File cfgFile = new File(storage, cfgFileName);
+                properties.put(FILEINSTALL_FILE_NAME, cfgFile.getCanonicalFile().toURI().toString());
+            }
         }
+        cfg.update(properties);
     }
 
     /* (non-Javadoc)
@@ -123,7 +126,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                         cfgFile = getCfgFileFromProperties(oldProps);
                         if (cfgFile == null) {
                             throw new IOException("The configuration value '" + oldProps.get(FILEINSTALL_FILE_NAME)
-                                    + "' for ' + FILEINSTALL_FILE_NAME + ' does not represent a valid file location.");
+                                    + "' for '" + FILEINSTALL_FILE_NAME + "' does not represent a valid file location.");
                         }
                     } catch (URISyntaxException | MalformedURLException e) {
                         throw new IOException(e);
@@ -209,7 +212,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             }
             config.update(properties);
             String pid = config.getPid();
-            updateStorage(pid, properties);
+//            updateStorage(pid, properties);
             return pid;
         } catch (IOException e) {
             throw new UncheckedIOException(e);

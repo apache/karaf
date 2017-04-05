@@ -27,25 +27,6 @@ public final class PlaceholderResolvers {
 
     private PlaceholderResolvers() { }
 
-    public static class PropertyPlaceholderResolver implements PlaceholderResolver {
-
-        private final Map<String, String> properties;
-
-        public PropertyPlaceholderResolver(Map<String, String> properties) {
-            this.properties = properties;
-        }
-
-        @Override
-        public String getScheme() {
-            return null;
-        }
-
-        @Override
-        public String resolve(Map<String, Map<String, String>> profile, String pid, String key, String value) {
-            return properties.get(value);
-        }
-    }
-
     public static class ProfilePlaceholderResolver implements PlaceholderResolver {
 
         public final String SCHEME = "profile";
@@ -63,7 +44,8 @@ public final class PlaceholderResolvers {
                 String propertyKey = value.substring(index + 1);
                 Map<String, String> props = profile.get(propertyPid);
                 if (props != null && props.containsKey(propertyKey)) {
-                    return props.get(propertyKey);
+                    Object v = props.get(propertyKey);
+                    return v.toString();
                 }
             }
             return null;

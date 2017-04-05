@@ -24,19 +24,14 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.AbstractMap;
-import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.felix.utils.properties.InterpolationHelper;
-import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.profile.PlaceholderResolver;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
@@ -142,7 +137,7 @@ public final class Profiles {
 
     public static Profile getEffective(final Profile profile, boolean finalSubstitution) {
         return getEffective(profile,
-                Collections.<PlaceholderResolver>singleton(new PlaceholderResolvers.ProfilePlaceholderResolver()),
+                Collections.singleton(new PlaceholderResolvers.ProfilePlaceholderResolver()),
                 finalSubstitution);
     }
 
@@ -156,165 +151,55 @@ public final class Profiles {
                                        boolean finalSubstitution) {
         assertNotNull(profile, "profile is null");
         assertNotNull(profile, "resolvers is null");
-        // Build dynamic configurations which can support lazy computation of substituted values
-        final Map<String, Map<String, String>> dynamic = new HashMap<>();
-        final Map<String, Properties> originals = new HashMap<>();
+
+        final Map<String, TypedProperties> originals = new HashMap<>();
         for (Map.Entry<String, byte[]> entry : profile.getFileConfigurations().entrySet()) {
             if (entry.getKey().endsWith(Profile.PROPERTIES_SUFFIX)) {
                 try {
                     String key = entry.getKey().substring(0, entry.getKey().length() - Profile.PROPERTIES_SUFFIX.length());
-                    Properties props = new Properties(false);
+                    TypedProperties props = new TypedProperties(false);
                     props.load(new ByteArrayInputStream(entry.getValue()));
                     originals.put(key, props);
-                    dynamic.put(key, new DynamicMap(dynamic, key, props, resolvers, finalSubstitution));
                 } catch (IOException e) {
                     throw new IllegalArgumentException("Can not load properties for " + entry.getKey());
                 }
             }
         }
-        // Force computation while preserving layout
+        final Map<String, Map<String, String>> dynamic = TypedProperties.prepare(originals);
+        TypedProperties.substitute(originals, dynamic, (pid, key, value) -> {
+            if (value != null) {
+                for (PlaceholderResolver resolver : resolvers) {
+                    if (resolver.getScheme() == null) {
+                        String val = resolver.resolve(dynamic, pid, key, value);
+                        if (val != null) {
+                            return val;
+                        }
+                    }
+                }
+                if (value.contains(":")) {
+                    String scheme = value.substring(0, value.indexOf(":"));
+                    String toSubst = value.substring(scheme.length() + 1);
+                    for (PlaceholderResolver resolver : resolvers) {
+                        if (scheme.equals(resolver.getScheme())) {
+                            String val = resolver.resolve(dynamic, pid, key, toSubst);
+                            if (val != null) {
+                                return val;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }, finalSubstitution);
+
+         // Force computation while preserving layout
         ProfileBuilder builder = ProfileBuilder.Factory.createFrom(profile);
-        for (Map.Entry<String, Map<String, String>> cfg : dynamic.entrySet()) {
-            Properties original = originals.get(cfg.getKey());
-            original.keySet().retainAll(cfg.getValue().keySet());
-            original.putAll(cfg.getValue());
+        for (Map.Entry<String, TypedProperties> cfg : originals.entrySet()) {
+            TypedProperties original = cfg.getValue();
             builder.addFileConfiguration(cfg.getKey() + Profile.PROPERTIES_SUFFIX, Utils.toBytes(original));
         }
         // Compute the new profile
         return builder.getProfile();
-    }
-
-    private static class DynamicMap extends AbstractMap<String, String> {
-
-        private final Map<String, String> computed = new HashMap<>();
-        private final Map<String, String> cycles = new HashMap<>();
-        private final Map<String, Map<String, String>> profile;
-        private final String pid;
-        private final Map<String, String> original;
-        private final Collection<PlaceholderResolver> resolvers;
-        private final boolean finalSubstitution;
-
-        private DynamicMap(Map<String, Map<String, String>> profile,
-                          String pid,
-                          Map<String, String> original,
-                          Collection<PlaceholderResolver> resolvers,
-                          boolean finalSubstitution) {
-            this.profile = profile;
-            this.pid = pid;
-            this.original = original;
-            this.resolvers = resolvers;
-            this.finalSubstitution = finalSubstitution;
-        }
-
-        @Override
-        public Set<Entry<String, String>> entrySet() {
-            return new DynamicEntrySet();
-        }
-
-        private class DynamicEntrySet extends AbstractSet<Entry<String, String>> {
-
-            @Override
-            public Iterator<Entry<String, String>> iterator() {
-                return new DynamicEntrySetIterator();
-            }
-
-            @Override
-            public int size() {
-                return original.size();
-            }
-
-        }
-
-        private class DynamicEntrySetIterator implements Iterator<Entry<String, String>> {
-            final Iterator<Entry<String, String>> delegate = original.entrySet().iterator();
-
-            @Override
-            public boolean hasNext() {
-                return delegate.hasNext();
-            }
-
-            @Override
-            public Entry<String, String> next() {
-                final Entry<String, String> original = delegate.next();
-                return new DynamicEntry(original.getKey(), original.getValue());
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        }
-
-        private class DynamicEntry implements Entry<String, String> {
-
-            private final String key;
-            private final String value;
-
-            private DynamicEntry(String key, String value) {
-                this.key = key;
-                this.value = value;
-            }
-
-            @Override
-            public String getKey() {
-                return key;
-            }
-
-            @Override
-            public String getValue() {
-                String v = computed.get(key);
-                if (v == null) {
-                    v = compute();
-                    computed.put(key, v);
-                }
-                return v;
-            }
-
-            private String compute() {
-                InterpolationHelper.SubstitutionCallback callback = new InterpolationHelper.SubstitutionCallback() {
-                    public String getValue(String value) {
-                        if (value != null) {
-                            for (PlaceholderResolver resolver : resolvers) {
-                                if (resolver.getScheme() == null) {
-                                    String val = resolver.resolve(profile, pid, key, value);
-                                    if (val != null) {
-                                        return val;
-                                    }
-                                }
-                            }
-                            if (value.contains(":")) {
-                                String scheme = value.substring(0, value.indexOf(":"));
-                                String toSubst = value.substring(scheme.length() + 1);
-                                for (PlaceholderResolver resolver : resolvers) {
-                                    if (scheme.equals(resolver.getScheme())) {
-                                        String val = resolver.resolve(profile, pid, key, toSubst);
-                                        if (val != null) {
-                                            return val;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        return null;
-                    }
-                };
-                String v = InterpolationHelper.substVars(value, key, cycles, DynamicMap.this, callback, finalSubstitution, finalSubstitution, finalSubstitution);
-                for (PlaceholderResolver resolver : resolvers) {
-                    if (PlaceholderResolver.CATCH_ALL_SCHEME.equals(resolver.getScheme())) {
-                        String val = resolver.resolve(profile, pid, key, v);
-                        if (val != null) {
-                            v = val;
-                        }
-                    }
-                }
-                return v;
-            }
-
-            @Override
-            public String setValue(String value) {
-                throw new UnsupportedOperationException();
-            }
-        }
     }
 
     static private class OverlayOptionsProvider {
@@ -325,7 +210,7 @@ public final class Profiles {
 
         private static class SupplementControl {
             byte[] data;
-            Properties props;
+            TypedProperties props;
         }
 
         private OverlayOptionsProvider(Map<String, Profile> profiles, Profile self, String environment) {
@@ -391,13 +276,13 @@ public final class Profiles {
                     SupplementControl ctrl = aggregate.get(key);
                     if (ctrl != null) {
                         // we can update the file..
-                        Properties childMap = Utils.toProperties(value);
+                        TypedProperties childMap = Utils.toProperties(value);
                         if (childMap.remove(Profile.DELETED) != null) {
                             ctrl.props.clear();
                         }
 
                         // Update the entries...
-                        for (Map.Entry<String, String> p : childMap.entrySet()) {
+                        for (Map.Entry<String, Object> p : childMap.entrySet()) {
                             if (Profile.DELETED.equals(p.getValue())) {
                                 ctrl.props.remove(p.getKey());
                             } else {

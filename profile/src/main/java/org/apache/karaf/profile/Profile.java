@@ -121,7 +121,7 @@ public interface Profile {
      *
      * @return The configurations in the profile.
      */
-    Map<String, Map<String, String>> getConfigurations();
+    Map<String, Map<String, Object>> getConfigurations();
 
     /**
      * Get the configuration properties for the given PID.
@@ -129,7 +129,7 @@ public interface Profile {
      * @param pid The configuration PID to look for.
      * @return An empty map if the there is no configuration for the given pid.
      */
-    Map<String, String> getConfiguration(String pid);
+    Map<String, Object> getConfiguration(String pid);
 
     /**
      * Indicate if this profile is an overlay or not.
