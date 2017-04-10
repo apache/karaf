@@ -53,6 +53,8 @@ public class Config implements ConfigInfo {
     protected String name;
     @XmlAttribute(required = false)
 	private Boolean append = false;
+    @XmlAttribute
+	private Boolean external = false;
 
     /**
      * Gets the value of the value property.
@@ -106,6 +108,14 @@ public class Config implements ConfigInfo {
 	 */
 	public void setAppend(boolean append) {
 		this.append = append;
+	}
+
+	public boolean isExternal() {
+		return external;
+	}
+
+	public void setExternal(boolean external) {
+		this.external = external;
 	}
 
 	public Properties getProperties() {

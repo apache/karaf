@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="dependency-feature-a">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.5.0" name="dependency-feature-a">
     <repository>mvn:test/dependency-feature-b/1.0-SNAPSHOT/xml/features</repository>
     <feature name="dependency-feature-a" description="dependency-feature-a" version="1.0.0.SNAPSHOT">
         <feature version="1.0.0.SNAPSHOT" prerequisite="false" dependency="false">dependency-feature-b</feature>

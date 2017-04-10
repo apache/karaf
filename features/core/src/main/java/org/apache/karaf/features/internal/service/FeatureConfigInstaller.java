@@ -104,7 +104,11 @@ public class FeatureConfigInstaller {
             TypedProperties props = new TypedProperties();
             // trim lines
             String val = config.getValue();
-            props.load(new StringReader(val));
+            if (config.isExternal()) {
+                props.load(new URL(val));
+            } else {
+                props.load(new StringReader(val));
+            }
 			String[] pid = parsePid(config.getName());
 			Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
 			if (cfg == null) {
