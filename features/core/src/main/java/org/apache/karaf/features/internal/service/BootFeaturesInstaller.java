@@ -38,7 +38,7 @@ public class BootFeaturesInstaller {
 
     private final FeaturesServiceImpl featuresService;
     private final BundleContext bundleContext;
-    private final String repositories;
+    private final String[] repositories;
     private final String features;
     private final boolean asynchronous;
     
@@ -59,7 +59,7 @@ public class BootFeaturesInstaller {
     
     public BootFeaturesInstaller(BundleContext bundleContext,
                                  FeaturesServiceImpl featuresService,
-                                 String repositories,
+                                 String[] repositories,
                                  String features,
                                  boolean asynchronous) {
         this.bundleContext = bundleContext;
@@ -90,7 +90,7 @@ public class BootFeaturesInstaller {
 
     protected void installBootFeatures() {
         try {
-            for (String repo : repositories.split(",")) {
+            for (String repo : repositories) {
                 repo = repo.trim();
                 if (!repo.isEmpty()) {
                     repo = separatorsToUnix(repo);

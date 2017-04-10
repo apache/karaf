@@ -134,6 +134,7 @@
                             org.apache.karaf.instance.core.internal.osgi,
                             org.apache.felix.utils.properties;-split-package:=merge-first,
                             org.apache.karaf.util,
+                            org.apache.karaf.util.config,
                             org.apache.karaf.util.locks,
                         </Private-Package>
                     </instructions>

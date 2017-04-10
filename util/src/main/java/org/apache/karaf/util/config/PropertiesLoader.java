@@ -19,10 +19,8 @@
 package org.apache.karaf.util.config;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -103,9 +101,7 @@ public class PropertiesLoader {
     public static void loadSystemProperties(File file) throws IOException {
         Properties props = new Properties(false);
         try {
-            InputStream is = new FileInputStream(file);
-            props.load(is);
-            is.close();
+            props.load(file);
         } catch (Exception e1) {
             // Ignore
         }
@@ -146,11 +142,8 @@ public class PropertiesLoader {
 
     public static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
         Properties configProps = new Properties(null, false);
-        InputStream is = null;
         try {
-            is = configPropURL.openConnection().getInputStream();
-            configProps.load(is);
-            is.close();
+            configProps.load(configPropURL);
         } catch (FileNotFoundException ex) {
             if (failIfNotFound) {
                 throw ex;
@@ -161,15 +154,6 @@ public class PropertiesLoader {
             System.err.println("Error loading config properties from " + configPropURL);
             System.err.println("Main: " + ex);
             return configProps;
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            }
-            catch (IOException ex2) {
-                // Nothing we can do.
-            }
         }
         loadIncludes(INCLUDES_PROPERTY, true, configPropURL, configProps);
         loadIncludes(OPTIONALS_PROPERTY, false, configPropURL, configProps);
@@ -178,8 +162,8 @@ public class PropertiesLoader {
     }
 
     private static void loadIncludes(String propertyName, boolean mandatory, URL configPropURL, Properties configProps)
-            throws MalformedURLException, Exception {
-        String includes = (String) configProps.get(propertyName);
+            throws Exception {
+        String includes = configProps.get(propertyName);
         if (includes != null) {
             StringTokenizer st = new StringTokenizer(includes, "\" ", true);
             if (st.countTokens() > 0) {
@@ -216,24 +200,27 @@ public class PropertiesLoader {
             boolean exit = false;
             while ((st.hasMoreTokens()) && (!exit)) {
                 tok = st.nextToken(tokenList);
-                if (tok.equals("\"")) {
-                    inQuote = !inQuote;
-                    if (inQuote) {
-                        tokenList = "\"";
-                    } else {
-                        tokenList = "\" ";
-                    }
-
-                } else if (tok.equals(" ")) {
-                    if (tokStarted) {
-                        retVal = tokBuf.toString();
-                        tokStarted = false;
-                        tokBuf = new StringBuffer(10);
-                        exit = true;
-                    }
-                } else {
-                    tokStarted = true;
-                    tokBuf.append(tok.trim());
+                switch (tok) {
+                    case "\"":
+                        inQuote = !inQuote;
+                        if (inQuote) {
+                            tokenList = "\"";
+                        } else {
+                            tokenList = "\" ";
+                        }
+                        break;
+                    case " ":
+                        if (tokStarted) {
+                            retVal = tokBuf.toString();
+                            tokStarted = false;
+                            tokBuf = new StringBuffer(10);
+                            exit = true;
+                        }
+                        break;
+                    default:
+                        tokStarted = true;
+                        tokBuf.append(tok.trim());
+                        break;
                 }
             }
 

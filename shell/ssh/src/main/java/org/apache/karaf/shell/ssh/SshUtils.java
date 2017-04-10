@@ -39,9 +39,9 @@ public class SshUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshUtils.class);
 
     public static <S> List<NamedFactory<S>> filter(Class<S> type,
-            Collection<NamedFactory<S>> factories, String names) {
+            Collection<NamedFactory<S>> factories, String[] names) {
         List<NamedFactory<S>> list = new ArrayList<NamedFactory<S>>();
-        for (String name : names.split(",")) {
+        for (String name : names) {
             name = name.trim();
             boolean found = false;
             for (NamedFactory<S> factory : factories) {
@@ -59,17 +59,17 @@ public class SshUtils {
         return list;
     }
 
-    public static List<NamedFactory<Mac>> buildMacs(String names) {
+    public static List<NamedFactory<Mac>> buildMacs(String[] names) {
         return filter(Mac.class, new ServerConfig().getMacFactories(), names);
     }
 
-    public static List<NamedFactory<Cipher>> buildCiphers(String names) {
+    public static List<NamedFactory<Cipher>> buildCiphers(String[] names) {
         ServerConfig defaults = new ServerConfig();
         List<NamedFactory<Cipher>> avail = defaults.getCipherFactories();
         return filter(Cipher.class, avail, names);
     }
 
-    public static List<NamedFactory<KeyExchange>> buildKexAlgorithms(String names) {
+    public static List<NamedFactory<KeyExchange>> buildKexAlgorithms(String[] names) {
         ServerConfig defaults = new ServerConfig();
         List<NamedFactory<KeyExchange>> avail = defaults.getKeyExchangeFactories();
 

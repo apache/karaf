@@ -49,11 +49,10 @@ public class UserAuthFactoriesFactory {
     private Set<String> methodSet;
     private List<NamedFactory<UserAuth>> factories;
 
-   public void setAuthMethods(String methods) {
+   public void setAuthMethods(String[] methods) {
         this.methodSet = new HashSet<String>();
         this.factories = new ArrayList<NamedFactory<UserAuth>>();
-        String[] ams = methods.split(",");
-        for (String am : ams) {
+        for (String am : methods) {
             if (PASSWORD_METHOD.equals(am)) {
                 this.factories.add(new UserAuthPasswordFactory());
             } else if (KEYBOARD_INTERACTIVE_METHOD.equals(am)) {

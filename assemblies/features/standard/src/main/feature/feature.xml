@@ -199,7 +199,7 @@
             # 3: DEBUG
             # 4: TRACE
             #
-            #logLevel=1
+            #logLevel = 1
 
             #
             # Specify an additional welcome banner to be displayed when a user logs into the server.
@@ -217,6 +217,7 @@
             # This property define the default value when you use the Karaf shell console.
             # You can change the completion mode directly in the shell console, using shell:completion command.
             #
+            completionMode = GLOBAL
 
             #
             # Override allowed SSH cipher algorithms.
@@ -242,7 +243,6 @@
             #
             # moduli-url = external moduli-url users wanna use
 
-            completionMode = GLOBAL
         </config>
         <bundle dependency="true" start-level="30">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.jline/jline/${jline.version}</bundle>
@@ -505,13 +505,13 @@
             # of lines searched for exceptions using log:exception-display. You can override this value
             # at runtime using -n in log:display.
             #
-            size = 500
+            size = I"500"
 
             #
             # The pattern used to format the log statement when using log:display. This pattern is according
             # to the log4j layout. You can override this parameter at runtime using log:display with -p.
             #
-            pattern = %d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n
+            pattern = "%d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n"
         </config>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.log/org.apache.karaf.log.core/${project.version}</bundle>
     </feature>
@@ -626,12 +626,6 @@
     </feature>
 
     <feature name="ssh" description="Provide a SSHd server on Karaf" version="${project.version}">
-        <config name="org.apache.karaf.shell">
-            sshPort=8101
-            sshHost=0.0.0.0
-            sshRealm=karaf
-            hostKey=${karaf.etc}/host.key
-        </config>
         <feature>shell</feature>
         <feature>jaas</feature>
         <bundle start="true" start-level="30">mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>

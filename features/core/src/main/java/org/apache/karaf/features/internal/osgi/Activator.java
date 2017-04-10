@@ -146,7 +146,7 @@ public class Activator extends BaseActivator {
         register(ManagedService.class, featureFinder, props);
 
         List<Repository> repositories = new ArrayList<>();
-        String[] resourceRepositories = getString("resourceRepositories", "").split(",");
+        String[] resourceRepositories = getStringArray("resourceRepositories", "");
         long repositoryExpiration = getLong("repositoryExpiration", FeaturesService.DEFAULT_REPOSITORY_EXPIRATION);
         boolean repositoryIgnoreFailures = getBoolean("repositoryIgnoreFailures", true);
         for (String url : resourceRepositories) {
@@ -259,7 +259,7 @@ public class Activator extends BaseActivator {
         featuresServiceMBean.setFeaturesService(featuresService);
         registerMBean(featuresServiceMBean, "type=feature");
 
-        String featuresRepositories = getString("featuresRepositories", "");
+        String[] featuresRepositories = getStringArray("featuresRepositories", "");
         String featuresBoot = getString("featuresBoot", "");
         boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
         BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(

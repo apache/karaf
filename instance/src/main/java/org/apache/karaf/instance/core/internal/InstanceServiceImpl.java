@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,15 +32,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.TreeMap;
 
+import org.apache.felix.utils.properties.InterpolationHelper;
+import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
@@ -54,6 +54,7 @@ import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.apache.karaf.util.StreamUtils;
+import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.locks.FileLockUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -63,10 +64,10 @@ import org.slf4j.LoggerFactory;
 
 public class InstanceServiceImpl implements InstanceService {
 
-    private static final String RESOURCE_BASE = "org/apache/karaf/instance/resources/";
     public static final String STORAGE_FILE = "instance.properties";
     public static final String BACKUP_EXTENSION = ".bak";
     private static final String FEATURES_CFG = "etc/org.apache.karaf.features.cfg";
+    private static final String RESOURCE_BASE = "org/apache/karaf/instance/resources/";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
 
@@ -86,7 +87,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     public static final String DEFAULT_JAVA_OPTS = "-server -Xmx512M -Dcom.sun.management.jmxremote -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass";
 
-    private LinkedHashMap<String, InstanceImpl> proxies = new LinkedHashMap<String, InstanceImpl>();
+    private LinkedHashMap<String, InstanceImpl> proxies = new LinkedHashMap<>();
 
     private File storageLocation;
 
@@ -108,13 +109,13 @@ public class InstanceServiceImpl implements InstanceService {
         public State() {
             //read port start value from the root instance configuration
             try {
-                Properties shellProperty = new Properties();
-                shellProperty.load(new FileInputStream(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg")));
-                defaultSshPortStart = Integer.valueOf((String)shellProperty.getOrDefault("sshPort", 8101));
-                Properties managementProperty = new Properties();
-                managementProperty.load(new FileInputStream(new File(System.getProperty("karaf.etc"), "org.apache.karaf.management.cfg")));
-                defaultRmiRegistryPortStart = Integer.valueOf((String)managementProperty.getOrDefault("rmiRegistryPort", 1099));
-                defaultRmiServerPortStart = Integer.valueOf((String)managementProperty.getOrDefault("rmiServerPort", 1099));
+                TypedProperties shellProperty = new TypedProperties();
+                shellProperty.load(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
+                defaultSshPortStart = getInt(shellProperty,"sshPort", 8101);
+                TypedProperties managementProperty = new TypedProperties();
+                managementProperty.load(new File(System.getProperty("karaf.etc"), "org.apache.karaf.management.cfg"));
+                defaultRmiRegistryPortStart = getInt(managementProperty, "rmiRegistryPort", 1099);
+                defaultRmiServerPortStart = getInt(managementProperty, "rmiServerPort", 1099);
             } catch (Exception e) {
                 LOGGER.debug("Could not read port start value from the root instance configuration.", e);
             }
@@ -146,13 +147,13 @@ public class InstanceServiceImpl implements InstanceService {
         this.stopTimeout = stopTimeout;
     }
 
-    private State loadData(org.apache.felix.utils.properties.Properties storage) {
+    private State loadData(TypedProperties storage) {
         State state = new State();
         int count = getInt(storage, "count", 0);
         state.defaultSshPortStart = getInt(storage, "ssh.port", state.defaultSshPortStart);
         state.defaultRmiRegistryPortStart = getInt(storage, "rmi.registry.port", state.defaultRmiRegistryPortStart);
         state.defaultRmiServerPortStart = getInt(storage, "rmi.server.port", state.defaultRmiServerPortStart);
-        state.instances = new LinkedHashMap<String, InstanceState>();
+        state.instances = new LinkedHashMap<>();
 
         for (int i = 0; i < count; i++) {
             InstanceState instance = new InstanceState();
@@ -169,7 +170,7 @@ public class InstanceServiceImpl implements InstanceService {
                 proxies.put(instance.name, new InstanceImpl(this, instance.name));
             }
         }
-        List<String> names = new ArrayList<String>(this.proxies.keySet());
+        List<String> names = new ArrayList<>(this.proxies.keySet());
         for (String name : names) {
             if (!state.instances.containsKey(name)) {
                 this.proxies.remove(name);
@@ -178,7 +179,7 @@ public class InstanceServiceImpl implements InstanceService {
         return state;
     }
 
-    private void saveData(State state, org.apache.felix.utils.properties.Properties storage) {
+    private void saveData(State state, TypedProperties storage) {
         storage.put("ssh.port", Integer.toString(state.defaultSshPortStart));
         storage.put("rmi.registry.port", Integer.toString(state.defaultRmiRegistryPortStart));
         storage.put("rmi.server.port", Integer.toString(state.defaultRmiServerPortStart));
@@ -202,34 +203,38 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private boolean getBool(org.apache.felix.utils.properties.Properties storage, String name, boolean def) {
+    private static boolean getBool(TypedProperties storage, String name, boolean def) {
         Object value = storage.get(name);
-        if (value != null) {
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        } else if (value != null) {
             return Boolean.parseBoolean(value.toString());
         } else {
             return def;
         }
     }
 
-    private int getInt(org.apache.felix.utils.properties.Properties storage, String name, int def) {
+    private static int getInt(TypedProperties storage, String name, int def) {
         Object value = storage.get(name);
-        if (value != null) {
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        } else if (value != null) {
             return Integer.parseInt(value.toString());
         } else {
             return def;
         }
     }
 
-    private String getString(org.apache.felix.utils.properties.Properties storage, String name, String def) {
+    private static String getString(TypedProperties storage, String name, String def) {
         Object value = storage.get(name);
         return value != null ? value.toString() : def;
     }
 
-    interface Task<T> {
-        T call(State state) throws IOException;
+    interface Task<U, T> {
+        T call(U state) throws IOException;
     }
 
-    synchronized <T> T execute(final Task<T> callback, final boolean writeToFile) {
+    synchronized <T> T execute(final Task<State, T> callback, final boolean writeToFile) {
         final File storageFile = new File(storageLocation, STORAGE_FILE);
         if (!storageFile.exists()) {
             storageFile.getParentFile().mkdirs();
@@ -244,15 +249,13 @@ public class InstanceServiceImpl implements InstanceService {
                 throw new IllegalStateException("Instance storage location should be a file: " + storageFile);
             }
             try {
-                return FileLockUtils.execute(storageFile, new FileLockUtils.CallableWithProperties<T>() {
-                    public T call(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                        State state = loadData(properties);
-                        T t = callback.call(state);
-                        if (writeToFile) {
-                            saveData(state, properties);
-                        }
-                        return t;
+                return FileLockUtils.execute(storageFile, properties -> {
+                    State state = loadData(properties);
+                    T t = callback.call(state);
+                    if (writeToFile) {
+                        saveData(state, properties);
                     }
+                    return t;
                 }, writeToFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -283,154 +286,150 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     public synchronized Instance createInstance(final String name, final InstanceSettings settings, final boolean printOutput) throws Exception {
-        return execute(new Task<Instance>() {
-            public Instance call(State state) throws IOException {
-                if (state.instances.get(name) != null) {
-                    throw new IllegalArgumentException("Instance '" + name + "' already exists");
-                }
-                if (!settings.getProfiles().isEmpty()) {
-                    try {
-                        ProfileApplier.verify();
-                    } catch (NoClassDefFoundError error) {
-                        throw new IllegalArgumentException("Profile service package is not available");
-                    }
-                }
-
-                String loc = settings.getLocation() != null ? settings.getLocation() : name;
-                File karafBase = new File(loc);
-                if (!karafBase.isAbsolute()) {
-                    karafBase = new File(storageLocation, loc);
-                }
-                int sshPort = settings.getSshPort();
-                if (sshPort <= 0) {
-                    sshPort = ++state.defaultSshPortStart;
-                }
-                String sshHost = settings.getAddress();
-                int rmiRegistryPort = settings.getRmiRegistryPort();
-                if (rmiRegistryPort <= 0) {
-                    rmiRegistryPort = ++state.defaultRmiRegistryPortStart;
-                }
-                int rmiServerPort = settings.getRmiServerPort();
-                if (rmiServerPort <= 0) {
-                    rmiServerPort = ++state.defaultRmiServerPortStart;
-                }
-                logInfo("Creating new instance on SSH port %d and registry port %d / RMI server port %d at: %s",
-                        printOutput, sshPort, rmiRegistryPort, rmiServerPort, karafBase);
-
-                mkdir(karafBase, "bin", printOutput);
-                mkdir(karafBase, "etc", printOutput);
-                mkdir(karafBase, "system", printOutput);
-                mkdir(karafBase, "deploy", printOutput);
-                mkdir(karafBase, "data", printOutput);
-
-                Map<String, URL> textResources = new HashMap<String, URL>(settings.getTextResources());
-                Map<String, URL> binaryResources = new HashMap<String, URL>(settings.getBinaryResources());
-
-                String[] resources = 
-                {
-                    "etc/all.policy",
-                    "etc/config.properties",
-                    "etc/custom.properties",
-                    "etc/distribution.info",
-                    "etc/equinox-debug.properties",
-                    "etc/java.util.logging.properties",
-                    "etc/jmx.acl.cfg",
-                    "etc/jre.properties",
-                    "etc/keys.properties",
-                    "etc/org.apache.felix.fileinstall-deploy.cfg",
-                    "etc/org.apache.karaf.features.repos.cfg",
-                    "etc/org.apache.karaf.jaas.cfg",
-                    "etc/org.apache.karaf.kar.cfg",
-                    "etc/org.apache.karaf.log.cfg",
-                    "etc/org.ops4j.pax.logging.cfg",
-                    "etc/org.ops4j.pax.url.mvn.cfg",
-                    "etc/shell.init.script",
-                    "etc/users.properties",
-                    FEATURES_CFG
-                };
-                copyResourcesToDir(resources, karafBase, textResources, printOutput);
-                addFeaturesFromSettings(new File(karafBase, FEATURES_CFG), settings);
-
-                // The startup.properties is now generated by the karaf maven plugin, so
-                // we use the one from the root instance instead of embedding it
-                File rootEtc = new File(System.getProperty("karaf.etc"));
-                copy(new File(rootEtc, "startup.properties"), new File(karafBase, "etc/startup.properties"));
-
-                // align child with any bundles we have overriden in the root instance
-                File rootOverrides = new File(rootEtc, "overrides.properties");
-                if (rootOverrides.exists()) {
-                    copy(rootOverrides, new File(karafBase, "etc/overrides.properties"));
-                }
-                
-                HashMap<String, String> props = new HashMap<String, String>();
-                props.put("${SUBST-KARAF-NAME}", name);
-                props.put("${SUBST-KARAF-HOME}", System.getProperty("karaf.home"));
-                props.put("${SUBST-KARAF-BASE}", karafBase.getPath());
-                props.put("${SUBST-SSH-PORT}", Integer.toString(sshPort));
-                props.put("${SUBST-SSH-HOST}", sshHost);
-                props.put("${SUBST-RMI-REGISTRY-PORT}", Integer.toString(rmiRegistryPort));
-                props.put("${SUBST-RMI-SERVER-PORT}", Integer.toString(rmiServerPort));
-
-                String[] filteredResources =
-                {
-                     "etc/system.properties",
-                     "etc/org.apache.karaf.shell.cfg",
-                     "etc/org.apache.karaf.management.cfg",
-                     "bin/karaf",
-                     "bin/start",
-                     "bin/stop",
-                     "bin/karaf.bat",
-                     "bin/start.bat",
-                     "bin/stop.bat"
-                };
-                copyFilteredResourcesToDir(filteredResources, karafBase, textResources, props, printOutput);
-
-                try {
-                    chmod(new File(karafBase, "bin/karaf"), "a+x");
-                    chmod(new File(karafBase, "bin/start"), "a+x");
-                    chmod(new File(karafBase, "bin/stop"), "a+x");
-                } catch (IOException e) {
-                    LOGGER.debug("Could not set file mode on scripts.", e);
-                }
-
-                for (String resource : textResources.keySet()) {
-                    copyFilteredResourceToDir(resource, karafBase, textResources, props, printOutput);
-                }
-
-                for (String resource : binaryResources.keySet()) {
-                    copyBinaryResourceToDir(resource, karafBase, binaryResources, printOutput);
-                }
-
-                if (!settings.getProfiles().isEmpty()) {
-                    ProfileApplier.applyProfiles(karafBase, settings.getProfiles(), printOutput);
-                }
-
-                String javaOpts = settings.getJavaOpts();
-                if (javaOpts == null || javaOpts.length() == 0) {
-                    javaOpts = DEFAULT_JAVA_OPTS;
-                }
-                InstanceState is = new InstanceState();
-                is.name = name;
-                is.loc = karafBase.toString();
-                is.opts = javaOpts;
-                state.instances.put(name, is);
-                InstanceImpl instance = new InstanceImpl(InstanceServiceImpl.this, name);
-                InstanceServiceImpl.this.proxies.put(name, instance);
-                return instance;
+        return execute(state -> {
+            if (state.instances.get(name) != null) {
+                throw new IllegalArgumentException("Instance '" + name + "' already exists");
             }
+            if (!settings.getProfiles().isEmpty()) {
+                try {
+                    ProfileApplier.verify();
+                } catch (NoClassDefFoundError error) {
+                    throw new IllegalArgumentException("Profile service package is not available");
+                }
+            }
+
+            String loc = settings.getLocation() != null ? settings.getLocation() : name;
+            File karafBase = new File(loc);
+            if (!karafBase.isAbsolute()) {
+                karafBase = new File(storageLocation, loc);
+            }
+            int sshPort = settings.getSshPort();
+            if (sshPort <= 0) {
+                sshPort = ++state.defaultSshPortStart;
+            }
+            String sshHost = settings.getAddress();
+            int rmiRegistryPort = settings.getRmiRegistryPort();
+            if (rmiRegistryPort <= 0) {
+                rmiRegistryPort = ++state.defaultRmiRegistryPortStart;
+            }
+            int rmiServerPort = settings.getRmiServerPort();
+            if (rmiServerPort <= 0) {
+                rmiServerPort = ++state.defaultRmiServerPortStart;
+            }
+            logInfo("Creating new instance on SSH port %d and registry port %d / RMI server port %d at: %s",
+                    printOutput, sshPort, rmiRegistryPort, rmiServerPort, karafBase);
+
+            mkdir(karafBase, "bin", printOutput);
+            mkdir(karafBase, "etc", printOutput);
+            mkdir(karafBase, "system", printOutput);
+            mkdir(karafBase, "deploy", printOutput);
+            mkdir(karafBase, "data", printOutput);
+
+            Map<String, URL> textResources = new HashMap<>(settings.getTextResources());
+            Map<String, URL> binaryResources = new HashMap<>(settings.getBinaryResources());
+
+            String[] resources =
+            {
+                "etc/all.policy",
+                "etc/config.properties",
+                "etc/custom.properties",
+                "etc/distribution.info",
+                "etc/equinox-debug.properties",
+                "etc/java.util.logging.properties",
+                "etc/jmx.acl.cfg",
+                "etc/jre.properties",
+                "etc/keys.properties",
+                "etc/org.apache.felix.fileinstall-deploy.cfg",
+                "etc/org.apache.karaf.features.repos.cfg",
+                "etc/org.apache.karaf.jaas.cfg",
+                "etc/org.apache.karaf.kar.cfg",
+                "etc/org.apache.karaf.log.cfg",
+                "etc/org.ops4j.pax.logging.cfg",
+                "etc/org.ops4j.pax.url.mvn.cfg",
+                "etc/shell.init.script",
+                "etc/users.properties",
+                FEATURES_CFG
+            };
+            copyResourcesToDir(resources, karafBase, textResources, printOutput);
+            addFeaturesFromSettings(new File(karafBase, FEATURES_CFG), settings);
+
+            // The startup.properties is now generated by the karaf maven plugin, so
+            // we use the one from the root instance instead of embedding it
+            File rootEtc = new File(System.getProperty("karaf.etc"));
+            copy(new File(rootEtc, "startup.properties"), new File(karafBase, "etc/startup.properties"));
+
+            // align child with any bundles we have overriden in the root instance
+            File rootOverrides = new File(rootEtc, "overrides.properties");
+            if (rootOverrides.exists()) {
+                copy(rootOverrides, new File(karafBase, "etc/overrides.properties"));
+            }
+
+            HashMap<String, String> props = new HashMap<>();
+            props.put("${SUBST-KARAF-NAME}", name);
+            props.put("${SUBST-KARAF-HOME}", System.getProperty("karaf.home"));
+            props.put("${SUBST-KARAF-BASE}", karafBase.getPath());
+            props.put("${SUBST-SSH-PORT}", Integer.toString(sshPort));
+            props.put("${SUBST-SSH-HOST}", sshHost);
+            props.put("${SUBST-RMI-REGISTRY-PORT}", Integer.toString(rmiRegistryPort));
+            props.put("${SUBST-RMI-SERVER-PORT}", Integer.toString(rmiServerPort));
+
+            String[] filteredResources =
+            {
+                 "etc/system.properties",
+                 "etc/org.apache.karaf.shell.cfg",
+                 "etc/org.apache.karaf.management.cfg",
+                 "bin/karaf",
+                 "bin/start",
+                 "bin/stop",
+                 "bin/karaf.bat",
+                 "bin/start.bat",
+                 "bin/stop.bat"
+            };
+            copyFilteredResourcesToDir(filteredResources, karafBase, textResources, props, printOutput);
+
+            try {
+                chmod(new File(karafBase, "bin/karaf"), "a+x");
+                chmod(new File(karafBase, "bin/start"), "a+x");
+                chmod(new File(karafBase, "bin/stop"), "a+x");
+            } catch (IOException e) {
+                LOGGER.debug("Could not set file mode on scripts.", e);
+            }
+
+            for (String resource : textResources.keySet()) {
+                copyFilteredResourceToDir(resource, karafBase, textResources, props, printOutput);
+            }
+
+            for (String resource : binaryResources.keySet()) {
+                copyBinaryResourceToDir(resource, karafBase, binaryResources, printOutput);
+            }
+
+            if (!settings.getProfiles().isEmpty()) {
+                ProfileApplier.applyProfiles(karafBase, settings.getProfiles(), printOutput);
+            }
+
+            String javaOpts = settings.getJavaOpts();
+            if (javaOpts == null || javaOpts.length() == 0) {
+                javaOpts = DEFAULT_JAVA_OPTS;
+            }
+            InstanceState is = new InstanceState();
+            is.name = name;
+            is.loc = karafBase.toString();
+            is.opts = javaOpts;
+            state.instances.put(name, is);
+            InstanceImpl instance = new InstanceImpl(InstanceServiceImpl.this, name);
+            InstanceServiceImpl.this.proxies.put(name, instance);
+            return instance;
         }, true);
     }
 
     void addFeaturesFromSettings(File featuresCfg, final InstanceSettings settings) throws IOException {
-        FileLockUtils.execute(featuresCfg, new FileLockUtils.RunnableWithProperties() {
-            public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                appendToPropList(properties, "featuresBoot", settings.getFeatures());
-                appendToPropList(properties, "featuresRepositories", settings.getFeatureURLs());
-            }
+        FileLockUtils.execute(featuresCfg, properties -> {
+            appendToPropList(properties, "featuresBoot", settings.getFeatures());
+            appendToPropList(properties, "featuresRepositories", settings.getFeatureURLs());
         }, true);
     }
 
-    private static void appendToPropList(org.apache.felix.utils.properties.Properties p, String key, List<String> elements) {
+    private static void appendToPropList(TypedProperties p, String key, List<String> elements) {
         if (elements == null) {
             return;
         }
@@ -445,36 +444,25 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     public Instance[] getInstances() {
-        return execute(new Task<Instance[]>() {
-            public Instance[] call(State state) throws IOException {
-                return proxies.values().toArray(new Instance[proxies.size()]);
-            }
-        }, false);
+        return execute(state -> proxies.values().toArray(new Instance[proxies.size()]), false);
     }
 
     public Instance getInstance(final String name) {
-        return execute(new Task<Instance>() {
-            public Instance call(State state) throws IOException {
-                return proxies.get(name);
-            }
-        }, false);
+        return execute(state -> proxies.get(name), false);
     }
 
     public void startInstance(final String name, final String javaOpts) {
-        execute(new Task<Object>() {
-            public Object call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                checkPid(instance);
-                if (instance.pid != 0) {
-                    throw new IllegalStateException("Instance already started");
-                }
-                doStart(instance, name, javaOpts);
-                return null;
+        execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
-
+            checkPid(instance);
+            if (instance.pid != 0) {
+                throw new IllegalStateException("Instance already started");
+            }
+            doStart(instance, name, javaOpts);
+            return null;
         }, true);
     }
 
@@ -532,11 +520,7 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     private StringBuilder classpathFromLibDir(File libDir) throws IOException {
-        File[] jars = libDir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".jar");
-            }
-        });
+        File[] jars = libDir.listFiles((dir, name) -> name.endsWith(".jar"));
         StringBuilder classpath = new StringBuilder();
         if (jars != null) {
             for (File jar : jars) {
@@ -574,167 +558,156 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     public void restartInstance(final String name, final String javaOpts) {
-        execute(new Task<Object>() {
-            public Object call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                String current = System.getProperty("karaf.name");
-                if (name.equals(current)) {
-                    String location = System.getProperty("karaf.home");
-                    StringBuilder classpath = new StringBuilder();
-                    addJar(classpath, "org.apache.karaf.instance", "org.apache.karaf.instance.core");
-                    addJar(classpath, "org.apache.karaf.shell", "org.apache.karaf.shell.core");
-                    addJar(classpath, "org.ops4j.pax.logging", "pax-logging-api");
-                    addJar(classpath, "jline", "jline");
-                    String command = "\""
-                            + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
-                            + "\" "
-                            + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
-                            + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
-                            + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
-                            + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
-                            + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
-                            + " -Dkaraf.instances=\"" + System.getProperty("karaf.instances") + "\""
-                            + " -classpath \"" + classpath.toString() + "\""
-                            + " " + Execute.class.getName()
-                            + " restart --java-opts \"" + javaOpts + "\" " + name;
-                    new ProcessBuilderFactoryImpl().newBuilder()
-                            .directory(new File(System.getProperty("karaf.home")))
-                            .command(command)
-                            .start();
-                } else {
-                    checkPid(instance);
-                    if (instance.pid != 0) {
-                        cleanShutdown(instance);
-                    }
-                    doStart(instance, name, javaOpts);
-                }
-                return null;
+        execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            String current = System.getProperty("karaf.name");
+            if (name.equals(current)) {
+                String location = System.getProperty("karaf.home");
+                StringBuilder classpath = new StringBuilder();
+                addJar(classpath, "org.apache.karaf.instance", "org.apache.karaf.instance.core");
+                addJar(classpath, "org.apache.karaf.shell", "org.apache.karaf.shell.core");
+                addJar(classpath, "org.ops4j.pax.logging", "pax-logging-api");
+                addJar(classpath, "jline", "jline");
+                String command = "\""
+                        + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
+                        + "\" "
+                        + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
+                        + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
+                        + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
+                        + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
+                        + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
+                        + " -Dkaraf.instances=\"" + System.getProperty("karaf.instances") + "\""
+                        + " -classpath \"" + classpath.toString() + "\""
+                        + " " + Execute.class.getName()
+                        + " restart --java-opts \"" + javaOpts + "\" " + name;
+                new ProcessBuilderFactoryImpl().newBuilder()
+                        .directory(new File(System.getProperty("karaf.home")))
+                        .command(command)
+                        .start();
+            } else {
+                checkPid(instance);
+                if (instance.pid != 0) {
+                    cleanShutdown(instance);
+                }
+                doStart(instance, name, javaOpts);
+            }
+            return null;
         }, true);
     }
 
     public void stopInstance(final String name) {
-        
-        Integer pid = (Integer)execute(new Task<Object>() {
-            
-            public Object call(State state) throws IOException {
-                int rootInstancePID = 0;
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                checkPid(instance);
-                if (instance.pid == 0) {
-                    throw new IllegalStateException("Instance already stopped");
-                }
-                cleanShutdown(instance);
-                if (instance.pid > 0) {
-                    if (!instance.root) {
-                        Process process = new ProcessBuilderFactoryImpl().newBuilder().attach(instance.pid);
-                        process.destroy();
-                    } else {
-                        //can't simply destroy root instance here
-                        //as it will lose the update in instances.properties
-                        //because of no chance to run the saveData
-                        rootInstancePID = instance.pid;
-                    }
-                    instance.pid = 0;
-                    
-                }
-                return rootInstancePID;
+        Integer pid = execute(state -> {
+            int rootInstancePID = 0;
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            checkPid(instance);
+            if (instance.pid == 0) {
+                throw new IllegalStateException("Instance already stopped");
+            }
+            cleanShutdown(instance);
+            if (instance.pid > 0) {
+                if (!instance.root) {
+                    Process process = new ProcessBuilderFactoryImpl().newBuilder().attach(instance.pid);
+                    process.destroy();
+                } else {
+                    //can't simply destroy root instance here
+                    //as it will lose the update in instances.properties
+                    //because of no chance to run the saveData
+                    rootInstancePID = instance.pid;
+                }
+                instance.pid = 0;
+
+            }
+            return rootInstancePID;
         }, true);
-        if (pid.intValue() != 0 && isInstanceRoot(name)) {
+        if (pid != 0 && isInstanceRoot(name)) {
             Process process;
             try {
-                process = new ProcessBuilderFactoryImpl().newBuilder().attach(pid.intValue());
+                process = new ProcessBuilderFactoryImpl().newBuilder().attach(pid);
                 process.destroy(); 
             } catch (IOException e) {
                 LOGGER.debug("Unable to cleanly shutdown root instance ", e);
             }
-                     
         }
     }
 
     public void destroyInstance(final String name) {
-        execute(new Task<Object>() {
-            public Object call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                checkPid(instance);
-                if (instance.pid != 0) {
-                    throw new IllegalStateException("Instance not stopped");
-                }
-                deleteFile(new File(instance.loc));
-                state.instances.remove(name);
-                InstanceServiceImpl.this.proxies.remove(name);
-                return null;
+        execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            checkPid(instance);
+            if (instance.pid != 0) {
+                throw new IllegalStateException("Instance not stopped");
+            }
+            deleteFile(new File(instance.loc));
+            state.instances.remove(name);
+            InstanceServiceImpl.this.proxies.remove(name);
+            return null;
         }, true);
     }
 
     public void renameInstance(final String oldName, final String newName, final boolean printOutput) throws Exception {
-        execute(new Task<Object>() {
-            public Object call(State state) throws IOException {
-                if (state.instances.get(newName) != null) {
-                    throw new IllegalArgumentException("Instance " + newName + " already exists");
-                }
-                InstanceState instance = state.instances.get(oldName);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + oldName + " not found");
-                }
-                if (instance.root) {
-                    throw new IllegalArgumentException("Root instance cannot be renamed");
-                }
-                checkPid(instance);
-                if (instance.pid != 0) {
-                    throw new IllegalStateException("Instance not stopped");
-                }
-
-                println("Renaming instance "
-                        + SimpleAnsi.INTENSITY_BOLD + oldName + SimpleAnsi.INTENSITY_NORMAL
-                        + " to "
-                        + SimpleAnsi.INTENSITY_BOLD + newName + SimpleAnsi.INTENSITY_NORMAL);
-                // rename directory
-                String oldLocationPath = instance.loc;
-                File oldLocation = new File(oldLocationPath);
-                String basedir = oldLocation.getParent();
-                File newLocation = new File(basedir, newName);
-                oldLocation.renameTo(newLocation);
-                // create the properties map including the instance name and instance location
-                // TODO: replacing is bad, we should re-extract the needed files
-                HashMap<String, String> props = new HashMap<String, String>();
-                props.put(oldName, newName);
-                props.put(oldLocationPath, newLocation.getPath());
-                // replace all references to the "old" name by the new one in etc/system.properties
-                // NB: it's replacement to avoid to override the user's changes
-                filterResource(newLocation, "etc/system.properties", props);
-                // replace all references to the "old" name by the new one in bin/karaf
-                filterResource(newLocation, "bin/karaf", props);
-                filterResource(newLocation, "bin/start", props);
-                filterResource(newLocation, "bin/stop", props);
-                filterResource(newLocation, "bin/karaf.bat", props);
-                filterResource(newLocation, "bin/start.bat", props);
-                filterResource(newLocation, "bin/stop.bat", props);
-                // update instance
-                instance.name = newName;
-                instance.loc = newLocation.getPath();
-                state.instances.put(newName, instance);
-                state.instances.remove(oldName);
-                InstanceImpl proxy = InstanceServiceImpl.this.proxies.remove(oldName);
-                if (proxy == null) {
-                    proxy = new InstanceImpl(InstanceServiceImpl.this, newName);
-                } else {
-                    proxy.doSetName(newName);
-                }
-                InstanceServiceImpl.this.proxies.put(newName, proxy);
-                return null;
+        execute(state -> {
+            if (state.instances.get(newName) != null) {
+                throw new IllegalArgumentException("Instance " + newName + " already exists");
             }
+            InstanceState instance = state.instances.get(oldName);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + oldName + " not found");
+            }
+            if (instance.root) {
+                throw new IllegalArgumentException("Root instance cannot be renamed");
+            }
+            checkPid(instance);
+            if (instance.pid != 0) {
+                throw new IllegalStateException("Instance not stopped");
+            }
+
+            println("Renaming instance "
+                    + SimpleAnsi.INTENSITY_BOLD + oldName + SimpleAnsi.INTENSITY_NORMAL
+                    + " to "
+                    + SimpleAnsi.INTENSITY_BOLD + newName + SimpleAnsi.INTENSITY_NORMAL);
+            // rename directory
+            String oldLocationPath = instance.loc;
+            File oldLocation = new File(oldLocationPath);
+            String basedir = oldLocation.getParent();
+            File newLocation = new File(basedir, newName);
+            oldLocation.renameTo(newLocation);
+            // create the properties map including the instance name and instance location
+            // TODO: replacing is bad, we should re-extract the needed files
+            HashMap<String, String> props = new HashMap<String, String>();
+            props.put(oldName, newName);
+            props.put(oldLocationPath, newLocation.getPath());
+            // replace all references to the "old" name by the new one in etc/system.properties
+            // NB: it's replacement to avoid to override the user's changes
+            filterResource(newLocation, "etc/system.properties", props);
+            // replace all references to the "old" name by the new one in bin/karaf
+            filterResource(newLocation, "bin/karaf", props);
+            filterResource(newLocation, "bin/start", props);
+            filterResource(newLocation, "bin/stop", props);
+            filterResource(newLocation, "bin/karaf.bat", props);
+            filterResource(newLocation, "bin/start.bat", props);
+            filterResource(newLocation, "bin/stop.bat", props);
+            // update instance
+            instance.name = newName;
+            instance.loc = newLocation.getPath();
+            state.instances.put(newName, instance);
+            state.instances.remove(oldName);
+            InstanceImpl proxy = InstanceServiceImpl.this.proxies.remove(oldName);
+            if (proxy == null) {
+                proxy = new InstanceImpl(InstanceServiceImpl.this, newName);
+            } else {
+                proxy.doSetName(newName);
+            }
+            InstanceServiceImpl.this.proxies.put(newName, proxy);
+            return null;
         }, true);
     }
 
@@ -742,65 +715,62 @@ public class InstanceServiceImpl implements InstanceService {
         final int instanceSshPort = getInstanceSshPort(name);
         final int instanceRmiRegistryPort = getInstanceRmiRegistryPort(name);
         final int instanceRmiServerPort = getInstanceRmiServerPort(name);
-
-        return execute(new Task<Instance>() {
-            public Instance call(State state) throws IOException {
-                if (state.instances.get(cloneName) != null) {
-                    throw new IllegalArgumentException("Instance " + cloneName + " already exists");
-                }
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-
-                // define the clone instance location
-                String cloneLocationPath = settings.getLocation() != null ? settings.getLocation() : cloneName;
-                File cloneLocation = new File(cloneLocationPath);
-                if (!cloneLocation.isAbsolute()) {
-                    cloneLocation = new File(storageLocation, cloneLocationPath);
-                }
-                // copy instance directory
-                String locationPath = instance.loc;
-                File location = new File(locationPath);
-                copy(location, cloneLocation);
-                // create the properties map including the instance name, location, ssh and rmi port numbers
-                // TODO: replacing stuff anywhere is not really good, we might end up replacing unwanted stuff
-                // TODO: if no ports are overriden, shouldn't we choose new ports ?
-                HashMap<String, String> props = new HashMap<String, String>();
-                props.put(name, cloneName);
-                props.put(locationPath, cloneLocationPath);
-                if (settings.getSshPort() > 0)
-                    props.put(Integer.toString(instanceSshPort), Integer.toString(settings.getSshPort()));
-                if (settings.getRmiRegistryPort() > 0)
-                    props.put(Integer.toString(instanceRmiRegistryPort), Integer.toString(settings.getRmiRegistryPort()));
-                if (settings.getRmiServerPort() > 0)
-                    props.put(Integer.toString(instanceRmiServerPort), Integer.toString(settings.getRmiServerPort()));
-
-                // filtering clone files
-                filterResource(cloneLocation, "etc/custom.properties", props);
-                filterResource(cloneLocation, "etc/org.apache.karaf.management.cfg", props);
-                filterResource(cloneLocation, "etc/org.apache.karaf.shell.cfg", props);
-                filterResource(cloneLocation, "etc/system.properties", props);
-                filterResource(cloneLocation, "bin/karaf", props);
-                filterResource(cloneLocation, "bin/start", props);
-                filterResource(cloneLocation, "bin/stop", props);
-                filterResource(cloneLocation, "bin/karaf.bat", props);
-                filterResource(cloneLocation, "bin/start.bat", props);
-                filterResource(cloneLocation, "bin/stop.bat", props);
-                // create and add the clone instance in the registry
-                String javaOpts = settings.getJavaOpts();
-                if (javaOpts == null || javaOpts.length() == 0) {
-                    javaOpts = DEFAULT_JAVA_OPTS;
-                }
-                InstanceState is = new InstanceState();
-                is.name = cloneName;
-                is.loc = cloneLocation.toString();
-                is.opts = javaOpts;
-                state.instances.put(cloneName, is);
-                InstanceImpl cloneInstance = new InstanceImpl(InstanceServiceImpl.this, cloneName);
-                InstanceServiceImpl.this.proxies.put(cloneName, cloneInstance);
-                return cloneInstance;
+        return execute(state -> {
+            if (state.instances.get(cloneName) != null) {
+                throw new IllegalArgumentException("Instance " + cloneName + " already exists");
             }
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
+            }
+
+            // define the clone instance location
+            String cloneLocationPath = settings.getLocation() != null ? settings.getLocation() : cloneName;
+            File cloneLocation = new File(cloneLocationPath);
+            if (!cloneLocation.isAbsolute()) {
+                cloneLocation = new File(storageLocation, cloneLocationPath);
+            }
+            // copy instance directory
+            String locationPath = instance.loc;
+            File location = new File(locationPath);
+            copy(location, cloneLocation);
+            // create the properties map including the instance name, location, ssh and rmi port numbers
+            // TODO: replacing stuff anywhere is not really good, we might end up replacing unwanted stuff
+            // TODO: if no ports are overriden, shouldn't we choose new ports ?
+            HashMap<String, String> props = new HashMap<String, String>();
+            props.put(name, cloneName);
+            props.put(locationPath, cloneLocationPath);
+            if (settings.getSshPort() > 0)
+                props.put(Integer.toString(instanceSshPort), Integer.toString(settings.getSshPort()));
+            if (settings.getRmiRegistryPort() > 0)
+                props.put(Integer.toString(instanceRmiRegistryPort), Integer.toString(settings.getRmiRegistryPort()));
+            if (settings.getRmiServerPort() > 0)
+                props.put(Integer.toString(instanceRmiServerPort), Integer.toString(settings.getRmiServerPort()));
+
+            // filtering clone files
+            filterResource(cloneLocation, "etc/custom.properties", props);
+            filterResource(cloneLocation, "etc/org.apache.karaf.management.cfg", props);
+            filterResource(cloneLocation, "etc/org.apache.karaf.shell.cfg", props);
+            filterResource(cloneLocation, "etc/system.properties", props);
+            filterResource(cloneLocation, "bin/karaf", props);
+            filterResource(cloneLocation, "bin/start", props);
+            filterResource(cloneLocation, "bin/stop", props);
+            filterResource(cloneLocation, "bin/karaf.bat", props);
+            filterResource(cloneLocation, "bin/start.bat", props);
+            filterResource(cloneLocation, "bin/stop.bat", props);
+            // create and add the clone instance in the registry
+            String javaOpts = settings.getJavaOpts();
+            if (javaOpts == null || javaOpts.length() == 0) {
+                javaOpts = DEFAULT_JAVA_OPTS;
+            }
+            InstanceState is = new InstanceState();
+            is.name = cloneName;
+            is.loc = cloneLocation.toString();
+            is.opts = javaOpts;
+            state.instances.put(cloneName, is);
+            InstanceImpl cloneInstance = new InstanceImpl(InstanceServiceImpl.this, cloneName);
+            InstanceServiceImpl.this.proxies.put(cloneName, cloneInstance);
+            return cloneInstance;
         }, true);
     }
 
@@ -816,17 +786,12 @@ public class InstanceServiceImpl implements InstanceService {
     protected void cleanShutdown(InstanceState instance) {
         try {
             File file = new File(new File(instance.loc, "etc"), CONFIG_PROPERTIES_FILE_NAME);
-            URL configPropURL = file.toURI().toURL();
-            Properties props = loadPropertiesFile(configPropURL);
+            Properties props = PropertiesLoader.loadPropertiesFile(file.toURI().toURL(), false);
             props.put("karaf.base", new File(instance.loc).getCanonicalPath());
             props.put("karaf.home", System.getProperty("karaf.home"));
             props.put("karaf.data", new File(new File(instance.loc), "data").getCanonicalPath());
             props.put("karaf.etc", new File(new File(instance.loc), "etc").getCanonicalPath());
-            for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
-                String key = (String) e.nextElement();
-                props.setProperty(key,
-                        substVars(props.getProperty(key), key, null, props));
-            }
+            InterpolationHelper.performSubstitution(props, null, true, false, true);
             int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
             String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
             String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
@@ -892,11 +857,7 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     private int getKarafPort(final String name, final String path, final String key) {
-        return execute(new Task<Integer>() {
-            public Integer call(State state) throws IOException {
-                return InstanceServiceImpl.this.getKarafPort(state, name, path, key);
-            }
-        }, false);
+        return execute(state -> getKarafPort(state, name, path, key), false);
     }
 
 
@@ -907,10 +868,9 @@ public class InstanceServiceImpl implements InstanceService {
         }
         File f = new File(instance.loc, path);
         try {
-            return FileLockUtils.execute(f, new FileLockUtils.CallableWithProperties<Integer>() {
-                public Integer call(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                    return Integer.parseInt(properties.get(key).toString());
-                }
+            return FileLockUtils.execute(f, properties -> {
+                Object obj = properties.get(key);
+                return obj instanceof Number ? ((Number) obj).intValue() : Integer.parseInt(obj.toString());
             }, false);
         } catch (IOException e) {
             return 0;
@@ -918,33 +878,25 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     private void setKarafPort(final String name, final String path, final String key, final int port) throws IOException {
-        execute(new Task<Object>() {
-            public Object call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                checkPid(instance);
-                if (instance.pid != 0) {
-                    throw new IllegalStateException("Instance is not stopped");
-                }
-                File f = new File(instance.loc, path);
-                FileLockUtils.execute(f, new FileLockUtils.RunnableWithProperties() {
-                    public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                        properties.put(key, Integer.toString(port));
-                    }
-                }, true);
-                return null;
+        execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            checkPid(instance);
+            if (instance.pid != 0) {
+                throw new IllegalStateException("Instance is not stopped");
+            }
+            File f = new File(instance.loc, path);
+            FileLockUtils.execute(f, properties -> {
+                properties.put(key, port);
+            }, true);
+            return null;
         }, true);
     }
 
     private String getKarafHost(final String name, final String path, final String key) {
-        return execute(new Task<String>() {
-            public String call(State state) throws IOException {
-                return InstanceServiceImpl.this.getKarafHost(state, name, path, key);
-            }
-        }, false);
+        return execute(state -> InstanceServiceImpl.this.getKarafHost(state, name, path, key), false);
     }
 
     private String getKarafHost(State state, String name, String path, final String key) {
@@ -954,108 +906,92 @@ public class InstanceServiceImpl implements InstanceService {
         }
         File f = new File(instance.loc, path);
         try {
-            return FileLockUtils.execute(f, new FileLockUtils.CallableWithProperties<String>() {
-                public String call(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                    return properties.get(key).toString();
-                }
-            }, false);
+            return FileLockUtils.execute(f, (TypedProperties properties) -> properties.get(key).toString(), false);
         } catch (IOException e) {
             return "0.0.0.0";
         }
     }
 
     boolean isInstanceRoot(final String name) {
-        return execute(new Task<Boolean>() {
-            public Boolean call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                return instance.root;
+        return execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            return instance.root;
         }, false);
     }
 
     String getInstanceLocation(final String name) {
-        return execute(new Task<String>() {
-            public String call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                return instance.loc;
+        return execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            return instance.loc;
         }, true);
     }
 
     int getInstancePid(final String name) {
         boolean updateInstanceProperties = isInstancePidNeedUpdate(name);
-        return execute(new Task<Integer>() {
-            public Integer call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                checkPid(instance);
-                return instance.pid;
+        return execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            checkPid(instance);
+            return instance.pid;
         }, updateInstanceProperties);
     }
 
     String getInstanceJavaOpts(final String name) {
-        return execute(new Task<String>() {
-            public String call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                return instance.opts;
+        return execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            return instance.opts;
         }, false);
     }
 
     void changeInstanceJavaOpts(final String name, final String opts) {
-        execute(new Task<String>() {
-            public String call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                instance.opts = opts;
-                return null;
+        execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            instance.opts = opts;
+            return null;
         }, true);
     }
 
     String getInstanceState(final String name) {
         boolean updateInstanceProperties = isInstancePidNeedUpdate(name);
-        return execute(new Task<String>() {
-            public String call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
+        return execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
+            }
+            int port = getKarafPort(state, name, "etc/org.apache.karaf.shell.cfg", "sshPort");
+            String host = getKarafHost(state, name, "etc/org.apache.karaf.shell.cfg", "sshHost");
+            if (host.equals("0.0.0.0")) {
+                host = "localhost";
+            }
+            if (!new File(instance.loc).isDirectory() || port <= 0) {
+                return Instance.ERROR;
+            }
+            checkPid(instance);
+            if (instance.pid == 0) {
+                return Instance.STOPPED;
+            } else {
+                try {
+                    Socket s = new Socket(host, port);
+                    s.close();
+                    return Instance.STARTED;
+                } catch (Exception e) {
+                    // ignore
                 }
-                int port = getKarafPort(state, name, "etc/org.apache.karaf.shell.cfg", "sshPort");
-                String host = getKarafHost(state, name, "etc/org.apache.karaf.shell.cfg", "sshHost");
-                if (host.equals("0.0.0.0")) {
-                    host = "localhost";
-                }
-                if (!new File(instance.loc).isDirectory() || port <= 0) {
-                    return Instance.ERROR;
-                }
-                checkPid(instance);
-                if (instance.pid == 0) {
-                    return Instance.STOPPED;
-                } else {
-                    try {
-                        Socket s = new Socket(host, port);
-                        s.close();
-                        return Instance.STARTED;
-                    } catch (Exception e) {
-                        // ignore
-                    }
-                    return Instance.STARTING;
-                }
+                return Instance.STARTING;
             }
         }, updateInstanceProperties);
     }
@@ -1285,142 +1221,36 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private static final String DELIM_START = "${";
-    private static final String DELIM_STOP = "}";
-
-    protected static String substVars(String val, String currentKey,
-                                      Map<String, String> cycleMap, Properties configProps)
-            throws IllegalArgumentException {
-        // If there is currently no cycle map, then create
-        // one for detecting cycles for this invocation.
-        if (cycleMap == null) {
-            cycleMap = new HashMap<String, String>();
-        }
-
-        // Put the current key in the cycle map.
-        cycleMap.put(currentKey, currentKey);
-
-        // Assume we have a value that is something like:
-        // "leading ${foo.${bar}} middle ${baz} trailing"
-
-        // Find the first ending '}' variable delimiter, which
-        // will correspond to the first deepest nested variable
-        // placeholder.
-        int stopDelim = val.indexOf(DELIM_STOP);
-
-        // Find the matching starting "${" variable delimiter
-        // by looping until we find a start delimiter that is
-        // greater than the stop delimiter we have found.
-        int startDelim = val.indexOf(DELIM_START);
-        while (stopDelim >= 0) {
-            int idx = val.indexOf(DELIM_START, startDelim + DELIM_START.length());
-            if ((idx < 0) || (idx > stopDelim)) {
-                break;
-            } else if (idx < stopDelim) {
-                startDelim = idx;
-            }
-        }
-
-        // If we do not have a start or stop delimiter, then just
-        // return the existing value.
-        if ((startDelim < 0) && (stopDelim < 0)) {
-            return val;
-        }
-        // At this point, we found a stop delimiter without a start,
-        // so throw an exception.
-        else if (((startDelim < 0) || (startDelim > stopDelim))
-                && (stopDelim >= 0)) {
-            throw new IllegalArgumentException(
-                    "stop delimiter with no start delimiter: "
-                            + val);
-        }
-
-        // At this point, we have found a variable placeholder so
-        // we must perform a variable substitution on it.
-        // Using the start and stop delimiter indices, extract
-        // the first, deepest nested variable placeholder.
-        String variable =
-                val.substring(startDelim + DELIM_START.length(), stopDelim);
-
-        // Verify that this is not a recursive variable reference.
-        if (cycleMap.get(variable) != null) {
-            throw new IllegalArgumentException(
-                    "recursive variable reference: " + variable);
-        }
-
-        // Get the value of the deepest nested variable placeholder.
-        // Try to configuration properties first.
-        String substValue = (configProps != null)
-                ? configProps.getProperty(variable, null)
-                : null;
-        if (substValue == null) {
-            // Ignore unknown property values.
-            substValue = System.getProperty(variable, "");
-        }
-
-        // Remove the found variable from the cycle map, since
-        // it may appear more than once in the value and we don't
-        // want such situations to appear as a recursive reference.
-        cycleMap.remove(variable);
-
-        // Append the leading characters, the substituted value of
-        // the variable, and the trailing characters to get the new
-        // value.
-        val = val.substring(0, startDelim)
-                + substValue
-                + val.substring(stopDelim + DELIM_STOP.length(), val.length());
-
-        // Now perform substitution again, since there could still
-        // be substitutions to make.
-        val = substVars(val, currentKey, cycleMap, configProps);
-
-        // Return the value.
-        return val;
-    }
-
     public void changeInstanceSshHost(String name, String host) throws Exception {
         setKarafHost(name, "etc/org.apache.karaf.shell.cfg", "sshHost", host);      
     }
 
     private void setKarafHost(final String name, final String path, final String key, final String host) throws IOException {
-        execute(new Task<Object>() {
-            public Object call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                checkPid(instance);
-                if (instance.pid != 0) {
-                    throw new IllegalStateException("Instance is not stopped");
-                }
-                File f = new File(instance.loc, path);
-                FileLockUtils.execute(f, new FileLockUtils.RunnableWithProperties() {
-                    public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                        properties.put(key, host);
-                    }
-                }, true);
-                return null;
+        execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            checkPid(instance);
+            if (instance.pid != 0) {
+                throw new IllegalStateException("Instance is not stopped");
+            }
+            File f = new File(instance.loc, path);
+            FileLockUtils.execute(f, properties -> { properties.put(key, host); }, true);
+            return null;
         }, true);
     }
     
-    private Boolean isInstancePidNeedUpdate(final String name) {
-        return execute(new Task<Boolean>() {
-            public Boolean call(State state) throws IOException {
-                InstanceState instance = state.instances.get(name);
-                if (instance == null) {
-                    throw new IllegalArgumentException("Instance " + name + " not found");
-                }
-                int origialPid = instance.pid;
-                checkPid(instance);
-                int newPid = instance.pid;
-                if (origialPid == newPid) {
-                    return false;
-                } else {
-                    return true;
-                }
-                
+    private boolean isInstancePidNeedUpdate(final String name) {
+        return execute(state -> {
+            InstanceState instance = state.instances.get(name);
+            if (instance == null) {
+                throw new IllegalArgumentException("Instance " + name + " not found");
             }
+            int originalPid = instance.pid;
+            checkPid(instance);
+            int newPid = instance.pid;
+            return originalPid != newPid;
         }, false);
     }
 
@@ -1451,11 +1281,9 @@ public class InstanceServiceImpl implements InstanceService {
                     Files.write(configFile, config.getValue());
                 }
             }
-            FileLockUtils.execute(new File(karafBase, FEATURES_CFG), new FileLockUtils.RunnableWithProperties() {
-                public void run(org.apache.felix.utils.properties.Properties properties) throws IOException {
-                    appendToPropList(properties, "featuresBoot", effective.getFeatures());
-                    appendToPropList(properties, "featuresRepositories", effective.getRepositories());
-                }
+            FileLockUtils.execute(new File(karafBase, FEATURES_CFG), properties -> {
+                appendToPropList(properties, "featuresBoot", effective.getFeatures());
+                appendToPropList(properties, "featuresRepositories", effective.getRepositories());
             }, true);
 
             bundleContext.ungetService(reference);
