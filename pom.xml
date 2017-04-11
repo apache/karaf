@@ -278,7 +278,7 @@
         <spring40.version>4.0.7.RELEASE_3</spring40.version>
         <spring41.version>4.1.9.RELEASE_1</spring41.version>
         <spring42.version>4.2.9.RELEASE_1</spring42.version>
-        <spring43.version>4.3.5.RELEASE_1</spring43.version>
+        <spring43.version>4.3.7.RELEASE_1</spring43.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
 
         <sshd.version>1.4.0</sshd.version>
