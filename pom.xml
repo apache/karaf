@@ -253,6 +253,8 @@
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
+        <maven-project.version>2.0.9</maven-project.version>
+        <maven-plugin-annotations.version>3.3</maven-plugin-annotations.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <osgi.version>6.0.0</osgi.version>
@@ -1063,7 +1065,7 @@
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-project</artifactId>
-                <version>${maven.version}</version>
+                <version>${maven-project.version}</version>
             </dependency>
             <dependency>
                 <groupId>xerces</groupId>
