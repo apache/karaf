@@ -173,9 +173,9 @@
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
 
         <easymock.version>3.4</easymock.version>
-        <equinox.groupId>org.eclipse.tycho</equinox.groupId>
+        <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
-        <equinox.version>3.11.2.v20161107-1947</equinox.version>
+        <equinox.version>3.11.3</equinox.version>
         <bndlib.version>2.4.0</bndlib.version>
         <equinox.region.version>1.1.0.v20120522-1841</equinox.region.version>
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
