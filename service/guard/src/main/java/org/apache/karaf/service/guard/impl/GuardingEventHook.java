@@ -47,14 +47,15 @@ public class GuardingEventHook implements EventListenerHook {
             return;
         }
 
+        boolean proxificationDone = false;
+        BundleContext system = bundleContext.getBundle(0).getBundleContext();
         for (Iterator<BundleContext> i = listeners.keySet().iterator(); i.hasNext(); ) {
             BundleContext bc = i.next();
-            if (bundleContext.equals(bc) || bc.getBundle().getBundleId() == 0L) {
+            if (bc == bundleContext || bc == system) {
                 // don't hide anything from this bundle or the system bundle
                 continue;
             }
-
-            if (guardProxyCatalog.handleProxificationForHook(sr)) {
+            if (proxificationDone || (proxificationDone = guardProxyCatalog.handleProxificationForHook(sr))) {
                 i.remove();
             }
         }
