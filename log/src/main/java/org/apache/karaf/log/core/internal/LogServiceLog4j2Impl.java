@@ -61,7 +61,7 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
                 names.put(loggerName, config.get(key).toString());
             }
             
-            loggerName  = getMatching(namePattern, key);levelPattern.matcher(key);
+            loggerName = getMatching(levelPattern, key);
             if (loggerName != null) {
                 levels.put(loggerName, config.get(key).toString());
             }
