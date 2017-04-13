@@ -274,7 +274,7 @@ setupDefaults() {
                 DEFAULT_JAVA_OPTS="${DEFAULT_JAVA_OPTS} -XX:MaxPermSize=${JAVA_MAX_PERM_MEM}"
             fi
         fi
-        DEFAULT_JAVA_OPTS="-server ${DEFAULT_JAVA_OPTS} -Dcom.sun.management.jmxremote"
+        DEFAULT_JAVA_OPTS="${DEFAULT_JAVA_OPTS} -Dcom.sun.management.jmxremote"
     elif [ "${JVM_VENDOR}" = "IBM" ]; then
         if ${os400}; then
             DEFAULT_JAVA_OPTS="${DEFAULT_JAVA_OPTS}"

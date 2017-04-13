@@ -96,7 +96,6 @@ if "%KARAF_ETC%" == "" (
 )
 
 set LOCAL_CLASSPATH=%CLASSPATH%
-set JAVA_MODE=-server
 
 set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
 set DEFAULT_JAVA_DEBUG_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
@@ -235,10 +234,9 @@ if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
         echo WARNING: Running Karaf on a Java HotSpot Client VM because server-mode is not available.
         echo Install Java Developer Kit to fix this.
         echo For more details see http://java.sun.com/products/hotspot/whitepaper.html#client
-        set JAVA_MODE=-client
     )
 )
-set DEFAULT_JAVA_OPTS=%JAVA_MODE% -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dcom.sun.management.jmxremote  -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
+set DEFAULT_JAVA_OPTS=-Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dcom.sun.management.jmxremote  -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
 
 rem Check some easily accessible MIN/MAX params for JVM mem usage
 if not "%JAVA_PERM_MEM%" == "" (
