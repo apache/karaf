@@ -58,7 +58,7 @@ Then specify the packaging in your project as usual, e.g.
 |The feature packaging verifies a features.xml descriptor using the `karaf:verify` goal.
 
 |kar
-|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:features-create-kar`
+|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:features-create-kar` goal.
 
 |karaf-assembly
 |Assembles a Karaf server based on the features descriptors and kar files listed as Maven dependencies.
