@@ -55,10 +55,10 @@ Then specify the packaging in your project as usual, e.g.
 |Packaging |Description
 
 |feature
-|The feature packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor`
+|The feature packaging verifies a features.xml descriptor using the `karaf:verify` goal.
 
 |kar
-|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:features-create-kar`
+|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:features-create-kar` goal.
 
 |karaf-assembly
 |Assembles a Karaf server based on the features descriptors and kar files listed as Maven dependencies.
@@ -135,8 +135,6 @@ The `karaf-maven-plugin` provides several goals to help you create and verify fe
 
 ===== `karaf:features-generate-descriptor`
 
-Except in unusual circumstances, use the `<packaging>feature</packaging>` to run this goal.
-
 The `karaf:features-generate-descriptor` goal generates a features XML file based on the Maven dependencies.
 By default, it will follow Maven transitive dependencies, stopping when it encounters bundles already present in features that are Maven dependencies.
 
@@ -209,17 +207,27 @@ This can be overridden by specifying the bundle in the source feature.xml with t
         <artifactId>karaf-maven-plugin</artifactId>
         <version>${project.version}</version>
         <extensions>true</extensions>
-          <configuration>
-            <startLevel>80</startLevel>
-            <aggregateFeatures>true</aggregateFeatures>
-          </configuration>
-        </plugin>
+        <configuration>
+          <enableGeneration>true</enableGeneration>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-features-file</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>features-generate-descriptor</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
 ----
 
 ===== `karaf:verify`
+
+Except in unusual circumstances, use the `<packaging>feature</packaging>` to run this goal.
 
 The `karaf:verify` goal verifies and validates a features XML descriptor by checking if all the required imports
 for the bundles defined in the features can be matched to a provided export.
@@ -237,32 +245,32 @@ It reads the definition for the packages that are exported by the system bundle 
 <project>
   <build>
     <plugins>
-            <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>karaf-maven-plugin</artifactId>
-                <configuration>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>verify</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>mvn:org.apache.karaf.features/framework/4.0.4/xml/features</descriptor>
-                                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
-                            </descriptors>
-                            <distribution>org.apache.karaf.features:framework</distribution>
-                            <javase>1.8</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <configuration>
+        </configuration>
+        <executions>
+          <execution>
+            <id>verify</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>mvn:org.apache.karaf.features/framework/4.0.4/xml/features</descriptor>
+                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
+              </descriptors>
+              <distribution>org.apache.karaf.features:framework</distribution>
+              <javase>1.8</javase>
+              <framework>
+                <feature>framework</feature>
+              </framework>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
