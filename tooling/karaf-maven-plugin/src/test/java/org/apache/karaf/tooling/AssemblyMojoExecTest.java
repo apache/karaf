@@ -1,6 +1,5 @@
 package org.apache.karaf.tooling;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
@@ -30,6 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
@@ -73,7 +74,6 @@ public class AssemblyMojoExecTest {
         assemblyMojo.setConfig(config);
         final Map<String, String> system = new HashMap<>();
         assemblyMojo.setSystem(system);
-        final ImmutableMap.Builder<Builder.Stage, String> builder = new ImmutableMap.Builder<>();
     }
 
     @Test
@@ -93,7 +93,8 @@ public class AssemblyMojoExecTest {
         assemblyMojoExec.doExecute(assemblyMojo);
         //then
         assertStageKarsAdded(Builder.Stage.Startup, new String[]{
-                "mvn:org.apache.karaf.features/framework/4.1.2-SNAPSHOT/xml/features",
+                // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
+                "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features",
                 "mvn:org.apache/test-compile-kar-/0.1.0/kar"
         });
         assertStageKarsAdded(Builder.Stage.Boot, new String[]{"mvn:org.apache/test-runtime-kar-/0.1.0/kar"});
@@ -164,12 +165,24 @@ public class AssemblyMojoExecTest {
     }
 
     private void assertStageKarsAdded(final Builder.Stage stage, final String[] kars) {
+        // convert plain mvn urls into regex patterns
+        final List<Pattern> patterns = Arrays.stream(kars)
+                                             .map(pattern -> "^" + pattern + "$")
+                                             .map(pattern -> pattern.replace(".", "\\."))
+                                             .map(pattern -> pattern.replace("WILDCARD", ".*"))
+                                             .map(Pattern::compile)
+                                             .collect(Collectors.toList());
         stringArgumentCaptor.getAllValues()
                             .clear();
         then(this.builder).should(times(kars.length))
                           .kars(eq(stage), anyBoolean(), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add kars to Stage " + stage)
-                                                       .containsExactlyInAnyOrder(kars);
+        assertThat(stringArgumentCaptor.getAllValues()).hasSize(kars.length);
+        assertThat(stringArgumentCaptor.getAllValues()
+                                       .stream()
+                                       .filter(kar -> patterns.stream()
+                                                              .anyMatch(pattern -> pattern.matcher(kar)
+                                                                                          .matches()))
+                                       .collect(Collectors.toList())).hasSize(kars.length);
     }
 
     private DefaultArtifact getDependency(final String scope, final String type, final String classifier) {
