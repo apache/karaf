@@ -32,9 +32,17 @@ public class AssemblyMojoExecTest {
     private Builder builder;
 
     @Test
-    //@Ignore
     public void shouldExecuteMojo() throws Exception {
         //given
+        final AssemblyMojo assemblyMojo = getAssemblyMojo();
+        builder = new MyBuilder();
+        //when
+        new AssemblyMojoExec(assemblyMojo.getLog(), () -> builder).doExecute(assemblyMojo);
+        //then
+        // ?
+    }
+
+    private AssemblyMojo getAssemblyMojo() throws Exception {
         final File baseDir = resources.getBasedir("assembly-execute-mojo");
         final File pom = new File(baseDir, "pom.xml");
         assertThat(pom).isNotNull();
@@ -48,14 +56,12 @@ public class AssemblyMojoExecTest {
                 new DefaultArtifact("net.kemitix", "assembly-execute-mojo", "0.1.0", "compile", "jar", "", null));
         mavenProject.setDependencyArtifacts(Collections.emptySet());
         final ArtifactRepository artifactRepository = new MavenArtifactRepository();
-        //artifactRepository.setUrl("file:///home/pcampbell/.m2/repository");
         final DefaultRepositoryLayout repositoryLayout = new DefaultRepositoryLayout();
         artifactRepository.setLayout(repositoryLayout);
         mavenProject.setRemoteArtifactRepositories(Collections.singletonList(artifactRepository));
         assemblyMojo.setProject(mavenProject);
 
         final MavenSession mavenSession = mojoRule.newMavenSession(mavenProject);
-        //mavenSession.getRequest().setOffline(true);
         assemblyMojo.setMavenSession(mavenSession);
 
         final ArtifactRepository localRepo = new StubArtifactRepository(baseDir.getAbsolutePath());
@@ -65,13 +71,7 @@ public class AssemblyMojoExecTest {
         assemblyMojo.setSourceDirectory(new File(baseDir, "source"));
         assemblyMojo.setFramework("framework");
         assemblyMojo.setJavase("1.8");
-
-        builder = new MyBuilder();
-
-        //when
-        new AssemblyMojoExec(assemblyMojo.getLog(), () -> builder).doExecute(assemblyMojo);
-        //then
-        // ?
+        return assemblyMojo;
     }
 
     private class MyBuilder extends Builder {
