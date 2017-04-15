@@ -111,6 +111,45 @@ public class AssemblyMojoExecTest {
         assemblyMojoExec.doExecute(assemblyMojo);
     }
 
+    @Test
+    public void executeMojoWithStartupProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
+        //given
+        assemblyMojo.setStartupProfiles(Collections.singletonList("startup profile"));
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("profilesDirectory must be specified");
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+    }
+
+    @Test
+    public void executeMojoWithBootProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
+        //given
+        assemblyMojo.setBootProfiles(Collections.singletonList("boot profile"));
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("profilesDirectory must be specified");
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+    }
+
+    @Test
+    public void executeMojoWithInstalledProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
+        //given
+        assemblyMojo.setInstalledProfiles(Collections.singletonList("installed profile"));
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("profilesDirectory must be specified");
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+    }
+
+    @Test
+    public void executeMojoWithProfilesAndProfileDirectoryShouldBeOkay() throws Exception {
+        //given
+        assemblyMojo.setInstalledProfiles(Collections.singletonList("installed profile"));
+        assemblyMojo.setProfilesUri("profiles uri");
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+    }
+
     private void shouldExecuteMojo(final String framework, final String frameworkKar) throws Exception {
         //given
         dependencyArtifacts.addAll(
