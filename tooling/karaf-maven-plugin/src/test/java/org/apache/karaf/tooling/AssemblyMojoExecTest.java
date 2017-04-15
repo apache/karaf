@@ -16,6 +16,7 @@ import org.apache.maven.project.MavenProject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
@@ -49,6 +50,9 @@ public class AssemblyMojoExecTest {
 
     @Rule
     public TestResources resources = new TestResources();
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     @Spy
     private Builder builder = Builder.newInstance();
@@ -95,6 +99,16 @@ public class AssemblyMojoExecTest {
     @Test
     public void shouldExecuteMojoForStaticFrameworkLogBack() throws Exception {
         shouldExecuteMojo("static-framework-logback", "mvn:org.apache.karaf.features/static/WILDCARD/xml/features");
+    }
+
+    @Test
+    public void executeMojoWithInvalidFrameworkShouldThrowException() throws Exception {
+        //given
+        assemblyMojo.setFramework("unknown");
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Unsupported framework: unknown");
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
     }
 
     private void shouldExecuteMojo(final String framework, final String frameworkKar) throws Exception {
