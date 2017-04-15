@@ -45,7 +45,7 @@ import static org.mockito.Mockito.times;
  */
 public class AssemblyMojoExecTest {
 
-    public static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
+    private static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
 
     @Rule
     public MojoRule mojoRule = new MojoRule();
