@@ -1,5 +1,6 @@
 package org.apache.karaf.tooling;
 
+import org.apache.karaf.profile.assembly.Builder;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
@@ -27,6 +28,8 @@ public class AssemblyMojoExecTest {
 
     @Rule
     public TestResources resources = new TestResources();
+
+    private Builder builder;
 
     @Test
     //@Ignore
@@ -59,12 +62,24 @@ public class AssemblyMojoExecTest {
         assemblyMojo.setLocalRepo(localRepo);
 
         assemblyMojo.setWorkDirectory(new File(baseDir, "assembly"));
+        assemblyMojo.setSourceDirectory(new File(baseDir, "source"));
         assemblyMojo.setFramework("framework");
         assemblyMojo.setJavase("1.8");
+
+        builder = new MyBuilder();
+
         //when
-        new AssemblyMojoExec(assemblyMojo.getLog()).doExecute(assemblyMojo);
+        new AssemblyMojoExec(assemblyMojo.getLog(), () -> builder).doExecute(assemblyMojo);
         //then
         // ?
     }
 
+    private class MyBuilder extends Builder {
+
+        @Override
+        public void generateAssembly() throws Exception {
+            // do nothing
+        }
+
+    }
 }

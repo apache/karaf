@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 /**
  * Executor for the {@link AssemblyMojo}.
@@ -32,6 +33,8 @@ import java.util.Properties;
 public class AssemblyMojoExec {
 
     private final Log log;
+
+    private final Supplier<Builder> builderSupplier;
 
     private List<String> startupRepositories;
 
@@ -65,8 +68,11 @@ public class AssemblyMojoExec {
 
     private List<String> blacklistedRepositories;
 
-    public AssemblyMojoExec(final Log log) {
+    public AssemblyMojoExec(
+            final Log log, final Supplier<Builder> builderSupplier
+                           ) {
         this.log = log;
+        this.builderSupplier = builderSupplier;
     }
 
     protected void doExecute(final AssemblyMojo mojo) throws Exception {
@@ -121,7 +127,7 @@ public class AssemblyMojoExec {
         }
         log.info("Using repositories: " + remote.toString());
 
-        Builder builder = Builder.newInstance();
+        Builder builder = builderSupplier.get();
         builder.offline(mojo.getMavenSession()
                             .isOffline());
         builder.localRepository(mojo.getLocalRepo()

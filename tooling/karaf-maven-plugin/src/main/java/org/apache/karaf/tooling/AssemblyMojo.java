@@ -249,7 +249,7 @@ public class AssemblyMojo extends MojoSupport {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            new AssemblyMojoExec(getLog()).doExecute(this);
+            new AssemblyMojoExec(getLog(), Builder::newInstance).doExecute(this);
         }
         catch (MojoExecutionException | MojoFailureException e) {
             throw e;
