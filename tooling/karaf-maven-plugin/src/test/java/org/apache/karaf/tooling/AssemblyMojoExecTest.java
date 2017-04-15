@@ -76,8 +76,28 @@ public class AssemblyMojoExecTest {
         assemblyMojo.setSystem(system);
     }
 
+    // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
     @Test
-    public void shouldExecuteMojo() throws Exception {
+    public void shouldExecuteMojoForFramework() throws Exception {
+        shouldExecuteMojo("framework", "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features");
+    }
+
+    @Test
+    public void shouldExecuteMojoForFrameworkLogBack() throws Exception {
+        shouldExecuteMojo("framework-logback", "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features");
+    }
+
+    @Test
+    public void shouldExecuteMojoForStaticFramework() throws Exception {
+        shouldExecuteMojo("static-framework", "mvn:org.apache.karaf.features/static/WILDCARD/xml/features");
+    }
+
+    @Test
+    public void shouldExecuteMojoForStaticFrameworkLogBack() throws Exception {
+        shouldExecuteMojo("static-framework-logback", "mvn:org.apache.karaf.features/static/WILDCARD/xml/features");
+    }
+
+    private void shouldExecuteMojo(final String framework, final String frameworkKar) throws Exception {
         //given
         dependencyArtifacts.addAll(
                 Arrays.asList(getDependency("compile", "jar", ""), getDependency("runtime", "jar", ""),
@@ -88,14 +108,12 @@ public class AssemblyMojoExecTest {
                               getDependency("compile", "jar", "karaf"), getDependency("runtime", "jar", "karaf"),
                               getDependency("provided", "jar", "karaf")
                              ));
-
+        assemblyMojo.setFramework(framework);
         //when
         assemblyMojoExec.doExecute(assemblyMojo);
         //then
         assertStageKarsAdded(Builder.Stage.Startup, new String[]{
-                // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
-                "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features",
-                "mvn:org.apache/test-compile-kar-/0.1.0/kar"
+                frameworkKar, "mvn:org.apache/test-compile-kar-/0.1.0/kar"
         });
         assertStageKarsAdded(Builder.Stage.Boot, new String[]{"mvn:org.apache/test-runtime-kar-/0.1.0/kar"});
         assertStageKarsAdded(Builder.Stage.Installed, new String[]{"mvn:org.apache/test-provided-kar-/0.1.0/kar"});
@@ -109,7 +127,7 @@ public class AssemblyMojoExecTest {
                 Builder.Stage.Installed, new String[]{"mvn:org.apache/test-provided-jar-karaf/0.1.0/jar/karaf"});
 
         assertFeaturesAdded(new String[]{});
-        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{"framework"}, 2);
+        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
         assertStageFeaturesAdded(Builder.Stage.Boot, new String[]{}, 1);
         assertStageFeaturesAdded(Builder.Stage.Installed, new String[]{}, 1);
         assertBundlesAdded(new String[]{
