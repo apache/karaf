@@ -18,32 +18,22 @@
  */
 package org.apache.karaf.tooling;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermissions;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.karaf.profile.assembly.Builder;
-import org.apache.karaf.tooling.utils.IoUtils;
-import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
-import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
-import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
-import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Creates a customized Karaf distribution by installing features and setting up
@@ -132,7 +122,7 @@ public class AssemblyMojo extends MojoSupport {
     private List<String> installedBundles;
     @Parameter
     private List<String> blacklistedBundles;
-    
+
     @Parameter
     private String profilesUri;
 
@@ -259,7 +249,7 @@ public class AssemblyMojo extends MojoSupport {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            doExecute();
+            new AssemblyMojoExec(getLog()).doExecute(this);
         }
         catch (MojoExecutionException | MojoFailureException e) {
             throw e;
@@ -269,312 +259,340 @@ public class AssemblyMojo extends MojoSupport {
         }
     }
 
-    protected void doExecute() throws Exception {
-        startupRepositories = nonNullList(startupRepositories);
-        bootRepositories = nonNullList(bootRepositories);
-        installedRepositories = nonNullList(installedRepositories);
-        startupBundles = nonNullList(startupBundles);
-        bootBundles = nonNullList(bootBundles);
-        installedBundles = nonNullList(installedBundles);
-        blacklistedBundles = nonNullList(blacklistedBundles);
-        startupFeatures = nonNullList(startupFeatures);
-        bootFeatures = nonNullList(bootFeatures);
-        installedFeatures = nonNullList(installedFeatures);
-        blacklistedFeatures = nonNullList(blacklistedFeatures);
-        startupProfiles = nonNullList(startupProfiles);
-        bootProfiles = nonNullList(bootProfiles);
-        installedProfiles = nonNullList(installedProfiles);
-        blacklistedProfiles = nonNullList(blacklistedProfiles);
-        blacklistedRepositories = nonNullList(blacklistedRepositories);
-
-        if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
-            if (profilesUri == null) {
-                throw new IllegalArgumentException("profilesDirectory must be specified");
-            }
-        }
-
-        if (featureRepositories != null && !featureRepositories.isEmpty()) {
-            getLog().warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or installedRepositories instead");
-            startupRepositories.addAll(featureRepositories);
-            bootRepositories.addAll(featureRepositories);
-            installedRepositories.addAll(featureRepositories);
-        }
-
-        StringBuilder remote = new StringBuilder();
-        for (Object obj : project.getRemoteProjectRepositories()) {
-            if (remote.length() > 0) {
-                remote.append(",");
-            }
-            remote.append(invoke(obj, "getUrl"));
-            remote.append("@id=").append(invoke(obj, "getId"));
-            if (!((Boolean) invoke(getPolicy(obj, false), "isEnabled"))) {
-                remote.append("@noreleases");
-            }
-            if ((Boolean) invoke(getPolicy(obj, true), "isEnabled")) {
-                remote.append("@snapshots");
-            }
-        }
-        getLog().info("Using repositories: " + remote.toString());
-
-        Builder builder = Builder.newInstance();
-        builder.offline(mavenSession.isOffline());
-        builder.localRepository(localRepo.getBasedir());
-        builder.mavenRepositories(remote.toString());
-        builder.javase(javase);
-
-        // Set up config and system props
-        if (config != null) {
-            config.forEach(builder::config);
-        }
-        if (system != null) {
-            system.forEach(builder::system);
-        }
-
-        // Set up blacklisted items
-        builder.blacklistBundles(blacklistedBundles);
-        builder.blacklistFeatures(blacklistedFeatures);
-        builder.blacklistProfiles(blacklistedProfiles);
-        builder.blacklistRepositories(blacklistedRepositories);
-        builder.blacklistPolicy(blacklistPolicy);
-
-        if (propertyFileEdits != null) {
-            File file = new File(propertyFileEdits);
-            if (file.exists()) {
-                KarafPropertyEdits edits;
-                try (InputStream editsStream = new FileInputStream(propertyFileEdits)) {
-                    KarafPropertyInstructionsModelStaxReader kipmsr = new KarafPropertyInstructionsModelStaxReader();
-                    edits = kipmsr.read(editsStream, true);
-                }
-                builder.propertyEdits(edits);
-            }
-        }
-        builder.pidsToExtract(pidsToExtract);
-
-        Map<String, String> urls = new HashMap<>();
-        List<Artifact> artifacts = new ArrayList<>(project.getAttachedArtifacts());
-        artifacts.add(project.getArtifact());
-        for (Artifact artifact : artifacts) {
-            if (artifact.getFile() != null && artifact.getFile().exists()) {
-                String mvnUrl = "mvn:" + artifact.getGroupId() + "/" + artifact.getArtifactId()
-                        + "/" + artifact.getVersion();
-                String type = artifact.getType();
-                if ("bundle".equals(type)) {
-                    type = "jar";
-                }
-                if (!"jar".equals(type) || artifact.getClassifier() != null) {
-                    mvnUrl += "/" + type;
-                    if (artifact.getClassifier() != null) {
-                        mvnUrl += "/" + artifact.getClassifier();
-                    }
-                }
-                urls.put(mvnUrl, artifact.getFile().toURI().toString());
-            }
-        }
-        if (translatedUrls != null) {
-            urls.putAll(translatedUrls);
-        }
-        builder.translatedUrls(urls);
-
-        // creating system directory
-        getLog().info("Creating work directory");
-        builder.homeDirectory(workDirectory.toPath());
-        IoUtils.deleteRecursive(workDirectory);
-        workDirectory.mkdirs();
-
-        List<String> startupKars = new ArrayList<>();
-        List<String> bootKars = new ArrayList<>();
-        List<String> installedKars = new ArrayList<>();
-
-        // Loading kars and features repositories
-        getLog().info("Loading kar and features repositories dependencies");
-        for (Artifact artifact : project.getDependencyArtifacts()) {
-            Builder.Stage stage;
-            switch (artifact.getScope()) {
-            case "compile":
-                stage = Builder.Stage.Startup;
-                break;
-            case "runtime":
-                stage = Builder.Stage.Boot;
-                break;
-            case "provided":
-                stage = Builder.Stage.Installed;
-                break;
-            default:
-                continue;
-            }
-            if ("kar".equals(artifact.getType())) {
-                String uri = artifactToMvn(artifact);
-                switch (stage) {
-                case Startup:   startupKars.add(uri); break;
-                case Boot:      bootKars.add(uri); break;
-                case Installed: installedKars.add(uri); break;
-                }
-            } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
-                String uri = artifactToMvn(artifact);
-                switch (stage) {
-                case Startup:   startupRepositories.add(uri); break;
-                case Boot:      bootRepositories.add(uri); break;
-                case Installed: installedRepositories.add(uri); break;
-                }
-            } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-                String uri = artifactToMvn(artifact);
-                switch (stage) {
-                case Startup:   startupBundles.add(uri); break;
-                case Boot:      bootBundles.add(uri); break;
-                case Installed: installedBundles.add(uri); break;
-                }
-            }
-        }
-
-        builder.karafVersion(karafVersion)
-               .useReferenceUrls(useReferenceUrls)
-               .defaultAddAll(installAllFeaturesByDefault)
-               .ignoreDependencyFlag(ignoreDependencyFlag);
-        if (profilesUri != null) {
-            builder.profilesUris(profilesUri);
-        }
-        if (libraries != null) {
-            builder.libraries(libraries.toArray(new String[libraries.size()]));
-        }
-        // Startup
-        boolean hasFrameworkKar = false;
-        for (String kar : startupKars) {
-            if (kar.startsWith("mvn:org.apache.karaf.features/framework/")
-                    || kar.startsWith("mvn:org.apache.karaf.features/static/")) {
-                hasFrameworkKar = true;
-                startupKars.remove(kar);
-                if (framework == null) {
-                    framework = kar.startsWith("mvn:org.apache.karaf.features/framework/")
-                            ? "framework" : "static-framework";
-                }
-                builder.kars(Builder.Stage.Startup, false, kar);
-                break;
-            }
-        }
-        if (!hasFrameworkKar) {
-            Properties versions = new Properties();
-            try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
-                versions.load(is);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-            String realKarafVersion = versions.getProperty("karaf-version");
-            String kar;
-            switch (framework) {
-                case "framework":
-                    kar = "mvn:org.apache.karaf.features/framework/" + realKarafVersion + "/xml/features";
-                    break;
-                case "framework-logback":
-                    kar = "mvn:org.apache.karaf.features/framework/" + realKarafVersion + "/xml/features";
-                    break;
-                case "static-framework":
-                    kar = "mvn:org.apache.karaf.features/static/" + realKarafVersion + "/xml/features";
-                    break;
-                case "static-framework-logback":
-                    kar = "mvn:org.apache.karaf.features/static/" + realKarafVersion + "/xml/features";
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported framework: " + framework);
-            }
-            builder.kars(Builder.Stage.Startup, false, kar);
-        }
-        if (!startupFeatures.contains(framework)) {
-            builder.features(Builder.Stage.Startup, framework);
-        }
-        builder.defaultStage(Builder.Stage.Startup)
-               .kars(toArray(startupKars))
-               .repositories(startupFeatures.isEmpty() && startupProfiles.isEmpty() && installAllFeaturesByDefault, toArray(startupRepositories))
-               .features(toArray(startupFeatures))
-               .bundles(toArray(startupBundles))
-               .profiles(toArray(startupProfiles));
-        // Boot
-        builder.defaultStage(Builder.Stage.Boot)
-                .kars(toArray(bootKars))
-                .repositories(bootFeatures.isEmpty() && bootProfiles.isEmpty() && installAllFeaturesByDefault, toArray(bootRepositories))
-                .features(toArray(bootFeatures))
-                .bundles(toArray(bootBundles))
-                .profiles(toArray(bootProfiles));
-        // Installed
-        builder.defaultStage(Builder.Stage.Installed)
-                .kars(toArray(installedKars))
-                .repositories(installedFeatures.isEmpty() && installedProfiles.isEmpty() && installAllFeaturesByDefault, toArray(installedRepositories))
-                .features(toArray(installedFeatures))
-                .bundles(toArray(installedBundles))
-                .profiles(toArray(installedProfiles));
-
-        // Generate the assembly
-        builder.generateAssembly();
-
-        // Include project classes content
-        if (includeBuildOutputDirectory)
-            IoUtils.copyDirectory(new File(project.getBuild().getOutputDirectory()), workDirectory);
-
-        // Overwrite assembly dir contents
-        if (sourceDirectory.exists())
-            IoUtils.copyDirectory(sourceDirectory, workDirectory);
-
-        // Chmod the bin/* scripts
-        File[] files = new File(workDirectory, "bin").listFiles();
-        if( files!=null ) {
-            for (File file : files) {
-                if( !file.getName().endsWith(".bat") ) {
-                    try {
-                        Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rwxr-xr-x"));
-                    } catch (Throwable ignore) {
-                        // we tried our best, perhaps the OS does not support posix file perms.
-                    }
-                }
-            }
-        }
+    File getSourceDirectory() {
+        return sourceDirectory;
     }
 
-    private Object invoke(Object object, String getter) throws MojoExecutionException {
-        try {
-            return object.getClass().getMethod(getter).invoke(object);
-        } catch (Exception e) {
-            throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
-        }
+    void setSourceDirectory(final File sourceDirectory) {
+        this.sourceDirectory = sourceDirectory;
     }
 
-    private Object getPolicy(Object object, boolean snapshots) throws MojoExecutionException {
-        return invoke(object, "getPolicy", new Class[] { Boolean.TYPE }, new Object[] { snapshots });
+    @Override
+    public File getWorkDirectory() {
+        return workDirectory;
     }
 
-    private Object invoke(Object object, String getter, Class[] types, Object[] params) throws MojoExecutionException {
-        try {
-            return object.getClass().getMethod(getter, types).invoke(object, params);
-        } catch (Exception e) {
-            throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
-        }
+    void setWorkDirectory(final File workDirectory) {
+        this.workDirectory = workDirectory;
     }
 
-    private String artifactToMvn(Artifact artifact) throws MojoExecutionException {
-        String uri;
-
-        String groupId = artifact.getGroupId();
-        String artifactId = artifact.getArtifactId();
-        String version = artifact.getBaseVersion();
-        String type = artifact.getArtifactHandler().getExtension();
-        String classifier = artifact.getClassifier();
-
-        if (MavenUtil.isEmpty(classifier)) {
-            if ("jar".equals(type)) {
-                uri = String.format("mvn:%s/%s/%s", groupId, artifactId, version);
-            } else {
-                uri = String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type);
-            }
-        } else {
-            uri = String.format("mvn:%s/%s/%s/%s/%s", groupId, artifactId, version, type, classifier);
-        }
-        return uri;
+    File getFeaturesCfgFile() {
+        return featuresCfgFile;
     }
 
-    private String[] toArray(List<String> strings) {
-        return strings.toArray(new String[strings.size()]);
+    void setFeaturesCfgFile(final File featuresCfgFile) {
+        this.featuresCfgFile = featuresCfgFile;
     }
 
-    private List<String> nonNullList(List<String> list) {
-        return list == null ? new ArrayList<String>() : list;
+    File getStartupPropertiesFile() {
+        return startupPropertiesFile;
     }
 
+    void setStartupPropertiesFile(final File startupPropertiesFile) {
+        this.startupPropertiesFile = startupPropertiesFile;
+    }
+
+    File getSystemDirectory() {
+        return systemDirectory;
+    }
+
+    void setSystemDirectory(final File systemDirectory) {
+        this.systemDirectory = systemDirectory;
+    }
+
+    int getDefaultStartLevel() {
+        return defaultStartLevel;
+    }
+
+    void setDefaultStartLevel(final int defaultStartLevel) {
+        this.defaultStartLevel = defaultStartLevel;
+    }
+
+    List<String> getStartupRepositories() {
+        return startupRepositories;
+    }
+
+    void setStartupRepositories(final List<String> startupRepositories) {
+        this.startupRepositories = startupRepositories;
+    }
+
+    List<String> getBootRepositories() {
+        return bootRepositories;
+    }
+
+    void setBootRepositories(final List<String> bootRepositories) {
+        this.bootRepositories = bootRepositories;
+    }
+
+    List<String> getInstalledRepositories() {
+        return installedRepositories;
+    }
+
+    void setInstalledRepositories(final List<String> installedRepositories) {
+        this.installedRepositories = installedRepositories;
+    }
+
+    List<String> getBlacklistedRepositories() {
+        return blacklistedRepositories;
+    }
+
+    void setBlacklistedRepositories(final List<String> blacklistedRepositories) {
+        this.blacklistedRepositories = blacklistedRepositories;
+    }
+
+    List<String> getStartupFeatures() {
+        return startupFeatures;
+    }
+
+    void setStartupFeatures(final List<String> startupFeatures) {
+        this.startupFeatures = startupFeatures;
+    }
+
+    List<String> getBootFeatures() {
+        return bootFeatures;
+    }
+
+    void setBootFeatures(final List<String> bootFeatures) {
+        this.bootFeatures = bootFeatures;
+    }
+
+    List<String> getInstalledFeatures() {
+        return installedFeatures;
+    }
+
+    void setInstalledFeatures(final List<String> installedFeatures) {
+        this.installedFeatures = installedFeatures;
+    }
+
+    List<String> getBlacklistedFeatures() {
+        return blacklistedFeatures;
+    }
+
+    void setBlacklistedFeatures(final List<String> blacklistedFeatures) {
+        this.blacklistedFeatures = blacklistedFeatures;
+    }
+
+    List<String> getStartupBundles() {
+        return startupBundles;
+    }
+
+    void setStartupBundles(final List<String> startupBundles) {
+        this.startupBundles = startupBundles;
+    }
+
+    List<String> getBootBundles() {
+        return bootBundles;
+    }
+
+    void setBootBundles(final List<String> bootBundles) {
+        this.bootBundles = bootBundles;
+    }
+
+    List<String> getInstalledBundles() {
+        return installedBundles;
+    }
+
+    void setInstalledBundles(final List<String> installedBundles) {
+        this.installedBundles = installedBundles;
+    }
+
+    List<String> getBlacklistedBundles() {
+        return blacklistedBundles;
+    }
+
+    void setBlacklistedBundles(final List<String> blacklistedBundles) {
+        this.blacklistedBundles = blacklistedBundles;
+    }
+
+    String getProfilesUri() {
+        return profilesUri;
+    }
+
+    void setProfilesUri(final String profilesUri) {
+        this.profilesUri = profilesUri;
+    }
+
+    List<String> getBootProfiles() {
+        return bootProfiles;
+    }
+
+    void setBootProfiles(final List<String> bootProfiles) {
+        this.bootProfiles = bootProfiles;
+    }
+
+    List<String> getStartupProfiles() {
+        return startupProfiles;
+    }
+
+    void setStartupProfiles(final List<String> startupProfiles) {
+        this.startupProfiles = startupProfiles;
+    }
+
+    List<String> getInstalledProfiles() {
+        return installedProfiles;
+    }
+
+    void setInstalledProfiles(final List<String> installedProfiles) {
+        this.installedProfiles = installedProfiles;
+    }
+
+    List<String> getBlacklistedProfiles() {
+        return blacklistedProfiles;
+    }
+
+    void setBlacklistedProfiles(final List<String> blacklistedProfiles) {
+        this.blacklistedProfiles = blacklistedProfiles;
+    }
+
+    Builder.BlacklistPolicy getBlacklistPolicy() {
+        return blacklistPolicy;
+    }
+
+    void setBlacklistPolicy(final Builder.BlacklistPolicy blacklistPolicy) {
+        this.blacklistPolicy = blacklistPolicy;
+    }
+
+    boolean isIgnoreDependencyFlag() {
+        return ignoreDependencyFlag;
+    }
+
+    void setIgnoreDependencyFlag(final boolean ignoreDependencyFlag) {
+        this.ignoreDependencyFlag = ignoreDependencyFlag;
+    }
+
+    List<String> getFeatureRepositories() {
+        return featureRepositories;
+    }
+
+    void setFeatureRepositories(final List<String> featureRepositories) {
+        this.featureRepositories = featureRepositories;
+    }
+
+    List<String> getLibraries() {
+        return libraries;
+    }
+
+    void setLibraries(final List<String> libraries) {
+        this.libraries = libraries;
+    }
+
+    boolean isUseReferenceUrls() {
+        return useReferenceUrls;
+    }
+
+    void setUseReferenceUrls(final boolean useReferenceUrls) {
+        this.useReferenceUrls = useReferenceUrls;
+    }
+
+    boolean isIncludeBuildOutputDirectory() {
+        return includeBuildOutputDirectory;
+    }
+
+    void setIncludeBuildOutputDirectory(final boolean includeBuildOutputDirectory) {
+        this.includeBuildOutputDirectory = includeBuildOutputDirectory;
+    }
+
+    boolean isInstallAllFeaturesByDefault() {
+        return installAllFeaturesByDefault;
+    }
+
+    void setInstallAllFeaturesByDefault(final boolean installAllFeaturesByDefault) {
+        this.installAllFeaturesByDefault = installAllFeaturesByDefault;
+    }
+
+    Builder.KarafVersion getKarafVersion() {
+        return karafVersion;
+    }
+
+    void setKarafVersion(final Builder.KarafVersion karafVersion) {
+        this.karafVersion = karafVersion;
+    }
+
+    String getJavase() {
+        return javase;
+    }
+
+    void setJavase(final String javase) {
+        this.javase = javase;
+    }
+
+    String getFramework() {
+        return framework;
+    }
+
+    void setFramework(final String framework) {
+        this.framework = framework;
+    }
+
+    String getPropertyFileEdits() {
+        return propertyFileEdits;
+    }
+
+    void setPropertyFileEdits(final String propertyFileEdits) {
+        this.propertyFileEdits = propertyFileEdits;
+    }
+
+    List<String> getPidsToExtract() {
+        return pidsToExtract;
+    }
+
+    void setPidsToExtract(final List<String> pidsToExtract) {
+        this.pidsToExtract = pidsToExtract;
+    }
+
+    Map<String, String> getTranslatedUrls() {
+        return translatedUrls;
+    }
+
+    void setTranslatedUrls(final Map<String, String> translatedUrls) {
+        this.translatedUrls = translatedUrls;
+    }
+
+    Map<String, String> getConfig() {
+        return config;
+    }
+
+    void setConfig(final Map<String, String> config) {
+        this.config = config;
+    }
+
+    Map<String, String> getSystem() {
+        return system;
+    }
+
+    void setSystem(final Map<String, String> system) {
+        this.system = system;
+    }
+
+    MavenSession getMavenSession() {
+        return mavenSession;
+    }
+
+    ArtifactRepository getLocalRepo() {
+        return localRepo;
+    }
+
+    boolean getUseReferenceUrls() {
+        return useReferenceUrls;
+    }
+
+    boolean getInstallAllFeaturesByDefault() {
+        return installAllFeaturesByDefault;
+    }
+
+    boolean getIgnoreDependencyFlag() {
+        return ignoreDependencyFlag;
+    }
+
+    boolean getIncludeBuildOutputDirectory() {
+        return includeBuildOutputDirectory;
+    }
+
+    void setLocalRepo(final ArtifactRepository localRepo) {
+        this.localRepo = localRepo;
+    }
+
+    void setProject(final MavenProject project) {
+        this.project = project;
+    }
 }

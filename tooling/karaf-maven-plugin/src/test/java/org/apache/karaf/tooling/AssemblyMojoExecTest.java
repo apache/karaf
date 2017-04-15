@@ -9,7 +9,6 @@ import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
 import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.apache.maven.project.MavenProject;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -19,9 +18,9 @@ import java.util.Collections;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link AssemblyMojo}.
+ * Tests for {@link AssemblyMojoExec}.
  */
-public class AssemblyMojoTest {
+public class AssemblyMojoExecTest {
 
     @Rule
     public MojoRule mojoRule = new MojoRule();
@@ -30,7 +29,7 @@ public class AssemblyMojoTest {
     public TestResources resources = new TestResources();
 
     @Test
-    @Ignore
+    //@Ignore
     public void shouldExecuteMojo() throws Exception {
         //given
         final File baseDir = resources.getBasedir("assembly-execute-mojo");
@@ -50,20 +49,20 @@ public class AssemblyMojoTest {
         final DefaultRepositoryLayout repositoryLayout = new DefaultRepositoryLayout();
         artifactRepository.setLayout(repositoryLayout);
         mavenProject.setRemoteArtifactRepositories(Collections.singletonList(artifactRepository));
-        mojoRule.setVariableValueToObject(assemblyMojo, "project", mavenProject);
+        assemblyMojo.setProject(mavenProject);
 
         final MavenSession mavenSession = mojoRule.newMavenSession(mavenProject);
         //mavenSession.getRequest().setOffline(true);
-        mojoRule.setVariableValueToObject(assemblyMojo, "mavenSession", mavenSession);
+        assemblyMojo.setMavenSession(mavenSession);
 
         final ArtifactRepository localRepo = new StubArtifactRepository(baseDir.getAbsolutePath());
-        mojoRule.setVariableValueToObject(assemblyMojo, "localRepo", localRepo);
+        assemblyMojo.setLocalRepo(localRepo);
 
-        mojoRule.setVariableValueToObject(assemblyMojo, "workDirectory", new File(baseDir, "assembly"));
-        mojoRule.setVariableValueToObject(assemblyMojo, "framework", "framework");
-        mojoRule.setVariableValueToObject(assemblyMojo, "javase", "1.8");
+        assemblyMojo.setWorkDirectory(new File(baseDir, "assembly"));
+        assemblyMojo.setFramework("framework");
+        assemblyMojo.setJavase("1.8");
         //when
-        assemblyMojo.execute();
+        new AssemblyMojoExec(assemblyMojo.getLog()).doExecute(assemblyMojo);
         //then
         // ?
     }

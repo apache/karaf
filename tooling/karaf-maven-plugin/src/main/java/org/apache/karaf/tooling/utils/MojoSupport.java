@@ -17,18 +17,6 @@
  */
 package org.apache.karaf.tooling.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.karaf.util.StreamUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -52,6 +40,18 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.settings.Proxy;
 import org.codehaus.plexus.PlexusContainer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
 public abstract class MojoSupport extends AbstractMojo {
@@ -91,13 +91,13 @@ public abstract class MojoSupport extends AbstractMojo {
 
     @Component
     protected ArtifactFactory factory;
-    
+
     /**
      * The artifact type of a feature.
      */
     @Parameter(defaultValue = "xml")
     private String featureArtifactType = "xml";
-    
+
     /**
      * The Maven session.
      */
@@ -113,11 +113,11 @@ public abstract class MojoSupport extends AbstractMojo {
     @Component
     protected PlexusContainer container;
 
-    protected MavenProject getProject() {
+    public MavenProject getProject() {
         return project;
     }
 
-    protected File getWorkDirectory() {
+    public File getWorkDirectory() {
         return workDirectory;
     }
 
@@ -168,7 +168,7 @@ public abstract class MojoSupport extends AbstractMojo {
         }
         return map;
     }
-    
+
     protected String translateFromMaven(String uri) {
         if (uri.startsWith("mvn:")) {
             String[] parts = uri.substring("mvn:".length()).split("/");
@@ -224,12 +224,12 @@ public abstract class MojoSupport extends AbstractMojo {
             throw new RuntimeException("Repository URL is not valid", e);
         }
     }
-    
+
     private Dependency findDependency(List<Dependency> dependencies, String artifactId, String groupId) {
         for(Dependency dep : dependencies) {
             if (artifactId.equals(dep.getArtifactId()) && groupId.equals(dep.getGroupId()) &&
                     featureArtifactType.equals(dep.getType())) {
-                if (dep.getVersion() != null) 
+                if (dep.getVersion() != null)
                     return dep;
             }
         }
@@ -325,7 +325,7 @@ public abstract class MojoSupport extends AbstractMojo {
         artifact.setRepository(repo);
         return artifact;
     }
-    
+
     private org.apache.maven.repository.Proxy configureProxyToInlineRepo() {
         if (mavenSession != null && mavenSession.getSettings() != null) {
             Proxy proxy = mavenSession.getSettings().getActiveProxy();
@@ -341,7 +341,7 @@ public abstract class MojoSupport extends AbstractMojo {
             } else {
                 return null;
             }
-            
+
         } else {
             return null;
         }
@@ -362,7 +362,7 @@ public abstract class MojoSupport extends AbstractMojo {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
-    
+
 
     /**
      * Make sure the target directory exists and that is actually a directory.
