@@ -13,11 +13,14 @@ import org.apache.maven.project.MavenProject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.io.File;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 
 /**
  * Tests for {@link AssemblyMojoExec}.
@@ -30,14 +33,16 @@ public class AssemblyMojoExecTest {
     @Rule
     public TestResources resources = new TestResources();
 
-    private Builder builder;
+    @Spy
+    private Builder builder = Builder.newInstance();
 
     private AssemblyMojo assemblyMojo;
 
     @Before
     public void setUp() throws Exception {
-        builder = new MyBuilder();
+        MockitoAnnotations.initMocks(this);
         assemblyMojo = getAssemblyMojo();
+        doNothing().when(builder).generateAssembly();
     }
 
     @Test
@@ -81,12 +86,4 @@ public class AssemblyMojoExecTest {
         return assemblyMojo;
     }
 
-    private class MyBuilder extends Builder {
-
-        @Override
-        public void generateAssembly() throws Exception {
-            // do nothing
-        }
-
-    }
 }
