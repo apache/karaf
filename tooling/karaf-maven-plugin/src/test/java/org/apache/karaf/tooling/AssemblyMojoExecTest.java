@@ -45,6 +45,8 @@ import static org.mockito.Mockito.times;
  */
 public class AssemblyMojoExecTest {
 
+    public static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
+
     @Rule
     public MojoRule mojoRule = new MojoRule();
 
@@ -83,22 +85,46 @@ public class AssemblyMojoExecTest {
     // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
     @Test
     public void shouldExecuteMojoForFramework() throws Exception {
-        shouldExecuteMojo("framework", "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features");
+        //given
+        final String framework = "framework";
+        final String expectedFrameworkKar = DEFAULT_FRAMEWORK_KAR;
+        //when
+        executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
+        //then
+        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
     }
 
     @Test
     public void shouldExecuteMojoForFrameworkLogBack() throws Exception {
-        shouldExecuteMojo("framework-logback", "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features");
+        //given
+        final String framework = "framework-logback";
+        final String expectedFrameworkKar = DEFAULT_FRAMEWORK_KAR;
+        //when
+        executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
+        //then
+        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
     }
 
     @Test
     public void shouldExecuteMojoForStaticFramework() throws Exception {
-        shouldExecuteMojo("static-framework", "mvn:org.apache.karaf.features/static/WILDCARD/xml/features");
+        //given
+        final String framework = "static-framework";
+        final String expectedFrameworkKar = "mvn:org.apache.karaf.features/static/WILDCARD/xml/features";
+        //when
+        executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
+        //then
+        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
     }
 
     @Test
     public void shouldExecuteMojoForStaticFrameworkLogBack() throws Exception {
-        shouldExecuteMojo("static-framework-logback", "mvn:org.apache.karaf.features/static/WILDCARD/xml/features");
+        //given
+        final String framework = "static-framework-logback";
+        final String expectedFrameworkKar = "mvn:org.apache.karaf.features/static/WILDCARD/xml/features";
+        //when
+        executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
+        //then
+        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
     }
 
     @Test
@@ -150,43 +176,143 @@ public class AssemblyMojoExecTest {
         assemblyMojoExec.doExecute(assemblyMojo);
     }
 
-    private void shouldExecuteMojo(final String framework, final String frameworkKar) throws Exception {
+    private void executeMojoCheckingForFrameworkKar(final String framework, final String expectedFrameworkKar)
+            throws Exception {
         //given
-        dependencyArtifacts.addAll(
-                Arrays.asList(getDependency("compile", "jar", ""), getDependency("runtime", "jar", ""),
-                              getDependency("provided", "jar", ""), getDependency("other", "jar", ""),
-                              getDependency("compile", "bundle", ""), getDependency("compile", "other", ""),
-                              getDependency("compile", "kar", ""), getDependency("runtime", "kar", ""),
-                              getDependency("provided", "kar", ""), getDependency("compile", "jar", "features"),
-                              getDependency("compile", "jar", "karaf"), getDependency("runtime", "jar", "karaf"),
-                              getDependency("provided", "jar", "karaf")
-                             ));
         assemblyMojo.setFramework(framework);
         //when
         assemblyMojoExec.doExecute(assemblyMojo);
         //then
-        assertStageKarsAdded(Builder.Stage.Startup, new String[]{
-                frameworkKar, "mvn:org.apache/test-compile-kar-/0.1.0/kar"
-        });
-        assertStageKarsAdded(Builder.Stage.Boot, new String[]{"mvn:org.apache/test-runtime-kar-/0.1.0/kar"});
-        assertStageKarsAdded(Builder.Stage.Installed, new String[]{"mvn:org.apache/test-provided-kar-/0.1.0/kar"});
+        assertStageKarsAdded(Builder.Stage.Startup, new String[]{expectedFrameworkKar}, 2);
+    }
 
-        assertStageRepoAdded(Builder.Stage.Startup, new String[]{
-                "mvn:org.apache/test-compile-jar-features/0.1.0/jar/features",
-                "mvn:org.apache/test-compile-jar-karaf/0.1.0/jar/karaf"
-        });
+    @Test
+    public void executeMojoWithCompileKarDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("compile", "kar", ""));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertStageKarsAdded(Builder.Stage.Startup, new String[]{
+                DEFAULT_FRAMEWORK_KAR, "mvn:org.apache/test-compile-kar-/0.1.0/kar"
+        }, 2);
+    }
+
+    @Test
+    public void executeMojoWithRuntimeKarDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("runtime", "kar", ""));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertStageKarsAdded(Builder.Stage.Boot, new String[]{"mvn:org.apache/test-runtime-kar-/0.1.0/kar"}, 1);
+    }
+
+    @Test
+    public void executeMojoWithProvidedKarDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("provided", "kar", ""));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertStageKarsAdded(Builder.Stage.Installed, new String[]{"mvn:org.apache/test-provided-kar-/0.1.0/kar"}, 1);
+    }
+
+    @Test
+    public void executeMojoWithCompileJarDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("compile", "jar", ""));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertBundlesAdded(new String[]{"mvn:org.apache/test-compile-jar-/0.1.0"});
+    }
+
+    @Test
+    public void executeMojoWithRuntimeJarDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("runtime", "jar", ""));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertBundlesAdded(new String[]{"mvn:org.apache/test-runtime-jar-/0.1.0"});
+    }
+
+    @Test
+    public void executeMojoWithProvidedJarDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("provided", "jar", ""));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertBundlesAdded(new String[]{"mvn:org.apache/test-provided-jar-/0.1.0"});
+    }
+
+    @Test
+    public void executeMojoWithCompileBundleDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("compile", "bundle", ""));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertBundlesAdded(new String[]{"mvn:org.apache/test-compile-bundle-/0.1.0/bundle",});
+    }
+
+    @Test
+    public void executeMojoWithCompileJarFeatureDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("compile", "jar", "features"));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertStageRepoAdded(
+                Builder.Stage.Startup, new String[]{"mvn:org.apache/test-compile-jar-features/0.1.0/jar/features"});
+    }
+
+    @Test
+    public void executeMojoWithCompileJarKarafDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("compile", "jar", "karaf"));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        assertStageRepoAdded(
+                Builder.Stage.Startup, new String[]{"mvn:org.apache/test-compile-jar-karaf/0.1.0/jar/karaf"});
+    }
+
+    @Test
+    public void executeMojoWithRuntimeJarKarafDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("runtime", "jar", "karaf"));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
         assertStageRepoAdded(Builder.Stage.Boot, new String[]{"mvn:org.apache/test-runtime-jar-karaf/0.1.0/jar/karaf"});
+    }
+
+    @Test
+    public void executeMojoWithProvidedJarKarafDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("provided", "jar", "karaf"));
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
         assertStageRepoAdded(
                 Builder.Stage.Installed, new String[]{"mvn:org.apache/test-provided-jar-karaf/0.1.0/jar/karaf"});
+    }
 
+    @Test
+    public void executeMojoWithNoDependencies()
+            throws Exception {
+        //given
+        dependencyArtifacts.clear();
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
         assertFeaturesAdded(new String[]{});
-        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
+        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{"framework"}, 2);
         assertStageFeaturesAdded(Builder.Stage.Boot, new String[]{}, 1);
         assertStageFeaturesAdded(Builder.Stage.Installed, new String[]{}, 1);
-        assertBundlesAdded(new String[]{
-                "mvn:org.apache/test-compile-jar-/0.1.0", "mvn:org.apache/test-compile-bundle-/0.1.0/bundle",
-                "mvn:org.apache/test-runtime-jar-/0.1.0", "mvn:org.apache/test-provided-jar-/0.1.0"
-        });
         assertProfilesAdded(new String[]{});
     }
 
@@ -235,7 +361,7 @@ public class AssemblyMojoExecTest {
                                                        .containsExactlyInAnyOrder(repos);
     }
 
-    private void assertStageKarsAdded(final Builder.Stage stage, final String[] kars) {
+    private void assertStageKarsAdded(final Builder.Stage stage, final String[] kars, final int calls) {
         // convert plain mvn urls into regex patterns
         final List<Pattern> patterns = Arrays.stream(kars)
                                              .map(pattern -> "^" + pattern + "$")
@@ -245,7 +371,7 @@ public class AssemblyMojoExecTest {
                                              .collect(Collectors.toList());
         stringArgumentCaptor.getAllValues()
                             .clear();
-        then(this.builder).should(times(kars.length))
+        then(builder).should(times(calls))
                           .kars(eq(stage), anyBoolean(), stringArgumentCaptor.capture());
         assertThat(stringArgumentCaptor.getAllValues()).hasSize(kars.length);
         assertThat(stringArgumentCaptor.getAllValues()
