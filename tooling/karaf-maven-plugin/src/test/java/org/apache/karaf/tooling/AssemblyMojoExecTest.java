@@ -10,6 +10,7 @@ import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
 import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.apache.maven.project.MavenProject;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -31,11 +32,17 @@ public class AssemblyMojoExecTest {
 
     private Builder builder;
 
+    private AssemblyMojo assemblyMojo;
+
+    @Before
+    public void setUp() throws Exception {
+        builder = new MyBuilder();
+        assemblyMojo = getAssemblyMojo();
+    }
+
     @Test
     public void shouldExecuteMojo() throws Exception {
         //given
-        final AssemblyMojo assemblyMojo = getAssemblyMojo();
-        builder = new MyBuilder();
         //when
         new AssemblyMojoExec(assemblyMojo.getLog(), () -> builder).doExecute(assemblyMojo);
         //then
