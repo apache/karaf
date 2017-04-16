@@ -71,9 +71,9 @@ public class AssemblyMojoExecTest {
     @Spy
     private Builder builder = Builder.newInstance();
 
-    private AssemblyMojo assemblyMojo;
+    private AssemblyMojo mojo;
 
-    private AssemblyMojoExec assemblyMojoExec;
+    private AssemblyMojoExec execMojo;
 
     private Set<Artifact> dependencyArtifacts;
 
@@ -92,10 +92,10 @@ public class AssemblyMojoExecTest {
         doNothing().when(builder)
                    .generateAssembly();
         dependencyArtifacts = new HashSet<>();
-        assemblyMojo = getAssemblyMojo();
-        assemblyMojoExec = new AssemblyMojoExec(log, () -> builder);
-        assemblyMojo.setConfig(new HashMap<>());
-        assemblyMojo.setSystem(new HashMap<>());
+        mojo = getAssemblyMojo();
+        execMojo = new AssemblyMojoExec(log, () -> builder);
+        mojo.setConfig(new HashMap<>());
+        mojo.setSystem(new HashMap<>());
     }
 
     @Test
@@ -145,9 +145,9 @@ public class AssemblyMojoExecTest {
     private void executeMojoCheckingForFrameworkKar(final String framework, final String expectedFrameworkKar)
             throws Exception {
         //given
-        assemblyMojo.setFramework(framework);
+        mojo.setFramework(framework);
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertStageKarsAdded(Builder.Stage.Startup, new String[]{expectedFrameworkKar}, 2);
     }
@@ -155,50 +155,50 @@ public class AssemblyMojoExecTest {
     @Test
     public void executeMojoWithInvalidFrameworkShouldThrowException() throws Exception {
         //given
-        assemblyMojo.setFramework("unknown");
+        mojo.setFramework("unknown");
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Unsupported framework: unknown");
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
     }
 
     @Test
     public void executeMojoWithStartupProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
         //given
-        assemblyMojo.setStartupProfiles(Collections.singletonList("startup profile"));
+        mojo.setStartupProfiles(Collections.singletonList("startup profile"));
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("profilesDirectory must be specified");
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
     }
 
     @Test
     public void executeMojoWithBootProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
         //given
-        assemblyMojo.setBootProfiles(Collections.singletonList("boot profile"));
+        mojo.setBootProfiles(Collections.singletonList("boot profile"));
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("profilesDirectory must be specified");
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
     }
 
     @Test
     public void executeMojoWithInstalledProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
         //given
-        assemblyMojo.setInstalledProfiles(Collections.singletonList("installed profile"));
+        mojo.setInstalledProfiles(Collections.singletonList("installed profile"));
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("profilesDirectory must be specified");
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
     }
 
     @Test
     public void executeMojoWithProfilesAndProfileDirectoryShouldBeOkay() throws Exception {
         //given
-        assemblyMojo.setInstalledProfiles(Collections.singletonList("installed profile"));
-        assemblyMojo.setProfilesUri("profiles uri");
+        mojo.setInstalledProfiles(Collections.singletonList("installed profile"));
+        mojo.setProfilesUri("profiles uri");
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
     }
 
     @Test
@@ -207,7 +207,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("compile", "kar", ""));
         final String expected = "mvn:org.apache/test-compile-kar-/0.1.0/kar";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertStageKarsAdded(Builder.Stage.Startup, new String[]{DEFAULT_FRAMEWORK_KAR, expected}, 2);
     }
@@ -218,7 +218,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("runtime", "kar", ""));
         final String expected = "mvn:org.apache/test-runtime-kar-/0.1.0/kar";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertStageKarsAdded(Builder.Stage.Boot, new String[]{expected}, 1);
     }
@@ -229,7 +229,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("provided", "kar", ""));
         final String expected = "mvn:org.apache/test-provided-kar-/0.1.0/kar";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertStageKarsAdded(Builder.Stage.Installed, new String[]{expected}, 1);
     }
@@ -240,7 +240,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("compile", "jar", ""));
         final String expected = "mvn:org.apache/test-compile-jar-/0.1.0";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertBundlesAdded(new String[]{expected});
     }
@@ -251,7 +251,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("runtime", "jar", ""));
         final String expected = "mvn:org.apache/test-runtime-jar-/0.1.0";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertBundlesAdded(new String[]{expected});
     }
@@ -262,7 +262,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("provided", "jar", ""));
         final String expected = "mvn:org.apache/test-provided-jar-/0.1.0";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertBundlesAdded(new String[]{expected});
     }
@@ -273,7 +273,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("compile", "bundle", ""));
         final String expected = "mvn:org.apache/test-compile-bundle-/0.1.0/bundle";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertBundlesAdded(new String[]{expected,});
     }
@@ -284,7 +284,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("compile", "jar", "features"));
         final String expected = "mvn:org.apache/test-compile-jar-features/0.1.0/jar/features";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertStageRepoAdded(Builder.Stage.Startup, new String[]{expected});
     }
@@ -295,7 +295,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("compile", "jar", "karaf"));
         final String expected = "mvn:org.apache/test-compile-jar-karaf/0.1.0/jar/karaf";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertStageRepoAdded(Builder.Stage.Startup, new String[]{expected});
     }
@@ -306,7 +306,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("runtime", "jar", "karaf"));
         final String expected = "mvn:org.apache/test-runtime-jar-karaf/0.1.0/jar/karaf";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertStageRepoAdded(Builder.Stage.Boot, new String[]{expected});
     }
@@ -317,7 +317,7 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts.add(getDependency("provided", "jar", "karaf"));
         final String expected = "mvn:org.apache/test-provided-jar-karaf/0.1.0/jar/karaf";
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertStageRepoAdded(Builder.Stage.Installed, new String[]{expected});
     }
@@ -327,7 +327,7 @@ public class AssemblyMojoExecTest {
         //given
         dependencyArtifacts.clear();
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         assertFeaturesAdded(new String[]{});
         assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{"framework"}, 2);
@@ -474,23 +474,23 @@ public class AssemblyMojoExecTest {
     public void executeMojoUsesDeprecatedFeatureRepositories() throws Exception {
         //given
         final List<String> featuresRepositories = Collections.singletonList("feature repository");
-        assemblyMojo.setFeatureRepositories(featuresRepositories);
+        mojo.setFeatureRepositories(featuresRepositories);
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         then(log).should()
                  .warn(anyString());
-        assertThat(assemblyMojo.getStartupRepositories()).containsAll(featuresRepositories);
-        assertThat(assemblyMojo.getBootRepositories()).containsAll(featuresRepositories);
-        assertThat(assemblyMojo.getInstalledRepositories()).containsAll(featuresRepositories);
+        assertThat(mojo.getStartupRepositories()).containsAll(featuresRepositories);
+        assertThat(mojo.getBootRepositories()).containsAll(featuresRepositories);
+        assertThat(mojo.getInstalledRepositories()).containsAll(featuresRepositories);
     }
 
     @Test
     public void executeMojoDoesntUseDeprecatedFeatureRepositories() throws Exception {
         //given
-        assemblyMojo.setFeatureRepositories(Collections.emptyList());
+        mojo.setFeatureRepositories(Collections.emptyList());
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         then(log).should(never())
                  .warn(anyString());
@@ -508,10 +508,10 @@ public class AssemblyMojoExecTest {
                 new MavenArtifactRepository("both-id", "both-url", layout, enabledPolicy, enabledPolicy),
                 new MavenArtifactRepository("neither-id", "neither-url", layout, disabledPolicy, disabledPolicy)
                                                                    );
-        assemblyMojo.getProject()
-                    .setRemoteArtifactRepositories(repositories);
+        mojo.getProject()
+            .setRemoteArtifactRepositories(repositories);
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         stringArgumentCaptor.getAllValues()
                             .clear();
@@ -528,9 +528,9 @@ public class AssemblyMojoExecTest {
     @Test
     public void executeMojoWithNullConfig() throws Exception {
         //given
-        assemblyMojo.setConfig(null);
+        mojo.setConfig(null);
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         then(builder).should(never())
                      .config(any(), any());
@@ -539,9 +539,9 @@ public class AssemblyMojoExecTest {
     @Test
     public void executeMojoWithNullSystem() throws Exception {
         //given
-        assemblyMojo.setSystem(null);
+        mojo.setSystem(null);
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         then(builder).should(never())
                      .system(any(), any());
@@ -552,9 +552,9 @@ public class AssemblyMojoExecTest {
         //given
         final String propertyFileEdits =
                 new File(resources.getBasedir(TEST_PROJECT), "property-file-edits").getAbsolutePath();
-        assemblyMojo.setPropertyFileEdits(propertyFileEdits);
+        mojo.setPropertyFileEdits(propertyFileEdits);
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .propertyEdits(any());
@@ -564,9 +564,9 @@ public class AssemblyMojoExecTest {
     public void executeMojoWithPropertyFileEditsWhenFileIsMissing() throws Exception {
         //given
         final String propertyFileEdits = new File(resources.getBasedir(TEST_PROJECT), "missing-file").getAbsolutePath();
-        assemblyMojo.setPropertyFileEdits(propertyFileEdits);
+        mojo.setPropertyFileEdits(propertyFileEdits);
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         then(builder).should(never())
                      .propertyEdits(any());
@@ -577,10 +577,10 @@ public class AssemblyMojoExecTest {
         //given
         final String propertyFileEdits = resources.getBasedir(TEST_PROJECT)
                                                   .getAbsolutePath();
-        assemblyMojo.setPropertyFileEdits(propertyFileEdits);
+        mojo.setPropertyFileEdits(propertyFileEdits);
         exception.expect(FileNotFoundException.class);
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
     }
 
     @Test
@@ -589,7 +589,7 @@ public class AssemblyMojoExecTest {
         // project attached artifacts
         // project artifact
         //when
-        assemblyMojoExec.doExecute(assemblyMojo);
+        execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
