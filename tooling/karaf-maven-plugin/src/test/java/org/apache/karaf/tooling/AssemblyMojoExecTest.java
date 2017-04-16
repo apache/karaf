@@ -405,7 +405,7 @@ public class AssemblyMojoExecTest {
     private DefaultArtifact getDependency(final String scope, final String type, final String classifier)
             throws IOException {
         final String groupId = "org.apache";
-        final String artifactId = String.format("test-%s-%s-%s", scope, type, classifier);
+        final String artifactId = String.format("test-%s-%s-%s", scope, type, classifier == null ? "" : classifier);
         final String version = "0.1.0";
         final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
         final DefaultArtifact artifact =
@@ -599,6 +599,20 @@ public class AssemblyMojoExecTest {
     }
 
     @Test
+    public void executeMojoWhenProjectArtifactFileIsNull() throws Exception {
+        //given
+        mojo.getProject()
+            .getArtifact()
+            .setFile(null);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()).doesNotContainKeys("mvn:org.apache/assembly-execute-mojo/0.1.0/jar/");
+    }
+
+    @Test
     public void executeMojoWithMissingProjectArtifactFile() throws Exception {
         //given
         mojo.getProject()
@@ -628,7 +642,7 @@ public class AssemblyMojoExecTest {
     }
 
     @Test
-    public void executeMojoWithProjectArtifactHasClassifier() throws Exception {
+    public void executeMojoWhenProjectArtifactIsJarAndHasClassifier() throws Exception {
         //given
         final DefaultArtifact bundle = getDependency("compile", "jar", "extra");
         bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
@@ -643,10 +657,10 @@ public class AssemblyMojoExecTest {
     }
 
     @Test
-    public void executeMojoWithProjectArtifactNonJarHasClassifier() throws Exception {
+    public void executeMojoWhenProjectArtifactIsJarAndHasNullClassifier() throws Exception {
         //given
-        final DefaultArtifact bundle = getDependency("compile", "bundle", "extra");
-        bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "bundle-file"));
+        final DefaultArtifact bundle = getDependency("compile", "jar", null);
+        bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
         mojo.getProject()
             .addAttachedArtifact(bundle);
         //when
@@ -654,8 +668,37 @@ public class AssemblyMojoExecTest {
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey(
-                "mvn:org.apache/test-compile-bundle-extra/0.1.0/jar/extra");
+        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-jar-/0.1.0");
+    }
+
+    @Test
+    public void executeMojoWhenProjectArtifactIsNonJarAndHasClassifier() throws Exception {
+        //given
+        final DefaultArtifact bundle = getDependency("compile", "kar", "extra");
+        bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
+        mojo.getProject()
+            .addAttachedArtifact(bundle);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-kar-extra/0.1.0/kar/extra");
+    }
+
+    @Test
+    public void executeMojoWhenProjectArtifactIsNonJarAndHasNullClassifier() throws Exception {
+        //given
+        final DefaultArtifact bundle = getDependency("compile", "kar", null);
+        bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
+        mojo.getProject()
+            .addAttachedArtifact(bundle);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-kar-/0.1.0/kar");
     }
 
     @Test
