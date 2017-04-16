@@ -26,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,6 +54,8 @@ public class AssemblyMojoExecTest {
 
     // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
     private static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
+
+    public static final String TEST_PROJECT = "assembly-execute-mojo";
 
     @Rule
     public MojoRule mojoRule = new MojoRule();
@@ -403,7 +406,7 @@ public class AssemblyMojoExecTest {
     }
 
     private AssemblyMojo getAssemblyMojo() throws Exception {
-        final File baseDir = resources.getBasedir("assembly-execute-mojo");
+        final File baseDir = resources.getBasedir(TEST_PROJECT);
         final File pom = new File(baseDir, "pom.xml");
         final MavenProject mavenProject = getMavenProject(pom);
 
@@ -441,7 +444,7 @@ public class AssemblyMojoExecTest {
 
     private DefaultArtifact getProjectArtifact() {
         final String groupId = "org.apache";
-        final String artifactId = "assembly-execute-mojo";
+        final String artifactId = TEST_PROJECT;
         final String version = "0.1.0";
         final String compile = "compile";
         final String type = "jar";
@@ -520,7 +523,8 @@ public class AssemblyMojoExecTest {
         //when
         assemblyMojoExec.doExecute(assemblyMojo);
         //then
-        then(builder).should(never()).config(any(), any());
+        then(builder).should(never())
+                     .config(any(), any());
     }
 
     @Test
@@ -530,7 +534,43 @@ public class AssemblyMojoExecTest {
         //when
         assemblyMojoExec.doExecute(assemblyMojo);
         //then
-        then(builder).should(never()).system(any(), any());
+        then(builder).should(never())
+                     .system(any(), any());
+    }
+
+    @Test
+    public void executeMojoWithPropertyFileEdits() throws Exception {
+        //given
+        final String propertyFileEdits =
+                new File(resources.getBasedir(TEST_PROJECT), "property-file-edits").getAbsolutePath();
+        assemblyMojo.setPropertyFileEdits(propertyFileEdits);
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        then(builder).should()
+                     .propertyEdits(any());
+    }
+
+    @Test
+    public void executeMojoWithPropertyFileEditsWhenFileIsMissing() throws Exception {
+        //given
+        final String propertyFileEdits = new File(resources.getBasedir(TEST_PROJECT), "missing-file").getAbsolutePath();
+        assemblyMojo.setPropertyFileEdits(propertyFileEdits);
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        then(builder).should(never())
+                     .propertyEdits(any());
+    }
+
+    @Test
+    public void executeMojoWithPropertyFileEditsWhenFileIsDirectory() throws Exception {
+        //given
+        final String propertyFileEdits = resources.getBasedir(TEST_PROJECT).getAbsolutePath();
+        assemblyMojo.setPropertyFileEdits(propertyFileEdits);
+        exception.expect(FileNotFoundException.class);
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
     }
 
 }
