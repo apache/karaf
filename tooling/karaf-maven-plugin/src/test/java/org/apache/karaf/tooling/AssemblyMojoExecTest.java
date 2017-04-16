@@ -739,4 +739,16 @@ public class AssemblyMojoExecTest {
                                     .entrySet()).hasSize(1);
     }
 
+    @Test
+    public void executeMojoWithLibraries() throws Exception {
+        //given
+        mojo.setLibraries(Collections.singletonList("library"));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .libraries(stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsSubsequence("library");
+    }
+
 }
