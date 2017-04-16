@@ -5,9 +5,11 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
@@ -19,10 +21,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,8 +39,10 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 /**
@@ -65,6 +71,9 @@ public class AssemblyMojoExecTest {
 
     private Set<Artifact> dependencyArtifacts;
 
+    @Mock
+    private Log log;
+
     @Captor
     private ArgumentCaptor<String> stringArgumentCaptor;
 
@@ -75,7 +84,7 @@ public class AssemblyMojoExecTest {
                    .generateAssembly();
         dependencyArtifacts = new HashSet<>();
         assemblyMojo = getAssemblyMojo();
-        assemblyMojoExec = new AssemblyMojoExec(assemblyMojo.getLog(), () -> builder);
+        assemblyMojoExec = new AssemblyMojoExec(log, () -> builder);
         assemblyMojo.setConfig(new HashMap<>());
         assemblyMojo.setSystem(new HashMap<>());
     }
@@ -398,6 +407,7 @@ public class AssemblyMojoExecTest {
         final MavenProject mavenProject = getMavenProject(pom);
 
         final AssemblyMojo assemblyMojo = (AssemblyMojo) mojoRule.lookupMojo("assembly", pom);
+        assemblyMojo.setLog(log);
         assemblyMojo.setProject(mavenProject);
         assemblyMojo.setMavenSession(getMavenSession(mavenProject));
         assemblyMojo.setLocalRepo(getLocalRepository(baseDir));
@@ -405,6 +415,9 @@ public class AssemblyMojoExecTest {
         assemblyMojo.setSourceDirectory(new File(baseDir, "source"));
         assemblyMojo.setFramework("framework");
         assemblyMojo.setJavase("1.8");
+        assemblyMojo.setStartupRepositories(new ArrayList<>());
+        assemblyMojo.setBootRepositories(new ArrayList<>());
+        assemblyMojo.setInstalledRepositories(new ArrayList<>());
         return assemblyMojo;
     }
 
@@ -438,8 +451,65 @@ public class AssemblyMojoExecTest {
 
     private List<ArtifactRepository> getArtifactRepositories() {
         final ArtifactRepository artifactRepository = new MavenArtifactRepository();
+        artifactRepository.setId("default-id");
+        artifactRepository.setUrl("default-url");
         artifactRepository.setLayout(new DefaultRepositoryLayout());
         return Collections.singletonList(artifactRepository);
+    }
+
+    @Test
+    public void executeMojoUsesDeprecatedFeatureRepositories() throws Exception {
+        //given
+        final List<String> featuresRepositories = Collections.singletonList("feature repository");
+        assemblyMojo.setFeatureRepositories(featuresRepositories);
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        then(log).should()
+                 .warn(anyString());
+        assertThat(assemblyMojo.getStartupRepositories()).containsAll(featuresRepositories);
+        assertThat(assemblyMojo.getBootRepositories()).containsAll(featuresRepositories);
+        assertThat(assemblyMojo.getInstalledRepositories()).containsAll(featuresRepositories);
+    }
+
+    @Test
+    public void executeMojoDoesntUseDeprecatedFeatureRepositories() throws Exception {
+        //given
+        assemblyMojo.setFeatureRepositories(Collections.emptyList());
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        then(log).should(never())
+                 .warn(anyString());
+    }
+
+    @Test
+    public void executeMojoAddsMavenRepositories() throws Exception {
+        //given
+        final ArtifactRepositoryPolicy enabledPolicy = new ArtifactRepositoryPolicy(true, "", "");
+        final ArtifactRepositoryPolicy disabledPolicy = new ArtifactRepositoryPolicy(false, "", "");
+        final DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
+        final List<ArtifactRepository> repositories = Arrays.asList(
+                new MavenArtifactRepository("snapshot-id", "snapshot-url", layout, enabledPolicy, disabledPolicy),
+                new MavenArtifactRepository("release-id", "release-url", layout, disabledPolicy, enabledPolicy),
+                new MavenArtifactRepository("both-id", "both-url", layout, enabledPolicy, enabledPolicy),
+                new MavenArtifactRepository("neither-id", "neither-url", layout, disabledPolicy, disabledPolicy)
+                                                                   );
+        assemblyMojo.getProject()
+                    .setRemoteArtifactRepositories(repositories);
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        stringArgumentCaptor.getAllValues()
+                            .clear();
+        then(builder).should()
+                     .mavenRepositories(stringArgumentCaptor.capture());
+        final String repos = stringArgumentCaptor.getValue();
+        assertThat(repos).as("default repo")
+                         .contains("snapshot-url@id=snapshot-id@noreleases@snapshots")
+                         .contains("release-url@id=release-id")
+                         .contains("both-url@id=both-id@snapshots")
+                         .contains("neither-url@id=neither-id@noreleases");
     }
 
 }
