@@ -402,12 +402,16 @@ public class AssemblyMojoExecTest {
                                        .collect(Collectors.toList())).hasSize(kars.length);
     }
 
-    private DefaultArtifact getDependency(final String scope, final String type, final String classifier) {
+    private DefaultArtifact getDependency(final String scope, final String type, final String classifier)
+            throws IOException {
         final String groupId = "org.apache";
         final String artifactId = String.format("test-%s-%s-%s", scope, type, classifier);
         final String version = "0.1.0";
         final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
-        return new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        final DefaultArtifact artifact =
+                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        artifact.setFile(new File(resources.getBasedir(TEST_PROJECT), artifactId));
+        return artifact;
     }
 
     private AssemblyMojo getAssemblyMojo() throws Exception {
@@ -586,14 +590,85 @@ public class AssemblyMojoExecTest {
     @Test
     public void executeMojoWithProjectArtifactFile() throws Exception {
         //given
-        // project attached artifacts
-        // project artifact
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
         assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/assembly-execute-mojo/0.1.0/jar/");
+    }
+
+    @Test
+    public void executeMojoWithMissingProjectArtifactFile() throws Exception {
+        //given
+        mojo.getProject()
+            .getArtifact()
+            .setFile(new File(resources.getBasedir(TEST_PROJECT), "missing-file"));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()).doesNotContainKeys("mvn:org.apache/assembly-execute-mojo/0.1.0/jar/");
+    }
+
+    @Test
+    public void executeMojoWithProjectArtifactIsBundle() throws Exception {
+        //given
+        final DefaultArtifact bundle = getDependency("compile", "bundle", "");
+        bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "bundle-file"));
+        mojo.getProject()
+            .addAttachedArtifact(bundle);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-bundle-/0.1.0/jar/");
+    }
+
+    @Test
+    public void executeMojoWithProjectArtifactHasClassifier() throws Exception {
+        //given
+        final DefaultArtifact bundle = getDependency("compile", "jar", "extra");
+        bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
+        mojo.getProject()
+            .addAttachedArtifact(bundle);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-jar-extra/0.1.0/jar/extra");
+    }
+
+    @Test
+    public void executeMojoWithProjectArtifactNonJarHasClassifier() throws Exception {
+        //given
+        final DefaultArtifact bundle = getDependency("compile", "bundle", "extra");
+        bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "bundle-file"));
+        mojo.getProject()
+            .addAttachedArtifact(bundle);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()).containsKey(
+                "mvn:org.apache/test-compile-bundle-extra/0.1.0/jar/extra");
+    }
+
+    @Test
+    public void executeMojoWithNullTranslatedUrls() throws Exception {
+        //given
+        mojo.setTranslatedUrls(null);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()
+                                    .entrySet()).hasSize(1);
     }
 
 }
