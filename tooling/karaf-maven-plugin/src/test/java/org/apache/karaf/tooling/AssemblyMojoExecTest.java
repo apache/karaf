@@ -27,12 +27,14 @@ import org.mockito.Spy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -80,6 +82,9 @@ public class AssemblyMojoExecTest {
 
     @Captor
     private ArgumentCaptor<String> stringArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Map<String, String>> mapArgumentCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -422,6 +427,7 @@ public class AssemblyMojoExecTest {
         assemblyMojo.setStartupRepositories(new ArrayList<>());
         assemblyMojo.setBootRepositories(new ArrayList<>());
         assemblyMojo.setInstalledRepositories(new ArrayList<>());
+        assemblyMojo.setTranslatedUrls(new HashMap<>());
         return assemblyMojo;
     }
 
@@ -433,7 +439,7 @@ public class AssemblyMojoExecTest {
         return new StubArtifactRepository(baseDir.getAbsolutePath());
     }
 
-    private MavenProject getMavenProject(final File pom) {
+    private MavenProject getMavenProject(final File pom) throws IOException {
         final MavenProject mavenProject = new MavenProject();
         mavenProject.setFile(pom);
         mavenProject.setArtifact(getProjectArtifact());
@@ -442,7 +448,7 @@ public class AssemblyMojoExecTest {
         return mavenProject;
     }
 
-    private DefaultArtifact getProjectArtifact() {
+    private DefaultArtifact getProjectArtifact() throws IOException {
         final String groupId = "org.apache";
         final String artifactId = TEST_PROJECT;
         final String version = "0.1.0";
@@ -450,7 +456,10 @@ public class AssemblyMojoExecTest {
         final String type = "jar";
         final String classifier = "";
         final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
-        return new DefaultArtifact(groupId, artifactId, version, compile, type, classifier, artifactHandler);
+        final DefaultArtifact defaultArtifact =
+                new DefaultArtifact(groupId, artifactId, version, compile, type, classifier, artifactHandler);
+        defaultArtifact.setFile(new File(resources.getBasedir(TEST_PROJECT), "artifact-file"));
+        return defaultArtifact;
     }
 
     private List<ArtifactRepository> getArtifactRepositories() {
@@ -566,11 +575,25 @@ public class AssemblyMojoExecTest {
     @Test
     public void executeMojoWithPropertyFileEditsWhenFileIsDirectory() throws Exception {
         //given
-        final String propertyFileEdits = resources.getBasedir(TEST_PROJECT).getAbsolutePath();
+        final String propertyFileEdits = resources.getBasedir(TEST_PROJECT)
+                                                  .getAbsolutePath();
         assemblyMojo.setPropertyFileEdits(propertyFileEdits);
         exception.expect(FileNotFoundException.class);
         //when
         assemblyMojoExec.doExecute(assemblyMojo);
+    }
+
+    @Test
+    public void executeMojoWithProjectArtifactFile() throws Exception {
+        //given
+        // project attached artifacts
+        // project artifact
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        then(builder).should()
+                     .translatedUrls(mapArgumentCaptor.capture());
+        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/assembly-execute-mojo/0.1.0/jar/");
     }
 
 }
