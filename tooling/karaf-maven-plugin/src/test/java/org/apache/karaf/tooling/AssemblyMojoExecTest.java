@@ -590,12 +590,13 @@ public class AssemblyMojoExecTest {
     @Test
     public void executeMojoWithProjectArtifactFile() throws Exception {
         //given
+        final String expected = "mvn:org.apache/assembly-execute-mojo/0.1.0/jar/";
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/assembly-execute-mojo/0.1.0/jar/");
+        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
     }
 
     @Test
@@ -604,12 +605,13 @@ public class AssemblyMojoExecTest {
         mojo.getProject()
             .getArtifact()
             .setFile(null);
+        final String expected = "mvn:org.apache/assembly-execute-mojo/0.1.0/jar/";
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).doesNotContainKeys("mvn:org.apache/assembly-execute-mojo/0.1.0/jar/");
+        assertThat(mapArgumentCaptor.getValue()).doesNotContainKeys(expected);
     }
 
     @Test
@@ -618,12 +620,13 @@ public class AssemblyMojoExecTest {
         mojo.getProject()
             .getArtifact()
             .setFile(new File(resources.getBasedir(TEST_PROJECT), "missing-file"));
+        final String expected = "mvn:org.apache/assembly-execute-mojo/0.1.0/jar/";
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).doesNotContainKeys("mvn:org.apache/assembly-execute-mojo/0.1.0/jar/");
+        assertThat(mapArgumentCaptor.getValue()).doesNotContainKeys(expected);
     }
 
     @Test
@@ -633,12 +636,13 @@ public class AssemblyMojoExecTest {
         bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "bundle-file"));
         mojo.getProject()
             .addAttachedArtifact(bundle);
+        final String expected = "mvn:org.apache/test-compile-bundle-/0.1.0/jar/";
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-bundle-/0.1.0/jar/");
+        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
     }
 
     @Test
@@ -648,12 +652,13 @@ public class AssemblyMojoExecTest {
         bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
         mojo.getProject()
             .addAttachedArtifact(bundle);
+        final String expected = "mvn:org.apache/test-compile-jar-extra/0.1.0/jar/extra";
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-jar-extra/0.1.0/jar/extra");
+        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
     }
 
     @Test
@@ -663,12 +668,13 @@ public class AssemblyMojoExecTest {
         bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
         mojo.getProject()
             .addAttachedArtifact(bundle);
+        final String expected = "mvn:org.apache/test-compile-jar-/0.1.0";
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-jar-/0.1.0");
+        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
     }
 
     @Test
@@ -678,12 +684,13 @@ public class AssemblyMojoExecTest {
         bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
         mojo.getProject()
             .addAttachedArtifact(bundle);
+        final String expected = "mvn:org.apache/test-compile-kar-extra/0.1.0/kar/extra";
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-kar-extra/0.1.0/kar/extra");
+        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
     }
 
     @Test
@@ -693,12 +700,13 @@ public class AssemblyMojoExecTest {
         bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "extra-file"));
         mojo.getProject()
             .addAttachedArtifact(bundle);
+        final String expected = "mvn:org.apache/test-compile-kar-/0.1.0/kar";
         //when
         execMojo.doExecute(mojo);
         //then
         then(builder).should()
                      .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey("mvn:org.apache/test-compile-kar-/0.1.0/kar");
+        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
     }
 
     @Test
