@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -510,6 +511,26 @@ public class AssemblyMojoExecTest {
                          .contains("release-url@id=release-id")
                          .contains("both-url@id=both-id@snapshots")
                          .contains("neither-url@id=neither-id@noreleases");
+    }
+
+    @Test
+    public void executeMojoWithNullConfig() throws Exception {
+        //given
+        assemblyMojo.setConfig(null);
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        then(builder).should(never()).config(any(), any());
+    }
+
+    @Test
+    public void executeMojoWithNullSystem() throws Exception {
+        //given
+        assemblyMojo.setSystem(null);
+        //when
+        assemblyMojoExec.doExecute(assemblyMojo);
+        //then
+        then(builder).should(never()).system(any(), any());
     }
 
 }
