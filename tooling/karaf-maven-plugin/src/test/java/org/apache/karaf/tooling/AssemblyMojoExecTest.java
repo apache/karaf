@@ -57,7 +57,7 @@ public class AssemblyMojoExecTest {
     // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
     private static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
 
-    public static final String TEST_PROJECT = "assembly-execute-mojo";
+    private static final String TEST_PROJECT = "assembly-execute-mojo";
 
     @Rule
     public MojoRule mojoRule = new MojoRule();
@@ -749,6 +749,78 @@ public class AssemblyMojoExecTest {
         then(builder).should()
                      .libraries(stringArgumentCaptor.capture());
         assertThat(stringArgumentCaptor.getAllValues()).containsSubsequence("library");
+    }
+
+    @Test
+    public void executeMojoDetectFrameworkKarForFrameworkWhenAlreadySet() throws Exception {
+        //given
+        final String groupId = "org.apache.karaf.features";
+        final String artifactId = "framework";
+        final String version = "version";
+        final String scope = "compile";
+        final String type = "kar";
+        final String classifier = "";
+        final DefaultArtifactHandlerStub artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
+        final DefaultArtifact dependency =
+                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        dependencyArtifacts.add(dependency);
+        mojo.setFramework("framework");
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        assertThat(mojo.getFramework()).isEqualTo("framework");
+        then(builder).should()
+                     .kars(eq(Builder.Stage.Startup), eq(false), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+                String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
+    }
+
+    @Test
+    public void executeMojoDetectFrameworkKarForFramework() throws Exception {
+        //given
+        final String groupId = "org.apache.karaf.features";
+        final String artifactId = "framework";
+        final String version = "version";
+        final String scope = "compile";
+        final String type = "kar";
+        final String classifier = "";
+        final DefaultArtifactHandlerStub artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
+        final DefaultArtifact dependency =
+                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        dependencyArtifacts.add(dependency);
+        mojo.setFramework(null);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        assertThat(mojo.getFramework()).isEqualTo("framework");
+        then(builder).should()
+                     .kars(eq(Builder.Stage.Startup), eq(false), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+                String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
+    }
+
+    @Test
+    public void executeMojoDetectFrameworkKarForStaticFramework() throws Exception {
+        //given
+        final String groupId = "org.apache.karaf.features";
+        final String artifactId = "static";
+        final String version = "version";
+        final String scope = "compile";
+        final String type = "kar";
+        final String classifier = "";
+        final DefaultArtifactHandlerStub artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
+        final DefaultArtifact dependency =
+                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        dependencyArtifacts.add(dependency);
+        mojo.setFramework(null);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        assertThat(mojo.getFramework()).isEqualTo("static-framework");
+        then(builder).should()
+                     .kars(eq(Builder.Stage.Startup), eq(false), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+                String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
     }
 
 }
