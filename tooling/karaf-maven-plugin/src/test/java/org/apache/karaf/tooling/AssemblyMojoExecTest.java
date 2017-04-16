@@ -823,4 +823,26 @@ public class AssemblyMojoExecTest {
                 String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
     }
 
+    @Test
+    public void executeMojoWhenStartupFeaturesIncludesFrameworkDoNotAddInjectAsMandatory() throws Exception {
+        //given
+        mojo.setStartupFeatures(Arrays.asList("framework", "other feature"));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should(never())
+                     .features(Builder.Stage.Startup, "framework");
+    }
+
+    @Test
+    public void executeMojoWhenStartupFeaturesDoesNotIncludeFrameworkThenInjectAsMandatory() throws Exception {
+        //given
+        mojo.setStartupFeatures(Collections.singletonList("other feature"));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .features(Builder.Stage.Startup, "framework");
+    }
+
 }
