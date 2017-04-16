@@ -323,6 +323,23 @@ public class AssemblyMojoExecTest {
     }
 
     @Test
+    public void executeMojoWithUnknownScope() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("unknown", "jar", ""));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        stringArgumentCaptor.getAllValues()
+                            .clear();
+        then(builder).should(times(3))
+                     .bundles(stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()
+                                       .stream()
+                                       .filter(value -> value.contains("unknown"))
+                                       .findAny()).isNotPresent();
+    }
+
+    @Test
     public void executeMojoWithNoDependencies() throws Exception {
         //given
         dependencyArtifacts.clear();
