@@ -246,6 +246,16 @@ public class AssemblyMojoExecTest {
     }
 
     @Test
+    public void executeMojoWithUnknownTypeDependency() throws Exception {
+        //given
+        dependencyArtifacts.add(getDependency("compile", "unknown", ""));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        assertBundlesAdded(new String[]{});
+    }
+
+    @Test
     public void executeMojoWithRuntimeJarDependency() throws Exception {
         //given
         dependencyArtifacts.add(getDependency("runtime", "jar", ""));
