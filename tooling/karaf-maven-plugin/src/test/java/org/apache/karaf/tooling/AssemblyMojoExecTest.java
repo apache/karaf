@@ -28,6 +28,7 @@ import org.mockito.Spy;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -892,6 +893,37 @@ public class AssemblyMojoExecTest {
         //then
         then(builder).should(times(3))
                      .repositories(eq(false));
+    }
+
+    @Test
+    public void executeMojoWhenNotIncludeBuildOutputDirectory() throws Exception {
+        //given
+        final String outputDirectory = new File(resources.getBasedir(TEST_PROJECT), "output").getAbsolutePath();
+        mojo.getProject()
+            .getBuild()
+            .setOutputDirectory(outputDirectory);
+        mojo.setIncludeBuildOutputDirectory(false);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        final File copyMeFile = new File(mojo.getWorkDirectory(), "copy-me");
+        assertThat(copyMeFile).doesNotExist();
+    }
+
+    @Test
+    public void executeMojoWhenIncludeBuildOutputDirectory() throws Exception {
+        //given
+        final String outputDirectory = new File(resources.getBasedir(TEST_PROJECT), "output").getAbsolutePath();
+        mojo.getProject()
+            .getBuild()
+            .setOutputDirectory(outputDirectory);
+        mojo.setIncludeBuildOutputDirectory(true);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        final File copyMeFile = new File(mojo.getWorkDirectory(), "copy-me");
+        assertThat(copyMeFile).exists();
+        assertThat(Files.readAllLines(copyMeFile.toPath())).containsExactly("copy-me content");
     }
 
 }
