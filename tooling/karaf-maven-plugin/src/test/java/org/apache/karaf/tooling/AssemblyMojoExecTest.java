@@ -28,6 +28,7 @@ import org.mockito.Spy;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -948,6 +950,36 @@ public class AssemblyMojoExecTest {
         execMojo.doExecute(mojo);
         //then
         assertThat(new File(mojo.getWorkDirectory(), "source-file")).exists();
+    }
+
+    @Test
+    public void executeMojoSetsBinFilesToExecutable() throws Exception {
+        //given
+        final File workDirectory = mojo.getWorkDirectory();
+        final FileSystem fileSystem = workDirectory.toPath()
+                                                   .getFileSystem();
+        assumeTrue(fileSystem.supportedFileAttributeViews()
+                             .contains("posix"));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        final File executableFile = new File(new File(workDirectory, "bin"), "executable-file");
+        assertThat(executableFile.canExecute()).isTrue();
+    }
+
+    @Test
+    public void executeMojoSetsBinFilesToExecutableUnlessBatFile() throws Exception {
+        //given
+        final File workDirectory = mojo.getWorkDirectory();
+        final FileSystem fileSystem = workDirectory.toPath()
+                                                   .getFileSystem();
+        assumeTrue(fileSystem.supportedFileAttributeViews()
+                             .contains("posix"));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        final File executableFile = new File(new File(workDirectory, "bin"), "batch.bat");
+        assertThat(executableFile.canExecute()).isFalse();
     }
 
 }
