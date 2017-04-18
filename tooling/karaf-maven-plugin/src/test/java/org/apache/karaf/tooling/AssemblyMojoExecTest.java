@@ -855,4 +855,43 @@ public class AssemblyMojoExecTest {
                      .features(Builder.Stage.Startup, "framework");
     }
 
+    @Test
+    public void executeMojoWithProfilesShouldNotAddAllRepositories() throws Exception {
+        //given
+        mojo.setProfilesUri("url");
+        mojo.setStartupRepositories(Collections.emptyList());
+        mojo.setStartupProfiles(Collections.singletonList("value"));
+        mojo.setBootProfiles(Collections.singletonList("value"));
+        mojo.setInstalledProfiles(Collections.singletonList("value"));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should(times(3))
+                     .repositories(eq(false));
+    }
+
+    @Test
+    public void executeMojoWithFeaturesShouldNotAddAllRepositories() throws Exception {
+        //given
+        mojo.setStartupFeatures(Collections.singletonList("value"));
+        mojo.setBootFeatures(Collections.singletonList("value"));
+        mojo.setInstalledFeatures(Collections.singletonList("value"));
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should(times(3))
+                     .repositories(eq(false));
+    }
+
+    @Test
+    public void executeMojoWhenNotInstallAllFeatureByDefault() throws Exception {
+        //given
+        mojo.setInstallAllFeaturesByDefault(false);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should(times(3))
+                     .repositories(eq(false));
+    }
+
 }
