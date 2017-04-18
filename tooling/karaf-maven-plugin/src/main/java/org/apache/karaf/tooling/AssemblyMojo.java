@@ -276,38 +276,6 @@ public class AssemblyMojo extends MojoSupport {
         this.workDirectory = workDirectory;
     }
 
-    File getFeaturesCfgFile() {
-        return featuresCfgFile;
-    }
-
-    void setFeaturesCfgFile(final File featuresCfgFile) {
-        this.featuresCfgFile = featuresCfgFile;
-    }
-
-    File getStartupPropertiesFile() {
-        return startupPropertiesFile;
-    }
-
-    void setStartupPropertiesFile(final File startupPropertiesFile) {
-        this.startupPropertiesFile = startupPropertiesFile;
-    }
-
-    File getSystemDirectory() {
-        return systemDirectory;
-    }
-
-    void setSystemDirectory(final File systemDirectory) {
-        this.systemDirectory = systemDirectory;
-    }
-
-    int getDefaultStartLevel() {
-        return defaultStartLevel;
-    }
-
-    void setDefaultStartLevel(final int defaultStartLevel) {
-        this.defaultStartLevel = defaultStartLevel;
-    }
-
     List<String> getStartupRepositories() {
         return startupRepositories;
     }
@@ -334,10 +302,6 @@ public class AssemblyMojo extends MojoSupport {
 
     List<String> getBlacklistedRepositories() {
         return blacklistedRepositories;
-    }
-
-    void setBlacklistedRepositories(final List<String> blacklistedRepositories) {
-        this.blacklistedRepositories = blacklistedRepositories;
     }
 
     List<String> getStartupFeatures() {
@@ -368,40 +332,20 @@ public class AssemblyMojo extends MojoSupport {
         return blacklistedFeatures;
     }
 
-    void setBlacklistedFeatures(final List<String> blacklistedFeatures) {
-        this.blacklistedFeatures = blacklistedFeatures;
-    }
-
     List<String> getStartupBundles() {
         return startupBundles;
-    }
-
-    void setStartupBundles(final List<String> startupBundles) {
-        this.startupBundles = startupBundles;
     }
 
     List<String> getBootBundles() {
         return bootBundles;
     }
 
-    void setBootBundles(final List<String> bootBundles) {
-        this.bootBundles = bootBundles;
-    }
-
     List<String> getInstalledBundles() {
         return installedBundles;
     }
 
-    void setInstalledBundles(final List<String> installedBundles) {
-        this.installedBundles = installedBundles;
-    }
-
     List<String> getBlacklistedBundles() {
         return blacklistedBundles;
-    }
-
-    void setBlacklistedBundles(final List<String> blacklistedBundles) {
-        this.blacklistedBundles = blacklistedBundles;
     }
 
     String getProfilesUri() {
@@ -440,24 +384,8 @@ public class AssemblyMojo extends MojoSupport {
         return blacklistedProfiles;
     }
 
-    void setBlacklistedProfiles(final List<String> blacklistedProfiles) {
-        this.blacklistedProfiles = blacklistedProfiles;
-    }
-
     Builder.BlacklistPolicy getBlacklistPolicy() {
         return blacklistPolicy;
-    }
-
-    void setBlacklistPolicy(final Builder.BlacklistPolicy blacklistPolicy) {
-        this.blacklistPolicy = blacklistPolicy;
-    }
-
-    boolean isIgnoreDependencyFlag() {
-        return ignoreDependencyFlag;
-    }
-
-    void setIgnoreDependencyFlag(final boolean ignoreDependencyFlag) {
-        this.ignoreDependencyFlag = ignoreDependencyFlag;
     }
 
     List<String> getFeatureRepositories() {
@@ -476,24 +404,8 @@ public class AssemblyMojo extends MojoSupport {
         this.libraries = libraries;
     }
 
-    boolean isUseReferenceUrls() {
-        return useReferenceUrls;
-    }
-
-    void setUseReferenceUrls(final boolean useReferenceUrls) {
-        this.useReferenceUrls = useReferenceUrls;
-    }
-
-    boolean isIncludeBuildOutputDirectory() {
-        return includeBuildOutputDirectory;
-    }
-
     void setIncludeBuildOutputDirectory(final boolean includeBuildOutputDirectory) {
         this.includeBuildOutputDirectory = includeBuildOutputDirectory;
-    }
-
-    boolean isInstallAllFeaturesByDefault() {
-        return installAllFeaturesByDefault;
     }
 
     void setInstallAllFeaturesByDefault(final boolean installAllFeaturesByDefault) {
@@ -502,10 +414,6 @@ public class AssemblyMojo extends MojoSupport {
 
     Builder.KarafVersion getKarafVersion() {
         return karafVersion;
-    }
-
-    void setKarafVersion(final Builder.KarafVersion karafVersion) {
-        this.karafVersion = karafVersion;
     }
 
     String getJavase() {
@@ -534,10 +442,6 @@ public class AssemblyMojo extends MojoSupport {
 
     List<String> getPidsToExtract() {
         return pidsToExtract;
-    }
-
-    void setPidsToExtract(final List<String> pidsToExtract) {
-        this.pidsToExtract = pidsToExtract;
     }
 
     Map<String, String> getTranslatedUrls() {
@@ -595,4 +499,5 @@ public class AssemblyMojo extends MojoSupport {
     void setProject(final MavenProject project) {
         this.project = project;
     }
+
 }
