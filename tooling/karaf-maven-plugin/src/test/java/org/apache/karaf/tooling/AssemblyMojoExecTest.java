@@ -926,4 +926,28 @@ public class AssemblyMojoExecTest {
         assertThat(Files.readAllLines(copyMeFile.toPath())).containsExactly("copy-me content");
     }
 
+    @Test
+    public void executeMojoWhenNotOverwriteAssemblyFromSource() throws Exception {
+        //given
+        final File sourceDirectory = new File(resources.getBasedir(TEST_PROJECT), "missing-dir");
+        mojo.setSourceDirectory(sourceDirectory);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        final File[] files = mojo.getWorkDirectory()
+                                 .listFiles();
+        assertThat(files).isEmpty();
+    }
+
+    @Test
+    public void executeMojoWhenOverwriteAssemblyFromSource() throws Exception {
+        //given
+        final File sourceDirectory = new File(resources.getBasedir(TEST_PROJECT), "source");
+        mojo.setSourceDirectory(sourceDirectory);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        assertThat(new File(mojo.getWorkDirectory(), "source-file")).exists();
+    }
+
 }
