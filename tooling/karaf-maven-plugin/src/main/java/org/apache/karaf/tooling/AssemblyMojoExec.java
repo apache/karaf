@@ -8,6 +8,7 @@ import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModel
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.eclipse.aether.repository.RemoteRepository;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -101,27 +102,28 @@ public class AssemblyMojoExec {
 
         if (mojo.getFeatureRepositories() != null && !mojo.getFeatureRepositories()
                                                           .isEmpty()) {
-            log.warn(
-                    "Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
-                    + "installedRepositories instead");
+            log.warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
+                     + "installedRepositories instead");
             startupRepositories.addAll(mojo.getFeatureRepositories());
             bootRepositories.addAll(mojo.getFeatureRepositories());
             installedRepositories.addAll(mojo.getFeatureRepositories());
         }
 
         StringBuilder remote = new StringBuilder();
-        for (Object obj : mojo.getProject()
-                              .getRemoteProjectRepositories()) {
+        for (RemoteRepository repository : mojo.getProject()
+                                               .getRemoteProjectRepositories()) {
             if (remote.length() > 0) {
                 remote.append(",");
             }
-            remote.append(invoke(obj, "getUrl"));
+            remote.append(repository.getUrl());
             remote.append("@id=")
-                  .append(invoke(obj, "getId"));
-            if (!((Boolean) invoke(getPolicy(obj, false), "isEnabled"))) {
+                  .append(repository.getId());
+            if (!repository.getPolicy(false)
+                           .isEnabled()) {
                 remote.append("@noreleases");
             }
-            if ((Boolean) invoke(getPolicy(obj, true), "isEnabled")) {
+            if (repository.getPolicy(true)
+                          .isEnabled()) {
                 remote.append("@snapshots");
             }
         }
@@ -346,10 +348,8 @@ public class AssemblyMojoExec {
         // Installed
         builder.defaultStage(Builder.Stage.Installed)
                .kars(toArray(installedKars))
-               .repositories(
-                       installedFeatures.isEmpty() && installedProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
-                       toArray(installedRepositories)
-                            )
+               .repositories(installedFeatures.isEmpty() && installedProfiles.isEmpty()
+                             && mojo.getInstallAllFeaturesByDefault(), toArray(installedRepositories))
                .features(toArray(installedFeatures))
                .bundles(toArray(installedBundles))
                .profiles(toArray(installedProfiles));
@@ -359,12 +359,14 @@ public class AssemblyMojoExec {
 
         // Include project classes content
         if (mojo.getIncludeBuildOutputDirectory()) {
-            IoUtils.copyDirectory(new File(mojo.getProject().getBuild()
-                                                  .getOutputDirectory()), mojo.getWorkDirectory());
+            IoUtils.copyDirectory(new File(mojo.getProject()
+                                               .getBuild()
+                                               .getOutputDirectory()), mojo.getWorkDirectory());
         }
 
         // Overwrite assembly dir contents
-        if (mojo.getSourceDirectory().exists()) {
+        if (mojo.getSourceDirectory()
+                .exists()) {
             IoUtils.copyDirectory(mojo.getSourceDirectory(), mojo.getWorkDirectory());
         }
 
@@ -381,30 +383,6 @@ public class AssemblyMojoExec {
                     }
                 }
             }
-        }
-    }
-
-    private Object invoke(Object object, String getter) throws MojoExecutionException {
-        try {
-            return object.getClass()
-                         .getMethod(getter)
-                         .invoke(object);
-        } catch (Exception e) {
-            throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
-        }
-    }
-
-    private Object getPolicy(Object object, boolean snapshots) throws MojoExecutionException {
-        return invoke(object, "getPolicy", new Class[]{Boolean.TYPE}, new Object[]{snapshots});
-    }
-
-    private Object invoke(Object object, String getter, Class[] types, Object[] params) throws MojoExecutionException {
-        try {
-            return object.getClass()
-                         .getMethod(getter, types)
-                         .invoke(object, params);
-        } catch (Exception e) {
-            throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
         }
     }
 
