@@ -197,43 +197,13 @@ public class AssemblyMojoExec {
             }
             if ("kar".equals(artifact.getType())) {
                 String uri = artifactToMvn(artifact);
-                switch (stage) {
-                    case Startup:
-                        startupKars.add(uri);
-                        break;
-                    case Boot:
-                        bootKars.add(uri);
-                        break;
-                    case Installed:
-                        installedKars.add(uri);
-                        break;
-                }
+                addUriByStage(stage, uri, startupKars, bootKars, installedKars);
             } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
                 String uri = artifactToMvn(artifact);
-                switch (stage) {
-                    case Startup:
-                        startupRepositories.add(uri);
-                        break;
-                    case Boot:
-                        bootRepositories.add(uri);
-                        break;
-                    case Installed:
-                        installedRepositories.add(uri);
-                        break;
-                }
+                addUriByStage(stage, uri, startupRepositories, bootRepositories, installedRepositories);
             } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
                 String uri = artifactToMvn(artifact);
-                switch (stage) {
-                    case Startup:
-                        startupBundles.add(uri);
-                        break;
-                    case Boot:
-                        bootBundles.add(uri);
-                        break;
-                    case Installed:
-                        installedBundles.add(uri);
-                        break;
-                }
+                addUriByStage(stage, uri, startupBundles, bootBundles, installedBundles);
             }
         }
 
@@ -351,6 +321,23 @@ public class AssemblyMojoExec {
                     }
                 }
             }
+        }
+    }
+
+    private void addUriByStage(
+            final Builder.Stage stage, final String uri, final List<String> startup, final List<String> boot,
+            final List<String> installed
+                              ) {
+        switch (stage) {
+            case Startup:
+                startup.add(uri);
+                break;
+            case Boot:
+                boot.add(uri);
+                break;
+            case Installed:
+                installed.add(uri);
+                break;
         }
     }
 
