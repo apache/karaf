@@ -51,11 +51,8 @@ class AssemblyMojoExec {
         final List<String> startupProfiles = nonNullList(mojo.getStartupProfiles());
         final List<String> bootProfiles = nonNullList(mojo.getBootProfiles());
         final List<String> installedProfiles = nonNullList(mojo.getInstalledProfiles());
-        if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
-            if (mojo.getProfilesUri() == null) {
-                throw new IllegalArgumentException("profilesDirectory must be specified");
-            }
-        }
+
+        validateMojo(mojo);
 
         final List<String> startupRepositories = nonNullList(mojo.getStartupRepositories());
         final List<String> bootRepositories = nonNullList(mojo.getBootRepositories());
@@ -309,6 +306,17 @@ class AssemblyMojoExec {
                         // we tried our best, perhaps the OS does not support posix file perms.
                     }
                 }
+            }
+        }
+    }
+
+    private void validateMojo(final AssemblyMojo mojo) {
+        final List<String> startupProfiles = nonNullList(mojo.getStartupProfiles());
+        final List<String> bootProfiles = nonNullList(mojo.getBootProfiles());
+        final List<String> installedProfiles = nonNullList(mojo.getInstalledProfiles());
+        if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
+            if (mojo.getProfilesUri() == null) {
+                throw new IllegalArgumentException("profilesDirectory must be specified");
             }
         }
     }
