@@ -46,29 +46,18 @@ class AssemblyMojoExec {
     }
 
     void doExecute(final AssemblyMojo mojo) throws Exception {
-        final List<String> startupRepositories = nonNullList(mojo.getStartupRepositories());
-        final List<String> bootRepositories = nonNullList(mojo.getBootRepositories());
-        final List<String> installedRepositories = nonNullList(mojo.getInstalledRepositories());
-        final List<String> startupBundles = nonNullList(mojo.getStartupBundles());
-        final List<String> bootBundles = nonNullList(mojo.getBootBundles());
-        final List<String> installedBundles = nonNullList(mojo.getInstalledBundles());
-        final List<String> blacklistedBundles = nonNullList(mojo.getBlacklistedBundles());
-        final List<String> startupFeatures = nonNullList(mojo.getStartupFeatures());
-        final List<String> bootFeatures = nonNullList(mojo.getBootFeatures());
-        final List<String> installedFeatures = nonNullList(mojo.getInstalledFeatures());
-        final List<String> blacklistedFeatures = nonNullList(mojo.getBlacklistedFeatures());
         final List<String> startupProfiles = nonNullList(mojo.getStartupProfiles());
         final List<String> bootProfiles = nonNullList(mojo.getBootProfiles());
         final List<String> installedProfiles = nonNullList(mojo.getInstalledProfiles());
-        final List<String> blacklistedProfiles = nonNullList(mojo.getBlacklistedProfiles());
-        final List<String> blacklistedRepositories = nonNullList(mojo.getBlacklistedRepositories());
-
         if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
             if (mojo.getProfilesUri() == null) {
                 throw new IllegalArgumentException("profilesDirectory must be specified");
             }
         }
 
+        final List<String> startupRepositories = nonNullList(mojo.getStartupRepositories());
+        final List<String> bootRepositories = nonNullList(mojo.getBootRepositories());
+        final List<String> installedRepositories = nonNullList(mojo.getInstalledRepositories());
         if (mojo.getFeatureRepositories() != null && !mojo.getFeatureRepositories()
                                                           .isEmpty()) {
             log.warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
@@ -117,9 +106,13 @@ class AssemblyMojoExec {
         }
 
         // Set up blacklisted items
+        final List<String> blacklistedBundles = nonNullList(mojo.getBlacklistedBundles());
         builder.blacklistBundles(blacklistedBundles);
+        final List<String> blacklistedFeatures = nonNullList(mojo.getBlacklistedFeatures());
         builder.blacklistFeatures(blacklistedFeatures);
+        final List<String> blacklistedProfiles = nonNullList(mojo.getBlacklistedProfiles());
         builder.blacklistProfiles(blacklistedProfiles);
+        final List<String> blacklistedRepositories = nonNullList(mojo.getBlacklistedRepositories());
         builder.blacklistRepositories(blacklistedRepositories);
         builder.blacklistPolicy(mojo.getBlacklistPolicy());
 
@@ -180,6 +173,9 @@ class AssemblyMojoExec {
 
         // Loading kars and features repositories
         log.info("Loading kar and features repositories dependencies");
+        final List<String> startupBundles = nonNullList(mojo.getStartupBundles());
+        final List<String> bootBundles = nonNullList(mojo.getBootBundles());
+        final List<String> installedBundles = nonNullList(mojo.getInstalledBundles());
         for (Artifact artifact : mojo.getProject()
                                      .getDependencyArtifacts()) {
             Builder.Stage stage;
@@ -262,9 +258,11 @@ class AssemblyMojoExec {
             }
             builder.kars(Builder.Stage.Startup, false, kar);
         }
+        final List<String> startupFeatures = nonNullList(mojo.getStartupFeatures());
         if (!startupFeatures.contains(mojo.getFramework())) {
             builder.features(Builder.Stage.Startup, mojo.getFramework());
         }
+        final List<String> bootFeatures = nonNullList(mojo.getBootFeatures());
         builder.defaultStage(Builder.Stage.Startup)
                .kars(toArray(startupKars))
                .repositories(
@@ -285,6 +283,7 @@ class AssemblyMojoExec {
                .bundles(toArray(bootBundles))
                .profiles(toArray(bootProfiles));
         // Installed
+        final List<String> installedFeatures = nonNullList(mojo.getInstalledFeatures());
         builder.defaultStage(Builder.Stage.Installed)
                .kars(toArray(installedKars))
                .repositories(installedFeatures.isEmpty() && installedProfiles.isEmpty()
