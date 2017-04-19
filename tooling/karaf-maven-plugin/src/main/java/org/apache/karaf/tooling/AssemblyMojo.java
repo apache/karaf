@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.karaf.tooling;
 
 import org.apache.karaf.profile.assembly.Builder;
@@ -44,7 +45,8 @@ import java.util.Map;
  * will be copied by the resource plugin to ${project.build.directory}/classes/etc,
  * and then added to the assembly by this goal.
  */
-@Mojo(name = "assembly", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+@Mojo(name = "assembly", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME,
+      threadSafe = true)
 public class AssemblyMojo extends MojoSupport {
 
     /**
@@ -74,7 +76,7 @@ public class AssemblyMojo extends MojoSupport {
     /**
      * Directory used during build to construction the Karaf system repository.
      */
-    @Parameter(defaultValue="${project.build.directory}/assembly/system")
+    @Parameter(defaultValue = "${project.build.directory}/assembly/system")
     protected File systemDirectory;
 
     /**
@@ -85,8 +87,10 @@ public class AssemblyMojo extends MojoSupport {
 
     @Parameter
     private List<String> startupRepositories;
+
     @Parameter
     private List<String> bootRepositories;
+
     @Parameter
     private List<String> installedRepositories;
 
@@ -94,19 +98,22 @@ public class AssemblyMojo extends MojoSupport {
     private List<String> blacklistedRepositories;
 
     /**
-     * List of features from runtime-scope features xml and kars to be installed into system and listed in startup.properties.
+     * List of features from runtime-scope features xml and kars to be installed into system and listed in
+     * startup.properties.
      */
     @Parameter
     private List<String> startupFeatures;
 
     /**
-     * List of features from runtime-scope features xml and kars to be installed into system repo and listed in features service boot features.
+     * List of features from runtime-scope features xml and kars to be installed into system repo and listed in features
+     * service boot features.
      */
     @Parameter
     private List<String> bootFeatures;
 
     /**
-     * List of features from runtime-scope features xml and kars to be installed into system repo and not mentioned elsewhere.
+     * List of features from runtime-scope features xml and kars to be installed into system repo and not mentioned
+     * elsewhere.
      */
     @Parameter
     private List<String> installedFeatures;
@@ -116,10 +123,13 @@ public class AssemblyMojo extends MojoSupport {
 
     @Parameter
     private List<String> startupBundles;
+
     @Parameter
     private List<String> bootBundles;
+
     @Parameter
     private List<String> installedBundles;
+
     @Parameter
     private List<String> blacklistedBundles;
 
@@ -250,11 +260,9 @@ public class AssemblyMojo extends MojoSupport {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             new AssemblyMojoExec(getLog(), Builder::newInstance).doExecute(this);
-        }
-        catch (MojoExecutionException | MojoFailureException e) {
+        } catch (MojoExecutionException | MojoFailureException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new MojoExecutionException("Unable to build assembly", e);
         }
     }
@@ -498,6 +506,38 @@ public class AssemblyMojo extends MojoSupport {
 
     void setProject(final MavenProject project) {
         this.project = project;
+    }
+
+    void setBlacklistedRepositories(final List<String> blacklistedRepositories) {
+        this.blacklistedRepositories = blacklistedRepositories;
+    }
+
+    void setBlacklistedFeatures(final List<String> blacklistedFeatures) {
+        this.blacklistedFeatures = blacklistedFeatures;
+    }
+
+    void setStartupBundles(final List<String> startupBundles) {
+        this.startupBundles = startupBundles;
+    }
+
+    void setBootBundles(final List<String> bootBundles) {
+        this.bootBundles = bootBundles;
+    }
+
+    void setInstalledBundles(final List<String> installedBundles) {
+        this.installedBundles = installedBundles;
+    }
+
+    void setBlacklistedBundles(final List<String> blacklistedBundles) {
+        this.blacklistedBundles = blacklistedBundles;
+    }
+
+    void setBlacklistedProfiles(final List<String> blacklistedProfiles) {
+        this.blacklistedProfiles = blacklistedProfiles;
+    }
+
+    void setPidsToExtract(final List<String> pidsToExtract) {
+        this.pidsToExtract = pidsToExtract;
     }
 
 }
