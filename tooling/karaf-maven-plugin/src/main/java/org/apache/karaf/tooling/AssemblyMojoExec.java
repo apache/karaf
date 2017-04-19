@@ -48,9 +48,6 @@ class AssemblyMojoExec {
     }
 
     void doExecute(final AssemblyMojo mojo) throws Exception {
-        final List<String> startupProfiles = nonNullList(mojo.getStartupProfiles());
-        final List<String> bootProfiles = nonNullList(mojo.getBootProfiles());
-        final List<String> installedProfiles = nonNullList(mojo.getInstalledProfiles());
 
         validateMojo(mojo);
 
@@ -248,7 +245,7 @@ class AssemblyMojoExec {
         if (!startupFeatures.contains(mojo.getFramework())) {
             builder.features(Builder.Stage.Startup, mojo.getFramework());
         }
-        final List<String> bootFeatures = nonNullList(mojo.getBootFeatures());
+        final List<String> startupProfiles = nonNullList(mojo.getStartupProfiles());
         builder.defaultStage(Builder.Stage.Startup)
                .kars(toArray(startupKars))
                .repositories(
@@ -259,6 +256,8 @@ class AssemblyMojoExec {
                .bundles(toArray(startupBundles))
                .profiles(toArray(startupProfiles));
         // Boot
+        final List<String> bootFeatures = nonNullList(mojo.getBootFeatures());
+        final List<String> bootProfiles = nonNullList(mojo.getBootProfiles());
         builder.defaultStage(Builder.Stage.Boot)
                .kars(toArray(bootKars))
                .repositories(
@@ -270,6 +269,7 @@ class AssemblyMojoExec {
                .profiles(toArray(bootProfiles));
         // Installed
         final List<String> installedFeatures = nonNullList(mojo.getInstalledFeatures());
+        final List<String> installedProfiles = nonNullList(mojo.getInstalledProfiles());
         builder.defaultStage(Builder.Stage.Installed)
                .kars(toArray(installedKars))
                .repositories(installedFeatures.isEmpty() && installedProfiles.isEmpty()
