@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Supplier;
 
@@ -328,17 +329,12 @@ public class AssemblyMojoExec {
             final Builder.Stage stage, final String uri, final List<String> startup, final List<String> boot,
             final List<String> installed
                               ) {
-        switch (stage) {
-            case Startup:
-                startup.add(uri);
-                break;
-            case Boot:
-                boot.add(uri);
-                break;
-            case Installed:
-                installed.add(uri);
-                break;
-        }
+        final Map<Builder.Stage, List<String>> listByStage = new HashMap<>();
+        listByStage.put(Builder.Stage.Startup, startup);
+        listByStage.put(Builder.Stage.Boot, boot);
+        listByStage.put(Builder.Stage.Installed, installed);
+        Optional.ofNullable(listByStage.get(stage))
+                .ifPresent(list -> list.add(uri));
     }
 
     private String artifactToMvn(Artifact artifact) throws MojoExecutionException {
