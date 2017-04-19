@@ -37,38 +37,6 @@ public class AssemblyMojoExec {
 
     private final Supplier<Builder> builderSupplier;
 
-    private List<String> startupRepositories;
-
-    private List<String> bootRepositories;
-
-    private List<String> installedRepositories;
-
-    private List<String> startupBundles;
-
-    private List<String> bootBundles;
-
-    private List<String> installedBundles;
-
-    private List<String> blacklistedBundles;
-
-    private List<String> startupFeatures;
-
-    private List<String> bootFeatures;
-
-    private List<String> installedFeatures;
-
-    private List<String> blacklistedFeatures;
-
-    private List<String> startupProfiles;
-
-    private List<String> bootProfiles;
-
-    private List<String> installedProfiles;
-
-    private List<String> blacklistedProfiles;
-
-    private List<String> blacklistedRepositories;
-
     public AssemblyMojoExec(
             final Log log, final Supplier<Builder> builderSupplier
                            ) {
@@ -77,22 +45,22 @@ public class AssemblyMojoExec {
     }
 
     protected void doExecute(final AssemblyMojo mojo) throws Exception {
-        startupRepositories = nonNullList(mojo.getStartupRepositories());
-        bootRepositories = nonNullList(mojo.getBootRepositories());
-        installedRepositories = nonNullList(mojo.getInstalledRepositories());
-        startupBundles = nonNullList(mojo.getStartupBundles());
-        bootBundles = nonNullList(mojo.getBootBundles());
-        installedBundles = nonNullList(mojo.getInstalledBundles());
-        blacklistedBundles = nonNullList(mojo.getBlacklistedBundles());
-        startupFeatures = nonNullList(mojo.getStartupFeatures());
-        bootFeatures = nonNullList(mojo.getBootFeatures());
-        installedFeatures = nonNullList(mojo.getInstalledFeatures());
-        blacklistedFeatures = nonNullList(mojo.getBlacklistedFeatures());
-        startupProfiles = nonNullList(mojo.getStartupProfiles());
-        bootProfiles = nonNullList(mojo.getBootProfiles());
-        installedProfiles = nonNullList(mojo.getInstalledProfiles());
-        blacklistedProfiles = nonNullList(mojo.getBlacklistedProfiles());
-        blacklistedRepositories = nonNullList(mojo.getBlacklistedRepositories());
+        final List<String> startupRepositories = nonNullList(mojo.getStartupRepositories());
+        final List<String> bootRepositories = nonNullList(mojo.getBootRepositories());
+        final List<String> installedRepositories = nonNullList(mojo.getInstalledRepositories());
+        final List<String> startupBundles = nonNullList(mojo.getStartupBundles());
+        final List<String> bootBundles = nonNullList(mojo.getBootBundles());
+        final List<String> installedBundles = nonNullList(mojo.getInstalledBundles());
+        final List<String> blacklistedBundles = nonNullList(mojo.getBlacklistedBundles());
+        final List<String> startupFeatures = nonNullList(mojo.getStartupFeatures());
+        final List<String> bootFeatures = nonNullList(mojo.getBootFeatures());
+        final List<String> installedFeatures = nonNullList(mojo.getInstalledFeatures());
+        final List<String> blacklistedFeatures = nonNullList(mojo.getBlacklistedFeatures());
+        final List<String> startupProfiles = nonNullList(mojo.getStartupProfiles());
+        final List<String> bootProfiles = nonNullList(mojo.getBootProfiles());
+        final List<String> installedProfiles = nonNullList(mojo.getInstalledProfiles());
+        final List<String> blacklistedProfiles = nonNullList(mojo.getBlacklistedProfiles());
+        final List<String> blacklistedRepositories = nonNullList(mojo.getBlacklistedRepositories());
 
         if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
             if (mojo.getProfilesUri() == null) {
