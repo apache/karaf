@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -48,12 +49,10 @@ class AssemblyMojoExec {
     }
 
     void doExecute(final AssemblyMojo mojo) throws Exception {
-
-        validateMojo(mojo);
-
-        final List<String> startupRepositories = nonNullList(mojo.getStartupRepositories());
-        final List<String> bootRepositories = nonNullList(mojo.getBootRepositories());
-        final List<String> installedRepositories = nonNullList(mojo.getInstalledRepositories());
+        validateAndCleanMojo(mojo);
+        final List<String> startupRepositories = mojo.getStartupRepositories();
+        final List<String> bootRepositories = mojo.getBootRepositories();
+        final List<String> installedRepositories = mojo.getInstalledRepositories();
         if (mojo.getFeatureRepositories() != null && !mojo.getFeatureRepositories()
                                                           .isEmpty()) {
             log.warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
@@ -89,13 +88,13 @@ class AssemblyMojoExec {
         }
 
         // Set up blacklisted items
-        final List<String> blacklistedBundles = nonNullList(mojo.getBlacklistedBundles());
+        final List<String> blacklistedBundles = mojo.getBlacklistedBundles();
         builder.blacklistBundles(blacklistedBundles);
-        final List<String> blacklistedFeatures = nonNullList(mojo.getBlacklistedFeatures());
+        final List<String> blacklistedFeatures = mojo.getBlacklistedFeatures();
         builder.blacklistFeatures(blacklistedFeatures);
-        final List<String> blacklistedProfiles = nonNullList(mojo.getBlacklistedProfiles());
+        final List<String> blacklistedProfiles = mojo.getBlacklistedProfiles();
         builder.blacklistProfiles(blacklistedProfiles);
-        final List<String> blacklistedRepositories = nonNullList(mojo.getBlacklistedRepositories());
+        final List<String> blacklistedRepositories = mojo.getBlacklistedRepositories();
         builder.blacklistRepositories(blacklistedRepositories);
         builder.blacklistPolicy(mojo.getBlacklistPolicy());
 
@@ -156,9 +155,9 @@ class AssemblyMojoExec {
 
         // Loading kars and features repositories
         log.info("Loading kar and features repositories dependencies");
-        final List<String> startupBundles = nonNullList(mojo.getStartupBundles());
-        final List<String> bootBundles = nonNullList(mojo.getBootBundles());
-        final List<String> installedBundles = nonNullList(mojo.getInstalledBundles());
+        final List<String> startupBundles = mojo.getStartupBundles();
+        final List<String> bootBundles = mojo.getBootBundles();
+        final List<String> installedBundles = mojo.getInstalledBundles();
         for (Artifact artifact : mojo.getProject()
                                      .getDependencyArtifacts()) {
             Builder.Stage stage;
@@ -241,11 +240,11 @@ class AssemblyMojoExec {
             }
             builder.kars(Builder.Stage.Startup, false, kar);
         }
-        final List<String> startupFeatures = nonNullList(mojo.getStartupFeatures());
+        final List<String> startupFeatures = mojo.getStartupFeatures();
         if (!startupFeatures.contains(mojo.getFramework())) {
             builder.features(Builder.Stage.Startup, mojo.getFramework());
         }
-        final List<String> startupProfiles = nonNullList(mojo.getStartupProfiles());
+        final List<String> startupProfiles = mojo.getStartupProfiles();
         builder.defaultStage(Builder.Stage.Startup)
                .kars(toArray(startupKars))
                .repositories(
@@ -256,8 +255,8 @@ class AssemblyMojoExec {
                .bundles(toArray(startupBundles))
                .profiles(toArray(startupProfiles));
         // Boot
-        final List<String> bootFeatures = nonNullList(mojo.getBootFeatures());
-        final List<String> bootProfiles = nonNullList(mojo.getBootProfiles());
+        final List<String> bootFeatures = mojo.getBootFeatures();
+        final List<String> bootProfiles = mojo.getBootProfiles();
         builder.defaultStage(Builder.Stage.Boot)
                .kars(toArray(bootKars))
                .repositories(
@@ -268,8 +267,8 @@ class AssemblyMojoExec {
                .bundles(toArray(bootBundles))
                .profiles(toArray(bootProfiles));
         // Installed
-        final List<String> installedFeatures = nonNullList(mojo.getInstalledFeatures());
-        final List<String> installedProfiles = nonNullList(mojo.getInstalledProfiles());
+        final List<String> installedFeatures = mojo.getInstalledFeatures();
+        final List<String> installedProfiles = mojo.getInstalledProfiles();
         builder.defaultStage(Builder.Stage.Installed)
                .kars(toArray(installedKars))
                .repositories(installedFeatures.isEmpty() && installedProfiles.isEmpty()
@@ -310,15 +309,52 @@ class AssemblyMojoExec {
         }
     }
 
-    private void validateMojo(final AssemblyMojo mojo) {
-        final List<String> startupProfiles = nonNullList(mojo.getStartupProfiles());
-        final List<String> bootProfiles = nonNullList(mojo.getBootProfiles());
-        final List<String> installedProfiles = nonNullList(mojo.getInstalledProfiles());
-        if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
+    private void validateAndCleanMojo(final AssemblyMojo mojo) {
+        setNullListsToEmpty(mojo);
+        verifyProfilesUrlIsProvidedIfProfilesAreUsed(mojo);
+    }
+
+    private void verifyProfilesUrlIsProvidedIfProfilesAreUsed(final AssemblyMojo mojo) {
+        final int startupProfileCount = mojo.getStartupProfiles()
+                                            .size();
+        final int bootProfileCount = mojo.getBootProfiles()
+                                         .size();
+        final int installedProfileCount = mojo.getInstalledProfiles()
+                                              .size();
+        if (startupProfileCount + bootProfileCount + installedProfileCount > 0) {
             if (mojo.getProfilesUri() == null) {
                 throw new IllegalArgumentException("profilesDirectory must be specified");
             }
         }
+    }
+
+    private void setNullListsToEmpty(final AssemblyMojo mojo) {
+        final Map<Supplier<List<String>>, Consumer<List<String>>> mappers = new HashMap<>();
+        mappers.put(mojo::getBlacklistedBundles, mojo::setBlacklistedBundles);
+        mappers.put(mojo::getBlacklistedFeatures, mojo::setBlacklistedFeatures);
+        mappers.put(mojo::getBlacklistedProfiles, mojo::setBlacklistedProfiles);
+        mappers.put(mojo::getBlacklistedRepositories, mojo::setBlacklistedRepositories);
+        mappers.put(mojo::getBootBundles, mojo::setBootBundles);
+        mappers.put(mojo::getBootFeatures, mojo::setBootFeatures);
+        mappers.put(mojo::getBootProfiles, mojo::setBootProfiles);
+        mappers.put(mojo::getBootRepositories, mojo::setBootRepositories);
+        mappers.put(mojo::getFeatureRepositories, mojo::setFeatureRepositories);
+        mappers.put(mojo::getInstalledBundles, mojo::setInstalledBundles);
+        mappers.put(mojo::getInstalledFeatures, mojo::setInstalledFeatures);
+        mappers.put(mojo::getInstalledProfiles, mojo::setInstalledProfiles);
+        mappers.put(mojo::getInstalledRepositories, mojo::setInstalledRepositories);
+        mappers.put(mojo::getLibraries, mojo::setLibraries);
+        mappers.put(mojo::getPidsToExtract, mojo::setPidsToExtract);
+        mappers.put(mojo::getStartupBundles, mojo::setStartupBundles);
+        mappers.put(mojo::getStartupFeatures, mojo::setStartupFeatures);
+        mappers.put(mojo::getStartupProfiles, mojo::setStartupProfiles);
+        mappers.put(mojo::getStartupRepositories, mojo::setStartupRepositories);
+        mappers.entrySet()
+               .stream()
+               .filter(entry -> entry.getKey()
+                                     .get() == null)
+               .map(Map.Entry::getValue)
+               .forEach(setter -> setter.accept(new ArrayList<>()));
     }
 
     private String getMavenRepositories(final List<RemoteRepository> repositories) {
@@ -371,10 +407,6 @@ class AssemblyMojoExec {
 
     private String[] toArray(List<String> strings) {
         return strings.toArray(new String[strings.size()]);
-    }
-
-    private List<String> nonNullList(List<String> list) {
-        return list == null ? new ArrayList<String>() : list;
     }
 
 }
