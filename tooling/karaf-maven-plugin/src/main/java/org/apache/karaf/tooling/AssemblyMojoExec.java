@@ -32,20 +32,20 @@ import java.util.function.Supplier;
  * fields, then executes it. This class handles that execution, and uses the
  * {@link AssemblyMojo} as its parameter.</p>
  */
-public class AssemblyMojoExec {
+class AssemblyMojoExec {
 
     private final Log log;
 
     private final Supplier<Builder> builderSupplier;
 
-    public AssemblyMojoExec(
+    AssemblyMojoExec(
             final Log log, final Supplier<Builder> builderSupplier
-                           ) {
+                    ) {
         this.log = log;
         this.builderSupplier = builderSupplier;
     }
 
-    protected void doExecute(final AssemblyMojo mojo) throws Exception {
+    void doExecute(final AssemblyMojo mojo) throws Exception {
         final List<String> startupRepositories = nonNullList(mojo.getStartupRepositories());
         final List<String> bootRepositories = nonNullList(mojo.getBootRepositories());
         final List<String> installedRepositories = nonNullList(mojo.getInstalledRepositories());
