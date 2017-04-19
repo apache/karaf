@@ -8,6 +8,7 @@ import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModel
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.repository.RemoteRepository;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Executor for the {@link AssemblyMojo}.
@@ -67,32 +69,19 @@ class AssemblyMojoExec {
             installedRepositories.addAll(mojo.getFeatureRepositories());
         }
 
-        StringBuilder remote = new StringBuilder();
-        for (RemoteRepository repository : mojo.getProject()
-                                               .getRemoteProjectRepositories()) {
-            if (remote.length() > 0) {
-                remote.append(",");
-            }
-            remote.append(repository.getUrl());
-            remote.append("@id=")
-                  .append(repository.getId());
-            if (!repository.getPolicy(false)
-                           .isEnabled()) {
-                remote.append("@noreleases");
-            }
-            if (repository.getPolicy(true)
-                          .isEnabled()) {
-                remote.append("@snapshots");
-            }
-        }
-        log.info("Using repositories: " + remote.toString());
 
         Builder builder = builderSupplier.get();
         builder.offline(mojo.getMavenSession()
                             .isOffline());
         builder.localRepository(mojo.getLocalRepo()
                                     .getBasedir());
-        builder.mavenRepositories(remote.toString());
+
+        final MavenProject mavenProject = mojo.getProject();
+        final List<RemoteRepository> remoteProjectRepositories = mavenProject.getRemoteProjectRepositories();
+        final String mavenRepositories = getMavenRepositories(remoteProjectRepositories);
+        log.info("Using repositories: " + mavenRepositories);
+        builder.mavenRepositories(mavenRepositories);
+
         builder.javase(mojo.getJavase());
 
         // Set up config and system props
@@ -322,6 +311,20 @@ class AssemblyMojoExec {
                 }
             }
         }
+    }
+
+    private String getMavenRepositories(final List<RemoteRepository> repositories) {
+        return repositories.stream()
+                           .map(this::getRemoteRepositoryAsString)
+                           .collect(Collectors.joining(","));
+    }
+
+    private String getRemoteRepositoryAsString(final RemoteRepository repository) {
+        final String releases = repository.getPolicy(false)
+                                          .isEnabled() ? "" : "@noreleases";
+        final String snapshots = repository.getPolicy(true)
+                                           .isEnabled() ? "@snapshots" : "";
+        return repository.getUrl() + "@id=" + repository.getId() + releases + snapshots;
     }
 
     private void addUriByStage(
