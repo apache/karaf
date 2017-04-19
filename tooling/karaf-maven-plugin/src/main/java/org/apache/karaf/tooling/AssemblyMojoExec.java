@@ -50,17 +50,6 @@ class AssemblyMojoExec {
 
     void doExecute(final AssemblyMojo mojo) throws Exception {
         validateAndCleanMojo(mojo);
-        final List<String> startupRepositories = mojo.getStartupRepositories();
-        final List<String> bootRepositories = mojo.getBootRepositories();
-        final List<String> installedRepositories = mojo.getInstalledRepositories();
-        if (mojo.getFeatureRepositories() != null && !mojo.getFeatureRepositories()
-                                                          .isEmpty()) {
-            log.warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
-                     + "installedRepositories instead");
-            startupRepositories.addAll(mojo.getFeatureRepositories());
-            bootRepositories.addAll(mojo.getFeatureRepositories());
-            installedRepositories.addAll(mojo.getFeatureRepositories());
-        }
 
 
         Builder builder = builderSupplier.get();
@@ -179,7 +168,9 @@ class AssemblyMojoExec {
                 addUriByStage(stage, uri, startupKars, bootKars, installedKars);
             } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
                 String uri = artifactToMvn(artifact);
-                addUriByStage(stage, uri, startupRepositories, bootRepositories, installedRepositories);
+                addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
+                              mojo.getInstalledRepositories()
+                             );
             } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
                 String uri = artifactToMvn(artifact);
                 addUriByStage(stage, uri, startupBundles, bootBundles, installedBundles);
@@ -249,7 +240,7 @@ class AssemblyMojoExec {
                .kars(toArray(startupKars))
                .repositories(
                        startupFeatures.isEmpty() && startupProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
-                       toArray(startupRepositories)
+                       toArray(mojo.getStartupRepositories())
                             )
                .features(toArray(startupFeatures))
                .bundles(toArray(startupBundles))
@@ -261,7 +252,7 @@ class AssemblyMojoExec {
                .kars(toArray(bootKars))
                .repositories(
                        bootFeatures.isEmpty() && bootProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
-                       toArray(bootRepositories)
+                       toArray(mojo.getBootRepositories())
                             )
                .features(toArray(bootFeatures))
                .bundles(toArray(bootBundles))
@@ -272,7 +263,7 @@ class AssemblyMojoExec {
         builder.defaultStage(Builder.Stage.Installed)
                .kars(toArray(installedKars))
                .repositories(installedFeatures.isEmpty() && installedProfiles.isEmpty()
-                             && mojo.getInstallAllFeaturesByDefault(), toArray(installedRepositories))
+                             && mojo.getInstallAllFeaturesByDefault(), toArray(mojo.getInstalledRepositories()))
                .features(toArray(installedFeatures))
                .bundles(toArray(installedBundles))
                .profiles(toArray(installedProfiles));
@@ -312,6 +303,22 @@ class AssemblyMojoExec {
     private void validateAndCleanMojo(final AssemblyMojo mojo) {
         setNullListsToEmpty(mojo);
         verifyProfilesUrlIsProvidedIfProfilesAreUsed(mojo);
+        updateDeprecatedConfiguration(mojo);
+    }
+
+    private void updateDeprecatedConfiguration(final AssemblyMojo mojo) {
+        final boolean featuresRepositoriesUsed = !mojo.getFeatureRepositories()
+                                                      .isEmpty();
+        if (featuresRepositoriesUsed) {
+            log.warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
+                     + "installedRepositories instead");
+            mojo.getStartupRepositories()
+                .addAll(mojo.getFeatureRepositories());
+            mojo.getBootRepositories()
+                .addAll(mojo.getFeatureRepositories());
+            mojo.getInstalledRepositories()
+                .addAll(mojo.getFeatureRepositories());
+        }
     }
 
     private void verifyProfilesUrlIsProvidedIfProfilesAreUsed(final AssemblyMojo mojo) {
