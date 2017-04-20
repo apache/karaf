@@ -2,11 +2,9 @@ package org.apache.karaf.tooling;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
-import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.repository.RemoteRepository;
@@ -229,16 +227,14 @@ class AssemblyMojoExec {
                 default:
                     continue;
             }
+            final String uri = artifactToMvnUri(artifact);
             if ("kar".equals(artifact.getType())) {
-                String uri = artifactToMvn(artifact);
                 addUriByStage(stage, uri, startupKars, bootKars, installedKars);
             } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
-                String uri = artifactToMvn(artifact);
                 addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
                               mojo.getInstalledRepositories()
                              );
             } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-                String uri = artifactToMvn(artifact);
                 addUriByStage(stage, uri, startupBundles, bootBundles, installedBundles);
             }
         }
@@ -421,26 +417,20 @@ class AssemblyMojoExec {
                 .ifPresent(list -> list.add(uri));
     }
 
-    private String artifactToMvn(Artifact artifact) throws MojoExecutionException {
-        String uri;
-
-        String groupId = artifact.getGroupId();
-        String artifactId = artifact.getArtifactId();
-        String version = artifact.getBaseVersion();
-        String type = artifact.getArtifactHandler()
-                              .getExtension();
-        String classifier = artifact.getClassifier();
-
-        if (MavenUtil.isEmpty(classifier)) {
-            if ("jar".equals(type)) {
-                uri = String.format("mvn:%s/%s/%s", groupId, artifactId, version);
-            } else {
-                uri = String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type);
-            }
-        } else {
-            uri = String.format("mvn:%s/%s/%s/%s/%s", groupId, artifactId, version, type, classifier);
+    private String artifactToMvnUri(final Artifact artifact) {
+        final String classifier = Optional.ofNullable(artifact.getClassifier())
+                                          .filter(c -> !"".matches(c))
+                                          .map(c -> "/" + c)
+                                          .orElse("");
+        final String type = "/" + artifact.getArtifactHandler()
+                                          .getExtension();
+        String suffix = "";
+        if (!classifier.isEmpty() || !"/jar".equals(type)) {
+            suffix = type + classifier;
         }
-        return uri;
+        return String.format("mvn:%s/%s/%s%s", artifact.getGroupId(), artifact.getArtifactId(),
+                             artifact.getBaseVersion(), suffix
+                            );
     }
 
     private String[] toArray(List<String> strings) {
