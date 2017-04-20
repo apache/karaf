@@ -50,23 +50,51 @@ class AssemblyMojoExec {
 
     void doExecute(final AssemblyMojo mojo) throws Exception {
         validateAndCleanMojo(mojo);
+        generateAssembly(mojo);
+        addProjectBuildOutputToAssembly(mojo);
+        overlayAssemblyFromProjectFiles(mojo);
+        markAssemblyBinFilesAsExecutable(mojo);
+    }
 
+    private void addProjectBuildOutputToAssembly(final AssemblyMojo mojo) throws IOException {
+        if (mojo.getIncludeBuildOutputDirectory()) {
+            IoUtils.copyDirectory(new File(mojo.getProject()
+                                               .getBuild()
+                                               .getOutputDirectory()), mojo.getWorkDirectory());
+        }
+    }
 
-        Builder builder = builderSupplier.get();
+    private void overlayAssemblyFromProjectFiles(final AssemblyMojo mojo) throws IOException {
+        if (mojo.getSourceDirectory()
+                .exists()) {
+            IoUtils.copyDirectory(mojo.getSourceDirectory(), mojo.getWorkDirectory());
+        }
+    }
+
+    private void markAssemblyBinFilesAsExecutable(final AssemblyMojo mojo) {
+        File[] files = new File(mojo.getWorkDirectory(), "bin").listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (!file.getName()
+                         .endsWith(".bat")) {
+                    try {
+                        Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rwxr-xr-x"));
+                    } catch (Throwable ignore) {
+                        // we tried our best, perhaps the OS does not support posix file perms.
+                    }
+                }
+            }
+        }
+    }
+
+    private void generateAssembly(final AssemblyMojo mojo) throws Exception {
+        final Builder builder = builderSupplier.get();
+
         builder.offline(mojo.getMavenSession()
                             .isOffline());
         builder.localRepository(mojo.getLocalRepo()
                                     .getBasedir());
-
-        final MavenProject mavenProject = mojo.getProject();
-        final List<RemoteRepository> remoteProjectRepositories = mavenProject.getRemoteProjectRepositories();
-        final String mavenRepositories = getMavenRepositories(remoteProjectRepositories);
-        log.info("Using repositories: " + mavenRepositories);
-        builder.mavenRepositories(mavenRepositories);
-
         builder.javase(mojo.getJavase());
-
-        // Set up config and system props
         if (mojo.getConfig() != null) {
             mojo.getConfig()
                 .forEach(builder::config);
@@ -75,17 +103,13 @@ class AssemblyMojoExec {
             mojo.getSystem()
                 .forEach(builder::system);
         }
-
-        // Set up blacklisted items
-        final List<String> blacklistedBundles = mojo.getBlacklistedBundles();
-        builder.blacklistBundles(blacklistedBundles);
-        final List<String> blacklistedFeatures = mojo.getBlacklistedFeatures();
-        builder.blacklistFeatures(blacklistedFeatures);
-        final List<String> blacklistedProfiles = mojo.getBlacklistedProfiles();
-        builder.blacklistProfiles(blacklistedProfiles);
-        final List<String> blacklistedRepositories = mojo.getBlacklistedRepositories();
-        builder.blacklistRepositories(blacklistedRepositories);
-        builder.blacklistPolicy(mojo.getBlacklistPolicy());
+        builder.karafVersion(mojo.getKarafVersion());
+        builder.useReferenceUrls(mojo.getUseReferenceUrls());
+        builder.defaultAddAll(mojo.getInstallAllFeaturesByDefault());
+        builder.ignoreDependencyFlag(mojo.getIgnoreDependencyFlag());
+        if (mojo.getProfilesUri() != null) {
+            builder.profilesUris(mojo.getProfilesUri());
+        }
 
         if (mojo.getPropertyFileEdits() != null) {
             File file = new File(mojo.getPropertyFileEdits());
@@ -99,6 +123,19 @@ class AssemblyMojoExec {
             }
         }
         builder.pidsToExtract(mojo.getPidsToExtract());
+
+
+        builder.blacklistPolicy(mojo.getBlacklistPolicy());
+        builder.blacklistBundles(mojo.getBlacklistedBundles());
+        builder.blacklistFeatures(mojo.getBlacklistedFeatures());
+        builder.blacklistProfiles(mojo.getBlacklistedProfiles());
+        builder.blacklistRepositories(mojo.getBlacklistedRepositories());
+
+        final MavenProject mavenProject = mojo.getProject();
+        final List<RemoteRepository> remoteProjectRepositories = mavenProject.getRemoteProjectRepositories();
+        final String mavenRepositories = getMavenRepositories(remoteProjectRepositories);
+        log.info("Using repositories: " + mavenRepositories);
+        builder.mavenRepositories(mavenRepositories);
 
         Map<String, String> urls = new HashMap<>();
         List<Artifact> artifacts = new ArrayList<>(mojo.getProject()
@@ -120,9 +157,10 @@ class AssemblyMojoExec {
                         mvnUrl += "/" + artifact.getClassifier();
                     }
                 }
-                urls.put(mvnUrl, artifact.getFile()
-                                         .toURI()
-                                         .toString());
+                urls.put(
+                        mvnUrl, artifact.getFile()
+                                        .toURI()
+                                        .toString());
             }
         }
         if (mojo.getTranslatedUrls() != null) {
@@ -177,13 +215,6 @@ class AssemblyMojoExec {
             }
         }
 
-        builder.karafVersion(mojo.getKarafVersion())
-               .useReferenceUrls(mojo.getUseReferenceUrls())
-               .defaultAddAll(mojo.getInstallAllFeaturesByDefault())
-               .ignoreDependencyFlag(mojo.getIgnoreDependencyFlag());
-        if (mojo.getProfilesUri() != null) {
-            builder.profilesUris(mojo.getProfilesUri());
-        }
         if (mojo.getLibraries() != null) {
             builder.libraries(mojo.getLibraries()
                                   .toArray(new String[mojo.getLibraries()
@@ -270,34 +301,6 @@ class AssemblyMojoExec {
 
         // Generate the assembly
         builder.generateAssembly();
-
-        // Include project classes content
-        if (mojo.getIncludeBuildOutputDirectory()) {
-            IoUtils.copyDirectory(new File(mojo.getProject()
-                                               .getBuild()
-                                               .getOutputDirectory()), mojo.getWorkDirectory());
-        }
-
-        // Overwrite assembly dir contents
-        if (mojo.getSourceDirectory()
-                .exists()) {
-            IoUtils.copyDirectory(mojo.getSourceDirectory(), mojo.getWorkDirectory());
-        }
-
-        // Chmod the bin/* scripts
-        File[] files = new File(mojo.getWorkDirectory(), "bin").listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (!file.getName()
-                         .endsWith(".bat")) {
-                    try {
-                        Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rwxr-xr-x"));
-                    } catch (Throwable ignore) {
-                        // we tried our best, perhaps the OS does not support posix file perms.
-                    }
-                }
-            }
-        }
     }
 
     private void validateAndCleanMojo(final AssemblyMojo mojo) {
