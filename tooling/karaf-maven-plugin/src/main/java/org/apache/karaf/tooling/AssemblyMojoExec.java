@@ -58,10 +58,17 @@ class AssemblyMojoExec {
 
     void doExecute(final AssemblyMojo mojo) throws Exception {
         validateAndCleanMojo(mojo);
+        deleteAnyPreviouslyGeneratedAssembly(mojo);
         generateAssembly(mojo);
         addProjectBuildOutputToAssembly(mojo);
         overlayAssemblyFromProjectFiles(mojo);
         markAssemblyBinFilesAsExecutable(mojo);
+    }
+
+    private void deleteAnyPreviouslyGeneratedAssembly(final AssemblyMojo mojo) {
+        IoUtils.deleteRecursive(mojo.getWorkDirectory());
+        mojo.getWorkDirectory()
+            .mkdirs();
     }
 
     private void addProjectBuildOutputToAssembly(final AssemblyMojo mojo) throws IOException {
@@ -196,9 +203,6 @@ class AssemblyMojoExec {
         log.info("Creating work directory");
         builder.homeDirectory(mojo.getWorkDirectory()
                                   .toPath());
-        IoUtils.deleteRecursive(mojo.getWorkDirectory());
-        mojo.getWorkDirectory()
-            .mkdirs();
 
         List<String> startupKars = new ArrayList<>();
         List<String> bootKars = new ArrayList<>();
