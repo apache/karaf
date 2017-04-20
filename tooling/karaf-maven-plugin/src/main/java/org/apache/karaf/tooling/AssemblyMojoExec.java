@@ -12,10 +12,14 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.repository.RemoteRepository;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,9 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Executor for the {@link AssemblyMojo}.
@@ -36,6 +42,8 @@ import java.util.stream.Collectors;
  * {@link AssemblyMojo} as its parameter.</p>
  */
 class AssemblyMojoExec {
+
+    private static final Set<PosixFilePermission> EXECUTABLE_PERMISSIONS = PosixFilePermissions.fromString("rwxr-xr-x");
 
     private final Log log;
 
@@ -72,18 +80,34 @@ class AssemblyMojoExec {
     }
 
     private void markAssemblyBinFilesAsExecutable(final AssemblyMojo mojo) {
-        File[] files = new File(mojo.getWorkDirectory(), "bin").listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (!file.getName()
-                         .endsWith(".bat")) {
-                    try {
-                        Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rwxr-xr-x"));
-                    } catch (Throwable ignore) {
-                        // we tried our best, perhaps the OS does not support posix file perms.
-                    }
-                }
-            }
+        findPosixFileSystem(mojo.getWorkDirectory()).map(workDirectory -> new File(workDirectory, "bin"))
+                                                    .map(binDirectory -> binDirectory.listFiles(nonBatchFiles()))
+                                                    .map(Stream::of)
+                                                    .ifPresent(files -> files.map(File::getAbsolutePath)
+                                                                             .map(Paths::get)
+                                                                             .forEach(this::setFilePermissions));
+    }
+
+    private FileFilter nonBatchFiles() {
+        return pathname -> !pathname.toString()
+                                    .endsWith(".bat");
+    }
+
+    private Optional<File> findPosixFileSystem(final File directory) {
+        return directory.toPath()
+                        .getFileSystem()
+                        .supportedFileAttributeViews()
+                        .stream()
+                        .filter("posix"::matches)
+                        .findAny()
+                        .map(v -> directory);
+    }
+
+    private void setFilePermissions(final Path filename) {
+        try {
+            Files.setPosixFilePermissions(filename, EXECUTABLE_PERMISSIONS);
+        } catch (IOException e) {
+            // non-posix filesystem should never have gotten this far
         }
     }
 
