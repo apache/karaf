@@ -89,6 +89,8 @@ public class AssemblyMojoExecTest {
     @Captor
     private ArgumentCaptor<Map<String, String>> mapArgumentCaptor;
 
+    private BuilderFactory builderFactory;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -96,7 +98,8 @@ public class AssemblyMojoExecTest {
                    .generateAssembly();
         dependencyArtifacts = new HashSet<>();
         mojo = getAssemblyMojo();
-        execMojo = new AssemblyMojoExec(log, () -> builder);
+        builderFactory = new BuilderFactory(log, builder);
+        execMojo = new AssemblyMojoExec(log, builderFactory);
         mojo.setConfig(new HashMap<>());
         mojo.setSystem(new HashMap<>());
     }
