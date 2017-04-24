@@ -45,6 +45,10 @@ class AssemblyMojoExec {
     void doExecute(final AssemblyMojo mojo) throws Exception {
         validateAndCleanMojo(mojo);
         deleteAnyPreviouslyGeneratedAssembly(mojo);
+        generateAssemblyDirectory(mojo);
+    }
+
+    private void generateAssemblyDirectory(final AssemblyMojo mojo) throws Exception {
         builderFactory.create(mojo)
                       .generateAssembly();
         addProjectBuildOutputToAssembly(mojo);
@@ -127,17 +131,19 @@ class AssemblyMojoExec {
     }
 
     private void verifyProfilesUrlIsProvidedIfProfilesAreUsed(final AssemblyMojo mojo) {
+        if (profilesAreUsed(mojo) && mojo.getProfilesUri() == null) {
+            throw new IllegalArgumentException("profilesDirectory must be specified");
+        }
+    }
+
+    private boolean profilesAreUsed(final AssemblyMojo mojo) {
         final int startupProfileCount = mojo.getStartupProfiles()
                                             .size();
         final int bootProfileCount = mojo.getBootProfiles()
                                          .size();
         final int installedProfileCount = mojo.getInstalledProfiles()
                                               .size();
-        if (startupProfileCount + bootProfileCount + installedProfileCount > 0) {
-            if (mojo.getProfilesUri() == null) {
-                throw new IllegalArgumentException("profilesDirectory must be specified");
-            }
-        }
+        return startupProfileCount + bootProfileCount + installedProfileCount > 0;
     }
 
     private void setNullListsToEmpty(final AssemblyMojo mojo) {
