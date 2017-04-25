@@ -1173,22 +1173,25 @@ public class Builder {
             downloader.download(repository, new DownloadCallback() {
                 @Override
                 public void downloaded(final StreamProvider provider) throws Exception {
-                    if (install) {
-                        synchronized (provider) {
-                            Path path = systemDirectory.resolve(pathFromProviderUrl(provider.getUrl()));
-                            Files.createDirectories(path.getParent());
-                            Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                        }
-                    }
-                    try (InputStream is = provider.open()) {
-                        Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
-                        if (blacklistPolicy == BlacklistPolicy.Discard) {
-                            Blacklist.blacklist(featuresModel, clauses);
-                        }
-                        synchronized (loaded) {
-                            loaded.put(provider.getUrl(), featuresModel);
-                            for (String innerRepository : featuresModel.getRepository()) {
-                                downloader.download(innerRepository, this);
+                    String url = provider.getUrl();
+                    synchronized (loaded) {
+                        if (!loaded.containsKey(provider.getUrl())) {
+                            if (install) {
+                                synchronized (provider) {
+                                    Path path = pathFromProviderUrl(url);
+                                    Files.createDirectories(path.getParent());
+                                    Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+                                }
+                            }
+                            try (InputStream is = provider.open()) {
+                                Features featuresModel = JaxbUtil.unmarshal(url, is, false);
+                                if (blacklistPolicy == BlacklistPolicy.Discard) {
+                                    Blacklist.blacklist(featuresModel, clauses);
+                                }
+                                loaded.put(provider.getUrl(), featuresModel);
+                                for (String innerRepository : featuresModel.getRepository()) {
+                                    downloader.download(innerRepository, this);
+                                }
                             }
                         }
                     }
