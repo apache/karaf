@@ -61,14 +61,10 @@ public class BuilderFactory {
         builder.localRepository(mojo.getLocalRepo()
                                     .getBasedir());
         builder.javase(mojo.getJavase());
-        if (mojo.getConfig() != null) {
-            mojo.getConfig()
-                .forEach(builder::config);
-        }
-        if (mojo.getSystem() != null) {
-            mojo.getSystem()
-                .forEach(builder::system);
-        }
+        mojo.getConfig()
+            .forEach(builder::config);
+        mojo.getSystem()
+            .forEach(builder::system);
         builder.karafVersion(mojo.getKarafVersion());
         builder.useReferenceUrls(mojo.getUseReferenceUrls());
         builder.defaultAddAll(mojo.getInstallAllFeaturesByDefault());
@@ -129,9 +125,7 @@ public class BuilderFactory {
                                         .toString());
             }
         }
-        if (mojo.getTranslatedUrls() != null) {
-            urls.putAll(mojo.getTranslatedUrls());
-        }
+        urls.putAll(mojo.getTranslatedUrls());
         builder.translatedUrls(urls);
 
         // creating system directory

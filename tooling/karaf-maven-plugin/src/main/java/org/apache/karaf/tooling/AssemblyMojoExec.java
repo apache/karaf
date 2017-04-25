@@ -111,6 +111,7 @@ class AssemblyMojoExec {
 
     private void validateAndCleanMojo(final AssemblyMojo mojo) {
         setNullListsToEmpty(mojo);
+        setNullMapsToEmpty(mojo);
         verifyProfilesUrlIsProvidedIfProfilesAreUsed(mojo);
         updateDeprecatedConfiguration(mojo);
     }
@@ -173,6 +174,19 @@ class AssemblyMojoExec {
                                      .get() == null)
                .map(Map.Entry::getValue)
                .forEach(setter -> setter.accept(new ArrayList<>()));
+    }
+
+    private void setNullMapsToEmpty(final AssemblyMojo mojo) {
+        final Map<Supplier<Map<String, String>>, Consumer<Map<String, String>>> mappers = new HashMap<>();
+        mappers.put(mojo::getTranslatedUrls, mojo::setTranslatedUrls);
+        mappers.put(mojo::getConfig, mojo::setConfig);
+        mappers.put(mojo::getSystem, mojo::setSystem);
+        mappers.entrySet()
+               .stream()
+               .filter(entry -> entry.getKey()
+                                     .get() == null)
+               .map(Map.Entry::getValue)
+               .forEach(setter -> setter.accept(new HashMap<>()));
     }
 
 }
