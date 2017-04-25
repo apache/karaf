@@ -1350,22 +1350,24 @@ public class Builder {
                     if (Blacklist.isBlacklisted(clausesRepos, url, TYPE_REPOSITORY)) {
                         return;
                     }
-                    if (install) {
-                        synchronized (provider) {
-                            Path path = systemDirectory.resolve(pathFromProviderUrl(url));
-                            Files.createDirectories(path.getParent());
-                            Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                        }
-                    }
-                    try (InputStream is = provider.open()) {
-                        Features featuresModel = JaxbUtil.unmarshal(url, is, false);
-                        if (blacklistPolicy == BlacklistPolicy.Discard) {
-                            Blacklist.blacklist(featuresModel, clauses);
-                        }
-                        synchronized (loaded) {
-                            loaded.put(provider.getUrl(), featuresModel);
-                            for (String innerRepository : featuresModel.getRepository()) {
-                                downloader.download(innerRepository, this);
+                    synchronized (loaded) {
+                        if (!loaded.containsKey(provider.getUrl())) {
+                            if (install) {
+                                synchronized (provider) {
+                                    Path path = pathFromProviderUrl(url);
+                                    Files.createDirectories(path.getParent());
+                                    Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+                                }
+                            }
+                            try (InputStream is = provider.open()) {
+                                Features featuresModel = JaxbUtil.unmarshal(url, is, false);
+                                if (blacklistPolicy == BlacklistPolicy.Discard) {
+                                    Blacklist.blacklist(featuresModel, clauses);
+                                }
+                                loaded.put(provider.getUrl(), featuresModel);
+                                for (String innerRepository : featuresModel.getRepository()) {
+                                    downloader.download(innerRepository, this);
+                                }
                             }
                         }
                     }

@@ -16,7 +16,9 @@
  */
 package org.apache.karaf.profile.assembly;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,8 +26,37 @@ import java.nio.file.Paths;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.osgi.framework.Constants;
 
 public class BuilderTest {
+
+    @Test
+    public void testCyclicRepos() throws Exception {
+        Path workDir = Paths.get("target/distrib");
+        recursiveDelete(workDir);
+
+        // Create dummy etc/config.properties file
+        Path config = workDir.resolve("etc/config.properties");
+        Files.createDirectories(config.getParent());
+        try (BufferedWriter w = Files.newBufferedWriter(config)) {
+            w.write(Constants.FRAMEWORK_SYSTEMPACKAGES + "= org.osgi.dto");
+            w.newLine();
+            w.write(Constants.FRAMEWORK_SYSTEMCAPABILITIES + "= ");
+            w.newLine();
+        }
+
+        Path mvnRepo = Paths.get("target/test-classes/repo");
+        Builder builder = Builder.newInstance()
+                .repositories(Builder.Stage.Startup, true, "mvn:foo/baz/1.0/xml/features")
+                .homeDirectory(workDir)
+                .localRepository(mvnRepo.toString());
+        try {
+            builder.generateAssembly();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
     @Test
     @Ignore("This test can not run at this position as it needs the staticFramework kar which is not yet available")
