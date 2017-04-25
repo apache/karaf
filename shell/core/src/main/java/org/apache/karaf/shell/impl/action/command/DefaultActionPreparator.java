@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.gogo.runtime.Token;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -107,15 +108,25 @@ public class DefaultActionPreparator {
         for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
             Object param = it.next();
 
-            if (processOptions && param instanceof String && ((String) param).startsWith("-")) {
-                boolean isKeyValuePair = ((String) param).indexOf('=') != -1;
+            String paramValue = null;
+            if (param instanceof String) {
+                paramValue = (String)param;
+            }
+            if (param instanceof Token) {
+                paramValue = ((Token)param).toString();
+            }
+
+            if (processOptions
+                    && paramValue != null
+                    && paramValue.startsWith("-")) {
+                boolean isKeyValuePair = paramValue.indexOf('=') != -1;
                 String name;
                 Object value = null;
                 if (isKeyValuePair) {
-                    name = ((String) param).substring(0, ((String) param).indexOf('='));
-                    value = ((String) param).substring(((String) param).indexOf('=') + 1);
+                    name = paramValue.substring(0, paramValue.indexOf('='));
+                    value = paramValue.substring(paramValue.indexOf('=') + 1);
                 } else {
-                    name = (String) param;
+                    name = paramValue;
                 }
                 Option option = null;
                 for (Option opt : options.keySet()) {
@@ -126,9 +137,9 @@ public class DefaultActionPreparator {
                 }
                 if (option == null) {
                     throw new CommandException(commandErrorSt
-                                + "undefined option " + INTENSITY_BOLD + param + INTENSITY_NORMAL + "\n"
+                                + "undefined option " + INTENSITY_BOLD + paramValue + INTENSITY_NORMAL + "\n"
                                 + "Try <command> --help' for more information.",
-                                        "Undefined option: " + param);
+                                        "Undefined option: " + paramValue);
                 }
                 Field field = options.get(option);
                 if (value == null && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
@@ -139,8 +150,8 @@ public class DefaultActionPreparator {
                 }
                 if (value == null) {
                         throw new CommandException(commandErrorSt
-                                + "missing value for option " + INTENSITY_BOLD + param + INTENSITY_NORMAL,
-                                "Missing value for option: " + param
+                                + "missing value for option " + INTENSITY_BOLD + paramValue + INTENSITY_NORMAL,
+                                "Missing value for option: " + paramValue
                         );
                 }
                 if (option.multiValued()) {
