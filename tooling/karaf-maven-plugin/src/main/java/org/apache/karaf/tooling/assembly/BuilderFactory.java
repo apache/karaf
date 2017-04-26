@@ -30,9 +30,18 @@ class BuilderFactory {
 
     private final Builder builder;
 
+    private Map<String, Builder.Stage> scopeToStageMap = new HashMap<String, Builder.Stage>();
+
     BuilderFactory(final Log log, final Builder builder) {
         this.log = log;
         this.builder = builder;
+        init();
+    }
+
+    private void init() {
+        scopeToStageMap.put("compile", Builder.Stage.Startup);
+        scopeToStageMap.put("runtime", Builder.Stage.Boot);
+        scopeToStageMap.put("provided", Builder.Stage.Installed);
     }
 
     Builder create(final AssemblyMojo mojo) throws IOException, XMLStreamException {
@@ -238,31 +247,23 @@ class BuilderFactory {
                                     ) {
         for (Artifact artifact : mojo.getProject()
                                      .getDependencyArtifacts()) {
-            Builder.Stage stage;
-            switch (artifact.getScope()) {
-                case "compile":
-                    stage = Builder.Stage.Startup;
-                    break;
-                case "runtime":
-                    stage = Builder.Stage.Boot;
-                    break;
-                case "provided":
-                    stage = Builder.Stage.Installed;
-                    break;
-                default:
-                    continue;
-            }
-            final String uri = artifactToMvnUri(artifact);
-            if ("kar".equals(artifact.getType())) {
-                addUriByStage(stage, uri, startupKars, bootKars, installedKars);
-            } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
-                addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
-                              mojo.getInstalledRepositories()
-                             );
-            } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-                addUriByStage(stage, uri, startupBundles, bootBundles, installedBundles);
-            }
+            mapScopeToStage(artifact).ifPresent(stage -> {
+                final String uri = artifactToMvnUri(artifact);
+                if ("kar".equals(artifact.getType())) {
+                    addUriByStage(stage, uri, startupKars, bootKars, installedKars);
+                } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
+                    addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
+                                  mojo.getInstalledRepositories()
+                                 );
+                } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
+                    addUriByStage(stage, uri, startupBundles, bootBundles, installedBundles);
+                }
+            });
         }
+    }
+
+    private Optional<Builder.Stage> mapScopeToStage(final Artifact artifact) {
+        return Optional.ofNullable(scopeToStageMap.get(artifact.getScope()));
     }
 
     private String getMavenRepositories(final List<RemoteRepository> repositories) {
