@@ -142,33 +142,7 @@ class BuilderFactory {
         final List<String> startupBundles = mojo.getStartupBundles();
         final List<String> bootBundles = mojo.getBootBundles();
         final List<String> installedBundles = mojo.getInstalledBundles();
-        for (Artifact artifact : mojo.getProject()
-                                     .getDependencyArtifacts()) {
-            Builder.Stage stage;
-            switch (artifact.getScope()) {
-                case "compile":
-                    stage = Builder.Stage.Startup;
-                    break;
-                case "runtime":
-                    stage = Builder.Stage.Boot;
-                    break;
-                case "provided":
-                    stage = Builder.Stage.Installed;
-                    break;
-                default:
-                    continue;
-            }
-            final String uri = artifactToMvnUri(artifact);
-            if ("kar".equals(artifact.getType())) {
-                addUriByStage(stage, uri, startupKars, bootKars, installedKars);
-            } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
-                addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
-                              mojo.getInstalledRepositories()
-                             );
-            } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-                addUriByStage(stage, uri, startupBundles, bootBundles, installedBundles);
-            }
-        }
+        loadKarsAndFeatures(mojo, startupKars, bootKars, installedKars, startupBundles, bootBundles, installedBundles);
 
         if (mojo.getLibraries() != null) {
             builder.libraries(mojo.getLibraries()
@@ -255,6 +229,40 @@ class BuilderFactory {
                .profiles(toArray(installedProfiles));
 
         return builder;
+    }
+
+    private void loadKarsAndFeatures(
+            final AssemblyMojo mojo, final List<String> startupKars, final List<String> bootKars,
+            final List<String> installedKars, final List<String> startupBundles, final List<String> bootBundles,
+            final List<String> installedBundles
+                                    ) {
+        for (Artifact artifact : mojo.getProject()
+                                     .getDependencyArtifacts()) {
+            Builder.Stage stage;
+            switch (artifact.getScope()) {
+                case "compile":
+                    stage = Builder.Stage.Startup;
+                    break;
+                case "runtime":
+                    stage = Builder.Stage.Boot;
+                    break;
+                case "provided":
+                    stage = Builder.Stage.Installed;
+                    break;
+                default:
+                    continue;
+            }
+            final String uri = artifactToMvnUri(artifact);
+            if ("kar".equals(artifact.getType())) {
+                addUriByStage(stage, uri, startupKars, bootKars, installedKars);
+            } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
+                addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
+                              mojo.getInstalledRepositories()
+                             );
+            } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
+                addUriByStage(stage, uri, startupBundles, bootBundles, installedBundles);
+            }
+        }
     }
 
     private String getMavenRepositories(final List<RemoteRepository> repositories) {
