@@ -142,16 +142,13 @@ class BuilderFactory {
         builder.homeDirectory(mojo.getWorkDirectory()
                                   .toPath());
 
-        List<String> startupKars = new ArrayList<>();
-        List<String> bootKars = new ArrayList<>();
-        List<String> installedKars = new ArrayList<>();
-
         // Loading kars and features repositories
         log.info("Loading kar and features repositories dependencies");
-        final List<String> startupBundles = mojo.getStartupBundles();
-        final List<String> bootBundles = mojo.getBootBundles();
-        final List<String> installedBundles = mojo.getInstalledBundles();
-        loadKarsAndFeatures(mojo, startupKars, bootKars, installedKars, startupBundles, bootBundles, installedBundles);
+        final ArtifactLists artifactLists = new ArtifactLists();
+        artifactLists.addStartupBundles(mojo.getStartupBundles());
+        artifactLists.addBootBundles(mojo.getBootBundles());
+        artifactLists.addInstalledBundles(mojo.getInstalledBundles());
+        loadArtifacts(mojo, artifactLists);
 
         if (mojo.getLibraries() != null) {
             builder.libraries(mojo.getLibraries()
@@ -160,11 +157,11 @@ class BuilderFactory {
         }
         // Startup
         boolean hasFrameworkKar = false;
-        for (String kar : startupKars) {
+        for (String kar : artifactLists.getStartupKars()) {
             if (kar.startsWith("mvn:org.apache.karaf.features/framework/") || kar.startsWith(
                     "mvn:org.apache.karaf.features/static/")) {
                 hasFrameworkKar = true;
-                startupKars.remove(kar);
+                artifactLists.removeStartupKar(kar);
                 if (mojo.getFramework() == null) {
                     mojo.setFramework(kar.startsWith("mvn:org.apache.karaf.features/framework/") ? "framework"
                                                                                                  : "static-framework");
@@ -206,64 +203,70 @@ class BuilderFactory {
         }
         final List<String> startupProfiles = mojo.getStartupProfiles();
         builder.defaultStage(Builder.Stage.Startup)
-               .kars(toArray(startupKars))
+               .kars(toArray(artifactLists.getStartupKars()))
                .repositories(
                        startupFeatures.isEmpty() && startupProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
                        toArray(mojo.getStartupRepositories())
                             )
                .features(toArray(startupFeatures))
-               .bundles(toArray(startupBundles))
+               .bundles(toArray(artifactLists.getStartupBundles()))
                .profiles(toArray(startupProfiles));
         // Boot
         final List<String> bootFeatures = mojo.getBootFeatures();
         final List<String> bootProfiles = mojo.getBootProfiles();
         builder.defaultStage(Builder.Stage.Boot)
-               .kars(toArray(bootKars))
+               .kars(toArray(artifactLists.getBootKars()))
                .repositories(
                        bootFeatures.isEmpty() && bootProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
                        toArray(mojo.getBootRepositories())
                             )
                .features(toArray(bootFeatures))
-               .bundles(toArray(bootBundles))
+               .bundles(toArray(artifactLists.getBootBundles()))
                .profiles(toArray(bootProfiles));
         // Installed
         final List<String> installedFeatures = mojo.getInstalledFeatures();
         final List<String> installedProfiles = mojo.getInstalledProfiles();
         builder.defaultStage(Builder.Stage.Installed)
-               .kars(toArray(installedKars))
+               .kars(toArray(artifactLists.getInstalledKars()))
                .repositories(installedFeatures.isEmpty() && installedProfiles.isEmpty()
                              && mojo.getInstallAllFeaturesByDefault(), toArray(mojo.getInstalledRepositories()))
                .features(toArray(installedFeatures))
-               .bundles(toArray(installedBundles))
+               .bundles(toArray(artifactLists.getInstalledBundles()))
                .profiles(toArray(installedProfiles));
 
         return builder;
     }
 
-    private void loadKarsAndFeatures(
-            final AssemblyMojo mojo, final List<String> startupKars, final List<String> bootKars,
-            final List<String> installedKars, final List<String> startupBundles, final List<String> bootBundles,
-            final List<String> installedBundles
-                                    ) {
-        for (Artifact artifact : mojo.getProject()
-                                     .getDependencyArtifacts()) {
-            mapScopeToStage(artifact).ifPresent(stage -> {
-                final String uri = artifactToMvnUri(artifact);
-                if ("kar".equals(artifact.getType())) {
-                    addUriByStage(stage, uri, startupKars, bootKars, installedKars);
-                } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
-                    addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
-                                  mojo.getInstalledRepositories()
-                                 );
-                } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-                    addUriByStage(stage, uri, startupBundles, bootBundles, installedBundles);
-                }
-            });
+    private void loadArtifacts(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
+        mojo.getProject()
+            .getDependencyArtifacts()
+            .forEach(artifact -> mapScopeToStage(artifact.getScope()).ifPresent(stage -> {
+                loadArtifact(mojo, artifactLists, artifact, stage);
+            }));
+    }
+
+    private void loadArtifact(
+            final AssemblyMojo mojo, final ArtifactLists artifactLists, final Artifact artifact,
+            final Builder.Stage stage
+                             ) {
+        final String uri = artifactToMvnUri(artifact);
+        if ("kar".equals(artifact.getType())) {
+            addUriByStage(stage, uri, artifactLists.getStartupKars(), artifactLists.getBootKars(),
+                          artifactLists.getInstalledKars()
+                         );
+        } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
+            addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
+                          mojo.getInstalledRepositories()
+                         );
+        } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
+            addUriByStage(stage, uri, artifactLists.getStartupBundles(), artifactLists.getBootBundles(),
+                          artifactLists.getInstalledBundles()
+                         );
         }
     }
 
-    private Optional<Builder.Stage> mapScopeToStage(final Artifact artifact) {
-        return Optional.ofNullable(scopeToStageMap.get(artifact.getScope()));
+    private Optional<Builder.Stage> mapScopeToStage(final String scope) {
+        return Optional.ofNullable(scopeToStageMap.get(scope));
     }
 
     private String getMavenRepositories(final List<RemoteRepository> repositories) {
