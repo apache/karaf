@@ -1,4 +1,4 @@
-package org.apache.karaf.tooling;
+package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
 /**
  * Factory for creating a {@link Builder} for an {@link AssemblyMojo}.
  */
-public class BuilderFactory {
+class BuilderFactory {
 
     private final Log log;
 
     private final Builder builder;
 
-    public BuilderFactory(final Log log, final Builder builder) {
+    BuilderFactory(final Log log, final Builder builder) {
         this.log = log;
         this.builder = builder;
     }

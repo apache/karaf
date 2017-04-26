@@ -1,4 +1,4 @@
-package org.apache.karaf.tooling;
+package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.maven.artifact.Artifact;

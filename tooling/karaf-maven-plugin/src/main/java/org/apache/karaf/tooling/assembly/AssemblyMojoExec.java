@@ -1,4 +1,4 @@
-package org.apache.karaf.tooling;
+package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.tooling.utils.IoUtils;
 import org.apache.maven.plugin.logging.Log;

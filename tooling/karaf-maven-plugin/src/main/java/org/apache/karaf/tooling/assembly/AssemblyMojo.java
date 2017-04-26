@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.karaf.tooling;
+package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.MojoSupport;
