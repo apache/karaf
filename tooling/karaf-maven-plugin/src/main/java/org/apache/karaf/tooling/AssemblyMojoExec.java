@@ -149,12 +149,12 @@ class AssemblyMojoExec {
     }
 
     private void markAssemblyBinFilesAsExecutable(final AssemblyMojo mojo) {
-        findPosixFileSystem(mojo.getWorkDirectory()).map(workDirectory -> new File(workDirectory, "bin"))
-                                                    .map(binDirectory -> binDirectory.listFiles(nonBatchFiles()))
-                                                    .map(Stream::of)
-                                                    .ifPresent(files -> files.map(File::getAbsolutePath)
-                                                                             .map(Paths::get)
-                                                                             .forEach(this::setFilePermissions));
+        whereIsPosix(mojo.getWorkDirectory()).map(workDirectory -> new File(workDirectory, "bin"))
+                                             .map(binDirectory -> binDirectory.listFiles(nonBatchFiles()))
+                                             .map(Stream::of)
+                                             .ifPresent(files -> files.map(File::getAbsolutePath)
+                                                                      .map(Paths::get)
+                                                                      .forEach(this::setFilePermissions));
     }
 
     private boolean profilesAreUsed(final AssemblyMojo mojo) {
@@ -167,7 +167,7 @@ class AssemblyMojoExec {
         return startupProfileCount + bootProfileCount + installedProfileCount > 0;
     }
 
-    private Optional<File> findPosixFileSystem(final File directory) {
+    private Optional<File> whereIsPosix(final File directory) {
         return directory.toPath()
                         .getFileSystem()
                         .supportedFileAttributeViews()
