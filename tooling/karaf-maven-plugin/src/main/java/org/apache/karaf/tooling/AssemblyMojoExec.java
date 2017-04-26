@@ -48,67 +48,6 @@ class AssemblyMojoExec {
         generateAssemblyDirectory(mojo);
     }
 
-    private void generateAssemblyDirectory(final AssemblyMojo mojo) throws Exception {
-        builderFactory.create(mojo)
-                      .generateAssembly();
-        addProjectBuildOutputToAssembly(mojo);
-        overlayAssemblyFromProjectFiles(mojo);
-        markAssemblyBinFilesAsExecutable(mojo);
-    }
-
-    private void deleteAnyPreviouslyGeneratedAssembly(final AssemblyMojo mojo) {
-        IoUtils.deleteRecursive(mojo.getWorkDirectory());
-        mojo.getWorkDirectory()
-            .mkdirs();
-    }
-
-    private void addProjectBuildOutputToAssembly(final AssemblyMojo mojo) throws IOException {
-        if (mojo.getIncludeBuildOutputDirectory()) {
-            IoUtils.copyDirectory(new File(mojo.getProject()
-                                               .getBuild()
-                                               .getOutputDirectory()), mojo.getWorkDirectory());
-        }
-    }
-
-    private void overlayAssemblyFromProjectFiles(final AssemblyMojo mojo) throws IOException {
-        if (mojo.getSourceDirectory()
-                .exists()) {
-            IoUtils.copyDirectory(mojo.getSourceDirectory(), mojo.getWorkDirectory());
-        }
-    }
-
-    private void markAssemblyBinFilesAsExecutable(final AssemblyMojo mojo) {
-        findPosixFileSystem(mojo.getWorkDirectory()).map(workDirectory -> new File(workDirectory, "bin"))
-                                                    .map(binDirectory -> binDirectory.listFiles(nonBatchFiles()))
-                                                    .map(Stream::of)
-                                                    .ifPresent(files -> files.map(File::getAbsolutePath)
-                                                                             .map(Paths::get)
-                                                                             .forEach(this::setFilePermissions));
-    }
-
-    private FileFilter nonBatchFiles() {
-        return pathname -> !pathname.toString()
-                                    .endsWith(".bat");
-    }
-
-    private Optional<File> findPosixFileSystem(final File directory) {
-        return directory.toPath()
-                        .getFileSystem()
-                        .supportedFileAttributeViews()
-                        .stream()
-                        .filter("posix"::matches)
-                        .findAny()
-                        .map(v -> directory);
-    }
-
-    private void setFilePermissions(final Path filename) {
-        try {
-            Files.setPosixFilePermissions(filename, EXECUTABLE_PERMISSIONS);
-        } catch (IOException e) {
-            // non-posix filesystem should never have gotten this far
-        }
-    }
-
     private void validateAndCleanMojo(final AssemblyMojo mojo) {
         setNullListsToEmpty(mojo);
         setNullMapsToEmpty(mojo);
@@ -116,35 +55,19 @@ class AssemblyMojoExec {
         updateDeprecatedConfiguration(mojo);
     }
 
-    private void updateDeprecatedConfiguration(final AssemblyMojo mojo) {
-        final boolean featuresRepositoriesUsed = !mojo.getFeatureRepositories()
-                                                      .isEmpty();
-        if (featuresRepositoriesUsed) {
-            log.warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
-                     + "installedRepositories instead");
-            mojo.getStartupRepositories()
-                .addAll(mojo.getFeatureRepositories());
-            mojo.getBootRepositories()
-                .addAll(mojo.getFeatureRepositories());
-            mojo.getInstalledRepositories()
-                .addAll(mojo.getFeatureRepositories());
-        }
+
+    private void deleteAnyPreviouslyGeneratedAssembly(final AssemblyMojo mojo) {
+        IoUtils.deleteRecursive(mojo.getWorkDirectory());
+        mojo.getWorkDirectory()
+            .mkdirs();
     }
 
-    private void verifyProfilesUrlIsProvidedIfProfilesAreUsed(final AssemblyMojo mojo) {
-        if (profilesAreUsed(mojo) && mojo.getProfilesUri() == null) {
-            throw new IllegalArgumentException("profilesDirectory must be specified");
-        }
-    }
-
-    private boolean profilesAreUsed(final AssemblyMojo mojo) {
-        final int startupProfileCount = mojo.getStartupProfiles()
-                                            .size();
-        final int bootProfileCount = mojo.getBootProfiles()
-                                         .size();
-        final int installedProfileCount = mojo.getInstalledProfiles()
-                                              .size();
-        return startupProfileCount + bootProfileCount + installedProfileCount > 0;
+    private void generateAssemblyDirectory(final AssemblyMojo mojo) throws Exception {
+        builderFactory.create(mojo)
+                      .generateAssembly();
+        addProjectBuildOutputToAssembly(mojo);
+        overlayAssemblyFromProjectFiles(mojo);
+        markAssemblyBinFilesAsExecutable(mojo);
     }
 
     private void setNullListsToEmpty(final AssemblyMojo mojo) {
@@ -187,6 +110,84 @@ class AssemblyMojoExec {
                                      .get() == null)
                .map(Map.Entry::getValue)
                .forEach(setter -> setter.accept(new HashMap<>()));
+    }
+
+    private void verifyProfilesUrlIsProvidedIfProfilesAreUsed(final AssemblyMojo mojo) {
+        if (profilesAreUsed(mojo) && mojo.getProfilesUri() == null) {
+            throw new IllegalArgumentException("profilesDirectory must be specified");
+        }
+    }
+
+    private void updateDeprecatedConfiguration(final AssemblyMojo mojo) {
+        final boolean featuresRepositoriesUsed = !mojo.getFeatureRepositories()
+                                                      .isEmpty();
+        if (featuresRepositoriesUsed) {
+            log.warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
+                     + "installedRepositories instead");
+            mojo.getStartupRepositories()
+                .addAll(mojo.getFeatureRepositories());
+            mojo.getBootRepositories()
+                .addAll(mojo.getFeatureRepositories());
+            mojo.getInstalledRepositories()
+                .addAll(mojo.getFeatureRepositories());
+        }
+    }
+
+    private void addProjectBuildOutputToAssembly(final AssemblyMojo mojo) throws IOException {
+        if (mojo.getIncludeBuildOutputDirectory()) {
+            IoUtils.copyDirectory(new File(mojo.getProject()
+                                               .getBuild()
+                                               .getOutputDirectory()), mojo.getWorkDirectory());
+        }
+    }
+
+    private void overlayAssemblyFromProjectFiles(final AssemblyMojo mojo) throws IOException {
+        if (mojo.getSourceDirectory()
+                .exists()) {
+            IoUtils.copyDirectory(mojo.getSourceDirectory(), mojo.getWorkDirectory());
+        }
+    }
+
+    private void markAssemblyBinFilesAsExecutable(final AssemblyMojo mojo) {
+        findPosixFileSystem(mojo.getWorkDirectory()).map(workDirectory -> new File(workDirectory, "bin"))
+                                                    .map(binDirectory -> binDirectory.listFiles(nonBatchFiles()))
+                                                    .map(Stream::of)
+                                                    .ifPresent(files -> files.map(File::getAbsolutePath)
+                                                                             .map(Paths::get)
+                                                                             .forEach(this::setFilePermissions));
+    }
+
+    private boolean profilesAreUsed(final AssemblyMojo mojo) {
+        final int startupProfileCount = mojo.getStartupProfiles()
+                                            .size();
+        final int bootProfileCount = mojo.getBootProfiles()
+                                         .size();
+        final int installedProfileCount = mojo.getInstalledProfiles()
+                                              .size();
+        return startupProfileCount + bootProfileCount + installedProfileCount > 0;
+    }
+
+    private Optional<File> findPosixFileSystem(final File directory) {
+        return directory.toPath()
+                        .getFileSystem()
+                        .supportedFileAttributeViews()
+                        .stream()
+                        .filter("posix"::matches)
+                        .findAny()
+                        .map(v -> directory);
+    }
+
+    private FileFilter nonBatchFiles() {
+        return pathname -> !pathname.toString()
+                                    .endsWith(".bat");
+    }
+
+    private void setFilePermissions(final Path filename) {
+        try {
+            Files.setPosixFilePermissions(filename, EXECUTABLE_PERMISSIONS);
+        } catch (IOException e) {
+            // non-posix filesystem should never have gotten this far
+        }
     }
 
 }
