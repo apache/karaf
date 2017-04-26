@@ -91,6 +91,8 @@ public class AssemblyMojoExecTest {
 
     private BuilderFactory builderFactory;
 
+    private AssemblyOutfitter assemblyOutfitter;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -99,7 +101,8 @@ public class AssemblyMojoExecTest {
         dependencyArtifacts = new HashSet<>();
         mojo = getAssemblyMojo();
         builderFactory = new BuilderFactory(log, builder);
-        execMojo = new AssemblyMojoExec(log, builderFactory);
+        assemblyOutfitter = new AssemblyOutfitter(mojo);
+        execMojo = new AssemblyMojoExec(log, builderFactory, assemblyOutfitter);
         mojo.setConfig(new HashMap<>());
         mojo.setSystem(new HashMap<>());
     }

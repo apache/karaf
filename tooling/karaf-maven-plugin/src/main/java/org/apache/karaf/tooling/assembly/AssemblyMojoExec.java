@@ -3,23 +3,12 @@ package org.apache.karaf.tooling.assembly;
 import org.apache.karaf.tooling.utils.IoUtils;
 import org.apache.maven.plugin.logging.Log;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * Executor for the {@link AssemblyMojo}.
@@ -31,15 +20,18 @@ import java.util.stream.Stream;
  */
 class AssemblyMojoExec {
 
-    private static final Set<PosixFilePermission> EXECUTABLE_PERMISSIONS = PosixFilePermissions.fromString("rwxr-xr-x");
-
     private final Log log;
 
     private final BuilderFactory builderFactory;
 
-    AssemblyMojoExec(final Log log, final BuilderFactory builderFactory) {
+    private final AssemblyOutfitter assemblyOutfitter;
+
+    AssemblyMojoExec(
+            final Log log, final BuilderFactory builderFactory, final AssemblyOutfitter assemblyOutfitter
+                    ) {
         this.log = log;
         this.builderFactory = builderFactory;
+        this.assemblyOutfitter = assemblyOutfitter;
     }
 
     void doExecute(final AssemblyMojo mojo) throws Exception {
@@ -55,7 +47,6 @@ class AssemblyMojoExec {
         updateDeprecatedConfiguration(mojo);
     }
 
-
     private void deleteAnyPreviouslyGeneratedAssembly(final AssemblyMojo mojo) {
         IoUtils.deleteRecursive(mojo.getWorkDirectory());
         mojo.getWorkDirectory()
@@ -65,9 +56,7 @@ class AssemblyMojoExec {
     private void generateAssemblyDirectory(final AssemblyMojo mojo) throws Exception {
         builderFactory.create(mojo)
                       .generateAssembly();
-        addProjectBuildOutputToAssembly(mojo);
-        overlayAssemblyFromProjectFiles(mojo);
-        markAssemblyBinFilesAsExecutable(mojo);
+        assemblyOutfitter.outfit();
     }
 
     private void setNullListsToEmpty(final AssemblyMojo mojo) {
@@ -132,31 +121,6 @@ class AssemblyMojoExec {
                 .addAll(mojo.getFeatureRepositories());
         }
     }
-
-    private void addProjectBuildOutputToAssembly(final AssemblyMojo mojo) throws IOException {
-        if (mojo.getIncludeBuildOutputDirectory()) {
-            IoUtils.copyDirectory(new File(mojo.getProject()
-                                               .getBuild()
-                                               .getOutputDirectory()), mojo.getWorkDirectory());
-        }
-    }
-
-    private void overlayAssemblyFromProjectFiles(final AssemblyMojo mojo) throws IOException {
-        if (mojo.getSourceDirectory()
-                .exists()) {
-            IoUtils.copyDirectory(mojo.getSourceDirectory(), mojo.getWorkDirectory());
-        }
-    }
-
-    private void markAssemblyBinFilesAsExecutable(final AssemblyMojo mojo) {
-        whereIsPosix(mojo.getWorkDirectory()).map(workDirectory -> new File(workDirectory, "bin"))
-                                             .map(binDirectory -> binDirectory.listFiles(nonBatchFiles()))
-                                             .map(Stream::of)
-                                             .ifPresent(files -> files.map(File::getAbsolutePath)
-                                                                      .map(Paths::get)
-                                                                      .forEach(this::setFilePermissions));
-    }
-
     private boolean profilesAreUsed(final AssemblyMojo mojo) {
         final int startupProfileCount = mojo.getStartupProfiles()
                                             .size();
@@ -165,29 +129,6 @@ class AssemblyMojoExec {
         final int installedProfileCount = mojo.getInstalledProfiles()
                                               .size();
         return startupProfileCount + bootProfileCount + installedProfileCount > 0;
-    }
-
-    private Optional<File> whereIsPosix(final File directory) {
-        return directory.toPath()
-                        .getFileSystem()
-                        .supportedFileAttributeViews()
-                        .stream()
-                        .filter("posix"::matches)
-                        .findAny()
-                        .map(v -> directory);
-    }
-
-    private FileFilter nonBatchFiles() {
-        return pathname -> !pathname.toString()
-                                    .endsWith(".bat");
-    }
-
-    private void setFilePermissions(final Path filename) {
-        try {
-            Files.setPosixFilePermissions(filename, EXECUTABLE_PERMISSIONS);
-        } catch (IOException e) {
-            // non-posix filesystem should never have gotten this far
-        }
     }
 
 }
