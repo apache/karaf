@@ -259,8 +259,10 @@ public class AssemblyMojo extends MojoSupport {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            new AssemblyMojoExec(getLog(), new BuilderFactory(getLog(), Builder.newInstance()),
-                                 new AssemblyOutfitter(this)).doExecute(this);
+            new AssemblyMojoExec(getLog(),
+                                 new BuilderFactory(getLog(), Builder.newInstance(), new MavenUriTranslator()),
+                                 new AssemblyOutfitter(this)
+            ).doExecute(this);
         } catch (MojoExecutionException | MojoFailureException e) {
             throw e;
         } catch (Exception e) {

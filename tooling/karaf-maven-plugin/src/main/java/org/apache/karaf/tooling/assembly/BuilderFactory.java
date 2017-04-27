@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,11 +32,16 @@ class BuilderFactory {
 
     private final Builder builder;
 
+    private final MavenUriTranslator mavenUriTranslator;
+
     private Map<String, Builder.Stage> scopeToStage = new HashMap<String, Builder.Stage>();
 
-    BuilderFactory(final Log log, final Builder builder) {
+    BuilderFactory(
+            final Log log, final Builder builder, final MavenUriTranslator mavenUriTranslator
+                  ) {
         this.log = log;
         this.builder = builder;
+        this.mavenUriTranslator = mavenUriTranslator;
         init();
     }
 
@@ -111,7 +115,7 @@ class BuilderFactory {
         log.info("Using repositories: " + mavenRepositories);
         builder.mavenRepositories(mavenRepositories);
 
-        addTranslatedUrls(mojo);
+        builder.translatedUrls(mavenUriTranslator.getTranslatedUris(mojo.getProject(), mojo.getTranslatedUrls()));
 
         // creating system directory
         log.info("Creating work directory");
@@ -218,28 +222,6 @@ class BuilderFactory {
         return builder;
     }
 
-    private void addTranslatedUrls(final AssemblyMojo mojo) {
-        Map<String, String> urls = new HashMap<>();
-        List<Artifact> artifacts = new ArrayList<>(mojo.getProject()
-                                                       .getAttachedArtifacts());
-        artifacts.add(mojo.getProject()
-                          .getArtifact());
-        for (Artifact artifact : artifacts) {
-            if (artifact.getFile() != null) {
-                if (artifact.getFile()
-                            .exists()) {
-                    final String mvnUri = artifactToMvnUri(artifact);
-                    final String localUri = artifact.getFile()
-                                                    .toURI()
-                                                    .toString();
-                    urls.put(mvnUri, localUri);
-                }
-            }
-        }
-        urls.putAll(mojo.getTranslatedUrls());
-        builder.translatedUrls(urls);
-    }
-
     private void addArtifactsToLists(final Collection<Artifact> artifacts, final ArtifactLists lists) {
         artifacts.forEach(artifact -> Optional.ofNullable(scopeToStage.get(artifact.getScope()))
                                               .ifPresent(stage -> addArtifactToList(lists, artifact, stage)));
@@ -283,7 +265,7 @@ class BuilderFactory {
         listByStage.put(Builder.Stage.Boot, boot);
         listByStage.put(Builder.Stage.Installed, installed);
         Optional.ofNullable(listByStage.get(stage))
-                .ifPresent(list -> list.add(artifactToMvnUri(artifact)));
+                .ifPresent(list -> list.add(mavenUriTranslator.artifactToMvnUri(artifact)));
     }
 
     private Optional<TargetType> getTargetType(final Artifact artifact) {
@@ -308,26 +290,6 @@ class BuilderFactory {
         return repositories.stream()
                            .map(this::getRemoteRepositoryAsString)
                            .collect(Collectors.joining(","));
-    }
-
-    private String artifactToMvnUri(final Artifact artifact) {
-        final String classifier = Optional.ofNullable(artifact.getClassifier())
-                                          .filter(c -> !"".matches(c))
-                                          .map(c -> "/" + c)
-                                          .orElse("");
-        String extension = artifact.getArtifactHandler()
-                                   .getExtension();
-        if ("bundle".equals(extension)) {
-            extension = "jar";
-        }
-        final String type = "/" + extension;
-        String suffix = "";
-        if (!classifier.isEmpty() || !"/jar".equals(type)) {
-            suffix = type + classifier;
-        }
-        return String.format("mvn:%s/%s/%s%s", artifact.getGroupId(), artifact.getArtifactId(),
-                             artifact.getBaseVersion(), suffix
-                            );
     }
 
     private String[] toArray(List<String> strings) {

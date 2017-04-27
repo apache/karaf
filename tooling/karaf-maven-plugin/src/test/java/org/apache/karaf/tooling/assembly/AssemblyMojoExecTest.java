@@ -100,7 +100,7 @@ public class AssemblyMojoExecTest {
                    .generateAssembly();
         dependencyArtifacts = new HashSet<>();
         mojo = getAssemblyMojo();
-        builderFactory = new BuilderFactory(log, builder);
+        builderFactory = new BuilderFactory(log, builder, new MavenUriTranslator());
         assemblyOutfitter = new AssemblyOutfitter(mojo);
         execMojo = new AssemblyMojoExec(log, builderFactory, assemblyOutfitter);
         mojo.setConfig(new HashMap<>());
