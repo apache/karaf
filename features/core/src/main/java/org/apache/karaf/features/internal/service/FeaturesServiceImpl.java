@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +49,8 @@ import java.util.regex.Pattern;
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.DeploymentEvent;
+import org.apache.karaf.features.DeploymentListener;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeatureState;
@@ -176,6 +177,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final org.osgi.service.repository.Repository globalRepository;
 
     private final List<FeaturesListener> listeners = new CopyOnWriteArrayIdentityList<>();
+    private final List<DeploymentListener> deploymentListeners = new CopyOnWriteArrayIdentityList<>();
+    private DeploymentEvent lastDeploymentEvent = DeploymentEvent.DEPLOYMENT_FINISHED;
 
     // Synchronized on lock
     private final Object lock = new Object();
@@ -255,9 +258,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         checkResolve();
     }
 
-    @SuppressWarnings({
-     "unchecked", "rawtypes"
-    })
     public void stop() {
       this.executor.shutdown();
     }
@@ -361,6 +361,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     // Listeners support
     //
 
+    @Override
     public void registerListener(FeaturesListener listener) {
         listeners.add(listener);
         try {
@@ -385,16 +386,41 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
+    @Override
     public void unregisterListener(FeaturesListener listener) {
         listeners.remove(listener);
     }
 
+    @Override
+    public void registerListener(DeploymentListener listener) {
+        deploymentListeners.add(listener);
+        listener.deploymentEvent(lastDeploymentEvent);
+    }
+
+    @Override
+    public void unregisterListener(DeploymentListener listener) {
+        deploymentListeners.remove(listener);
+    }
+
+    @Override
     public void callListeners(FeatureEvent event) {
         if (eventAdminListener != null) {
             eventAdminListener.featureEvent(event);
         }
         for (FeaturesListener listener : listeners) {
             listener.featureEvent(event);
+        }
+    }
+
+    @Override
+    public void callListeners(DeploymentEvent event) {
+        lastDeploymentEvent = event;
+        for (DeploymentListener listener : deploymentListeners) {
+            try {
+                listener.deploymentEvent(event);
+            } catch (Exception e) {
+                LOGGER.warn("DeploymentListener {} failed to process event {}", listener, event, e);
+            }
         }
     }
 
@@ -590,6 +616,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     // Features support
     //
 
+    @Override
     public Feature getFeature(String name) throws Exception {
         Feature[] features = this.getFeatures(name);
         if (features.length < 1) {
@@ -599,6 +626,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
+    @Override
     public Feature getFeature(String name, String version) throws Exception {
         Feature[] features = this.getFeatures(name, version);
         if (features.length < 1) {
@@ -608,6 +636,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
+    @Override
     public Feature[] getFeatures(String nameOrId) throws Exception {
         String[] parts = nameOrId.split("/");
         String name = parts.length > 0 ? parts[0] : nameOrId;
@@ -615,6 +644,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         return getFeatures(name, version);
     }
 
+    @Override
     public Feature[] getFeatures(String name, String version) throws Exception {
         List<Feature> features = new ArrayList<>();
         Pattern pattern = Pattern.compile(name);
@@ -662,6 +692,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
+    @Override
     public Feature[] listFeatures() throws Exception {
         Set<Feature> features = new HashSet<>();
         for (Map<String, Feature> featureWithDifferentVersion : getFeatures().values()) {
@@ -780,7 +811,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return installed != null && installed.contains(id);
         }
     }
-    
+
     @Override
     public FeatureState getState(String featureId) {
         String id = normalize(featureId);
@@ -906,8 +937,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                         String req = f.getName() + "/" + new VersionRange(f.getVersion(), true);
                         featuresToAdd.add(req);
                         Feature[] installedFeatures = listInstalledFeatures();
-                        for (int i=0;i<installedFeatures.length;i++) {
-                            if (installedFeatures[i].getName().equals(f.getName()) && installedFeatures[i].getVersion().equals(f.getVersion())) {
+                        for (Feature installedFeature : installedFeatures) {
+                            if (installedFeature.getName().equals(f.getName()) && installedFeature.getVersion().equals(f.getVersion())) {
                                 LOGGER.info("The specified feature: '{}' version '{}' {}",f.getName(),f.getVersion(),f.getVersion().endsWith("SNAPSHOT") ? "has been upgraded": "is already installed");
                             }
                         }
@@ -945,6 +976,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         doProvisionInThread(required, stateChanges, state, options);
     }
 
+    @Override
     public void uninstallFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception {
         State state = copyState();
         Map<String, Set<String>> required = copy(state.requirements);
@@ -1203,6 +1235,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         return props;
     }
 
+    @Override
     public void print(String message, boolean verbose) {
         LOGGER.info(message);
         if (verbose) {
@@ -1210,6 +1243,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
+    @Override
     public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         FrameworkWiring fw = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
@@ -1397,7 +1431,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
         digraph.replace(temp);
     }
-    
+
     private Pattern getFeaturePattern(String name, String version) {
         String req = FEATURE_OSGI_REQUIREMENT_PREFIX + name + "/" + new VersionRange(version, true);
         req = req.replace("[", "\\[");
