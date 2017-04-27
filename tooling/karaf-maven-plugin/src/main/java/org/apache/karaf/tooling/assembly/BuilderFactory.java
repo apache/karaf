@@ -111,34 +111,7 @@ class BuilderFactory {
         log.info("Using repositories: " + mavenRepositories);
         builder.mavenRepositories(mavenRepositories);
 
-        Map<String, String> urls = new HashMap<>();
-        List<Artifact> artifacts = new ArrayList<>(mojo.getProject()
-                                                       .getAttachedArtifacts());
-        artifacts.add(mojo.getProject()
-                          .getArtifact());
-        for (Artifact artifact : artifacts) {
-            if (artifact.getFile() != null && artifact.getFile()
-                                                      .exists()) {
-                String mvnUrl =
-                        "mvn:" + artifact.getGroupId() + "/" + artifact.getArtifactId() + "/" + artifact.getVersion();
-                String type = artifact.getType();
-                if ("bundle".equals(type)) {
-                    type = "jar";
-                }
-                if (!"jar".equals(type) || artifact.getClassifier() != null) {
-                    mvnUrl += "/" + type;
-                    if (artifact.getClassifier() != null) {
-                        mvnUrl += "/" + artifact.getClassifier();
-                    }
-                }
-                urls.put(
-                        mvnUrl, artifact.getFile()
-                                        .toURI()
-                                        .toString());
-            }
-        }
-        urls.putAll(mojo.getTranslatedUrls());
-        builder.translatedUrls(urls);
+        addTranslatedUrls(mojo);
 
         // creating system directory
         log.info("Creating work directory");
@@ -245,6 +218,28 @@ class BuilderFactory {
         return builder;
     }
 
+    private void addTranslatedUrls(final AssemblyMojo mojo) {
+        Map<String, String> urls = new HashMap<>();
+        List<Artifact> artifacts = new ArrayList<>(mojo.getProject()
+                                                       .getAttachedArtifacts());
+        artifacts.add(mojo.getProject()
+                          .getArtifact());
+        for (Artifact artifact : artifacts) {
+            if (artifact.getFile() != null) {
+                if (artifact.getFile()
+                            .exists()) {
+                    final String mvnUri = artifactToMvnUri(artifact);
+                    final String localUri = artifact.getFile()
+                                                    .toURI()
+                                                    .toString();
+                    urls.put(mvnUri, localUri);
+                }
+            }
+        }
+        urls.putAll(mojo.getTranslatedUrls());
+        builder.translatedUrls(urls);
+    }
+
     private void addArtifactsToLists(final Collection<Artifact> artifacts, final ArtifactLists lists) {
         artifacts.forEach(artifact -> Optional.ofNullable(scopeToStage.get(artifact.getScope()))
                                               .ifPresent(stage -> addArtifactToList(lists, artifact, stage)));
@@ -320,8 +315,12 @@ class BuilderFactory {
                                           .filter(c -> !"".matches(c))
                                           .map(c -> "/" + c)
                                           .orElse("");
-        final String type = "/" + artifact.getArtifactHandler()
-                                          .getExtension();
+        String extension = artifact.getArtifactHandler()
+                                   .getExtension();
+        if ("bundle".equals(extension)) {
+            extension = "jar";
+        }
+        final String type = "/" + extension;
         String suffix = "";
         if (!classifier.isEmpty() || !"/jar".equals(type)) {
             suffix = type + classifier;

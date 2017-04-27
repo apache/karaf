@@ -290,7 +290,7 @@ public class AssemblyMojoExecTest {
     public void executeMojoWithCompileBundleDependency() throws Exception {
         //given
         dependencyArtifacts.add(getDependency("compile", "bundle", ""));
-        final String expected = "mvn:org.apache/test-compile-bundle-/0.1.0/bundle";
+        final String expected = "mvn:org.apache/test-compile-bundle-/0.1.0";
         //when
         execMojo.doExecute(mojo);
         //then
@@ -626,7 +626,7 @@ public class AssemblyMojoExecTest {
     @Test
     public void executeMojoWithProjectArtifactFile() throws Exception {
         //given
-        final String expected = "mvn:org.apache/assembly-execute-mojo/0.1.0/jar/";
+        final String expected = "mvn:org.apache/assembly-execute-mojo/0.1.0";
         //when
         execMojo.doExecute(mojo);
         //then
@@ -672,7 +672,7 @@ public class AssemblyMojoExecTest {
         bundle.setFile(new File(resources.getBasedir(TEST_PROJECT), "bundle-file"));
         mojo.getProject()
             .addAttachedArtifact(bundle);
-        final String expected = "mvn:org.apache/test-compile-bundle-/0.1.0/jar/";
+        final String expected = "mvn:org.apache/test-compile-bundle-/0.1.0";
         //when
         execMojo.doExecute(mojo);
         //then
