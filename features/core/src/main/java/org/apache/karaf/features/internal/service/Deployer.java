@@ -41,6 +41,7 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
+import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeatureState;
@@ -115,6 +116,7 @@ public class Deployer {
         void saveState(State state);
         void persistResolveRequest(DeploymentRequest request) throws IOException;
         void installFeature(Feature feature) throws IOException, InvalidSyntaxException;
+        void callListeners(DeploymentEvent deployEvent);
         void callListeners(FeatureEvent featureEvent);
 
         Bundle installBundle(String region, String uri, InputStream is) throws BundleException;
@@ -252,9 +254,13 @@ public class Deployer {
                     for (String feature : featureSet) {
                         String[] p = feature.split("/");
                         found = name.equals(p[0]) && range.contains(VersionTable.getVersion(p[1]));
-                        if (found) break;
+                        if (found) {
+                            break;
+                        }
                     }
-                    if (found) break;
+                    if (found) {
+                        break;
+                    }
                 }
                 if (found) {
                     iterator.remove();
@@ -569,7 +575,6 @@ public class Deployer {
         // #10: send events
         //
 
-
         //
         // Handle updates on the FeaturesService bundle
         //
@@ -578,6 +583,7 @@ public class Deployer {
         if (rootRegionDeployment != null && rootRegionDeployment.toDelete.contains(dstate.serviceBundle)) {
             throw new UnsupportedOperationException("Uninstalling the FeaturesService bundle is not supported");
         }
+
         // If the bundle needs to be updated, do the following:
         //  - persist the request to indicate the resolution must be continued after restart
         //  - update the checksum and save the state
@@ -588,8 +594,7 @@ public class Deployer {
         //  - start the bundle
         //  - exit
         // When restarting, the resolution will be attempted again
-        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(dstate.serviceBundle)
-            ) {
+        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(dstate.serviceBundle)) {
             callback.persistResolveRequest(request);
             // If the bundle is updated because of a different checksum,
             // save the new checksum persistently
@@ -618,6 +623,8 @@ public class Deployer {
             callback.startBundle(dstate.serviceBundle);
             return;
         }
+
+        callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
 
         //
         // Perform bundle operations
@@ -754,7 +761,7 @@ public class Deployer {
         }
         if (hasToInstall) {
             print("Installing bundles:", verbose);
-            Map<Bundle, Integer> customStartLevels = new HashMap<Bundle, Integer>();
+            Map<Bundle, Integer> customStartLevels = new HashMap<>();
             for (Map.Entry<String, Deployer.RegionDeployment> entry : deployment.regions.entrySet()) {
                 String name = entry.getKey();
                 Deployer.RegionDeployment regionDeployment = entry.getValue();
@@ -795,7 +802,7 @@ public class Deployer {
                     }
                 }
             }
-            
+
             // Set start levels after install to avoid starting before all bundles are installed
             for (Bundle bundle : customStartLevels.keySet()) {
                 callback.setBundleStartLevel(bundle, customStartLevels.get(bundle));
@@ -874,7 +881,9 @@ public class Deployer {
         toResolve.addAll(toStart);
         toResolve.addAll(toRefresh.keySet());
         removeBundlesInState(toResolve, UNINSTALLED);
+        callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         callback.resolveBundles(toResolve, resolver.getWiring(), deployment.resToBnd);
+        callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
 
         // Compute bundles to start
         removeFragmentsAndBundlesInState(toStart, UNINSTALLED | ACTIVE);
@@ -916,11 +925,12 @@ public class Deployer {
                 }
             }
         }
+        callback.callListeners(DeploymentEvent.DEPLOYMENT_FINISHED);
 
         print("Done.", verbose);
     }
 
-    private VersionRange getRange(String version, String featureResolutionRange) {
+    private static VersionRange getRange(String version, String featureResolutionRange) {
         VersionRange range;
         if (version.equals("0.0.0")) {
             range = VersionRange.ANY_VERSION;
@@ -946,18 +956,18 @@ public class Deployer {
         }
     }
 
-    private boolean isSubsystem(Resource resource) {
+    private static boolean isSubsystem(Resource resource) {
         return TYPE_SUBSYSTEM.equals(getType(resource));
     }
 
-    private boolean isBundle(Resource resource) {
+    private static boolean isBundle(Resource resource) {
         return TYPE_BUNDLE.equals(getType(resource));
     }
 
     /**
      * Returns the most active state of the given states
      */
-    private FeatureState mergeStates(FeatureState s1, FeatureState s2) {
+    private static FeatureState mergeStates(FeatureState s1, FeatureState s2) {
         if (s1 == FeatureState.Started || s2 == FeatureState.Started) {
             return FeatureState.Started;
         }
@@ -967,7 +977,7 @@ public class Deployer {
         return FeatureState.Installed;
     }
 
-    private void computeBundlesToRefresh(Map<Bundle, String> toRefresh, Collection<Bundle> bundles, Map<Resource, Bundle> resources, Map<Resource, List<Wire>> resolution) {
+    private static void computeBundlesToRefresh(Map<Bundle, String> toRefresh, Collection<Bundle> bundles, Map<Resource, Bundle> resources, Map<Resource, List<Wire>> resolution) {
         // Compute the new list of fragments
         Map<Bundle, Set<Resource>> newFragments = new HashMap<>();
         for (Bundle bundle : bundles) {
@@ -1096,7 +1106,7 @@ public class Deployer {
         callback.print(message, verbose);
     }
 
-    private void removeFragmentsAndBundlesInState(Collection<Bundle> bundles, int state) {
+    private static void removeFragmentsAndBundlesInState(Collection<Bundle> bundles, int state) {
         for (Iterator<Bundle> iterator = bundles.iterator(); iterator.hasNext();) {
             Bundle bundle = iterator.next();
             if ((bundle.getState() & state) != 0
@@ -1106,7 +1116,7 @@ public class Deployer {
         }
     }
 
-    private void removeBundlesInState(Collection<Bundle> bundles, int state) {
+    private static void removeBundlesInState(Collection<Bundle> bundles, int state) {
         for (Iterator<Bundle> iterator = bundles.iterator(); iterator.hasNext();) {
             Bundle bundle = iterator.next();
             if ((bundle.getState() & state) != 0) {
@@ -1196,7 +1206,7 @@ public class Deployer {
             // Compute the list of resources to deploy in the region
             Set<Resource> bundlesInRegion = bundlesPerRegions.get(region);
             List<Resource> toDeploy = bundlesInRegion != null
-                    ? new ArrayList<>(bundlesInRegion) : new ArrayList<Resource>();
+                    ? new ArrayList<>(bundlesInRegion) : new ArrayList<>();
 
             // Remove the system bundle
             Bundle systemBundle = dstate.bundles.get(0l);
@@ -1411,6 +1421,7 @@ public class Deployer {
         }
         if (!bundlesToDestroy.isEmpty()) {
             Collections.sort(bundlesToDestroy, new Comparator<Bundle>() {
+                @Override
                 public int compare(Bundle b1, Bundle b2) {
                     return Long.compare(b2.getLastModified(), b1.getLastModified());
                 }

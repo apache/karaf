@@ -156,6 +156,10 @@ public interface FeaturesService {
 
     void unregisterListener(FeaturesListener listener);
 
+    void registerListener(DeploymentListener listener);
+
+    void unregisterListener(DeploymentListener listener);
+
     FeatureState getState(String featureId);
 
 }

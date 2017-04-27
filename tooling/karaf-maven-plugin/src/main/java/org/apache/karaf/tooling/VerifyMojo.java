@@ -58,6 +58,7 @@ import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.DownloadCallback;
@@ -82,12 +83,10 @@ import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.settings.Settings;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
@@ -211,7 +210,7 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    private Object invoke(Object object, String getter) throws MojoExecutionException {
+    private static Object invoke(Object object, String getter) throws MojoExecutionException {
         try {
             return object.getClass().getMethod(getter).invoke(object);
         } catch (Exception e) {
@@ -219,11 +218,11 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    private Object getPolicy(Object object, boolean snapshots) throws MojoExecutionException {
+    private static Object getPolicy(Object object, boolean snapshots) throws MojoExecutionException {
         return invoke(object, "getPolicy", new Class[] { Boolean.TYPE }, new Object[] { snapshots });
     }
 
-    private Object invoke(Object object, String getter, Class[] types, Object[] params) throws MojoExecutionException {
+    private static Object invoke(Object object, String getter, Class<?>[] types, Object[] params) throws MojoExecutionException {
         try {
             return object.getClass().getMethod(getter, types).invoke(object, params);
         } catch (Exception e) {
@@ -474,7 +473,7 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    private Deployer.DeploymentRequest createDeploymentRequest() {
+    private static Deployer.DeploymentRequest createDeploymentRequest() {
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE;
         request.featureResolutionRange = FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE;
@@ -486,7 +485,7 @@ public class VerifyMojo extends MojoSupport {
         return request;
     }
 
-    private String toString(Collection<String> collection) {
+    private static String toString(Collection<String> collection) {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n");
         for (String s : collection) {
@@ -551,7 +550,7 @@ public class VerifyMojo extends MojoSupport {
 //        attributes = DeploymentBuilder.overrideAttributes(attributes, metadata);
 
         final Hashtable<String, String> headers = new Hashtable<>();
-        for (Map.Entry attr : attributes.entrySet()) {
+        for (Map.Entry<Object, Object> attr : attributes.entrySet()) {
             headers.put(attr.getKey().toString(), attr.getValue().toString());
         }
 
@@ -788,6 +787,10 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
+        public void callListeners(DeploymentEvent deployEvent) {
+        }
+
+        @Override
         public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
             try {
                 Hashtable<String, String> headers = new Hashtable<>();
@@ -796,7 +799,7 @@ public class VerifyMojo extends MojoSupport {
                 while ((entry = zis.getNextEntry()) != null) {
                     if (MANIFEST_NAME.equals(entry.getName())) {
                         Attributes attributes = new Manifest(zis).getMainAttributes();
-                        for (Map.Entry attr : attributes.entrySet()) {
+                        for (Map.Entry<Object, Object> attr : attributes.entrySet()) {
                             headers.put(attr.getKey().toString(), attr.getValue().toString());
                         }
                     }

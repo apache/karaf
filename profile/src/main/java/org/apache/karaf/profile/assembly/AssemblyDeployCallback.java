@@ -34,13 +34,12 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
 import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.model.Library;
-import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
-import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Feature;
@@ -195,6 +194,10 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     }
 
     @Override
+    public void callListeners(DeploymentEvent deployEvent) {
+    }
+
+    @Override
     public void callListeners(FeatureEvent featureEvent) {
     }
 
@@ -230,7 +233,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             Hashtable<String, String> headers = new Hashtable<>();
             try (JarFile jar = new JarFile(bundleSystemFile.toFile())) {
                 Attributes attributes = jar.getManifest().getMainAttributes();
-                for (Map.Entry attr : attributes.entrySet()) {
+                for (Map.Entry<Object, Object> attr : attributes.entrySet()) {
                     headers.put(attr.getKey().toString(), attr.getValue().toString());
                 }
             }
@@ -280,7 +283,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     @Override
     public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
     }
-    
+
     private String substFinalName(String finalname) {
         final String markerVarBeg = "${";
         final String markerVarEnd = "}";
