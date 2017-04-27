@@ -20,6 +20,12 @@ class ArtifactLists {
 
     private final List<String> installedBundles = new ArrayList<>();
 
+    private final List<String> startupRepositories = new ArrayList<>();
+
+    private final List<String> bootRepositories = new ArrayList<>();
+
+    private final List<String> installedRepositories = new ArrayList<>();
+
     void addStartupKars(final List<String> startup) {
         this.startupKars.addAll(startup);
     }
@@ -42,6 +48,18 @@ class ArtifactLists {
 
     void addInstalledBundles(final List<String> installed) {
         this.installedBundles.addAll(installed);
+    }
+
+    void addStartupRepositories(final List<String> startup) {
+        this.startupRepositories.addAll(startup);
+    }
+
+    void addBootRepositories(final List<String> startup) {
+        this.bootRepositories.addAll(startup);
+    }
+
+    void addInstalledRepositories(final List<String> startup) {
+        this.installedRepositories.addAll(startup);
     }
 
     List<String> getStartupBundles() {
@@ -70,5 +88,17 @@ class ArtifactLists {
 
     void removeStartupKar(final String kar) {
         startupKars.remove(kar);
+    }
+
+    List<String> getStartupRepositories() {
+        return startupRepositories;
+    }
+
+    List<String> getBootRepositories() {
+        return startupRepositories;
+    }
+
+    List<String> getInstalledRepositories() {
+        return startupRepositories;
     }
 }

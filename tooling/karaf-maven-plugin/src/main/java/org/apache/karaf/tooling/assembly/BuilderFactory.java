@@ -14,11 +14,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +33,7 @@ class BuilderFactory {
 
     private final Builder builder;
 
-    private Map<String, Builder.Stage> scopeToStageMap = new HashMap<String, Builder.Stage>();
+    private Map<String, Builder.Stage> scopeToStage = new HashMap<String, Builder.Stage>();
 
     BuilderFactory(final Log log, final Builder builder) {
         this.log = log;
@@ -39,9 +42,9 @@ class BuilderFactory {
     }
 
     private void init() {
-        scopeToStageMap.put("compile", Builder.Stage.Startup);
-        scopeToStageMap.put("runtime", Builder.Stage.Boot);
-        scopeToStageMap.put("provided", Builder.Stage.Installed);
+        scopeToStage.put("compile", Builder.Stage.Startup);
+        scopeToStage.put("runtime", Builder.Stage.Boot);
+        scopeToStage.put("provided", Builder.Stage.Installed);
     }
 
     Builder create(final AssemblyMojo mojo) throws IOException, XMLStreamException {
@@ -148,7 +151,11 @@ class BuilderFactory {
         artifactLists.addStartupBundles(mojo.getStartupBundles());
         artifactLists.addBootBundles(mojo.getBootBundles());
         artifactLists.addInstalledBundles(mojo.getInstalledBundles());
-        loadArtifacts(mojo, artifactLists);
+        artifactLists.addStartupRepositories(mojo.getStartupRepositories());
+        artifactLists.addBootRepositories(mojo.getStartupRepositories());
+        artifactLists.addInstalledRepositories(mojo.getStartupRepositories());
+        addArtifactsToLists(mojo.getProject()
+                                .getDependencyArtifacts(), artifactLists);
 
         if (mojo.getLibraries() != null) {
             builder.libraries(mojo.getLibraries()
@@ -206,7 +213,7 @@ class BuilderFactory {
                .kars(toArray(artifactLists.getStartupKars()))
                .repositories(
                        startupFeatures.isEmpty() && startupProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
-                       toArray(mojo.getStartupRepositories())
+                       toArray(artifactLists.getStartupRepositories())
                             )
                .features(toArray(startupFeatures))
                .bundles(toArray(artifactLists.getStartupBundles()))
@@ -218,7 +225,7 @@ class BuilderFactory {
                .kars(toArray(artifactLists.getBootKars()))
                .repositories(
                        bootFeatures.isEmpty() && bootProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
-                       toArray(mojo.getBootRepositories())
+                       toArray(artifactLists.getBootRepositories())
                             )
                .features(toArray(bootFeatures))
                .bundles(toArray(artifactLists.getBootBundles()))
@@ -228,8 +235,9 @@ class BuilderFactory {
         final List<String> installedProfiles = mojo.getInstalledProfiles();
         builder.defaultStage(Builder.Stage.Installed)
                .kars(toArray(artifactLists.getInstalledKars()))
-               .repositories(installedFeatures.isEmpty() && installedProfiles.isEmpty()
-                             && mojo.getInstallAllFeaturesByDefault(), toArray(mojo.getInstalledRepositories()))
+               .repositories(
+                       installedFeatures.isEmpty() && installedProfiles.isEmpty()
+                       && mojo.getInstallAllFeaturesByDefault(), toArray(artifactLists.getInstalledRepositories()))
                .features(toArray(installedFeatures))
                .bundles(toArray(artifactLists.getInstalledBundles()))
                .profiles(toArray(installedProfiles));
@@ -237,54 +245,74 @@ class BuilderFactory {
         return builder;
     }
 
-    private void loadArtifacts(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
-        mojo.getProject()
-            .getDependencyArtifacts()
-            .forEach(artifact -> mapScopeToStage(artifact.getScope()).ifPresent(stage -> {
-                loadArtifact(mojo, artifactLists, artifact, stage);
-            }));
+    private void addArtifactsToLists(final Collection<Artifact> artifacts, final ArtifactLists lists) {
+        artifacts.forEach(artifact -> Optional.ofNullable(scopeToStage.get(artifact.getScope()))
+                                              .ifPresent(stage -> addArtifactToList(lists, artifact, stage)));
     }
 
-    private void loadArtifact(
-            final AssemblyMojo mojo, final ArtifactLists artifactLists, final Artifact artifact,
-            final Builder.Stage stage
-                             ) {
-        final String uri = artifactToMvnUri(artifact);
+    private void addArtifactToList(
+            final ArtifactLists lists, final Artifact artifact, final Builder.Stage stage
+                                  ) {
+        final Map<TargetType, Consumer<Artifact>> artifactLoaders = buildLoadArtifactHandlers(lists, stage);
+        getTargetType(artifact).ifPresent(type -> artifactLoaders.get(type)
+                                                                 .accept(artifact));
+    }
+
+    private Map<TargetType, Consumer<Artifact>> buildLoadArtifactHandlers(
+            final ArtifactLists lists, final Builder.Stage stage
+                                                                         ) {
+        final Map<TargetType, Consumer<Artifact>> loaders = new HashMap<>(3);
+        loaders.put(TargetType.Kar,
+                    (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupKars(), lists.getBootKars(),
+                                                         lists.getInstalledKars()
+                                                        )
+                   );
+        loaders.put(TargetType.Repository,
+                    (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupRepositories(),
+                                                         lists.getBootRepositories(), lists.getInstalledRepositories()
+                                                        )
+                   );
+        loaders.put(TargetType.Bundle, (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupBundles(),
+                                                                            lists.getBootBundles(),
+                                                                            lists.getInstalledBundles()
+                                                                           ));
+        return Collections.unmodifiableMap(loaders);
+    }
+
+    private void addArtifactToStageList(
+            final Builder.Stage stage, final Artifact artifact, final List<String> startup, final List<String> boot,
+            final List<String> installed
+                                       ) {
+        final Map<Builder.Stage, List<String>> listByStage = new HashMap<>();
+        listByStage.put(Builder.Stage.Startup, startup);
+        listByStage.put(Builder.Stage.Boot, boot);
+        listByStage.put(Builder.Stage.Installed, installed);
+        Optional.ofNullable(listByStage.get(stage))
+                .ifPresent(list -> list.add(artifactToMvnUri(artifact)));
+    }
+
+    private Optional<TargetType> getTargetType(final Artifact artifact) {
+        TargetType type = null;
         if ("kar".equals(artifact.getType())) {
-            addUriToListByStage(stage, uri, artifactLists.getStartupKars(), artifactLists.getBootKars(),
-                                artifactLists.getInstalledKars()
-                               );
+            type = TargetType.Kar;
         } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
-            addUriToListByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
-                                mojo.getInstalledRepositories()
-                               );
+            type = TargetType.Repository;
         } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-            addUriToListByStage(stage, uri, artifactLists.getStartupBundles(), artifactLists.getBootBundles(),
-                                artifactLists.getInstalledBundles()
-                               );
+            type = TargetType.Bundle;
         }
+        return Optional.ofNullable(type);
     }
 
-    private Optional<Builder.Stage> mapScopeToStage(final String scope) {
-        return Optional.ofNullable(scopeToStageMap.get(scope));
+    private enum TargetType {
+        Kar,
+        Repository,
+        Bundle,
     }
 
     private String getMavenRepositories(final List<RemoteRepository> repositories) {
         return repositories.stream()
                            .map(this::getRemoteRepositoryAsString)
                            .collect(Collectors.joining(","));
-    }
-
-    private void addUriToListByStage(
-            final Builder.Stage stage, final String uri, final List<String> startup, final List<String> boot,
-            final List<String> installed
-                                    ) {
-        final Map<Builder.Stage, List<String>> listByStage = new HashMap<>();
-        listByStage.put(Builder.Stage.Startup, startup);
-        listByStage.put(Builder.Stage.Boot, boot);
-        listByStage.put(Builder.Stage.Installed, installed);
-        Optional.ofNullable(listByStage.get(stage))
-                .ifPresent(list -> list.add(uri));
     }
 
     private String artifactToMvnUri(final Artifact artifact) {
