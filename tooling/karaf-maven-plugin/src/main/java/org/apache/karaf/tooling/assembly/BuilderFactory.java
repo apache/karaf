@@ -251,17 +251,17 @@ class BuilderFactory {
                              ) {
         final String uri = artifactToMvnUri(artifact);
         if ("kar".equals(artifact.getType())) {
-            addUriByStage(stage, uri, artifactLists.getStartupKars(), artifactLists.getBootKars(),
-                          artifactLists.getInstalledKars()
-                         );
+            addUriToListByStage(stage, uri, artifactLists.getStartupKars(), artifactLists.getBootKars(),
+                                artifactLists.getInstalledKars()
+                               );
         } else if ("features".equals(artifact.getClassifier()) || "karaf".equals(artifact.getClassifier())) {
-            addUriByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
-                          mojo.getInstalledRepositories()
-                         );
+            addUriToListByStage(stage, uri, mojo.getStartupRepositories(), mojo.getBootRepositories(),
+                                mojo.getInstalledRepositories()
+                               );
         } else if ("jar".equals(artifact.getType()) || "bundle".equals(artifact.getType())) {
-            addUriByStage(stage, uri, artifactLists.getStartupBundles(), artifactLists.getBootBundles(),
-                          artifactLists.getInstalledBundles()
-                         );
+            addUriToListByStage(stage, uri, artifactLists.getStartupBundles(), artifactLists.getBootBundles(),
+                                artifactLists.getInstalledBundles()
+                               );
         }
     }
 
@@ -275,10 +275,10 @@ class BuilderFactory {
                            .collect(Collectors.joining(","));
     }
 
-    private void addUriByStage(
+    private void addUriToListByStage(
             final Builder.Stage stage, final String uri, final List<String> startup, final List<String> boot,
             final List<String> installed
-                              ) {
+                                    ) {
         final Map<Builder.Stage, List<String>> listByStage = new HashMap<>();
         listByStage.put(Builder.Stage.Startup, startup);
         listByStage.put(Builder.Stage.Boot, boot);
