@@ -481,12 +481,13 @@ public class InstanceServiceImpl implements InstanceService {
 
         String location = instance.loc;
 
-        File libDir = new File(System.getProperty("karaf.home"), "lib" + File.separator + "boot");
+        File libDir = new File(System.getProperty("karaf.home"), "lib");
+        File bootLibDir = new File(libDir, "boot");
         File childLibDir = new File(location, "lib");
 
-        StringBuilder classpath = classpathFromLibDir(libDir);
+        StringBuilder classpath = classpathFromLibDir(bootLibDir);
         StringBuilder childClasspath = classpathFromLibDir(childLibDir);
-        if (childClasspath.length() > 0 && !libDir.equals(childLibDir)) {
+        if (childClasspath.length() > 0 && !bootLibDir.equals(childLibDir)) {
             classpath.append(System.getProperty("path.separator"));
             classpath.append(childClasspath);
         }
