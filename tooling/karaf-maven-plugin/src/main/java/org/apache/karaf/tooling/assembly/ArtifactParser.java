@@ -25,6 +25,20 @@ class ArtifactParser {
 
     private static final String TYPE_BUNDLE = "bundle";
 
+    private static final String KARAF_FRAMEWORK_DYNAMIC = "mvn:org.apache.karaf.features/framework/";
+
+    private static final String KARAF_FRAMEWORK_STATIC = "mvn:org.apache.karaf.features/static/";
+
+    private static final String FRAMEWORK_SUFFIX = "/xml/features";
+
+    private static final String FRAMEWORK = "framework";
+
+    private static final String FRAMEWORK_LOGBACK = "framework-logback";
+
+    private static final String STATIC_FRAMEWORK = "static-framework";
+
+    private static final String STATIC_FRAMEWORK_LOGBACK = "static-framework-logback";
+
     private final MavenUriParser mavenUriParser;
 
     private final Builder builder;
@@ -56,13 +70,11 @@ class ArtifactParser {
         // Startup
         boolean hasFrameworkKar = false;
         for (String kar : artifactLists.getStartupKars()) {
-            if (kar.startsWith("mvn:org.apache.karaf.features/framework/") || kar.startsWith(
-                    "mvn:org.apache.karaf.features/static/")) {
+            if (kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(KARAF_FRAMEWORK_STATIC)) {
                 hasFrameworkKar = true;
                 artifactLists.removeStartupKar(kar);
                 if (mojo.getFramework() == null) {
-                    mojo.setFramework(kar.startsWith("mvn:org.apache.karaf.features/framework/") ? "framework"
-                                                                                                 : "static-framework");
+                    mojo.setFramework(kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) ? FRAMEWORK : STATIC_FRAMEWORK);
                 }
                 builder.kars(Builder.Stage.Startup, false, kar);
                 break;
@@ -78,17 +90,17 @@ class ArtifactParser {
             String realKarafVersion = versions.getProperty("karaf-version");
             String kar;
             switch (mojo.getFramework()) {
-                case "framework":
-                    kar = "mvn:org.apache.karaf.features/framework/" + realKarafVersion + "/xml/features";
+                case FRAMEWORK:
+                    kar = KARAF_FRAMEWORK_DYNAMIC + realKarafVersion + FRAMEWORK_SUFFIX;
                     break;
-                case "framework-logback":
-                    kar = "mvn:org.apache.karaf.features/framework/" + realKarafVersion + "/xml/features";
+                case FRAMEWORK_LOGBACK:
+                    kar = KARAF_FRAMEWORK_DYNAMIC + realKarafVersion + FRAMEWORK_SUFFIX;
                     break;
-                case "static-framework":
-                    kar = "mvn:org.apache.karaf.features/static/" + realKarafVersion + "/xml/features";
+                case STATIC_FRAMEWORK:
+                    kar = KARAF_FRAMEWORK_STATIC + realKarafVersion + FRAMEWORK_SUFFIX;
                     break;
-                case "static-framework-logback":
-                    kar = "mvn:org.apache.karaf.features/static/" + realKarafVersion + "/xml/features";
+                case STATIC_FRAMEWORK_LOGBACK:
+                    kar = KARAF_FRAMEWORK_STATIC + realKarafVersion + FRAMEWORK_SUFFIX;
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported framework: " + mojo.getFramework());
