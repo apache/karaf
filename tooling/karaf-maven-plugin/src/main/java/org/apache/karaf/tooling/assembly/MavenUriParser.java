@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 /**
  * Handles translation of Maven URI to local file URI.
  */
-class MavenUriTranslator {
+class MavenUriParser {
 
     Map<String, String> getTranslatedUris(final MavenProject mavenProject, final Map<String, String> translatedUrls) {
         final List<Artifact> artifacts = getProjectAndAttachedArtifacts(mavenProject);

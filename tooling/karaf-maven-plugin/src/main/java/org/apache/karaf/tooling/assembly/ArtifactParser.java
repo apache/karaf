@@ -25,14 +25,14 @@ class ArtifactParser {
 
     private static final String TYPE_BUNDLE = "bundle";
 
-    private final MavenUriTranslator mavenUriTranslator;
+    private final MavenUriParser mavenUriParser;
 
     private final Builder builder;
 
     private final Map<String, Builder.Stage> scopeToStage = new HashMap<>();
 
-    ArtifactParser(final MavenUriTranslator mavenUriTranslator, final Builder builder) {
-        this.mavenUriTranslator = mavenUriTranslator;
+    ArtifactParser(final MavenUriParser mavenUriParser, final Builder builder) {
+        this.mavenUriParser = mavenUriParser;
         this.builder = builder;
         init();
     }
@@ -178,7 +178,7 @@ class ArtifactParser {
         listByStage.put(Builder.Stage.Boot, boot);
         listByStage.put(Builder.Stage.Installed, installed);
         Optional.ofNullable(listByStage.get(stage))
-                .ifPresent(list -> list.add(mavenUriTranslator.artifactToMvnUri(artifact)));
+                .ifPresent(list -> list.add(mavenUriParser.artifactToMvnUri(artifact)));
     }
 
     private Optional<String> getTargetType(final Artifact artifact) {

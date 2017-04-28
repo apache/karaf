@@ -270,10 +270,10 @@ public class AssemblyMojo extends MojoSupport {
 
     private BuilderFactory getBuilderFactory() {
         final Builder builder = Builder.newInstance();
-        final MavenUriTranslator mavenUriTranslator = new MavenUriTranslator();
-        return new BuilderFactory(getLog(), builder, mavenUriTranslator,
+        final MavenUriParser mavenUriParser = new MavenUriParser();
+        return new BuilderFactory(getLog(), builder, mavenUriParser,
                                   new ProfileEditsParser(new KarafPropertyInstructionsModelStaxReader()),
-                                  new ArtifactParser(mavenUriTranslator, builder)
+                                  new ArtifactParser(mavenUriParser, builder)
         );
     }
 

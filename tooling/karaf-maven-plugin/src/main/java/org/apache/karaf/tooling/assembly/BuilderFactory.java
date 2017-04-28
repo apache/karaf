@@ -17,19 +17,19 @@ class BuilderFactory {
 
     private final Builder builder;
 
-    private final MavenUriTranslator mavenUriTranslator;
+    private final MavenUriParser mavenUriParser;
 
     private final ProfileEditsParser profileEditsParser;
 
     private final ArtifactParser artifactParser;
 
     BuilderFactory(
-            final Log log, final Builder builder, final MavenUriTranslator mavenUriTranslator,
+            final Log log, final Builder builder, final MavenUriParser mavenUriParser,
             final ProfileEditsParser profileEditsParser, final ArtifactParser artifactParser
                   ) {
         this.log = log;
         this.builder = builder;
-        this.mavenUriTranslator = mavenUriTranslator;
+        this.mavenUriParser = mavenUriParser;
         this.profileEditsParser = profileEditsParser;
         this.artifactParser = artifactParser;
     }
@@ -63,7 +63,7 @@ class BuilderFactory {
         final String mavenRepositories = getMavenRepositories(mojo);
         log.info("Using repositories: " + mavenRepositories);
         builder.mavenRepositories(mavenRepositories);
-        builder.translatedUrls(mavenUriTranslator.getTranslatedUris(mojo.getProject(), mojo.getTranslatedUrls()));
+        builder.translatedUrls(mavenUriParser.getTranslatedUris(mojo.getProject(), mojo.getTranslatedUrls()));
         // creating system directory
         log.info("Creating work directory");
         builder.homeDirectory(mojo.getWorkDirectory()

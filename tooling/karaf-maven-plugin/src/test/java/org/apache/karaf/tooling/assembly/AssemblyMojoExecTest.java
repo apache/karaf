@@ -108,10 +108,10 @@ public class AssemblyMojoExecTest {
                    .generateAssembly();
         dependencyArtifacts = new HashSet<>();
         mojo = getAssemblyMojo();
-        final MavenUriTranslator mavenUriTranslator = new MavenUriTranslator();
+        final MavenUriParser mavenUriParser = new MavenUriParser();
         builderFactory =
-                new BuilderFactory(log, builder, mavenUriTranslator, new ProfileEditsParser(profileEditsReader),
-                                   new ArtifactParser(mavenUriTranslator, builder));
+                new BuilderFactory(log, builder, mavenUriParser, new ProfileEditsParser(profileEditsReader),
+                                   new ArtifactParser(mavenUriParser, builder));
         assemblyOutfitter = new AssemblyOutfitter(mojo);
         execMojo = new AssemblyMojoExec(log, builderFactory, assemblyOutfitter);
         mojo.setConfig(new HashMap<>());
