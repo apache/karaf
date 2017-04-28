@@ -2,12 +2,10 @@ package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.repository.RemoteRepository;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +22,7 @@ class BuilderFactory {
     private final ProfileEditsParser profileEditsParser;
 
     private final ArtifactParser artifactParser;
+
     BuilderFactory(
             final Log log, final Builder builder, final MavenUriTranslator mavenUriTranslator,
             final ProfileEditsParser profileEditsParser, final ArtifactParser artifactParser
@@ -61,9 +60,7 @@ class BuilderFactory {
         builder.blacklistProfiles(mojo.getBlacklistedProfiles());
         builder.blacklistRepositories(mojo.getBlacklistedRepositories());
 
-        final MavenProject mavenProject = mojo.getProject();
-        final List<RemoteRepository> remoteProjectRepositories = mavenProject.getRemoteProjectRepositories();
-        final String mavenRepositories = getMavenRepositories(remoteProjectRepositories);
+        final String mavenRepositories = getMavenRepositories(mojo);
         log.info("Using repositories: " + mavenRepositories);
         builder.mavenRepositories(mavenRepositories);
         builder.translatedUrls(mavenUriTranslator.getTranslatedUris(mojo.getProject(), mojo.getTranslatedUrls()));
@@ -83,18 +80,25 @@ class BuilderFactory {
         return builder;
     }
 
-    private String getMavenRepositories(final List<RemoteRepository> repositories) {
-        return repositories.stream()
-                           .map(this::getRemoteRepositoryAsString)
-                           .collect(Collectors.joining(","));
+    private String getMavenRepositories(final AssemblyMojo mojo) {
+        return mojo.getProject()
+                   .getRemoteProjectRepositories()
+                   .stream()
+                   .map(this::repositoryToString)
+                   .collect(Collectors.joining(","));
     }
 
-    private String getRemoteRepositoryAsString(final RemoteRepository repository) {
-        final String releases = repository.getPolicy(false)
-                                          .isEnabled() ? "" : "@noreleases";
-        final String snapshots = repository.getPolicy(true)
-                                           .isEnabled() ? "@snapshots" : "";
-        return repository.getUrl() + "@id=" + repository.getId() + releases + snapshots;
+    private String repositoryToString(final RemoteRepository repository) {
+        final String releasesPolicy = repositoryPolicy(repository, false, "", "@noreleases");
+        final String snapshotPolicy = repositoryPolicy(repository, true, "@snapshots", "");
+        return repository.getUrl() + "@id=" + repository.getId() + releasesPolicy + snapshotPolicy;
+    }
+
+    private String repositoryPolicy(
+            final RemoteRepository repository, final boolean snapshot, final String ifEnabled, final String ifDisabled
+                                   ) {
+        return repository.getPolicy(snapshot)
+                         .isEnabled() ? ifEnabled : ifDisabled;
     }
 
 }
