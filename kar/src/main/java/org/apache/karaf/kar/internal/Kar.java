@@ -115,7 +115,7 @@ public class Kar {
 
             ZipEntry entry = zipIs.getNextEntry();
             while (entry != null) {
-                if (entry.getName().startsWith("repository")) {
+                if (entry.getName().startsWith("repository/")) {
                     String path = entry.getName().substring("repository/".length());
                     File destFile = new File(repoDir, path);
                     extract(zipIs, entry, destFile);
@@ -128,8 +128,8 @@ public class Kar {
                     }
                 }
 
-                if (entry.getName().startsWith("resource")) {
-                    String path = entry.getName().substring("resource/".length());
+                if (entry.getName().startsWith("resources/")) {
+                    String path = entry.getName().substring("resources/".length());
                     File destFile = new File(resourceDir, path);
                     extract(zipIs, entry, destFile);
                 }

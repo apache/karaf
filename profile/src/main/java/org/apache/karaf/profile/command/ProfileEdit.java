@@ -210,7 +210,7 @@ public class ProfileEdit implements Action {
      * Adds or remove the specified features to the specified profile.
      */
     private void handleFeatures(ProfileBuilder builder, String[] features, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String feature : features) {
             if (delete) {
                 System.out.println("Deleting feature:" + feature + " from profile:" + profile.getId());
@@ -226,7 +226,7 @@ public class ProfileEdit implements Action {
      * Adds or remove the specified feature repositories to the specified profile.
      */
     private void handleFeatureRepositories(ProfileBuilder builder, String[] repositories, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String repositoryURI : repositories) {
             if (set) {
                 System.out.println("Adding feature repository:" + repositoryURI + " to profile:" + profile.getId());
@@ -246,7 +246,7 @@ public class ProfileEdit implements Action {
      * @param libPrefix The prefix of the lib.
      */
     private void handleLibraries(ProfileBuilder builder, String[] libs, Profile profile, String libType, String libPrefix) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String lib : libs) {
             if (set) {
                 System.out.println("Adding "+libType+":" + lib + " to profile:" + profile.getId());
@@ -264,7 +264,7 @@ public class ProfileEdit implements Action {
      * @param profile   The target profile.
      */
     private void handleBundles(ProfileBuilder builder, String[] bundles, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String bundle : bundles) {
             if (set) {
                 System.out.println("Adding bundle:" + bundle + " to profile:" + profile.getId());
@@ -282,7 +282,7 @@ public class ProfileEdit implements Action {
      * @param profile       The target profile.
      */
     private void handleOverrides(ProfileBuilder builder, String[] overrides, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String override : overrides) {
             if (set) {
                 System.out.println("Adding override:" + override + " to profile:" + profile.getId());
@@ -312,7 +312,7 @@ public class ProfileEdit implements Action {
             } else {
                 currentPid = pidProperty;
             }
-            Map<String, String> conf = getConfigurationFromBuilder(builder, currentPid);
+            Map<String, Object> conf = getConfigurationFromBuilder(builder, currentPid);
             
             // We only support import when a single pid is specified
             if (pidProperties.length == 1 && importPid) {
@@ -362,7 +362,7 @@ public class ProfileEdit implements Action {
      * @param profile               The target profile.
      */
     private void handleSystemProperties(ProfileBuilder builder, String[] systemProperties, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String systemProperty : systemProperties) {
             Map<String, String> configMap = extractConfigs(systemProperty);
             for (Map.Entry<String, String> configEntries : configMap.entrySet()) {
@@ -389,7 +389,7 @@ public class ProfileEdit implements Action {
      * @param profile               The target profile.
      */
     private void handleConfigProperties(ProfileBuilder builder, String[] configProperties, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String configProperty : configProperties) {
             Map<String, String> configMap = extractConfigs(configProperty);
             for (Map.Entry<String, String> configEntries : configMap.entrySet()) {
@@ -422,9 +422,9 @@ public class ProfileEdit implements Action {
         */
     }
 
-    public void updatedDelimitedList(Map<String, String> map, String key, String value, String delimiter, boolean set, boolean delete, boolean append, boolean remove) {
+    public void updatedDelimitedList(Map<String, Object> map, String key, String value, String delimiter, boolean set, boolean delete, boolean append, boolean remove) {
         if (append || remove) {
-            String oldValue = map.containsKey(key) ? map.get(key) : "";
+            String oldValue = map.containsKey(key) ? (String) map.get(key) : "";
             List<String> parts = new LinkedList<>(Arrays.asList(oldValue.split(delimiter)));
             //We need to remove any possible blanks.
             parts.remove("");
@@ -449,7 +449,7 @@ public class ProfileEdit implements Action {
         }
     }
 
-    private void updateConfig(Map<String, String> map, String key, String value, boolean set, boolean delete) {
+    private void updateConfig(Map<String, Object> map, String key, Object value, boolean set, boolean delete) {
         if (set) {
             map.put(key, value);
         } else if (delete) {
@@ -460,7 +460,7 @@ public class ProfileEdit implements Action {
     /**
      * Imports the pid to the target Map.
      */
-    private void importPidFromLocalConfigAdmin(String pid, Map<String, String> target) {
+    private void importPidFromLocalConfigAdmin(String pid, Map<String, Object> target) {
         try {
             Configuration[] configuration = configurationAdmin.listConfigurations("(service.pid=" + pid + ")");
             if (configuration != null && configuration.length > 0) {
@@ -580,7 +580,7 @@ public class ProfileEdit implements Action {
     }
         */
 
-    private Map<String, String> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
+    private Map<String, Object> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
         return builder.getConfiguration(pid);
     }
 

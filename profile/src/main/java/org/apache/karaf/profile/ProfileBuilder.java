@@ -57,13 +57,13 @@ public interface ProfileBuilder {
      * @param pid The configuration PID.
      * @return The copy of the configuration with the given PID.
      */
-    Map<String, String> getConfiguration(String pid);
+    Map<String, Object> getConfiguration(String pid);
     
-    ProfileBuilder addConfiguration(String pid, Map<String, String> config);
+    ProfileBuilder addConfiguration(String pid, Map<String, Object> config);
 
-    ProfileBuilder addConfiguration(String pid, String key, String value);
+    ProfileBuilder addConfiguration(String pid, String key, Object value);
 
-    ProfileBuilder setConfigurations(Map<String, Map<String, String>> configs);
+    ProfileBuilder setConfigurations(Map<String, Map<String, Object>> configs);
 
     ProfileBuilder deleteConfiguration(String pid);
 

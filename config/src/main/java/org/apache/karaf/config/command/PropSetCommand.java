@@ -33,7 +33,7 @@ public class PropSetCommand extends ConfigPropertyCommandSupport {
     String prop;
 
     @Argument(index = 1, name = "value", description = "The value of the property", required = true, multiValued = false)
-    String value;
+    Object value;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override

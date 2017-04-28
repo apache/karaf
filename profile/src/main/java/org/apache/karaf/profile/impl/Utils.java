@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.properties.TypedProperties;
 
 public final class Utils {
 
@@ -57,23 +58,33 @@ public final class Utils {
     }
 
 
-    public static byte[] toBytes(Properties source) {
+    public static byte[] toBytes(TypedProperties source) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            source.store(baos, null);
+            source.save(baos);
         } catch (IOException ex) {
             throw new IllegalArgumentException("Cannot store properties", ex);
         }
         return baos.toByteArray();
     }
 
-    public static byte[] toBytes(Map<String, String> source) {
+    public static byte[] toBytes(Properties source) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            source.save(baos);
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Cannot store properties", ex);
+        }
+        return baos.toByteArray();
+    }
+
+    public static byte[] toBytes(Map<String, Object> source) {
         return toBytes(toProperties(source));
     }
 
-    public static Properties toProperties(byte[] source)  {
+    public static TypedProperties toProperties(byte[] source)  {
         try {
-            Properties rc = new Properties(false);
+            TypedProperties rc = new TypedProperties(false);
             if (source != null) {
                 rc.load(new ByteArrayInputStream(source));
             }
@@ -83,17 +94,13 @@ public final class Utils {
         }
     }
 
-    public static Properties toProperties(Map<String, String> source) {
-        try {
-            if (source instanceof Properties) {
-                return (Properties) source;
-            }
-            Properties rc = new Properties(false);
-            rc.putAll(source);
-            return rc;
-        } catch (IOException ex) {
-            throw new IllegalArgumentException("Cannot load properties", ex);
+    public static TypedProperties toProperties(Map<String, Object> source) {
+        if (source instanceof TypedProperties) {
+            return (TypedProperties) source;
         }
+        TypedProperties rc = new TypedProperties(false);
+        rc.putAll(source);
+        return rc;
     }
 
     public static String stripSuffix(String value, String suffix) {

@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf</groupId>
     <artifactId>karaf</artifactId>
     <packaging>pom</packaging>
-    <version>4.1.2-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <name>Apache Karaf</name>
     <inceptionYear>2007</inceptionYear>
 
@@ -173,9 +173,9 @@
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
 
         <easymock.version>3.4</easymock.version>
-        <equinox.groupId>org.eclipse.tycho</equinox.groupId>
+        <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
-        <equinox.version>3.11.2.v20161107-1947</equinox.version>
+        <equinox.version>3.11.3</equinox.version>
         <bndlib.version>2.4.0</bndlib.version>
         <equinox.region.version>1.1.0.v20120522-1841</equinox.region.version>
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
@@ -184,7 +184,7 @@
         <felix.configadmin.version>1.8.14</felix.configadmin.version>
         <felix.connect.version>0.1.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
-        <felix.fileinstall.version>3.5.8</felix.fileinstall.version>
+        <felix.fileinstall.version>3.6.0-SNAPSHOT</felix.fileinstall.version>
         <felix.framework.version>5.6.2</felix.framework.version>
         <felix.framework.security.version>2.6.0</felix.framework.security.version>
         <felix.gogo.runtime.version>1.0.4</felix.gogo.runtime.version>
@@ -192,7 +192,7 @@
         <felix.httplite.version>0.1.5</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
         <felix.plugin.version>3.3.0</felix.plugin.version>
-        <felix.utils.version>1.9.0</felix.utils.version>
+        <felix.utils.version>1.10.0-SNAPSHOT</felix.utils.version>
         <felix.webconsole.version>4.3.0</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
         <felix.metatype.version>1.1.2</felix.metatype.version>
@@ -220,7 +220,7 @@
         <aries.jmx.blueprint.api.version>1.1.5</aries.jmx.blueprint.api.version>
         <aries.jmx.blueprint.core.version>1.1.5</aries.jmx.blueprint.core.version>
         <aries.jmx.whiteboard.version>1.1.5</aries.jmx.whiteboard.version>
-        <aries.jpa.version>2.6.0</aries.jpa.version>
+        <aries.jpa.version>2.6.1</aries.jpa.version>
         <aries.jpa.blueprint.aries.version>1.0.4</aries.jpa.blueprint.aries.version>
         <aries.jpa.api.version>1.0.2</aries.jpa.api.version>
         <aries.jpa.container.version>1.0.4</aries.jpa.container.version>
@@ -278,7 +278,7 @@
         <spring40.version>4.0.7.RELEASE_3</spring40.version>
         <spring41.version>4.1.9.RELEASE_1</spring41.version>
         <spring42.version>4.2.9.RELEASE_1</spring42.version>
-        <spring43.version>4.3.5.RELEASE_1</spring43.version>
+        <spring43.version>4.3.7.RELEASE_1</spring43.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
 
         <sshd.version>1.4.0</sshd.version>

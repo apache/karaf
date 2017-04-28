@@ -16,16 +16,14 @@
  */
 package org.apache.karaf.client;
 
+import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.properties.TypedProperties;
+import org.apache.karaf.util.config.PropertiesLoader;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ClientConfig {
 
@@ -46,31 +44,23 @@ public class ClientConfig {
     private String command;
     private boolean interactiveMode = false;
 
-    public ClientConfig(String[] args) throws IOException {
-        Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"), null);
-        Properties customCfg = loadProps(new File(System.getProperty("karaf.etc"), "custom.properties"), null);
-        
-        host = shellCfg.getProperty("sshHost", "localhost");
-        host = expandEnvVars(host);
-        String portString = shellCfg.getProperty("sshPort", "8101");
-        portString = expandEnvVars(portString);
-        
-        // if sshHost of sshPort properties contain a reference to another property (coming from 
-        // , we try to use the custom.properties value
-        if (host.contains("${")) {
-            host = replaceVariable(host, "localhost", customCfg);
-        }
+    private TypedProperties configuration;
+
+    public ClientConfig(String[] args) throws Exception {
+        File karafEtc = new File(System.getProperty("karaf.etc"));
+        PropertiesLoader.loadSystemProperties(new File(karafEtc, "system.properties"));
+        Properties configProps = PropertiesLoader.loadConfigProperties(new File(karafEtc, "config.properties"));
+        configuration = loadProps(new File(karafEtc, "org.apache.karaf.shell.cfg"), configProps);
+
+        host = getString("sshHost", "localhost");
         if (host.contains("0.0.0.0")) {
             host = "localhost";
         }
-        if (portString.contains("${")) {
-            portString = replaceVariable(portString, "8101", customCfg);
-        }
-        port = Integer.parseInt(portString);
-        level = Integer.parseInt(shellCfg.getProperty("logLevel", "0"));
+        port = getInt("sshPort", 8101);
+        level = getInt("logLevel", 0);
         retryAttempts = 0;
         retryDelay = 2;
-        idleTimeout = Long.parseLong(shellCfg.getProperty("sshIdleTimeout", "1800000"));
+        idleTimeout = getLong("sshIdleTimeout", 1800000L);
         batch = false;
         file = null;
         user = null;
@@ -171,8 +161,7 @@ public class ClientConfig {
         }
         command = commandBuilder.toString();
 
-        Map<String, String> usersCfg = new LinkedHashMap<>();
-        loadProps(new File(System.getProperty("karaf.etc") + "/users.properties"), usersCfg);
+        Map<String, String> usersCfg = PropertiesLoader.loadPropertiesFile(new File(karafEtc,"users.properties").toURI().toURL(), false);
         if (!usersCfg.isEmpty()) {
             Set<String> users = new LinkedHashSet<>();
             for (String user : usersCfg.keySet()) {
@@ -216,65 +205,50 @@ public class ClientConfig {
         System.exit(0);
     }
 
-    // tries a very basic variable substitution
-    private static String replaceVariable(String input, String defaultValue, Properties customCfg) {
+    private static TypedProperties loadProps(File file, Properties context) {
+        TypedProperties props = new TypedProperties((name, key, value) -> context.getProperty(value));
         try {
-            int indexOfDollar = input.indexOf('$');
-            int indexOfClosingBrace = input.indexOf('}', indexOfDollar + 1);
-            String varName = input.substring(indexOfDollar + 2, indexOfClosingBrace);
-            String varValue = customCfg.getProperty(varName, defaultValue);
-            return input.replace("${" + varName + "}", varValue);
+            props.load(file);
         } catch (Exception e) {
-            return input;
-        }
-    }
-
-    private static Properties loadProps(File file, final Map<String, String> additionalStorage) {
-        Properties props = new Properties() {
-            @Override
-            public synchronized Object put(Object key, Object value) {
-                if (additionalStorage != null) {
-                    additionalStorage.put((String) key, (String) value);
-                }
-                return super.put(key, value);
-            }
-        };
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream(file);
-            props.load(is);
-
-        } catch (Exception e) {
-                System.err.println("Warning: could not load properties from: " + file + ", Reason: " + e.getMessage());
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
+            System.err.println("Warning: could not load properties from: " + file + ": " + e);
         }
         return props;
     }
 
-    
-    private static String expandEnvVars(String text) {
-        Map<String, String> envMap = System.getenv();
-        String pattern = "\\$\\{([A-Za-z0-9]+)\\}";
-        Pattern expr = Pattern.compile(pattern);
-        Matcher matcher = expr.matcher(text);
-        while (matcher.find()) {
-            String envValue = envMap.get(matcher.group(1).toUpperCase());
-            if (envValue != null) {
-                envValue = envValue.replace("\\", "\\\\");
-                Pattern subexpr = Pattern.compile(Pattern.quote(matcher.group(0)));
-                text = subexpr.matcher(text).replaceAll(envValue);
+    protected int getInt(String key, int def) {
+        if (configuration != null) {
+            Object val = configuration.get(key);
+            if (val instanceof Number) {
+                return ((Number) val).intValue();
+            } else if (val != null) {
+                return Integer.parseInt(val.toString());
             }
         }
-        return text;
+        return def;
     }
-    
+
+    protected long getLong(String key, long def) {
+        if (configuration != null) {
+            Object val = configuration.get(key);
+            if (val instanceof Number) {
+                return ((Number) val).longValue();
+            } else if (val != null) {
+                return Long.parseLong(val.toString());
+            }
+        }
+        return def;
+    }
+
+    protected String getString(String key, String def) {
+        if (configuration != null) {
+            Object val = configuration.get(key);
+            if (val != null) {
+                return val.toString();
+            }
+        }
+        return def;
+    }
+
     public String getHost() {
         return host;
     }

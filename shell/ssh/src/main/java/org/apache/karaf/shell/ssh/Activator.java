@@ -138,20 +138,20 @@ public class Activator extends BaseActivator implements ManagedService {
     }
 
     protected SshServer createSshServer(SessionFactory sessionFactory) {
-        int sshPort           = getInt("sshPort", 8181);
-        String sshHost        = getString("sshHost", "0.0.0.0");
-        long sshIdleTimeout   = getLong("sshIdleTimeout", 1800000);
-        String sshRealm       = getString("sshRealm", "karaf");
-        String hostKey        = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
-        String hostKeyFormat  = getString("hostKeyFormat", "simple");
-        String authMethods    = getString("authMethods", "keyboard-interactive,password,publickey");
-        int keySize           = getInt("keySize", 4096);
-        String algorithm      = getString("algorithm", "RSA");
-        String macs           = getString("macs", "hmac-sha2-512,hmac-sha2-256,hmac-sha1");
-        String ciphers        = getString("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
-        String kexAlgorithms  = getString("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
-        String welcomeBanner  = getString("welcomeBanner", null);
-        String moduliUrl      = getString("moduli-url", null);
+        int sshPort            = getInt("sshPort", 8181);
+        String sshHost         = getString("sshHost", "0.0.0.0");
+        long sshIdleTimeout    = getLong("sshIdleTimeout", 1800000);
+        String sshRealm        = getString("sshRealm", "karaf");
+        String hostKey         = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
+        String hostKeyFormat   = getString("hostKeyFormat", "simple");
+        String[] authMethods   = getStringArray("authMethods", "keyboard-interactive,password,publickey");
+        int keySize            = getInt("keySize", 4096);
+        String algorithm       = getString("algorithm", "RSA");
+        String[] macs          = getStringArray("macs", "hmac-sha2-512,hmac-sha2-256,hmac-sha1");
+        String[] ciphers       = getStringArray("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
+        String[] kexAlgorithms = getStringArray("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
+        String welcomeBanner   = getString("welcomeBanner", null);
+        String moduliUrl       = getString("moduli-url", null);
 
         AbstractGeneratorHostKeyProvider keyPairProvider;
         if ("simple".equalsIgnoreCase(hostKeyFormat)) {

@@ -26,7 +26,7 @@ import static org.junit.Assert.assertThat;
 public class ClientConfigTest {
 
     @Test
-    public void testDefaultUser() throws IOException {
+    public void testDefaultUser() throws Exception {
 
         String etc = System.getProperty("karaf.etc");
 

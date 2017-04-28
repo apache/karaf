@@ -36,7 +36,7 @@ public class SshUtilsTest {
         // verify our default configuration...
         String ciphers = "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc";
 
-        List<NamedFactory<Cipher>> list = SshUtils.buildCiphers(ciphers);
+        List<NamedFactory<Cipher>> list = SshUtils.buildCiphers(ciphers.split(","));
 
         // verify that all configured ciphers are actually resolved...
         for (String cipher : ciphers.split(",")) {
@@ -59,7 +59,7 @@ public class SshUtilsTest {
         // verify our default configuration...
         String macs = "hmac-sha2-512,hmac-sha2-256,hmac-sha1";
 
-        List<NamedFactory<Mac>> list = SshUtils.buildMacs(macs);
+        List<NamedFactory<Mac>> list = SshUtils.buildMacs(macs.split(","));
 
         // verify that all configured HMACs are actually resolved...
         for (String mac : macs.split(",")) {
@@ -82,7 +82,7 @@ public class SshUtilsTest {
         // verify our default configuration...
         String kexAlgorithms = "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1";
 
-        List<NamedFactory<KeyExchange>> list = SshUtils.buildKexAlgorithms(kexAlgorithms);
+        List<NamedFactory<KeyExchange>> list = SshUtils.buildKexAlgorithms(kexAlgorithms.split(","));
 
         // verify that all configured key exchange algorithms are actually resolved...
         for (String kex : kexAlgorithms.split(",")) {

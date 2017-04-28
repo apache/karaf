@@ -17,6 +17,7 @@
 package org.apache.karaf.config.command;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import org.apache.karaf.config.command.completers.ConfigurationCompleter;
@@ -36,12 +37,12 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      "rawtypes", "unchecked"
     })
     protected Object doExecute() throws Exception {
-        Dictionary props = getEditedProps();
+        Dictionary<String, Object> props = getEditedProps();
         if (props == null && pid == null) {
             System.err.println("No configuration is being edited--run the edit command first");
         } else {
             if (props == null) {
-                props = new Properties();
+                props = new Hashtable<>();
             }
             propertyAction(props);
             if(requiresUpdate(pid)) {
@@ -82,8 +83,8 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      */
     @SuppressWarnings("rawtypes")
     @Override
-    protected Dictionary getEditedProps() throws Exception {
-        Dictionary props = this.configRepository.getConfigProperties(pid);
+    protected Dictionary<String, Object> getEditedProps() throws Exception {
+        Dictionary<String, Object> props = this.configRepository.getConfigProperties(pid);
         return (props != null) ? props : super.getEditedProps();
     }
 }

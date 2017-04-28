@@ -136,30 +136,42 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             }
         }
         // Install
+        Downloader downloader = manager.createDownloader();
         for (Config config : ((Feature) feature).getConfig()) {
-            Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
-            LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
-            if (!Files.exists(configFile)) {
-                Files.write(configFile, config.getValue().getBytes());
-            } else if (config.isAppend()) {
-                Files.write(configFile, config.getValue().getBytes(), StandardOpenOption.APPEND);
+            if (config.isExternal()) {
+                downloader.download(config.getValue().trim(), provider -> {
+                    Path input = provider.getFile().toPath();
+                    byte[] data = Files.readAllBytes(input);
+                    Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
+                    LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                    if (!Files.exists(configFile)) {
+                        Files.write(configFile, data);
+                    } else if (config.isAppend()) {
+                        Files.write(configFile, data, StandardOpenOption.APPEND);
+                    }
+                });
+            } else {
+                byte[] data = config.getValue().getBytes();
+                Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
+                LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                if (!Files.exists(configFile)) {
+                    Files.write(configFile, data);
+                } else if (config.isAppend()) {
+                    Files.write(configFile, data, StandardOpenOption.APPEND);
+                }
             }
         }
-        Downloader downloader = manager.createDownloader();
         for (final ConfigFile configFile : ((Feature) feature).getConfigfile()) {
-            downloader.download(configFile.getLocation(), new DownloadCallback() {
-                @Override
-                public void downloaded(StreamProvider provider) throws Exception {
-                    Path input = provider.getFile().toPath();
-                    String path = configFile.getFinalname();
-                    if (path.startsWith("/")) {
-                        path = path.substring(1);
-                    }
-                    path = substFinalName(path);
-                    Path output = homeDirectory.resolve(path);
-                    LOGGER.info("      adding config file: {}", path);
-                    Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
+            downloader.download(configFile.getLocation(), provider -> {
+                Path input = provider.getFile().toPath();
+                String path = configFile.getFinalname();
+                if (path.startsWith("/")) {
+                    path = path.substring(1);
                 }
+                path = substFinalName(path);
+                Path output = homeDirectory.resolve(path);
+                LOGGER.info("      adding config file: {}", path);
+                Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
             });
         }
         List<String> libraries = new ArrayList<>();

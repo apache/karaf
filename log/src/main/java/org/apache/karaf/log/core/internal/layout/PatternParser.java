@@ -480,6 +480,8 @@ public class PatternParser {
     public
     String convert(PaxLoggingEvent event) {
       String n = getFullyQualifiedName(event);
+      if (n == null)
+	    return null;
       if(precision <= 0)
 	return n;
       else {

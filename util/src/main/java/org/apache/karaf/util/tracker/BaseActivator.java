@@ -32,6 +32,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -226,6 +228,28 @@ public class BaseActivator implements BundleActivator, Runnable {
             }
         }
         return def;
+    }
+
+    protected String[] getStringArray(String key, String def) {
+        Object val = null;
+        if (configuration != null) {
+            val = configuration.get(key);
+        }
+        if (val == null) {
+            val = def;
+        }
+        if (val == null) {
+            return null;
+        }
+        Stream<String> s;
+        if (val instanceof String[]) {
+            return (String[]) val;
+        } else if (val instanceof Iterable) {
+            return StreamSupport.stream(((Iterable<?>) val).spliterator(), false)
+                    .map(Object::toString).toArray(String[]::new);
+        } else {
+            return val.toString().split(",");
+        }
     }
 
     protected void reconfigure() {

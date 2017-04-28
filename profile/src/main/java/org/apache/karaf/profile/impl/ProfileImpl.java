@@ -43,7 +43,7 @@ final class ProfileImpl implements Profile {
     private final Map<String, String> attributes;
     private final List<String> parents = new ArrayList<>();
     private final Map<String, byte[]> fileConfigurations = new HashMap<>();
-    private final Map<String, Map<String, String>> configurations = new HashMap<>();
+    private final Map<String, Map<String, Object>> configurations = new HashMap<>();
     private final boolean isOverlay;
     private int hash;
 
@@ -97,13 +97,13 @@ final class ProfileImpl implements Profile {
 
     private Map<String, String> getPrefixedMap(String prefix) {
         Map<String, String> map = new HashMap<>();
-        Map<String, String> agentConfig = configurations.get(Profile.INTERNAL_PID);
+        Map<String, Object> agentConfig = configurations.get(Profile.INTERNAL_PID);
         if (agentConfig != null) {
             int prefixLength = prefix.length();
-            for (Entry<String, String> entry : agentConfig.entrySet()) {
+            for (Entry<String, Object> entry : agentConfig.entrySet()) {
                 String key = entry.getKey();
                 if (key.startsWith(prefix)) {
-                    map.put(key.substring(prefixLength), entry.getValue());
+                    map.put(key.substring(prefixLength), entry.getValue().toString());
                 }
             }
         }
@@ -147,12 +147,16 @@ final class ProfileImpl implements Profile {
 
     @Override
     public boolean isAbstract() {
-        return Boolean.parseBoolean(getAttributes().get(ABSTRACT));
+        return parseBoolean(getAttributes().get(ABSTRACT));
     }
 
     @Override
     public boolean isHidden() {
-        return Boolean.parseBoolean(getAttributes().get(HIDDEN));
+        return parseBoolean(getAttributes().get(HIDDEN));
+    }
+
+    private Boolean parseBoolean(Object obj) {
+        return obj instanceof Boolean ? (Boolean) obj : Boolean.parseBoolean(obj.toString());
     }
 
     public boolean isOverlay() {
@@ -174,24 +178,24 @@ final class ProfileImpl implements Profile {
         return fileConfigurations.get(fileName);
     }
 
-    public Map<String, Map<String, String>> getConfigurations() {
+    public Map<String, Map<String, Object>> getConfigurations() {
         return Collections.unmodifiableMap(configurations);
     }
 
     @Override
-    public Map<String, String> getConfiguration(String pid) {
-        Map<String, String> config = configurations.get(pid);
-        config = config != null ? config : Collections.<String, String> emptyMap();
+    public Map<String, Object> getConfiguration(String pid) {
+        Map<String, Object> config = configurations.get(pid);
+        config = config != null ? config : Collections.emptyMap();
         return Collections.unmodifiableMap(config);
     }
 
     private List<String> getContainerConfigList(ConfigListType type) {
-        Map<String, String> containerProps = getConfiguration(Profile.INTERNAL_PID);
+        Map<String, Object> containerProps = getConfiguration(Profile.INTERNAL_PID);
         List<String> rc = new ArrayList<>();
         String prefix = type + ".";
-        for (Map.Entry<String, String> e : containerProps.entrySet()) {
+        for (Map.Entry<String, Object> e : containerProps.entrySet()) {
             if ((e.getKey()).startsWith(prefix)) {
-                rc.add(e.getValue());
+                rc.add(e.getValue().toString());
             }
         }
         return rc;
@@ -239,7 +243,7 @@ final class ProfileImpl implements Profile {
 
         private String value;
 
-        private ConfigListType(String value) {
+        ConfigListType(String value) {
             this.value = value;
         }
 

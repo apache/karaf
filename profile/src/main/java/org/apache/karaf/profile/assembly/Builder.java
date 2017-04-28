@@ -68,6 +68,7 @@ import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Conditional;
 import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
+import org.apache.karaf.features.internal.model.Content;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
@@ -564,10 +565,10 @@ public class Builder {
 
         manager = new CustomDownloadManager(resolver, executor, overallEffective, translatedUrls);
 
-        Hashtable<String, String> agentProps = new Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
-        final Map<String, String> properties = new HashMap<>();
-        properties.put("karaf.default.repository", "system");
-        InterpolationHelper.performSubstitution(agentProps, properties::get, false, false, true);
+//        Hashtable<String, String> agentProps = new Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
+//        final Map<String, String> properties = new HashMap<>();
+//        properties.put("karaf.default.repository", "system");
+//        InterpolationHelper.performSubstitution(agentProps, properties::get, false, false, true);
 
         //
         // Write config and system properties
@@ -906,29 +907,33 @@ public class Builder {
                     }
                 }
             }
-            // Install config files
-            for (ConfigFile configFile : feature.getConfigfile()) {
-                installArtifact(downloader, configFile.getLocation().trim());
-            }
-            for (Conditional cond : feature.getConditional()) {
-                for (ConfigFile configFile : cond.getConfigfile()) {
+            List<Content> contents = new ArrayList<>();
+            contents.add(feature);
+            contents.addAll(feature.getConditional());
+            for (Content content : contents) {
+                // Install config files
+                for (Config config : content.getConfig()) {
+                    if (config.isExternal()) {
+                        installArtifact(downloader, config.getValue().trim());
+                    }
+                }
+                for (ConfigFile configFile : content.getConfigfile()) {
                     installArtifact(downloader, configFile.getLocation().trim());
                 }
-            }
-            // Extract configs
-            for (Config config : feature.getConfig()) {
-                if (pidMatching(config.getName())) {
-                    Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
-                    LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
-                    Files.write(configFile, config.getValue().getBytes());
-                }
-            }
-            for (Conditional cond : feature.getConditional()) {
-                for (Config config : cond.getConfig()) {
+                // Extract configs
+                for (Config config : content.getConfig()) {
                     if (pidMatching(config.getName())) {
                         Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
                         LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
-                        Files.write(configFile, config.getValue().getBytes());
+                        if (config.isExternal()) {
+                            downloader.download(config.getValue().trim(), provider -> {
+                                synchronized (provider) {
+                                    Files.copy(provider.getFile().toPath(), configFile, StandardCopyOption.REPLACE_EXISTING);
+                                }
+                            });
+                        } else {
+                            Files.write(configFile, config.getValue().getBytes());
+                        }
                     }
                 }
             }
@@ -1224,18 +1229,15 @@ public class Builder {
                 // for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
                 location = location.substring(0, location.length() - 1);
             }
-            downloader.download(location, new DownloadCallback() {
-                @Override
-                public void downloaded(final StreamProvider provider) throws Exception {
-                    String uri = provider.getUrl();
-                    if (Blacklist.isBundleBlacklisted(blacklistedBundles, uri)) {
-                        throw new RuntimeException("Bundle " + uri + " is blacklisted");
-                    }
-                    Path path = pathFromProviderUrl(uri);
-                    synchronized (provider) {
-                        Files.createDirectories(path.getParent());
-                        Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                    }
+            downloader.download(location, provider -> {
+                String uri = provider.getUrl();
+                if (Blacklist.isBundleBlacklisted(blacklistedBundles, uri)) {
+                    throw new RuntimeException("Bundle " + uri + " is blacklisted");
+                }
+                Path path = pathFromProviderUrl(uri);
+                synchronized (provider) {
+                    Files.createDirectories(path.getParent());
+                    Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
                 }
             });
         } else {
@@ -1350,22 +1352,24 @@ public class Builder {
                     if (Blacklist.isBlacklisted(clausesRepos, url, TYPE_REPOSITORY)) {
                         return;
                     }
-                    if (install) {
-                        synchronized (provider) {
-                            Path path = systemDirectory.resolve(pathFromProviderUrl(url));
-                            Files.createDirectories(path.getParent());
-                            Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                        }
-                    }
-                    try (InputStream is = provider.open()) {
-                        Features featuresModel = JaxbUtil.unmarshal(url, is, false);
-                        if (blacklistPolicy == BlacklistPolicy.Discard) {
-                            Blacklist.blacklist(featuresModel, clauses);
-                        }
-                        synchronized (loaded) {
-                            loaded.put(provider.getUrl(), featuresModel);
-                            for (String innerRepository : featuresModel.getRepository()) {
-                                downloader.download(innerRepository, this);
+                    synchronized (loaded) {
+                        if (!loaded.containsKey(provider.getUrl())) {
+                            if (install) {
+                                synchronized (provider) {
+                                    Path path = pathFromProviderUrl(url);
+                                    Files.createDirectories(path.getParent());
+                                    Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+                                }
+                            }
+                            try (InputStream is = provider.open()) {
+                                Features featuresModel = JaxbUtil.unmarshal(url, is, false);
+                                if (blacklistPolicy == BlacklistPolicy.Discard) {
+                                    Blacklist.blacklist(featuresModel, clauses);
+                                }
+                                loaded.put(provider.getUrl(), featuresModel);
+                                for (String innerRepository : featuresModel.getRepository()) {
+                                    downloader.download(innerRepository, this);
+                                }
                             }
                         }
                     }

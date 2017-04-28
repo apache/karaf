@@ -159,12 +159,7 @@ public class CommandExtension implements Extension {
                 reg.register(entry.getValue());
             }
             for (final Map.Entry<Class, List> entry : state.getMultiServices().entrySet()) {
-                reg.register(new Callable() {
-                    @Override
-                    public Object call() throws Exception {
-                        return entry.getValue();
-                    }
-                }, entry.getKey());
+                reg.register((Callable) entry::getValue, entry.getKey());
             }
             for (Class clazz : classes) {
                 manager.register(clazz);
@@ -180,7 +175,8 @@ public class CommandExtension implements Extension {
         // Create trackers
         for (Class<?> cl = clazz; cl != Object.class; cl = cl.getSuperclass()) {
             for (Field field : cl.getDeclaredFields()) {
-                if (field.getAnnotation(Reference.class) != null) {
+                Reference ref = field.getAnnotation(Reference.class);
+                if (ref != null) {
                     GenericType type = new GenericType(field.getGenericType());
                     Class clazzRef = type.getRawClass() == List.class ? type.getActualTypeArgument(0).getRawClass() : type.getRawClass();
                     if (clazzRef != BundleContext.class
@@ -190,7 +186,7 @@ public class CommandExtension implements Extension {
                             && clazzRef != Registry.class
                             && clazzRef != SessionFactory.class
                             && !registry.hasService(clazzRef)) {
-                        track(type);
+                        track(type, ref.optional());
                     }
                 }
             }
@@ -199,13 +195,13 @@ public class CommandExtension implements Extension {
     }
 
     @SuppressWarnings("unchecked")
-    protected void track(final GenericType type) {
+    protected void track(final GenericType type, boolean optional) {
         if (type.getRawClass() == List.class) {
             final Class clazzRef = type.getActualTypeArgument(0).getRawClass();
-            tracker.track(clazzRef, true);
+            tracker.trackList(clazzRef);
         } else {
             final Class clazzRef = type.getRawClass();
-            tracker.track(clazzRef, false);
+            tracker.trackSingle(clazzRef, optional);
         }
     }
 

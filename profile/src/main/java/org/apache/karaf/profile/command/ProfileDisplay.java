@@ -85,18 +85,18 @@ public class ProfileDisplay implements Action {
             profile = profileService.getEffectiveProfile(profile);
         }
 
-        Map<String, Map<String, String>> configuration = new HashMap<>(profile.getConfigurations());
+        Map<String, Map<String, Object>> configuration = new HashMap<>(profile.getConfigurations());
         Map<String, byte[]> resources = profile.getFileConfigurations();
-        Map<String,String> agentConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
+        Map<String,Object> agentConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
         List<String> agentProperties = new ArrayList<String>();
         List<String> systemProperties = new ArrayList<String>();
         List<String> configProperties = new ArrayList<String>();
         List<String> otherResources = new ArrayList<String>();
-        for (Map.Entry<String, String> entry : agentConfiguration.entrySet()) {
+        for (Map.Entry<String, Object> entry : agentConfiguration.entrySet()) {
             String key = entry.getKey();
-            String value = entry.getValue();
-            if (value.contains(",")) {
-                value = "\t" + value.replace(",", ",\n\t\t");
+            Object value = entry.getValue();
+            if (value instanceof String && ((String) value).contains(",")) {
+                value = "\t" + ((String) value).replace(",", ",\n\t\t");
             }
 
             if (key.startsWith("system.")) {
@@ -149,10 +149,10 @@ public class ProfileDisplay implements Action {
 
         output.println("\nConfiguration details");
         output.println("----------------------------");
-        for (Map.Entry<String, Map<String, String>> cfg : configuration.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> cfg : configuration.entrySet()) {
             output.println("PID: " + cfg.getKey());
 
-            for (Map.Entry<String, String> values : cfg.getValue().entrySet()) {
+            for (Map.Entry<String, Object> values : cfg.getValue().entrySet()) {
                 output.println("  " + values.getKey() + " " + values.getValue());
             }
             output.println("\n");
