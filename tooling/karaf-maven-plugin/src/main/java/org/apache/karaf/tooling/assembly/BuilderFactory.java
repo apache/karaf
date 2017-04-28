@@ -280,16 +280,16 @@ class BuilderFactory {
                            .collect(Collectors.joining(","));
     }
 
-    private String[] toArray(List<String> strings) {
-        return strings.toArray(new String[strings.size()]);
-    }
-
     private String getRemoteRepositoryAsString(final RemoteRepository repository) {
         final String releases = repository.getPolicy(false)
                                           .isEnabled() ? "" : "@noreleases";
         final String snapshots = repository.getPolicy(true)
                                            .isEnabled() ? "@snapshots" : "";
         return repository.getUrl() + "@id=" + repository.getId() + releases + snapshots;
+    }
+
+    private String[] toArray(List<String> strings) {
+        return strings.toArray(new String[strings.size()]);
     }
 
 }
