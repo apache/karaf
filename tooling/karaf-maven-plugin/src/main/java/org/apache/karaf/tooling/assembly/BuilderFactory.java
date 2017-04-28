@@ -71,12 +71,6 @@ class BuilderFactory {
         // Loading kars and features repositories
         log.info("Loading kar and features repositories dependencies");
         artifactParser.parse(mojo);
-        if (mojo.getLibraries() != null) {
-            builder.libraries(mojo.getLibraries()
-                                  .toArray(new String[mojo.getLibraries()
-                                                          .size()]));
-        }
-
         return builder;
     }
 

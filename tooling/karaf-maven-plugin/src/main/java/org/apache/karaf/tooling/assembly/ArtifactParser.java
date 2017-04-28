@@ -132,6 +132,7 @@ class ArtifactParser {
                .features(toArray(installedFeatures))
                .bundles(toArray(artifactLists.getInstalledBundles()))
                .profiles(toArray(installedProfiles));
+        builder.libraries(toArray(mojo.getLibraries()));
     }
 
     private void addArtifactsToLists(final Collection<Artifact> artifacts, final ArtifactLists lists) {
