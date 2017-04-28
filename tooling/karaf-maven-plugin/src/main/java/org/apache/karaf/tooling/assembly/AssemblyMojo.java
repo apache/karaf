@@ -21,6 +21,7 @@ package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -259,15 +260,18 @@ public class AssemblyMojo extends MojoSupport {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            new AssemblyMojoExec(getLog(),
-                                 new BuilderFactory(getLog(), Builder.newInstance(), new MavenUriTranslator()),
-                                 new AssemblyOutfitter(this)
-            ).doExecute(this);
+            new AssemblyMojoExec(getLog(), getBuilderFactory(), new AssemblyOutfitter(this)).doExecute(this);
         } catch (MojoExecutionException | MojoFailureException e) {
             throw e;
         } catch (Exception e) {
             throw new MojoExecutionException("Unable to build assembly", e);
         }
+    }
+
+    private BuilderFactory getBuilderFactory() {
+        return new BuilderFactory(getLog(), Builder.newInstance(), new MavenUriTranslator(),
+                                   new ProfileEditsParser(new KarafPropertyInstructionsModelStaxReader())
+        );
     }
 
     File getSourceDirectory() {

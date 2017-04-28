@@ -1,6 +1,8 @@
 package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
+import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
@@ -28,6 +30,7 @@ import org.mockito.Spy;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -42,7 +45,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.isA;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -93,6 +98,9 @@ public class AssemblyMojoExecTest {
 
     private AssemblyOutfitter assemblyOutfitter;
 
+    @Mock
+    private KarafPropertyInstructionsModelStaxReader profileEditsReader;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -100,7 +108,8 @@ public class AssemblyMojoExecTest {
                    .generateAssembly();
         dependencyArtifacts = new HashSet<>();
         mojo = getAssemblyMojo();
-        builderFactory = new BuilderFactory(log, builder, new MavenUriTranslator());
+        builderFactory =
+                new BuilderFactory(log, builder, new MavenUriTranslator(), new ProfileEditsParser(profileEditsReader));
         assemblyOutfitter = new AssemblyOutfitter(mojo);
         execMojo = new AssemblyMojoExec(log, builderFactory, assemblyOutfitter);
         mojo.setConfig(new HashMap<>());
@@ -590,6 +599,8 @@ public class AssemblyMojoExecTest {
     @Test
     public void executeMojoWithPropertyFileEdits() throws Exception {
         //given
+        final KarafPropertyEdits edit = new KarafPropertyEdits();
+        given(profileEditsReader.read(any(InputStream.class), eq(true))).willReturn(edit);
         final String propertyFileEdits =
                 new File(resources.getBasedir(TEST_PROJECT), "property-file-edits").getAbsolutePath();
         mojo.setPropertyFileEdits(propertyFileEdits);
@@ -618,7 +629,8 @@ public class AssemblyMojoExecTest {
         final String propertyFileEdits = resources.getBasedir(TEST_PROJECT)
                                                   .getAbsolutePath();
         mojo.setPropertyFileEdits(propertyFileEdits);
-        exception.expect(FileNotFoundException.class);
+        exception.expect(RuntimeException.class);
+        exception.expectCause(isA(FileNotFoundException.class));
         //when
         execMojo.doExecute(mojo);
     }

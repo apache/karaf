@@ -1,16 +1,12 @@
 package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
-import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
-import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.repository.RemoteRepository;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -34,14 +30,18 @@ class BuilderFactory {
 
     private final MavenUriTranslator mavenUriTranslator;
 
-    private Map<String, Builder.Stage> scopeToStage = new HashMap<String, Builder.Stage>();
+    private final ProfileEditsParser profileEditsParser;
+
+    private final Map<String, Builder.Stage> scopeToStage = new HashMap<>();
 
     BuilderFactory(
-            final Log log, final Builder builder, final MavenUriTranslator mavenUriTranslator
+            final Log log, final Builder builder, final MavenUriTranslator mavenUriTranslator,
+            final ProfileEditsParser profileEditsParser
                   ) {
         this.log = log;
         this.builder = builder;
         this.mavenUriTranslator = mavenUriTranslator;
+        this.profileEditsParser = profileEditsParser;
         init();
     }
 
@@ -88,21 +88,9 @@ class BuilderFactory {
         if (mojo.getProfilesUri() != null) {
             builder.profilesUris(mojo.getProfilesUri());
         }
-
-        if (mojo.getPropertyFileEdits() != null) {
-            File file = new File(mojo.getPropertyFileEdits());
-            if (file.exists()) {
-                KarafPropertyEdits edits;
-                try (InputStream editsStream = new FileInputStream(mojo.getPropertyFileEdits())) {
-                    KarafPropertyInstructionsModelStaxReader kipmsr = new KarafPropertyInstructionsModelStaxReader();
-                    edits = kipmsr.read(editsStream, true);
-                }
-                builder.propertyEdits(edits);
-            }
-        }
+        profileEditsParser.parse(mojo)
+                          .ifPresent(builder::propertyEdits);
         builder.pidsToExtract(mojo.getPidsToExtract());
-
-
         builder.blacklistPolicy(mojo.getBlacklistPolicy());
         builder.blacklistBundles(mojo.getBlacklistedBundles());
         builder.blacklistFeatures(mojo.getBlacklistedFeatures());
