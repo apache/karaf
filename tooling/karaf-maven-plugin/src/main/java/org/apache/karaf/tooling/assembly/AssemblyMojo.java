@@ -269,8 +269,11 @@ public class AssemblyMojo extends MojoSupport {
     }
 
     private BuilderFactory getBuilderFactory() {
-        return new BuilderFactory(getLog(), Builder.newInstance(), new MavenUriTranslator(),
-                                   new ProfileEditsParser(new KarafPropertyInstructionsModelStaxReader())
+        final Builder builder = Builder.newInstance();
+        final MavenUriTranslator mavenUriTranslator = new MavenUriTranslator();
+        return new BuilderFactory(getLog(), builder, mavenUriTranslator,
+                                  new ProfileEditsParser(new KarafPropertyInstructionsModelStaxReader()),
+                                  new ArtifactParser(mavenUriTranslator, builder)
         );
     }
 
