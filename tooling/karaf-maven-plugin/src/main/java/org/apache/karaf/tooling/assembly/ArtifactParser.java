@@ -196,19 +196,22 @@ class ArtifactParser {
 
     private void startup(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> startupFeatures = mojo.getStartupFeatures();
-        if (!startupFeatures.contains(mojo.getFramework())) {
-            builder.features(Builder.Stage.Startup, mojo.getFramework());
-        }
+        addFrameworkFeatureIfMissing(mojo.getFramework(), startupFeatures);
         final List<String> startupProfiles = mojo.getStartupProfiles();
+        final boolean addAll =
+                startupFeatures.isEmpty() && startupProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault();
         builder.defaultStage(Builder.Stage.Startup)
                .kars(toArray(artifactLists.getStartupKars()))
-               .repositories(
-                       startupFeatures.isEmpty() && startupProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
-                       toArray(artifactLists.getStartupRepositories())
-                            )
+               .repositories(addAll, toArray(artifactLists.getStartupRepositories()))
                .features(toArray(startupFeatures))
                .bundles(toArray(artifactLists.getStartupBundles()))
                .profiles(toArray(startupProfiles));
+    }
+
+    private void addFrameworkFeatureIfMissing(final String framework, final List<String> startupFeatures) {
+        if (!startupFeatures.contains(framework)) {
+            builder.features(Builder.Stage.Startup, framework);
+        }
     }
 
     private String[] toArray(List<String> strings) {
