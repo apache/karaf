@@ -865,6 +865,10 @@ public class AssemblyMojoExecTest {
         //then
         then(builder).should(never())
                      .features(Builder.Stage.Startup, "framework");
+        then(builder).should()
+                     .kars(eq(Builder.Stage.Startup), eq(false),
+                           startsWith("mvn:org.apache.karaf.features/framework/")
+                          );
     }
 
     @Test
