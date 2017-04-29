@@ -58,6 +58,15 @@ class ArtifactParser {
     }
 
     void parse(final AssemblyMojo mojo) {
+        final ArtifactLists artifactLists = buildArtifactLists(mojo);
+        addFrameworkKar(mojo, artifactLists);
+        startup(mojo, artifactLists);
+        boot(mojo, artifactLists);
+        installed(mojo, artifactLists);
+        builder.libraries(toArray(mojo.getLibraries()));
+    }
+
+    private ArtifactLists buildArtifactLists(final AssemblyMojo mojo) {
         final ArtifactLists artifactLists = new ArtifactLists();
         artifactLists.addStartupBundles(mojo.getStartupBundles());
         artifactLists.addBootBundles(mojo.getBootBundles());
@@ -67,7 +76,10 @@ class ArtifactParser {
         artifactLists.addInstalledRepositories(mojo.getStartupRepositories());
         addArtifactsToLists(mojo.getProject()
                                 .getDependencyArtifacts(), artifactLists);
-        // Startup
+        return artifactLists;
+    }
+
+    private void addFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         boolean hasFrameworkKar = false;
         for (String kar : artifactLists.getStartupKars()) {
             if (kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(KARAF_FRAMEWORK_STATIC)) {
@@ -107,6 +119,9 @@ class ArtifactParser {
             }
             builder.kars(Builder.Stage.Startup, false, kar);
         }
+    }
+
+    private void startup(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> startupFeatures = mojo.getStartupFeatures();
         if (!startupFeatures.contains(mojo.getFramework())) {
             builder.features(Builder.Stage.Startup, mojo.getFramework());
@@ -121,7 +136,9 @@ class ArtifactParser {
                .features(toArray(startupFeatures))
                .bundles(toArray(artifactLists.getStartupBundles()))
                .profiles(toArray(startupProfiles));
-        // Boot
+    }
+
+    private void boot(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> bootFeatures = mojo.getBootFeatures();
         final List<String> bootProfiles = mojo.getBootProfiles();
         builder.defaultStage(Builder.Stage.Boot)
@@ -133,7 +150,9 @@ class ArtifactParser {
                .features(toArray(bootFeatures))
                .bundles(toArray(artifactLists.getBootBundles()))
                .profiles(toArray(bootProfiles));
-        // Installed
+    }
+
+    private void installed(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> installedFeatures = mojo.getInstalledFeatures();
         final List<String> installedProfiles = mojo.getInstalledProfiles();
         builder.defaultStage(Builder.Stage.Installed)
@@ -144,7 +163,6 @@ class ArtifactParser {
                .features(toArray(installedFeatures))
                .bundles(toArray(artifactLists.getInstalledBundles()))
                .profiles(toArray(installedProfiles));
-        builder.libraries(toArray(mojo.getLibraries()));
     }
 
     private void addArtifactsToLists(final Collection<Artifact> artifacts, final ArtifactLists lists) {
