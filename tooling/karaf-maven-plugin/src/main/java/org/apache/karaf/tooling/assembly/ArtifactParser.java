@@ -45,6 +45,8 @@ class ArtifactParser {
 
     private final Map<String, Builder.Stage> scopeToStage = new HashMap<>();
 
+    private final Map<String, String> frameworkUris = new HashMap<>();
+
     ArtifactParser(final MavenUriParser mavenUriParser, final Builder builder) {
         this.mavenUriParser = mavenUriParser;
         this.builder = builder;
@@ -55,6 +57,11 @@ class ArtifactParser {
         scopeToStage.put("compile", Builder.Stage.Startup);
         scopeToStage.put("runtime", Builder.Stage.Boot);
         scopeToStage.put("provided", Builder.Stage.Installed);
+
+        frameworkUris.put(FRAMEWORK, KARAF_FRAMEWORK_DYNAMIC);
+        frameworkUris.put(FRAMEWORK_LOGBACK, KARAF_FRAMEWORK_DYNAMIC);
+        frameworkUris.put(STATIC_FRAMEWORK, KARAF_FRAMEWORK_STATIC);
+        frameworkUris.put(STATIC_FRAMEWORK_LOGBACK, KARAF_FRAMEWORK_STATIC);
     }
 
     void parse(final AssemblyMojo mojo) {
@@ -144,19 +151,25 @@ class ArtifactParser {
     }
 
     private void addFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
-        final String kar = findSelectedFrameworkKar(mojo, artifactLists).orElseGet(() -> {
-            String realKarafVersion = getRealKarafVersion();
-            switch (mojo.getFramework()) {
-                case FRAMEWORK:
-                case FRAMEWORK_LOGBACK:
-                    return KARAF_FRAMEWORK_DYNAMIC + realKarafVersion + FRAMEWORK_SUFFIX;
-                case STATIC_FRAMEWORK:
-                case STATIC_FRAMEWORK_LOGBACK:
-                    return KARAF_FRAMEWORK_STATIC + realKarafVersion + FRAMEWORK_SUFFIX;
-            }
-            throw new IllegalArgumentException("Unsupported framework: " + mojo.getFramework());
-        });
+        final String kar =
+                findSelectedFrameworkKar(mojo, artifactLists).orElseGet(() -> getFrameworkKar(mojo.getFramework()));
         builder.kars(Builder.Stage.Startup, false, kar);
+    }
+
+    private String getFrameworkKar(final String framework) {
+        return Optional.ofNullable(frameworkUris.get(framework))
+                       .map(uri -> uri + (getRealKarafVersion() + FRAMEWORK_SUFFIX))
+                       .orElseThrow(() -> new IllegalArgumentException("Unsupported framework: " + framework));
+    }
+
+    private String getRealKarafVersion() {
+        Properties versions = new Properties();
+        try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
+            versions.load(is);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+        return versions.getProperty("karaf-version");
     }
 
     private Optional<String> findSelectedFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
@@ -170,16 +183,6 @@ class ArtifactParser {
             }
         }
         return Optional.empty();
-    }
-
-    private String getRealKarafVersion() {
-        Properties versions = new Properties();
-        try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
-            versions.load(is);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-        return versions.getProperty("karaf-version");
     }
 
     private void startup(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
