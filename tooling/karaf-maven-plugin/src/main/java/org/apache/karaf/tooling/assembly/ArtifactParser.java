@@ -81,13 +81,7 @@ class ArtifactParser {
 
     private void addFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final String kar = findSelectedFrameworkKar(mojo, artifactLists).orElseGet(() -> {
-            Properties versions = new Properties();
-            try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
-                versions.load(is);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-            String realKarafVersion = versions.getProperty("karaf-version");
+            String realKarafVersion = getRealKarafVersion();
             switch (mojo.getFramework()) {
                 case FRAMEWORK:
                 case FRAMEWORK_LOGBACK:
@@ -165,6 +159,16 @@ class ArtifactParser {
             }
         }
         return Optional.empty();
+    }
+
+    private String getRealKarafVersion() {
+        Properties versions = new Properties();
+        try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
+            versions.load(is);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+        return versions.getProperty("karaf-version");
     }
 
     private void addArtifactToList(
