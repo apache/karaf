@@ -80,19 +80,7 @@ class ArtifactParser {
     }
 
     private void addFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
-        boolean hasFrameworkKar = false;
-        for (String kar : artifactLists.getStartupKars()) {
-            if (kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(KARAF_FRAMEWORK_STATIC)) {
-                hasFrameworkKar = true;
-                artifactLists.removeStartupKar(kar);
-                if (mojo.getFramework() == null) {
-                    mojo.setFramework(kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) ? FRAMEWORK : STATIC_FRAMEWORK);
-                }
-                builder.kars(Builder.Stage.Startup, false, kar);
-                break;
-            }
-        }
-        if (!hasFrameworkKar) {
+        final String kar = findSelectedFrameworkKar(mojo, artifactLists).orElseGet(() -> {
             Properties versions = new Properties();
             try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
                 versions.load(is);
@@ -100,25 +88,17 @@ class ArtifactParser {
                 throw new IllegalStateException(e);
             }
             String realKarafVersion = versions.getProperty("karaf-version");
-            String kar;
             switch (mojo.getFramework()) {
                 case FRAMEWORK:
-                    kar = KARAF_FRAMEWORK_DYNAMIC + realKarafVersion + FRAMEWORK_SUFFIX;
-                    break;
                 case FRAMEWORK_LOGBACK:
-                    kar = KARAF_FRAMEWORK_DYNAMIC + realKarafVersion + FRAMEWORK_SUFFIX;
-                    break;
+                    return KARAF_FRAMEWORK_DYNAMIC + realKarafVersion + FRAMEWORK_SUFFIX;
                 case STATIC_FRAMEWORK:
-                    kar = KARAF_FRAMEWORK_STATIC + realKarafVersion + FRAMEWORK_SUFFIX;
-                    break;
                 case STATIC_FRAMEWORK_LOGBACK:
-                    kar = KARAF_FRAMEWORK_STATIC + realKarafVersion + FRAMEWORK_SUFFIX;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported framework: " + mojo.getFramework());
+                    return KARAF_FRAMEWORK_STATIC + realKarafVersion + FRAMEWORK_SUFFIX;
             }
-            builder.kars(Builder.Stage.Startup, false, kar);
-        }
+            throw new IllegalArgumentException("Unsupported framework: " + mojo.getFramework());
+        });
+        builder.kars(Builder.Stage.Startup, false, kar);
     }
 
     private void startup(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
@@ -172,6 +152,19 @@ class ArtifactParser {
     private void addArtifactsToLists(final Collection<Artifact> artifacts, final ArtifactLists lists) {
         artifacts.forEach(artifact -> Optional.ofNullable(scopeToStage.get(artifact.getScope()))
                                               .ifPresent(stage -> addArtifactToList(lists, artifact, stage)));
+    }
+
+    private Optional<String> findSelectedFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
+        for (String kar : artifactLists.getStartupKars()) {
+            if (kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(KARAF_FRAMEWORK_STATIC)) {
+                artifactLists.removeStartupKar(kar);
+                if (mojo.getFramework() == null) {
+                    mojo.setFramework(kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) ? FRAMEWORK : STATIC_FRAMEWORK);
+                }
+                return Optional.of(kar);
+            }
+        }
+        return Optional.empty();
     }
 
     private void addArtifactToList(
