@@ -221,12 +221,11 @@ class ArtifactParser {
     private void boot(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> bootFeatures = mojo.getBootFeatures();
         final List<String> bootProfiles = mojo.getBootProfiles();
+        final boolean addAll =
+                bootFeatures.isEmpty() && bootProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault();
         builder.defaultStage(Builder.Stage.Boot)
                .kars(toArray(artifactLists.getBootKars()))
-               .repositories(
-                       bootFeatures.isEmpty() && bootProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault(),
-                       toArray(artifactLists.getBootRepositories())
-                            )
+               .repositories(addAll, toArray(artifactLists.getBootRepositories()))
                .features(toArray(bootFeatures))
                .bundles(toArray(artifactLists.getBootBundles()))
                .profiles(toArray(bootProfiles));
@@ -235,11 +234,11 @@ class ArtifactParser {
     private void installed(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> installedFeatures = mojo.getInstalledFeatures();
         final List<String> installedProfiles = mojo.getInstalledProfiles();
+        final boolean addAll =
+                installedFeatures.isEmpty() && installedProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault();
         builder.defaultStage(Builder.Stage.Installed)
                .kars(toArray(artifactLists.getInstalledKars()))
-               .repositories(
-                       installedFeatures.isEmpty() && installedProfiles.isEmpty()
-                       && mojo.getInstallAllFeaturesByDefault(), toArray(artifactLists.getInstalledRepositories()))
+               .repositories(addAll, toArray(artifactLists.getInstalledRepositories()))
                .features(toArray(installedFeatures))
                .bundles(toArray(artifactLists.getInstalledBundles()))
                .profiles(toArray(installedProfiles));
