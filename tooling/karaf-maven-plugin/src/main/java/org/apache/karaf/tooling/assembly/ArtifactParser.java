@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Parse Artifacts.
@@ -87,15 +88,15 @@ class ArtifactParser {
     }
 
     private void addArtifactsToLists(final Collection<Artifact> artifacts, final ArtifactLists lists) {
-        artifacts.forEach(artifact -> Optional.ofNullable(scopeToStage.get(artifact.getScope()))
-                                              .ifPresent(stage -> addArtifactToList(lists, artifact, stage)));
+        groupArtifactsByStage(artifacts).forEach((key, value) -> addArtifactsToStageLists(key, value, lists));
     }
 
-    private void addArtifactToList(
-            final ArtifactLists lists, final Artifact artifact, final Builder.Stage stage
-                                  ) {
-        getTargetType(artifact).ifPresent(type -> getLoadArtifactHandlers(lists, stage).get(type)
-                                                                                       .accept(artifact));
+    private void addArtifactsToStageLists(
+            final Builder.Stage stage, final List<Artifact> artifacts, final ArtifactLists lists
+                                         ) {
+        final Map<String, Consumer<Artifact>> handlers = getLoadArtifactHandlers(lists, stage);
+        artifacts.forEach(artifact -> getTargetType(artifact).ifPresent(type -> handlers.get(type)
+                                                                                        .accept(artifact)));
     }
 
     private Optional<String> getTargetType(final Artifact artifact) {
@@ -148,6 +149,12 @@ class ArtifactParser {
         return (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupBundles(), lists.getBootBundles(),
                                                     lists.getInstalledBundles()
                                                    );
+    }
+
+    private Map<Builder.Stage, List<Artifact>> groupArtifactsByStage(final Collection<Artifact> artifacts) {
+        return artifacts.stream()
+                        .filter(artifact -> scopeToStage.get(artifact.getScope()) != null)
+                        .collect(Collectors.groupingBy(this::getStage, Collectors.toList()));
     }
 
     private void addFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
@@ -242,6 +249,17 @@ class ArtifactParser {
                .features(toArray(installedFeatures))
                .bundles(toArray(artifactLists.getInstalledBundles()))
                .profiles(toArray(installedProfiles));
+    }
+
+    private Builder.Stage getStage(final Artifact artifact) {
+        return scopeToStage.get(artifact.getScope());
+    }
+
+    private void addArtifactToList(
+            final ArtifactLists lists, final Artifact artifact, final Builder.Stage stage
+                                  ) {
+        getTargetType(artifact).ifPresent(type -> getLoadArtifactHandlers(lists, stage).get(type)
+                                                                                       .accept(artifact));
     }
 
     private boolean isFrameworkUri(final String kar) {
