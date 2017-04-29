@@ -165,13 +165,13 @@ class ArtifactParser {
     }
 
     private String getRealKarafVersion() {
-        Properties versions = new Properties();
         try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
+            Properties versions = new Properties();
             versions.load(is);
+            return versions.getProperty("karaf-version");
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        return versions.getProperty("karaf-version");
     }
 
     private Optional<String> findSelectedFrameworkKar(final ArtifactLists artifactLists) {
