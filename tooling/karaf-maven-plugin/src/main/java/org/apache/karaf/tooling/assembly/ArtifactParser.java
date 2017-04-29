@@ -152,7 +152,9 @@ class ArtifactParser {
 
     private void addFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final String kar =
-                findSelectedFrameworkKar(mojo, artifactLists).orElseGet(() -> getFrameworkKar(mojo.getFramework()));
+                findSelectedFrameworkKar(artifactLists).orElseGet(() -> getFrameworkKar(mojo.getFramework()));
+        artifactLists.removeStartupKar(kar);
+        setFrameworkIfMissing(mojo, kar);
         builder.kars(Builder.Stage.Startup, false, kar);
     }
 
@@ -172,17 +174,25 @@ class ArtifactParser {
         return versions.getProperty("karaf-version");
     }
 
-    private Optional<String> findSelectedFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
-        for (String kar : artifactLists.getStartupKars()) {
-            if (kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(KARAF_FRAMEWORK_STATIC)) {
-                artifactLists.removeStartupKar(kar);
-                if (mojo.getFramework() == null) {
-                    mojo.setFramework(kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) ? FRAMEWORK : STATIC_FRAMEWORK);
-                }
-                return Optional.of(kar);
-            }
+    private Optional<String> findSelectedFrameworkKar(final ArtifactLists artifactLists) {
+        return artifactLists.getStartupKars()
+                            .stream()
+                            .filter(kar -> kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(
+                                    KARAF_FRAMEWORK_STATIC))
+                            .findAny();
+    }
+
+    private void setFrameworkIfMissing(final AssemblyMojo mojo, final String kar) {
+        if (mojo.getFramework() == null) {
+            mojo.setFramework(getFrameworkFromUri(kar));
         }
-        return Optional.empty();
+    }
+
+    private String getFrameworkFromUri(final String kar) {
+        if (kar.startsWith(KARAF_FRAMEWORK_DYNAMIC)) {
+            return FRAMEWORK;
+        }
+        return STATIC_FRAMEWORK;
     }
 
     private void startup(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
