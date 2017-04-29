@@ -165,6 +165,10 @@ class ArtifactParser {
                .profiles(toArray(installedProfiles));
     }
 
+    private String[] toArray(List<String> strings) {
+        return strings.toArray(new String[strings.size()]);
+    }
+
     private void addArtifactsToLists(final Collection<Artifact> artifacts, final ArtifactLists lists) {
         artifacts.forEach(artifact -> Optional.ofNullable(scopeToStage.get(artifact.getScope()))
                                               .ifPresent(stage -> addArtifactToList(lists, artifact, stage)));
@@ -175,46 +179,6 @@ class ArtifactParser {
                                   ) {
         getTargetType(artifact).ifPresent(type -> getLoadArtifactHandlers(lists, stage).get(type)
                                                                                        .accept(artifact));
-    }
-
-    private Map<String, Consumer<Artifact>> getLoadArtifactHandlers(
-            final ArtifactLists lists, final Builder.Stage stage
-                                                                   ) {
-        final Map<String, Consumer<Artifact>> loaders = new HashMap<>(3);
-        loaders.put(TYPE_KAR, karArtifactLoadHandler(lists, stage));
-        loaders.put(TYPE_REPOSITORY, repositoryArtifactLoadHandler(lists, stage));
-        loaders.put(TYPE_BUNDLE, bundleArtifactLoadHandler(lists, stage));
-        return Collections.unmodifiableMap(loaders);
-    }
-
-    private Consumer<Artifact> bundleArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
-        return (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupBundles(), lists.getBootBundles(),
-                                                    lists.getInstalledBundles()
-                                                   );
-    }
-
-    private Consumer<Artifact> repositoryArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
-        return (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupRepositories(),
-                                                    lists.getBootRepositories(), lists.getInstalledRepositories()
-                                                   );
-    }
-
-    private Consumer<Artifact> karArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
-        return (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupKars(), lists.getBootKars(),
-                                                    lists.getInstalledKars()
-                                                   );
-    }
-
-    private void addArtifactToStageList(
-            final Builder.Stage stage, final Artifact artifact, final List<String> startup, final List<String> boot,
-            final List<String> installed
-                                       ) {
-        final Map<Builder.Stage, List<String>> listByStage = new HashMap<>();
-        listByStage.put(Builder.Stage.Startup, startup);
-        listByStage.put(Builder.Stage.Boot, boot);
-        listByStage.put(Builder.Stage.Installed, installed);
-        Optional.ofNullable(listByStage.get(stage))
-                .ifPresent(list -> list.add(mavenUriParser.artifactToMvnUri(artifact)));
     }
 
     private Optional<String> getTargetType(final Artifact artifact) {
@@ -229,8 +193,44 @@ class ArtifactParser {
         return Optional.ofNullable(type);
     }
 
-    private String[] toArray(List<String> strings) {
-        return strings.toArray(new String[strings.size()]);
+    private Map<String, Consumer<Artifact>> getLoadArtifactHandlers(
+            final ArtifactLists lists, final Builder.Stage stage
+                                                                   ) {
+        final Map<String, Consumer<Artifact>> loaders = new HashMap<>(3);
+        loaders.put(TYPE_KAR, karArtifactLoadHandler(lists, stage));
+        loaders.put(TYPE_REPOSITORY, repositoryArtifactLoadHandler(lists, stage));
+        loaders.put(TYPE_BUNDLE, bundleArtifactLoadHandler(lists, stage));
+        return Collections.unmodifiableMap(loaders);
+    }
+
+    private Consumer<Artifact> karArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
+        return (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupKars(), lists.getBootKars(),
+                                                    lists.getInstalledKars()
+                                                   );
+    }
+
+    private Consumer<Artifact> repositoryArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
+        return (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupRepositories(),
+                                                    lists.getBootRepositories(), lists.getInstalledRepositories()
+                                                   );
+    }
+
+    private Consumer<Artifact> bundleArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
+        return (artifact) -> addArtifactToStageList(stage, artifact, lists.getStartupBundles(), lists.getBootBundles(),
+                                                    lists.getInstalledBundles()
+                                                   );
+    }
+
+    private void addArtifactToStageList(
+            final Builder.Stage stage, final Artifact artifact, final List<String> startup, final List<String> boot,
+            final List<String> installed
+                                       ) {
+        final Map<Builder.Stage, List<String>> listByStage = new HashMap<>();
+        listByStage.put(Builder.Stage.Startup, startup);
+        listByStage.put(Builder.Stage.Boot, boot);
+        listByStage.put(Builder.Stage.Installed, installed);
+        Optional.ofNullable(listByStage.get(stage))
+                .ifPresent(list -> list.add(mavenUriParser.artifactToMvnUri(artifact)));
     }
 
 }
