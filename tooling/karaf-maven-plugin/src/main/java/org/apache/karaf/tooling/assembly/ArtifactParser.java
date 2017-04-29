@@ -262,13 +262,6 @@ class ArtifactParser {
         return scopeToStage.get(artifact.getScope());
     }
 
-    private void addArtifactToList(
-            final ArtifactLists lists, final Artifact artifact, final Builder.Stage stage
-                                  ) {
-        getTargetType(artifact).ifPresent(type -> getLoadArtifactHandlers(lists, stage).get(type)
-                                                                                       .accept(artifact));
-    }
-
     private boolean isFrameworkUri(final String kar) {
         return kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(KARAF_FRAMEWORK_STATIC);
     }
