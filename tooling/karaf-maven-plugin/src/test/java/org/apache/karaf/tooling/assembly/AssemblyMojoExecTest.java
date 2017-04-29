@@ -53,6 +53,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -118,6 +119,66 @@ public class AssemblyMojoExecTest {
         mojo.setSystem(new HashMap<>());
     }
 
+    private AssemblyMojo getAssemblyMojo() throws Exception {
+        final File baseDir = resources.getBasedir(TEST_PROJECT);
+        final File pom = new File(baseDir, "pom.xml");
+        final MavenProject mavenProject = getMavenProject(pom);
+
+        final AssemblyMojo assemblyMojo = (AssemblyMojo) mojoRule.lookupMojo("assembly", pom);
+        assemblyMojo.setLog(log);
+        assemblyMojo.setProject(mavenProject);
+        assemblyMojo.setMavenSession(getMavenSession(mavenProject));
+        assemblyMojo.setLocalRepo(getLocalRepository(baseDir));
+        assemblyMojo.setWorkDirectory(new File(baseDir, "assembly"));
+        assemblyMojo.setSourceDirectory(new File(baseDir, "source"));
+        assemblyMojo.setFramework("framework");
+        assemblyMojo.setJavase("1.8");
+        assemblyMojo.setStartupRepositories(new ArrayList<>());
+        assemblyMojo.setBootRepositories(new ArrayList<>());
+        assemblyMojo.setInstalledRepositories(new ArrayList<>());
+        assemblyMojo.setTranslatedUrls(new HashMap<>());
+        return assemblyMojo;
+    }
+
+    private MavenSession getMavenSession(final MavenProject mavenProject) {
+        return mojoRule.newMavenSession(mavenProject);
+    }
+
+    private ArtifactRepository getLocalRepository(final File baseDir) {
+        return new StubArtifactRepository(baseDir.getAbsolutePath());
+    }
+
+    private MavenProject getMavenProject(final File pom) throws IOException {
+        final MavenProject mavenProject = new MavenProject();
+        mavenProject.setFile(pom);
+        mavenProject.setArtifact(getProjectArtifact());
+        mavenProject.setDependencyArtifacts(dependencyArtifacts);
+        mavenProject.setRemoteArtifactRepositories(getArtifactRepositories());
+        return mavenProject;
+    }
+
+    private DefaultArtifact getProjectArtifact() throws IOException {
+        final String groupId = "org.apache";
+        final String artifactId = TEST_PROJECT;
+        final String version = "0.1.0";
+        final String compile = "compile";
+        final String type = "jar";
+        final String classifier = "";
+        final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
+        final DefaultArtifact defaultArtifact =
+                new DefaultArtifact(groupId, artifactId, version, compile, type, classifier, artifactHandler);
+        defaultArtifact.setFile(new File(resources.getBasedir(TEST_PROJECT), "artifact-file"));
+        return defaultArtifact;
+    }
+
+    private List<ArtifactRepository> getArtifactRepositories() {
+        final ArtifactRepository artifactRepository = new MavenArtifactRepository();
+        artifactRepository.setId("default-id");
+        artifactRepository.setUrl("default-url");
+        artifactRepository.setLayout(new DefaultRepositoryLayout());
+        return Collections.singletonList(artifactRepository);
+    }
+
     @Test
     public void shouldExecuteMojoForFramework() throws Exception {
         //given
@@ -127,6 +188,46 @@ public class AssemblyMojoExecTest {
         executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
         //then
         assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
+    }
+
+    private void executeMojoCheckingForFrameworkKar(final String framework, final String expectedFrameworkKar)
+            throws Exception {
+        //given
+        mojo.setFramework(framework);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        assertStageKarsAdded(Builder.Stage.Startup, new String[]{expectedFrameworkKar}, 2);
+    }
+
+    private void assertStageKarsAdded(final Builder.Stage stage, final String[] kars, final int calls) {
+        // convert plain mvn urls into regex patterns
+        final List<Pattern> patterns = Arrays.stream(kars)
+                                             .map(pattern -> "^" + pattern + "$")
+                                             .map(pattern -> pattern.replace(".", "\\."))
+                                             .map(pattern -> pattern.replace("WILDCARD", ".*"))
+                                             .map(Pattern::compile)
+                                             .collect(Collectors.toList());
+        stringArgumentCaptor.getAllValues()
+                            .clear();
+        then(builder).should(times(calls))
+                     .kars(eq(stage), anyBoolean(), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).hasSize(kars.length);
+        assertThat(stringArgumentCaptor.getAllValues()
+                                       .stream()
+                                       .filter(kar -> patterns.stream()
+                                                              .anyMatch(pattern -> pattern.matcher(kar)
+                                                                                          .matches()))
+                                       .collect(Collectors.toList())).hasSize(kars.length);
+    }
+
+    private void assertStageFeaturesAdded(final Builder.Stage stage, final String[] features, final int calls) {
+        stringArgumentCaptor.getAllValues()
+                            .clear();
+        then(builder).should(times(calls))
+                     .features(eq(stage), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).as("Add features to Stage " + stage)
+                                                       .containsExactlyInAnyOrder(features);
     }
 
     @Test
@@ -160,16 +261,6 @@ public class AssemblyMojoExecTest {
         executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
         //then
         assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
-    }
-
-    private void executeMojoCheckingForFrameworkKar(final String framework, final String expectedFrameworkKar)
-            throws Exception {
-        //given
-        mojo.setFramework(framework);
-        //when
-        execMojo.doExecute(mojo);
-        //then
-        assertStageKarsAdded(Builder.Stage.Startup, new String[]{expectedFrameworkKar}, 2);
     }
 
     @Test
@@ -232,6 +323,18 @@ public class AssemblyMojoExecTest {
         assertStageKarsAdded(Builder.Stage.Startup, new String[]{DEFAULT_FRAMEWORK_KAR, expected}, 2);
     }
 
+    private DefaultArtifact getDependency(final String scope, final String type, final String classifier)
+            throws IOException {
+        final String groupId = "org.apache";
+        final String artifactId = String.format("test-%s-%s-%s", scope, type, classifier == null ? "" : classifier);
+        final String version = "0.1.0";
+        final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
+        final DefaultArtifact artifact =
+                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        artifact.setFile(new File(resources.getBasedir(TEST_PROJECT), artifactId));
+        return artifact;
+    }
+
     @Test
     public void executeMojoWithRuntimeKarDependency() throws Exception {
         //given
@@ -263,6 +366,15 @@ public class AssemblyMojoExecTest {
         execMojo.doExecute(mojo);
         //then
         assertBundlesAdded(new String[]{expected});
+    }
+
+    private void assertBundlesAdded(final String[] bundles) {
+        stringArgumentCaptor.getAllValues()
+                            .clear();
+        then(builder).should(times(3))
+                     .bundles(stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).as("Add bundles")
+                                                       .containsExactlyInAnyOrder(bundles);
     }
 
     @Test
@@ -317,6 +429,15 @@ public class AssemblyMojoExecTest {
         execMojo.doExecute(mojo);
         //then
         assertStageRepoAdded(Builder.Stage.Startup, new String[]{expected});
+    }
+
+    private void assertStageRepoAdded(final Builder.Stage stage, final String[] repos) {
+        stringArgumentCaptor.getAllValues()
+                            .clear();
+        then(builder).should()
+                     .repositories(eq(stage), anyBoolean(), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).as("Add repositories to Stage " + stage)
+                                                       .containsExactlyInAnyOrder(repos);
     }
 
     @Test
@@ -392,15 +513,6 @@ public class AssemblyMojoExecTest {
                                                        .containsExactlyInAnyOrder(profiles);
     }
 
-    private void assertBundlesAdded(final String[] bundles) {
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(3))
-                     .bundles(stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add bundles")
-                                                       .containsExactlyInAnyOrder(bundles);
-    }
-
     private void assertFeaturesAdded(final String[] features) {
         stringArgumentCaptor.getAllValues()
                             .clear();
@@ -408,117 +520,6 @@ public class AssemblyMojoExecTest {
                      .features(stringArgumentCaptor.capture());
         assertThat(stringArgumentCaptor.getAllValues()).as("Add features")
                                                        .containsExactlyInAnyOrder(features);
-    }
-
-    private void assertStageFeaturesAdded(final Builder.Stage stage, final String[] features, final int calls) {
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(calls))
-                     .features(eq(stage), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add features to Stage " + stage)
-                                                       .containsExactlyInAnyOrder(features);
-    }
-
-    private void assertStageRepoAdded(final Builder.Stage stage, final String[] repos) {
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should()
-                     .repositories(eq(stage), anyBoolean(), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add repositories to Stage " + stage)
-                                                       .containsExactlyInAnyOrder(repos);
-    }
-
-    private void assertStageKarsAdded(final Builder.Stage stage, final String[] kars, final int calls) {
-        // convert plain mvn urls into regex patterns
-        final List<Pattern> patterns = Arrays.stream(kars)
-                                             .map(pattern -> "^" + pattern + "$")
-                                             .map(pattern -> pattern.replace(".", "\\."))
-                                             .map(pattern -> pattern.replace("WILDCARD", ".*"))
-                                             .map(Pattern::compile)
-                                             .collect(Collectors.toList());
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(calls))
-                     .kars(eq(stage), anyBoolean(), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).hasSize(kars.length);
-        assertThat(stringArgumentCaptor.getAllValues()
-                                       .stream()
-                                       .filter(kar -> patterns.stream()
-                                                              .anyMatch(pattern -> pattern.matcher(kar)
-                                                                                          .matches()))
-                                       .collect(Collectors.toList())).hasSize(kars.length);
-    }
-
-    private DefaultArtifact getDependency(final String scope, final String type, final String classifier)
-            throws IOException {
-        final String groupId = "org.apache";
-        final String artifactId = String.format("test-%s-%s-%s", scope, type, classifier == null ? "" : classifier);
-        final String version = "0.1.0";
-        final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
-        final DefaultArtifact artifact =
-                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
-        artifact.setFile(new File(resources.getBasedir(TEST_PROJECT), artifactId));
-        return artifact;
-    }
-
-    private AssemblyMojo getAssemblyMojo() throws Exception {
-        final File baseDir = resources.getBasedir(TEST_PROJECT);
-        final File pom = new File(baseDir, "pom.xml");
-        final MavenProject mavenProject = getMavenProject(pom);
-
-        final AssemblyMojo assemblyMojo = (AssemblyMojo) mojoRule.lookupMojo("assembly", pom);
-        assemblyMojo.setLog(log);
-        assemblyMojo.setProject(mavenProject);
-        assemblyMojo.setMavenSession(getMavenSession(mavenProject));
-        assemblyMojo.setLocalRepo(getLocalRepository(baseDir));
-        assemblyMojo.setWorkDirectory(new File(baseDir, "assembly"));
-        assemblyMojo.setSourceDirectory(new File(baseDir, "source"));
-        assemblyMojo.setFramework("framework");
-        assemblyMojo.setJavase("1.8");
-        assemblyMojo.setStartupRepositories(new ArrayList<>());
-        assemblyMojo.setBootRepositories(new ArrayList<>());
-        assemblyMojo.setInstalledRepositories(new ArrayList<>());
-        assemblyMojo.setTranslatedUrls(new HashMap<>());
-        return assemblyMojo;
-    }
-
-    private MavenSession getMavenSession(final MavenProject mavenProject) {
-        return mojoRule.newMavenSession(mavenProject);
-    }
-
-    private ArtifactRepository getLocalRepository(final File baseDir) {
-        return new StubArtifactRepository(baseDir.getAbsolutePath());
-    }
-
-    private MavenProject getMavenProject(final File pom) throws IOException {
-        final MavenProject mavenProject = new MavenProject();
-        mavenProject.setFile(pom);
-        mavenProject.setArtifact(getProjectArtifact());
-        mavenProject.setDependencyArtifacts(dependencyArtifacts);
-        mavenProject.setRemoteArtifactRepositories(getArtifactRepositories());
-        return mavenProject;
-    }
-
-    private DefaultArtifact getProjectArtifact() throws IOException {
-        final String groupId = "org.apache";
-        final String artifactId = TEST_PROJECT;
-        final String version = "0.1.0";
-        final String compile = "compile";
-        final String type = "jar";
-        final String classifier = "";
-        final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
-        final DefaultArtifact defaultArtifact =
-                new DefaultArtifact(groupId, artifactId, version, compile, type, classifier, artifactHandler);
-        defaultArtifact.setFile(new File(resources.getBasedir(TEST_PROJECT), "artifact-file"));
-        return defaultArtifact;
-    }
-
-    private List<ArtifactRepository> getArtifactRepositories() {
-        final ArtifactRepository artifactRepository = new MavenArtifactRepository();
-        artifactRepository.setId("default-id");
-        artifactRepository.setUrl("default-url");
-        artifactRepository.setLayout(new DefaultRepositoryLayout());
-        return Collections.singletonList(artifactRepository);
     }
 
     @Test
@@ -857,7 +858,73 @@ public class AssemblyMojoExecTest {
     }
 
     @Test
-    public void executeMojoWhenStartupFeaturesIncludesFrameworkDoNotAddInjectAsMandatory() throws Exception {
+    public void executeMojoKarCompileDependencyIsAStartupKar() throws Exception {
+        //given
+        final String groupId = "org.apache.karaf.features";
+        final String artifactId = "test";
+        final String version = "version";
+        final String scope = "compile";
+        final String type = "kar";
+        final String classifier = "";
+        final DefaultArtifactHandlerStub artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
+        final DefaultArtifact dependency =
+                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        dependencyArtifacts.add(dependency);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .kars(eq(Builder.Stage.Startup), eq(true), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+                String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
+    }
+
+    @Test
+    public void executeMojoKarRuntimeDependencyIsABootKar() throws Exception {
+        //given
+        final String groupId = "org.apache.karaf.features";
+        final String artifactId = "test";
+        final String version = "version";
+        final String scope = "runtime";
+        final String type = "kar";
+        final String classifier = "";
+        final DefaultArtifactHandlerStub artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
+        final DefaultArtifact dependency =
+                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        dependencyArtifacts.add(dependency);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .kars(eq(Builder.Stage.Boot), eq(true), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+                String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
+    }
+
+    @Test
+    public void executeMojoKarProvidedDependencyIsAnInstalledKar() throws Exception {
+        //given
+        final String groupId = "org.apache.karaf.features";
+        final String artifactId = "test";
+        final String version = "version";
+        final String scope = "provided";
+        final String type = "kar";
+        final String classifier = "";
+        final DefaultArtifactHandlerStub artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
+        final DefaultArtifact dependency =
+                new DefaultArtifact(groupId, artifactId, version, scope, type, classifier, artifactHandler);
+        dependencyArtifacts.add(dependency);
+        //when
+        execMojo.doExecute(mojo);
+        //then
+        then(builder).should()
+                     .kars(eq(Builder.Stage.Installed), eq(true), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).contains(
+                String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
+    }
+
+    @Test
+    public void executeMojoWhenStartupFeaturesIncludesFrameworkThenAddFrameworkAsKar() throws Exception {
         //given
         mojo.setStartupFeatures(Arrays.asList("framework", "other feature"));
         //when
