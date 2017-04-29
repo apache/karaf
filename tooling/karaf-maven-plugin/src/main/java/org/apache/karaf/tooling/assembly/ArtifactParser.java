@@ -177,8 +177,7 @@ class ArtifactParser {
     private Optional<String> findSelectedFrameworkKar(final ArtifactLists artifactLists) {
         return artifactLists.getStartupKars()
                             .stream()
-                            .filter(kar -> kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(
-                                    KARAF_FRAMEWORK_STATIC))
+                            .filter(this::isFrameworkUri)
                             .findAny();
     }
 
@@ -241,6 +240,10 @@ class ArtifactParser {
                .features(toArray(installedFeatures))
                .bundles(toArray(artifactLists.getInstalledBundles()))
                .profiles(toArray(installedProfiles));
+    }
+
+    private boolean isFrameworkUri(final String kar) {
+        return kar.startsWith(KARAF_FRAMEWORK_DYNAMIC) || kar.startsWith(KARAF_FRAMEWORK_STATIC);
     }
 
 }
