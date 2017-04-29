@@ -68,12 +68,18 @@ class AssemblyMojoExec {
         mappers.put(mojo::getStartupFeatures, mojo::setStartupFeatures);
         mappers.put(mojo::getStartupProfiles, mojo::setStartupProfiles);
         mappers.put(mojo::getStartupRepositories, mojo::setStartupRepositories);
+        replaceNullValues(mappers, ArrayList::new);
+    }
+
+    private static <S> void replaceNullValues(
+            final Map<Supplier<S>, Consumer<S>> mappers, final Supplier<S> generator
+                                             ) {
         mappers.entrySet()
                .stream()
                .filter(entry -> entry.getKey()
                                      .get() == null)
                .map(Map.Entry::getValue)
-               .forEach(setter -> setter.accept(new ArrayList<>()));
+               .forEach(setter -> setter.accept(generator.get()));
     }
 
     private void setNullMapsToEmpty(final AssemblyMojo mojo) {
@@ -81,12 +87,7 @@ class AssemblyMojoExec {
         mappers.put(mojo::getTranslatedUrls, mojo::setTranslatedUrls);
         mappers.put(mojo::getConfig, mojo::setConfig);
         mappers.put(mojo::getSystem, mojo::setSystem);
-        mappers.entrySet()
-               .stream()
-               .filter(entry -> entry.getKey()
-                                     .get() == null)
-               .map(Map.Entry::getValue)
-               .forEach(setter -> setter.accept(new HashMap<>()));
+        replaceNullValues(mappers, HashMap::new);
     }
 
     private void verifyProfilesUrlIsProvidedIfProfilesAreUsed(final AssemblyMojo mojo) {
