@@ -47,18 +47,6 @@ class AssemblyMojoExec {
         updateDeprecatedConfiguration(mojo);
     }
 
-    private void deleteAnyPreviouslyGeneratedAssembly(final AssemblyMojo mojo) {
-        IoUtils.deleteRecursive(mojo.getWorkDirectory());
-        mojo.getWorkDirectory()
-            .mkdirs();
-    }
-
-    private void generateAssemblyDirectory(final AssemblyMojo mojo) throws Exception {
-        builderFactory.create(mojo)
-                      .generateAssembly();
-        assemblyOutfitter.outfit();
-    }
-
     private void setNullListsToEmpty(final AssemblyMojo mojo) {
         final Map<Supplier<List<String>>, Consumer<List<String>>> mappers = new HashMap<>();
         mappers.put(mojo::getBlacklistedBundles, mojo::setBlacklistedBundles);
@@ -107,6 +95,16 @@ class AssemblyMojoExec {
         }
     }
 
+    private boolean profilesAreUsed(final AssemblyMojo mojo) {
+        final int startupProfileCount = mojo.getStartupProfiles()
+                                            .size();
+        final int bootProfileCount = mojo.getBootProfiles()
+                                         .size();
+        final int installedProfileCount = mojo.getInstalledProfiles()
+                                              .size();
+        return startupProfileCount + bootProfileCount + installedProfileCount > 0;
+    }
+
     private void updateDeprecatedConfiguration(final AssemblyMojo mojo) {
         final boolean featuresRepositoriesUsed = !mojo.getFeatureRepositories()
                                                       .isEmpty();
@@ -121,14 +119,17 @@ class AssemblyMojoExec {
                 .addAll(mojo.getFeatureRepositories());
         }
     }
-    private boolean profilesAreUsed(final AssemblyMojo mojo) {
-        final int startupProfileCount = mojo.getStartupProfiles()
-                                            .size();
-        final int bootProfileCount = mojo.getBootProfiles()
-                                         .size();
-        final int installedProfileCount = mojo.getInstalledProfiles()
-                                              .size();
-        return startupProfileCount + bootProfileCount + installedProfileCount > 0;
+
+    private void deleteAnyPreviouslyGeneratedAssembly(final AssemblyMojo mojo) {
+        IoUtils.deleteRecursive(mojo.getWorkDirectory());
+        mojo.getWorkDirectory()
+            .mkdirs();
+    }
+
+    private void generateAssemblyDirectory(final AssemblyMojo mojo) throws Exception {
+        builderFactory.create(mojo)
+                      .generateAssembly();
+        assemblyOutfitter.outfit();
     }
 
 }
