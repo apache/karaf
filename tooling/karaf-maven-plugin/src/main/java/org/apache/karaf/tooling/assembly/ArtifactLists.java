@@ -26,18 +26,6 @@ class ArtifactLists {
 
     private final List<String> installedRepositories = new ArrayList<>();
 
-    void addStartupKars(final List<String> startup) {
-        this.startupKars.addAll(startup);
-    }
-
-    void addBootKars(final List<String> boot) {
-        this.bootKars.addAll(boot);
-    }
-
-    void addInstalledKars(final List<String> installed) {
-        this.installedKars.addAll(installed);
-    }
-
     void addStartupBundles(final List<String> startup) {
         this.startupBundles.addAll(startup);
     }
