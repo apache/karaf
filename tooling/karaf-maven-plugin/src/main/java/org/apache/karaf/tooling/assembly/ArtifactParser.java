@@ -68,10 +68,10 @@ class ArtifactParser {
     void parse(final AssemblyMojo mojo) {
         final ArtifactLists artifactLists = buildArtifactLists(mojo);
         addFrameworkKar(mojo, artifactLists);
-        startup(mojo, artifactLists);
-        boot(mojo, artifactLists);
-        installed(mojo, artifactLists);
-        builder.libraries(toArray(mojo.getLibraries()));
+        configureStartupPhase(mojo, artifactLists);
+        configureBootPhase(mojo, artifactLists);
+        configureInstalledPhase(mojo, artifactLists);
+        addLibraries(mojo);
     }
 
     private ArtifactLists buildArtifactLists(final AssemblyMojo mojo) {
@@ -208,7 +208,7 @@ class ArtifactParser {
         return STATIC_FRAMEWORK;
     }
 
-    private void startup(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
+    private void configureStartupPhase(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> startupFeatures = mojo.getStartupFeatures();
         addFrameworkFeatureIfMissing(mojo.getFramework(), startupFeatures);
         final List<String> startupProfiles = mojo.getStartupProfiles();
@@ -232,7 +232,7 @@ class ArtifactParser {
         return strings.toArray(new String[strings.size()]);
     }
 
-    private void boot(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
+    private void configureBootPhase(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> bootFeatures = mojo.getBootFeatures();
         final List<String> bootProfiles = mojo.getBootProfiles();
         final boolean addAll =
@@ -245,7 +245,7 @@ class ArtifactParser {
                .profiles(toArray(bootProfiles));
     }
 
-    private void installed(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
+    private void configureInstalledPhase(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> installedFeatures = mojo.getInstalledFeatures();
         final List<String> installedProfiles = mojo.getInstalledProfiles();
         final boolean addAll =
@@ -256,6 +256,10 @@ class ArtifactParser {
                .features(toArray(installedFeatures))
                .bundles(toArray(artifactLists.getInstalledBundles()))
                .profiles(toArray(installedProfiles));
+    }
+
+    private void addLibraries(final AssemblyMojo mojo) {
+        builder.libraries(toArray(mojo.getLibraries()));
     }
 
     private Builder.Stage getStage(final Artifact artifact) {
