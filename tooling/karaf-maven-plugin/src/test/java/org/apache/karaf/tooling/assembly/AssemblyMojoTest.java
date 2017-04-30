@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -610,16 +611,21 @@ public class AssemblyMojoTest {
     @Test
     public void executeMojoWithPropertyFileEdits() throws Exception {
         //given
-        final KarafPropertyEdits edit = new KarafPropertyEdits();
+        final KarafPropertyEdits edit = givenPropertyEditsExist();
         given(profileEditsReader.read(any(InputStream.class), eq(true))).willReturn(edit);
-        final String propertyFileEdits =
-                new File(resources.getBasedir(TEST_PROJECT), "property-file-edits").getAbsolutePath();
-        mojo.setPropertyFileEdits(propertyFileEdits);
         //when
         executeMojo();
         //then
         then(builder).should()
                      .propertyEdits(any());
+    }
+
+    private KarafPropertyEdits givenPropertyEditsExist() throws IOException {
+        final KarafPropertyEdits edit = new KarafPropertyEdits();
+        final String propertyFileEdits =
+                new File(resources.getBasedir(TEST_PROJECT), "property-file-edits").getAbsolutePath();
+        mojo.setPropertyFileEdits(propertyFileEdits);
+        return edit;
     }
 
     @Test
@@ -1117,6 +1123,32 @@ public class AssemblyMojoTest {
         exception.expect(MojoFailureException.class);
         //when
         executeMojo();
+    }
+
+    @Test
+    public void executeMojoHandlesIOExceptionReadingProfileEdits() throws Exception {
+        //given
+        givenPropertyEditsExist();
+        doThrow(IOException.class).when(profileEditsReader)
+                                  .read(any(InputStream.class), eq(true));
+        //when
+        executeMojo();
+        //then
+        then(builder).should(never())
+                     .propertyEdits(any());
+    }
+
+    @Test
+    public void executeMojoHandlesXMLStreamExceptionReadingProfileEdits() throws Exception {
+        //given
+        givenPropertyEditsExist();
+        doThrow(XMLStreamException.class).when(profileEditsReader)
+                                         .read(any(InputStream.class), eq(true));
+        //when
+        executeMojo();
+        //then
+        then(builder).should(never())
+                     .propertyEdits(any());
     }
 
 }
