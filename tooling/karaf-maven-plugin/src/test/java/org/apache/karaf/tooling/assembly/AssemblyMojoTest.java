@@ -11,6 +11,7 @@ import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
@@ -45,7 +46,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.isA;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -59,9 +60,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 /**
- * Tests for {@link AssemblyMojoExec}.
+ * Tests for {@link AssemblyMojo} and it's attendant classes.
  */
-public class AssemblyMojoExecTest {
+public class AssemblyMojoTest {
 
     // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
     private static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
@@ -115,6 +116,7 @@ public class AssemblyMojoExecTest {
         mojo.setSystem(new HashMap<>());
         final AssemblyOutfitter assemblyOutfitter = new AssemblyOutfitter(mojo);
         execMojo = new AssemblyMojoExec(log, builder, builderConfiguration, assemblyOutfitter);
+        mojo.setMojoExec(execMojo);
     }
 
     private AssemblyMojo getAssemblyMojo() throws Exception {
@@ -197,7 +199,7 @@ public class AssemblyMojoExecTest {
     }
 
     private void executeMojo() throws Exception {
-        execMojo.doExecute(mojo);
+        mojo.execute();
     }
 
     private void assertStageKarsAdded(final Builder.Stage stage, final String[] kars, final int calls) {
@@ -266,40 +268,44 @@ public class AssemblyMojoExecTest {
     public void executeMojoWithInvalidFrameworkShouldThrowException() throws Exception {
         //given
         mojo.setFramework("unknown");
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Unsupported framework: unknown");
         //when
-        executeMojo();
+        executeMojoAndExpect(IllegalArgumentException.class, "Unsupported framework: unknown");
+    }
+
+    private void executeMojoAndExpect(final Class<IllegalArgumentException> expectedCause, final String message)
+            throws Exception {
+        try {
+            executeMojo();
+            fail("MojoExecutionException not thrown");
+        } catch (MojoExecutionException e) {
+            final Throwable cause = e.getCause();
+            assertThat(cause).isInstanceOf(expectedCause);
+            assertThat(cause.getMessage()).contains(message);
+        }
     }
 
     @Test
     public void executeMojoWithStartupProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
         //given
         mojo.setStartupProfiles(Collections.singletonList("startup profile"));
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("profilesDirectory must be specified");
         //when
-        executeMojo();
+        executeMojoAndExpect(IllegalArgumentException.class, "profilesDirectory must be specified");
     }
 
     @Test
     public void executeMojoWithBootProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
         //given
         mojo.setBootProfiles(Collections.singletonList("boot profile"));
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("profilesDirectory must be specified");
         //when
-        executeMojo();
+        executeMojoAndExpect(IllegalArgumentException.class, "profilesDirectory must be specified");
     }
 
     @Test
     public void executeMojoWithInstalledProfilesAndNoProfileDirectoryShouldThrowException() throws Exception {
         //given
         mojo.setInstalledProfiles(Collections.singletonList("installed profile"));
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("profilesDirectory must be specified");
         //when
-        executeMojo();
+        executeMojoAndExpect(IllegalArgumentException.class, "profilesDirectory must be specified");
     }
 
     @Test
@@ -631,10 +637,14 @@ public class AssemblyMojoExecTest {
         final String propertyFileEdits = resources.getBasedir(TEST_PROJECT)
                                                   .getAbsolutePath();
         mojo.setPropertyFileEdits(propertyFileEdits);
-        exception.expect(RuntimeException.class);
-        exception.expectCause(isA(FileNotFoundException.class));
         //when
-        executeMojo();
+        try {
+            executeMojo();
+            fail("MojoExecutionException not thrown");
+        } catch (MojoExecutionException e) {
+            assertThat(e.getCause()
+                        .getCause()).isInstanceOf(FileNotFoundException.class);
+        }
     }
 
     @Test

@@ -50,8 +50,6 @@ import java.util.Map;
       threadSafe = true)
 public class AssemblyMojo extends MojoSupport {
 
-    private final AssemblyMojoExec mojoExec;
-
     /**
      * Base directory used to overwrite resources in generated assembly after the build (resource directory).
      */
@@ -191,6 +189,8 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     protected Map<String, String> system;
 
+    private AssemblyMojoExec mojoExec;
+
     private Builder builder;
 
     @Parameter
@@ -285,6 +285,10 @@ public class AssemblyMojo extends MojoSupport {
 
     void setBuilder(final Builder builder) {
         this.builder = builder;
+    }
+
+    void setMojoExec(final AssemblyMojoExec mojoExec) {
+        this.mojoExec = mojoExec;
     }
 
     File getSourceDirectory() {
