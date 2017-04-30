@@ -94,12 +94,12 @@ class ArtifactParser {
     private void addArtifactsToStageLists(
             final Builder.Stage stage, final List<Artifact> artifacts, final ArtifactLists lists
                                          ) {
-        final Map<String, Consumer<Artifact>> handlers = getLoadArtifactHandlers(lists, stage);
-        artifacts.forEach(artifact -> getTargetType(artifact).ifPresent(type -> handlers.get(type)
-                                                                                        .accept(artifact)));
+        final Map<String, Consumer<Artifact>> handlers = getArtifactHandlers(lists, stage);
+        artifacts.forEach(artifact -> getArtifactType(artifact).ifPresent(type -> handlers.get(type)
+                                                                                          .accept(artifact)));
     }
 
-    private Optional<String> getTargetType(final Artifact artifact) {
+    private Optional<String> getArtifactType(final Artifact artifact) {
         String type = null;
         if ("kar".equals(artifact.getType())) {
             type = TYPE_KAR;
@@ -111,30 +111,30 @@ class ArtifactParser {
         return Optional.ofNullable(type);
     }
 
-    private Map<String, Consumer<Artifact>> getLoadArtifactHandlers(
+    private Map<String, Consumer<Artifact>> getArtifactHandlers(
             final ArtifactLists lists, final Builder.Stage stage
-                                                                   ) {
+                                                               ) {
         final Map<String, Consumer<Artifact>> loaders = new HashMap<>(3);
-        loaders.put(TYPE_KAR, karArtifactLoadHandler(lists, stage));
-        loaders.put(TYPE_REPOSITORY, repositoryArtifactLoadHandler(lists, stage));
-        loaders.put(TYPE_BUNDLE, bundleArtifactLoadHandler(lists, stage));
+        loaders.put(TYPE_KAR, karArtifactHandler(lists, stage));
+        loaders.put(TYPE_REPOSITORY, repositoryArtifactHandler(lists, stage));
+        loaders.put(TYPE_BUNDLE, bundleArtifactHandler(lists, stage));
         return Collections.unmodifiableMap(loaders);
     }
 
-    private Consumer<Artifact> karArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
+    private Consumer<Artifact> karArtifactHandler(final ArtifactLists lists, final Builder.Stage stage) {
         final Map<Builder.Stage, List<String>> listsByStage =
-                buildListMap(lists.getStartupKars(), lists.getBootKars(), lists.getInstalledKars());
+                mapListsByStage(lists.getStartupKars(), lists.getBootKars(), lists.getInstalledKars());
         return (artifact) -> addArtifactToStageList(stage, artifact, listsByStage);
     }
 
-    private Map<Builder.Stage, List<String>> buildListMap(
+    private Map<Builder.Stage, List<String>> mapListsByStage(
             final List<String> startup, final List<String> boot, final List<String> installed
-                                                         ) {
+                                                            ) {
         final Map<Builder.Stage, List<String>> listsByStage = new HashMap<>();
         listsByStage.put(Builder.Stage.Startup, startup);
         listsByStage.put(Builder.Stage.Boot, boot);
         listsByStage.put(Builder.Stage.Installed, installed);
-        return listsByStage;
+        return Collections.unmodifiableMap(listsByStage);
     }
 
     private void addArtifactToStageList(
@@ -144,17 +144,17 @@ class ArtifactParser {
                 .ifPresent(list -> list.add(mavenUriParser.artifactToMvnUri(artifact)));
     }
 
-    private Consumer<Artifact> repositoryArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
+    private Consumer<Artifact> repositoryArtifactHandler(final ArtifactLists lists, final Builder.Stage stage) {
         final Map<Builder.Stage, List<String>> listsByStage =
-                buildListMap(lists.getStartupRepositories(), lists.getBootRepositories(),
-                             lists.getInstalledRepositories()
-                            );
+                mapListsByStage(lists.getStartupRepositories(), lists.getBootRepositories(),
+                                lists.getInstalledRepositories()
+                               );
         return (artifact) -> addArtifactToStageList(stage, artifact, listsByStage);
     }
 
-    private Consumer<Artifact> bundleArtifactLoadHandler(final ArtifactLists lists, final Builder.Stage stage) {
+    private Consumer<Artifact> bundleArtifactHandler(final ArtifactLists lists, final Builder.Stage stage) {
         final Map<Builder.Stage, List<String>> listsByStage =
-                buildListMap(lists.getStartupBundles(), lists.getBootBundles(), lists.getInstalledBundles());
+                mapListsByStage(lists.getStartupBundles(), lists.getBootBundles(), lists.getInstalledBundles());
         return (artifact) -> addArtifactToStageList(stage, artifact, listsByStage);
     }
 
@@ -165,8 +165,8 @@ class ArtifactParser {
     }
 
     private void addFrameworkKar(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
-        final String kar =
-                findSelectedFrameworkKar(artifactLists).orElseGet(() -> getFrameworkKar(mojo.getFramework()));
+        final String kar = findSelectedFrameworkKar(artifactLists.getStartupKars()).orElseGet(
+                () -> getFrameworkKar(mojo.getFramework()));
         artifactLists.removeStartupKar(kar);
         setFrameworkIfMissing(mojo, kar);
         builder.kars(Builder.Stage.Startup, false, kar);
@@ -188,11 +188,10 @@ class ArtifactParser {
         }
     }
 
-    private Optional<String> findSelectedFrameworkKar(final ArtifactLists artifactLists) {
-        return artifactLists.getStartupKars()
-                            .stream()
-                            .filter(this::isFrameworkUri)
-                            .findAny();
+    private Optional<String> findSelectedFrameworkKar(final List<String> startupKars) {
+        return startupKars.stream()
+                          .filter(this::isFrameworkUri)
+                          .findAny();
     }
 
     private void setFrameworkIfMissing(final AssemblyMojo mojo, final String kar) {
@@ -204,7 +203,8 @@ class ArtifactParser {
     }
 
     private String getFrameworkFromUri(final String kar) {
-        if (kar.startsWith(KARAF_FRAMEWORK_DYNAMIC)) {
+        final boolean isDynamicFramework = kar.startsWith(KARAF_FRAMEWORK_DYNAMIC);
+        if (isDynamicFramework) {
             return FRAMEWORK;
         }
         return STATIC_FRAMEWORK;
