@@ -1,17 +1,15 @@
 package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
+import org.apache.karaf.tooling.RealKarafVersion;
 import org.apache.maven.artifact.Artifact;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -179,13 +177,7 @@ class ArtifactParser {
     }
 
     private String getRealKarafVersion() {
-        try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
-            Properties versions = new Properties();
-            versions.load(is);
-            return versions.getProperty("karaf-version");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        return new RealKarafVersion().get();
     }
 
     private Optional<String> findSelectedFrameworkKar(final List<String> startupKars) {
