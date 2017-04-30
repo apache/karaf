@@ -206,32 +206,30 @@ public class AssemblyMojo extends MojoSupport {
      * This allows you to
      * customize these files without making copies in your resources
      * directories. Here's a simple example:
-     * <pre>
-     * {@literal
-      <property-edits xmlns="http://karaf.apache.org/tools/property-edits/1.0.0">
-         <edits>
-          <edit>
-            <file>config.properties</file>
-            <operation>put</operation>
-            <key>karaf.framework</key>
-            <value>equinox</value>
-          </edit>
-          <edit>
-            <file>config.properties</file>
-            <operation>extend</operation>
-            <key>org.osgi.framework.system.capabilities</key>
-            <value>my-magic-capability</value>
-          </edit>
-          <edit>
-            <file>config.properties</file>
-            <operation prepend='true'>extend</operation>
-            <key>some-other-list</key>
-            <value>my-value-goes-first</value>
-            </edit>
-         </edits>
-      </property-edits>
-    }
-     </pre>
+     * <pre>{@literal
+     * <property-edits xmlns="http://karaf.apache.org/tools/property-edits/1.0.0">
+     *   <edits>
+     *     <edit>
+     *       <file>config.properties</file>
+     *       <operation>put</operation>
+     *       <key>karaf.framework</key>
+     *       <value>equinox</value>
+     *     </edit>
+     *     <edit>
+     *       <file>config.properties</file>
+     *       <operation>extend</operation>
+     *       <key>org.osgi.framework.system.capabilities</key>
+     *       <value>my-magic-capability</value>
+     *     </edit>
+     *     <edit>
+     *       <file>config.properties</file>
+     *       <operation prepend='true'>extend</operation>
+     *       <key>some-other-list</key>
+     *       <value>my-value-goes-first</value>
+     *     </edit>
+     *   </edits>
+     * </property-edits>
+     * }</pre>
      */
     @Parameter(defaultValue = "${project.basedir}/src/main/karaf/assembly-property-edits.xml")
     protected String propertyFileEdits;
