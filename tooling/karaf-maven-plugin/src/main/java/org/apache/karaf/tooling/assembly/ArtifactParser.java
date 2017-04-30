@@ -196,8 +196,10 @@ class ArtifactParser {
     }
 
     private void setFrameworkIfMissing(final AssemblyMojo mojo, final String kar) {
-        if (mojo.getFramework() == null) {
-            mojo.setFramework(getFrameworkFromUri(kar));
+        final boolean frameworkIsMissing = mojo.getFramework() == null;
+        if (frameworkIsMissing) {
+            final String framework = getFrameworkFromUri(kar);
+            mojo.setFramework(framework);
         }
     }
 
@@ -223,7 +225,8 @@ class ArtifactParser {
     }
 
     private void addFrameworkFeatureIfMissing(final String framework, final List<String> startupFeatures) {
-        if (!startupFeatures.contains(framework)) {
+        final boolean frameworkIsMissing = !startupFeatures.contains(framework);
+        if (frameworkIsMissing) {
             builder.features(Builder.Stage.Startup, framework);
         }
     }
