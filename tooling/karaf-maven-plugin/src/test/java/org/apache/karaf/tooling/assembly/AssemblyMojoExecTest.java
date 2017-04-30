@@ -95,10 +95,6 @@ public class AssemblyMojoExecTest {
     @Captor
     private ArgumentCaptor<Map<String, String>> mapArgumentCaptor;
 
-    private BuilderFactory builderFactory;
-
-    private AssemblyOutfitter assemblyOutfitter;
-
     @Mock
     private KarafPropertyInstructionsModelStaxReader profileEditsReader;
 
@@ -108,15 +104,16 @@ public class AssemblyMojoExecTest {
         doNothing().when(builder)
                    .generateAssembly();
         dependencyArtifacts = new HashSet<>();
-        mojo = getAssemblyMojo();
         final MavenUriParser mavenUriParser = new MavenUriParser();
-        builderFactory =
-                new BuilderFactory(log, builder, mavenUriParser, new ProfileEditsParser(profileEditsReader),
-                                   new ArtifactParser(mavenUriParser, builder));
-        assemblyOutfitter = new AssemblyOutfitter(mojo);
-        execMojo = new AssemblyMojoExec(log, builderFactory, assemblyOutfitter);
+        final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
+        final ArtifactParser artifactParser = new ArtifactParser(mavenUriParser, builder);
+        final BuilderFactory builderFactory =
+                new BuilderFactory(log, builder, mavenUriParser, profileEditsParser, artifactParser);
+        mojo = getAssemblyMojo();
         mojo.setConfig(new HashMap<>());
         mojo.setSystem(new HashMap<>());
+        final AssemblyOutfitter assemblyOutfitter = new AssemblyOutfitter(mojo);
+        execMojo = new AssemblyMojoExec(log, builderFactory, assemblyOutfitter);
     }
 
     private AssemblyMojo getAssemblyMojo() throws Exception {
@@ -159,14 +156,13 @@ public class AssemblyMojoExecTest {
 
     private DefaultArtifact getProjectArtifact() throws IOException {
         final String groupId = "org.apache";
-        final String artifactId = TEST_PROJECT;
         final String version = "0.1.0";
         final String compile = "compile";
         final String type = "jar";
         final String classifier = "";
         final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
         final DefaultArtifact defaultArtifact =
-                new DefaultArtifact(groupId, artifactId, version, compile, type, classifier, artifactHandler);
+                new DefaultArtifact(groupId, TEST_PROJECT, version, compile, type, classifier, artifactHandler);
         defaultArtifact.setFile(new File(resources.getBasedir(TEST_PROJECT), "artifact-file"));
         return defaultArtifact;
     }
@@ -183,9 +179,8 @@ public class AssemblyMojoExecTest {
     public void shouldExecuteMojoForFramework() throws Exception {
         //given
         final String framework = "framework";
-        final String expectedFrameworkKar = DEFAULT_FRAMEWORK_KAR;
         //when
-        executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
+        executeMojoCheckingForFrameworkKar(framework, DEFAULT_FRAMEWORK_KAR);
         //then
         assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
     }
@@ -234,9 +229,8 @@ public class AssemblyMojoExecTest {
     public void shouldExecuteMojoForFrameworkLogBack() throws Exception {
         //given
         final String framework = "framework-logback";
-        final String expectedFrameworkKar = DEFAULT_FRAMEWORK_KAR;
         //when
-        executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
+        executeMojoCheckingForFrameworkKar(framework, DEFAULT_FRAMEWORK_KAR);
         //then
         assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
     }
