@@ -12,6 +12,7 @@ import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
@@ -56,6 +57,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
@@ -1090,6 +1093,30 @@ public class AssemblyMojoTest {
         executeMojo();
         //then
         assertThat(mojo.getPidsToExtract()).isEmpty();
+    }
+
+    @Test
+    public void executeMojoRethrowsMojoExecutionExceptions() throws Exception {
+        //given
+        final AssemblyMojoExec mojoExec = mock(AssemblyMojoExec.class);
+        mojo.setMojoExec(mojoExec);
+        doThrow(MojoExecutionException.class).when(mojoExec)
+                                             .doExecute(any());
+        exception.expect(MojoExecutionException.class);
+        //when
+        executeMojo();
+    }
+
+    @Test
+    public void executeMojoRethrowsMojoFailureExceptions() throws Exception {
+        //given
+        final AssemblyMojoExec mojoExec = mock(AssemblyMojoExec.class);
+        mojo.setMojoExec(mojoExec);
+        doThrow(MojoFailureException.class).when(mojoExec)
+                                           .doExecute(any());
+        exception.expect(MojoFailureException.class);
+        //when
+        executeMojo();
     }
 
 }
