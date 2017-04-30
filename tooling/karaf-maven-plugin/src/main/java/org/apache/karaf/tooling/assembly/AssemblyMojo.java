@@ -50,6 +50,8 @@ import java.util.Map;
       threadSafe = true)
 public class AssemblyMojo extends MojoSupport {
 
+    private final AssemblyMojoExec mojoExec;
+
     /**
      * Base directory used to overwrite resources in generated assembly after the build (resource directory).
      */
@@ -85,72 +87,6 @@ public class AssemblyMojo extends MojoSupport {
      */
     @Parameter
     protected int defaultStartLevel = 30;
-
-    @Parameter
-    private List<String> startupRepositories;
-
-    @Parameter
-    private List<String> bootRepositories;
-
-    @Parameter
-    private List<String> installedRepositories;
-
-    @Parameter
-    private List<String> blacklistedRepositories;
-
-    /**
-     * List of features from runtime-scope features xml and kars to be installed into system and listed in
-     * startup.properties.
-     */
-    @Parameter
-    private List<String> startupFeatures;
-
-    /**
-     * List of features from runtime-scope features xml and kars to be installed into system repo and listed in features
-     * service boot features.
-     */
-    @Parameter
-    private List<String> bootFeatures;
-
-    /**
-     * List of features from runtime-scope features xml and kars to be installed into system repo and not mentioned
-     * elsewhere.
-     */
-    @Parameter
-    private List<String> installedFeatures;
-
-    @Parameter
-    private List<String> blacklistedFeatures;
-
-    @Parameter
-    private List<String> startupBundles;
-
-    @Parameter
-    private List<String> bootBundles;
-
-    @Parameter
-    private List<String> installedBundles;
-
-    @Parameter
-    private List<String> blacklistedBundles;
-
-    @Parameter
-    private String profilesUri;
-
-    @Parameter
-    private List<String> bootProfiles;
-
-    @Parameter
-    private List<String> startupProfiles;
-
-    @Parameter
-    private List<String> installedProfiles;
-
-    @Parameter
-    private List<String> blacklistedProfiles;
-
-    @Parameter
-    private Builder.BlacklistPolicy blacklistPolicy = Builder.BlacklistPolicy.Discard;
 
     /**
      * Ignore the dependency attribute (dependency="[true|false]") on bundle
@@ -255,10 +191,91 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     protected Map<String, String> system;
 
+    private Builder builder;
+
+    @Parameter
+    private List<String> startupRepositories;
+
+    @Parameter
+    private List<String> bootRepositories;
+
+    @Parameter
+    private List<String> installedRepositories;
+
+    @Parameter
+    private List<String> blacklistedRepositories;
+
+    /**
+     * List of features from runtime-scope features xml and kars to be installed into system and listed in
+     * startup.properties.
+     */
+    @Parameter
+    private List<String> startupFeatures;
+
+    /**
+     * List of features from runtime-scope features xml and kars to be installed into system repo and listed in features
+     * service boot features.
+     */
+    @Parameter
+    private List<String> bootFeatures;
+
+    /**
+     * List of features from runtime-scope features xml and kars to be installed into system repo and not mentioned
+     * elsewhere.
+     */
+    @Parameter
+    private List<String> installedFeatures;
+
+    @Parameter
+    private List<String> blacklistedFeatures;
+
+    @Parameter
+    private List<String> startupBundles;
+
+    @Parameter
+    private List<String> bootBundles;
+
+    @Parameter
+    private List<String> installedBundles;
+
+    @Parameter
+    private List<String> blacklistedBundles;
+
+    @Parameter
+    private String profilesUri;
+
+    @Parameter
+    private List<String> bootProfiles;
+
+    @Parameter
+    private List<String> startupProfiles;
+
+    @Parameter
+    private List<String> installedProfiles;
+
+    @Parameter
+    private List<String> blacklistedProfiles;
+
+    @Parameter
+    private Builder.BlacklistPolicy blacklistPolicy = Builder.BlacklistPolicy.Discard;
+
+    public AssemblyMojo() {
+        final KarafPropertyInstructionsModelStaxReader profileEditsReader =
+                new KarafPropertyInstructionsModelStaxReader();
+        final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
+        final MavenUriParser mavenUriParser = new MavenUriParser();
+        builder = Builder.newInstance();
+        final ArtifactParser artifactParser = new ArtifactParser(mavenUriParser, builder);
+        final BuilderConfiguration builderConfiguration =
+                new BuilderConfiguration(getLog(), mavenUriParser, profileEditsParser, artifactParser);
+        final AssemblyOutfitter assemblyOutfitter = new AssemblyOutfitter(this);
+        mojoExec = new AssemblyMojoExec(getLog(), builder, builderConfiguration, assemblyOutfitter);
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            new AssemblyMojoExec(getLog(), getBuilderFactory(), new AssemblyOutfitter(this)).doExecute(this);
+            mojoExec.doExecute(this);
         } catch (MojoExecutionException | MojoFailureException e) {
             throw e;
         } catch (Exception e) {
@@ -266,13 +283,8 @@ public class AssemblyMojo extends MojoSupport {
         }
     }
 
-    private BuilderFactory getBuilderFactory() {
-        final Builder builder = Builder.newInstance();
-        final MavenUriParser mavenUriParser = new MavenUriParser();
-        return new BuilderFactory(getLog(), builder, mavenUriParser,
-                                  new ProfileEditsParser(new KarafPropertyInstructionsModelStaxReader()),
-                                  new ArtifactParser(mavenUriParser, builder)
-        );
+    void setBuilder(final Builder builder) {
+        this.builder = builder;
     }
 
     File getSourceDirectory() {
@@ -320,6 +332,10 @@ public class AssemblyMojo extends MojoSupport {
         return blacklistedRepositories;
     }
 
+    void setBlacklistedRepositories(final List<String> blacklistedRepositories) {
+        this.blacklistedRepositories = blacklistedRepositories;
+    }
+
     List<String> getStartupFeatures() {
         return startupFeatures;
     }
@@ -348,20 +364,40 @@ public class AssemblyMojo extends MojoSupport {
         return blacklistedFeatures;
     }
 
+    void setBlacklistedFeatures(final List<String> blacklistedFeatures) {
+        this.blacklistedFeatures = blacklistedFeatures;
+    }
+
     List<String> getStartupBundles() {
         return startupBundles;
+    }
+
+    void setStartupBundles(final List<String> startupBundles) {
+        this.startupBundles = startupBundles;
     }
 
     List<String> getBootBundles() {
         return bootBundles;
     }
 
+    void setBootBundles(final List<String> bootBundles) {
+        this.bootBundles = bootBundles;
+    }
+
     List<String> getInstalledBundles() {
         return installedBundles;
     }
 
+    void setInstalledBundles(final List<String> installedBundles) {
+        this.installedBundles = installedBundles;
+    }
+
     List<String> getBlacklistedBundles() {
         return blacklistedBundles;
+    }
+
+    void setBlacklistedBundles(final List<String> blacklistedBundles) {
+        this.blacklistedBundles = blacklistedBundles;
     }
 
     String getProfilesUri() {
@@ -400,6 +436,10 @@ public class AssemblyMojo extends MojoSupport {
         return blacklistedProfiles;
     }
 
+    void setBlacklistedProfiles(final List<String> blacklistedProfiles) {
+        this.blacklistedProfiles = blacklistedProfiles;
+    }
+
     Builder.BlacklistPolicy getBlacklistPolicy() {
         return blacklistPolicy;
     }
@@ -418,14 +458,6 @@ public class AssemblyMojo extends MojoSupport {
 
     void setLibraries(final List<String> libraries) {
         this.libraries = libraries;
-    }
-
-    void setIncludeBuildOutputDirectory(final boolean includeBuildOutputDirectory) {
-        this.includeBuildOutputDirectory = includeBuildOutputDirectory;
-    }
-
-    void setInstallAllFeaturesByDefault(final boolean installAllFeaturesByDefault) {
-        this.installAllFeaturesByDefault = installAllFeaturesByDefault;
     }
 
     Builder.KarafVersion getKarafVersion() {
@@ -460,6 +492,10 @@ public class AssemblyMojo extends MojoSupport {
         return pidsToExtract;
     }
 
+    void setPidsToExtract(final List<String> pidsToExtract) {
+        this.pidsToExtract = pidsToExtract;
+    }
+
     Map<String, String> getTranslatedUrls() {
         return translatedUrls;
     }
@@ -492,12 +528,20 @@ public class AssemblyMojo extends MojoSupport {
         return localRepo;
     }
 
+    void setLocalRepo(final ArtifactRepository localRepo) {
+        this.localRepo = localRepo;
+    }
+
     boolean getUseReferenceUrls() {
         return useReferenceUrls;
     }
 
     boolean getInstallAllFeaturesByDefault() {
         return installAllFeaturesByDefault;
+    }
+
+    void setInstallAllFeaturesByDefault(final boolean installAllFeaturesByDefault) {
+        this.installAllFeaturesByDefault = installAllFeaturesByDefault;
     }
 
     boolean getIgnoreDependencyFlag() {
@@ -508,44 +552,12 @@ public class AssemblyMojo extends MojoSupport {
         return includeBuildOutputDirectory;
     }
 
-    void setLocalRepo(final ArtifactRepository localRepo) {
-        this.localRepo = localRepo;
+    void setIncludeBuildOutputDirectory(final boolean includeBuildOutputDirectory) {
+        this.includeBuildOutputDirectory = includeBuildOutputDirectory;
     }
 
     void setProject(final MavenProject project) {
         this.project = project;
-    }
-
-    void setBlacklistedRepositories(final List<String> blacklistedRepositories) {
-        this.blacklistedRepositories = blacklistedRepositories;
-    }
-
-    void setBlacklistedFeatures(final List<String> blacklistedFeatures) {
-        this.blacklistedFeatures = blacklistedFeatures;
-    }
-
-    void setStartupBundles(final List<String> startupBundles) {
-        this.startupBundles = startupBundles;
-    }
-
-    void setBootBundles(final List<String> bootBundles) {
-        this.bootBundles = bootBundles;
-    }
-
-    void setInstalledBundles(final List<String> installedBundles) {
-        this.installedBundles = installedBundles;
-    }
-
-    void setBlacklistedBundles(final List<String> blacklistedBundles) {
-        this.blacklistedBundles = blacklistedBundles;
-    }
-
-    void setBlacklistedProfiles(final List<String> blacklistedProfiles) {
-        this.blacklistedProfiles = blacklistedProfiles;
-    }
-
-    void setPidsToExtract(final List<String> pidsToExtract) {
-        this.pidsToExtract = pidsToExtract;
     }
 
 }

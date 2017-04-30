@@ -9,13 +9,11 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 /**
- * Factory for creating a {@link Builder} for an {@link AssemblyMojo}.
+ * Configures a {@link Builder} for an {@link AssemblyMojo}.
  */
-class BuilderFactory {
+class BuilderConfiguration {
 
     private final Log log;
-
-    private final Builder builder;
 
     private final MavenUriParser mavenUriParser;
 
@@ -23,18 +21,17 @@ class BuilderFactory {
 
     private final ArtifactParser artifactParser;
 
-    BuilderFactory(
-            final Log log, final Builder builder, final MavenUriParser mavenUriParser,
-            final ProfileEditsParser profileEditsParser, final ArtifactParser artifactParser
-                  ) {
+    BuilderConfiguration(
+            final Log log, final MavenUriParser mavenUriParser, final ProfileEditsParser profileEditsParser,
+            final ArtifactParser artifactParser
+                        ) {
         this.log = log;
-        this.builder = builder;
         this.mavenUriParser = mavenUriParser;
         this.profileEditsParser = profileEditsParser;
         this.artifactParser = artifactParser;
     }
 
-    Builder create(final AssemblyMojo mojo) throws IOException, XMLStreamException {
+    void configure(final Builder builder, final AssemblyMojo mojo) throws IOException, XMLStreamException {
         builder.offline(mojo.getMavenSession()
                             .isOffline());
         builder.localRepository(mojo.getLocalRepo()
@@ -71,7 +68,6 @@ class BuilderFactory {
         // Loading kars and features repositories
         log.info("Loading kar and features repositories dependencies");
         artifactParser.parse(mojo);
-        return builder;
     }
 
     private String getMavenRepositories(final AssemblyMojo mojo) {

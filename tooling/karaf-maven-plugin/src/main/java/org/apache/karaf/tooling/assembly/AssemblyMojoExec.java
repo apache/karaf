@@ -1,5 +1,6 @@
 package org.apache.karaf.tooling.assembly;
 
+import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
 import org.apache.maven.plugin.logging.Log;
 
@@ -22,15 +23,19 @@ class AssemblyMojoExec {
 
     private final Log log;
 
-    private final BuilderFactory builderFactory;
+    private final BuilderConfiguration builderConfiguration;
 
     private final AssemblyOutfitter assemblyOutfitter;
 
+    private final Builder builder;
+
     AssemblyMojoExec(
-            final Log log, final BuilderFactory builderFactory, final AssemblyOutfitter assemblyOutfitter
+            final Log log, final Builder builder, final BuilderConfiguration builderConfiguration,
+            final AssemblyOutfitter assemblyOutfitter
                     ) {
         this.log = log;
-        this.builderFactory = builderFactory;
+        this.builder = builder;
+        this.builderConfiguration = builderConfiguration;
         this.assemblyOutfitter = assemblyOutfitter;
     }
 
@@ -128,8 +133,8 @@ class AssemblyMojoExec {
     }
 
     private void generateAssemblyDirectory(final AssemblyMojo mojo) throws Exception {
-        builderFactory.create(mojo)
-                      .generateAssembly();
+        builderConfiguration.configure(builder, mojo);
+        builder.generateAssembly();
         assemblyOutfitter.outfit();
     }
 

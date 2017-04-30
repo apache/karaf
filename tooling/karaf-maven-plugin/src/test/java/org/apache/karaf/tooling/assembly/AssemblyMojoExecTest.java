@@ -107,13 +107,14 @@ public class AssemblyMojoExecTest {
         final MavenUriParser mavenUriParser = new MavenUriParser();
         final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
         final ArtifactParser artifactParser = new ArtifactParser(mavenUriParser, builder);
-        final BuilderFactory builderFactory =
-                new BuilderFactory(log, builder, mavenUriParser, profileEditsParser, artifactParser);
+        final BuilderConfiguration builderConfiguration =
+                new BuilderConfiguration(log, mavenUriParser, profileEditsParser, artifactParser);
         mojo = getAssemblyMojo();
+        mojo.setBuilder(builder);
         mojo.setConfig(new HashMap<>());
         mojo.setSystem(new HashMap<>());
         final AssemblyOutfitter assemblyOutfitter = new AssemblyOutfitter(mojo);
-        execMojo = new AssemblyMojoExec(log, builderFactory, assemblyOutfitter);
+        execMojo = new AssemblyMojoExec(log, builder, builderConfiguration, assemblyOutfitter);
     }
 
     private AssemblyMojo getAssemblyMojo() throws Exception {
