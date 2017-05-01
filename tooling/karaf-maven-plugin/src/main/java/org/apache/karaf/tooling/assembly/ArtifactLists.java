@@ -83,10 +83,10 @@ class ArtifactLists {
     }
 
     List<String> getBootRepositories() {
-        return startupRepositories;
+        return bootRepositories;
     }
 
     List<String> getInstalledRepositories() {
-        return startupRepositories;
+        return installedRepositories;
     }
 }
