@@ -20,6 +20,7 @@ import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -66,7 +67,8 @@ import static org.mockito.Mockito.times;
 /**
  * Tests for {@link AssemblyMojo} and it's attendant classes.
  */
-public class AssemblyMojoTest {
+@Ignore
+public class AssemblyMojoMockitoTest {
 
     // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
     private static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
