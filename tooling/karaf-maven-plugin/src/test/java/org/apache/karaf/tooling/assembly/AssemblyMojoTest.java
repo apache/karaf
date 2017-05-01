@@ -115,7 +115,6 @@ public class AssemblyMojoTest {
         final BuilderConfiguration builderConfiguration =
                 new BuilderConfiguration(log, mavenUriParser, profileEditsParser, artifactParser);
         mojo = getAssemblyMojo();
-        mojo.setBuilder(builder);
         mojo.setConfig(new HashMap<>());
         mojo.setSystem(new HashMap<>());
         final ExecutableFile executableFile = new ExecutableFile();

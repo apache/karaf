@@ -191,8 +191,6 @@ public class AssemblyMojo extends MojoSupport {
 
     private AssemblyMojoExec mojoExec;
 
-    private Builder builder;
-
     @Parameter
     private List<String> startupRepositories;
 
@@ -264,7 +262,7 @@ public class AssemblyMojo extends MojoSupport {
                 new KarafPropertyInstructionsModelStaxReader();
         final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
         final MavenUriParser mavenUriParser = new MavenUriParser();
-        builder = Builder.newInstance();
+        final Builder builder = Builder.newInstance();
         final ArtifactParser artifactParser = new ArtifactParser(mavenUriParser, builder);
         final BuilderConfiguration builderConfiguration =
                 new BuilderConfiguration(getLog(), mavenUriParser, profileEditsParser, artifactParser);
@@ -282,10 +280,6 @@ public class AssemblyMojo extends MojoSupport {
         } catch (Exception e) {
             throw new MojoExecutionException("Unable to build assembly", e);
         }
-    }
-
-    void setBuilder(final Builder builder) {
-        this.builder = builder;
     }
 
     void setMojoExec(final AssemblyMojoExec mojoExec) {
