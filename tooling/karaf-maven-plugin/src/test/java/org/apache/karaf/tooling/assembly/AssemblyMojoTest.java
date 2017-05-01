@@ -118,7 +118,8 @@ public class AssemblyMojoTest {
         mojo.setBuilder(builder);
         mojo.setConfig(new HashMap<>());
         mojo.setSystem(new HashMap<>());
-        final AssemblyOutfitter assemblyOutfitter = new AssemblyOutfitter(mojo);
+        final ExecutableFile executableFile = new ExecutableFile();
+        final AssemblyOutfitter assemblyOutfitter = new AssemblyOutfitter(mojo, executableFile);
         execMojo = new AssemblyMojoExec(log, builder, builderConfiguration, assemblyOutfitter);
         mojo.setMojoExec(execMojo);
     }

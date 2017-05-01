@@ -5,13 +5,8 @@ import org.apache.karaf.tooling.utils.IoUtils;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -19,12 +14,13 @@ import java.util.stream.Stream;
  */
 class AssemblyOutfitter {
 
-    private static final Set<PosixFilePermission> EXECUTABLE_PERMISSIONS = PosixFilePermissions.fromString("rwxr-xr-x");
-
     private final AssemblyMojo mojo;
 
-    AssemblyOutfitter(final AssemblyMojo mojo) {
+    private final ExecutableFile executableFile;
+
+    AssemblyOutfitter(final AssemblyMojo mojo, final ExecutableFile executableFile) {
         this.mojo = mojo;
+        this.executableFile = executableFile;
     }
 
     void outfit() throws IOException {
@@ -54,7 +50,7 @@ class AssemblyOutfitter {
                                              .map(Stream::of)
                                              .ifPresent(files -> files.map(File::getAbsolutePath)
                                                                       .map(Paths::get)
-                                                                      .forEach(this::setFilePermissions));
+                                                                      .forEach(executableFile::make));
     }
 
     private Optional<File> whereIsPosix(final File directory) {
@@ -70,14 +66,6 @@ class AssemblyOutfitter {
     private FileFilter nonBatchFiles() {
         return pathname -> !pathname.toString()
                                     .endsWith(".bat");
-    }
-
-    private void setFilePermissions(final Path filename) {
-        try {
-            Files.setPosixFilePermissions(filename, EXECUTABLE_PERMISSIONS);
-        } catch (IOException e) {
-            // non-posix filesystem should never have gotten this far
-        }
     }
 
 }
