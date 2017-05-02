@@ -16,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ExecutableFileTest {
 
-    private ExecutableFile executableFile;
-
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
+
+    private ExecutableFile executableFile;
 
     @Before
     public void setUp() throws Exception {
@@ -32,19 +32,24 @@ public class ExecutableFileTest {
         //assume Posix filesystem
         final Path filePath = folder.newFile("executable-file")
                                     .toPath();
-        Assume.assumeTrue(filePath.getFileSystem()
-                                  .supportedFileAttributeViews()
-                                  .contains("posix"));
+        assumePosixFilesystem(filePath);
         //when
         executableFile.make(filePath);
         //then
         assertThat(filePath).isExecutable();
     }
 
+    private void assumePosixFilesystem(final Path filePath) {
+        Assume.assumeTrue(filePath.getFileSystem()
+                                  .supportedFileAttributeViews()
+                                  .contains("posix"));
+    }
+
     @Test
     public void setExecutableIgnoresIOException() throws Exception {
         //given
         final String filename = "/dev/null";
+        assumePosixFilesystem(Paths.get(filename));
         //when
         executableFile.make(Paths.get(filename));
         //then
