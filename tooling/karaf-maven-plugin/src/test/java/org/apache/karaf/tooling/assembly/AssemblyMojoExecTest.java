@@ -81,7 +81,7 @@ public class AssemblyMojoExecTest extends EasyMockSupport {
     }
 
     @Test
-    public void shouldBeOkayWhenProfileUriSuppliedAndProfileAreUsed() throws Exception {
+    public void shouldBeOkayWhenProfileUriSuppliedAndProfilesAreUsed() throws Exception {
         //given
         mojo.setStartupProfiles(Collections.singletonList("startup profile"));
         mojo.setProfilesUri("profiles uri");
