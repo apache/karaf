@@ -27,13 +27,13 @@ class ProfileEditsParser {
         return Optional.ofNullable(mojo.getPropertyFileEdits())
                        .map(File::new)
                        .filter(File::exists)
-                       .flatMap(this::openFile)
+                       .map(this::openFile)
                        .flatMap(this::readFile);
     }
 
-    private Optional<FileInputStream> openFile(final File file) {
+    private FileInputStream openFile(final File file) {
         try {
-            return Optional.of(new FileInputStream(file));
+            return new FileInputStream(file);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
