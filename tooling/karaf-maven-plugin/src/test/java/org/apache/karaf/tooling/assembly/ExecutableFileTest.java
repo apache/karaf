@@ -1,6 +1,5 @@
 package org.apache.karaf.tooling.assembly;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.file.Paths;
@@ -10,8 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for {@link ExecutableFile}.
  */
-@Ignore
-public class ExecutableFileMockitoTest {
+public class ExecutableFileTest {
 
     @Test
     public void setExecutableIgnoresIOException() throws Exception {
