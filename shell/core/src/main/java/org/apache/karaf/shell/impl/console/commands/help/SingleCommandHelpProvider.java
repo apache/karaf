@@ -17,6 +17,7 @@
  */
 package org.apache.karaf.shell.impl.console.commands.help;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
@@ -33,9 +34,10 @@ public class SingleCommandHelpProvider implements HelpProvider {
             }
         }
 
+        ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos, true);
-        Session s = session.getFactory().create(null, ps, ps, session);
+        Session s = session.getFactory().create(bais, ps, ps, session);
         s.put(Session.SCOPE, session.get(Session.SCOPE));
         s.put(Session.SUBSHELL, session.get(Session.SUBSHELL));
         try {
