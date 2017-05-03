@@ -128,8 +128,7 @@ public class AssemblyMojoMockitoTest {
     private AssemblyMojo getAssemblyMojo() throws Exception {
         final File baseDir = resources.getBasedir(TEST_PROJECT);
         final File pom = new File(baseDir, "pom.xml");
-        final MavenProject mavenProject = getMavenProject(pom);
-
+        final MavenProject mavenProject = AssemblyMother.getProject(TEST_PROJECT, resources, dependencyArtifacts);
         final AssemblyMojo assemblyMojo = (AssemblyMojo) mojoRule.lookupMojo("assembly", pom);
         assemblyMojo.setLog(log);
         assemblyMojo.setProject(mavenProject);
@@ -152,36 +151,6 @@ public class AssemblyMojoMockitoTest {
 
     private ArtifactRepository getLocalRepository(final File baseDir) {
         return new StubArtifactRepository(baseDir.getAbsolutePath());
-    }
-
-    private MavenProject getMavenProject(final File pom) throws IOException {
-        final MavenProject mavenProject = new MavenProject();
-        mavenProject.setFile(pom);
-        mavenProject.setArtifact(getProjectArtifact());
-        mavenProject.setDependencyArtifacts(dependencyArtifacts);
-        mavenProject.setRemoteArtifactRepositories(getArtifactRepositories());
-        return mavenProject;
-    }
-
-    private DefaultArtifact getProjectArtifact() throws IOException {
-        final String groupId = "org.apache";
-        final String version = "0.1.0";
-        final String compile = "compile";
-        final String type = "jar";
-        final String classifier = "";
-        final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
-        final DefaultArtifact defaultArtifact =
-                new DefaultArtifact(groupId, TEST_PROJECT, version, compile, type, classifier, artifactHandler);
-        defaultArtifact.setFile(new File(resources.getBasedir(TEST_PROJECT), "artifact-file"));
-        return defaultArtifact;
-    }
-
-    private List<ArtifactRepository> getArtifactRepositories() {
-        final ArtifactRepository artifactRepository = new MavenArtifactRepository();
-        artifactRepository.setId("default-id");
-        artifactRepository.setUrl("default-url");
-        artifactRepository.setLayout(new DefaultRepositoryLayout());
-        return Collections.singletonList(artifactRepository);
     }
 
     @Test

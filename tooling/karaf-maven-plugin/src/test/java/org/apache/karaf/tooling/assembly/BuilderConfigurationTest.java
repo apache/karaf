@@ -2,17 +2,9 @@ package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.handler.ArtifactHandler;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
-import org.apache.maven.artifact.repository.MavenArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
-import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
 import org.easymock.EasyMockRule;
 import org.easymock.EasyMockSupport;
@@ -26,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 import static org.easymock.EasyMock.contains;
@@ -68,8 +59,6 @@ public class BuilderConfigurationTest extends EasyMockSupport {
 
     private AssemblyMojo mojo = new AssemblyMojo();
 
-    private MavenSession mavenSession;
-
     @Before
     public void setUp() throws Exception {
         subject = new BuilderConfiguration(log, mavenUriParser, profileEditsParser, artifactParser);
@@ -102,12 +91,10 @@ public class BuilderConfigurationTest extends EasyMockSupport {
     }
 
     private void givenBasicConfiguration() throws IOException {
-        final File baseDir = resources.getBasedir(TEST_PROJECT);
-        final File pom = new File(baseDir, "pom.xml");
-        final MavenProject mavenProject = getMavenProject(pom);
+        final MavenProject mavenProject = AssemblyMother.getProject(TEST_PROJECT, resources, Collections.emptySet());
         mojo.setProject(mavenProject);
-        mojo.setMavenSession(getMavenSession(mavenProject));
-        mojo.setLocalRepo(createArtifactRepository());
+        mojo.setMavenSession(AssemblyMother.getSession(mavenProject, mojoRule));
+        mojo.setLocalRepo(AssemblyMother.createArtifactRepository());
         expect(builder.offline(false)).andReturn(builder);
         expect(builder.localRepository("/")).andReturn(builder);
         mojo.setJavase("javase version");
@@ -133,7 +120,8 @@ public class BuilderConfigurationTest extends EasyMockSupport {
         expect(builder.blacklistProfiles(Collections.singletonList("blacklist profile"))).andReturn(builder);
         mojo.setBlacklistedRepositories(Collections.singletonList("blacklist repository"));
         expect(builder.blacklistRepositories(Collections.singletonList("blacklist repository"))).andReturn(builder);
-        mavenProject.setRemoteArtifactRepositories(Collections.singletonList(createArtifactRepository()));
+        mavenProject.setRemoteArtifactRepositories(
+                Collections.singletonList(AssemblyMother.createArtifactRepository()));
         final String removeRepositoryAsString = "default-url@id=default-id";
         log.info(contains("Using repositories: " + removeRepositoryAsString));
         expectLastCall();
@@ -142,7 +130,7 @@ public class BuilderConfigurationTest extends EasyMockSupport {
         expect(builder.translatedUrls(Collections.emptyMap())).andReturn(builder);
         log.info("Creating work directory");
         expectLastCall();
-        final File workDirectory = new File(baseDir, "output");
+        final File workDirectory = new File(AssemblyMother.getProjectDirectory(TEST_PROJECT, resources), "output");
         mojo.setWorkDirectory(workDirectory);
         expect(builder.homeDirectory(workDirectory.toPath())).andReturn(builder);
         log.info("Loading kar and features repositories dependencies");
@@ -156,48 +144,6 @@ public class BuilderConfigurationTest extends EasyMockSupport {
         if (profilesUri != null) {
             expect(builder.profilesUris(profilesUri)).andReturn(builder);
         }
-    }
-
-    private MavenSession getMavenSession(final MavenProject mavenProject) {
-        return mojoRule.newMavenSession(mavenProject);
-    }
-
-    private MavenProject getMavenProject(final File pom) throws IOException {
-        final MavenProject mavenProject = new MavenProject();
-        mavenProject.setFile(pom);
-        mavenProject.setArtifact(getProjectArtifact());
-        mavenProject.setRemoteArtifactRepositories(getArtifactRepositories());
-        return mavenProject;
-    }
-
-    private DefaultArtifact getProjectArtifact() throws IOException {
-        final String groupId = "org.apache";
-        final String version = "0.1.0";
-        final String compile = "compile";
-        final String type = "jar";
-        final String classifier = "";
-        final ArtifactHandler artifactHandler = new DefaultArtifactHandlerStub(type, classifier);
-        final DefaultArtifact defaultArtifact =
-                new DefaultArtifact(groupId, TEST_PROJECT, version, compile, type, classifier, artifactHandler);
-        defaultArtifact.setFile(new File(resources.getBasedir(TEST_PROJECT), "artifact-file"));
-        return defaultArtifact;
-    }
-
-    private List<ArtifactRepository> getArtifactRepositories() {
-        final ArtifactRepository artifactRepository = createArtifactRepository();
-        return Collections.singletonList(artifactRepository);
-    }
-
-    private ArtifactRepository createArtifactRepository() {
-        final ArtifactRepository artifactRepository = new MavenArtifactRepository();
-        artifactRepository.setId("default-id");
-        artifactRepository.setUrl("default-url");
-        artifactRepository.setLayout(new DefaultRepositoryLayout());
-        final ArtifactRepositoryPolicy enabledPolicy = new ArtifactRepositoryPolicy(true, "", "");
-        final ArtifactRepositoryPolicy disabledPolicy = new ArtifactRepositoryPolicy(false, "", "");
-        artifactRepository.setReleaseUpdatePolicy(disabledPolicy);
-        artifactRepository.setSnapshotUpdatePolicy(enabledPolicy);
-        return artifactRepository;
     }
 
 }
