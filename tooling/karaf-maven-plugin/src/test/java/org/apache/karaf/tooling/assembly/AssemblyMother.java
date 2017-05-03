@@ -33,9 +33,11 @@ import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.project.MavenProject;
+import org.junit.Assume;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -98,4 +100,11 @@ class AssemblyMother {
     static File getProjectDirectory(final String testProject, final TestResources resources) throws IOException {
         return resources.getBasedir(testProject);
     }
+
+    public static void assumePosixFilesystem(final Path filePath) {
+        Assume.assumeTrue(filePath.getFileSystem()
+                                  .supportedFileAttributeViews()
+                                  .contains("posix"));
+    }
+
 }

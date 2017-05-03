@@ -1,6 +1,5 @@
 package org.apache.karaf.tooling.assembly;
 
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,24 +31,18 @@ public class ExecutableFileTest {
         //assume Posix filesystem
         final Path filePath = folder.newFile("executable-file")
                                     .toPath();
-        assumePosixFilesystem(filePath);
+        AssemblyMother.assumePosixFilesystem(filePath);
         //when
         executableFile.make(filePath);
         //then
         assertThat(filePath).isExecutable();
     }
 
-    private void assumePosixFilesystem(final Path filePath) {
-        Assume.assumeTrue(filePath.getFileSystem()
-                                  .supportedFileAttributeViews()
-                                  .contains("posix"));
-    }
-
     @Test
     public void setExecutableIgnoresIOException() throws Exception {
         //given
         final String filename = "/dev/null";
-        assumePosixFilesystem(Paths.get(filename));
+        AssemblyMother.assumePosixFilesystem(Paths.get(filename));
         //when
         executableFile.make(Paths.get(filename));
         //then
