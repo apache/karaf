@@ -33,7 +33,7 @@ service:get = { $.context getService ($.context getServiceReference $args) };
 
 env = { shell:set $args }
 edit = { shell:nano $args }
-more = { shell:less $args }
+more = { shell:less -F $args }
 
 prompt = "[1m${USER}[0m@${APPLICATION}(${SUBSHELL})> "
 
