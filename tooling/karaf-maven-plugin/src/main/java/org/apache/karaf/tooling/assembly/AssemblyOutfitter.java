@@ -3,7 +3,6 @@ package org.apache.karaf.tooling.assembly;
 import org.apache.karaf.tooling.utils.IoUtils;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -46,7 +45,7 @@ class AssemblyOutfitter {
 
     private void markAssemblyBinFilesAsExecutable() {
         whereIsPosix(mojo.getWorkDirectory()).map(workDirectory -> new File(workDirectory, "bin"))
-                                             .map(binDirectory -> binDirectory.listFiles(nonBatchFiles()))
+                                             .map(binDirectory -> binDirectory.listFiles(this::nonBatchFile))
                                              .map(Stream::of)
                                              .ifPresent(files -> files.map(File::getAbsolutePath)
                                                                       .map(Paths::get)
@@ -63,9 +62,13 @@ class AssemblyOutfitter {
                         .map(v -> directory);
     }
 
-    private FileFilter nonBatchFiles() {
-        return pathname -> !pathname.toString()
-                                    .endsWith(".bat");
+    private boolean nonBatchFile(final File pathname) {
+        return !batchFile(pathname);
+    }
+
+    private boolean batchFile(final File pathname) {
+        return pathname.toString()
+                       .endsWith(".bat");
     }
 
 }
