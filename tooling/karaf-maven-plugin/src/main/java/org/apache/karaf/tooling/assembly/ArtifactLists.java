@@ -42,12 +42,12 @@ class ArtifactLists {
         this.startupRepositories.addAll(startup);
     }
 
-    void addBootRepositories(final List<String> startup) {
-        this.bootRepositories.addAll(startup);
+    void addBootRepositories(final List<String> boot) {
+        this.bootRepositories.addAll(boot);
     }
 
-    void addInstalledRepositories(final List<String> startup) {
-        this.installedRepositories.addAll(startup);
+    void addInstalledRepositories(final List<String> installed) {
+        this.installedRepositories.addAll(installed);
     }
 
     List<String> getStartupBundles() {
