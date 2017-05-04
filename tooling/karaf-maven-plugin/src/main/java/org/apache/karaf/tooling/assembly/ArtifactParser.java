@@ -78,8 +78,8 @@ class ArtifactParser {
         artifactLists.addBootBundles(mojo.getBootBundles());
         artifactLists.addInstalledBundles(mojo.getInstalledBundles());
         artifactLists.addStartupRepositories(mojo.getStartupRepositories());
-        artifactLists.addBootRepositories(mojo.getStartupRepositories());
-        artifactLists.addInstalledRepositories(mojo.getStartupRepositories());
+        artifactLists.addBootRepositories(mojo.getBootRepositories());
+        artifactLists.addInstalledRepositories(mojo.getInstalledRepositories());
         addArtifactsToLists(mojo.getProject()
                                 .getDependencyArtifacts(), artifactLists);
         return artifactLists;
