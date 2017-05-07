@@ -20,7 +20,6 @@ import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.apache.maven.project.MavenProject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -67,7 +66,6 @@ import static org.mockito.Mockito.times;
 /**
  * Tests for {@link AssemblyMojo} and it's attendant classes.
  */
-@Ignore
 public class AssemblyMojoMockitoTest {
 
     // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
@@ -113,7 +111,8 @@ public class AssemblyMojoMockitoTest {
         dependencyArtifacts = new HashSet<>();
         final MavenUriParser mavenUriParser = new MavenUriParser();
         final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
-        final ArtifactParser artifactParser = new ArtifactParser(mavenUriParser, builder);
+        final ArtifactFrameworkParser frameworkParser = new ArtifactFrameworkParser(builder);
+        final ArtifactParser artifactParser = new ArtifactParser(mavenUriParser, builder, frameworkParser);
         final BuilderConfiguration builderConfiguration =
                 new BuilderConfiguration(log, mavenUriParser, profileEditsParser, artifactParser);
         mojo = getAssemblyMojo();
