@@ -112,7 +112,7 @@ public class AssemblyMojoMockitoTest {
         final MavenUriParser mavenUriParser = new MavenUriParser();
         final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
         final ArtifactFrameworkParser frameworkParser = new ArtifactFrameworkParser();
-        final StartupArtifactParser startupArtifactParser = new StartupArtifactParser(builder);
+        final StartupArtifactParser startupArtifactParser = new StartupArtifactParser();
         final ArtifactParser artifactParser =
                 new ArtifactParser(mavenUriParser, builder, frameworkParser, startupArtifactParser);
         final BuilderConfiguration builderConfiguration =

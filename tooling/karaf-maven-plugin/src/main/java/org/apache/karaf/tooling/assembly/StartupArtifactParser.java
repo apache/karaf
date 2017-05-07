@@ -9,15 +9,9 @@ import java.util.List;
  */
 class StartupArtifactParser extends AbstractPhasedArtifactParser {
 
-    private final Builder builder;
-
-    StartupArtifactParser(final Builder builder) {
-        this.builder = builder;
-    }
-
-    void parse(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
+    void parse(final Builder builder, final AssemblyMojo mojo, final ArtifactLists artifactLists) {
         final List<String> startupFeatures = mojo.getStartupFeatures();
-        addFrameworkFeatureIfMissing(mojo.getFramework(), startupFeatures);
+        addFrameworkFeatureIfMissing(builder, mojo.getFramework(), startupFeatures);
         final List<String> startupProfiles = mojo.getStartupProfiles();
         final boolean addAll =
                 startupFeatures.isEmpty() && startupProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault();
@@ -29,7 +23,9 @@ class StartupArtifactParser extends AbstractPhasedArtifactParser {
                .profiles(toArray(startupProfiles));
     }
 
-    private void addFrameworkFeatureIfMissing(final String framework, final List<String> startupFeatures) {
+    private void addFrameworkFeatureIfMissing(
+            final Builder builder, final String framework, final List<String> startupFeatures
+                                             ) {
         final boolean frameworkIsMissing = !startupFeatures.contains(framework);
         if (frameworkIsMissing) {
             builder.features(Builder.Stage.Startup, framework);
