@@ -31,16 +31,19 @@ class ArtifactParser {
 
     private final StartupArtifactParser startupArtifactParser;
 
+    private final BootArtifactParser bootArtifactParser;
+
     private final Map<String, Builder.Stage> scopeToStage = new HashMap<>();
 
     ArtifactParser(
             final MavenUriParser mavenUriParser, final Builder builder, final ArtifactFrameworkParser frameworkParser,
-            final StartupArtifactParser startupArtifactParser
+            final StartupArtifactParser startupArtifactParser, final BootArtifactParser bootArtifactParser
                   ) {
         this.mavenUriParser = mavenUriParser;
         this.builder = builder;
         this.frameworkParser = frameworkParser;
         this.startupArtifactParser = startupArtifactParser;
+        this.bootArtifactParser = bootArtifactParser;
         init();
     }
 
@@ -54,7 +57,7 @@ class ArtifactParser {
         final ArtifactLists artifactLists = buildArtifactLists(mojo);
         frameworkParser.parse(builder, mojo, artifactLists);
         startupArtifactParser.parse(builder, mojo, artifactLists);
-        configureBootPhase(mojo, artifactLists);
+        bootArtifactParser.parse(builder, mojo, artifactLists);
         configureInstalledPhase(mojo, artifactLists);
         addLibraries(mojo);
     }
@@ -151,19 +154,6 @@ class ArtifactParser {
 
     private String[] toArray(List<String> strings) {
         return strings.toArray(new String[strings.size()]);
-    }
-
-    private void configureBootPhase(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
-        final List<String> bootFeatures = mojo.getBootFeatures();
-        final List<String> bootProfiles = mojo.getBootProfiles();
-        final boolean addAll =
-                bootFeatures.isEmpty() && bootProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault();
-        builder.defaultStage(Builder.Stage.Boot)
-               .kars(toArray(artifactLists.getBootKars()))
-               .repositories(addAll, toArray(artifactLists.getBootRepositories()))
-               .features(toArray(bootFeatures))
-               .bundles(toArray(artifactLists.getBootBundles()))
-               .profiles(toArray(bootProfiles));
     }
 
     private void configureInstalledPhase(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
