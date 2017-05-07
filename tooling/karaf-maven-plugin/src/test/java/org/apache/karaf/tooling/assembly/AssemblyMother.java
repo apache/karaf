@@ -24,6 +24,7 @@ package org.apache.karaf.tooling.assembly;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
@@ -54,8 +55,7 @@ class AssemblyMother {
     }
 
     static MavenProject getProject(
-            final String testProject, final TestResources resources,
-            final Set<Artifact> dependencyArtifacts
+            final String testProject, final TestResources resources, final Set<Artifact> dependencyArtifacts
                                   ) throws IOException {
         final File pom = new File(getProjectDirectory(testProject, resources), "pom.xml");
         final MavenProject mavenProject = new MavenProject();
@@ -107,4 +107,10 @@ class AssemblyMother {
                                   .contains("posix"));
     }
 
+    static Artifact createArtifact(
+            final String artifactId, final String scope, final String type, final String classifier
+                                  ) {
+        return new DefaultArtifact(
+                "org.apache", artifactId, "version", scope, type, classifier, new DefaultArtifactHandler());
+    }
 }
