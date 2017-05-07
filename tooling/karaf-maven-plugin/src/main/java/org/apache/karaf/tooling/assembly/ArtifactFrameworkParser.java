@@ -27,19 +27,18 @@ class ArtifactFrameworkParser {
 
     private static final String STATIC_FRAMEWORK_LOGBACK = "static-framework-logback";
 
-    private final Builder builder;
-
     private final Map<String, String> frameworkUris = new HashMap<>();
 
-    ArtifactFrameworkParser(final Builder builder) {
-        this.builder = builder;
+    ArtifactFrameworkParser() {
         frameworkUris.put(FRAMEWORK, KARAF_FRAMEWORK_DYNAMIC);
         frameworkUris.put(FRAMEWORK_LOGBACK, KARAF_FRAMEWORK_DYNAMIC);
         frameworkUris.put(STATIC_FRAMEWORK, KARAF_FRAMEWORK_STATIC);
         frameworkUris.put(STATIC_FRAMEWORK_LOGBACK, KARAF_FRAMEWORK_STATIC);
     }
 
-    void parse(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
+    void parse(
+            final Builder builder, final AssemblyMojo mojo, final ArtifactLists artifactLists
+              ) {
         final String kar = findSelectedFrameworkKar(artifactLists.getStartupKars()).orElseGet(
                 () -> getFrameworkKar(mojo.getFramework()));
         artifactLists.removeStartupKar(kar);

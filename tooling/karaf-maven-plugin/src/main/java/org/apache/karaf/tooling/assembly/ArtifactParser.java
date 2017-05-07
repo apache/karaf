@@ -52,7 +52,7 @@ class ArtifactParser {
 
     void parse(final AssemblyMojo mojo) {
         final ArtifactLists artifactLists = buildArtifactLists(mojo);
-        frameworkParser.parse(mojo, artifactLists);
+        frameworkParser.parse(builder, mojo, artifactLists);
         startupArtifactParser.parse(mojo, artifactLists);
         configureBootPhase(mojo, artifactLists);
         configureInstalledPhase(mojo, artifactLists);
