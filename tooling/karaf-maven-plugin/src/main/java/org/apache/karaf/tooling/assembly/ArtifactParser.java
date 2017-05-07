@@ -29,12 +29,18 @@ class ArtifactParser {
 
     private final ArtifactFrameworkParser frameworkParser;
 
+    private final StartupArtifactParser startupArtifactParser;
+
     private final Map<String, Builder.Stage> scopeToStage = new HashMap<>();
 
-    ArtifactParser(final MavenUriParser mavenUriParser, final Builder builder, final ArtifactFrameworkParser frameworkParser) {
+    ArtifactParser(
+            final MavenUriParser mavenUriParser, final Builder builder, final ArtifactFrameworkParser frameworkParser,
+            final StartupArtifactParser startupArtifactParser
+                  ) {
         this.mavenUriParser = mavenUriParser;
         this.builder = builder;
         this.frameworkParser = frameworkParser;
+        this.startupArtifactParser = startupArtifactParser;
         init();
     }
 
@@ -47,7 +53,7 @@ class ArtifactParser {
     void parse(final AssemblyMojo mojo) {
         final ArtifactLists artifactLists = buildArtifactLists(mojo);
         frameworkParser.parse(mojo, artifactLists);
-        configureStartupPhase(mojo, artifactLists);
+        startupArtifactParser.parse(mojo, artifactLists);
         configureBootPhase(mojo, artifactLists);
         configureInstalledPhase(mojo, artifactLists);
         addLibraries(mojo);
@@ -141,27 +147,6 @@ class ArtifactParser {
         return artifacts.stream()
                         .filter(artifact -> scopeToStage.get(artifact.getScope()) != null)
                         .collect(Collectors.groupingBy(this::getStage, Collectors.toList()));
-    }
-
-    private void configureStartupPhase(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
-        final List<String> startupFeatures = mojo.getStartupFeatures();
-        addFrameworkFeatureIfMissing(mojo.getFramework(), startupFeatures);
-        final List<String> startupProfiles = mojo.getStartupProfiles();
-        final boolean addAll =
-                startupFeatures.isEmpty() && startupProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault();
-        builder.defaultStage(Builder.Stage.Startup)
-               .kars(toArray(artifactLists.getStartupKars()))
-               .repositories(addAll, toArray(artifactLists.getStartupRepositories()))
-               .features(toArray(startupFeatures))
-               .bundles(toArray(artifactLists.getStartupBundles()))
-               .profiles(toArray(startupProfiles));
-    }
-
-    private void addFrameworkFeatureIfMissing(final String framework, final List<String> startupFeatures) {
-        final boolean frameworkIsMissing = !startupFeatures.contains(framework);
-        if (frameworkIsMissing) {
-            builder.features(Builder.Stage.Startup, framework);
-        }
     }
 
     private String[] toArray(List<String> strings) {
