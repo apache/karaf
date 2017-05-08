@@ -66,7 +66,7 @@ import static org.mockito.Mockito.times;
 /**
  * Tests for {@link AssemblyMojo} and it's attendant classes.
  */
-public class AssemblyMojoMockitoTest {
+public class AssemblyMojoSystemTest {
 
     // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
     private static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
