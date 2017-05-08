@@ -68,7 +68,6 @@ class AssemblyMojoExec {
         mappers.put(mojo::getInstalledProfiles, mojo::setInstalledProfiles);
         mappers.put(mojo::getInstalledRepositories, mojo::setInstalledRepositories);
         mappers.put(mojo::getLibraries, mojo::setLibraries);
-        mappers.put(mojo::getPidsToExtract, mojo::setPidsToExtract);
         mappers.put(mojo::getStartupBundles, mojo::setStartupBundles);
         mappers.put(mojo::getStartupFeatures, mojo::setStartupFeatures);
         mappers.put(mojo::getStartupProfiles, mojo::setStartupProfiles);

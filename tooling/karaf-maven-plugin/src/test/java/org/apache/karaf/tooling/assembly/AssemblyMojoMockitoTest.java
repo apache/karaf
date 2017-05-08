@@ -1068,16 +1068,6 @@ public class AssemblyMojoMockitoTest {
     }
 
     @Test
-    public void executeMojoNullPidsToExtractIsReplaceWithEmptyList() throws Exception {
-        //given
-        mojo.setPidsToExtract(null);
-        //when
-        executeMojo();
-        //then
-        assertThat(mojo.getPidsToExtract()).isEmpty();
-    }
-
-    @Test
     public void executeMojoRethrowsMojoExecutionExceptions() throws Exception {
         //given
         final AssemblyMojoExec mojoExec = mock(AssemblyMojoExec.class);

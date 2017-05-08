@@ -498,10 +498,6 @@ public class AssemblyMojo extends MojoSupport {
         return pidsToExtract;
     }
 
-    void setPidsToExtract(final List<String> pidsToExtract) {
-        this.pidsToExtract = pidsToExtract;
-    }
-
     Map<String, String> getTranslatedUrls() {
         return translatedUrls;
     }
