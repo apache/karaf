@@ -152,7 +152,7 @@ class ArtifactParser {
 
     private Map<Builder.Stage, List<Artifact>> groupArtifactsByStage(final Collection<Artifact> artifacts) {
         return artifacts.stream()
-                        .filter(artifact -> scopeToStage.get(artifact.getScope()) != null)
+                        .filter(artifact -> getStage(artifact) != null)
                         .collect(Collectors.groupingBy(this::getStage, Collectors.toList()));
     }
 
