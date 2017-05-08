@@ -141,6 +141,7 @@ public class Activator extends BaseActivator implements ManagedService {
         int sshPort            = getInt("sshPort", 8181);
         String sshHost         = getString("sshHost", "0.0.0.0");
         long sshIdleTimeout    = getLong("sshIdleTimeout", 1800000);
+        int nioWorkers         = getInt("nio-workers", 2);
         String sshRealm        = getString("sshRealm", "karaf");
         String hostKey         = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
         String hostKeyFormat   = getString("hostKeyFormat", "simple");
@@ -194,6 +195,7 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setAgentFactory(KarafAgentFactory.getInstance());
         server.setTcpipForwardingFilter(AcceptAllForwardingFilter.INSTANCE);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
+        server.getProperties().put(SshServer.NIO_WORKERS, new Integer(nioWorkers).toString());
         if (moduliUrl != null) {
             server.getProperties().put(SshServer.MODULI_URL, moduliUrl);
         }
