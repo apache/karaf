@@ -33,17 +33,21 @@ class ArtifactParser {
 
     private final BootArtifactParser bootArtifactParser;
 
+    private final InstalledArtifactParser installedArtifactParser;
+
     private final Map<String, Builder.Stage> scopeToStage = new HashMap<>();
 
     ArtifactParser(
             final MavenUriParser mavenUriParser, final Builder builder, final ArtifactFrameworkParser frameworkParser,
-            final StartupArtifactParser startupArtifactParser, final BootArtifactParser bootArtifactParser
+            final StartupArtifactParser startupArtifactParser, final BootArtifactParser bootArtifactParser,
+            final InstalledArtifactParser installedArtifactParser
                   ) {
         this.mavenUriParser = mavenUriParser;
         this.builder = builder;
         this.frameworkParser = frameworkParser;
         this.startupArtifactParser = startupArtifactParser;
         this.bootArtifactParser = bootArtifactParser;
+        this.installedArtifactParser = installedArtifactParser;
         init();
     }
 
@@ -58,7 +62,7 @@ class ArtifactParser {
         frameworkParser.parse(builder, mojo, artifactLists);
         startupArtifactParser.parse(builder, mojo, artifactLists);
         bootArtifactParser.parse(builder, mojo, artifactLists);
-        configureInstalledPhase(mojo, artifactLists);
+        installedArtifactParser.parse(builder, mojo, artifactLists);
         addLibraries(mojo);
     }
 
@@ -154,19 +158,6 @@ class ArtifactParser {
 
     private String[] toArray(List<String> strings) {
         return strings.toArray(new String[strings.size()]);
-    }
-
-    private void configureInstalledPhase(final AssemblyMojo mojo, final ArtifactLists artifactLists) {
-        final List<String> installedFeatures = mojo.getInstalledFeatures();
-        final List<String> installedProfiles = mojo.getInstalledProfiles();
-        final boolean addAll =
-                installedFeatures.isEmpty() && installedProfiles.isEmpty() && mojo.getInstallAllFeaturesByDefault();
-        builder.defaultStage(Builder.Stage.Installed)
-               .kars(toArray(artifactLists.getInstalledKars()))
-               .repositories(addAll, toArray(artifactLists.getInstalledRepositories()))
-               .features(toArray(installedFeatures))
-               .bundles(toArray(artifactLists.getInstalledBundles()))
-               .profiles(toArray(installedProfiles));
     }
 
     private void addLibraries(final AssemblyMojo mojo) {

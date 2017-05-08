@@ -266,9 +266,11 @@ public class AssemblyMojo extends MojoSupport {
         final ArtifactFrameworkParser frameworkParser = new ArtifactFrameworkParser();
         final StartupArtifactParser startupArtifactParser = new StartupArtifactParser();
         final BootArtifactParser bootArtifactParser = new BootArtifactParser();
-        final ArtifactParser artifactParser = new ArtifactParser(mavenUriParser, builder, frameworkParser,
-                                                                 startupArtifactParser, bootArtifactParser
-        );
+        final InstalledArtifactParser installedArtifactParser = new InstalledArtifactParser();
+        final ArtifactParser artifactParser =
+                new ArtifactParser(mavenUriParser, builder, frameworkParser, startupArtifactParser, bootArtifactParser,
+                                   installedArtifactParser
+                );
         final BuilderConfiguration builderConfiguration =
                 new BuilderConfiguration(getLog(), mavenUriParser, profileEditsParser, artifactParser);
         final ExecutableFile executableFile = new ExecutableFile();
