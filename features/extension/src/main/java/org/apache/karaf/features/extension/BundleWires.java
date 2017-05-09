@@ -48,7 +48,9 @@ class BundleWires {
     BundleWires(Bundle bundle) {
         this.bundleId = bundle.getBundleId();
         for (BundleWire wire : bundle.adapt(BundleWiring.class).getRequiredWires(null)) {
-            this.wiring.put(getRequirementId(wire.getRequirement()), getCapabilityId(wire.getCapability()));
+            String requirementId = getRequirementId(wire.getRequirement());
+            String capabilityId = getCapabilityId(wire.getCapability());
+            this.wiring.put(requirementId, capabilityId);
         }
     }
 
@@ -92,14 +94,20 @@ class BundleWires {
     }
 
     long getFragmentHost() {
-        return wiring.entrySet().stream().filter(e -> e.getKey().startsWith(HostNamespace.HOST_NAMESPACE))
-            .map(Map.Entry::getValue).mapToLong(s -> {
-                int idx = s.indexOf(';');
-                if (idx > 0) {
-                    s = s.substring(0, idx);
-                }
-                return Long.parseLong(s.trim());
-            }).findFirst().orElse(-1);
+        return wiring.entrySet().stream() //
+            .filter(e -> e.getKey().startsWith(HostNamespace.HOST_NAMESPACE)) //
+            .map(Map.Entry::getValue) //
+            .mapToLong(s -> getBundleId(s)) //
+            .findFirst() //
+            .orElse(-1);
+    }
+    
+    private long getBundleId(String value) {
+        int idx = value.indexOf(';');
+        if (idx > 0) {
+            value = value.substring(0, idx);
+        }
+        return Long.parseLong(value.trim());
     }
 
     void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
