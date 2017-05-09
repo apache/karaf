@@ -114,7 +114,7 @@ public class VerifyMojo extends MojoSupport {
     protected Set<String> descriptors;
 
     @Parameter(property = "features")
-    protected Set<String> features;
+    protected List<String> features;
 
     @Parameter(property = "framework")
     protected Set<String> framework;
@@ -313,18 +313,7 @@ public class VerifyMojo extends MojoSupport {
             }
         }
         if (features != null && !features.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (String feature : features) {
-                if (sb.length() > 0) {
-                    sb.append("|");
-                }
-                String p = feature.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*");
-                sb.append(p);
-                if (!feature.contains("/")) {
-                    sb.append("/.*");
-                }
-            }
-            Pattern pattern = Pattern.compile(sb.toString());
+            Pattern pattern = getPattern(features);
             for (Iterator<Feature> iterator = featuresToTest.iterator(); iterator.hasNext();) {
                 Feature feature = iterator.next();
                 String id = feature.getName() + "/" + feature.getVersion();
@@ -392,6 +381,36 @@ public class VerifyMojo extends MojoSupport {
         if ("end".equals(fail) && !failures.isEmpty()) {
             throw new MojoExecutionException("Verification failures", new MultiException("Verification failures", failures));
         }
+    }
+
+    static Pattern getPattern(List<String> features) {
+        StringBuilder sb = new StringBuilder();
+        boolean prevIsNeg = false;
+        for (String feature : features) {
+            if (sb.length() > 0 && !prevIsNeg) {
+                sb.append("|");
+            }
+            sb.append("(");
+            feature = feature.trim();
+            boolean negative = feature.startsWith("!");
+            if (negative) {
+                feature = feature.substring("!".length());
+                sb.append("(?!");
+            }
+            String p = feature.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*");
+            sb.append(p);
+            if (!feature.contains("/")) {
+                sb.append("/.*");
+            }
+            if (negative) {
+                sb.append(")");
+            }
+            prevIsNeg = negative;
+        }
+        for (String feature : features) {
+            sb.append(")");
+        }
+        return Pattern.compile(sb.toString());
     }
 
     private void verifyResolution(DownloadManager manager, final Map<String, Features> repositories, Set<String> features, Hashtable<String, String> properties) throws MojoExecutionException {
