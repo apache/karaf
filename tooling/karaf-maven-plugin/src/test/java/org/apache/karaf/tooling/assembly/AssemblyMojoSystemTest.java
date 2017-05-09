@@ -19,15 +19,17 @@ import org.apache.maven.plugin.testing.resources.TestResources;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
 import org.apache.maven.plugin.testing.stubs.StubArtifactRepository;
 import org.apache.maven.project.MavenProject;
+import org.easymock.EasyMockRule;
+import org.easymock.EasyMockSupport;
+import org.easymock.Mock;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,25 +51,24 @@ import static org.apache.karaf.profile.assembly.Builder.Stage.Installed;
 import static org.apache.karaf.profile.assembly.Builder.Stage.Startup;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.junit.Assume.assumeTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 
 /**
  * Tests for {@link AssemblyMojo} and it's attendant classes.
  */
-public class AssemblyMojoSystemTest {
+public class AssemblyMojoSystemTest extends EasyMockSupport {
 
     // WILDCARD is used in place of the framework version as the test shouldn't be updated for every release
     private static final String DEFAULT_FRAMEWORK_KAR = "mvn:org.apache.karaf.features/framework/WILDCARD/xml/features";
 
     private static final String TEST_PROJECT = "assembly-execute-mojo";
+
+    @Rule
+    public EasyMockRule rule = new EasyMockRule(this);
 
     @Rule
     public MojoRule mojoRule = new MojoRule();
@@ -94,7 +95,6 @@ public class AssemblyMojoSystemTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         dependencyArtifacts = new HashSet<>();
         final MavenUriParser mavenUriParser = new MavenUriParser();
         final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
@@ -470,11 +470,14 @@ public class AssemblyMojoSystemTest {
         //given
         final List<String> featuresRepositories = Collections.singletonList("feature repository");
         mojo.setFeatureRepositories(featuresRepositories);
+        log.warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
+                 + "installedRepositories instead");
+        withDefaultLogging();
+        replayAll();
         //when
         executeMojo();
         //then
-        then(log).should()
-                 .warn(anyString());
+        verifyAll();
         assertThat(mojo.getStartupRepositories()).containsAll(featuresRepositories);
         assertThat(mojo.getBootRepositories()).containsAll(featuresRepositories);
         assertThat(mojo.getInstalledRepositories()).containsAll(featuresRepositories);
@@ -484,11 +487,12 @@ public class AssemblyMojoSystemTest {
     public void executeMojoDoesntUseDeprecatedFeatureRepositories() throws Exception {
         //given
         mojo.setFeatureRepositories(Collections.emptyList());
+        withDefaultLogging();
+        replayAll();
         //when
         executeMojo();
         //then
-        then(log).should(never())
-                 .warn(anyString());
+        verifyAll();
     }
 
     @Test
@@ -540,10 +544,13 @@ public class AssemblyMojoSystemTest {
     public void executeMojoWithPropertyFileEdits() throws Exception {
         //given
         final KarafPropertyEdits edit = givenPropertyEditsExist();
-        given(profileEditsReader.read(any(InputStream.class), eq(true))).willReturn(edit);
+        expect(profileEditsReader.read(anyObject(InputStream.class), eq(true))).andReturn(edit);
+        withDefaultLogging();
+        replayAll();
         //when
         executeMojo();
         //then
+        verifyAll();
         assertThat(builder.isPropertyEditsCalled()).isTrue();
     }
 
@@ -992,11 +999,14 @@ public class AssemblyMojoSystemTest {
         //given
         final AssemblyMojoExec mojoExec = mock(AssemblyMojoExec.class);
         mojo.setMojoExec(mojoExec);
-        doThrow(MojoExecutionException.class).when(mojoExec)
-                                             .doExecute(any());
+        mojoExec.doExecute(mojo);
+        expectLastCall().andThrow(new MojoExecutionException(""));
+        replayAll();
         exception.expect(MojoExecutionException.class);
         //when
         executeMojo();
+        //then
+        verifyAll();
     }
 
     @Test
@@ -1004,35 +1014,49 @@ public class AssemblyMojoSystemTest {
         //given
         final AssemblyMojoExec mojoExec = mock(AssemblyMojoExec.class);
         mojo.setMojoExec(mojoExec);
-        doThrow(MojoFailureException.class).when(mojoExec)
-                                           .doExecute(any());
+        mojoExec.doExecute(mojo);
+        expectLastCall().andThrow(new MojoFailureException(""));
+        replayAll();
         exception.expect(MojoFailureException.class);
         //when
         executeMojo();
+        //then
+        verifyAll();
     }
 
     @Test
     public void executeMojoHandlesIOExceptionReadingProfileEdits() throws Exception {
         //given
         givenPropertyEditsExist();
-        doThrow(IOException.class).when(profileEditsReader)
-                                  .read(any(InputStream.class), eq(true));
+        expect(profileEditsReader.read(anyObject(InputStream.class), eq(true))).andThrow(new IOException());
+        withDefaultLogging();
+        replayAll();
         //when
         executeMojo();
         //then
         assertThat(builder.isPropertyEditsCalled()).isFalse();
+        verifyAll();
     }
 
     @Test
     public void executeMojoHandlesXMLStreamExceptionReadingProfileEdits() throws Exception {
         //given
         givenPropertyEditsExist();
-        doThrow(XMLStreamException.class).when(profileEditsReader)
-                                         .read(any(InputStream.class), eq(true));
+        expect(profileEditsReader.read(anyObject(FileInputStream.class), eq(true))).andThrow(new XMLStreamException());
+        withDefaultLogging();
+        replayAll();
         //when
         executeMojo();
         //then
         assertThat(builder.isPropertyEditsCalled()).isFalse();
+        verifyAll();
+    }
+
+    private void withDefaultLogging() {
+        log.info("Using repositories: default-url@id=default-id@noreleases@snapshots");
+        log.info("Creating work directory");
+        log.info("Loading kar and features repositories dependencies");
+        expectLastCall();
     }
 
 }
