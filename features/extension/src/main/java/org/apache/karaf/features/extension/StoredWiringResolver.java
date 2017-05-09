@@ -37,22 +37,22 @@ import org.osgi.resource.Resource;
 
 class StoredWiringResolver implements ResolverHook {
     private final Map<Long, BundleWires> wiring = new HashMap<>();
-	private Path path;
-    
-    StoredWiringResolver(Path path) {
-    	this.path = path;
-    	load();
-	}
+    private Path path;
 
-	void load() {
+    StoredWiringResolver(Path path) {
+        this.path = path;
+        load();
+    }
+
+    void load() {
         try {
             Files.createDirectories(path);
             Files.list(path).forEach(p -> {
                 String name = p.getFileName().toString();
                 if (name.matches("[0-9]+")) {
+                    long id = Long.parseLong(name);
                     try (BufferedReader reader = Files.newBufferedReader(p)) {
-                    	long id = Long.parseLong(name);
-                        wiring.put(id, new BundleWires(reader));
+                        wiring.put(id, new BundleWires(id, reader));
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -62,13 +62,14 @@ class StoredWiringResolver implements ResolverHook {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     @Override
     public void filterResolvable(Collection<BundleRevision> candidates) {
     }
 
     @Override
-    public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+    public void filterSingletonCollisions(BundleCapability singleton,
+                                          Collection<BundleCapability> collisionCandidates) {
     }
 
     @Override
@@ -76,37 +77,37 @@ class StoredWiringResolver implements ResolverHook {
         long sourceId = getBundleId(requirement);
         wiring.get(sourceId).filterMatches(requirement, candidates);
     }
-    
+
     @Override
     public void end() {
     }
 
-	private long getBundleId(BundleRequirement requirement) {
-		long sourceId = requirement.getRevision().getBundle().getBundleId();
+    private long getBundleId(BundleRequirement requirement) {
+        long sourceId = requirement.getRevision().getBundle().getBundleId();
         if (isFragment(requirement.getRevision())
-                && !requirement.getNamespace().equals(HostNamespace.HOST_NAMESPACE)) {
+            && !requirement.getNamespace().equals(HostNamespace.HOST_NAMESPACE)) {
             sourceId = wiring.get(sourceId).getFragmentHost();
         }
-		return sourceId;
-	}
+        return sourceId;
+    }
 
     private static boolean isFragment(Resource resource) {
         for (Capability cap : resource.getCapabilities(null)) {
             if (IdentityNamespace.IDENTITY_NAMESPACE.equals(cap.getNamespace())) {
-                return IdentityNamespace.TYPE_FRAGMENT.equals(
-                        cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE));
+                return IdentityNamespace.TYPE_FRAGMENT
+                    .equals(cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE));
             }
         }
         return false;
     }
 
-	synchronized void update(Bundle bundle) {
-		BundleWires bw = new BundleWires(bundle);
-		bw.save(path);
-		wiring.put(bundle.getBundleId(), bw);
-	}
-	
-	synchronized void delete(Bundle bundle) {
-		wiring.get(bundle.getBundleId()).delete(path);
-	}
+    synchronized void update(Bundle bundle) {
+        BundleWires bw = new BundleWires(bundle);
+        bw.save(path);
+        wiring.put(bundle.getBundleId(), bw);
+    }
+
+    synchronized void delete(Bundle bundle) {
+        wiring.get(bundle.getBundleId()).delete(path);
+    }
 }

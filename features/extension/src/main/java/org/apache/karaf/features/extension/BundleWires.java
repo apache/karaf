@@ -43,24 +43,22 @@ import org.osgi.resource.Requirement;
 
 class BundleWires {
 	long bundleId;
-	Map<String, String> wiring;
+	Map<String, String> wiring = new HashMap<>();
 
 	BundleWires(Bundle bundle) {
 		this.bundleId = bundle.getBundleId();
-		this.wiring = new HashMap<>();
-        Map<String, String> bw = new HashMap<>();
         for (BundleWire wire : bundle.adapt(BundleWiring.class).getRequiredWires(null)) {
-            bw.put(getRequirementId(wire.getRequirement()), getCapabilityId(wire.getCapability()));
+            this.wiring.put(getRequirementId(wire.getRequirement()), getCapabilityId(wire.getCapability()));
         }
 	}
 	
-	BundleWires(BufferedReader reader) throws IOException {
-		Map<String, String> map = new HashMap<>();
+	BundleWires(long bundleId, BufferedReader reader) throws IOException {
+	    this.bundleId = bundleId;
 		while (true) {
 			String key = reader.readLine();
 			String val = reader.readLine();
 			if (key != null && val != null) {
-				map.put(key, val);
+				this.wiring.put(key, val);
 			} else {
 				break;
 			}
