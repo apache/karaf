@@ -23,11 +23,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -47,21 +44,20 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.apache.karaf.profile.assembly.Builder.Stage.Boot;
+import static org.apache.karaf.profile.assembly.Builder.Stage.Installed;
+import static org.apache.karaf.profile.assembly.Builder.Stage.Startup;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.startsWith;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 
 /**
  * Tests for {@link AssemblyMojo} and it's attendant classes.
@@ -82,8 +78,7 @@ public class AssemblyMojoSystemTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    @Spy
-    private Builder builder = Builder.newInstance();
+    private BuilderSpy builder = new BuilderSpy();
 
     private AssemblyMojo mojo;
 
@@ -94,20 +89,12 @@ public class AssemblyMojoSystemTest {
     @Mock
     private Log log;
 
-    @Captor
-    private ArgumentCaptor<String> stringArgumentCaptor;
-
-    @Captor
-    private ArgumentCaptor<Map<String, String>> mapArgumentCaptor;
-
     @Mock
     private KarafPropertyInstructionsModelStaxReader profileEditsReader;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        doNothing().when(builder)
-                   .generateAssembly();
         dependencyArtifacts = new HashSet<>();
         final MavenUriParser mavenUriParser = new MavenUriParser();
         final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
@@ -165,7 +152,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojoCheckingForFrameworkKar(framework, DEFAULT_FRAMEWORK_KAR);
         //then
-        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
+        assertFeaturesAddedToStage(Startup, new String[]{framework});
     }
 
     private void executeMojoCheckingForFrameworkKar(final String framework, final String expectedFrameworkKar)
@@ -175,7 +162,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertStageKarsAdded(Builder.Stage.Startup, new String[]{expectedFrameworkKar}, 2);
+        assertStageKarsAdded(Startup, new String[]{expectedFrameworkKar}, 2);
     }
 
     private void executeMojo() throws Exception {
@@ -190,26 +177,13 @@ public class AssemblyMojoSystemTest {
                                              .map(pattern -> pattern.replace("WILDCARD", ".*"))
                                              .map(Pattern::compile)
                                              .collect(Collectors.toList());
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(calls))
-                     .kars(eq(stage), anyBoolean(), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).hasSize(kars.length);
-        assertThat(stringArgumentCaptor.getAllValues()
-                                       .stream()
-                                       .filter(kar -> patterns.stream()
-                                                              .anyMatch(pattern -> pattern.matcher(kar)
-                                                                                          .matches()))
-                                       .collect(Collectors.toList())).hasSize(kars.length);
-    }
-
-    private void assertStageFeaturesAdded(final Builder.Stage stage, final String[] features, final int calls) {
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(calls))
-                     .features(eq(stage), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add features to Stage " + stage)
-                                                       .containsExactlyInAnyOrder(features);
+        final List<String> karsByStage = builder.getAllKarsForStage(stage);
+        assertThat(karsByStage).hasSize(kars.length);
+        assertThat(karsByStage.stream()
+                              .filter(kar -> patterns.stream()
+                                                     .anyMatch(pattern -> pattern.matcher(kar)
+                                                                                 .matches()))
+                              .collect(Collectors.toList())).hasSize(kars.length);
     }
 
     @Test
@@ -219,7 +193,13 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojoCheckingForFrameworkKar(framework, DEFAULT_FRAMEWORK_KAR);
         //then
-        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
+        assertFeaturesAddedToStage(Startup, new String[]{framework});
+    }
+
+    private void assertFeaturesAddedToStage(final Builder.Stage stage, final String[] features) {
+        List<String> allFeaturesForStage = builder.getAllFeaturesForStage(stage);
+        assertThat(allFeaturesForStage).as("Add features to Stage " + stage)
+                                       .containsExactlyInAnyOrder(features);
     }
 
     @Test
@@ -230,7 +210,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
         //then
-        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
+        assertFeaturesAddedToStage(Startup, new String[]{framework});
     }
 
     @Test
@@ -241,7 +221,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojoCheckingForFrameworkKar(framework, expectedFrameworkKar);
         //then
-        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{framework}, 2);
+        assertFeaturesAddedToStage(Startup, new String[]{framework});
     }
 
     @Test
@@ -305,7 +285,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertStageKarsAdded(Builder.Stage.Startup, new String[]{DEFAULT_FRAMEWORK_KAR, expected}, 2);
+        assertStageKarsAdded(Startup, new String[]{DEFAULT_FRAMEWORK_KAR, expected}, 2);
     }
 
     private DefaultArtifact getDependency(final String scope, final String type, final String classifier)
@@ -328,7 +308,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertStageKarsAdded(Builder.Stage.Boot, new String[]{expected}, 1);
+        assertStageKarsAdded(Boot, new String[]{expected}, 1);
     }
 
     @Test
@@ -350,16 +330,12 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertBundlesAdded(new String[]{expected});
+        assertBundlesAddedToStage(Startup, new String[]{expected});
     }
 
-    private void assertBundlesAdded(final String[] bundles) {
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(3))
-                     .bundles(stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add bundles")
-                                                       .containsExactlyInAnyOrder(bundles);
+    private void assertBundlesAddedToStage(final Builder.Stage stage, final String[] bundles) {
+        assertThat(builder.getAllBundlesForStage(stage)).as("Add bundles to stage " + stage)
+                                                        .containsExactlyInAnyOrder(bundles);
     }
 
     @Test
@@ -369,7 +345,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertBundlesAdded(new String[]{});
+        assertBundlesAddedToStage(Startup, new String[]{});
     }
 
     @Test
@@ -380,7 +356,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertBundlesAdded(new String[]{expected});
+        assertBundlesAddedToStage(Boot, new String[]{expected});
     }
 
     @Test
@@ -391,7 +367,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertBundlesAdded(new String[]{expected});
+        assertBundlesAddedToStage(Installed, new String[]{expected});
     }
 
     @Test
@@ -402,7 +378,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertBundlesAdded(new String[]{expected,});
+        assertBundlesAddedToStage(Startup, new String[]{expected});
     }
 
     @Test
@@ -413,16 +389,12 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertStageRepoAdded(Builder.Stage.Startup, new String[]{expected});
+        assertRepoAddedToStage(Startup, new String[]{expected});
     }
 
-    private void assertStageRepoAdded(final Builder.Stage stage, final String[] repos) {
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should()
-                     .repositories(eq(stage), anyBoolean(), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add repositories to Stage " + stage)
-                                                       .containsExactlyInAnyOrder(repos);
+    private void assertRepoAddedToStage(final Builder.Stage stage, final String[] repos) {
+        assertThat(builder.getAllRepositoriesForStage(stage)).as("Add repositories to Stage " + stage)
+                                                             .containsExactlyInAnyOrder(repos);
     }
 
     @Test
@@ -433,7 +405,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertStageRepoAdded(Builder.Stage.Startup, new String[]{expected});
+        assertRepoAddedToStage(Startup, new String[]{expected});
     }
 
     @Test
@@ -444,7 +416,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertStageRepoAdded(Builder.Stage.Boot, new String[]{expected});
+        assertRepoAddedToStage(Boot, new String[]{expected});
     }
 
     @Test
@@ -455,7 +427,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertStageRepoAdded(Builder.Stage.Installed, new String[]{expected});
+        assertRepoAddedToStage(Builder.Stage.Installed, new String[]{expected});
     }
 
     @Test
@@ -465,14 +437,9 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(3))
-                     .bundles(stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()
-                                       .stream()
-                                       .filter(value -> value.contains("unknown"))
-                                       .findAny()).isNotPresent();
+        assertThat(builder.getAllBundlesForStage(Startup)).isEmpty();
+        assertThat(builder.getAllBundlesForStage(Boot)).isEmpty();
+        assertThat(builder.getAllBundlesForStage(Installed)).isEmpty();
     }
 
     @Test
@@ -482,29 +449,20 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        assertFeaturesAdded(new String[]{});
-        assertStageFeaturesAdded(Builder.Stage.Startup, new String[]{"framework"}, 2);
-        assertStageFeaturesAdded(Builder.Stage.Boot, new String[]{}, 1);
-        assertStageFeaturesAdded(Builder.Stage.Installed, new String[]{}, 1);
-        assertProfilesAdded(new String[]{});
+        assertBundlesAddedToStage(Startup, new String[]{});
+        assertBundlesAddedToStage(Boot, new String[]{});
+        assertBundlesAddedToStage(Installed, new String[]{});
+        assertFeaturesAddedToStage(Startup, new String[]{"framework"});
+        assertFeaturesAddedToStage(Boot, new String[]{});
+        assertFeaturesAddedToStage(Installed, new String[]{});
+        assertProfilesAddedToStage(Startup, new String[]{});
+        assertProfilesAddedToStage(Boot, new String[]{});
+        assertProfilesAddedToStage(Installed, new String[]{});
     }
 
-    private void assertProfilesAdded(final String[] profiles) {
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(3))
-                     .profiles(stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add profiles")
-                                                       .containsExactlyInAnyOrder(profiles);
-    }
-
-    private void assertFeaturesAdded(final String[] features) {
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should(times(3))
-                     .features(stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).as("Add features")
-                                                       .containsExactlyInAnyOrder(features);
+    private void assertProfilesAddedToStage(final Builder.Stage stage, final String[] profiles) {
+        assertThat(builder.getAllProfilesForStage(stage)).as("Add profiles to stage " + stage)
+                                                         .containsExactlyInAnyOrder(profiles);
     }
 
     @Test
@@ -550,11 +508,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        stringArgumentCaptor.getAllValues()
-                            .clear();
-        then(builder).should()
-                     .mavenRepositories(stringArgumentCaptor.capture());
-        final String repos = stringArgumentCaptor.getValue();
+        final String repos = builder.getAllMavenRepositories();
         assertThat(repos).as("default repo")
                          .contains("snapshot-url@id=snapshot-id@noreleases@snapshots")
                          .contains("release-url@id=release-id")
@@ -569,8 +523,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should(never())
-                     .config(any(), any());
+        assertThat(builder.isConfigCalled()).isFalse();
     }
 
     @Test
@@ -580,8 +533,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should(never())
-                     .system(any(), any());
+        assertThat(builder.isSystemCalled()).isFalse();
     }
 
     @Test
@@ -592,8 +544,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .propertyEdits(any());
+        assertThat(builder.isPropertyEditsCalled()).isTrue();
     }
 
     private KarafPropertyEdits givenPropertyEditsExist() throws IOException {
@@ -612,8 +563,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should(never())
-                     .propertyEdits(any());
+        assertThat(builder.isPropertyEditsCalled()).isFalse();
     }
 
     @Test
@@ -639,9 +589,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
+        assertThat(builder.getAllTranslatedUrls()).containsKey(expected);
     }
 
     @Test
@@ -654,9 +602,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).doesNotContainKeys(expected);
+        assertThat(builder.getAllTranslatedUrls()).doesNotContainKeys(expected);
     }
 
     @Test
@@ -669,9 +615,8 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).doesNotContainKeys(expected);
+        final Map<String, String> translatedUrls = builder.getAllTranslatedUrls();
+        assertThat(translatedUrls).doesNotContainKeys(expected);
     }
 
     @Test
@@ -685,9 +630,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
+        assertThat(builder.getAllTranslatedUrls()).containsKey(expected);
     }
 
     @Test
@@ -701,9 +644,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
+        assertThat(builder.getAllTranslatedUrls()).containsKey(expected);
     }
 
     @Test
@@ -717,9 +658,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
+        assertThat(builder.getAllTranslatedUrls()).containsKey(expected);
     }
 
     @Test
@@ -733,9 +672,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
+        assertThat(builder.getAllTranslatedUrls()).containsKey(expected);
     }
 
     @Test
@@ -749,9 +686,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()).containsKey(expected);
+        assertThat(builder.getAllTranslatedUrls()).containsKey(expected);
     }
 
     @Test
@@ -761,10 +696,8 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .translatedUrls(mapArgumentCaptor.capture());
-        assertThat(mapArgumentCaptor.getValue()
-                                    .entrySet()).hasSize(1);
+        assertThat(builder.getAllTranslatedUrls()
+                          .entrySet()).hasSize(1);
     }
 
     @Test
@@ -774,9 +707,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .libraries(stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).containsSubsequence("library");
+        assertThat(builder.getAllLibraries()).containsExactly("library");
     }
 
     @Test
@@ -797,9 +728,7 @@ public class AssemblyMojoSystemTest {
         executeMojo();
         //then
         assertThat(mojo.getFramework()).isEqualTo("framework");
-        then(builder).should()
-                     .kars(eq(Builder.Stage.Startup), eq(false), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+        assertThat(builder.getAllKarsForStage(Startup)).containsOnly(
                 String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
     }
 
@@ -821,9 +750,7 @@ public class AssemblyMojoSystemTest {
         executeMojo();
         //then
         assertThat(mojo.getFramework()).isEqualTo("framework");
-        then(builder).should()
-                     .kars(eq(Builder.Stage.Startup), eq(false), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+        assertThat(builder.getAllKarsForStage(Startup)).containsOnly(
                 String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
     }
 
@@ -845,9 +772,7 @@ public class AssemblyMojoSystemTest {
         executeMojo();
         //then
         assertThat(mojo.getFramework()).isEqualTo("static-framework");
-        then(builder).should()
-                     .kars(eq(Builder.Stage.Startup), eq(false), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+        assertThat(builder.getAllKarsForStage(Startup)).containsOnly(
                 String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
     }
 
@@ -867,9 +792,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .kars(eq(Builder.Stage.Startup), eq(true), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+        assertThat(builder.getAllKarsForStage(Startup)).contains(
                 String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
     }
 
@@ -889,9 +812,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .kars(eq(Builder.Stage.Boot), eq(true), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).containsOnly(
+        assertThat(builder.getAllKarsForStage(Boot)).containsOnly(
                 String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
     }
 
@@ -911,9 +832,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .kars(eq(Builder.Stage.Installed), eq(true), stringArgumentCaptor.capture());
-        assertThat(stringArgumentCaptor.getAllValues()).contains(
+        assertThat(builder.getAllKarsForStage(Installed)).contains(
                 String.format("mvn:%s/%s/%s/%s", groupId, artifactId, version, type));
     }
 
@@ -924,12 +843,10 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should(never())
-                     .features(Builder.Stage.Startup, "framework");
-        then(builder).should()
-                     .kars(eq(Builder.Stage.Startup), eq(false),
-                           startsWith("mvn:org.apache.karaf.features/framework/")
-                          );
+        assertThat(builder.getAllFeaturesForStage(Startup)).contains("framework", "other feature");
+        final List<String> startupKars = builder.getAllKarsForStage(Startup);
+        assertThat(startupKars).hasSize(1);
+        assertThat(startupKars.get(0)).startsWith("mvn:org.apache.karaf.features/framework/");
     }
 
     @Test
@@ -939,8 +856,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should()
-                     .features(Builder.Stage.Startup, "framework");
+        assertThat(builder.getAllFeaturesForStage(Startup)).containsExactlyInAnyOrder("framework", "other feature");
     }
 
     @Test
@@ -948,14 +864,16 @@ public class AssemblyMojoSystemTest {
         //given
         mojo.setProfilesUri("url");
         mojo.setStartupRepositories(Collections.emptyList());
-        mojo.setStartupProfiles(Collections.singletonList("value"));
-        mojo.setBootProfiles(Collections.singletonList("value"));
-        mojo.setInstalledProfiles(Collections.singletonList("value"));
+        mojo.setStartupProfiles(Collections.singletonList("startup profile"));
+        mojo.setBootProfiles(Collections.singletonList("boot profile"));
+        mojo.setInstalledProfiles(Collections.singletonList("installed profile"));
         //when
         executeMojo();
         //then
-        then(builder).should(times(3))
-                     .repositories(eq(false));
+        assertThat(builder.getAllRepositoriesForStage(Startup)).isEmpty();
+        assertThat(builder.getAllProfilesForStage(Startup)).containsExactly("startup profile");
+        assertThat(builder.getAllProfilesForStage(Boot)).containsExactly("boot profile");
+        assertThat(builder.getAllProfilesForStage(Installed)).containsExactly("installed profile");
     }
 
     @Test
@@ -967,8 +885,9 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should(times(3))
-                     .repositories(eq(false));
+        assertThat(builder.getAllRepositoriesForStage(Startup)).isEmpty();
+        assertThat(builder.getAllRepositoriesForStage(Boot)).isEmpty();
+        assertThat(builder.getAllRepositoriesForStage(Builder.Stage.Installed)).isEmpty();
     }
 
     @Test
@@ -978,8 +897,9 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should(times(3))
-                     .repositories(eq(false));
+        assertThat(builder.getAllRepositoriesForStage(Startup)).isEmpty();
+        assertThat(builder.getAllRepositoriesForStage(Boot)).isEmpty();
+        assertThat(builder.getAllRepositoriesForStage(Builder.Stage.Installed)).isEmpty();
     }
 
     @Test
@@ -1100,8 +1020,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should(never())
-                     .propertyEdits(any());
+        assertThat(builder.isPropertyEditsCalled()).isFalse();
     }
 
     @Test
@@ -1113,8 +1032,7 @@ public class AssemblyMojoSystemTest {
         //when
         executeMojo();
         //then
-        then(builder).should(never())
-                     .propertyEdits(any());
+        assertThat(builder.isPropertyEditsCalled()).isFalse();
     }
 
 }
