@@ -42,82 +42,78 @@ import org.osgi.resource.Namespace;
 import org.osgi.resource.Requirement;
 
 class BundleWires {
-	long bundleId;
-	Map<String, String> wiring = new HashMap<>();
+    long bundleId;
+    Map<String, String> wiring = new HashMap<>();
 
-	BundleWires(Bundle bundle) {
-		this.bundleId = bundle.getBundleId();
+    BundleWires(Bundle bundle) {
+        this.bundleId = bundle.getBundleId();
         for (BundleWire wire : bundle.adapt(BundleWiring.class).getRequiredWires(null)) {
             this.wiring.put(getRequirementId(wire.getRequirement()), getCapabilityId(wire.getCapability()));
         }
-	}
-	
-	BundleWires(long bundleId, BufferedReader reader) throws IOException {
-	    this.bundleId = bundleId;
-		while (true) {
-			String key = reader.readLine();
-			String val = reader.readLine();
-			if (key != null && val != null) {
-				this.wiring.put(key, val);
-			} else {
-				break;
-			}
-		}
-	}
-    
-	void save(Path path) {
-		try {
-			Files.createDirectories(path);
-			Path file = path.resolve(Long.toString(this.bundleId));
-			Files.createDirectories(file.getParent());
-			try (BufferedWriter fw = Files.newBufferedWriter(file, TRUNCATE_EXISTING, WRITE, CREATE)) {
-				for (Map.Entry<String, String> wire : wiring.entrySet()) {
-					fw.append(wire.getKey()).append('\n');
-					fw.append(wire.getValue()).append('\n');
-				}
-			}
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
-	}
-    
-	void delete(Path path) {
-		try {
-			Files.createDirectories(path);
-			Path file = path.resolve(Long.toString(this.bundleId));
-			Files.deleteIfExists(file);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
-	}
-    
-	long getFragmentHost() {
-		return wiring.entrySet().stream()
-        .filter(e -> e.getKey().startsWith(HostNamespace.HOST_NAMESPACE))
-        .map(Map.Entry::getValue)
-        .mapToLong(s -> {
-            int idx = s.indexOf(';');
-            if (idx > 0) {
-                s = s.substring(0, idx);
+    }
+
+    BundleWires(long bundleId, BufferedReader reader) throws IOException {
+        this.bundleId = bundleId;
+        while (true) {
+            String key = reader.readLine();
+            String val = reader.readLine();
+            if (key != null && val != null) {
+                this.wiring.put(key, val);
+            } else {
+                break;
             }
-            return Long.parseLong(s.trim());
-        })
-        .findFirst()
-        .orElse(-1);
-	}
-	
-	void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+        }
+    }
+
+    void save(Path path) {
+        try {
+            Files.createDirectories(path);
+            Path file = path.resolve(Long.toString(this.bundleId));
+            Files.createDirectories(file.getParent());
+            try (BufferedWriter fw = Files.newBufferedWriter(file, TRUNCATE_EXISTING, WRITE, CREATE)) {
+                for (Map.Entry<String, String> wire : wiring.entrySet()) {
+                    fw.append(wire.getKey()).append('\n');
+                    fw.append(wire.getValue()).append('\n');
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    void delete(Path path) {
+        try {
+            Files.createDirectories(path);
+            Path file = path.resolve(Long.toString(this.bundleId));
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    long getFragmentHost() {
+        return wiring.entrySet().stream().filter(e -> e.getKey().startsWith(HostNamespace.HOST_NAMESPACE))
+            .map(Map.Entry::getValue).mapToLong(s -> {
+                int idx = s.indexOf(';');
+                if (idx > 0) {
+                    s = s.substring(0, idx);
+                }
+                return Long.parseLong(s.trim());
+            }).findFirst().orElse(-1);
+    }
+
+    void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
         String cap = wiring.get(getRequirementId(requirement));
         for (Iterator<BundleCapability> candIter = candidates.iterator(); candIter.hasNext();) {
             BundleCapability cand = candIter.next();
             if (cap != null && !cap.equals(getCapabilityId(cand))
-            		|| cap == null && cand.getRevision().getBundle().getBundleId() != this.bundleId) {
+                || cap == null && cand.getRevision().getBundle().getBundleId() != this.bundleId) {
                 candIter.remove();
             }
         }
-	}
-	
-	private String getRequirementId(Requirement requirement) {
+    }
+
+    private String getRequirementId(Requirement requirement) {
         String filter = requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
         if (filter != null) {
             return requirement.getNamespace() + "; " + filter;

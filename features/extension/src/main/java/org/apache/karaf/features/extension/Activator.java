@@ -28,12 +28,12 @@ import org.osgi.framework.wiring.FrameworkWiring;
 
 public class Activator implements BundleActivator, SynchronousBundleListener {
     private static final String WIRING_PATH = "wiring";
-	private StoredWiringResolver resolver;
-	private BundleContext context;
+    private StoredWiringResolver resolver;
+    private BundleContext context;
 
     @Override
     public void start(BundleContext context) throws Exception {
-    	this.context = context;
+        this.context = context;
         resolver = new StoredWiringResolver(context.getDataFile(WIRING_PATH).toPath());
         context.addBundleListener(this);
     }
@@ -43,23 +43,25 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
         context.removeBundleListener(this);
     }
 
-	@Override
-	public void bundleChanged(BundleEvent event) {
-		if (event.getBundle().getBundleId() == 0 && event.getType() == BundleEvent.STARTED) {
-			resolveAll();
-		} else if (event.getType() == BundleEvent.RESOLVED) {
-			resolver.update(event.getBundle());
-		} else if (event.getType() == BundleEvent.UNRESOLVED) {
-			resolver.delete(event.getBundle());
-		}
-	}
+    @Override
+    public void bundleChanged(BundleEvent event) {
+        if (event.getBundle().getBundleId() == 0 && event.getType() == BundleEvent.STARTED) {
+            resolveAll();
+        } else if (event.getType() == BundleEvent.RESOLVED) {
+            resolver.update(event.getBundle());
+        } else if (event.getType() == BundleEvent.UNRESOLVED) {
+            resolver.delete(event.getBundle());
+        }
+    }
 
-	private void resolveAll() {
-		ServiceRegistration<ResolverHookFactory> registration = context.registerService(ResolverHookFactory.class, (triggers) -> resolver, null);
-		try {
-		    context.getBundle().adapt(FrameworkWiring.class).resolveBundles(Arrays.asList(context.getBundles()));
-		} finally {
-		    registration.unregister();
-		}
-	}
+    private void resolveAll() {
+        ServiceRegistration<ResolverHookFactory> registration = context
+            .registerService(ResolverHookFactory.class, (triggers) -> resolver, null);
+        try {
+            context.getBundle().adapt(FrameworkWiring.class)
+                .resolveBundles(Arrays.asList(context.getBundles()));
+        } finally {
+            registration.unregister();
+        }
+    }
 }
