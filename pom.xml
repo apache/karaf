@@ -187,8 +187,8 @@
         <felix.fileinstall.version>3.6.0</felix.fileinstall.version>
         <felix.framework.version>5.6.2</felix.framework.version>
         <felix.framework.security.version>2.6.0</felix.framework.security.version>
-        <felix.gogo.runtime.version>1.0.5-SNAPSHOT</felix.gogo.runtime.version>
-        <felix.gogo.jline.version>1.0.5-SNAPSHOT</felix.gogo.jline.version>
+        <felix.gogo.runtime.version>1.0.6</felix.gogo.runtime.version>
+        <felix.gogo.jline.version>1.0.6</felix.gogo.jline.version>
         <felix.httplite.version>0.1.5</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
         <felix.plugin.version>3.3.0</felix.plugin.version>
@@ -247,7 +247,7 @@
         <hibernate43.version>4.3.6.Final</hibernate43.version>
         <hibernate.version>5.2.8.Final</hibernate.version>
         <hibernate.validator.version>5.3.4.Final</hibernate.validator.version>
-        <jansi.version>1.16-SNAPSHOT</jansi.version>
+        <jansi.version>1.16</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
         <jline.version>3.3.0-SNAPSHOT</jline.version>
         <jsw.version>3.2.3</jsw.version>
