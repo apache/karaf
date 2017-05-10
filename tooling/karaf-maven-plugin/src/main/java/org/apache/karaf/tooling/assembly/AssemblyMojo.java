@@ -392,8 +392,6 @@ public class AssemblyMojo extends MojoSupport {
     }
 
     private void generateAssemblyDirectory() throws Exception {
-        assert builderConfiguration != null;
-        assert builder != null;
         builderConfiguration.configure(builder, this);
         builder.generateAssembly();
         assemblyOutfitter.outfit();
