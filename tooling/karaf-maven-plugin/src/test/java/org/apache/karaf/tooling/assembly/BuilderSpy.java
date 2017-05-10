@@ -36,6 +36,8 @@ class BuilderSpy extends Builder {
 
     private boolean systemCalled;
 
+    private Exception exceptionToThrow;
+
     @Override
     public Builder features(final Stage stage, final String... features) {
         recordByStage(allFeaturesByStage, stage, features);
@@ -56,7 +58,9 @@ class BuilderSpy extends Builder {
 
     @Override
     public void generateAssembly() throws Exception {
-        // do nothing
+        if (exceptionToThrow != null) {
+            throw exceptionToThrow;
+        }
     }
 
     @Override
@@ -159,5 +163,9 @@ class BuilderSpy extends Builder {
 
     boolean isSystemCalled() {
         return systemCalled;
+    }
+
+    void willThrow(final Exception exceptionToThrow) {
+        this.exceptionToThrow = exceptionToThrow;
     }
 }

@@ -20,6 +20,7 @@
 package org.apache.karaf.tooling.assembly;
 
 import org.apache.karaf.profile.assembly.Builder;
+import org.apache.karaf.tooling.utils.IoUtils;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -33,9 +34,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Creates a customized Karaf distribution by installing features and setting up
@@ -49,6 +54,12 @@ import java.util.Map;
 @Mojo(name = "assembly", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME,
       threadSafe = true)
 public class AssemblyMojo extends MojoSupport {
+
+    private BuilderConfiguration builderConfiguration;
+
+    private AssemblyOutfitter assemblyOutfitter;
+
+    private Builder builder;
 
     /**
      * Base directory used to overwrite resources in generated assembly after the build (resource directory).
@@ -189,8 +200,6 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     protected Map<String, String> system;
 
-    private AssemblyMojoExec mojoExec;
-
     @Parameter
     private List<String> startupRepositories;
 
@@ -257,12 +266,120 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     private Builder.BlacklistPolicy blacklistPolicy = Builder.BlacklistPolicy.Discard;
 
+    private KarafPropertyInstructionsModelStaxReader profileEditsReader;
+
     public AssemblyMojo() {
-        final KarafPropertyInstructionsModelStaxReader profileEditsReader =
-                new KarafPropertyInstructionsModelStaxReader();
+        profileEditsReader = new KarafPropertyInstructionsModelStaxReader();
+        builder = Builder.newInstance();
+        assemblyOutfitter = new AssemblyOutfitter(this, new ExecutableFile());
+    }
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        prepareConfiguration();
+        try {
+            doExecute();
+        } catch (MojoExecutionException | MojoFailureException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new MojoExecutionException("Unable to build assembly", e);
+        }
+    }
+
+    void doExecute() throws Exception {
+        validateAndCleanMojo();
+        deleteAnyPreviouslyGeneratedAssembly();
+        generateAssemblyDirectory();
+    }
+
+    private void validateAndCleanMojo() {
+        setNullListsToEmpty();
+        setNullMapsToEmpty();
+        verifyProfilesUrlIsProvidedIfProfilesAreUsed();
+        updateDeprecatedConfiguration();
+    }
+
+    private void setNullListsToEmpty() {
+        final Map<Supplier<List<String>>, Consumer<List<String>>> mappers = new HashMap<>();
+        mappers.put(this::getBlacklistedBundles, this::setBlacklistedBundles);
+        mappers.put(this::getBlacklistedFeatures, this::setBlacklistedFeatures);
+        mappers.put(this::getBlacklistedProfiles, this::setBlacklistedProfiles);
+        mappers.put(this::getBlacklistedRepositories, this::setBlacklistedRepositories);
+        mappers.put(this::getBootBundles, this::setBootBundles);
+        mappers.put(this::getBootFeatures, this::setBootFeatures);
+        mappers.put(this::getBootProfiles, this::setBootProfiles);
+        mappers.put(this::getBootRepositories, this::setBootRepositories);
+        mappers.put(this::getFeatureRepositories, this::setFeatureRepositories);
+        mappers.put(this::getInstalledBundles, this::setInstalledBundles);
+        mappers.put(this::getInstalledFeatures, this::setInstalledFeatures);
+        mappers.put(this::getInstalledProfiles, this::setInstalledProfiles);
+        mappers.put(this::getInstalledRepositories, this::setInstalledRepositories);
+        mappers.put(this::getLibraries, this::setLibraries);
+        mappers.put(this::getStartupBundles, this::setStartupBundles);
+        mappers.put(this::getStartupFeatures, this::setStartupFeatures);
+        mappers.put(this::getStartupProfiles, this::setStartupProfiles);
+        mappers.put(this::getStartupRepositories, this::setStartupRepositories);
+        replaceNullValues(mappers, ArrayList::new);
+    }
+
+    private static <S> void replaceNullValues(
+            final Map<Supplier<S>, Consumer<S>> mappers, final Supplier<S> generator
+                                             ) {
+        mappers.entrySet()
+               .stream()
+               .filter(entry -> entry.getKey()
+                                     .get() == null)
+               .map(Map.Entry::getValue)
+               .forEach(setter -> setter.accept(generator.get()));
+    }
+
+    private void setNullMapsToEmpty() {
+        final Map<Supplier<Map<String, String>>, Consumer<Map<String, String>>> mappers = new HashMap<>();
+        mappers.put(this::getTranslatedUrls, this::setTranslatedUrls);
+        mappers.put(this::getConfig, this::setConfig);
+        mappers.put(this::getSystem, this::setSystem);
+        replaceNullValues(mappers, HashMap::new);
+    }
+
+    private void verifyProfilesUrlIsProvidedIfProfilesAreUsed() {
+        if (profilesAreUsed() && getProfilesUri() == null) {
+            throw new IllegalArgumentException("profilesDirectory must be specified");
+        }
+    }
+
+    private boolean profilesAreUsed() {
+        final int startupProfileCount = getStartupProfiles().size();
+        final int bootProfileCount = getBootProfiles().size();
+        final int installedProfileCount = getInstalledProfiles().size();
+        return startupProfileCount + bootProfileCount + installedProfileCount > 0;
+    }
+
+
+    private void updateDeprecatedConfiguration() {
+        final boolean featuresRepositoriesUsed = !getFeatureRepositories().isEmpty();
+        if (featuresRepositoriesUsed) {
+            getLog().warn("Use of featureRepositories is deprecated, use startupRepositories, bootRepositories or "
+                          + "installedRepositories instead");
+            getStartupRepositories().addAll(getFeatureRepositories());
+            getBootRepositories().addAll(getFeatureRepositories());
+            getInstalledRepositories().addAll(getFeatureRepositories());
+        }
+    }
+
+    private void deleteAnyPreviouslyGeneratedAssembly() {
+        final File workDirectory = getWorkDirectory();
+        IoUtils.deleteRecursive(workDirectory);
+        workDirectory.mkdirs();
+    }
+
+    @Override
+    public File getWorkDirectory() {
+        return workDirectory;
+    }
+
+    private void prepareConfiguration() {
         final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
         final MavenUriParser mavenUriParser = new MavenUriParser();
-        final Builder builder = Builder.newInstance();
         final ArtifactFrameworkParser frameworkParser = new ArtifactFrameworkParser();
         final StartupArtifactParser startupArtifactParser = new StartupArtifactParser();
         final BootArtifactParser bootArtifactParser = new BootArtifactParser();
@@ -271,43 +388,47 @@ public class AssemblyMojo extends MojoSupport {
                 new ArtifactParser(mavenUriParser, builder, frameworkParser, startupArtifactParser, bootArtifactParser,
                                    installedArtifactParser
                 );
-        final BuilderConfiguration builderConfiguration =
-                new BuilderConfiguration(getLog(), mavenUriParser, profileEditsParser, artifactParser);
-        final ExecutableFile executableFile = new ExecutableFile();
-        final AssemblyOutfitter assemblyOutfitter = new AssemblyOutfitter(this, executableFile);
-        mojoExec = new AssemblyMojoExec(getLog(), builder, builderConfiguration, assemblyOutfitter);
+        builderConfiguration = new BuilderConfiguration(getLog(), mavenUriParser, profileEditsParser, artifactParser);
     }
 
-    @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        try {
-            mojoExec.doExecute(this);
-        } catch (MojoExecutionException | MojoFailureException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new MojoExecutionException("Unable to build assembly", e);
-        }
+    private void generateAssemblyDirectory() throws Exception {
+        assert builderConfiguration != null;
+        assert builder != null;
+        builderConfiguration.configure(builder, this);
+        builder.generateAssembly();
+        assemblyOutfitter.outfit();
     }
 
-    void setMojoExec(final AssemblyMojoExec mojoExec) {
-        this.mojoExec = mojoExec;
+    List<String> getBootProfiles() {
+        return bootProfiles;
     }
 
-    File getSourceDirectory() {
-        return sourceDirectory;
+    void setBootProfiles(final List<String> bootProfiles) {
+        this.bootProfiles = bootProfiles;
     }
 
-    void setSourceDirectory(final File sourceDirectory) {
-        this.sourceDirectory = sourceDirectory;
+    List<String> getStartupProfiles() {
+        return startupProfiles;
     }
 
-    @Override
-    public File getWorkDirectory() {
-        return workDirectory;
+    void setStartupProfiles(final List<String> startupProfiles) {
+        this.startupProfiles = startupProfiles;
     }
 
-    void setWorkDirectory(final File workDirectory) {
-        this.workDirectory = workDirectory;
+    List<String> getInstalledProfiles() {
+        return installedProfiles;
+    }
+
+    void setInstalledProfiles(final List<String> installedProfiles) {
+        this.installedProfiles = installedProfiles;
+    }
+
+    String getProfilesUri() {
+        return profilesUri;
+    }
+
+    void setProfilesUri(final String profilesUri) {
+        this.profilesUri = profilesUri;
     }
 
     List<String> getStartupRepositories() {
@@ -332,6 +453,26 @@ public class AssemblyMojo extends MojoSupport {
 
     void setInstalledRepositories(final List<String> installedRepositories) {
         this.installedRepositories = installedRepositories;
+    }
+
+    List<String> getFeatureRepositories() {
+        return featureRepositories;
+    }
+
+    void setFeatureRepositories(final List<String> featureRepositories) {
+        this.featureRepositories = featureRepositories;
+    }
+
+    void setWorkDirectory(final File workDirectory) {
+        this.workDirectory = workDirectory;
+    }
+
+    File getSourceDirectory() {
+        return sourceDirectory;
+    }
+
+    void setSourceDirectory(final File sourceDirectory) {
+        this.sourceDirectory = sourceDirectory;
     }
 
     List<String> getBlacklistedRepositories() {
@@ -406,38 +547,6 @@ public class AssemblyMojo extends MojoSupport {
         this.blacklistedBundles = blacklistedBundles;
     }
 
-    String getProfilesUri() {
-        return profilesUri;
-    }
-
-    void setProfilesUri(final String profilesUri) {
-        this.profilesUri = profilesUri;
-    }
-
-    List<String> getBootProfiles() {
-        return bootProfiles;
-    }
-
-    void setBootProfiles(final List<String> bootProfiles) {
-        this.bootProfiles = bootProfiles;
-    }
-
-    List<String> getStartupProfiles() {
-        return startupProfiles;
-    }
-
-    void setStartupProfiles(final List<String> startupProfiles) {
-        this.startupProfiles = startupProfiles;
-    }
-
-    List<String> getInstalledProfiles() {
-        return installedProfiles;
-    }
-
-    void setInstalledProfiles(final List<String> installedProfiles) {
-        this.installedProfiles = installedProfiles;
-    }
-
     List<String> getBlacklistedProfiles() {
         return blacklistedProfiles;
     }
@@ -448,14 +557,6 @@ public class AssemblyMojo extends MojoSupport {
 
     Builder.BlacklistPolicy getBlacklistPolicy() {
         return blacklistPolicy;
-    }
-
-    List<String> getFeatureRepositories() {
-        return featureRepositories;
-    }
-
-    void setFeatureRepositories(final List<String> featureRepositories) {
-        this.featureRepositories = featureRepositories;
     }
 
     List<String> getLibraries() {
@@ -562,4 +663,19 @@ public class AssemblyMojo extends MojoSupport {
         this.project = project;
     }
 
+    void setBuilder(final Builder builder) {
+        this.builder = builder;
+    }
+
+    void setProfileEditsReader(final KarafPropertyInstructionsModelStaxReader profileEditsReader) {
+        this.profileEditsReader = profileEditsReader;
+    }
+
+    void setBuilderConfiguration(final BuilderConfiguration builderConfiguration) {
+        this.builderConfiguration = builderConfiguration;
+    }
+
+    void setAssemblyOutfitter(final AssemblyOutfitter assemblyOutfitter) {
+        this.assemblyOutfitter = assemblyOutfitter;
+    }
 }

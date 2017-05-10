@@ -83,8 +83,6 @@ public class AssemblyMojoSystemTest extends EasyMockSupport {
 
     private AssemblyMojo mojo;
 
-    private AssemblyMojoExec execMojo;
-
     private Set<Artifact> dependencyArtifacts;
 
     @Mock
@@ -96,25 +94,7 @@ public class AssemblyMojoSystemTest extends EasyMockSupport {
     @Before
     public void setUp() throws Exception {
         dependencyArtifacts = new HashSet<>();
-        final MavenUriParser mavenUriParser = new MavenUriParser();
-        final ProfileEditsParser profileEditsParser = new ProfileEditsParser(profileEditsReader);
-        final ArtifactFrameworkParser frameworkParser = new ArtifactFrameworkParser();
-        final StartupArtifactParser startupArtifactParser = new StartupArtifactParser();
-        final BootArtifactParser bootArtifactParser = new BootArtifactParser();
-        final InstalledArtifactParser installedArtifactParser = new InstalledArtifactParser();
-        final ArtifactParser artifactParser =
-                new ArtifactParser(mavenUriParser, builder, frameworkParser, startupArtifactParser, bootArtifactParser,
-                                   installedArtifactParser
-                );
-        final BuilderConfiguration builderConfiguration =
-                new BuilderConfiguration(log, mavenUriParser, profileEditsParser, artifactParser);
         mojo = getAssemblyMojo();
-        mojo.setConfig(new HashMap<>());
-        mojo.setSystem(new HashMap<>());
-        final ExecutableFile executableFile = new ExecutableFile();
-        final AssemblyOutfitter assemblyOutfitter = new AssemblyOutfitter(mojo, executableFile);
-        execMojo = new AssemblyMojoExec(log, builder, builderConfiguration, assemblyOutfitter);
-        mojo.setMojoExec(execMojo);
     }
 
     private AssemblyMojo getAssemblyMojo() throws Exception {
@@ -122,7 +102,11 @@ public class AssemblyMojoSystemTest extends EasyMockSupport {
         final File pom = new File(baseDir, "pom.xml");
         final MavenProject mavenProject = AssemblyMother.getProject(TEST_PROJECT, resources, dependencyArtifacts);
         final AssemblyMojo assemblyMojo = (AssemblyMojo) mojoRule.lookupMojo("assembly", pom);
+        assemblyMojo.setBuilder(builder);
         assemblyMojo.setLog(log);
+        assemblyMojo.setProfileEditsReader(profileEditsReader);
+        assemblyMojo.setConfig(new HashMap<>());
+        assemblyMojo.setSystem(new HashMap<>());
         assemblyMojo.setProject(mavenProject);
         assemblyMojo.setMavenSession(getMavenSession(mavenProject));
         assemblyMojo.setLocalRepo(getLocalRepository(baseDir));
@@ -997,31 +981,19 @@ public class AssemblyMojoSystemTest extends EasyMockSupport {
     @Test
     public void executeMojoRethrowsMojoExecutionExceptions() throws Exception {
         //given
-        final AssemblyMojoExec mojoExec = mock(AssemblyMojoExec.class);
-        mojo.setMojoExec(mojoExec);
-        mojoExec.doExecute(mojo);
-        expectLastCall().andThrow(new MojoExecutionException(""));
-        replayAll();
+        builder.willThrow(new MojoExecutionException(""));
         exception.expect(MojoExecutionException.class);
         //when
         executeMojo();
-        //then
-        verifyAll();
     }
 
     @Test
     public void executeMojoRethrowsMojoFailureExceptions() throws Exception {
         //given
-        final AssemblyMojoExec mojoExec = mock(AssemblyMojoExec.class);
-        mojo.setMojoExec(mojoExec);
-        mojoExec.doExecute(mojo);
-        expectLastCall().andThrow(new MojoFailureException(""));
-        replayAll();
+        builder.willThrow(new MojoFailureException(""));
         exception.expect(MojoFailureException.class);
         //when
         executeMojo();
-        //then
-        verifyAll();
     }
 
     @Test
