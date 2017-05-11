@@ -367,7 +367,8 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         String[] pidStrArray = pid.split(Pattern.quote("."));
         Set<String[]> rets = new TreeSet<String[]>(WILDCARD_PID_COMPARATOR);
         for (String id : allPids) {
-            String[] idStrArray = id.split(Pattern.quote("."));
+            String idWithoutRandomSuffix = id.replaceFirst("\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "");
+            String[] idStrArray = idWithoutRandomSuffix.split(Pattern.quote("."));
             if (idStrArray.length == pidStrArray.length) {
                 boolean match = true;
                 for (int i = 0; i < idStrArray.length; i++) {
@@ -380,7 +381,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                     }
                 }
                 if (match) {
-                    rets.add(idStrArray);
+                    rets.add(id.split(Pattern.quote(".")));
                 }
             }
         }
