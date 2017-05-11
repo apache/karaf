@@ -82,6 +82,7 @@ import org.apache.karaf.kar.internal.Kar;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.impl.Profiles;
+import org.apache.karaf.profile.versioning.VersionUtils;
 import org.apache.karaf.tools.utils.KarafPropertiesEditor;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 import org.apache.karaf.profile.versioning.VersionUtils;
