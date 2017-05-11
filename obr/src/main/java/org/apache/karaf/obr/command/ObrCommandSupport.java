@@ -24,14 +24,11 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.felix.bundlerepository.Reason;
-import org.apache.felix.bundlerepository.Repository;
-import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.felix.bundlerepository.Requirement;
-import org.apache.felix.bundlerepository.Resolver;
-import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.bundlerepository.*;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.osgi.framework.Bundle;
@@ -124,6 +121,7 @@ public abstract class ObrCommandSupport implements Action {
 
     protected void doDeploy(RepositoryAdmin admin, List<String> bundles, boolean start, boolean deployOptional) throws Exception {
         Resolver resolver = admin.resolver();
+
         for (String bundle : bundles) {
             String[] target = getTarget(bundle);
             Resource resource = selectNewestVersion(searchRepository(admin, target[0], target[1]));
@@ -133,8 +131,10 @@ public abstract class ObrCommandSupport implements Action {
                 System.err.println("Unknown bundle - " + target[0]);
             }
         }
+
         if ((resolver.getAddedResources() != null) &&
                 (resolver.getAddedResources().length > 0)) {
+
             if (resolver.resolve(deployOptional ? 0 : Resolver.NO_OPTIONAL_RESOURCES)) {
                 System.out.println("Target resource(s):");
                 printUnderline(System.out, 19);
@@ -170,6 +170,7 @@ public abstract class ObrCommandSupport implements Action {
                 } catch (IllegalStateException ex) {
                     System.err.println(ex);
                 }
+
             } else {
                 Reason[] reqs = resolver.getUnsatisfiedRequirements();
                 if ((reqs != null) && (reqs.length > 0)) {
