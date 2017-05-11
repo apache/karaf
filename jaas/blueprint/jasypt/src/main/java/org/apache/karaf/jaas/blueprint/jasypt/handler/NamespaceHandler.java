@@ -53,7 +53,11 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     private int idCounter;
 
     public URL getSchemaLocation(String s) {
-        return getClass().getResource("/org/apache/karaf/jaas/blueprint/jasypt/handler/karaf-jasypt-1.0.0.xsd");
+        if (JASYPT_NAMESPACE_1_0.equals(s)) {
+            return getClass().getResource("/org/apache/karaf/jaas/blueprint/jasypt/handler/karaf-jasypt-1.0.0.xsd");
+        } else {
+            return null;
+        }
     }
 
     public Set<Class> getManagedClasses() {
