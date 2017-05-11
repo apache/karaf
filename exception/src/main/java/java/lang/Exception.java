@@ -23,6 +23,8 @@ import java.lang.ref.WeakReference;
 
 import javax.xml.bind.annotation.XmlTransient;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 
 /**
  * {@code Exception} is the superclass of all classes that represent recoverable
@@ -156,6 +158,10 @@ public class Exception extends Throwable {
             context[i] = c == null ? Object.class : c;
         }
         return context;
+    }
+    
+    protected Class[] classContext() {
+      return classContext;
     }
 
     private static class SecurityManagerEx extends SecurityManager
