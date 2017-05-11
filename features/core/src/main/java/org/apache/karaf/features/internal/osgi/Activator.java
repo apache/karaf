@@ -28,6 +28,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
@@ -84,6 +87,7 @@ public class Activator extends BaseActivator {
     private static final String STATE_FILE = "state.json";
 
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
+    private ThreadPoolExecutor resolverExecutor;
     private FeaturesServiceImpl featuresService;
     private StandardRegionDigraph digraph;
     private StandardManageableRegionDigraph digraphMBean;
@@ -116,7 +120,10 @@ public class Activator extends BaseActivator {
 
     protected void doStart() throws Exception {
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
-        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_INFO));
+        resolverExecutor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(),
+                                                  10L, TimeUnit.SECONDS,
+                                                  new SynchronousQueue<Runnable>());
+        Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_INFO), resolverExecutor);
         URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
 
         if (configurationAdmin == null || mvnUrlHandler == null) {
@@ -281,6 +288,10 @@ public class Activator extends BaseActivator {
         if (featuresService != null) {
             featuresService.stop();
             featuresService = null;
+        }
+        if (resolverExecutor != null) {
+          resolverExecutor.shutdownNow();
+          resolverExecutor = null;
         }
         if (digraph != null) {
             doPersistRegionDigraph();
