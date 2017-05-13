@@ -20,6 +20,9 @@ package org.apache.karaf.shell.impl.console;
 
 import org.apache.karaf.shell.api.console.History;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+
 public class HistoryWrapper implements History {
 
     private final org.jline.reader.History history;
@@ -30,7 +33,11 @@ public class HistoryWrapper implements History {
 
     @Override
     public void clear() {
-        history.purge();
+        try {
+            history.purge();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public int first() {
