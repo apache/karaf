@@ -37,6 +37,8 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.download.DownloadCallback;
+import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.model.Library;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
