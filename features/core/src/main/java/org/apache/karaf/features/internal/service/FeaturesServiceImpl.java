@@ -43,8 +43,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
@@ -504,13 +507,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return;
         }
 
-        Set<String> features = new HashSet<>();
+        Set<String> features;
         synchronized (lock) {
-            for (Feature feature : repo.getFeatures()) {
-                if (isRequired(feature)) {
-                    features.add(feature.getId());
-                }
-            }
+            features = Stream.of(repo.getFeatures())
+                    .filter(this::isRequired)
+                    .map(Feature::getId)
+                    .collect(Collectors.toSet());
         }
         if (!features.isEmpty()) {
             if (uninstall) {
@@ -694,13 +696,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Feature[] listFeatures() throws Exception {
-        Set<Feature> features = new HashSet<>();
-        for (Map<String, Feature> featureWithDifferentVersion : getFeatures().values()) {
-            for (Feature f : featureWithDifferentVersion.values()) {
-                features.add(f);
-            }
-        }
-        return features.toArray(new Feature[features.size()]);
+        Map<String, Map<String, Feature>> allFeatures = getFeatures();
+        return flattenFeatures(allFeatures);
     }
 
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
@@ -772,36 +769,31 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Feature[] listInstalledFeatures() throws Exception {
-        Set<Feature> features = new HashSet<>();
         Map<String, Map<String, Feature>> allFeatures = getFeatures();
         synchronized (lock) {
-            for (Map<String, Feature> featureWithDifferentVersion : allFeatures.values()) {
-                for (Feature f : featureWithDifferentVersion.values()) {
-                    if (isInstalled(f)) {
-                        features.add(f);
-                    }
-                }
-            }
+            return flattenFeatures(allFeatures, this::isInstalled);
         }
-        return features.toArray(new Feature[features.size()]);
     }
 
     @Override
     public Feature[] listRequiredFeatures() throws Exception {
-        Set<Feature> features = new HashSet<>();
         Map<String, Map<String, Feature>> allFeatures = getFeatures();
         synchronized (lock) {
-            for (Map<String, Feature> featureWithDifferentVersion : allFeatures.values()) {
-                for (Feature f : featureWithDifferentVersion.values()) {
-                    if (isRequired(f)) {
-                        features.add(f);
-                    }
-                }
-            }
+            return flattenFeatures(allFeatures, this::isRequired);
         }
-        return features.toArray(new Feature[features.size()]);
     }
 
+    private Feature[] flattenFeatures(Map<String, Map<String, Feature>> features) {
+        return flattenFeatures(features, f -> true /* include all */);
+    }
+
+    private Feature[] flattenFeatures(Map<String, Map<String, Feature>> features, Predicate<Feature> pred) {
+        return features.values().stream()
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .filter(pred)
+                .toArray(Feature[]::new);
+    }
 
     @Override
     public boolean isInstalled(Feature f) {
@@ -916,11 +908,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         if (region == null || region.isEmpty()) {
             region = ROOT_REGION;
         }
-        Set<String> fl = required.get(region);
-        if (fl == null) {
-            fl = new HashSet<>();
-            required.put(region, fl);
-        }
+        Set<String> fl = required.computeIfAbsent(region, k -> new HashSet<>());
         List<String> featuresToAdd = new ArrayList<>();
         List<String> featuresToRemove = new ArrayList<>();
         for (String feature : features) {
@@ -983,11 +971,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         if (region == null || region.isEmpty()) {
             region = ROOT_REGION;
         }
-        Set<String> fl = required.get(region);
-        if (fl == null) {
-            fl = new HashSet<>();
-            required.put(region, fl);
-        }
+        Set<String> fl = required.computeIfAbsent(region, k -> new HashSet<>());
         List<String> featuresToRemove = new ArrayList<>();
         for (String feature : new HashSet<>(features)) {
             List<String> toRemove = new ArrayList<>();
@@ -1247,14 +1231,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         FrameworkWiring fw = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
-        fw.refreshBundles(bundles, new FrameworkListener() {
-            @Override
-            public void frameworkEvent(FrameworkEvent event) {
-                if (event.getType() == FrameworkEvent.ERROR) {
-                    LOGGER.error("Framework error", event.getThrowable());
-                }
-                latch.countDown();
+        fw.refreshBundles(bundles, (FrameworkListener) event -> {
+            if (event.getType() == FrameworkEvent.ERROR) {
+                LOGGER.error("Framework error", event.getThrowable());
             }
+            latch.countDown();
         });
         latch.await();
     }
@@ -1382,12 +1363,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             public void end() {
             }
         };
-        ResolverHookFactory factory = new ResolverHookFactory() {
-            @Override
-            public ResolverHook begin(Collection<BundleRevision> triggers) {
-                return hook;
-            }
-        };
+        ResolverHookFactory factory = triggers -> hook;
         ServiceRegistration<ResolverHookFactory> registration = systemBundleContext.registerService(ResolverHookFactory.class, factory, null);
         try {
             FrameworkWiring frameworkWiring = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
