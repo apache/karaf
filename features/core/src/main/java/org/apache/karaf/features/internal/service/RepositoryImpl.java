@@ -21,7 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.URI;
+import java.util.Set;
 
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
@@ -32,16 +35,22 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
 public class RepositoryImpl implements Repository {
 
     private final URI uri;
-    private final String blacklisted;
+    private final Clause[] blacklisted;
     private Features features;
 
     public RepositoryImpl(URI uri) {
-        this(uri, null);
+        this(uri, (Clause[]) null);
     }
 
     public RepositoryImpl(URI uri, String blacklisted) {
         this.uri = uri;
-        this.blacklisted = blacklisted;
+        Set<String> blacklistStrings = Blacklist.loadBlacklist(blacklisted);
+        this.blacklisted = Parser.parseClauses(blacklistStrings.toArray(new String[blacklistStrings.size()]));
+    }
+
+    public RepositoryImpl(URI uri, Clause[] blacklisted) {
+        this.uri = uri;
+        this.blacklisted = blacklisted != null ? blacklisted : new Clause[0];
     }
 
     public URI getURI() {

@@ -49,6 +49,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
@@ -721,6 +723,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
         //the outer map's key is feature name, the inner map's key is feature version
         Map<String, Map<String, Feature>> map = new HashMap<>();
+        // Load blacklist
+        Set<String> blacklistStrings = Blacklist.loadBlacklist(blacklisted);
+        Clause[] blacklist = Parser.parseClauses(blacklistStrings.toArray(new String[blacklistStrings.size()]));
         // Two phase load:
         // * first load dependent repositories
         Set<String> loaded = new HashSet<>();
@@ -733,7 +738,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
             try {
                 if (repo == null) {
-                    RepositoryImpl rep = new RepositoryImpl(URI.create(uri), blacklisted);
+                    RepositoryImpl rep = new RepositoryImpl(URI.create(uri), blacklist);
                     rep.load();
                     repo = rep;
                     synchronized (lock) {

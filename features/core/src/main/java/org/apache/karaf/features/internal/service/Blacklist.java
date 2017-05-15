@@ -57,10 +57,8 @@ public class Blacklist {
     }
 
     public static void blacklist(Features features, Collection<String> blacklist) {
-        if (!blacklist.isEmpty()) {
-            Clause[] clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
-            blacklist(features, clauses);
-        }
+        Clause[] clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
+        blacklist(features, clauses);
     }
 
     public static void blacklist(Features features, Clause[] clauses) {
