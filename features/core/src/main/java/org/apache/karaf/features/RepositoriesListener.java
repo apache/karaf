@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.features;
 
-public interface FeaturesListener extends RepositoriesListener {
-
-    void featureEvent(FeatureEvent event);
-
+public interface RepositoriesListener {
+    void repositoryEvent(RepositoryEvent event);
 }

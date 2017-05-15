@@ -27,6 +27,10 @@ import org.apache.karaf.features.internal.util.MapUtils;
 public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
+    
+    /**
+     * List of repositories is not the life list. It is just copied from Repositories before saving
+     */
     public final Set<String> repositories = new TreeSet<>();
     public final Map<String, Set<String>> requirements = new HashMap<>();
     public final Map<String, Set<String>> installedFeatures = new HashMap<>();
