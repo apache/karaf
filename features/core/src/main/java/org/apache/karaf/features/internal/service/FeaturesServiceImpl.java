@@ -403,6 +403,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         deploymentListeners.remove(listener);
     }
 
+    /*
+     * Should never be called while holding a lock as we're calling outside our bundle.
+     */
     @Override
     public void callListeners(FeatureEvent event) {
         if (eventAdminListener != null) {
@@ -413,6 +416,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
+    /*
+     * Should never be called while holding a lock as we're calling outside our bundle.
+     */
     @Override
     public void callListeners(DeploymentEvent event) {
         lastDeploymentEvent = event;
@@ -425,6 +431,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
+    /*
+     * Should never be called while holding a lock as we're calling outside our bundle.
+     */
     protected void callListeners(RepositoryEvent event) {
         if (eventAdminListener != null) {
             eventAdminListener.repositoryEvent(event);
@@ -698,6 +707,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         return flattenFeatures(allFeatures);
     }
 
+    /**
+     * Should not be called while holding a lock.
+     */
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
         List<String> uris;
         synchronized (lock) {
