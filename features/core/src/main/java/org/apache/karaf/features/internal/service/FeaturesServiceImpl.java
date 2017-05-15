@@ -627,7 +627,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Feature getFeature(String name) throws Exception {
-        Feature[] features = this.getFeatures(name);
+        Feature[] features = getFeatures(name);
         if (features.length < 1) {
             return null;
         } else {
@@ -637,7 +637,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Feature getFeature(String name, String version) throws Exception {
-        Feature[] features = this.getFeatures(name, version);
+        Feature[] features = getFeatures(name, version);
         if (features.length < 1) {
             return null;
         } else {
@@ -657,10 +657,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     public Feature[] getFeatures(String name, String version) throws Exception {
         List<Feature> features = new ArrayList<>();
         Pattern pattern = Pattern.compile(name);
-        for (String featureName : getFeatures().keySet()) {
+        Map<String, Map<String, Feature>> allFeatures = getFeatures();
+        for (String featureName : allFeatures.keySet()) {
             Matcher matcher = pattern.matcher(featureName);
             if (matcher.matches()) {
-                Map<String, Feature> versions = getFeatures().get(featureName);
+                Map<String, Feature> versions = allFeatures.get(featureName);
                 Feature matchingFeature = getFeatureMatching(versions, version);
                 if (matchingFeature != null) {
                     features.add(matchingFeature);
@@ -923,6 +924,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             region = ROOT_REGION;
         }
         Set<String> fl = required.computeIfAbsent(region, k -> new HashSet<>());
+        Map<String, Map<String, Feature>> allFeatures = getFeatures();
         List<String> featuresToAdd = new ArrayList<>();
         List<String> featuresToRemove = new ArrayList<>();
         for (String feature : features) {
@@ -931,10 +933,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             String version = feature.substring(feature.indexOf(VERSION_SEPARATOR) + 1);
             Pattern pattern = Pattern.compile(name);
             boolean matched = false;
-            for (String fKey : getFeatures().keySet()) {
+            for (String fKey : allFeatures.keySet()) {
                 Matcher matcher = pattern.matcher(fKey);
                 if (matcher.matches()) {
-                    Feature f = getFeatureMatching(getFeatures().get(fKey), version);
+                    Feature f = getFeatureMatching(allFeatures.get(fKey), version);
                     if (f != null) {
                         String req = getFeatureRequirement(f);
                         featuresToAdd.add(req);
