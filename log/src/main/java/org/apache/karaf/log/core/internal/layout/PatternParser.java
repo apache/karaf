@@ -451,6 +451,9 @@ public class PatternParser {
 
     public
     String convert(PaxLoggingEvent event) {
+      if(!event.locationInformationExists()){
+        return "?";
+      }
       PaxLocationInfo locationInfo = event.getLocationInformation();
       switch(type) {
       /*case FULL_LOCATION_CONVERTER:
@@ -508,6 +511,9 @@ public class PatternParser {
     }
 
     String getFullyQualifiedName(PaxLoggingEvent event) {
+      if(!event.locationInformationExists()){
+        return "?";
+      }
       return event.getLocationInformation().getClassName();
     }
   }
