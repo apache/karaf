@@ -714,12 +714,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
      * Should not be called while holding a lock.
      */
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
-        List<String> uris;
+        Set<String> uris;
         synchronized (lock) {
             if (featureCache != null) {
                 return featureCache;
             }
-            uris = new ArrayList<>(state.repositories);
+            uris = new TreeSet<>(state.repositories);
         }
         //the outer map's key is feature name, the inner map's key is feature version
         Map<String, Map<String, Feature>> map = new HashMap<>();
@@ -771,8 +771,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
         }
         synchronized (lock) {
-            if (uris.size() == state.repositories.size()
-                    && state.repositories.containsAll(uris)) {
+            if (uris.equals(state.repositories)) {
                 featureCache = map;
             }
         }
