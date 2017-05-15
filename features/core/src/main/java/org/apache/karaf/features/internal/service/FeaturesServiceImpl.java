@@ -112,6 +112,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
     private static final String FEATURE_OSGI_REQUIREMENT_PREFIX = "feature:";
+    private static final String VERSION_SEPARATOR = "/";
 
     /**
      * Our bundle and corresponding bundle context.
@@ -486,7 +487,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         if (install) {
             HashSet<String> features = new HashSet<>();
             for (Feature feature : repository.getFeatures()) {
-                features.add(feature.getName() + "/" + feature.getVersion());
+                features.add(feature.getId());
             }
             installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
         }
@@ -637,7 +638,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Feature[] getFeatures(String nameOrId) throws Exception {
-        String[] parts = nameOrId.split("/");
+        String[] parts = nameOrId.split(VERSION_SEPARATOR);
         String name = parts.length > 0 ? parts[0] : nameOrId;
         String version = parts.length > 1 ? parts[1] : null;
         return getFeatures(name, version);
@@ -817,7 +818,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public boolean isRequired(Feature f) {
-        String id = FEATURE_OSGI_REQUIREMENT_PREFIX + f.getName() + "/" + new VersionRange(f.getVersion(), true);
+        String id = FEATURE_OSGI_REQUIREMENT_PREFIX + getFeatureRequirement(f);
         synchronized (lock) {
             Set<String> features = state.requirements.get(ROOT_REGION);
             return features != null && features.contains(id);
@@ -835,7 +836,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void installFeature(String name, String version) throws Exception {
-        installFeature(version != null ? name + "/" + version : name, EnumSet.noneOf(Option.class));
+        installFeature(getId(name, version), EnumSet.noneOf(Option.class));
     }
 
     @Override
@@ -845,7 +846,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
-        installFeature(version != null ? name + "/" + version : name, options);
+        installFeature(getId(name, version), options);
     }
 
     @Override
@@ -860,12 +861,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void uninstallFeature(String name, String version) throws Exception {
-        uninstallFeature(version != null ? name + "/" + version : name);
+        uninstallFeature(getId(name, version));
     }
 
     @Override
     public void uninstallFeature(String name, String version, EnumSet<Option> options) throws Exception {
-        uninstallFeature(version != null ? name + "/" + version : name, options);
+        uninstallFeature(getId(name, version), options);
     }
 
     @Override
@@ -881,6 +882,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     @Override
     public void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception {
         uninstallFeatures(features, ROOT_REGION, options);
+    }
+
+    private String getId(String name, String version) {
+        return version != null ? name + VERSION_SEPARATOR + version : name;
     }
 
 
@@ -910,8 +915,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         List<String> featuresToRemove = new ArrayList<>();
         for (String feature : features) {
             feature = normalize(feature);
-            String name = feature.substring(0, feature.indexOf("/"));
-            String version = feature.substring(feature.indexOf("/") + 1);
+            String name = feature.substring(0, feature.indexOf(VERSION_SEPARATOR));
+            String version = feature.substring(feature.indexOf(VERSION_SEPARATOR) + 1);
             Pattern pattern = Pattern.compile(name);
             boolean matched = false;
             for (String fKey : getFeatures().keySet()) {
@@ -919,7 +924,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 if (matcher.matches()) {
                     Feature f = getFeatureMatching(getFeatures().get(fKey), version);
                     if (f != null) {
-                        String req = f.getName() + "/" + new VersionRange(f.getVersion(), true);
+                        String req = getFeatureRequirement(f);
                         featuresToAdd.add(req);
                         Feature[] installedFeatures = listInstalledFeatures();
                         for (Feature installedFeature : installedFeatures) {
@@ -938,7 +943,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 for (String existentFeatureReq : fl) {
                     //remove requirement prefix feature:
                     String existentFeature = existentFeatureReq.substring(FEATURE_OSGI_REQUIREMENT_PREFIX.length());
-                    if (existentFeature.startsWith(name + "/")
+                    if (existentFeature.startsWith(name + VERSION_SEPARATOR)
                             && !featuresToAdd.contains(existentFeature)) {
                         featuresToRemove.add(existentFeature);
                         //do not break cycle to remove all old versions of feature
@@ -975,7 +980,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             feature = normalize(feature);
             if (feature.endsWith("/0.0.0")) {
                 // Match only on name
-                String nameSep = FEATURE_OSGI_REQUIREMENT_PREFIX + feature.substring(0, feature.indexOf("/") + 1);
+                String nameSep = FEATURE_OSGI_REQUIREMENT_PREFIX + feature.substring(0, feature.indexOf(VERSION_SEPARATOR) + 1);
                 for (String f : fl) {
                     Pattern pattern = Pattern.compile(nameSep.substring(0, nameSep.length() - 1));
                     Matcher matcher = pattern.matcher(f);
@@ -985,8 +990,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 }
             } else {
                 // Match on name and version
-                String name = feature.substring(0, feature.indexOf("/"));
-                String version = feature.substring(feature.indexOf("/") + 1);
+                String name = feature.substring(0, feature.indexOf(VERSION_SEPARATOR));
+                String version = feature.substring(feature.indexOf(VERSION_SEPARATOR) + 1);
                 Pattern pattern = getFeaturePattern(name, version);
                 for (String f : fl) {
                     Matcher matcher = pattern.matcher(f);
@@ -1050,13 +1055,13 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     protected String normalize(String feature) {
-        if (!feature.contains("/")) {
+        if (!feature.contains(VERSION_SEPARATOR)) {
             feature += "/0.0.0";
         }
-        int idx = feature.indexOf("/");
+        int idx = feature.indexOf(VERSION_SEPARATOR);
         String name = feature.substring(0, idx);
         String version = feature.substring(idx + 1);
-        return name + "/" + VersionCleaner.clean(version);
+        return name + VERSION_SEPARATOR + VersionCleaner.clean(version);
     }
 
     /**
@@ -1406,13 +1411,21 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     private Pattern getFeaturePattern(String name, String version) {
-        String req = FEATURE_OSGI_REQUIREMENT_PREFIX + name + "/" + new VersionRange(version, true);
+        String req = FEATURE_OSGI_REQUIREMENT_PREFIX + getFeatureRequirement(name, version);
         req = req.replace("[", "\\[");
         req = req.replace("(", "\\(");
         req = req.replace("]", "\\]");
         req = req.replace(")", "\\)");
         Pattern pattern = Pattern.compile(req);
         return pattern;
+    }
+
+    private String getFeatureRequirement(Feature feature) {
+        return getFeatureRequirement(feature.getName(), feature.getVersion());
+    }
+
+    private String getFeatureRequirement(String name, String version) {
+        return name + VERSION_SEPARATOR + new VersionRange(version, true);
     }
 
     private String join(List<String> list) {
