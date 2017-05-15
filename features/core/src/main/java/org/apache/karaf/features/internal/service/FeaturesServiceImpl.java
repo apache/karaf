@@ -170,8 +170,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     private final String blacklisted;
 
-    private final boolean configCfgStore;
-
     private final ThreadLocal<String> outputFile = new ThreadLocal<>();
 
     /**
@@ -255,7 +253,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.scheduleDelay = scheduleDelay;
         this.scheduleMaxRun = scheduleMaxRun;
         this.blacklisted = blacklisted;
-        this.configCfgStore = configCfgStore;
         this.executor = Executors.newSingleThreadExecutor();
         loadState();
         checkResolve();
