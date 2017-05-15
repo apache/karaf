@@ -751,7 +751,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     }
                 }
             } catch (Exception e) {
-                    LOGGER.warn("Can't load features repository {}", uri, e);
+                LOGGER.warn("Can't load features repository {}", uri, e);
             }
         }
         List<Repository> repos;
@@ -1435,8 +1435,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         req = req.replace("(", "\\(");
         req = req.replace("]", "\\]");
         req = req.replace(")", "\\)");
-        Pattern pattern = Pattern.compile(req);
-        return pattern;
+        return Pattern.compile(req);
     }
 
     private String getFeatureRequirement(Feature feature) {
