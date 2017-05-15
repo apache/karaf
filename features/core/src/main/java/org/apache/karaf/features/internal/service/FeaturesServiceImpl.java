@@ -127,7 +127,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
      */
     private final StateStorage storage;
     private final FeatureFinder featureFinder;
-    private final EventAdminListener eventAdminListener;
     private final ConfigurationAdmin configurationAdmin;
     private final Resolver resolver;
     private final FeatureConfigInstaller configInstaller;
@@ -188,7 +187,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                BundleContext systemBundleContext,
                                StateStorage storage,
                                FeatureFinder featureFinder,
-                               EventAdminListener eventAdminListener,
                                ConfigurationAdmin configurationAdmin,
                                Resolver resolver,
                                RegionDigraph digraph,
@@ -202,7 +200,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                long scheduleDelay,
                                int scheduleMaxRun,
                                String blacklisted) {
-        this(bundle, bundleContext,systemBundleContext, storage, featureFinder, eventAdminListener, configurationAdmin,
+        this(bundle, bundleContext,systemBundleContext, storage, featureFinder, configurationAdmin,
                 resolver, digraph, overrides, featureResolutionRange, bundleUpdateRange, updateSnaphots,
                 serviceRequirements, globalRepository, downloadThreads, scheduleDelay, scheduleMaxRun, blacklisted,
                 FeaturesService.DEFAULT_CONFIG_CFG_STORE);
@@ -213,7 +211,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                BundleContext systemBundleContext,
                                StateStorage storage,
                                FeatureFinder featureFinder,
-                               EventAdminListener eventAdminListener,
                                ConfigurationAdmin configurationAdmin,
                                Resolver resolver,
                                RegionDigraph digraph,
@@ -233,7 +230,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.systemBundleContext = systemBundleContext;
         this.storage = storage;
         this.featureFinder = featureFinder;
-        this.eventAdminListener = eventAdminListener;
         this.configurationAdmin = configurationAdmin;
         this.resolver = resolver;
         this.configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, configCfgStore) : null;
@@ -251,9 +247,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.executor = Executors.newSingleThreadExecutor();
         loadState();
         this.repositories = new Repositories(blacklisted, state.repositories);
-        if (eventAdminListener != null) {
-            this.repositories.registerListener(eventAdminListener);
-        }
         checkResolve();
     }
 
@@ -402,9 +395,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void callListeners(FeatureEvent event) {
-        if (eventAdminListener != null) {
-            eventAdminListener.featureEvent(event);
-        }
         for (FeaturesListener listener : listeners) {
             listener.featureEvent(event);
         }
@@ -528,29 +518,25 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Repository[] listRepositories() throws Exception {
-        // Make sure the cache is loaded
-        getFeatures();
+        updateFeatureCache();
         return repositories.list();
     }
 
     @Override
     public Repository[] listRequiredRepositories() throws Exception {
-        // Make sure the cache is loaded
-        getFeatures();
+        updateFeatureCache();
         return repositories.listRequired();
     }
 
     @Override
     public Repository getRepository(String name) throws Exception {
-        // Make sure the cache is loaded
-        getFeatures();
+        updateFeatureCache();
         return repositories.getByName(name);
     }
 
     @Override
     public Repository getRepository(URI uri) throws Exception {
-        // Make sure the cache is loaded
-        getFeatures();
+        updateFeatureCache();
         return repositories.getByURI(uri);
     }
 
@@ -649,6 +635,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
         }
         return features.toArray(new Feature[features.size()]);
+    }
+    
+    
+    private void updateFeatureCache() throws Exception {
+        getFeatures();
     }
 
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
