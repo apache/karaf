@@ -671,7 +671,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         return features.toArray(new Feature[features.size()]);
     }
 
-    protected Feature getFeatureMatching(Map<String, Feature> versions, String version) {
+    private Feature getFeatureMatching(Map<String, Feature> versions, String version) {
         if (version != null) {
             version = version.trim();
             if (version.equals(org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)) {
@@ -1068,7 +1068,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
-    protected String normalize(String feature) {
+    private String normalize(String feature) {
         if (!feature.contains(VERSION_SEPARATOR)) {
             feature += "/0.0.0";
         }
@@ -1090,7 +1090,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
      * @param options the provisioning options.
      * @throws Exception in case of provisioning failure.
      */
-    public void doProvisionInThread(final Map<String, Set<String>> requirements,
+    private void doProvisionInThread(final Map<String, Set<String>> requirements,
                                     final Map<String, Map<String, FeatureState>> stateChanges,
                                     final State state,
                                     final EnumSet<Option> options) throws Exception {
@@ -1115,7 +1115,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
-    protected Deployer.DeploymentState getDeploymentState(State state) throws Exception {
+    private Deployer.DeploymentState getDeploymentState(State state) throws Exception {
         Deployer.DeploymentState dstate = new Deployer.DeploymentState();
         // State
         dstate.state = state;
@@ -1181,7 +1181,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
 
 
-    public void doProvision(Map<String, Set<String>> requirements,                // all requirements
+    private void doProvision(Map<String, Set<String>> requirements,                // all requirements
                             Map<String, Map<String, FeatureState>> stateChanges,  // features state changes
                             State state,                                          // current state
                             EnumSet<Option> options,                              // installation options
