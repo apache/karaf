@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
@@ -78,10 +79,10 @@ public class RepositoryImpl implements Repository {
                 .toArray(URI[]::new);
     }
 
-    public org.apache.karaf.features.Feature[] getFeatures() throws IOException {
+    public Feature[] getFeatures() throws IOException {
         load();
         return features.getFeature()
-                .toArray(new org.apache.karaf.features.Feature[features.getFeature().size()]);
+                .toArray(new Feature[features.getFeature().size()]);
     }
 
 
