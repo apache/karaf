@@ -201,19 +201,12 @@ public class Activator extends BaseActivator {
                 return new FileOutputStream(file);
             }
         };
-        EventAdminListener eventAdminListener;
-        try {
-            eventAdminListener = new EventAdminListener(bundleContext);
-        } catch (Throwable t) {
-            eventAdminListener = null;
-        }
         featuresService = new FeaturesServiceImpl(
                 bundleContext.getBundle(),
                 bundleContext,
                 bundleContext.getBundle(0).getBundleContext(),
                 stateStorage,
                 featureFinder,
-                eventAdminListener,
                 configurationAdmin,
                 resolver,
                 dg,
@@ -228,6 +221,13 @@ public class Activator extends BaseActivator {
                 scheduleMaxRun,
                 blacklisted,
                 configCfgStore);
+        
+        try {
+            EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
+            featuresService.registerListener(eventAdminListener);
+        } catch (Throwable t) {
+            // No EventAdmin support in this case 
+        }
         register(FeaturesService.class, featuresService);
 
         featuresListenerTracker = new ServiceTracker<>(
