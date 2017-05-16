@@ -74,6 +74,7 @@ import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
+import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.State;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
@@ -87,6 +88,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.eclipse.equinox.region.RegionDigraph;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
@@ -417,7 +419,7 @@ public class VerifyMojo extends MojoSupport {
         try {
             Bundle systemBundle = getSystemBundle(getMetadata(properties, "metadata#"));
             DummyDeployCallback callback = new DummyDeployCallback(systemBundle, repositories.values());
-            Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback);
+            Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback, callback);
 
 
             // Install framework
@@ -756,7 +758,7 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    public static class DummyDeployCallback implements Deployer.DeployCallback {
+    public static class DummyDeployCallback implements Deployer.DeployCallback, BundleInstallSupport {
 
         private final Bundle systemBundle;
         private final Deployer.DeploymentState dstate;
@@ -798,7 +800,11 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
-        public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        public void installConfigs(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        }
+        
+        @Override
+        public void installLibraries(org.apache.karaf.features.Feature feature) throws IOException {
         }
 
         @Override
@@ -865,6 +871,15 @@ public class VerifyMojo extends MojoSupport {
 
         @Override
         public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
+        }
+
+        @Override
+        public void saveState() throws IOException {
+        }
+
+        @Override
+        public RegionDigraph getDiGraphCopy() throws BundleException {
+            return null;
         }
     }
 

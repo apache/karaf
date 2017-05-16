@@ -56,7 +56,8 @@ public class FeaturesServiceImplTest extends TestBase {
     public void testGetFeature() throws Exception {
         Feature transactionFeature = feature("transaction", "1.0.0");
         final Map<String, Map<String, Feature>> features = features(transactionFeature);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null) {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg ) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             }
@@ -67,7 +68,8 @@ public class FeaturesServiceImplTest extends TestBase {
     
     @Test
     public void testGetFeatureStripVersion() throws Exception {
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null) {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
@@ -81,7 +83,8 @@ public class FeaturesServiceImplTest extends TestBase {
     
     @Test
     public void testGetFeatureNotAvailable() throws Exception {
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null) {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
@@ -95,7 +98,8 @@ public class FeaturesServiceImplTest extends TestBase {
                 feature("transaction", "1.0.0"),
                 feature("transaction", "2.0.0")
         );
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null) {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             }
@@ -113,7 +117,8 @@ public class FeaturesServiceImplTest extends TestBase {
             }
         } : null);
         try {
-            final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null);
+            FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+            final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg);
             impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
             impl.getFeatures();
         } finally {

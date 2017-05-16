@@ -42,8 +42,12 @@ import org.apache.karaf.features.internal.repository.XmlRepository;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
 import org.apache.karaf.features.internal.service.EventAdminListener;
+import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.service.FeatureFinder;
+import org.apache.karaf.features.internal.service.FeaturesServiceConfig;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
+import org.apache.karaf.features.internal.service.BundleInstallSupport;
+import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
@@ -53,6 +57,7 @@ import org.eclipse.equinox.internal.region.CollisionHookHelper;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
 import org.eclipse.equinox.region.RegionDigraph;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.bundle.CollisionHook;
@@ -174,15 +179,16 @@ public class Activator extends BaseActivator {
             break;
         }
 
-        String overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
-        String featureResolutionRange = getString("featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE);
-        String bundleUpdateRange = getString("bundleUpdateRange", FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE);
-        String updateSnapshots = getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS);
-        int downloadThreads = getInt("downloadThreads", FeaturesService.DEFAULT_DOWNLOAD_THREADS);
-        long scheduleDelay = getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY);
-        int scheduleMaxRun = getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN);
-        String blacklisted = getString("blacklisted", new File(System.getProperty("karaf.etc"), "blacklisted.properties").toURI().toString());
-        String serviceRequirements = getString("serviceRequirements", FeaturesService.SERVICE_REQUIREMENTS_DEFAULT);
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        cfg.overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
+        cfg.featureResolutionRange = getString("featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE);
+        cfg.bundleUpdateRange = getString("bundleUpdateRange", FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE);
+        cfg.updateSnapshots = getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS);
+        cfg.downloadThreads = getInt("downloadThreads", FeaturesService.DEFAULT_DOWNLOAD_THREADS);
+        cfg.scheduleDelay = getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY);
+        cfg.scheduleMaxRun = getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN);
+        cfg.blacklisted = getString("blacklisted", new File(System.getProperty("karaf.etc"), "blacklisted.properties").toURI().toString());
+        cfg.serviceRequirements = getString("serviceRequirements", FeaturesService.SERVICE_REQUIREMENTS_DEFAULT);
         boolean configCfgStore = getBoolean("configCfgStore", FeaturesService.DEFAULT_CONFIG_CFG_STORE);
         StateStorage stateStorage = new StateStorage() {
             @Override
@@ -201,26 +207,23 @@ public class Activator extends BaseActivator {
                 return new FileOutputStream(file);
             }
         };
+        BundleContext systemBundleContext = bundleContext.getBundle(0).getBundleContext();
+        FeatureConfigInstaller configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, configCfgStore) : null;
+        BundleInstallSupport installSupport = new BundleInstallSupportImpl(bundleContext.getBundle(),
+                    systemBundleContext,
+                    configInstaller,
+                    dg);
         featuresService = new FeaturesServiceImpl(
                 bundleContext.getBundle(),
                 bundleContext,
-                bundleContext.getBundle(0).getBundleContext(),
+                systemBundleContext,
                 stateStorage,
                 featureFinder,
                 configurationAdmin,
                 resolver,
-                dg,
-                overrides,
-                featureResolutionRange,
-                bundleUpdateRange,
-                updateSnapshots,
-                serviceRequirements,
+                installSupport,
                 globalRepository,
-                downloadThreads,
-                scheduleDelay,
-                scheduleMaxRun,
-                blacklisted,
-                configCfgStore);
+                cfg);
         
         try {
             EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);

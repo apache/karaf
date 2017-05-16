@@ -45,10 +45,12 @@ import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.service.Blacklist;
+import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.State;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.util.maven.Parser;
+import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -59,7 +61,7 @@ import org.osgi.resource.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssemblyDeployCallback implements Deployer.DeployCallback {
+public class AssemblyDeployCallback implements Deployer.DeployCallback, BundleInstallSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
 
@@ -127,13 +129,8 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     }
 
     @Override
-    public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
-        // Check blacklist
-        if (Blacklist.isFeatureBlacklisted(builder.getBlacklistedFeatures(), feature.getName(), feature.getVersion())) {
-            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
-                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
-            }
-        }
+    public void installConfigs(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        assertNotBlacklisted(feature);
         // Install
         Downloader downloader = manager.createDownloader();
         for (Config config : ((Feature) feature).getConfig()) {
@@ -173,6 +170,13 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                 Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
             });
         }
+    }
+
+    
+    @Override
+    public void installLibraries(org.apache.karaf.features.Feature feature) throws IOException {
+        assertNotBlacklisted(feature);
+        Downloader downloader = manager.createDownloader();
         List<String> libraries = new ArrayList<>();
         for (Library library : ((Feature) feature).getLibraries()) {
             String lib = library.getLocation() +
@@ -190,6 +194,14 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             downloader.await();
         } catch (Exception e) {
             throw new IOException("Error downloading configuration files", e);
+        }
+    }
+    
+    private void assertNotBlacklisted(org.apache.karaf.features.Feature feature) {
+        if (Blacklist.isFeatureBlacklisted(builder.getBlacklistedFeatures(), feature.getName(), feature.getVersion())) {
+            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
+                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
+            }
         }
     }
 
@@ -301,5 +313,14 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             }
         }
         return finalname;
+    }
+
+    @Override
+    public void saveState() throws IOException {
+    }
+
+    @Override
+    public RegionDigraph getDiGraphCopy() throws BundleException {
+        return null;
     }
 }
