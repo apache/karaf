@@ -874,11 +874,16 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
-        public void saveState() throws IOException {
+        public void saveState() {
         }
 
         @Override
         public RegionDigraph getDiGraphCopy() throws BundleException {
+            return null;
+        }
+
+        @Override
+        public File getDataFile(String name) {
             return null;
         }
     }

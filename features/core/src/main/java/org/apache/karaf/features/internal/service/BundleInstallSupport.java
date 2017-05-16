@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -56,12 +57,14 @@ public interface BundleInstallSupport {
                         Map<String, Set<Long>> bundles)
         throws BundleException, InvalidSyntaxException;
 
-    void saveState() throws IOException;
+    void saveState();
 
     RegionDigraph getDiGraphCopy() throws BundleException;
     
     void installConfigs(Feature feature) throws IOException, InvalidSyntaxException;
     
     void installLibraries(Feature feature) throws IOException;
+
+    File getDataFile(String name);
 
 }

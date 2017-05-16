@@ -91,8 +91,8 @@ public class Activator extends BaseActivator {
 
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
     private FeaturesServiceImpl featuresService;
-    private StandardRegionDigraph digraph;
     private StandardManageableRegionDigraph digraphMBean;
+    private BundleInstallSupport installSupport;
 
     public Activator() {
         // Special case here, as we don't want the activator to wait for current job to finish,
@@ -130,7 +130,7 @@ public class Activator extends BaseActivator {
         }
 
         // RegionDigraph
-        StandardRegionDigraph dg = digraph = DigraphHelper.loadDigraph(bundleContext);
+        StandardRegionDigraph dg = DigraphHelper.loadDigraph(bundleContext);
         register(ResolverHookFactory.class, dg.getResolverHookFactory());
         register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
         register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook());
@@ -138,7 +138,6 @@ public class Activator extends BaseActivator {
         register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook());
         register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook());
         register(RegionDigraph.class, dg);
-        register(RegionDigraphPersistence.class, this::doPersistRegionDigraph);
 
         if (getBoolean("digraphMBean", FeaturesService.DEFAULT_DIGRAPH_MBEAN)) {
             StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
@@ -209,10 +208,13 @@ public class Activator extends BaseActivator {
         };
         BundleContext systemBundleContext = bundleContext.getBundle(0).getBundleContext();
         FeatureConfigInstaller configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, configCfgStore) : null;
-        BundleInstallSupport installSupport = new BundleInstallSupportImpl(bundleContext.getBundle(),
+        installSupport = new BundleInstallSupportImpl(
+                    bundleContext.getBundle(),
+                    bundleContext,
                     systemBundleContext,
                     configInstaller,
                     dg);
+        register(RegionDigraphPersistence.class, () -> installSupport.saveState());
         featuresService = new FeaturesServiceImpl(
                 bundleContext.getBundle(),
                 bundleContext,
@@ -285,19 +287,8 @@ public class Activator extends BaseActivator {
             featuresService.stop();
             featuresService = null;
         }
-        if (digraph != null) {
-            doPersistRegionDigraph();
-            digraph = null;
-        }
-    }
-
-    private void doPersistRegionDigraph() {
-        if (digraph != null) {
-            try {
-                DigraphHelper.saveDigraph(bundleContext, digraph);
-            } catch (Exception e) {
-                // Ignore
-            }
+        if (installSupport != null) {
+            installSupport.saveState();
         }
     }
 

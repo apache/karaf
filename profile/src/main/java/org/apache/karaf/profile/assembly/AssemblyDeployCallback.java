@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.profile.assembly;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -316,11 +317,16 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback, BundleIn
     }
 
     @Override
-    public void saveState() throws IOException {
+    public void saveState() {
     }
 
     @Override
     public RegionDigraph getDiGraphCopy() throws BundleException {
+        return null;
+    }
+
+    @Override
+    public File getDataFile(String name) {
         return null;
     }
 }

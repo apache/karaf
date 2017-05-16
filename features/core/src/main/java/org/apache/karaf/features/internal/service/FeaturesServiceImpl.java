@@ -62,10 +62,10 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
+import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
-import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
@@ -81,7 +81,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.karaf.features.internal.service.StateStorage.toStringStringSetMap;
 import static org.apache.karaf.features.internal.util.MapUtils.add;
-import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.apache.karaf.features.internal.util.MapUtils.copy;
 import static org.apache.karaf.features.internal.util.MapUtils.remove;
 
@@ -1029,29 +1028,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 dstate.features.put(id, feature);
             }
         }
-        // Region -> bundles mapping
-        // Region -> policy mapping
-        dstate.bundlesPerRegion = new HashMap<>();
-        dstate.filtersPerRegion = new HashMap<>();
-        RegionDigraph clone = installSupport.getDiGraphCopy();
-        for (Region region : clone.getRegions()) {
-            // Get bundles
-            dstate.bundlesPerRegion.put(region.getName(), new HashSet<>(region.getBundleIds()));
-            // Get policies
-            Map<String, Map<String, Set<String>>> edges = new HashMap<>();
-            for (RegionDigraph.FilteredRegion fr : clone.getEdges(region)) {
-                Map<String, Set<String>> policy = new HashMap<>();
-                Map<String, Collection<String>> current = fr.getFilter().getSharingPolicy();
-                for (String ns : current.keySet()) {
-                    for (String f : current.get(ns)) {
-                        addToMapSet(policy, ns, f);
-                    }
-                }
-                edges.put(fr.getRegion().getName(), policy);
-            }
-            dstate.filtersPerRegion.put(region.getName(), edges);
+        RegionDigraph regionDigraph = installSupport.getDiGraphCopy();
+        if (regionDigraph != null) {
+            dstate.bundlesPerRegion = DigraphHelper.getBundlesPerRegion(regionDigraph);
+            dstate.filtersPerRegion = DigraphHelper.getPolicies(regionDigraph);
         }
-        // Return
         return dstate;
     }
 

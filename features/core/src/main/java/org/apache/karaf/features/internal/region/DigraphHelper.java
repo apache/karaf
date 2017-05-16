@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,7 +48,7 @@ import org.osgi.framework.InvalidSyntaxException;
 
 public final class DigraphHelper {
 
-    private static final String DIGRAPH_FILE = "digraph.json";
+    public static final String DIGRAPH_FILE = "digraph.json";
 
     private static final String REGIONS = "regions";
     private static final String EDGES = "edges";
@@ -95,10 +97,9 @@ public final class DigraphHelper {
         return digraph;
     }
 
-    public static void saveDigraph(BundleContext bundleContext, RegionDigraph digraph) throws IOException {
-        File digraphFile = bundleContext.getDataFile(DIGRAPH_FILE);
+    public static void saveDigraph(File outFile, RegionDigraph digraph) {
         try (
-                FileOutputStream out = new FileOutputStream(digraphFile)
+            FileOutputStream out = new FileOutputStream(outFile)
         ) {
             saveDigraph(digraph, out);
         } catch (Exception e) {
@@ -157,4 +158,31 @@ public final class DigraphHelper {
         JsonWriter.write(out, json);
     }
 
+    public static Map<String, Set<Long>> getBundlesPerRegion(RegionDigraph digraph) {
+        Map<String, Set<Long>> bundlesPerRegion = new HashMap<>();
+        for (Region region : digraph.getRegions()) {
+            bundlesPerRegion.put(region.getName(), new HashSet<>(region.getBundleIds()));
+        }
+        return bundlesPerRegion;
+    }
+    
+    public static Map<String, Map<String, Map<String, Set<String>>>> getPolicies(RegionDigraph digraph) {
+        Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion = new HashMap<>();
+        
+        for (Region region : digraph.getRegions()) {
+            Map<String, Map<String, Set<String>>> edges = new HashMap<>();
+            for (RegionDigraph.FilteredRegion fr : digraph.getEdges(region)) {
+                Map<String, Set<String>> policy = new HashMap<>();
+                Map<String, Collection<String>> current = fr.getFilter().getSharingPolicy();
+                for (String ns : current.keySet()) {
+                    for (String f : current.get(ns)) {
+                        addToMapSet(policy, ns, f);
+                    }
+                }
+                edges.put(fr.getRegion().getName(), policy);
+            }
+            filtersPerRegion.put(region.getName(), edges);
+        }
+        return filtersPerRegion;
+    }
 }

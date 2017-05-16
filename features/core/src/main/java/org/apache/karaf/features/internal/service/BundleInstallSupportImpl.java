@@ -62,6 +62,7 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     
     private final RegionDigraph digraph;
     private final Bundle ourBundle;
+    private final BundleContext ourBundleContext;
     private final FeatureConfigInstaller configInstaller;
     
     /**
@@ -73,10 +74,12 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     private final BundleContext systemBundleContext;
     
     public BundleInstallSupportImpl(Bundle ourBundle,
+                   BundleContext ourBundleContext,
                    BundleContext systemBundleContext,
                    FeatureConfigInstaller configInstaller,
                    RegionDigraph digraph) {
         this.ourBundle = ourBundle;
+        this.ourBundleContext = ourBundleContext;
         this.systemBundleContext = systemBundleContext;
         this.configInstaller = configInstaller;
         this.digraph = digraph;
@@ -281,8 +284,8 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
      * @see org.apache.karaf.features.internal.service.Regions#saveState()
      */
     @Override
-    public void saveState() throws IOException {
-        DigraphHelper.saveDigraph(ourBundle.getBundleContext(), digraph);
+    public void saveState() {
+        DigraphHelper.saveDigraph(getDataFile(DigraphHelper.DIGRAPH_FILE), digraph);
     }
     
     /* (non-Javadoc)
@@ -304,4 +307,10 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     public void installLibraries(Feature feature) {
         // TODO: install libraries
     }
+
+    @Override
+    public File getDataFile(String fileName) {
+        return ourBundleContext.getDataFile(fileName);
+    }
+
 }
