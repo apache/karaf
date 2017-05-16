@@ -560,13 +560,13 @@ public class Deployer {
         // #9: start bundles in order
         // #10: send events
         //
-
+        Bundle serviceBundle = dstate.serviceBundle;
         //
         // Handle updates on the FeaturesService bundle
         //
         Deployer.RegionDeployment rootRegionDeployment = deployment.regions.get(ROOT_REGION);
         // We don't support uninstalling the bundle
-        if (rootRegionDeployment != null && rootRegionDeployment.toDelete.contains(dstate.serviceBundle)) {
+        if (rootRegionDeployment != null && rootRegionDeployment.toDelete.contains(serviceBundle)) {
             throw new UnsupportedOperationException("Uninstalling the FeaturesService bundle is not supported");
         }
 
@@ -580,33 +580,33 @@ public class Deployer {
         //  - start the bundle
         //  - exit
         // When restarting, the resolution will be attempted again
-        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(dstate.serviceBundle)) {
+        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(serviceBundle)) {
             callback.persistResolveRequest(request);
             // If the bundle is updated because of a different checksum,
             // save the new checksum persistently
-            if (deployment.bundleChecksums.containsKey(dstate.serviceBundle.getBundleId())) {
+            if (deployment.bundleChecksums.containsKey(serviceBundle.getBundleId())) {
                 State state = dstate.state.copy();
-                state.bundleChecksums.put(dstate.serviceBundle.getBundleId(),
-                                          deployment.bundleChecksums.get(dstate.serviceBundle.getBundleId()));
+                state.bundleChecksums.put(serviceBundle.getBundleId(),
+                                          deployment.bundleChecksums.get(serviceBundle.getBundleId()));
                 callback.saveState(state);
             }
-            Resource resource = rootRegionDeployment.toUpdate.get(dstate.serviceBundle);
+            Resource resource = rootRegionDeployment.toUpdate.get(serviceBundle);
             String uri = getUri(resource);
             print("The FeaturesService bundle needs is being updated with " + uri, verbose);
             toRefresh.clear();
-            toRefresh.put(dstate.serviceBundle, "FeaturesService bundle is being updated");
+            toRefresh.put(serviceBundle, "FeaturesService bundle is being updated");
             computeBundlesToRefresh(toRefresh,
                     dstate.bundles.values(),
                     Collections.<Resource, Bundle>emptyMap(),
                     Collections.<Resource, List<Wire>>emptyMap());
-            installSupport.stopBundle(dstate.serviceBundle, STOP_TRANSIENT);
+            installSupport.stopBundle(serviceBundle, STOP_TRANSIENT);
             try (
                     InputStream is = getBundleInputStream(resource, providers)
             ) {
-                installSupport.updateBundle(dstate.serviceBundle, uri, is);
+                installSupport.updateBundle(serviceBundle, uri, is);
             }
             installSupport.refreshPackages(toRefresh.keySet());
-            installSupport.startBundle(dstate.serviceBundle);
+            installSupport.startBundle(serviceBundle);
             return;
         }
 
@@ -734,7 +734,7 @@ public class Deployer {
         for (Map.Entry<Bundle, Integer> entry : toUpdateStartLevel.entrySet()) {
             Bundle bundle = entry.getKey();
             int sl = entry.getValue();
-            installSupport.setBundleStartLevel(bundle, sl);
+            bundle.adapt(BundleStartLevel.class).setStartLevel(sl);
         }
         //
         // Install bundles
@@ -791,7 +791,8 @@ public class Deployer {
 
             // Set start levels after install to avoid starting before all bundles are installed
             for (Bundle bundle : customStartLevels.keySet()) {
-                installSupport.setBundleStartLevel(bundle, customStartLevels.get(bundle));
+                int startLevel = customStartLevels.get(bundle);
+                bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
             }
         }
 
@@ -857,8 +858,8 @@ public class Deployer {
                     print("    " + bundle.getSymbolicName() + "/" + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
                 }
                 // Ensure all classes are loaded in case the bundle will be refreshed
-                if (dstate.serviceBundle != null && toRefresh.containsKey(dstate.serviceBundle)) {
-                    ensureAllClassesLoaded(dstate.serviceBundle);
+                if (serviceBundle != null && toRefresh.containsKey(serviceBundle)) {
+                    ensureAllClassesLoaded(serviceBundle);
                 }
                 installSupport.refreshPackages(toRefresh.keySet());
 
@@ -880,7 +881,7 @@ public class Deployer {
             List<Exception> exceptions = new ArrayList<>();
             print("Starting bundles:", verbose);
             while (!toStart.isEmpty()) {
-                List<Bundle> bs = getBundlesToStart(toStart, dstate.serviceBundle);
+                List<Bundle> bs = getBundlesToStart(toStart, serviceBundle);
                 for (Bundle bundle : bs) {
                     print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                     try {
