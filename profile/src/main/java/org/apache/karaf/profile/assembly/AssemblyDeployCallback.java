@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.profile.assembly;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -29,7 +28,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -46,23 +44,20 @@ import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.service.Blacklist;
-import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.State;
+import org.apache.karaf.features.internal.service.StaticInstallSupport;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.util.maven.Parser;
-import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.resource.Resource;
-import org.osgi.resource.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssemblyDeployCallback implements Deployer.DeployCallback, BundleInstallSupport {
+public class AssemblyDeployCallback extends StaticInstallSupport implements Deployer.DeployCallback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
 
@@ -114,10 +109,6 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback, BundleIn
 
     public Deployer.DeploymentState getDeploymentState() {
         return dstate;
-    }
-
-    @Override
-    public void print(String message, boolean verbose) {
     }
 
     @Override
@@ -263,38 +254,8 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback, BundleIn
     }
 
     @Override
-    public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void uninstall(Bundle bundle) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void startBundle(Bundle bundle) throws BundleException {
-    }
-
-    @Override
-    public void stopBundle(Bundle bundle, int options) throws BundleException {
-    }
-
-    @Override
     public void setBundleStartLevel(Bundle bundle, int startLevel) {
         bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
-    }
-
-    @Override
-    public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
-    }
-
-    @Override
-    public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
-    }
-
-    @Override
-    public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
     }
 
     private String substFinalName(String finalname) {
@@ -316,17 +277,4 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback, BundleIn
         return finalname;
     }
 
-    @Override
-    public void saveState() {
-    }
-
-    @Override
-    public RegionDigraph getDiGraphCopy() throws BundleException {
-        return null;
-    }
-
-    @Override
-    public File getDataFile(String name) {
-        return null;
-    }
 }

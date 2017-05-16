@@ -42,7 +42,7 @@ public class FeaturesServiceConfig {
      */
     public String updateSnapshots;
     
-    public int downloadThreads;
+    public int downloadThreads = 1;
     
     public long scheduleDelay;
     

@@ -216,9 +216,6 @@ public class Activator extends BaseActivator {
                     dg);
         register(RegionDigraphPersistence.class, () -> installSupport.saveState());
         featuresService = new FeaturesServiceImpl(
-                bundleContext.getBundle(),
-                bundleContext,
-                systemBundleContext,
                 stateStorage,
                 featureFinder,
                 configurationAdmin,

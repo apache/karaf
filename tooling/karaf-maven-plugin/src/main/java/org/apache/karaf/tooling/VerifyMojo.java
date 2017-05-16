@@ -74,8 +74,8 @@ import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
-import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.State;
+import org.apache.karaf.features.internal.service.StaticInstallSupport;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.profile.assembly.CustomDownloadManager;
@@ -88,7 +88,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.eclipse.equinox.region.RegionDigraph;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
@@ -103,8 +102,6 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Requirement;
-import org.osgi.resource.Resource;
-import org.osgi.resource.Wire;
 import org.osgi.service.resolver.ResolutionException;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
@@ -758,7 +755,7 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    public static class DummyDeployCallback implements Deployer.DeployCallback, BundleInstallSupport {
+    public static class DummyDeployCallback extends StaticInstallSupport implements Deployer.DeployCallback {
 
         private final Bundle systemBundle;
         private final Deployer.DeploymentState dstate;
@@ -784,10 +781,6 @@ public class VerifyMojo extends MojoSupport {
 
         public Deployer.DeploymentState getDeploymentState() {
             return dstate;
-        }
-
-        @Override
-        public void print(String message, boolean verbose) {
         }
 
         @Override
@@ -839,53 +832,6 @@ public class VerifyMojo extends MojoSupport {
             }
         }
 
-        @Override
-        public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void uninstall(Bundle bundle) throws BundleException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void startBundle(Bundle bundle) throws BundleException {
-        }
-
-        @Override
-        public void stopBundle(Bundle bundle, int options) throws BundleException {
-        }
-
-        @Override
-        public void setBundleStartLevel(Bundle bundle, int startLevel) {
-        }
-
-        @Override
-        public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
-        }
-
-        @Override
-        public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
-        }
-
-        @Override
-        public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
-        }
-
-        @Override
-        public void saveState() {
-        }
-
-        @Override
-        public RegionDigraph getDiGraphCopy() throws BundleException {
-            return null;
-        }
-
-        @Override
-        public File getDataFile(String name) {
-            return null;
-        }
     }
 
     public class MavenResolverLog extends org.apache.felix.resolver.Logger {

@@ -48,6 +48,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
@@ -147,9 +148,6 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         bundle.uninstall();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#startBundle(org.osgi.framework.Bundle)
-     */
     @Override
     public void startBundle(Bundle bundle) throws BundleException {
         if (bundle != this.ourBundle || bundle.getState() != Bundle.STARTING) {
@@ -313,4 +311,18 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         return ourBundleContext.getDataFile(fileName);
     }
 
+    @Override
+    public FrameworkInfo getInfo() {
+        FrameworkInfo info = new FrameworkInfo();
+        info.ourBundle = ourBundle;
+        FrameworkStartLevel fsl = systemBundleContext.getBundle().adapt(FrameworkStartLevel.class);
+        info.initialBundleStartLevel = fsl.getInitialBundleStartLevel();
+        info.currentStartLevel = fsl.getStartLevel();
+        info.bundles = new HashMap<>();
+        for (Bundle bundle : systemBundleContext.getBundles()) {
+            info.bundles.put(bundle.getBundleId(), bundle);
+        }
+        info.systemBundle = info.bundles.get(0);
+        return info;
+    }
 }

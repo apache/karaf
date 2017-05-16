@@ -28,6 +28,7 @@ import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.TestBase;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.resolver.Resolver;
@@ -57,7 +58,9 @@ public class FeaturesServiceImplTest extends TestBase {
         Feature transactionFeature = feature("transaction", "1.0.0");
         final Map<String, Map<String, Feature>> features = features(transactionFeature);
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg ) {
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        EasyMock.replay(installSupport);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg ) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             }
@@ -69,7 +72,8 @@ public class FeaturesServiceImplTest extends TestBase {
     @Test
     public void testGetFeatureStripVersion() throws Exception {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg) {
+        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
@@ -84,7 +88,8 @@ public class FeaturesServiceImplTest extends TestBase {
     @Test
     public void testGetFeatureNotAvailable() throws Exception {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg) {
+        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
@@ -99,7 +104,8 @@ public class FeaturesServiceImplTest extends TestBase {
                 feature("transaction", "2.0.0")
         );
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg) {
+        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             }
@@ -118,7 +124,9 @@ public class FeaturesServiceImplTest extends TestBase {
         } : null);
         try {
             FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-            final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, this.resolver, null, null, cfg);
+            BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+            EasyMock.replay(installSupport);
+            final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg);
             impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
             impl.getFeatures();
         } finally {

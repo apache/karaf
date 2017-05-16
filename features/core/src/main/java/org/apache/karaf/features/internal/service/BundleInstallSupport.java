@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,5 +67,16 @@ public interface BundleInstallSupport {
     void installLibraries(Feature feature) throws IOException;
 
     File getDataFile(String name);
+    
+    FrameworkInfo getInfo();
+    
+    class FrameworkInfo {
+        public Bundle ourBundle;
+        public Bundle systemBundle;
+        public int initialBundleStartLevel;
+        public int currentStartLevel;
+        public Map<Long, Bundle> bundles = new HashMap<>();
+
+    }
 
 }

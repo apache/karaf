@@ -63,16 +63,14 @@ import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
 import org.apache.karaf.features.internal.region.DigraphHelper;
+import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
-import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.resolver.Resolver;
@@ -89,17 +87,11 @@ import static org.apache.karaf.features.internal.util.MapUtils.remove;
  */
 public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCallback {
 
+    private static final String RESOLVE_FILE = "resolve";
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
     private static final String FEATURE_OSGI_REQUIREMENT_PREFIX = "feature:";
     private static final String VERSION_SEPARATOR = "/";
 
-    /**
-     * Our bundle and corresponding bundle context.
-     * We use it to check bundle operations affecting our own bundle.
-     */
-    private final Bundle bundle;
-    private final BundleContext bundleContext;
-    private final BundleContext systemBundleContext;
     /**
      * Used to load and save the {@link State} of this service.
      */
@@ -128,19 +120,13 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final ExecutorService executor;
     private Map<String, Map<String, Feature>> featureCache;
 
-    public FeaturesServiceImpl(Bundle bundle,
-                               BundleContext bundleContext,
-                               BundleContext systemBundleContext,
-                               StateStorage storage,
+    public FeaturesServiceImpl(StateStorage storage,
                                FeatureFinder featureFinder,
                                ConfigurationAdmin configurationAdmin,
                                Resolver resolver,
                                BundleInstallSupport installSupport,
                                org.osgi.service.repository.Repository globalRepository,
                                FeaturesServiceConfig cfg) {
-        this.bundle = bundle;
-        this.bundleContext = bundleContext;
-        this.systemBundleContext = systemBundleContext;
         this.storage = storage;
         this.featureFinder = featureFinder;
         this.configurationAdmin = configurationAdmin;
@@ -159,11 +145,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void checkResolve() {
-        if (bundleContext == null) {
-            return; // Most certainly in unit tests
-        }
-        File resolveFile = bundleContext.getDataFile("resolve");
-        if (!resolveFile.exists()) {
+        File resolveFile = installSupport.getDataFile(RESOLVE_FILE);
+        if (resolveFile == null || !resolveFile.exists()) {
             return;
         }
         Map<String, Object> request;
@@ -191,7 +174,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     private void writeResolve(Map<String, Set<String>> requestedFeatures, EnumSet<Option> options) throws IOException {
-        File resolveFile = bundleContext.getDataFile("resolve");
+        File resolveFile = installSupport.getDataFile(RESOLVE_FILE);
         Map<String, Object> request = new HashMap<>();
         List<String> opts = new ArrayList<>();
         for (Option opt : options) {
@@ -230,9 +213,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     state.bundleChecksums.clear();
                 }
                 storage.save(state);
-                if (bundleContext != null) { // For tests, this should never happen at runtime
-                    installSupport.saveState();
-                }
+                installSupport.saveState();
             }
         } catch (IOException e) {
             LOGGER.warn("Error saving FeaturesService state", e);
@@ -1007,19 +988,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     private Deployer.DeploymentState getDeploymentState(State state) throws Exception {
         Deployer.DeploymentState dstate = new Deployer.DeploymentState();
-        // State
         dstate.state = state;
-        // Service bundle
-        dstate.serviceBundle = bundle;
-        // Start level
-        FrameworkStartLevel fsl = systemBundleContext.getBundle().adapt(FrameworkStartLevel.class);
-        dstate.initialBundleStartLevel = fsl.getInitialBundleStartLevel();
-        dstate.currentStartLevel = fsl.getStartLevel();
-        // Bundles
-        dstate.bundles = new HashMap<>();
-        for (Bundle bundle : systemBundleContext.getBundles()) {
-            dstate.bundles.put(bundle.getBundleId(), bundle);
-        }
+        FrameworkInfo info = installSupport.getInfo();
+        dstate.serviceBundle = info.ourBundle;
+        dstate.initialBundleStartLevel = info.initialBundleStartLevel;
+        dstate.currentStartLevel = info.currentStartLevel;
+        dstate.bundles = info.bundles;
         // Features
         dstate.features = new HashMap<>();
         for (Map<String, Feature> m : getFeatures().values()) {
@@ -1050,8 +1024,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         request.outputFile = outputFile;
         return request;
     }
-
-
 
     private void doProvision(Map<String, Set<String>> requirements,                // all requirements
                             Map<String, Map<String, FeatureState>> stateChanges,  // features state changes
