@@ -58,7 +58,6 @@ import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -120,6 +119,7 @@ public class Activator extends BaseActivator {
     }
 
     protected void doStart() throws Exception {
+        BundleContext systemBundleContext = bundleContext.getBundle(0).getBundleContext();
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
         Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class)));
         URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
@@ -128,24 +128,58 @@ public class Activator extends BaseActivator {
             return;
         }
 
-        // RegionDigraph
         StandardRegionDigraph dg = DigraphHelper.loadDigraph(bundleContext);
-        register(ResolverHookFactory.class, dg.getResolverHookFactory());
-        register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
-        register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook());
-        register(org.osgi.framework.hooks.bundle.EventHook.class, dg.getBundleEventHook());
-        register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook());
-        register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook());
-        register(RegionDigraph.class, dg);
-
-        if (getBoolean("digraphMBean", FeaturesService.DEFAULT_DIGRAPH_MBEAN)) {
-            StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
-            dgmb.registerMBean();
-        }
+        registerRegionDiGraph(dg);
+        boolean configCfgStore = getBoolean("configCfgStore", FeaturesService.DEFAULT_CONFIG_CFG_STORE);
+        FeatureConfigInstaller configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, configCfgStore) : null;
+        installSupport = new BundleInstallSupportImpl(
+                    bundleContext.getBundle(),
+                    bundleContext,
+                    systemBundleContext,
+                    configInstaller,
+                    dg);
+        register(RegionDigraphPersistence.class, () -> installSupport.saveState());
 
         FeatureRepoFinder featureFinder = new FeatureRepoFinder();
         register(ManagedService.class, featureFinder, FeatureRepoFinder.getServiceProperties());
 
+        Repository globalRepository = getGlobalRepository();
+        FeaturesServiceConfig cfg = getConfig();
+        StateStorage stateStorage = createStateStorage();
+        featuresService = new FeaturesServiceImpl(
+                stateStorage,
+                featureFinder,
+                configurationAdmin,
+                resolver,
+                installSupport,
+                globalRepository,
+                cfg);
+        try {
+            EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
+            featuresService.registerListener(eventAdminListener);
+        } catch (Throwable t) {
+            // No EventAdmin support in this case 
+        }
+        register(FeaturesService.class, featuresService);
+
+        featuresListenerTracker = createFeatureListenerTracker();
+        featuresListenerTracker.open();
+
+        FeaturesServiceMBeanImpl featuresServiceMBean = new FeaturesServiceMBeanImpl();
+        featuresServiceMBean.setBundleContext(bundleContext);
+        featuresServiceMBean.setFeaturesService(featuresService);
+        registerMBean(featuresServiceMBean, "type=feature");
+
+        String[] featuresRepositories = getStringArray("featuresRepositories", "");
+        String featuresBoot = getString("featuresBoot", "");
+        boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
+        BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(
+                bundleContext, featuresService,
+                featuresRepositories, featuresBoot, featuresBootAsynchronous);
+        bootFeaturesInstaller.start();
+    }
+
+    private Repository getGlobalRepository() {
         List<Repository> repositories = new ArrayList<>();
         String[] resourceRepositories = getStringArray("resourceRepositories", "");
         long repositoryExpiration = getLong("repositoryExpiration", FeaturesService.DEFAULT_REPOSITORY_EXPIRATION);
@@ -174,7 +208,10 @@ public class Activator extends BaseActivator {
             globalRepository = new AggregateRepository(repositories);
             break;
         }
+        return globalRepository;
+    }
 
+    private FeaturesServiceConfig getConfig() {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
         cfg.overrides = getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString());
         cfg.featureResolutionRange = getString("featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE);
@@ -185,7 +222,10 @@ public class Activator extends BaseActivator {
         cfg.scheduleMaxRun = getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN);
         cfg.blacklisted = getString("blacklisted", new File(System.getProperty("karaf.etc"), "blacklisted.properties").toURI().toString());
         cfg.serviceRequirements = getString("serviceRequirements", FeaturesService.SERVICE_REQUIREMENTS_DEFAULT);
-        boolean configCfgStore = getBoolean("configCfgStore", FeaturesService.DEFAULT_CONFIG_CFG_STORE);
+        return cfg;
+    }
+
+    private StateStorage createStateStorage() {
         StateStorage stateStorage = new StateStorage() {
             @Override
             protected InputStream getInputStream() throws IOException {
@@ -196,40 +236,34 @@ public class Activator extends BaseActivator {
                     return null;
                 }
             }
-
+    
             @Override
             protected OutputStream getOutputStream() throws IOException {
                 File file = bundleContext.getDataFile(STATE_FILE);
                 return new FileOutputStream(file);
             }
         };
-        BundleContext systemBundleContext = bundleContext.getBundle(0).getBundleContext();
-        FeatureConfigInstaller configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, configCfgStore) : null;
-        installSupport = new BundleInstallSupportImpl(
-                    bundleContext.getBundle(),
-                    bundleContext,
-                    systemBundleContext,
-                    configInstaller,
-                    dg);
-        register(RegionDigraphPersistence.class, () -> installSupport.saveState());
-        featuresService = new FeaturesServiceImpl(
-                stateStorage,
-                featureFinder,
-                configurationAdmin,
-                resolver,
-                installSupport,
-                globalRepository,
-                cfg);
-        
-        try {
-            EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
-            featuresService.registerListener(eventAdminListener);
-        } catch (Throwable t) {
-            // No EventAdmin support in this case 
-        }
-        register(FeaturesService.class, featuresService);
+        return stateStorage;
+    }
 
-        featuresListenerTracker = new ServiceTracker<>(
+    @SuppressWarnings("deprecation")
+    private void registerRegionDiGraph(StandardRegionDigraph dg) {
+        register(ResolverHookFactory.class, dg.getResolverHookFactory());
+        register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
+        register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook());
+        register(org.osgi.framework.hooks.bundle.EventHook.class, dg.getBundleEventHook());
+        register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook());
+        register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook());
+        register(RegionDigraph.class, dg);
+        
+        if (getBoolean("digraphMBean", FeaturesService.DEFAULT_DIGRAPH_MBEAN)) {
+            StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
+            dgmb.registerMBean();
+        }
+    }
+
+    private ServiceTracker<FeaturesListener, FeaturesListener> createFeatureListenerTracker() {
+        return new ServiceTracker<>(
                 bundleContext,
                 FeaturesListener.class,
                 new ServiceTrackerCustomizer<FeaturesListener, FeaturesListener>() {
@@ -239,11 +273,11 @@ public class Activator extends BaseActivator {
                         featuresService.registerListener(service);
                         return service;
                     }
-
+    
                     @Override
                     public void modifiedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
                     }
-
+    
                     @Override
                     public void removedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
                         featuresService.unregisterListener(service);
@@ -251,20 +285,6 @@ public class Activator extends BaseActivator {
                     }
                 }
         );
-        featuresListenerTracker.open();
-
-        FeaturesServiceMBeanImpl featuresServiceMBean = new FeaturesServiceMBeanImpl();
-        featuresServiceMBean.setBundleContext(bundleContext);
-        featuresServiceMBean.setFeaturesService(featuresService);
-        registerMBean(featuresServiceMBean, "type=feature");
-
-        String[] featuresRepositories = getStringArray("featuresRepositories", "");
-        String featuresBoot = getString("featuresBoot", "");
-        boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
-        BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(
-                bundleContext, featuresService,
-                featuresRepositories, featuresBoot, featuresBootAsynchronous);
-        bootFeaturesInstaller.start();
     }
 
     protected void doStop() {
