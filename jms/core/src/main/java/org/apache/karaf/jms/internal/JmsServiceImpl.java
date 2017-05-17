@@ -265,7 +265,7 @@ public class JmsServiceImpl implements JmsService {
             MessageConsumer consumer = session.createConsumer(session.createQueue(queue), selector);
             Message message;
             do {
-                message = consumer.receive(5000L);
+                message = consumer.receive(500L);
                 if (message != null) {
                     count++;
                 }
@@ -286,7 +286,7 @@ public class JmsServiceImpl implements JmsService {
             MessageConsumer consumer = session.createConsumer(session.createQueue(sourceQueue), selector);
             Message message;
             do {
-                message = consumer.receive(5000L);
+                message = consumer.receive(500L);
                 if (message != null) {
                     MessageProducer producer = session.createProducer(session.createQueue(targetQueue));
                     producer.send(message);
