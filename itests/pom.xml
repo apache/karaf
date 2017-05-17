@@ -49,10 +49,10 @@
             <scope>test</scope>
             <type>tar.gz</type>
             <exclusions>
-            	<exclusion>
-            		<artifactId>org.apache.karaf.client</artifactId>
-            		<groupId>org.apache.karaf</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>*</artifactId>
+                    <groupId>*</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -62,11 +62,19 @@
             <type>tar.gz</type>
             <exclusions>
                 <exclusion>
-                    <artifactId>org.apache.karaf.client</artifactId>
-                    <groupId>org.apache.karaf</groupId>
+                    <artifactId>*</artifactId>
+                    <groupId>*</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-karaf</artifactId>
+            <version>5.14.4</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        
         <dependency>
             <groupId>org.ops4j.pax.cdi</groupId>
             <artifactId>pax-cdi-features</artifactId>
@@ -103,6 +111,20 @@
             <artifactId>geronimo-atinject_1.0_spec</artifactId>
             <version>1.0</version>
             <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.fileinstall</artifactId>
         </dependency>
 
         <!-- for JmsTest -->
