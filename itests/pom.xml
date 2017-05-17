@@ -198,21 +198,21 @@
                     </execution>
                 </executions>
             </plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<systemPropertyVariables>
-						<org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
                         <spring31.version>${spring31.version}</spring31.version>
                         <spring32.version>${spring32.version}</spring32.version>
                         <spring40.version>${spring40.version}</spring40.version>
                         <spring41.version>${spring41.version}</spring41.version>
                         <spring42.version>${spring42.version}</spring42.version>
                         <spring43.version>${spring43.version}</spring43.version>
-					</systemPropertyVariables>
-				</configuration>
-			</plugin>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
