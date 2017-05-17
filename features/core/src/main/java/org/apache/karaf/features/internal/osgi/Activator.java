@@ -43,7 +43,7 @@ import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
 import org.apache.karaf.features.internal.service.EventAdminListener;
 import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
-import org.apache.karaf.features.internal.service.FeatureFinder;
+import org.apache.karaf.features.internal.service.FeatureRepoFinder;
 import org.apache.karaf.features.internal.service.FeaturesServiceConfig;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.BundleInstallSupport;
@@ -84,7 +84,6 @@ import org.slf4j.LoggerFactory;
 )
 public class Activator extends BaseActivator {
 
-    public static final String FEATURES_REPOS_PID = "org.apache.karaf.features.repos";
     public static final String FEATURES_SERVICE_CONFIG_FILE = "org.apache.karaf.features.cfg";
 
     private static final String STATE_FILE = "state.json";
@@ -144,10 +143,8 @@ public class Activator extends BaseActivator {
             dgmb.registerMBean();
         }
 
-        FeatureFinder featureFinder = new FeatureFinder();
-        Hashtable<String, Object> props = new Hashtable<>();
-        props.put(Constants.SERVICE_PID, FEATURES_REPOS_PID);
-        register(ManagedService.class, featureFinder, props);
+        FeatureRepoFinder featureFinder = new FeatureRepoFinder();
+        register(ManagedService.class, featureFinder, FeatureRepoFinder.getServiceProperties());
 
         List<Repository> repositories = new ArrayList<>();
         String[] resourceRepositories = getStringArray("resourceRepositories", "");

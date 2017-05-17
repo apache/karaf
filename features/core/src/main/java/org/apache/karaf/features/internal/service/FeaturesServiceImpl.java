@@ -96,7 +96,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
      * Used to load and save the {@link State} of this service.
      */
     private final StateStorage storage;
-    private final FeatureFinder featureFinder;
+    private final FeatureRepoFinder featureFinder;
     private final ConfigurationAdmin configurationAdmin;
     private final Resolver resolver;
     private final BundleInstallSupport installSupport;
@@ -121,7 +121,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private Map<String, Map<String, Feature>> featureCache;
 
     public FeaturesServiceImpl(StateStorage storage,
-                               FeatureFinder featureFinder,
+                               FeatureRepoFinder featureFinder,
                                ConfigurationAdmin configurationAdmin,
                                Resolver resolver,
                                BundleInstallSupport installSupport,
