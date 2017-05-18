@@ -19,6 +19,8 @@ package org.apache.karaf.jms.internal;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -46,19 +48,17 @@ public class JmsConnector implements Closeable {
     }
     
     private ServiceReference<ConnectionFactory> lookupConnectionFactory(String name) {
-        Collection<ServiceReference<ConnectionFactory>> references;
         try {
-            references = bc.getServiceReferences(ConnectionFactory.class, "(|(osgi.jndi.service.name=" + name + ")(name=" + name + ")(service.id=" + name + "))");
+            Collection<ServiceReference<ConnectionFactory>> references = bc.getServiceReferences(
+                    ConnectionFactory.class,
+                    "(|(osgi.jndi.service.name=" + name + ")(name=" + name + ")(service.id=" + name + "))");
+            return references.stream()
+                    .sorted(Comparator.<ServiceReference<?>>naturalOrder().reversed())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("No JMS connection factory found for " + name));
         } catch (InvalidSyntaxException e) {
             throw new RuntimeException("Error finding connection factory service " + name, e);
         }
-        if (references == null || references.size() == 0) {
-            throw new IllegalArgumentException("No JMS connection factory found for " + name);
-        }
-        if (references.size() > 1) {
-            throw new IllegalArgumentException("Multiple JMS connection factories found for " + name);
-        }
-        return references.iterator().next();
     }
 
     @Override
@@ -84,7 +84,7 @@ public class JmsConnector implements Closeable {
 
     public Connection connect() throws JMSException {
         reference = this.lookupConnectionFactory(connectionFactoryName);
-        ConnectionFactory cf = (ConnectionFactory) bc.getService(reference);
+        ConnectionFactory cf = bc.getService(reference);
         connection = cf.createConnection(username, password);
         connection.start();
         return connection;

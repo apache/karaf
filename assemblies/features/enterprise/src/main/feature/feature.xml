@@ -175,10 +175,13 @@
 
     <feature name="jms" description="JMS service and commands" version="${project.version}">
         <details>JMS support provinding service, commands, and MBean.</details>
-        <feature version="[2,3)">transaction</feature>
-        <feature>aries-blueprint</feature>
+        <feature dependency="true">aries-blueprint</feature>
+        <bundle dependency="true">mvn:javax.jms/javax.jms-api/2.0</bundle>
+        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.commons/commons-pool2/2.4.2</bundle>
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.core/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.pool/${project.version}</bundle>
         <!--
             Requirement on Blueprint.
             We don't use a feature dependency to allow the choice between aries-blueprint and gemini-blueprint.

@@ -19,16 +19,16 @@
 
     <service interface="javax.jms.ConnectionFactory">
         <service-properties>
-            <entry key="name" value="${name}"/>
-            <entry key="osgi.jndi.service.name" value="jms/${name}"/>
+            <entry key="name" value="${name}" />
+            <entry key="osgi.jndi.service.name" value="jms/${name}" />
             <entry key="karaf.jms.wrap" value="true" />
+            <entry key="karaf.jms.pool.maxConnections" value="8" />
         </service-properties>
-        <bean class="com.ibm.mq.jms.MQQueueConnectionFactory">
-            <property name="transportType" value="1" />
-            <property name="hostName" value="${hostname}" />
-            <property name="port" value="${port}" />
-            <property name="queueManager" value="${queuemanager}" />
-            <property name="channel" value="${channel}" />
+        <bean class="org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory">
+            <argument value="${url}" />
+            <argument value="${username}" />
+            <argument value="${password}" />
+            <property name="producerWindowSize" value="-1" />
         </bean>
     </service>
 

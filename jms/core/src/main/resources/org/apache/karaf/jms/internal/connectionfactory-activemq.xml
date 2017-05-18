@@ -17,22 +17,18 @@
     -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="${url}" />
-        <property name="userName" value="${username}" />
-        <property name="password" value="${password}" />
-    </bean>
-
-     <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
-        <property name="maxConnections" value="8" />
-        <property name="connectionFactory" ref="connectionFactory" />
-    </bean>
-
-    <service ref="pooledConnectionFactory" interface="javax.jms.ConnectionFactory">
+    <service interface="javax.jms.ConnectionFactory">
         <service-properties>
             <entry key="name" value="${name}" />
             <entry key="osgi.jndi.service.name" value="jms/${name}" />
+            <entry key="karaf.jms.wrap" value="true" />
+            <entry key="karaf.jms.pool.maxConnections" value="8" />
         </service-properties>
+        <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+            <property name="brokerURL" value="${url}" />
+            <property name="userName" value="${username}" />
+            <property name="password" value="${password}" />
+        </bean>
     </service>
 
 </blueprint>
