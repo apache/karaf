@@ -16,35 +16,43 @@
  */
 package org.apache.karaf.itests.mavenresolver;
 
+import static org.apache.karaf.itests.KarafTestSupport.MAX_RMI_REG_PORT;
+import static org.apache.karaf.itests.KarafTestSupport.MAX_RMI_SERVER_PORT;
+import static org.apache.karaf.itests.KarafTestSupport.MIN_RMI_REG_PORT;
+import static org.apache.karaf.itests.KarafTestSupport.MIN_RMI_SERVER_PORT;
+import static org.ops4j.pax.exam.CoreOptions.composite;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
+import static org.osgi.framework.Constants.OBJECTCLASS;
+
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.karaf.itests.monitoring.Activator;
-import org.apache.karaf.itests.monitoring.RegisteredService;
 import org.apache.karaf.itests.monitoring.ServiceMonitor;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.ProbeBuilder;
+import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
 import org.ops4j.store.intern.TemporaryStore;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.karaf.itests.KarafTestSupport.*;
-import static org.ops4j.pax.exam.CoreOptions.composite;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 // don't extend, because we don't want @Rule Retry
 public abstract class KarafMinimalMonitoredTestSupport {
@@ -52,7 +60,13 @@ public abstract class KarafMinimalMonitoredTestSupport {
     public static Logger LOG = LoggerFactory.getLogger(KarafMinimalMonitoredTestSupport.class);
 
     @Inject
-    protected BundleContext bundleContext;
+    protected ServiceMonitor serviceMonitor;
+    
+    @ProbeBuilder
+    public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
+        probe.setHeader(Constants.IMPORT_PACKAGE, ServiceMonitor.class.getPackage().getName());
+        return probe;
+    }
 
     public Option[] baseConfig() throws Exception {
         MavenArtifactUrlReference karafUrl = maven()
@@ -70,38 +84,26 @@ public abstract class KarafMinimalMonitoredTestSupport {
                 karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
                 configureSecurity().disableKarafMBeanServerBuilder(),
-                keepRuntimeFolder(),
                 logLevel(LogLevelOption.LogLevel.INFO),
                 editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
                 editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
                 editConfigurationFilePut("etc/startup.properties", "file:../../" + new File(url.toURI()).getName(), "1"),
-//                new TimeoutOption(3600000),
-//                KarafDistributionOption.debugConfiguration("8889", true),
                 composite(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", new File("target/test-classes/etc/org.apache.karaf.features.cfg")))
         };
     }
 
     private InputStream createMonitorBundle() {
         return bundle()
-                .set(Constants.BUNDLE_SYMBOLICNAME, "monitor")
                 .set(Constants.BUNDLE_ACTIVATOR, Activator.class.getName())
-                .set(Constants.IMPORT_PACKAGE, "org.osgi.framework")
-                .set(Constants.EXPORT_PACKAGE, Activator.class.getPackage().getName())
-                .set(Constants.BUNDLE_VERSION, "1.0.0")
-                .set(Constants.BUNDLE_MANIFESTVERSION, "2")
+                .set(Constants.EXPORT_PACKAGE, ServiceMonitor.class.getPackage().getName())
                 .add(Activator.class)
-                .add(RegisteredService.class)
                 .add(ServiceMonitor.class)
-                .build();
+                .build(withBnd());
     }
 
-    @SuppressWarnings({
-     "unchecked", "rawtypes"
-    })
     protected long numberOfServiceEventsFor(String serviceName) {
-        ServiceReference<List> sr = bundleContext.getBundle(0L).getBundleContext().getServiceReference(List.class);
-        List<String> services = new ArrayList<>(bundleContext.getService(sr));
-        return services.stream().filter(v -> v.equals(serviceName)).count();
+        Function<ServiceEvent, String> getObjectClass = event -> ((String[])event.getServiceReference().getProperty(OBJECTCLASS))[0];
+        return serviceMonitor.getEvents().stream().map(getObjectClass).filter(v -> v.equals(serviceName)).count();
     }
 
 }
