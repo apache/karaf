@@ -61,7 +61,7 @@ public abstract class KarafMinimalMonitoredTestSupport {
     @Inject
     protected ServiceMonitor serviceMonitor;
     
-    @ProbeBuilder
+    //@ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
         probe.setHeader(Constants.IMPORT_PACKAGE, ServiceMonitor.class.getPackage().getName());
         return probe;

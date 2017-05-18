@@ -23,6 +23,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceCo
 
 import java.io.File;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -53,6 +54,7 @@ public class MavenResolverRegisteredBeforeConfigAdminTest extends KarafMinimalMo
         };
     }
 
+    @Ignore
     @Test
     public void mavenResolverAvailable() throws Exception {
         long count = numberOfServiceEventsFor("org.ops4j.pax.url.mvn.MavenResolver");
