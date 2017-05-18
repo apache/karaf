@@ -13,10 +13,10 @@
  */
 package org.apache.karaf.itests;
 
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
@@ -51,10 +51,10 @@ public class ConfigTest extends KarafTestSupport {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=config,name=root");
         List<String> configs = (List<String>) mbeanServer.getAttribute(name, "Configs");
-        assertThat(configs, contains("org.apache.karaf.features"));
+        assertThat(configs, hasItem("org.apache.karaf.features"));
         Map<String, String> properties = (Map<String, String>) mbeanServer
             .invoke(name, "listProperties", new Object[]{"org.apache.karaf.features"}, new String[]{"java.lang.String"});
-        assertTrue(properties.keySet().size() > 0);
+        assertThat(properties, hasKey("featuresRepositories"));
     }
 
 }
