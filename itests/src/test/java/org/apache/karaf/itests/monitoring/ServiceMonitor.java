@@ -19,17 +19,11 @@ package org.apache.karaf.itests.monitoring;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 
 public class ServiceMonitor {
 
-    private BundleContext systemContext;
     private List<String> services = new LinkedList<>();
-
-    public ServiceMonitor(BundleContext systemContext) {
-        this.systemContext = systemContext;
-    }
 
     public void addServiceEvent(ServiceEvent event) {
         services.add(((String[])event.getServiceReference().getProperty("objectClass"))[0]);

@@ -14,33 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.itests;
+package org.apache.karaf.itests.mavenresolver;
+
+import static org.junit.Assert.assertEquals;
+import static org.ops4j.pax.exam.CoreOptions.composite;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFileExtend;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
-import org.apache.karaf.itests.monitoring.Activator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFileExtend;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
 
 /**
  * Test shows that without <code>org.ops4j.pax.url.mvn.requireConfigAdminConfig=true</code>,
@@ -54,22 +45,20 @@ public class MavenResolverRegisteredOnlyAfterConfigAdminTest extends KarafMinima
 
     @Configuration
     public Option[] config() throws Exception {
-        List<Option> result = new LinkedList<>();
-        result.addAll(Arrays.asList(super.baseConfig()));
-        result.addAll(Arrays.asList(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", new File("target/test-classes/etc/org.apache.karaf.features.cfg"))));
-        // etc/config.properties which have org.ops4j.pax.url.mvn.requireConfigAdminConfig=true
-        result.add(editConfigurationFileExtend("etc/config.properties", "etc/org.apache.karaf.features.cfg", "true"));
-
-        return result.toArray(new Option[result.size()]);
+        return new Option[] //
+        {
+         composite(super.baseConfig()),
+         composite(editConfigurationFilePut("etc/org.apache.karaf.features.cfg",
+                                            new File("target/test-classes/etc/org.apache.karaf.features.cfg"))),
+         // etc/config.properties which have org.ops4j.pax.url.mvn.requireConfigAdminConfig=true
+         editConfigurationFileExtend("etc/config.properties", "etc/org.apache.karaf.features.cfg", "true")
+        };
     }
 
     @Test
     public void mavenResolverAvailable() throws Exception {
-        assertNotNull(bundleContext);
-        ServiceReference<List> sr = bundleContext.getBundle(0L).getBundleContext().getServiceReference(List.class);
-        List<String> services = new ArrayList<>(bundleContext.getService(sr));
-        assertTrue("There should be only one MavenResolver registration - after non-INITIAL ConfigAdmin update", services.stream()
-                .filter(v -> v.equals("org.ops4j.pax.url.mvn.MavenResolver")).count() == 1L);
+        long count = numberOfServiceEventsFor("org.ops4j.pax.url.mvn.MavenResolver");
+        assertEquals("There should be only one MavenResolver registration - after non-INITIAL ConfigAdmin update", 1l, count);
     }
 
 }

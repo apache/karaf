@@ -70,7 +70,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.RerunTestException;
 import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.osgi.framework.Bundle;
@@ -211,10 +210,9 @@ public class KarafTestSupport {
         };
     }
 
-    protected int getAvailablePort(int min, int max) {
+    public static int getAvailablePort(int min, int max) {
         for (int i = min; i <= max; i++) {
-            try {
-                ServerSocket socket = new ServerSocket(i);
+            try (ServerSocket socket = new ServerSocket(i)) {
                 return socket.getLocalPort();
             } catch (Exception e) {
                 System.err.println("Port " + i + " not available, trying next one");

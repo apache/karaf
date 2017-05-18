@@ -29,7 +29,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        service = new ServiceMonitor(context.getBundle(0L).getBundleContext());
+        service = new ServiceMonitor();
         registration = context.registerService(List.class, service.getServices(), null);
         context.addServiceListener(service::addServiceEvent);
     }
