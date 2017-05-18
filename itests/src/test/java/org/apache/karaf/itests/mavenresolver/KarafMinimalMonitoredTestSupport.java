@@ -61,9 +61,14 @@ public abstract class KarafMinimalMonitoredTestSupport {
     @Inject
     protected ServiceMonitor serviceMonitor;
     
-    //@ProbeBuilder
+    @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
-        probe.setHeader(Constants.IMPORT_PACKAGE, ServiceMonitor.class.getPackage().getName());
+        /**
+         *  We need to import the package to be able to access the service inside the test.
+         *  The optional import is necessary because of a bug in pax exam
+         */
+        
+        probe.setHeader(Constants.IMPORT_PACKAGE, ServiceMonitor.class.getPackage().getName() + ";resolution:=optional");
         return probe;
     }
 
