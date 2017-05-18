@@ -30,6 +30,7 @@ import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
+@SuppressWarnings("rawtypes")
 public class RunIfRule implements MethodRule {
 
     public interface RunIfCondition {
