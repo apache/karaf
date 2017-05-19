@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.osgi.framework.Bundle;
@@ -97,7 +96,7 @@ class BundleWires {
         return wiring.entrySet().stream() //
             .filter(e -> e.getKey().startsWith(HostNamespace.HOST_NAMESPACE)) //
             .map(Map.Entry::getValue) //
-            .mapToLong(s -> getBundleId(s)) //
+            .mapToLong(this::getBundleId) //
             .findFirst() //
             .orElse(-1);
     }
@@ -112,13 +111,12 @@ class BundleWires {
 
     void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
         String cap = wiring.get(getRequirementId(requirement));
-        for (Iterator<BundleCapability> candIter = candidates.iterator(); candIter.hasNext();) {
-            BundleCapability cand = candIter.next();
-            if (cap != null && !cap.equals(getCapabilityId(cand))
-                || cap == null && cand.getRevision().getBundle().getBundleId() != this.bundleId) {
-                candIter.remove();
-            }
-        }
+        candidates.removeIf(cand -> checkRemove(cap, cand));
+    }
+
+    private boolean checkRemove(String cap, BundleCapability cand) {
+        return cap != null && !cap.equals(getCapabilityId(cand))
+            || cap == null && cand.getRevision().getBundle().getBundleId() != this.bundleId;
     }
 
     private String getRequirementId(Requirement requirement) {
