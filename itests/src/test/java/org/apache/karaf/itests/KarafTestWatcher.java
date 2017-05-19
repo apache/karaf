@@ -19,12 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KarafTestWatcher extends TestWatcher {
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_GREEN = "\u001B[32m";
 
     private static final Logger LOG = LoggerFactory.getLogger(KarafTestWatcher.class);
 
     @Override
     protected void starting(Description description) {
-        LOG.info(">>>>>> {} <<<<<" , description.getDisplayName());
+        System.out.println();
+        System.out.println(ANSI_GREEN + description.getTestClass().getSimpleName() + ": " + description.getMethodName() + ANSI_RESET);
     }
 
     @Override

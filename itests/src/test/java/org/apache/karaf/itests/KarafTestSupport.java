@@ -16,6 +16,7 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
@@ -67,7 +68,6 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.RerunTestException;
@@ -142,8 +142,6 @@ public class KarafTestSupport {
             return new Statement() {
                 @Override
                 public void evaluate() throws Throwable {
-                    Throwable caughtThrowable = null;
-                    
                     // implement retry logic here
                     // retry once to honor the FeatureService refresh
                     try {
@@ -195,6 +193,7 @@ public class KarafTestSupport {
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
             // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
             configureSecurity().disableKarafMBeanServerBuilder(),
+            configureConsole().ignoreLocalConsole(),
             keepRuntimeFolder(),
             logLevel(LogLevel.INFO),
             mavenBundle().groupId("org.awaitility").artifactId("awaitility").versionAsInProject(),
