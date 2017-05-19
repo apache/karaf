@@ -18,7 +18,7 @@
  */
 
 
-package org.apache.karaf.itests;
+package org.apache.karaf.itests.ssh;
 
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
@@ -47,7 +47,7 @@ public class SshKeyFormatTest extends SshCommandTestBase {
 
     @Configuration
     public Option[] config() {
-        File keyFile = new File("src/test/resources/org/apache/karaf/itests/test.pem");
+        File keyFile = new File("src/test/resources/org/apache/karaf/itests/ssh/test.pem");
         return options(composite(super.config()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM"),

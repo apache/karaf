@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.itests;
+package org.apache.karaf.itests.ssh;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
