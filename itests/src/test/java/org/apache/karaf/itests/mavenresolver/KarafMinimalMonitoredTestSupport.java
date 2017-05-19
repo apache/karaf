@@ -53,7 +53,7 @@ import org.osgi.framework.ServiceEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// don't extend, because we don't want @Rule Retry
+// Don't extend KarafTestSupport, because we don't want @Rule Retry
 public abstract class KarafMinimalMonitoredTestSupport {
 
     public static Logger LOG = LoggerFactory.getLogger(KarafMinimalMonitoredTestSupport.class);
@@ -63,12 +63,7 @@ public abstract class KarafMinimalMonitoredTestSupport {
     
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
-        /**
-         *  We need to import the package to be able to access the service inside the test.
-         *  The optional import is necessary because of a bug in pax exam
-         */
-        
-        probe.setHeader(Constants.IMPORT_PACKAGE, ServiceMonitor.class.getPackage().getName() + ";resolution:=optional");
+        probe.setHeader(Constants.IMPORT_PACKAGE, ServiceMonitor.class.getPackage().getName());
         return probe;
     }
 

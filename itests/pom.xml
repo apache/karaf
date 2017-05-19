@@ -111,12 +111,12 @@
             <artifactId>pax-exam-container-karaf</artifactId>
             <scope>test</scope>
             <exclusions>
-            	<exclusion>
-            		<groupId>org.apache.felix</groupId>
-            		<artifactId>
-            			org.apache.felix.configadmin
-            		</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>
+                        org.apache.felix.configadmin
+                    </artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -256,6 +256,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <forkCount>1</forkCount>
+                    <reuseForks>false</reuseForks>
                     <systemPropertyVariables>
                         <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
                         <spring31.version>${spring31.version}</spring31.version>
