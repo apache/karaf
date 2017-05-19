@@ -42,6 +42,12 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
@@ -104,6 +110,14 @@
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-container-karaf</artifactId>
             <scope>test</scope>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.apache.felix</groupId>
+            		<artifactId>
+            			org.apache.felix.configadmin
+            		</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
