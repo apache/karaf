@@ -22,22 +22,30 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.*;
+import java.util.EnumSet;
 import java.util.Map;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.TestBase;
+import org.apache.karaf.features.FeaturesService.Option;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
+import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.easymock.EasyMock;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link org.apache.karaf.features.internal.service.FeaturesServiceImpl}
@@ -51,6 +59,19 @@ public class FeaturesServiceImplTest extends TestBase {
     @Before
     public void setUp() throws IOException {
         dataFile = File.createTempFile("features", null, null);
+        URL.setURLStreamHandlerFactory(protocol -> protocol.equals("custom") ? new URLStreamHandler() {
+            @Override
+            protected URLConnection openConnection(URL u) throws IOException {
+                return getClass().getResource(u.getPath()).openConnection();
+            }
+        } : null);
+    }
+    
+    @After
+    public void after() throws Exception {
+        Field field = URL.class.getDeclaredField("factory");
+        field.setAccessible(true);
+        field.set(null, null);
     }
 
     @Test
@@ -116,26 +137,48 @@ public class FeaturesServiceImplTest extends TestBase {
 
     @Test
     public void testCyclicFeatures() throws Exception {
-        URL.setURLStreamHandlerFactory(protocol -> protocol.equals("custom") ? new URLStreamHandler() {
-            @Override
-            protected URLConnection openConnection(URL u) throws IOException {
-                return getClass().getResource(u.getPath()).openConnection();
-            }
-        } : null);
-        try {
-            FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-            BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
-            EasyMock.replay(installSupport);
-            final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg);
-            impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
-            impl.getFeatures();
-        } finally {
-            Field field = URL.class.getDeclaredField("factory");
-            field.setAccessible(true);
-            field.set(null, null);
-        }
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        EasyMock.replay(installSupport);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg);
+        impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
+        impl.getFeatures();
     }
 
+    @Test
+    public void testRemoveRepo() throws Exception {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        FrameworkInfo dummyInfo = new FrameworkInfo();
+        expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
+        EasyMock.replay(installSupport);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                                                                 installSupport, null, cfg);
+        URI activemqRepo = URI.create("custom:remove/a.xml");
+        impl.addRepository(activemqRepo);
+        Feature a1Feature = impl.getFeature("a1");
+        installFeature(impl, a1Feature);
+        Feature b1Feature = impl.getFeature("b1");
+        installFeature(impl, b1Feature);
+        impl.removeRepository(activemqRepo);
+        assertFalse("a1 feature should not be installed anymore after removal of repo",
+                    impl.isInstalled(a1Feature));
+        /*
+        assertFalse("b1 feature should not be installed anymore after removal of repo",
+                    impl.isInstalled(b1Feature));
+        */
+        assertTrue("b1 feature still present -> issue KARAF-5123 is not yet fixed",
+                    impl.isInstalled(b1Feature));
+    }
+
+    private void installFeature(final FeaturesServiceImpl impl, Feature a1Feature)
+        throws Exception, InterruptedException {
+        impl.installFeature(a1Feature, EnumSet.noneOf(Option.class));
+        while (!impl.isInstalled(a1Feature)) {
+            Thread.sleep(100);
+        }
+    }
+    
     /**
      * This test ensures that every feature get installed only once, even if it appears multiple times in the list
      * of transitive feature dependencies (KARAF-1600)

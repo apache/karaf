@@ -160,15 +160,19 @@ public final class DigraphHelper {
 
     public static Map<String, Set<Long>> getBundlesPerRegion(RegionDigraph digraph) {
         Map<String, Set<Long>> bundlesPerRegion = new HashMap<>();
-        for (Region region : digraph.getRegions()) {
-            bundlesPerRegion.put(region.getName(), new HashSet<>(region.getBundleIds()));
+        if (digraph != null) {
+            for (Region region : digraph.getRegions()) {
+                bundlesPerRegion.put(region.getName(), new HashSet<>(region.getBundleIds()));
+            }
         }
         return bundlesPerRegion;
     }
     
     public static Map<String, Map<String, Map<String, Set<String>>>> getPolicies(RegionDigraph digraph) {
         Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion = new HashMap<>();
-        
+        if (digraph == null) {
+            return filtersPerRegion;
+        }
         for (Region region : digraph.getRegions()) {
             Map<String, Map<String, Set<String>>> edges = new HashMap<>();
             for (RegionDigraph.FilteredRegion fr : digraph.getEdges(region)) {

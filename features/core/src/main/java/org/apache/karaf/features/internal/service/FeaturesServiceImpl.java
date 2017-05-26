@@ -946,10 +946,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
         }
         RegionDigraph regionDigraph = installSupport.getDiGraphCopy();
-        if (regionDigraph != null) {
-            dstate.bundlesPerRegion = DigraphHelper.getBundlesPerRegion(regionDigraph);
-            dstate.filtersPerRegion = DigraphHelper.getPolicies(regionDigraph);
-        }
+        dstate.bundlesPerRegion = DigraphHelper.getBundlesPerRegion(regionDigraph);
+        dstate.filtersPerRegion = DigraphHelper.getPolicies(regionDigraph);
         return dstate;
     }
 
