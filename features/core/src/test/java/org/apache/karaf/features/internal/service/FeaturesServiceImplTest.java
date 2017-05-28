@@ -33,7 +33,6 @@ import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.easymock.EasyMock;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.resolver.Resolver;

@@ -107,7 +107,9 @@ public final class DigraphHelper {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+     "unchecked", "rawtypes"
+    })
     static StandardRegionDigraph readDigraph(InputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws IOException, BundleException, InvalidSyntaxException {
         StandardRegionDigraph digraph = new StandardRegionDigraph(bundleContext, threadLocal);
         Map json = (Map) JsonReader.read(in);
