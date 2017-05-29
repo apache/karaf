@@ -35,7 +35,6 @@
 
     <properties>
         <appendedResourcesDirectory>${project.basedir}/../../etc/appended-resources</appendedResourcesDirectory>
-        <org.json.version.osgi>0.0.0.${org.json.version}</org.json.version.osgi>
     </properties>
 
     <dependencies>
@@ -85,12 +84,6 @@
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
 
     <build>
@@ -131,8 +124,7 @@
                         <Export-Package>
                             org.apache.felix.webconsole;version="${felix.webconsole.api.version}";provide:=true,
                             org.apache.felix.webconsole.bundleinfo;version=1.0.0;provide:=true,
-                            org.apache.felix.webconsole.i18n;version=1.0.0;provide:=true,
-                            org.json;version="${org.json.version.osgi}"
+                            org.apache.felix.webconsole.i18n;version=1.0.0;provide:=true
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
@@ -169,12 +161,12 @@
                             org.apache.felix.webconsole;inline=**,
 
                             <!-- Import/Export-Package parsing -->
-                            org.apache.felix.utils;inline=org/apache/felix/utils/manifest/**,
+                            org.apache.felix.utils.manifest;inline=org/apache/felix/utils/manifest/**,
+                            org.apache.felix.utils.json;inline=org/apache/felix/utils/json/**,
                             org.apache.felix.framework;inline=org/apache/felix/framework/util/VersionRange**,
 
                             <!-- ServiceTracker -->
-                            org.osgi.compendium;
-                                inline=org/osgi/util/tracker/*,
+                            org.osgi.compendium;inline=org/osgi/util/tracker/*,
 
                             <!-- File Upload -->
                             commons-fileupload,

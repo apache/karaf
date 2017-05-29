@@ -257,7 +257,6 @@
         <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
-        <org.json.version>20150729</org.json.version>
 
         <pax.cdi.version>1.0.0.RC2</pax.cdi.version>
         <pax.exam.version>4.11.0</pax.exam.version>
@@ -837,12 +836,6 @@
               <type>xml</type>
               <classifier>features</classifier>
               <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>${org.json.version}</version>
             </dependency>
 
             <dependency>
