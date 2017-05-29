@@ -72,7 +72,9 @@ public class MavenDownloadManager implements DownloadManager {
         return new MavenDownloader();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+     "unchecked", "rawtypes"
+    })
     @Override
     public Map<String, StreamProvider> getProviders() {
         return (Map) Collections.synchronizedMap(downloaded);

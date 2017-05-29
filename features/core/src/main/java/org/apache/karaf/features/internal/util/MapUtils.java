@@ -145,7 +145,9 @@ public final class MapUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+     "unchecked", "rawtypes"
+    })
     public static <S> S copy(S obj) {
         if (obj instanceof List) {
             List r = new ArrayList();
@@ -169,6 +171,9 @@ public final class MapUtils {
         return obj;
     }
 
+    @SuppressWarnings({
+     "rawtypes", "unchecked"
+    })
     public static <S> void copy(S s1, S s2) {
         if (s1 instanceof Collection) {
             for (Object o : (Collection) s1) {

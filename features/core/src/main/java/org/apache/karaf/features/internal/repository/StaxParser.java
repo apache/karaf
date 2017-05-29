@@ -143,7 +143,7 @@ public final class StaxParser {
             } else if (val instanceof Double) {
                 writer.writeAttribute(TYPE, "Double");
             } else if (val instanceof Iterable) {
-                Iterable it = (Iterable) att.getValue();
+                Iterable<?> it = (Iterable<?>) att.getValue();
                 String scalar = null;
                 for (Object o : it) {
                     String ts;

@@ -116,6 +116,7 @@ public class Deployer {
         void callListeners(FeatureEvent featureEvent);
     }
 
+    @SuppressWarnings("serial")
     public static class CircularPrerequisiteException extends Exception {
         private final Set<String> prereqs;
 
@@ -129,6 +130,7 @@ public class Deployer {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class PartialDeploymentException extends Exception {
         private final Set<String> missing;
 
@@ -1386,6 +1388,7 @@ public class Deployer {
         return sorted;
     }
 
+    @SuppressWarnings("rawtypes")
     protected List<Bundle> getBundlesToStop(Collection<Bundle> bundles) {
         SortedMap<Integer, Set<Bundle>> bundlesPerStartLevel = new TreeMap<>();
         for (Bundle bundle : bundles) {
@@ -1438,7 +1441,7 @@ public class Deployer {
         return bundlesToDestroy;
     }
 
-    private static int getServiceUsage(ServiceReference ref, Collection<Bundle> bundles) {
+    private static int getServiceUsage(ServiceReference<?> ref, Collection<Bundle> bundles) {
         Bundle[] usingBundles = ref.getUsingBundles();
         int nb = 0;
         if (usingBundles != null) {

@@ -42,7 +42,6 @@ import static org.easymock.EasyMock.verify;
 public class BootFeaturesInstallerTest extends TestBase {
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testParser() {
         BootFeaturesInstaller installer = new BootFeaturesInstaller(null, null, new String[0], "", false);
         Assert.assertEquals(asList(setOf("test1", "test2"), setOf("test3")), installer.parseBootFeatures(" ( test1 , test2 ) , test3 "));

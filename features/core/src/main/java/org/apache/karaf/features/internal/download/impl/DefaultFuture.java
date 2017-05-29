@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A simple future
  */
-public class DefaultFuture<T extends DefaultFuture> {
+public class DefaultFuture<T extends DefaultFuture<?>> {
 
     /**
      * A default value to indicate the future has been canceled

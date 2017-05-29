@@ -41,6 +41,7 @@ import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
 
+@SuppressWarnings("rawtypes")
 public class JmxFeature {
 
     /**

@@ -50,6 +50,7 @@ public final class JsonWriter {
         write(writer, value, indent);
     }
 
+    @SuppressWarnings("rawtypes")
     private static void write(Writer writer, Object value, int indent) throws IOException {
         if (value instanceof Map) {
             writeObject(writer, (Map) value, indent);
@@ -68,6 +69,7 @@ public final class JsonWriter {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private static void writeObject(Writer writer, Map<?, ?> value, int indent) throws IOException {
         writer.append('{');
         boolean first = true;

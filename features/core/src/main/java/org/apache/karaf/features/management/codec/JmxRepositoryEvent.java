@@ -65,7 +65,7 @@ public class JmxRepositoryEvent {
         try {
             String description = "This type identify a Karaf repository event";
             String[] itemNames = FeaturesServiceMBean.REPOSITORY_EVENT;
-            OpenType[] itemTypes = new OpenType[itemNames.length];
+            OpenType<?>[] itemTypes = new OpenType[itemNames.length];
             String[] itemDescriptions = new String[itemNames.length];
             itemTypes[0] = SimpleType.STRING;
             itemTypes[1] = SimpleType.STRING;

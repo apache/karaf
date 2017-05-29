@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 
 import org.apache.felix.utils.version.VersionRange;
 
+@SuppressWarnings("rawtypes")
 public class SimpleFilter {
     public static final int MATCH_ALL = 0;
     public static final int AND = 1;
@@ -65,6 +66,7 @@ public class SimpleFilter {
         return sb.toString();
     }
 
+    @SuppressWarnings("unchecked")
     private void toString(StringBuilder sb)
     {
         switch (op)

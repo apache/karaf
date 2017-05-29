@@ -21,7 +21,7 @@ package org.apache.karaf.features.internal.download.impl;
  * of an asynchronous download operation : {@link DefaultFuture}.
  *
  */
-public interface FutureListener<T extends DefaultFuture> {
+public interface FutureListener<T extends DefaultFuture<?>> {
 
     /**
      * Invoked when the operation associated with the {@link DefaultFuture}

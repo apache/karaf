@@ -34,6 +34,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 
+@SuppressWarnings("rawtypes")
 public class CapabilitySet {
 
     private static final Class<?>[] STRING_CLASS = new Class[] {String.class};
