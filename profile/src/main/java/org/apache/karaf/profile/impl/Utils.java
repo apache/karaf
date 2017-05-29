@@ -91,7 +91,7 @@ public final class Utils {
             Properties rc = new Properties(false);
             rc.putAll(source);
             return rc;
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new IllegalArgumentException("Cannot load properties", ex);
         }
     }
