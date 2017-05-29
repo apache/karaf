@@ -117,5 +117,9 @@ public class RepositoryImpl implements Repository {
         }
     }
 
+    @Override
+    public String toString() {
+        return getURI().toString();
+    }
 }
 
