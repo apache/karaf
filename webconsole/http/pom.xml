@@ -59,6 +59,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>${servlet.spec.groupId}</groupId>
             <artifactId>${servlet.spec.artifactId}</artifactId>
             <scope>provided</scope>
@@ -76,12 +81,6 @@
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -116,6 +115,9 @@
                             javax.servlet*;version=2.4,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.felix.utils.json
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
