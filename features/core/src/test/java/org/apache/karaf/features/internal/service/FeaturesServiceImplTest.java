@@ -27,12 +27,14 @@ import java.util.Map;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.TestBase;
 import org.apache.karaf.features.FeaturesService.Option;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.easymock.EasyMock;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.resolver.Resolver;
@@ -145,35 +147,60 @@ public class FeaturesServiceImplTest extends TestBase {
     }
 
     @Test
-    public void testRemoveRepo() throws Exception {
+    public void testRemoveRepo1() throws Exception {
+        final FeaturesService featureService = createTestFeatureService();
+        URI repoA = URI.create("custom:remove/a.xml");
+        featureService.addRepository(repoA);
+        Feature a1Feature = featureService.getFeature("a1");
+        installFeature(featureService, a1Feature);
+        Feature b1Feature = featureService.getFeature("b1");
+        installFeature(featureService, b1Feature);
+        featureService.removeRepository(repoA);
+        assertNotInstalled(featureService, a1Feature);
+        assertNotInstalled(featureService, b1Feature);
+    }
+    
+    @Test
+    public void testRemoveRepo2() throws Exception {
+        final FeaturesService featureService = createTestFeatureService();
+        URI repoA = URI.create("custom:remove/a.xml");
+        URI repoB = URI.create("custom:remove/b.xml");
+        featureService.addRepository(repoA);
+        featureService.addRepository(repoB);
+        Feature a1Feature = featureService.getFeature("a1");
+        installFeature(featureService, a1Feature);
+        Feature b1Feature = featureService.getFeature("b1");
+        installFeature(featureService, b1Feature);
+        featureService.removeRepository(repoA);
+        assertNotInstalled(featureService, a1Feature);
+        assertInstalled(featureService, b1Feature);
+    }
+
+    private FeaturesServiceImpl createTestFeatureService() {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         FrameworkInfo dummyInfo = new FrameworkInfo();
         expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
         EasyMock.replay(installSupport);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+        final FeaturesServiceImpl featureService = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
                                                                  installSupport, null, cfg);
-        URI activemqRepo = URI.create("custom:remove/a.xml");
-        impl.addRepository(activemqRepo);
-        Feature a1Feature = impl.getFeature("a1");
-        installFeature(impl, a1Feature);
-        Feature b1Feature = impl.getFeature("b1");
-        installFeature(impl, b1Feature);
-        impl.removeRepository(activemqRepo);
-        assertFalse("a1 feature should not be installed anymore after removal of repo",
-                    impl.isInstalled(a1Feature));
-        /*
-        assertFalse("b1 feature should not be installed anymore after removal of repo",
-                    impl.isInstalled(b1Feature));
-        */
-        assertTrue("b1 feature still present -> issue KARAF-5123 is not yet fixed",
-                    impl.isInstalled(b1Feature));
+        return featureService;
     }
 
-    private void installFeature(final FeaturesServiceImpl impl, Feature a1Feature)
+    private void assertNotInstalled(FeaturesService featureService, Feature feature) {
+        assertFalse("Feature " + feature.getName() + " should not be installed anymore after removal of repo",
+                    featureService.isInstalled(feature));
+    }
+    
+    private void assertInstalled(FeaturesService featureService, Feature feature) {
+        assertTrue("Feature " + feature.getName() + " should still be installed after removal of repo",
+                    featureService.isInstalled(feature));
+    }
+
+    private void installFeature(final FeaturesService featureService, Feature a1Feature)
         throws Exception, InterruptedException {
-        impl.installFeature(a1Feature, EnumSet.noneOf(Option.class));
-        while (!impl.isInstalled(a1Feature)) {
+        featureService.installFeature(a1Feature, EnumSet.noneOf(Option.class));
+        while (!featureService.isInstalled(a1Feature)) {
             Thread.sleep(100);
         }
     }

@@ -116,6 +116,28 @@ public class RepositoryImpl implements Repository {
             return super.read(b, off, len);
         }
     }
+    
+    @Override
+    public int hashCode() {
+        return uri.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RepositoryImpl other = (RepositoryImpl)obj;
+        if (uri == null) {
+            if (other.uri != null)
+                return false;
+        } else if (!uri.equals(other.uri))
+            return false;
+        return true;
+    }
 
     @Override
     public String toString() {

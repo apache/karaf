@@ -131,4 +131,24 @@ public class RepositoryCache {
         }
     }
 
+    public Set<Repository> getRepositories(Repository repo) throws Exception {
+        HashSet<Repository> repos = new HashSet<>();
+        for (URI repoURI : repo.getRepositories()) {
+            repos.add(load(repoURI));
+        }
+        return repos;
+    }
+    
+    public Set<Repository> tranGetRepositories(Repository repo) throws Exception {
+        HashSet<Repository> repos = new HashSet<>();
+        repos.add(repo);
+        Set<Repository> deps = getRepositories(repo);
+        for (Repository depRepo : deps) {
+            if (!repos.contains(depRepo)) {
+                repos.addAll(tranGetRepositories(depRepo));
+            }
+        }
+        return repos;
+    }
+
 }

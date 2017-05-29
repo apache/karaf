@@ -379,7 +379,13 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return;
         }
 
-        Set<String> features = getRequiredFeatureIds(repo);
+        Set<Repository> repos = getReposToRemove(repo);
+
+        Set<String> features = new HashSet<>();
+        for (Repository tranRepo : repos) {
+            features.addAll(getRequiredFeatureIds(tranRepo));
+        }
+        
         if (!features.isEmpty()) {
             if (uninstall) {
                 uninstallFeatures(features, EnumSet.noneOf(Option.class));
@@ -399,6 +405,25 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             saveState();
         }
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
+    }
+
+    private Set<Repository> getReposToRemove(Repository repo) throws Exception {
+        Set<Repository> repos = repositories.tranGetRepositories(repo);
+        synchronized (lock) {
+            repos.removeAll(getRequiredRepos());
+        }
+        repos.add(repo);
+        return repos;
+    }
+    
+    private Set<Repository> getRequiredRepos() throws Exception {
+        synchronized (lock) {
+            Set<Repository> repos = new HashSet<>();
+            for (String  repoURI : state.repositories) {
+                repos.add(repositories.getRepository(URI.create(repoURI)));
+            }
+            return repos;
+        }
     }
 
     private Set<String> getRequiredFeatureIds(Repository repo) throws Exception {
