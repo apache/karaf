@@ -310,12 +310,7 @@ public class SubsystemResolver {
     private void addBundleInfos(Subsystem subsystem) {
         if (subsystem != null) {
             String region = getFlatSubsystemsMap().get(subsystem.getName());
-            Map<String, BundleInfo> bis = bundleInfos.get(region);
-            if (bis == null) {
-                bis = new HashMap<>();
-                bundleInfos.put(region, bis);
-            }
-            bis.putAll(subsystem.getBundleInfos());
+            bundleInfos.computeIfAbsent(region, k -> new HashMap<>()).putAll(subsystem.getBundleInfos());
             for (Subsystem child : subsystem.getChildren()) {
                 addBundleInfos(child);
             }

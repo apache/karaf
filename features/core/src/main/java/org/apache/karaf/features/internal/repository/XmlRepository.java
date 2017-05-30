@@ -148,11 +148,7 @@ public class XmlRepository extends BaseRepository {
     private boolean checkAndLoadReferrals(String url, int hopCount) {
         boolean modified = false;
         if (hopCount > 0) {
-            XmlLoader loader = loaders.get(url);
-            if (loader == null) {
-                loader = new XmlLoader(url, expiration);
-                loaders.put(url, loader);
-            }
+            XmlLoader loader = loaders.computeIfAbsent(url, u -> new XmlLoader(u, expiration));
             modified = loader.checkAndLoadCache();
             for (StaxParser.Referral referral : loader.xml.referrals) {
                 modified |= checkAndLoadReferrals(referral.url, Math.min(referral.depth, hopCount - 1));

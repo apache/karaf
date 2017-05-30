@@ -160,13 +160,7 @@ public class Capabilities extends BundlesCommand {
         {
             if (matchNamespace(namespace, wire.getCapability().getNamespace()))
             {
-                List<BundleWire> dependents = map.get(wire.getCapability());
-                if (dependents == null)
-                {
-                    dependents = new ArrayList<BundleWire>();
-                    map.put(wire.getCapability(), dependents);
-                }
-                dependents.add(wire);
+                map.computeIfAbsent(wire.getCapability(), k -> new ArrayList<>()).add(wire);
             }
         }
         return map;
