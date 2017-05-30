@@ -340,11 +340,7 @@ public class SubsystemResolveContext extends ResolveContext {
                 while (!ss.isAcceptDependencies()) {
                     ss = ss.getParent();
                 }
-                Map<Capability, Capability> map = mapping.get(ss);
-                if (map == null) {
-                    map = new HashMap<Capability, Capability>();
-                    mapping.put(ss, map);
-                }
+                Map<Capability, Capability> map = mapping.computeIfAbsent(ss, k -> new HashMap<>());
                 for (Capability cap : entry.getValue()) {
                     Capability wrapped = map.get(cap);
                     if (wrapped == null) {

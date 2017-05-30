@@ -128,10 +128,7 @@ public class LDAPOptions {
                 int index = mapping.lastIndexOf("=");
                 String ldapRole = mapping.substring(0,index).trim();
                 String[] karafRoles = mapping.substring(index+1).split(",");
-                if (roleMapping.get(ldapRole) == null) {
-                    roleMapping.put(ldapRole, new HashSet<String>());
-                }
-                final Set<String> karafRolesSet = roleMapping.get(ldapRole);
+                final Set<String> karafRolesSet = roleMapping.computeIfAbsent(ldapRole, k -> new HashSet<>());
                 for (String karafRole : karafRoles) {
                     karafRolesSet.add(karafRole.trim());
                 }

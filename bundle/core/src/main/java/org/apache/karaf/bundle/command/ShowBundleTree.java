@@ -136,10 +136,7 @@ public class ShowBundleTree extends BundleCommand {
                     if (wires != null) {
                         for (BundleWire wire : wires) {
                             String name = wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE).toString();
-                            if (exports.get(name) == null) {
-                                exports.put(name, new HashSet<Bundle>());
-                            }
-                            exports.get(name).add(bundle);
+                            exports.computeIfAbsent(name, k -> new HashSet<>()).add(bundle);
                         }
                     }
                 }

@@ -70,12 +70,7 @@ public class TestBase {
     }
     
     private Map<String, Feature> getOrCreate(final Map<String, Map<String, Feature>> featuresMap, Feature feature) {
-        Map<String, Feature> featureVersion = featuresMap.get(feature.getName());
-        if (featureVersion == null) {
-            featureVersion = new HashMap<String, Feature>();
-            featuresMap.put(feature.getName(), featureVersion);
-        }
-        return featureVersion;
+        return featuresMap.computeIfAbsent(feature.getName(), k -> new HashMap<>());
     }
 
     public Feature feature(String name) {

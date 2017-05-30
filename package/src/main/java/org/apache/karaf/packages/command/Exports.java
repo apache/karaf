@@ -140,11 +140,8 @@ public class Exports implements Action {
                     String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
                     Version version = (Version)attr.get("version");
                     String key = packageName + ":" + version.toString();
-                    PackageVersion pVer = packageVersionMap.get(key);
-                    if (pVer == null) {
-                        pVer = new PackageVersion(packageName, version);
-                        packageVersionMap.put(key, pVer);
-                    }
+                    PackageVersion pVer =
+                            packageVersionMap.computeIfAbsent(key, k -> new PackageVersion(packageName, version));
                     pVer.addBundle(bundle);
                 }
             }

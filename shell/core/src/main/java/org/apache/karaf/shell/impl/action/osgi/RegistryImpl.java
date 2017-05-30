@@ -74,12 +74,7 @@ public class RegistryImpl implements Registry {
             if (service instanceof Command) {
                 Command cmd = (Command) service;
                 String key = cmd.getScope() + ":" + cmd.getName();
-                List<Command> cmds = commands.get(key);
-                if (cmds == null) {
-                    cmds = new ArrayList<Command>();
-                    commands.put(key, cmds);
-                }
-                cmds.add(cmd);
+                commands.computeIfAbsent(key, k -> new ArrayList<>()).add(cmd);
             }
         }
     }
