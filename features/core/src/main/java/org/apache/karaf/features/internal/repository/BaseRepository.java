@@ -57,12 +57,7 @@ public class BaseRepository implements Repository {
     protected void addResource(Resource resource) {
         for (Capability cap : resource.getCapabilities(null)) {
             String ns = cap.getNamespace();
-            CapabilitySet set = capSets.get(ns);
-            if (set == null) {
-                set = new CapabilitySet(Collections.singletonList(ns));
-                capSets.put(ns, set);
-            }
-            set.addCapability(cap);
+            capSets.computeIfAbsent(ns, n -> new CapabilitySet(Collections.singletonList(n))).addCapability(cap);
         }
         resources.add(resource);
     }

@@ -559,11 +559,7 @@ public class Subsystem extends ResourceImpl {
 
     private void doAddDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
         String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
-        DependencyInfo info = dependencies.get(id);
-        if (info == null) {
-            info = new DependencyInfo();
-            dependencies.put(id, info);
-        }
+        DependencyInfo info = dependencies.computeIfAbsent(id, k -> new DependencyInfo());
         info.resource = resource;
         info.mandatory |= mandatory;
         info.start |= start;

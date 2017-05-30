@@ -96,12 +96,7 @@ public class CapabilitySet {
 
     private void indexCapability(
             Map<Object, Set<Capability>> index, Capability cap, Object capValue) {
-        Set<Capability> caps = index.get(capValue);
-        if (caps == null) {
-            caps = new HashSet<>();
-            index.put(capValue, caps);
-        }
-        caps.add(cap);
+        index.computeIfAbsent(capValue, k -> new HashSet<>()).add(cap);
     }
 
     public void removeCapability(Capability cap) {

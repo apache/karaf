@@ -606,11 +606,8 @@ public class VerifyMojo extends MojoSupport {
                 key = key.substring(prefix.length());
                 String[] parts = key.split("#");
                 if (parts.length == 3) {
-                    Map<VersionRange, Map<String, String>> ranges = result.get(parts[0]);
-                    if (ranges == null) {
-                        ranges = new HashMap<>();
-                        result.put(parts[0], ranges);
-                    }
+                    Map<VersionRange, Map<String, String>> ranges =
+                            result.computeIfAbsent(parts[0], k -> new HashMap<>());
                     String version = parts[1];
                     if (!version.startsWith("[") && !version.startsWith("(")) {
                         Processor processor = new Processor();
@@ -619,12 +616,7 @@ public class VerifyMojo extends MojoSupport {
                         version = macro.process("${range;[==,=+)}");
                     }
                     VersionRange range = new VersionRange(version);
-                    Map<String, String> hdrs = ranges.get(range);
-                    if (hdrs == null) {
-                        hdrs = new HashMap<>();
-                        ranges.put(range, hdrs);
-                    }
-                    hdrs.put(parts[2], val);
+                    ranges.computeIfAbsent(range, k -> new HashMap<>()).put(parts[2], val);
                 }
             }
         }

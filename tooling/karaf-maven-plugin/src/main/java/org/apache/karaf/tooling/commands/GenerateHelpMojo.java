@@ -138,12 +138,7 @@ public class GenerateHelpMojo extends AbstractMojo {
                     out.close();
                     outStream.close();
 
-                    Set<String> cmds = commands.get(cmd.scope());
-                    if (cmds == null) {
-                        cmds = new TreeSet<String>();
-                        commands.put(cmd.scope(), cmds);
-                    }
-                    cmds.add(cmd.name());
+                    commands.computeIfAbsent(cmd.scope(), k -> new TreeSet<>()).add(cmd.name());
                     getLog().info("Found command: " + cmd.scope() + ":" + cmd.name());
                 } catch (Exception e) {
                     getLog().warn("Unable to write help for " + clazz.getName(), e);

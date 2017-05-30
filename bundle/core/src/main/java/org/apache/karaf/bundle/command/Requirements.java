@@ -126,12 +126,7 @@ public class Requirements extends BundlesCommand {
         Map<BundleRequirement, List<BundleWire>> map = new HashMap<BundleRequirement, List<BundleWire>>();
         for (BundleWire wire : wires) {
             if (matchNamespace(namespace, wire.getRequirement().getNamespace())) {
-                List<BundleWire> providers = map.get(wire.getRequirement());
-                if (providers == null) {
-                    providers = new ArrayList<BundleWire>();
-                    map.put(wire.getRequirement(), providers);
-                }
-                providers.add(wire);
+                map.computeIfAbsent(wire.getRequirement(), k -> new ArrayList<>()).add(wire);
             }
         }
         return map;

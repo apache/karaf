@@ -328,11 +328,7 @@ public class Deployer {
         }
         for (Map.Entry<String, Set<String>> entry : newFeatures.entrySet()) {
             for (String feature : entry.getValue()) {
-                Map<String, String> map = stateFeatures.get(entry.getKey());
-                if (map == null) {
-                    map = new HashMap<>();
-                    stateFeatures.put(entry.getKey(), map);
-                }
+                Map<String, String> map = stateFeatures.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
                 map.put(feature, noStart ? FeatureState.Installed.name() : FeatureState.Started.name());
             }
         }
@@ -694,11 +690,7 @@ public class Deployer {
             // Update managed regions
             for (Region computedRegion : computedDigraph.getRegions()) {
                 String name = computedRegion.getName();
-                Map<String, Map<String, Set<String>>> policy = policies.get(name);
-                if (policy == null) {
-                    policy = new HashMap<>();
-                    policies.put(name, policy);
-                }
+                Map<String, Map<String, Set<String>>> policy = policies.computeIfAbsent(name, k -> new HashMap<>());
                 for (RegionDigraph.FilteredRegion fr : computedRegion.getEdges()) {
                     String r2 = fr.getRegion().getName();
                     Map<String, Set<String>> filters = new HashMap<>();
