@@ -62,7 +62,7 @@ public class Wait implements Action {
                 filter = "(" + filter + ")";
             }
             Filter osgiFilter = FrameworkUtil.createFilter(filter);
-            tracker = new ServiceTracker<Object, Object>(bundleContext, osgiFilter, null);
+            tracker = new ServiceTracker<>(bundleContext, osgiFilter, null);
             tracker.open(true);
             Object svc = tracker.getService();
             if (timeout >= 0) {

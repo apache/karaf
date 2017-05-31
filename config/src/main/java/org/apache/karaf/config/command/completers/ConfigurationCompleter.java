@@ -75,7 +75,7 @@ public class ConfigurationCompleter implements Completer, ConfigurationListener 
             return;
         }
 
-        Collection<String> pids = new ArrayList<String>();
+        Collection<String> pids = new ArrayList<>();
         for (Configuration config : configs) {
             pids.add(config.getPid());
         }

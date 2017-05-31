@@ -58,7 +58,7 @@ public class Execute {
             StartCommand.class,
             StatusCommand.class,
             StopCommand.class};
-    private static final Map<String, Class<?>> COMMANDS = new TreeMap<String, Class<?>>();
+    private static final Map<String, Class<?>> COMMANDS = new TreeMap<>();
 
     static {
         for (Class<?> c : COMMAND_CLASSES) {
@@ -136,7 +136,7 @@ public class Execute {
 
     static void execute(InstanceCommandSupport command, File storageFile, String[] args) throws Exception {
         DefaultActionPreparator dap = new DefaultActionPreparator();
-        List<Object> params = new ArrayList<Object>(Arrays.asList(args));
+        List<Object> params = new ArrayList<>(Arrays.asList(args));
         params.remove(0); // this is the actual command name
 
         if (!dap.prepare(command, null, params)) {

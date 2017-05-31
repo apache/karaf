@@ -123,7 +123,7 @@ public class Requirements extends BundlesCommand {
     private static Map<BundleRequirement, List<BundleWire>> aggregateRequirements(
             Pattern namespace, List<BundleWire> wires) {
         // Aggregate matching capabilities.
-        Map<BundleRequirement, List<BundleWire>> map = new HashMap<BundleRequirement, List<BundleWire>>();
+        Map<BundleRequirement, List<BundleWire>> map = new HashMap<>();
         for (BundleWire wire : wires) {
             if (matchNamespace(namespace, wire.getRequirement().getNamespace())) {
                 map.computeIfAbsent(wire.getRequirement(), k -> new ArrayList<>()).add(wire);

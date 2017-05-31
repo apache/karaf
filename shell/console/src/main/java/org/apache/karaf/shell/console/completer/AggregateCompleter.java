@@ -44,7 +44,7 @@ public class AggregateCompleter implements Completer
         // buffer could be null
         assert candidates != null;
 
-        List<Completion> completions = new ArrayList<Completion>(completers.size());
+        List<Completion> completions = new ArrayList<>(completers.size());
 
         // Run each completer, saving its completion results
         int max = -1;

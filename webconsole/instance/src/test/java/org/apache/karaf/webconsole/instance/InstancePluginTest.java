@@ -63,7 +63,7 @@ public class InstancePluginTest extends TestCase {
         InstancePlugin ap = new InstancePlugin();
         ap.setInstanceService(instanceService);
 
-        final Map<String, String> params = new HashMap<String, String>();
+        final Map<String, String> params = new HashMap<>();
         params.put("action", "create");
         params.put("name", "instance1");
         params.put("sshPort", "123");
@@ -72,7 +72,7 @@ public class InstancePluginTest extends TestCase {
         params.put("featureURLs", "http://someURL");
         params.put("features", "abc,def");
         HttpServletRequest req = EasyMock.createMock(HttpServletRequest.class);
-        EasyMock.expect(req.getParameter((String) EasyMock.anyObject())).andAnswer(new IAnswer<String>() {
+        EasyMock.expect(req.getParameter(EasyMock.anyObject())).andAnswer(new IAnswer<String>() {
             public String answer() throws Throwable {
                 return params.get(EasyMock.getCurrentArguments()[0]);
             }

@@ -185,7 +185,7 @@ public class FeatureConfigInstaller {
         // Substitute all variables, but keep unknown ones.
         final String dummyKey = "";
         try {
-            finalname = InterpolationHelper.substVars(finalname, dummyKey, null, null, (SubstitutionCallback) null,
+            finalname = InterpolationHelper.substVars(finalname, dummyKey, null, null, null,
                     true, true, false);
         } catch (final IllegalArgumentException ex) {
             LOGGER.info("Substitution failed. Skip substitution of variables of configuration final name ({}).",

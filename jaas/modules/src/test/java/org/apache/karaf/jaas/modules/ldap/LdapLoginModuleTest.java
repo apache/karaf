@@ -372,7 +372,7 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
 
         assertEquals(4, subject.getPrincipals().size());
 
-        final List<String> roles = new ArrayList<String>(Arrays.asList("karaf", "test", "another"));
+        final List<String> roles = new ArrayList<>(Arrays.asList("karaf", "test", "another"));
 
         boolean foundUser = false;
         boolean foundRole = false;
@@ -418,7 +418,7 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
 
         assertEquals(4, subject.getPrincipals().size());
 
-        final List<String> roles = new ArrayList<String>(Arrays.asList("karaf", "test", "another"));
+        final List<String> roles = new ArrayList<>(Arrays.asList("karaf", "test", "another"));
 
         boolean foundUser = false;
         boolean foundRole = false;
@@ -468,7 +468,7 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
 
         assertEquals(2, subject.getPrincipals().size());
 
-        final List<String> roles = new ArrayList<String>(Arrays.asList("karaf"));
+        final List<String> roles = new ArrayList<>(Arrays.asList("karaf"));
 
         boolean foundUser = false;
         boolean foundRole = false;

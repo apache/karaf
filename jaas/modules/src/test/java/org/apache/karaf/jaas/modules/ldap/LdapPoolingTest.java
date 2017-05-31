@@ -79,7 +79,7 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
         System.setProperty("com.sun.jndi.ldap.connect.pool.maxsize", "2");
         System.setProperty("com.sun.jndi.ldap.connect.pool.protocol", "ssl");
         System.setProperty("com.sun.jndi.ldap.connect.pool.debug", "all");
-        Hashtable<String, String> env = new Hashtable<String, String>();
+        Hashtable<String, String> env = new Hashtable<>();
         env.put("com.sun.jndi.ldap.connect.pool", "true");
         env.put("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
         env.put("java.naming.provider.url", "ldaps://localhost:" + getLdapServer().getPortSSL() + "/ou=system");
@@ -111,7 +111,7 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
         System.setProperty("com.sun.jndi.ldap.connect.pool.maxsize", "2");
         System.setProperty("com.sun.jndi.ldap.connect.pool.protocol", "ssl");
         System.setProperty("com.sun.jndi.ldap.connect.pool.debug", "all");
-        Hashtable<String, String> env = new Hashtable<String, String>();
+        Hashtable<String, String> env = new Hashtable<>();
         env.put("com.sun.jndi.ldap.connect.pool", "false");
         env.put("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
         env.put("java.naming.provider.url", "ldaps://localhost:" + getLdapServer().getPortSSL() + "/ou=system");

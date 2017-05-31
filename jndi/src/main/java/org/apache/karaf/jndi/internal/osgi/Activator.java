@@ -45,7 +45,7 @@ public class Activator extends BaseActivator {
         JndiServiceImpl service = new JndiServiceImpl();
         service.setBundleContext(bundleContext);
         service.setProxyManager(proxyManager);
-        Hashtable<String, String> props = new Hashtable<String, String>();
+        Hashtable<String, String> props = new Hashtable<>();
         // bind the JNDI service itself in the JNDI context
         props.put("osgi.jndi.service.name", "jndi");
         register(JndiService.class, service, props);

@@ -302,7 +302,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
     }
 
     private List<Repository> getRepositories() {
-        List<Repository> repositories = new ArrayList<Repository>();
+        List<Repository> repositories = new ArrayList<>();
 
         if (featuresService == null) {
             this.log.error("Features service is not available");
@@ -321,7 +321,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
     }
 
     private List<ExtendedFeature> getFeatures(List<Repository> repositories) {
-        List<ExtendedFeature> features = new ArrayList<ExtendedFeature>();
+        List<ExtendedFeature> features = new ArrayList<>();
 
         if (featuresService == null) {
             this.log.error("Features service is not available");

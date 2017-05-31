@@ -57,7 +57,7 @@ public class ResolveCommand extends ObrCommandSupport {
     List<String> requirements;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-        List<Repository> repositories = new ArrayList<Repository>();
+        List<Repository> repositories = new ArrayList<>();
         repositories.add(admin.getSystemRepository());
         if (!noLocal) {
             repositories.add(admin.getLocalRepository());

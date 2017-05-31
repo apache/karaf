@@ -26,27 +26,27 @@ public class MavenConfigServiceTest {
 
     @Test
     public void testLocalRepoEmpty() throws Exception {
-        Hashtable<String, Object> config = new Hashtable<String, Object>();
+        Hashtable<String, Object> config = new Hashtable<>();
         assertEquals(null, MavenConfigService.getLocalRepoFromConfig(config));
     }
 
     @Test
     public void testLocalRepoExplicit() throws Exception {
-        Hashtable<String, Object> config = new Hashtable<String, Object>();
+        Hashtable<String, Object> config = new Hashtable<>();
         config.put("org.ops4j.pax.url.mvn.localRepository", "foo/bar");
         assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config));
     }
 
     @Test
     public void testLocalRepoFromSettings() throws Exception {
-        Hashtable<String, Object> config = new Hashtable<String, Object>();
+        Hashtable<String, Object> config = new Hashtable<>();
         config.put("org.ops4j.pax.url.mvn.settings", getClass().getResource("/settings.xml").getPath());
         assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config));
     }
 
     @Test
     public void testLocalRepoFromSettingsNs() throws Exception {
-        Hashtable<String, Object> config = new Hashtable<String, Object>();
+        Hashtable<String, Object> config = new Hashtable<>();
         config.put("org.ops4j.pax.url.mvn.settings", getClass().getResource("/settings2.xml").getPath());
         assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config));
     }

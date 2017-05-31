@@ -75,6 +75,6 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
         addOption(FeaturesService.Option.DisplayFeaturesWiring, featuresWiring);
         addOption(FeaturesService.Option.DisplayAllWiring, allWiring);
         admin.setResolutionOutputFile(outputFile);
-        admin.installFeatures(new HashSet<String>(features), region, options);
+        admin.installFeatures(new HashSet<>(features), region, options);
     }
 }

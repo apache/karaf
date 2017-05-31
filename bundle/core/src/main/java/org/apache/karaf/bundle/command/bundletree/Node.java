@@ -29,7 +29,7 @@ public class Node<T> {
     
     private final T value;
     private Node<T> parent;
-    private List<Node<T>> children = new LinkedList<Node<T>>();
+    private List<Node<T>> children = new LinkedList<>();
 
     /**
      * Create a new node. Only meant for wrapper use,
@@ -79,7 +79,7 @@ public class Node<T> {
      * @return the child node.
      */
     public Node<T> addChild(T value) {
-        Node<T> node = new Node<T>(value, this);
+        Node<T> node = new Node<>(value, this);
         children.add(node);
         return node;
     }
@@ -90,7 +90,7 @@ public class Node<T> {
      * @return the set of values.
      */
     public Set<T> flatten() {
-        Set<T> result = new HashSet<T>();
+        Set<T> result = new HashSet<>();
         result.add(getValue());
         for (Node<T> child : getChildren()) {
             result.addAll(child.flatten());

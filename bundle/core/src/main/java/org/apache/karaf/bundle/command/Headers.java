@@ -86,17 +86,17 @@ public class Headers extends BundlesCommand {
 
     protected String generateFormattedOutput(Bundle bundle) {
         StringBuilder output = new StringBuilder();
-        Map<String, Object> otherAttribs = new TreeMap<String, Object>();
-        Map<String, Object> karafAttribs = new TreeMap<String, Object>();
-        Map<String, Object> bundleAttribs = new TreeMap<String, Object>();
-        Map<String, Object> serviceAttribs = new TreeMap<String, Object>();
-        Map<String, Object> packagesAttribs = new TreeMap<String, Object>();
+        Map<String, Object> otherAttribs = new TreeMap<>();
+        Map<String, Object> karafAttribs = new TreeMap<>();
+        Map<String, Object> bundleAttribs = new TreeMap<>();
+        Map<String, Object> serviceAttribs = new TreeMap<>();
+        Map<String, Object> packagesAttribs = new TreeMap<>();
         Dictionary<String, String> dict = bundle.getHeaders();
         Enumeration<String> keys = dict.keys();
 
         // do an initial loop and separate the attributes in different groups
         while (keys.hasMoreElements()) {
-            String k = (String) keys.nextElement();
+            String k = keys.nextElement();
             Object v = dict.get(k);
             if (k.startsWith(KARAF_PREFIX)) {
                 // starts with Karaf-xxx
@@ -170,7 +170,7 @@ public class Headers extends BundlesCommand {
             output.append('\n');
         }
 
-        Map<String, ClauseFormatter> formatters = new HashMap<String, ClauseFormatter>();
+        Map<String, ClauseFormatter> formatters = new HashMap<>();
         formatters.put(REQUIRE_BUNDLE_ATTRIB, new ClauseFormatter() {
             public void pre(Clause clause, StringBuilder output) {
                 boolean isSatisfied = checkBundle(clause.getName(), clause.getAttribute("bundle-version"));

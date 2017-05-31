@@ -54,7 +54,7 @@ public enum Signal {
     IO(29),
     PWR(30);
 
-    private static final Map<String, Signal> lookupTable = new HashMap<String, Signal>(40);
+    private static final Map<String, Signal> lookupTable = new HashMap<>(40);
 
     static {
         // registering the signals in the lookup table to allow faster

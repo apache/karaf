@@ -42,7 +42,7 @@ public class DocBookCommandHelpPrinter extends AbstractCommandHelpPrinter {
     public void printHelp(Action action, PrintStream out, boolean includeHelpOption) {
         Command command = action.getClass().getAnnotation(Command.class);
         Set<Option> options = new HashSet<>();
-        List<Argument> arguments = new ArrayList<Argument>();
+        List<Argument> arguments = new ArrayList<>();
         Map<Argument, Field> argFields = new HashMap<>();
         Map<Option, Field> optFields = new HashMap<>();
         for (Class<?> type = action.getClass(); type != null; type = type.getSuperclass()) {

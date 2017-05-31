@@ -384,7 +384,7 @@ public class DefaultConverter {
     private static final Map<Class, Class> primitives;
 
     static {
-        primitives = new HashMap<Class, Class>();
+        primitives = new HashMap<>();
         primitives.put(byte.class, Byte.class);
         primitives.put(short.class, Short.class);
         primitives.put(char.class, Character.class);

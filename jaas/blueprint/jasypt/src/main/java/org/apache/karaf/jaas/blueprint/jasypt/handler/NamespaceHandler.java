@@ -57,7 +57,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     }
 
     public Set<Class> getManagedClasses() {
-        return new HashSet<Class>(Arrays.asList(
+        return new HashSet<>(Arrays.asList(
                 EncryptablePropertyPlaceholder.class
         ));
     }

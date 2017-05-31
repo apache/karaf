@@ -64,7 +64,7 @@ public class MetaCompleter implements Completer, BundleListener {
 
             @Override
             public List<String> callWith(MetaTypeService metatypeService) {
-                List<String> pids = new ArrayList<String>();
+                List<String> pids = new ArrayList<>();
                 Bundle[] bundles = context.getBundles();
                 for (Bundle bundle : bundles) {
                     

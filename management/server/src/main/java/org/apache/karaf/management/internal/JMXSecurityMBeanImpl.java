@@ -94,7 +94,7 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
                 table.put(data);
             } else {
                 for (String method : methods) {
-                    List<String> argTypes = new ArrayList<String>();
+                    List<String> argTypes = new ArrayList<>();
                     String name = parseMethodName(method, argTypes);
 
                     boolean res;

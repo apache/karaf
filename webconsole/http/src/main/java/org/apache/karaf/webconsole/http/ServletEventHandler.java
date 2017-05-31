@@ -32,7 +32,7 @@ import org.osgi.framework.BundleListener;
 public class ServletEventHandler implements ServletListener, BundleListener {
 
     BundleContext bundleContext;
-    Map<String, ServletEvent> servletEvents =  new HashMap<String, ServletEvent>();
+    Map<String, ServletEvent> servletEvents = new HashMap<>();
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;

@@ -458,7 +458,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     public List<String> getResourceRepositories() {
         return resourceRepositories != null
                 ? resourceRepositories
-                : Collections.<String>emptyList();
+                : Collections.emptyList();
     }
 
     public void setResourceRepositories(List<String> resourceRepositories) {

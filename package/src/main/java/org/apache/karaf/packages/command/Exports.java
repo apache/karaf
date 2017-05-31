@@ -130,7 +130,7 @@ public class Exports implements Action {
     }
 
     private SortedMap<String, PackageVersion> getDuplicatePackages(Bundle[] bundles) {
-        SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<String, PackageVersion>();
+        SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<>();
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
             if (rev != null) {

@@ -82,7 +82,7 @@ public class Kar {
         InputStream is = null;
         JarInputStream zipIs = null;
         FeatureDetector featureDetector = new FeatureDetector();
-        this.featureRepos = new ArrayList<URI>();
+        this.featureRepos = new ArrayList<>();
         this.shouldInstallFeatures = true;
 
         try {

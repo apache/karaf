@@ -39,7 +39,7 @@ import java.util.*;
 public class KarafMBeanServerGuardTest extends TestCase {
 
     public void testRequiredRolesMethodNameOnly() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("doit", "master");
         configuration.put("fryit", "editor,viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -56,11 +56,11 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
     @SuppressWarnings("unchecked")
     public void testRequiredRolesMethodNameEmpty() throws Exception {
-        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf1 = new Hashtable<>();
         conf1.put("doit", "");
         conf1.put("fryit", "editor, viewer");
         conf1.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
-        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf2 = new Hashtable<>();
         conf2.put("doit", "editor");
         conf2.put(Constants.SERVICE_PID, "jmx.acl.foo.bar");
         ConfigurationAdmin ca = getMockConfigAdmin2(conf1, conf2);
@@ -75,7 +75,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesSignature() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("testit", "master");
         configuration.put("testit(java.lang.String)", "viewer");
         configuration.put("testit(java.lang.String, java.lang.String)", "editor");
@@ -90,7 +90,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesSignatureEmpty() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("testit", "master");
         configuration.put("testit(java.lang.String)", "viewer");
         configuration.put("testit(java.lang.String, java.lang.String)", "");
@@ -105,7 +105,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesExact() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("testit", "master");
         configuration.put("testit(java.lang.String)", "viewer");
         configuration.put("testit(java.lang.String, java.lang.String)", "editor");
@@ -136,7 +136,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesExact2() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("foo(java.lang.String,java.lang.String)[\"a\",\",\"]", "editor #this is the editor rule");
         configuration.put("foo(java.lang.String,java.lang.String)[\",\" , \"a\"]", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -154,7 +154,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesNumeric() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("bar(int)[\"17\"]", "editor #this is the editor rule");
         configuration.put("bar", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -170,7 +170,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesExactNobody() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("foo(java.lang.String)[\"a\"]", "");
         configuration.put("foo(java.lang.String)[\"aa\"]", "#hello");
         configuration.put("foo", "test");
@@ -187,7 +187,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesRegExp() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("  testit   (java.lang.String)  [  /ab/]", "manager");
         configuration.put("testit(java.lang.String)[/c\"d/]", "tester");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -208,7 +208,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesRegExpNobody() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("testit(java.lang.String)[/ab/]", "");
         configuration.put("test*", "tester");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -222,7 +222,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesRegExp2() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("foo(java.lang.String,java.lang.String)[/a/,/b/]", "editor");
         configuration.put("foo(java.lang.String,java.lang.String)[/[bc]/ , /[^b]/]", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -243,17 +243,17 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
     @SuppressWarnings("unchecked")
     public void testRequiredRolesHierarchy() throws Exception {
-        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf1 = new Hashtable<>();
         conf1.put("foo", "editor");
         conf1.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
-        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf2 = new Hashtable<>();
         conf2.put("bar", "viewer");
         conf2.put("foo", "viewer");
         conf2.put(Constants.SERVICE_PID, "jmx.acl.foo.bar");
-        Dictionary<String, Object> conf3 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf3 = new Hashtable<>();
         conf3.put("tar", "admin");
         conf3.put(Constants.SERVICE_PID, "jmx.acl.foo");
-        Dictionary<String, Object> conf4 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf4 = new Hashtable<>();
         conf4.put("zar", "visitor");
         conf4.put(Constants.SERVICE_PID, "jmx.acl");
 
@@ -278,10 +278,10 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
     @SuppressWarnings("unchecked")
     public void testRequiredRolesHierarchyWildcard1() throws Exception {
-        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf1 = new Hashtable<>();
         conf1.put("foo", "viewer");
         conf1.put(Constants.SERVICE_PID, "jmx.acl._.bar.Test");
-        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf2 = new Hashtable<>();
         conf2.put("foo", "editor");
         conf2.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
 
@@ -303,10 +303,10 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
     @SuppressWarnings("unchecked")
     public void testRequiredRolesHierarchyWildcard2() throws Exception {
-        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf1 = new Hashtable<>();
         conf1.put("foo", "viewer");
         conf1.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
-        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf2 = new Hashtable<>();
         conf2.put("foo", "editor");
         conf2.put(Constants.SERVICE_PID, "jmx.acl._.bar.Test");
 
@@ -328,10 +328,10 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
     @SuppressWarnings("unchecked")
     public void testRequiredRolesHierarchyWildcard3() throws Exception {
-        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf1 = new Hashtable<>();
         conf1.put("foo", "viewer");
         conf1.put(Constants.SERVICE_PID, "jmx.acl._.bar.Test");
-        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf2 = new Hashtable<>();
         conf2.put("foo", "editor");
         conf2.put(Constants.SERVICE_PID, "jmx.acl.foo._.Test");
 
@@ -354,7 +354,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesMethodNameWildcard() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("getFoo", "viewer");
         configuration.put("get*", " tester , editor,manager");
         configuration.put("*", "admin");
@@ -373,7 +373,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesMethodNameWildcard2() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("ge", "janitor");
         configuration.put("get", "admin");
         configuration.put("get*", "viewer");
@@ -393,7 +393,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testRequiredRolesMethodNameWildcard3() throws Exception {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("get*", "viewer");
         configuration.put("*", "admin");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -412,11 +412,11 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
     @SuppressWarnings("unchecked")
     public void testRequiredRolesMethodNameWildcardEmpty() throws Exception {
-        Dictionary<String, Object> conf1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf1 = new Hashtable<>();
         conf1.put("get*", " ");
         conf1.put("*", "admin");
         conf1.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
-        Dictionary<String, Object> conf2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> conf2 = new Hashtable<>();
         conf2.put("get*", "viewer");
         conf2.put(Constants.SERVICE_PID, "jmx.acl");
         ConfigurationAdmin ca = getMockConfigAdmin2(conf1, conf2);
@@ -438,7 +438,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     private ConfigurationAdmin getMockConfigAdmin2(Dictionary<String, Object>... configurations) throws IOException, InvalidSyntaxException {
-        List<Configuration> allConfigs = new ArrayList<Configuration>();
+        List<Configuration> allConfigs = new ArrayList<>();
         for (Dictionary<String, Object> configuration : configurations) {
             Configuration conf = EasyMock.createMock(Configuration.class);
             EasyMock.expect(conf.getPid()).andReturn((String) configuration.get(Constants.SERVICE_PID)).anyTimes();
@@ -488,7 +488,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     public void testInvoke() throws Throwable {
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("someMethod", "editor");
         configuration.put("someOtherMethod", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -543,7 +543,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(mbeanInfo).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("getToast", "admin");
         configuration.put("isToast", "editor");
         configuration.put("getTest*", "admin");
@@ -592,7 +592,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(mbeanInfo).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("getToast", "editor");
         configuration.put("getTest*", "admin");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -640,7 +640,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(mbeanInfo).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("isT*", "editor");
         configuration.put("getToast", "admin");
         configuration.put("getButter", "editor");
@@ -691,7 +691,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(mbeanInfo).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("setSomething", "editor");
         configuration.put("setValue*", "admin");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -747,7 +747,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(mbeanInfo).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("setSomething", "editor");
         configuration.put("setValue*", "admin");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -812,7 +812,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on2)).andReturn(info2).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("doit(java.lang.String)[/11/]", "admin");
         configuration.put("doit(java.lang.String)", "viewer");
         configuration.put("doit(java.lang.String,java.lang.String)", "viewer");
@@ -855,7 +855,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("doit(java.lang.String)[/11/]", "admin");
         configuration.put("doit(java.lang.String)", "admin");
         configuration.put("doit(java.lang.String,java.lang.String)", "admin");
@@ -900,7 +900,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("doit(java.lang.String)", "admin");
         configuration.put("doit(java.lang.String,java.lang.String)", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -941,7 +941,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("foit(java.lang.String)", "viewer");
         configuration.put("doit(java.lang.String,java.lang.String)", "admin");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -975,7 +975,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("doit(java.lang.String)", "admin");
         configuration.put("doit(java.lang.String,java.lang.String)", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -1011,7 +1011,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("getFoo(java.lang.String)", "admin");
         configuration.put("getFoo()", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -1047,7 +1047,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("getFoo(java.lang.String)", "viewer");
         configuration.put("getFoo()", "admin");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -1083,7 +1083,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("getFoo(java.lang.String)", "admin");
         configuration.put("getFoo()", "admin");
         configuration.put("isFoo()", "viewer");
@@ -1120,7 +1120,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("getFoo(java.lang.String)", "viewer");
         configuration.put("getFoo()", "viewer");
         configuration.put("isFoo()", "admin");
@@ -1157,7 +1157,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("setFoo(java.lang.String)", "admin");
         configuration.put("setFoo(boolean)", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -1193,7 +1193,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("setFoo(java.lang.String)", "viewer");
         configuration.put("setFoo(boolean)", "admin");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
@@ -1229,7 +1229,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("get*", "admin");
         configuration.put("is*", "viewer");
         configuration.put("*", "admin");
@@ -1267,7 +1267,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("get*", "admin");
         configuration.put("is*", "viewer");
         configuration.put("*", "admin");
@@ -1305,7 +1305,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("getA1", "viewer");
         configuration.put("is*", "admin");
         configuration.put("*", "admin");
@@ -1343,7 +1343,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("get*", "admin");
         configuration.put("setA2", "viewer");
         configuration.put("*", "admin");
@@ -1381,7 +1381,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         EasyMock.expect(mbs.getMBeanInfo(on)).andReturn(info).anyTimes();
         EasyMock.replay(mbs);
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("get*", "admin");
         configuration.put("setA2", "admin");
         configuration.put("*", "admin");
@@ -1408,7 +1408,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     public void testCanInvokeMethod() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("doit(java.lang.String)[/11/]", "admin");
         configuration.put("doit(java.lang.String)", "viewer");
         configuration.put("doit(java.lang.String,java.lang.String)", "viewer");
@@ -1443,7 +1443,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     public void testCanInvokeMethod2() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        Dictionary<String, Object> configuration = new Hashtable<String, Object>();
+        Dictionary<String, Object> configuration = new Hashtable<>();
         configuration.put("doit(java.lang.String)[/11/]", "viewer");
         configuration.put("doit(java.lang.String)", "admin");
         configuration.put("doit(java.lang.String,java.lang.String)", "admin");
@@ -1489,7 +1489,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         private Subject subject;
 
         private static Principal[] getPrincipals(String... roles) {
-            List<Principal> principals = new ArrayList<Principal>();
+            List<Principal> principals = new ArrayList<>();
             for (String role : roles) {
                 principals.add(new RolePrincipal(role));
             }

@@ -244,7 +244,7 @@ public class Main {
     }
 
     private static List<URL> getFiles(File base) throws MalformedURLException {
-        List<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<>();
         getFiles(base, urls);
         return urls;
     }

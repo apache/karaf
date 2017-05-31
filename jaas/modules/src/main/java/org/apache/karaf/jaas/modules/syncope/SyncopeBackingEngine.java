@@ -159,7 +159,7 @@ public class SyncopeBackingEngine implements BackingEngine {
     }
 
     public List<GroupPrincipal> listGroups(UserPrincipal principal) {
-        return new ArrayList<GroupPrincipal>();
+        return new ArrayList<>();
     }
 
     public void addGroup(String username, String group) {

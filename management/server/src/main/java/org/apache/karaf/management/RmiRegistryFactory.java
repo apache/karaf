@@ -131,7 +131,7 @@ public class RmiRegistryFactory {
         }
         if (registry != null) {
             // register the registry as an OSGi service
-            Hashtable<String, Object> props = new Hashtable<String, Object>();
+            Hashtable<String, Object> props = new Hashtable<>();
             props.put("port", getPort());
             props.put("host", getHost());
             bundleContext.registerService(Registry.class, registry, props);

@@ -25,7 +25,7 @@ import java.util.List;
 @Deprecated
 public class MultiException extends Exception {
 
-    private List<Exception> exceptions = new ArrayList<Exception>();
+    private List<Exception> exceptions = new ArrayList<>();
 
     public MultiException(String message) {
         super(message);

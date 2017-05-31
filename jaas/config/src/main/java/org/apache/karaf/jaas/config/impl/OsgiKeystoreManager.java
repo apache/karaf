@@ -38,7 +38,7 @@ public class OsgiKeystoreManager implements KeystoreManager {
 
     private final static transient Logger logger = LoggerFactory.getLogger(OsgiKeystoreManager.class);
 
-    private List<KeystoreInstance> keystores = new CopyOnWriteArrayIdentityList<KeystoreInstance>();
+    private List<KeystoreInstance> keystores = new CopyOnWriteArrayIdentityList<>();
 
     public void register(KeystoreInstance keystore, Map<String, ?> properties) {
         keystores.add(keystore);

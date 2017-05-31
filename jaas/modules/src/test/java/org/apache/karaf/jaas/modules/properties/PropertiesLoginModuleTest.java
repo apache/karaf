@@ -47,7 +47,7 @@ public class PropertiesLoginModuleTest {
             pbe.addUser("pqr", "abc");
 
             PropertiesLoginModule module = new PropertiesLoginModule();
-            Map<String, String> options = new HashMap<String, String>();
+            Map<String, String> options = new HashMap<>();
             options.put(PropertiesLoginModule.USER_FILE, f.getAbsolutePath());
             CallbackHandler cb = new CallbackHandler() {
                 @Override
@@ -103,7 +103,7 @@ public class PropertiesLoginModuleTest {
             pbe.addUser("pqr", "abc");
 
             PropertiesLoginModule module = new PropertiesLoginModule();
-            Map<String, String> options = new HashMap<String, String>();
+            Map<String, String> options = new HashMap<>();
             options.put(PropertiesLoginModule.USER_FILE, f.getAbsolutePath());
             CallbackHandler cb = new CallbackHandler() {
                 @Override
@@ -144,7 +144,7 @@ public class PropertiesLoginModuleTest {
             pbe.addGroupRole("group1", "r1");
 
             PropertiesLoginModule module = new PropertiesLoginModule();
-            Map<String, String> options = new HashMap<String, String>();
+            Map<String, String> options = new HashMap<>();
             options.put(PropertiesLoginModule.USER_FILE, f.getAbsolutePath());
             CallbackHandler cb = new CallbackHandler() {
                 @Override
@@ -212,7 +212,7 @@ public class PropertiesLoginModuleTest {
             pbe.addGroupRole("group1", "r1");
 
             PropertiesLoginModule module = new PropertiesLoginModule();
-            Map<String, String> options = new HashMap<String, String>();
+            Map<String, String> options = new HashMap<>();
             options.put(PropertiesLoginModule.USER_FILE, f.getAbsolutePath());
             CallbackHandler cb = new CallbackHandler() {
                 @Override
@@ -264,7 +264,7 @@ public class PropertiesLoginModuleTest {
         PropertiesLoginModule module = new PropertiesLoginModule();
         Subject subject = new Subject();
         CallbackHandler handler = new NullHandler();
-        Map<String, String> options = new HashMap<String, String>();
+        Map<String, String> options = new HashMap<>();
         options.put(PropertiesLoginModule.USER_FILE, getTestUsersFile());
         module.initialize(subject, handler, null, options);
 
@@ -280,7 +280,7 @@ public class PropertiesLoginModuleTest {
         PropertiesLoginModule module = new PropertiesLoginModule();
         Subject sub = new Subject();
         CallbackHandler handler = new NamePasswordHandler("test", "test");
-        Map<String, String> options = new HashMap<String, String>();
+        Map<String, String> options = new HashMap<>();
         options.put(PropertiesLoginModule.USER_FILE, usersFilePath);
         module.initialize(sub, handler, null, options);
         module.login();
@@ -290,7 +290,7 @@ public class PropertiesLoginModuleTest {
     public void testNullCallbackHandler() {
         PropertiesLoginModule module = new PropertiesLoginModule();
         Subject subject = new Subject();
-        Map<String, String> options = new HashMap<String, String>();
+        Map<String, String> options = new HashMap<>();
         options.put(PropertiesLoginModule.USER_FILE, getTestUsersFile());
         module.initialize(subject, null, null, options );
         try {

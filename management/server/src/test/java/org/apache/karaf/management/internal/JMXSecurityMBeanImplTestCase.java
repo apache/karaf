@@ -171,10 +171,10 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
         JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
         mb.setMBeanServer(mbs);
         mb.setGuard(testGuard);
-        Map<String, List<String>> query = new HashMap<String, List<String>>();
+        Map<String, List<String>> query = new HashMap<>();
         query.put(objectName, Arrays.asList("otherMethod", "testMethod(long)", "testMethod(java.lang.String)"));
-        query.put(objectName2, Collections.<String>emptyList());
-        query.put(objectName3, Collections.<String>emptyList());
+        query.put(objectName2, Collections.emptyList());
+        query.put(objectName3, Collections.emptyList());
         TabularData result = mb.canInvoke(query);
         assertEquals(5, result.size());
 
@@ -224,7 +224,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
         JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
         mb.setMBeanServer(mbs);
         mb.setGuard(testGuard);
-        Map<String, List<String>> query = new HashMap<String, List<String>>();
+        Map<String, List<String>> query = new HashMap<>();
         query.put(objectName, Arrays.asList("duplicateMethod1(long)", "duplicateMethod1(java.lang.String)", "duplicateMethod1(long)", "duplicateMethod2", "duplicateMethod2"));
         TabularData result = mb.canInvoke(query);
         assertEquals(3, result.size());
@@ -278,7 +278,7 @@ public class JMXSecurityMBeanImplTestCase extends TestCase {
         JMXSecurityMBeanImpl mb = new JMXSecurityMBeanImpl();
         mb.setMBeanServer(mbs);
         mb.setGuard(guard);
-        Map<String, List<String>> query = new HashMap<String, List<String>>();
+        Map<String, List<String>> query = new HashMap<>();
         query.put(objectName, Collections.singletonList("testMethod(java.lang.String)"));
         query.put(objectName2, Collections.singletonList("testMethod(long)"));
         TabularData result = mb.canInvoke(query);

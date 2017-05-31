@@ -36,7 +36,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<MBea
     @Override
     public void start(BundleContext context) throws Exception {
         this.context = context;
-        mbeanServerTracker = new ServiceTracker<MBeanServer, MBeanServer>(context, MBeanServer.class, this);
+        mbeanServerTracker = new ServiceTracker<>(context, MBeanServer.class, this);
         mbeanServerTracker.open();
     }
 

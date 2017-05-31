@@ -33,7 +33,7 @@ public class Activator extends BaseActivator {
 
     @Override
     protected void doStart() throws Exception {
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put("service.ranking", -1);
         register(ArtifactUrlTransformer.class, new WrapDeploymentListener(), props);
     }

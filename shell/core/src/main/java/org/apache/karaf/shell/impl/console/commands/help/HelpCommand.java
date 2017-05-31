@@ -134,7 +134,7 @@ public class HelpCommand implements Command {
                 return -1;
             }
             protected boolean verifyCompleter(Session session, Completer completer, String argument) {
-                List<String> candidates = new ArrayList<String>();
+                List<String> candidates = new ArrayList<>();
                 return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
             }
         };
@@ -175,7 +175,7 @@ public class HelpCommand implements Command {
         if (path == null) {
             path = "%root%";
         }
-        Map<String,String> props = new HashMap<String,String>();
+        Map<String,String> props = new HashMap<>();
         props.put("data", "${" + path + "}");
         final List<HelpProvider> providers = session.getRegistry().getServices(HelpProvider.class);
         InterpolationHelper.performSubstitution(props, new InterpolationHelper.SubstitutionCallback() {

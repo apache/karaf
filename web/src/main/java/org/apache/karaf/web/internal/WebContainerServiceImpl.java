@@ -68,13 +68,13 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
     public List<WebBundle> list() throws Exception {
         Bundle[] bundles = bundleContext.getBundles();
         Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
-        List<WebBundle> webBundles = new ArrayList<WebBundle>();
+        List<WebBundle> webBundles = new ArrayList<>();
         if (bundles != null) {
             for (Bundle bundle : bundles) {
                 // first check if the bundle is a web bundle
-                String contextPath = (String) bundle.getHeaders().get("Web-ContextPath");
+                String contextPath = bundle.getHeaders().get("Web-ContextPath");
                 if (contextPath == null) {
-                    contextPath = (String) bundle.getHeaders().get("Webapp-Context"); // this one used by pax-web but is deprecated
+                    contextPath = bundle.getHeaders().get("Webapp-Context"); // this one used by pax-web but is deprecated
                 }
                 if (contextPath == null) {
                     // the bundle is not a web bundle
@@ -85,13 +85,13 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
                 contextPath = contextPath.trim();
                 
                 // get the bundle name
-                String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
+                String name = bundle.getHeaders().get(Constants.BUNDLE_NAME);
                 // if there is no name, then default to symbolic name
                 name = (name == null) ? bundle.getSymbolicName() : name;
                 // if there is no symbolic name, resort to location
                 name = (name == null) ? bundle.getLocation() : name;
                 // get the bundle version
-                String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+                String version = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
                 name = ((version != null)) ? name + " (" + version + ")" : name;
                 long bundleId = bundle.getBundleId();
                 int level = bundle.adapt(BundleStartLevel.class).getStartLevel();

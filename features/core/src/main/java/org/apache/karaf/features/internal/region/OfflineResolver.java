@@ -81,12 +81,12 @@ public class OfflineResolver {
 
             @Override
             public Collection<Resource> getMandatoryResources() {
-                List<Resource> resources = new ArrayList<Resource>();
+                List<Resource> resources = new ArrayList<>();
                 Requirement req = new RequirementImpl(
                         null,
                         IDENTITY_NAMESPACE,
-                        Collections.<String, String>emptyMap(),
-                        Collections.<String, Object>emptyMap(),
+                        Collections.emptyMap(),
+                        Collections.emptyMap(),
                         SimpleFilter.parse("(" + IDENTITY_NAMESPACE + "=root)"));
                 Collection<Capability> identities = repository.findProviders(Collections.singleton(req)).get(req);
                 for (Capability identity : identities) {

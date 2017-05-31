@@ -28,7 +28,7 @@ public class SimpleHelpProvider implements HelpProvider {
     private final Map<String, String> help;
 
     public SimpleHelpProvider() {
-        help = new HashMap<String, String>();
+        help = new HashMap<>();
         help.put("%root%", "${command-list|}");
         help.put("all", "${command-list|}");
     }

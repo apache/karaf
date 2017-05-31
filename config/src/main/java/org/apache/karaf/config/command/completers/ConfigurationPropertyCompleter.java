@@ -97,7 +97,7 @@ public class ConfigurationPropertyCompleter implements Completer {
      */
     @SuppressWarnings("rawtypes")
     private Set<String> getPropertyNames(String pid) {
-        Set<String> propertyNames = new HashSet<String>();
+        Set<String> propertyNames = new HashSet<>();
         if (pid != null) {
             Configuration configuration = null;
             try {

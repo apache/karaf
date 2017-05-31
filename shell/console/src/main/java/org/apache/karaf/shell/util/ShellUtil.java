@@ -48,7 +48,7 @@ public class ShellUtil {
 
     public static String getBundleName(Bundle bundle) {
         if (bundle != null) {
-            String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
+            String name = bundle.getHeaders().get(Constants.BUNDLE_NAME);
             return (name == null)
                     ? "Bundle " + Long.toString(bundle.getBundleId())
                     : name + " (" + Long.toString(bundle.getBundleId()) + ")";

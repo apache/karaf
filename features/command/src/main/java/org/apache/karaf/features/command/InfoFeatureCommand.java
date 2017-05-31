@@ -219,7 +219,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 
             if (resolved != null) {
                 if (bundle) {
-                    List<String> bundleLocation = new LinkedList<String>();
+                    List<String> bundleLocation = new LinkedList<>();
                     List<BundleInfo> bundles = resolved.getBundles();
                     for (BundleInfo bundleInfo : bundles) {
                         bundleLocation.add(bundleInfo.getLocation());
