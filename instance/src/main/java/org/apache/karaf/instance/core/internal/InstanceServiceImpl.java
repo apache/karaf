@@ -1007,8 +1007,7 @@ public class InstanceServiceImpl implements InstanceService {
             if (files == null) {
                 result = false;
             } else {
-                for (int i = 0; i < files.length; i++) {
-                    File file = files[i];
+                for (File file : files) {
                     if (file.getName().equals(".") || file.getName().equals("..")) {
                         continue;
                     }

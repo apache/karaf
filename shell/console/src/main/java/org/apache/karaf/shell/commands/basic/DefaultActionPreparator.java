@@ -64,8 +64,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                 + "Error executing command " + command2.scope() + ":" 
                 + INTENSITY_BOLD + command2.name() + INTENSITY_NORMAL
                 + COLOR_DEFAULT + ": " : "";
-        for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
-            Object param = it.next();
+        for (Object param : params) {
             if (HelpOption.HELP.name().equals(param)) {
                 int termWidth = getWidth(session);
                 boolean globalScope = NameScoping.isGlobalScope(session, actionMetaData.getCommand().scope());

@@ -548,11 +548,11 @@ public class PatternParser {
             if (properties.size() > 0) {
               Object[] keys = properties.keySet().toArray();
               Arrays.sort(keys);
-              for (int i = 0; i < keys.length; i++) {
+              for (Object key : keys) {
                   buf.append('{');
-                  buf.append(keys[i]);
+                  buf.append(key);
                   buf.append(',');
-                  buf.append(properties.get(keys[i]));
+                  buf.append(properties.get(key));
                   buf.append('}');
               }
             }

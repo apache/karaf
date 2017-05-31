@@ -149,9 +149,9 @@ public class EventAdminImpl implements EventAdmin
         if (needTimeStamp || needSubject) {
             String[] names = event.getPropertyNames();
             HashMap<String, Object> map = new HashMap<String, Object>(names.length + 1);
-            for (int i = 0; i < names.length; i++) {
-                if (!EventConstants.EVENT_TOPIC.equals(names[i])) {
-                    map.put(names[i], event.getProperty(names[i]));
+            for (String name : names) {
+                if (!EventConstants.EVENT_TOPIC.equals(name)) {
+                    map.put(name, event.getProperty(name));
                 }
             }
             if (needTimeStamp) {
