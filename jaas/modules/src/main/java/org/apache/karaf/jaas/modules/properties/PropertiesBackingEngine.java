@@ -71,7 +71,7 @@ public class PropertiesBackingEngine implements BackingEngine {
             }
         }
 
-        String userInfos = (String) users.get(username);
+        String userInfos = users.get(username);
 
         //If user already exists, update password
         if (userInfos != null && userInfos.length() > 0) {
@@ -113,7 +113,7 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     @Override
     public List<UserPrincipal> listUsers() {
-        List<UserPrincipal> result = new ArrayList<UserPrincipal>();
+        List<UserPrincipal> result = new ArrayList<>();
 
         for (Object user : users.keySet()) {
             String userName = (String) user;
@@ -137,8 +137,8 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     private List<RolePrincipal> listRoles(String name) {
 
-        List<RolePrincipal> result = new ArrayList<RolePrincipal>();
-        String userInfo = (String) users.get(name);
+        List<RolePrincipal> result = new ArrayList<>();
+        String userInfo = users.get(name);
         String[] infos = userInfo.split(",");
         for (int i = 1; i < infos.length; i++) {
             String roleName = infos[i];
@@ -160,7 +160,7 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     @Override
     public void addRole(String username, String role) {
-        String userInfos = (String) users.get(username);
+        String userInfos = users.get(username);
         if (userInfos != null) {
             for (RolePrincipal rp : listRoles(username)) {
                 if (role.equals(rp.getName())) {
@@ -187,7 +187,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         String[] infos = null;
         StringBuffer userInfoBuffer = new StringBuffer();
 
-        String userInfos = (String) users.get(username);
+        String userInfos = users.get(username);
 
         //If user already exists, remove the role
         if (userInfos != null && userInfos.length() > 0) {
@@ -219,8 +219,8 @@ public class PropertiesBackingEngine implements BackingEngine {
     }
 
     private List<GroupPrincipal> listGroups(String userName) {
-        List<GroupPrincipal> result = new ArrayList<GroupPrincipal>();
-        String userInfo = (String) users.get(userName);
+        List<GroupPrincipal> result = new ArrayList<>();
+        String userInfo = users.get(userName);
         if (userInfo != null) {
             String[] infos = userInfo.split(",");
             for (int i = 1; i < infos.length; i++) {
@@ -271,7 +271,7 @@ public class PropertiesBackingEngine implements BackingEngine {
     }
 
     public Map<GroupPrincipal, String> listGroups() {
-        Map<GroupPrincipal, String> result = new HashMap<GroupPrincipal, String>();
+        Map<GroupPrincipal, String> result = new HashMap<>();
         for (String name : users.keySet()) {
             if (name.startsWith(GROUP_PREFIX)) {
                 result.put(new GroupPrincipal(name.substring(GROUP_PREFIX.length())), users.get(name));

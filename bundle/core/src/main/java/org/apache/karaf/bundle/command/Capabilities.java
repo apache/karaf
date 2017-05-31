@@ -155,7 +155,7 @@ public class Capabilities extends BundlesCommand {
     {
         // Aggregate matching capabilities.
         Map<BundleCapability, List<BundleWire>> map =
-            new HashMap<BundleCapability, List<BundleWire>>();
+                new HashMap<>();
         for (BundleWire wire : wires)
         {
             if (matchNamespace(namespace, wire.getCapability().getNamespace()))

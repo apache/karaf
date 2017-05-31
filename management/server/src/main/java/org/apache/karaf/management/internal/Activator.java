@@ -120,7 +120,7 @@ public class Activator extends BaseActivator implements ManagedService {
         connectorServerFactory.setDaemon(daemon);
         connectorServerFactory.setThreaded(threaded);
         connectorServerFactory.setObjectName(objectName);
-        Map<String, Object> environment = new HashMap<String, Object>();
+        Map<String, Object> environment = new HashMap<>();
         environment.put("jmx.remote.authenticator", jaasAuthenticator);
         try {
             connectorServerFactory.setEnvironment(environment);
@@ -145,7 +145,7 @@ public class Activator extends BaseActivator implements ManagedService {
 
         register(MBeanServer.class, mbeanServer);
         
-        keystoreInstanceServiceTracker = new ServiceTracker<KeystoreInstance, KeystoreInstance>(
+        keystoreInstanceServiceTracker = new ServiceTracker<>(
             bundleContext, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
                 @Override
                 public KeystoreInstance addingService(ServiceReference<KeystoreInstance> reference) {

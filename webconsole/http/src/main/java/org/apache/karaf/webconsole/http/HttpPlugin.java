@@ -199,7 +199,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     protected List<ServletDetails> getServletDetails() {
 
         Collection<ServletEvent> events = servletEventHandler.getServletEvents();
-        List<ServletDetails> result = new ArrayList<ServletDetails>(events.size());
+        List<ServletDetails> result = new ArrayList<>(events.size());
 
         for (ServletEvent event : events) {
             Servlet servlet = event.getServlet();
@@ -215,7 +215,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
 
             String alias = event.getAlias() != null ? event.getAlias() : " ";
 
-            String[] urls = (String[]) (event.getUrlParameter() != null ? event.getUrlParameter() : new String[]{""});
+            String[] urls = event.getUrlParameter() != null ? event.getUrlParameter() : new String[]{""};
 
             ServletDetails details = new ServletDetails();
             details.setId(event.getBundle().getBundleId());
@@ -232,7 +232,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     protected List<WebDetail> getWebDetails() {
         Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
 
-        List<WebDetail> result = new ArrayList<WebDetail>();
+        List<WebDetail> result = new ArrayList<>();
 
         for (WebEvent event : bundleEvents.values()) {
 
@@ -264,7 +264,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     }
 
     public String getStatusLine(List<ServletDetails> servlets, List<WebDetail> web) {
-        Map<String, Integer> states = new HashMap<String, Integer>();
+        Map<String, Integer> states = new HashMap<>();
         for (ServletDetails servlet : servlets) {
             states.merge(servlet.getState(), 1, (a, b) -> a + b);
         }

@@ -127,7 +127,7 @@ public class InfoAction implements Action {
         }
 
         //Display Information from external information providers.
-        Map<String, Map<Object, Object>> properties = new HashMap<String, Map<Object, Object>>();
+        Map<String, Map<Object, Object>> properties = new HashMap<>();
         if (infoProviders != null) {
             // dump all properties to Map, KARAF-425
             for (InfoProvider provider : infoProviders) {
@@ -137,10 +137,10 @@ public class InfoAction implements Action {
                 properties.get(provider.getName()).putAll(provider.getProperties());
             }
 
-            List<String> sections = new ArrayList<String>(properties.keySet());
+            List<String> sections = new ArrayList<>(properties.keySet());
             Collections.sort(sections);
             for (String section : sections) {
-                List<Object> keys = new ArrayList<Object>(properties.get(section).keySet());
+                List<Object> keys = new ArrayList<>(properties.get(section).keySet());
                 if (keys.size() > 0) {
                     System.out.println(section);
 

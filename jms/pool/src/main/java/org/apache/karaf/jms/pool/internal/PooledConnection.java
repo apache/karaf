@@ -54,9 +54,9 @@ public class PooledConnection implements TopicConnection, QueueConnection, Poole
 
     protected ConnectionPool pool;
     private volatile boolean stopped;
-    private final List<TemporaryQueue> connTempQueues = new CopyOnWriteArrayList<TemporaryQueue>();
-    private final List<TemporaryTopic> connTempTopics = new CopyOnWriteArrayList<TemporaryTopic>();
-    private final List<PooledSession> loanedSessions = new CopyOnWriteArrayList<PooledSession>();
+    private final List<TemporaryQueue> connTempQueues = new CopyOnWriteArrayList<>();
+    private final List<TemporaryTopic> connTempTopics = new CopyOnWriteArrayList<>();
+    private final List<PooledSession> loanedSessions = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new PooledConnection instance that uses the given ConnectionPool to create

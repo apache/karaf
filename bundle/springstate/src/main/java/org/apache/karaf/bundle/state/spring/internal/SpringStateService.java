@@ -46,7 +46,7 @@ public class SpringStateService
     private final Map<Long, OsgiBundleApplicationContextEvent> states;
 
     public SpringStateService() {
-        this.states = new ConcurrentHashMap<Long, OsgiBundleApplicationContextEvent>();
+        this.states = new ConcurrentHashMap<>();
     }
 
     public String getName() {

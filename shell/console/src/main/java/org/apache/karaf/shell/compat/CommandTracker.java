@@ -55,7 +55,7 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                 CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION,
                 Constants.OBJECTCLASS, CommandWithAction.class.getName(),
                 Constants.OBJECTCLASS, org.apache.felix.gogo.commands.CommandWithAction.class.getName()));
-        this.tracker = new ServiceTracker<Object, Object>(context, filter, this);
+        this.tracker = new ServiceTracker<>(context, filter, this);
         this.tracker.open();
     }
 

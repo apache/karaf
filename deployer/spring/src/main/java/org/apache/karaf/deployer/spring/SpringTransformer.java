@@ -120,7 +120,7 @@ public class SpringTransformer {
 
     public static Set<String> analyze(Source source) throws Exception {
 
-        Set<String> refers = new TreeSet<String>();
+        Set<String> refers = new TreeSet<>();
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         Result r = new StreamResult(bout);

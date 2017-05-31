@@ -44,7 +44,7 @@ public class BlueprintStateService implements org.osgi.service.blueprint.contain
     private final Map<Long, BlueprintEvent> states;
 
     public BlueprintStateService() {
-        states = new ConcurrentHashMap<Long, BlueprintEvent>();
+        states = new ConcurrentHashMap<>();
     }
 
     @Override

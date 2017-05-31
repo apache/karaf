@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class JmsMessage {
 
-    private Map<String, Object> properties = new HashMap<String, Object>();
+    private Map<String, Object> properties = new HashMap<>();
 
     private String content;
     private String charset = "UTF-8";

@@ -41,7 +41,7 @@ public class Activator extends BaseActivator {
             return;
         }
 
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put("url.handler.protocol", "feature");
         FeatureURLHandler handler = new FeatureURLHandler();
         register(URLStreamHandlerService.class, handler, props);

@@ -71,7 +71,7 @@ public class SimpleCommand extends AbstractCommand {
         {
             throw new IllegalArgumentException("Action class is not annotated with @Command");
         }
-        Hashtable<String, String> props = new Hashtable<String, String>();
+        Hashtable<String, String> props = new Hashtable<>();
         props.put("osgi.command.scope", cmd.scope());
         props.put("osgi.command.function", cmd.name());
         SimpleCommand command = new SimpleCommand(actionClass);

@@ -111,7 +111,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         MBeanInfo info = mbeanServer.getMBeanInfo(objectName);
 
         for (MBeanOperationInfo operation : info.getOperations()) {
-            List<String> sig = new ArrayList<String>();
+            List<String> sig = new ArrayList<>();
             for (MBeanParameterInfo param : operation.getSignature()) {
                 sig.add(param.getType());
             }
@@ -168,7 +168,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                 continue;
             }
 
-            List<String> sig = new ArrayList<String>();
+            List<String> sig = new ArrayList<>();
             for (MBeanParameterInfo param : op.getSignature()) {
                 sig.add(param.getType());
             }
@@ -285,7 +285,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
     
     private boolean canBypassRBAC(BulkRequestContext context, ObjectName objectName, String operationName) {
-        List<String> allBypassObjectName = new ArrayList<String>();
+        List<String> allBypassObjectName = new ArrayList<>();
 
         List<Dictionary<String, Object>> configs = context.getWhitelistProperties();
         for (Dictionary<String, Object> config : configs) {
@@ -352,7 +352,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             String generalPid = getGeneralPid(context.getAllPids(), pid);
             if (generalPid.length() > 0) {
                 Dictionary<String, Object> config = context.getConfiguration(generalPid);
-                List<String> roles = new ArrayList<String>();
+                List<String> roles = new ArrayList<>();
                 ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(methodName, params, signature, config, roles);
                 if (s != ACLConfigurationParser.Specificity.NO_MATCH) {
                     return roles;
@@ -365,7 +365,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     private String getGeneralPid(List<String> allPids, String pid) {
         String ret = "";
         String[] pidStrArray = pid.split(Pattern.quote("."));
-        Set<String[]> rets = new TreeSet<String[]>(WILDCARD_PID_COMPARATOR);
+        Set<String[]> rets = new TreeSet<>(WILDCARD_PID_COMPARATOR);
         for (String id : allPids) {
             String[] idStrArray = id.split(Pattern.quote("."));
             if (idStrArray.length == pidStrArray.length) {
@@ -401,7 +401,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     private List<String> getNameSegments(ObjectName objectName) {
-        List<String> segments = new ArrayList<String>();
+        List<String> segments = new ArrayList<>();
         segments.add(objectName.getDomain());
         // TODO can an ObjectName property contain a comma as key or value ?
         // TODO support quoting as described in http://docs.oracle.com/javaee/1.4/api/javax/management/ObjectName.html
@@ -435,7 +435,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
      * @return the PIDs corresponding with the ObjectName in the above order.
      */
     private List<String> iterateDownPids(List<String> segments) {
-        List<String> res = new ArrayList<String>();
+        List<String> res = new ArrayList<>();
         for (int i = segments.size(); i > 0; i--) {
             StringBuilder sb = new StringBuilder();
             sb.append(JMX_ACL_PID_PREFIX);

@@ -56,7 +56,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String traceColor = getString("traceColor", "39");
 
         LruList events = new LruList(size);
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put("org.ops4j.pax.logging.appender.name", "VmLogAppender");
         register(PaxAppender.class, events, props);
 

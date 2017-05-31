@@ -37,7 +37,7 @@ public class UpdateCommandTest extends TestCase {
     private static final String PID = "myPid";
 
     public void testupdateRegularConfig() throws Exception {
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 
         UpdateCommand command = new UpdateCommand();
         ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
@@ -54,7 +54,7 @@ public class UpdateCommandTest extends TestCase {
     }
 
     public void testupdateOnNewFactoryPid() throws Exception {
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 
         UpdateCommand command = new UpdateCommand();
         ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);

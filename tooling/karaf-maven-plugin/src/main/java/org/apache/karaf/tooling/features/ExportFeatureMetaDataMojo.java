@@ -72,7 +72,7 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
         Set<Feature> featuresSet = resolveFeatures();
         if (mergedFeature) {
             Feature feature = oneVersion ? mergeFeatureOneVersion(featuresSet) : mergeFeature(featuresSet);
-            featuresSet = new HashSet<Feature>();
+            featuresSet = new HashSet<>();
             featuresSet.add(feature);
         }
         try {
@@ -89,7 +89,7 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
 
     private Feature mergeFeature(Set<Feature> featuresSet) throws MojoExecutionException {
         Feature merged = new Feature("merged");
-        Set<String> bundleIds = new HashSet<String>();
+        Set<String> bundleIds = new HashSet<>();
         for (Feature feature : featuresSet) {
             for (Bundle bundle : feature.getBundle()) {
                 String symbolicName = getBundleSymbolicName(bundle);

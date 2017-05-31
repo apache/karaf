@@ -540,7 +540,7 @@ public class Subsystem extends ResourceImpl {
             while ((entry = zis.getNextEntry()) != null) {
                 if (MANIFEST_NAME.equals(entry.getName())) {
                     Attributes attributes = new Manifest(zis).getMainAttributes();
-                    Map<java.lang.String, java.lang.String> headers = new HashMap<java.lang.String, java.lang.String>();
+                    Map<java.lang.String, java.lang.String> headers = new HashMap<>();
                     for (Map.Entry attr : attributes.entrySet()) {
                         headers.put(attr.getKey().toString(), attr.getValue().toString());
                     }

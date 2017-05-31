@@ -150,7 +150,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
     }
 
     private List<String> parseStringList(String value) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         if (value != null) {
             for (String el : value.split(",")) {
                 String trimmed = el.trim();

@@ -154,7 +154,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
     @Override
     public Map<String, String> getProperties(boolean unset, boolean dumpToFile) throws MBeanException {
         try {
-            Map<String, String> result = new HashMap<String, String>();
+            Map<String, String> result = new HashMap<>();
 
             Properties props = (Properties) java.lang.System.getProperties().clone();
 

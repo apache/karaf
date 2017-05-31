@@ -46,7 +46,7 @@ public class CapabilitySet {
         indices = new TreeMap<>();
         for (int i = 0; (indexProps != null) && (i < indexProps.size()); i++) {
             indices.put(
-                    indexProps.get(i), new HashMap<Object, Set<Capability>>());
+                    indexProps.get(i), new HashMap<>());
         }
     }
 

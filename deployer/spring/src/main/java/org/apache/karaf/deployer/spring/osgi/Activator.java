@@ -32,7 +32,7 @@ public class Activator extends BaseActivator {
 
     @Override
     protected void doStart() throws Exception {
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put("url.handler.protocol", "spring");
         register(URLStreamHandlerService.class, new SpringURLHandler(), props);
         register(new Class[] { ArtifactUrlTransformer.class, ArtifactListener.class },

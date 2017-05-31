@@ -65,7 +65,7 @@ public class BootFeaturesInstallerTest extends TestBase {
         bootFeatures.installBootFeatures();
         verify(impl);
 
-        List<String> features = new ArrayList<String>(featuresCapture.getValue());
+        List<String> features = new ArrayList<>(featuresCapture.getValue());
         Assert.assertEquals("config", features.get(0));
         Assert.assertEquals("standard", features.get(1));
         Assert.assertEquals("region", features.get(2));

@@ -79,7 +79,7 @@ public final class Overrides {
                 // Ignore invalid overrides
                 continue;
             }
-            for (String uri : new ArrayList<String>(resources.keySet())) {
+            for (String uri : new ArrayList<>(resources.keySet())) {
                 Resource res = resources.get(uri);
                 if (shouldOverride(res, over, overrideRange)) {
                     resources.put(uri, over);
@@ -110,7 +110,7 @@ public final class Overrides {
     }
 
     public static Set<String> loadOverrides(String overridesUrl) {
-        Set<String> overrides = new HashSet<String>();
+        Set<String> overrides = new HashSet<>();
         try {
             if (overridesUrl != null) {
                 try (

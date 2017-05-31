@@ -375,12 +375,12 @@ public class FeaturesServiceTest extends TestBase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl(new Storage(), null, null, resolver, installSupport, null, cfg);
         svc.addRepository(uri);
         try {
-            List<String> features = new ArrayList<String>();
+            List<String> features = new ArrayList<>();
             for (Feature feature : svc.listFeatures()) {
                 features.add(feature.getId());
             }
             Collections.reverse(features);
-            svc.installFeatures(new CopyOnWriteArraySet<String>(features),
+            svc.installFeatures(new CopyOnWriteArraySet<>(features),
                                 EnumSet.noneOf(FeaturesService.Option.class));
             fail("Call should have thrown an exception");
         } catch (MultiException e) {

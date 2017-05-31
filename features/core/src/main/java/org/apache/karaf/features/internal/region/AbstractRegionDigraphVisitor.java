@@ -34,9 +34,9 @@ import org.eclipse.equinox.region.RegionFilter;
 public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVisitor {
 
     private final Collection<C> allCandidates;
-    private final Deque<Set<C>> allowedDeque = new ArrayDeque<Set<C>>();
-    private final Deque<Collection<C>> filteredDeque = new ArrayDeque<Collection<C>>();
-    private Set<C> allowed = new HashSet<C>();
+    private final Deque<Set<C>> allowedDeque = new ArrayDeque<>();
+    private final Deque<Collection<C>> filteredDeque = new ArrayDeque<>();
+    private Set<C> allowed = new HashSet<>();
 
     public AbstractRegionDigraphVisitor(Collection<C> candidates) {
         this.allCandidates = candidates;
@@ -69,7 +69,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
     public boolean preEdgeTraverse(RegionFilter regionFilter) {
         // Find the candidates filtered by the previous edge
         Collection<C> filtered = filteredDeque.isEmpty() ? allCandidates : filteredDeque.peek();
-        Collection<C> candidates = new ArrayList<C>(filtered);
+        Collection<C> candidates = new ArrayList<>(filtered);
         // remove any candidates contained in the current region
         candidates.removeAll(allowed);
         // apply the filter across remaining candidates
@@ -87,7 +87,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
         filteredDeque.push(candidates);
         // push the allowed
         allowedDeque.push(allowed);
-        allowed = new HashSet<C>();
+        allowed = new HashSet<>();
         return true;
     }
 

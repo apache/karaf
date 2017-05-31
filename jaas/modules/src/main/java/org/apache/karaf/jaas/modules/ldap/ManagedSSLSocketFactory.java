@@ -22,7 +22,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class ManagedSSLSocketFactory extends SSLSocketFactory implements Comparator<Object> {
 
-    private static final ThreadLocal<SSLSocketFactory> factories = new ThreadLocal<SSLSocketFactory>();
+    private static final ThreadLocal<SSLSocketFactory> factories = new ThreadLocal<>();
 
     public static void setSocketFactory(SSLSocketFactory factory) {
         factories.set(factory);

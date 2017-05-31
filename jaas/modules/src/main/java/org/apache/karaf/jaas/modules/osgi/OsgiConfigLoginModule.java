@@ -86,7 +86,7 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
             	}
             }
 
-            principals = new HashSet<Principal>();
+            principals = new HashSet<>();
             principals.add(new UserPrincipal(user));
             for (int i = 1; i < infos.length; i++) {
                 principals.add(new RolePrincipal(infos[i]));

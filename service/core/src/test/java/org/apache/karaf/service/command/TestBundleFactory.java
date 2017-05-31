@@ -35,11 +35,11 @@ public class TestBundleFactory {
         if (keyProp.length % 2 != 0) {
             throw new IllegalArgumentException("");
         }
-        Hashtable<String, Object> keyPropMap = new Hashtable<String, Object>();
+        Hashtable<String, Object> keyPropMap = new Hashtable<>();
         int c = 0;
         while (c < keyProp.length) {
             String key = (String)keyProp[c++];
-            Object value = (Object)keyProp[c++];
+            Object value = keyProp[c++];
             keyPropMap.put(key, value);
             expect(serviceRef.getProperty(key)).andReturn(value).anyTimes();
         }
@@ -50,7 +50,7 @@ public class TestBundleFactory {
     Bundle createBundle(long id, String name) {
         Bundle bundle = createMock(Bundle.class);
         expect(bundle.getBundleId()).andReturn(id).anyTimes();
-        Dictionary<String, String> headers = new Hashtable<String, String>();
+        Dictionary<String, String> headers = new Hashtable<>();
         headers.put(Constants.BUNDLE_NAME, name);
         expect(bundle.getHeaders()).andReturn(headers).anyTimes();
         return bundle;

@@ -26,7 +26,7 @@ public class PackageVersion {
 
     private String packageName;
     private Version version;
-    private Set<Bundle> bundles = new HashSet<Bundle>();
+    private Set<Bundle> bundles = new HashSet<>();
     
     public PackageVersion(String packageName, Version version) {
         this.packageName = packageName;

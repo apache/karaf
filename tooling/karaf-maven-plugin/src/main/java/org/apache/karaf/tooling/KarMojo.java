@@ -199,7 +199,7 @@ public class KarMojo extends MojoSupport {
      * @throws MojoExecutionException
      */
     private List<Artifact> readResources(File featuresFile) throws MojoExecutionException {
-        List<Artifact> resources = new ArrayList<Artifact>();
+        List<Artifact> resources = new ArrayList<>();
         try {
             Features features = JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
             for (Feature feature : features.getFeature()) {

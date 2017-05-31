@@ -129,8 +129,8 @@ public abstract class AggregateServiceTracker {
 
     public class State {
 
-        private final Map<Class, List> multi = new HashMap<Class, List>();
-        private final Map<Class, Object> single = new HashMap<Class, Object>();
+        private final Map<Class, List> multi = new HashMap<>();
+        private final Map<Class, Object> single = new HashMap<>();
 
         public boolean isSatisfied() {
             return singleTrackers.keySet().stream()
@@ -146,7 +146,7 @@ public abstract class AggregateServiceTracker {
         }
 
         public List<String> getMissingServices() {
-            List<String> missing = new ArrayList<String>();
+            List<String> missing = new ArrayList<>();
             for (SingleServiceTracker tracker : singleTrackers.values()) {
                 if (!single.containsKey(tracker.getTrackedClass())) {
                     missing.add(tracker.getTrackedClass().getName());
