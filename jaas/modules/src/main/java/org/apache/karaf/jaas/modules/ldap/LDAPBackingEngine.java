@@ -94,8 +94,7 @@ public class LDAPBackingEngine implements BackingEngine {
                     // we need to pull out the cn=, uid=, ect.. from the user name to get the actual user name
                     String userName = userDN;
                     if (userDN.contains("=")) userName = userDN.split("=")[1];
-
-                    // Only list principals with roles, since without a role they cannot log in
+                  
                     users.add(new UserPrincipal(userName));
 
 
