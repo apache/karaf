@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -90,10 +91,12 @@ public class LDAPBackingEngine implements BackingEngine {
                             userDNNamespace.substring(0, indexOfUserBaseDN) :
                             result.getName();
 
+                    // we need to pull out the cn=, uid=, ect.. from the user name to get the actual user name
+                    String userName = userDN;
+                    if (userDN.contains("=")) userName = userDN.split("=")[1];
+
                     // Only list principals with roles, since without a role they cannot log in
-                    UserPrincipal userPrincipal = new UserPrincipal(userDN);
-                    if (listRoles(userPrincipal).size() > 0)
-                        users.add(userPrincipal);
+                    users.add(new UserPrincipal(userName));
 
 
                 }
@@ -151,6 +154,8 @@ public class LDAPBackingEngine implements BackingEngine {
 
         try {
             String[] userAndNameSpace = cache.getUserDnAndNamespace(principal.getName());
+            if (userAndNameSpace == null || userAndNameSpace.length < 2) return Collections.emptyList();
+
             ArrayList<RolePrincipal> roles = new ArrayList<>();
             for (String role : cache.getUserRoles(principal.getName(), userAndNameSpace[0], userAndNameSpace[1])) {
                 roles.add(new RolePrincipal(role));
