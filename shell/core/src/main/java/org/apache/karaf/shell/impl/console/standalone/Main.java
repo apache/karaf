@@ -108,14 +108,11 @@ public class Main {
         }
 
         if (file != null) {
-            Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-            try {
+            try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
                 sb.setLength(0);
                 for (int c = reader.read(); c >= 0; c = reader.read()) {
                     sb.append((char) c);
                 }
-            } finally {
-                reader.close();
             }
         } else if (batch) {
             Reader reader = new BufferedReader(new InputStreamReader(System.in));
