@@ -43,7 +43,7 @@ public class ManagerImpl implements Manager {
 
     private final Registry dependencies;
     private final Registry registrations;
-    private final Map<Class<?>, Object> instances = new HashMap<Class<?>, Object>();
+    private final Map<Class<?>, Object> instances = new HashMap<>();
     private final boolean allowCustomServices;
 
     public ManagerImpl(Registry dependencies, Registry registrations) {
@@ -76,12 +76,12 @@ public class ManagerImpl implements Manager {
                     GenericType type = new GenericType(field.getGenericType());
                     Object value;
                     if (type.getRawClass() == List.class) {
-                        Set<Object> set = new HashSet<Object>();
+                        Set<Object> set = new HashSet<>();
                         set.addAll(registry.getServices(type.getActualTypeArgument(0).getRawClass()));
                         if (registry != this.dependencies) {
                             set.addAll(this.dependencies.getServices(type.getActualTypeArgument(0).getRawClass()));
                         }
-                        value = new ArrayList<Object>(set);
+                        value = new ArrayList<>(set);
                     } else {
                         value = registry.getService(type.getRawClass());
                         if (value == null && registry != this.dependencies) {

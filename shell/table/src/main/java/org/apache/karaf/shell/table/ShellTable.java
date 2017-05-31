@@ -27,8 +27,8 @@ import java.util.List;
 @Deprecated
 public class ShellTable {
 
-    private List<Col> cols = new ArrayList<Col>();
-    private List<Row> rows = new ArrayList<Row>();
+    private List<Col> cols = new ArrayList<>();
+    private List<Row> rows = new ArrayList<>();
     boolean showHeaders = true;
     private String separator = " | ";
     private int size;

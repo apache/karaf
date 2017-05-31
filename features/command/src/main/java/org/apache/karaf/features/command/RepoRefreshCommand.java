@@ -43,7 +43,7 @@ public class RepoRefreshCommand extends FeaturesCommandSupport {
 
     @Override
     protected void doExecute(FeaturesService featuresService) throws Exception {
-        List<URI> uris = new ArrayList<URI>();
+        List<URI> uris = new ArrayList<>();
     	if (nameOrUrl != null) {
     		String effectiveVersion = (version == null) ? "LATEST" : version;
         	URI uri = featuresService.getRepositoryUriFor(nameOrUrl, effectiveVersion);

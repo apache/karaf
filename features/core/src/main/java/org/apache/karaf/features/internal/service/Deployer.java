@@ -595,8 +595,8 @@ public class Deployer {
             toRefresh.put(serviceBundle, "FeaturesService bundle is being updated");
             computeBundlesToRefresh(toRefresh,
                     dstate.bundles.values(),
-                    Collections.<Resource, Bundle>emptyMap(),
-                    Collections.<Resource, List<Wire>>emptyMap());
+                    Collections.emptyMap(),
+                    Collections.emptyMap());
             installSupport.stopBundle(serviceBundle, STOP_TRANSIENT);
             try (
                     InputStream is = getBundleInputStream(resource, providers)
@@ -964,7 +964,7 @@ public class Deployer {
         // Compute the new list of fragments
         Map<Bundle, Set<Resource>> newFragments = new HashMap<>();
         for (Bundle bundle : bundles) {
-            newFragments.put(bundle, new HashSet<Resource>());
+            newFragments.put(bundle, new HashSet<>());
         }
         if (resolution != null) {
             for (Resource res : resolution.keySet()) {

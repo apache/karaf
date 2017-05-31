@@ -111,22 +111,22 @@ public class GuardProxyCatalogTest {
 
         GuardProxyCatalog gpc = new GuardProxyCatalog(bc);
 
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        Dictionary<String, Object> props = new Hashtable<>();
         props.put(GuardProxyCatalog.PROXY_SERVICE_KEY, Boolean.TRUE);
         assertTrue(gpc.isProxy(mockServiceReference(props)));
-        assertFalse(gpc.isProxy(mockServiceReference(new Hashtable<String, Object>())));
+        assertFalse(gpc.isProxy(mockServiceReference(new Hashtable<>())));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testHandleProxificationForHook() throws Exception {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, GuardProxyCatalog.SERVICE_ACL_PREFIX + "foo");
         config.put(GuardProxyCatalog.SERVICE_GUARD_KEY, "(a>=5)");
         BundleContext bc = mockConfigAdminBundleContext(config);
         GuardProxyCatalog gpc = new GuardProxyCatalog(bc);
 
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        Dictionary<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_ID, 13L);
         props.put("a", "6");
         props.put(GuardProxyCatalog.PROXY_SERVICE_KEY, Boolean.TRUE);
@@ -135,7 +135,7 @@ public class GuardProxyCatalogTest {
                 gpc.handleProxificationForHook(sref2));
         assertEquals("No proxy should have been created", 0, gpc.proxyMap.size());
 
-        Dictionary<String, Object> props4 = new Hashtable<String, Object>();
+        Dictionary<String, Object> props4 = new Hashtable<>();
         props4.put(Constants.SERVICE_ID, 15L);
         props4.put("a", "7");
         ServiceReference<?> sref4 = mockServiceReference(props4);
@@ -152,13 +152,13 @@ public class GuardProxyCatalogTest {
         EasyMock.replay(clientBC);
         EasyMock.replay(client2BC);
 
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         long originalServiceID = 12345678901234L;
         props.put(Constants.SERVICE_ID, new Long(originalServiceID));
         props.put("foo", "bar");
         ServiceReference<?> originalRef = mockServiceReference(props);
 
-        Hashtable<String, Object> props2 = new Hashtable<String, Object>();
+        Hashtable<String, Object> props2 = new Hashtable<>();
         long anotherServiceID = 5123456789012345L;
         props2.put(Constants.SERVICE_ID, anotherServiceID);
         ServiceReference<?> anotherRef = mockServiceReference(props2);
@@ -191,7 +191,7 @@ public class GuardProxyCatalogTest {
         assertEquals("Registered events should be ignored", 2, gpc.proxyMap.size());
         assertEquals("Registered events should be ignored", 2, gpc.createProxyQueue.size());
 
-        Hashtable<String, Object> proxyProps = new Hashtable<String, Object>(props);
+        Hashtable<String, Object> proxyProps = new Hashtable<>(props);
         proxyProps.put(GuardProxyCatalog.PROXY_SERVICE_KEY, Boolean.TRUE);
         ServiceReference<?> proxyRef = mockServiceReference(proxyProps);
         gpc.serviceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING, proxyRef));
@@ -245,7 +245,7 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testAssignRoles() throws Exception {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, "foobar");
         config.put("service.guard", "(objectClass=" + TestServiceAPI.class.getName() + ")");
         config.put("somemethod", "a,b");
@@ -258,14 +258,14 @@ public class GuardProxyCatalogTest {
         BundleContext bc = mockConfigAdminBundleContext(config);
 
         Dictionary<String, Object> proxyProps = testCreateProxy(bc, TestServiceAPI.class, new TestService());
-        assertEquals(new HashSet<String>(Arrays.asList("a", "b", "c", "d", "e", "f", "g")),
-                new HashSet<String>((Collection<String>) proxyProps.get(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY)));
+        assertEquals(new HashSet<>(Arrays.asList("a", "b", "c", "d", "e", "f", "g")),
+                new HashSet<>((Collection<String>) proxyProps.get(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY)));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testAssignRoles2() throws Exception {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, "foobar");
         config.put("service.guard", "(objectClass=" + TestServiceAPI2.class.getName() + ")");
         config.put("doit", "X");
@@ -282,14 +282,14 @@ public class GuardProxyCatalogTest {
     public void testAssignRoles3() throws Exception {
         abstract class MyAbstractClass implements TestServiceAPI, TestServiceAPI2 {};
 
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, "foobar");
         config.put("service.guard", "(objectClass=" + TestServiceAPI2.class.getName() + ")");
         config.put("doit", "X");
 
         BundleContext bc = mockConfigAdminBundleContext(config);
 
-        Map<ServiceReference, Object> serviceMap = new HashMap<ServiceReference, Object>();
+        Map<ServiceReference, Object> serviceMap = new HashMap<>();
         testCreateProxy(bc, new Class [] {TestServiceAPI.class, TestServiceAPI2.class}, new MyAbstractClass() {
             @Override
             public String doit() {
@@ -309,7 +309,7 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testAssignRoles4() throws Exception {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, "foobar");
         config.put("service.guard", "(objectClass=" + TestServiceAPI.class.getName() + ")");
         config.put("somemethod", "b");
@@ -327,11 +327,11 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testInvocationBlocking1() throws Exception {
-        Dictionary<String, Object> c1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c1 = new Hashtable<>();
         c1.put(Constants.SERVICE_PID, "foobar");
         c1.put("service.guard", "(objectClass=" + TestServiceAPI.class.getName() + ")");
         c1.put("doit", "a,b");
-        Dictionary<String, Object> c2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c2 = new Hashtable<>();
         c2.put(Constants.SERVICE_PID, "barfoobar");
         c2.put("service.guard", "(objectClass=" + TestObjectWithoutInterface.class.getName() + ")");
         c2.put("compute", "c");
@@ -364,7 +364,7 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testInvocationBlocking2() throws Exception {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, "barfoobar");
         config.put("service.guard", "(objectClass=" + TestObjectWithoutInterface.class.getName() + ")");
         config.put("compute(long)[\"42\"]", "b");
@@ -408,11 +408,11 @@ public class GuardProxyCatalogTest {
             }
         };
 
-        Dictionary<String, Object> c1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c1 = new Hashtable<>();
         c1.put(Constants.SERVICE_PID, "foobar");
         c1.put("service.guard", "(objectClass=" + TestServiceAPI.class.getName() + ")");
         c1.put("do*", "c");
-        Dictionary<String, Object> c2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c2 = new Hashtable<>();
         c2.put(Constants.SERVICE_PID, "foobar2");
         c2.put("service.guard", "(objectClass=" + TestServiceAPI2.class.getName() + ")");
         c2.put("doit(java.lang.String)[/[tT][a]+/]", "b,d # a regex rule");
@@ -485,7 +485,7 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testInvocationBlocking5() throws Exception {
-        Dictionary<String, Object> c1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c1 = new Hashtable<>();
         c1.put(Constants.SERVICE_PID, "foobar");
         c1.put("service.guard", "(objectClass=" + TestServiceAPI.class.getName() + ")");
         c1.put("doit", "a,b");
@@ -515,11 +515,11 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testInvocationBlocking6() throws Exception {
-        Dictionary<String, Object> c1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c1 = new Hashtable<>();
         c1.put(Constants.SERVICE_PID, "foobar");
         c1.put("service.guard", "(objectClass=" + TestServiceAPI.class.getName() + ")");
         c1.put("doit", "a,b");
-        Dictionary<String, Object> c2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c2 = new Hashtable<>();
         c2.put(Constants.SERVICE_PID, "foobar2");
         c2.put("service.guard", "(objectClass=" + TestServiceAPI2.class.getName() + ")");
         c2.put("bar", "c");
@@ -555,7 +555,7 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testInvocationBlocking7() throws Exception {
-        Dictionary<String, Object> c1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c1 = new Hashtable<>();
         c1.put(Constants.SERVICE_PID, "foobar");
         c1.put("service.guard", "(objectClass=" + TestServiceAPI3.class.getName() + ")");
         c1.put("foo()", "a");
@@ -615,7 +615,7 @@ public class GuardProxyCatalogTest {
             }
         };
 
-        Dictionary<String, Object> c1 = new Hashtable<String, Object>();
+        Dictionary<String, Object> c1 = new Hashtable<>();
         c1.put(Constants.SERVICE_PID, "foobar");
         c1.put("service.guard", "(objectClass=" + TestServiceAPI.class.getName() + ")");
         c1.put("doit", MyRolePrincipal.class.getName() + ":role1");
@@ -711,16 +711,16 @@ public class GuardProxyCatalogTest {
         GuardProxyCatalog gpc = new GuardProxyCatalog(bc);
 
         // The service being proxied has these properties
-        final Hashtable<String, Object> serviceProps = new Hashtable<String, Object>();
+        final Hashtable<String, Object> serviceProps = new Hashtable<>();
         serviceProps.put(Constants.OBJECTCLASS, new String [] {TestServiceAPI.class.getName()});
         serviceProps.put(Constants.SERVICE_ID, 162L);
 
-        final Map<ServiceReference<?>, Object> serviceMap = new HashMap<ServiceReference<?>, Object>();
+        final Map<ServiceReference<?>, Object> serviceMap = new HashMap<>();
 
         // The mock bundle context for the bundle providing the service is set up here
         BundleContext providerBC = EasyMock.createMock(BundleContext.class);
         // These are the expected service properties of the proxy registration. Note the proxy marker...
-        final Hashtable<String, Object> expectedProxyProps = new Hashtable<String, Object>(serviceProps);
+        final Hashtable<String, Object> expectedProxyProps = new Hashtable<>(serviceProps);
         expectedProxyProps.put(GuardProxyCatalog.PROXY_SERVICE_KEY, Boolean.TRUE);
         EasyMock.expect(providerBC.registerService(
                 EasyMock.isA(String[].class),
@@ -834,11 +834,11 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testHandleServiceModified() throws Exception {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, "test.1.2.3");
         config.put("service.guard", "(objectClass=" + TestServiceAPI.class.getName() + ")");
         config.put("doit", "role.1");
-        Dictionary<String, Object> config2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> config2 = new Hashtable<>();
         config2.put(Constants.SERVICE_PID, "test.1.2.4");
         config2.put("service.guard", "(objectClass=" + TestServiceAPI2.class.getName() + ")");
         config2.put("doit", "role.2");
@@ -847,7 +847,7 @@ public class GuardProxyCatalogTest {
         GuardProxyCatalog gpc = new GuardProxyCatalog(bc);
         // The service being proxied has these properties
         long serviceID = 1L;
-        final Hashtable<String, Object> serviceProps = new Hashtable<String, Object>();
+        final Hashtable<String, Object> serviceProps = new Hashtable<>();
         serviceProps.put(Constants.OBJECTCLASS, new String [] {TestServiceAPI.class.getName(), TestServiceAPI2.class.getName()});
         serviceProps.put(Constants.SERVICE_ID, serviceID);
         serviceProps.put(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY, Arrays.asList("someone")); // will be overwritten
@@ -948,7 +948,7 @@ public class GuardProxyCatalogTest {
 
         // The service being proxied has these properties
         long serviceID = 1L;
-        final Hashtable<String, Object> serviceProps = new Hashtable<String, Object>();
+        final Hashtable<String, Object> serviceProps = new Hashtable<>();
         serviceProps.put(Constants.OBJECTCLASS, new String [] {TestServiceAPI.class.getName()});
         serviceProps.put(Constants.SERVICE_ID, serviceID);
 
@@ -1033,7 +1033,7 @@ public class GuardProxyCatalogTest {
     @Test
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void testServiceFactoryBehaviour() throws Exception {
-        final Map<ServiceReference, Object> serviceMap = new HashMap<ServiceReference, Object>();
+        final Map<ServiceReference, Object> serviceMap = new HashMap<>();
         TestServiceAPI testService = new TestService();
 
         BundleContext bc = mockConfigAdminBundleContext();
@@ -1041,7 +1041,7 @@ public class GuardProxyCatalogTest {
 
         // The service being proxied has these properties
         long serviceID = 117L;
-        final Hashtable<String, Object> serviceProps = new Hashtable<String, Object>();
+        final Hashtable<String, Object> serviceProps = new Hashtable<>();
         serviceProps.put(Constants.OBJECTCLASS, new String [] {TestServiceAPI.class.getName()});
         serviceProps.put(Constants.SERVICE_ID, serviceID);
         serviceProps.put("bar", 42L);
@@ -1145,17 +1145,17 @@ public class GuardProxyCatalogTest {
 
         // The service being proxied has these properties
         long serviceID = 456L;
-        final Hashtable<String, Object> serviceProps = new Hashtable<String, Object>();
+        final Hashtable<String, Object> serviceProps = new Hashtable<>();
         serviceProps.put(Constants.OBJECTCLASS, new String [] {intf.getName()});
         serviceProps.put(Constants.SERVICE_ID, serviceID);
         serviceProps.put(".foo", 123L);
 
-        final Map<ServiceReference<?>, Object> serviceMap = new HashMap<ServiceReference<?>, Object>();
+        final Map<ServiceReference<?>, Object> serviceMap = new HashMap<>();
 
         // The mock bundle context for the bundle providing the service is set up here
         BundleContext providerBC = EasyMock.createMock(BundleContext.class);
         // These are the expected service properties of the proxy registration. Note the proxy marker...
-        final Hashtable<String, Object> expectedProxyProps = new Hashtable<String, Object>(serviceProps);
+        final Hashtable<String, Object> expectedProxyProps = new Hashtable<>(serviceProps);
         expectedProxyProps.put(GuardProxyCatalog.PROXY_SERVICE_KEY, Boolean.TRUE);
         // This will check that the right proxy is being registered.
         EasyMock.expect(providerBC.registerService(
@@ -1258,12 +1258,12 @@ public class GuardProxyCatalogTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Object testCreateProxy(Class<?> [] objectClasses, Object testService) throws Exception {
-        return testCreateProxy(mockConfigAdminBundleContext(), objectClasses, objectClasses, testService, new HashMap<ServiceReference, Object>());
+        return testCreateProxy(mockConfigAdminBundleContext(), objectClasses, objectClasses, testService, new HashMap<>());
     }
 
     @SuppressWarnings("rawtypes")
     public Object testCreateProxy(BundleContext bc, Class<?> [] objectClasses, Object testService) throws Exception {
-        return testCreateProxy(bc, objectClasses, objectClasses, testService, new HashMap<ServiceReference, Object>());
+        return testCreateProxy(bc, objectClasses, objectClasses, testService, new HashMap<>());
     }
 
     @SuppressWarnings("rawtypes")
@@ -1274,13 +1274,13 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Object testCreateProxy(BundleContext bc, Class [] objectClasses, final Class [] proxyRegClasses, Object testService, final Map<ServiceReference, Object> serviceMap) throws Exception {
         // A linked hash map to keep iteration order over the keys predictable
-        final LinkedHashMap<String, Class> objClsMap = new LinkedHashMap<String, Class>();
+        final LinkedHashMap<String, Class> objClsMap = new LinkedHashMap<>();
         for (Class cls : objectClasses) {
             objClsMap.put(cls.getName(), cls);
         }
 
         // A linked hash map to keep iteration order over the keys predictable
-        final LinkedHashMap<String, Class> proxyRegClsMap = new LinkedHashMap<String, Class>();
+        final LinkedHashMap<String, Class> proxyRegClsMap = new LinkedHashMap<>();
         for (Class cls : proxyRegClasses) {
             proxyRegClsMap.put(cls.getName(), cls);
         }
@@ -1290,7 +1290,7 @@ public class GuardProxyCatalogTest {
 
         // The service being proxied has these properties
         long serviceID = Long.MAX_VALUE;
-        final Hashtable<String, Object> serviceProps = new Hashtable<String, Object>();
+        final Hashtable<String, Object> serviceProps = new Hashtable<>();
         serviceProps.put(Constants.OBJECTCLASS, objClsMap.keySet().toArray(new String [] {}));
         serviceProps.put(Constants.SERVICE_ID, serviceID);
         serviceProps.put(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY, Arrays.asList("everyone")); // will be overwritten
@@ -1299,7 +1299,7 @@ public class GuardProxyCatalogTest {
         // The mock bundle context for the bundle providing the service is set up here
         BundleContext providerBC = EasyMock.createMock(BundleContext.class);
         // These are the expected service properties of the proxy registration. Note the proxy marker...
-        final Hashtable<String, Object> expectedProxyProps = new Hashtable<String, Object>(serviceProps);
+        final Hashtable<String, Object> expectedProxyProps = new Hashtable<>(serviceProps);
         expectedProxyProps.put(GuardProxyCatalog.PROXY_SERVICE_KEY, Boolean.TRUE);
         // This will check that the right proxy is being registered.
         EasyMock.expect(providerBC.registerService(
@@ -1421,7 +1421,7 @@ public class GuardProxyCatalogTest {
     }
 
     private Dictionary<String, Object> getServiceReferenceProperties(ServiceReference<?> sr) {
-        Dictionary<String, Object> dict = new Hashtable<String, Object>();
+        Dictionary<String, Object> dict = new Hashtable<>();
 
         for (String key : sr.getPropertyKeys()) {
             dict.put(key, sr.getProperty(key));

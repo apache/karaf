@@ -92,13 +92,13 @@ public class ActionMetaData {
 
     public void printUsage(Action action, PrintStream out, boolean globalScope, int termWidth) {
         if (command != null) {
-            List<Argument> argumentsSet = new ArrayList<Argument>(arguments.keySet());
+            List<Argument> argumentsSet = new ArrayList<>(arguments.keySet());
             Collections.sort(argumentsSet, new Comparator<Argument>() {
                 public int compare(Argument o1, Argument o2) {
                     return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
                 }
             });
-            Set<Option> optionsSet = new HashSet<Option>(options.keySet());
+            Set<Option> optionsSet = new HashSet<>(options.keySet());
             optionsSet.add(HelpOption.HELP);
             if (command != null && (command.description() != null || command.name() != null)) {
                 out.println(INTENSITY_BOLD + "DESCRIPTION" + INTENSITY_NORMAL);

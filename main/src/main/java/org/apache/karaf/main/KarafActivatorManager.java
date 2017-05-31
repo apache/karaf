@@ -39,7 +39,7 @@ public class KarafActivatorManager {
 
     Logger LOG = Logger.getLogger(this.getClass().getName());
 
-    private List<BundleActivator> karafActivators = new ArrayList<BundleActivator>();
+    private List<BundleActivator> karafActivators = new ArrayList<>();
     private final ClassLoader classLoader;
     private final Framework framework;
     

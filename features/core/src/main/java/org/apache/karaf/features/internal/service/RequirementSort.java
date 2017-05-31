@@ -42,20 +42,20 @@ public final class RequirementSort<T extends Resource> {
      * @return sorted collection of resources.
      */
     public static <T extends Resource> Collection<T> sort(Collection<T> resources) {
-        Set<String> namespaces = new HashSet<String>();
+        Set<String> namespaces = new HashSet<>();
         for (Resource r : resources) {
             for (Capability cap : r.getCapabilities(null)) {
                 namespaces.add(cap.getNamespace());
             }
         }
-        CapabilitySet capSet = new CapabilitySet(new ArrayList<String>(namespaces));
+        CapabilitySet capSet = new CapabilitySet(new ArrayList<>(namespaces));
         for (Resource r : resources) {
             for (Capability cap : r.getCapabilities(null)) {
                 capSet.addCapability(cap);
             }
         }
-        Set<T> sorted = new LinkedHashSet<T>();
-        Set<T> visited = new LinkedHashSet<T>();
+        Set<T> sorted = new LinkedHashSet<>();
+        Set<T> visited = new LinkedHashSet<>();
         for (T r : resources) {
             visit(r, visited, sorted, capSet);
         }
@@ -74,7 +74,7 @@ public final class RequirementSort<T extends Resource> {
 
     @SuppressWarnings("unchecked")
     private static <T extends Resource> Set<T> collectDependencies(T resource, CapabilitySet capSet) {
-        Set<T> result = new LinkedHashSet<T>();
+        Set<T> result = new LinkedHashSet<>();
         for (Requirement requirement : resource.getRequirements(null)) {
             String filter = requirement.getDirectives().get(Constants.FILTER_DIRECTIVE);
             SimpleFilter sf = (filter != null)

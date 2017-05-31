@@ -29,7 +29,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        tracker = new BundleTracker<ServiceRegistration<InfoProvider>>(context, Bundle.ACTIVE, new InfoBundleTrackerCustomizer());
+        tracker = new BundleTracker<>(context, Bundle.ACTIVE, new InfoBundleTrackerCustomizer());
         tracker.open();
     }
 

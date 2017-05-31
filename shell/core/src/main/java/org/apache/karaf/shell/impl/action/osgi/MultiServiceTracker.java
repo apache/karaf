@@ -42,7 +42,7 @@ public abstract class MultiServiceTracker<T> {
 
     private final BundleContext ctx;
     private final Class<T> clazz;
-    private final Map<ServiceReference<T>, T> refs = new HashMap<ServiceReference<T>, T>();
+    private final Map<ServiceReference<T>, T> refs = new HashMap<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
 
     private final ServiceListener listener = new ServiceListener() {
@@ -91,7 +91,7 @@ public abstract class MultiServiceTracker<T> {
 
             List<ServiceReference> oldRefs;
             synchronized (refs) {
-                oldRefs = new ArrayList<ServiceReference>(refs.keySet());
+                oldRefs = new ArrayList<>(refs.keySet());
                 refs.clear();
             }
             for (ServiceReference ref : oldRefs) {
@@ -101,7 +101,7 @@ public abstract class MultiServiceTracker<T> {
     }
 
     private void updateState() {
-        List<T> svcs = new ArrayList<T>();
+        List<T> svcs = new ArrayList<>();
         synchronized (refs) {
             svcs.addAll(refs.values());
         }

@@ -24,8 +24,8 @@ public class Row {
     private List<String> content;
     
     Row() {
-        data = new ArrayList<Object>();
-        content = new ArrayList<String>();
+        data = new ArrayList<>();
+        content = new ArrayList<>();
     }
     
     Row(List<Col> cols) {

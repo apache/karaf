@@ -163,7 +163,7 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
         // user infos container read from the users properties file
         String userInfos = null;
         try {
-            userInfos = (String) users.get(user);
+            userInfos = users.get(user);
         } catch (NullPointerException e) {
             //error handled in the next statement
         }
@@ -205,13 +205,13 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
         	}
         }
 
-        principals = new HashSet<Principal>();
+        principals = new HashSet<>();
         principals.add(new UserPrincipal(user));
         for (int i = 1; i < infos.length; i++) {
             if (infos[i].trim().startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
                 // it's a group reference
                 principals.add(new GroupPrincipal(infos[i].trim().substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
-                String groupInfo = (String) users.get(infos[i].trim());
+                String groupInfo = users.get(infos[i].trim());
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
                     for (int j = 1; j < roles.length; j++) {

@@ -138,7 +138,7 @@ public class ManageRealmCommand extends JaasCommandSupport {
 
             commands = (Queue<JaasCommandSupport>) this.session.get(JAAS_CMDS);
             if (commands == null) {
-                commands = new LinkedList<JaasCommandSupport>();
+                commands = new LinkedList<>();
             }
 
             this.session.put(JAAS_REALM, realm);

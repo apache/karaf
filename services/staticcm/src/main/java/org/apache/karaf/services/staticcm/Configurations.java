@@ -72,7 +72,7 @@ public class Configurations {
             Map<String, String> cfg = entry.getValue();
             InterpolationHelper.performSubstitution(cfg, context);
             cfg.put(Constants.SERVICE_PID, pid[0]);
-            configurations.add(new StaticConfigurationImpl(pid[0], pid[1], new Hashtable<String, Object>(cfg)));
+            configurations.add(new StaticConfigurationImpl(pid[0], pid[1], new Hashtable<>(cfg)));
         }
         return configurations;
     }

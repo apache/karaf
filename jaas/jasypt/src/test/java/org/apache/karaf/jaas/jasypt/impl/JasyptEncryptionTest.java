@@ -32,7 +32,7 @@ public class JasyptEncryptionTest extends TestCase {
      * @see junit.framework.TestCase#setUp()
      */
     public void setUp() {
-        Map<String,String> props = new HashMap<String,String>();
+        Map<String,String> props = new HashMap<>();
         props.put(EncryptionService.ALGORITHM, "MD5");
         this.encryption = new JasyptEncryption(props);
     }

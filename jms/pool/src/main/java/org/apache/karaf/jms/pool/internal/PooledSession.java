@@ -54,9 +54,9 @@ public class PooledSession implements Session, TopicSession, QueueSession, XASes
 
     private final SessionKey key;
     private final KeyedObjectPool<SessionKey, PooledSession> sessionPool;
-    private final CopyOnWriteArrayList<MessageConsumer> consumers = new CopyOnWriteArrayList<MessageConsumer>();
-    private final CopyOnWriteArrayList<QueueBrowser> browsers = new CopyOnWriteArrayList<QueueBrowser>();
-    private final CopyOnWriteArrayList<PooledSessionEventListener> sessionEventListeners = new CopyOnWriteArrayList<PooledSessionEventListener>();
+    private final CopyOnWriteArrayList<MessageConsumer> consumers = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<QueueBrowser> browsers = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<PooledSessionEventListener> sessionEventListeners = new CopyOnWriteArrayList<>();
 
     private MessageProducer producer;
     private TopicPublisher publisher;

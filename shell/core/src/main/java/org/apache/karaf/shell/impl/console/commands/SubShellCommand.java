@@ -61,7 +61,7 @@ public class SubShellCommand extends TopLevelCommand {
     @Override
     protected void printHelp(Session session, PrintStream out) {
         try {
-            new HelpCommand(session.getFactory()).execute(session, Arrays.<Object>asList("shell|" + name));
+            new HelpCommand(session.getFactory()).execute(session, Arrays.asList("shell|" + name));
         } catch (Exception e) {
             throw new RuntimeException("Unable to print subshell help", e);
         }

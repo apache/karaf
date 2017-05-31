@@ -179,7 +179,7 @@ public class Configuration
                     interfaceNames = new String[] {ManagedService.class.getName(), MetaTypeProvider.class.getName()};
                     service = enhancedService;
                 }
-                Dictionary<String, Object> props = new Hashtable<String, Object>();
+                Dictionary<String, Object> props = new Hashtable<>();
                 props.put( Constants.SERVICE_PID, PID );
                 m_managedServiceReg = m_bundleContext.registerService( interfaceNames, service, props );
             }

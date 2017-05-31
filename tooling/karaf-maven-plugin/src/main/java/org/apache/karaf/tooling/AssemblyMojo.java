@@ -574,7 +574,7 @@ public class AssemblyMojo extends MojoSupport {
     }
 
     private List<String> nonNullList(List<String> list) {
-        return list == null ? new ArrayList<String>() : list;
+        return list == null ? new ArrayList<>() : list;
     }
 
 }

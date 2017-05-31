@@ -61,9 +61,9 @@ public class DefaultActionPreparator {
     public boolean prepare(Action action, Session session, List<Object> params) throws Exception {
 
         Command command = action.getClass().getAnnotation(Command.class);
-        Map<Option, Field> options = new HashMap<Option, Field>();
-        Map<Argument, Field> arguments = new HashMap<Argument, Field>();
-        List<Argument> orderedArguments = new ArrayList<Argument>();
+        Map<Option, Field> options = new HashMap<>();
+        Map<Argument, Field> arguments = new HashMap<>();
+        List<Argument> orderedArguments = new ArrayList<>();
 
         for (Class<?> type = action.getClass(); type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {

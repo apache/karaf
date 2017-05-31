@@ -42,7 +42,7 @@ public class ImportServiceTest extends KarafTestSupport {
     @SuppressWarnings("deprecation")
     @Configuration
     public Option[] config() {
-        List<Option> options = new ArrayList<Option>(Arrays.asList(super.config()));
+        List<Option> options = new ArrayList<>(Arrays.asList(super.config()));
         InputStream testBundleImportService = bundle()
             .set(Constants.IMPORT_SERVICE, "FooService")
             .set(Constants.BUNDLE_SYMBOLICNAME, BUNDLE1_NAME)

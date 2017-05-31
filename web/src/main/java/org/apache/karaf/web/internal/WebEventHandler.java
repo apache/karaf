@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class WebEventHandler implements WebListener {
 
-    private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();
+    private final Map<Long, WebEvent> bundleEvents = new HashMap<>();
 
     public Map<Long, WebEvent> getBundleEvents() {
         return bundleEvents;

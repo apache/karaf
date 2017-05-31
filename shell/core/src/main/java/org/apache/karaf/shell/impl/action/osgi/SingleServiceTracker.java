@@ -38,8 +38,8 @@ public abstract class SingleServiceTracker<T> {
 
     private final BundleContext ctx;
     private final Class<T> clazz;
-    private final AtomicReference<T> service = new AtomicReference<T>();
-    private final AtomicReference<ServiceReference<T>> ref = new AtomicReference<ServiceReference<T>>();
+    private final AtomicReference<T> service = new AtomicReference<>();
+    private final AtomicReference<ServiceReference<T>> ref = new AtomicReference<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
 
     private final ServiceListener listener = new ServiceListener() {

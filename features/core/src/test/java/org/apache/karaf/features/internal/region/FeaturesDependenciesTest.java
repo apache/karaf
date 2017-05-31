@@ -131,12 +131,12 @@ public class FeaturesDependenciesTest {
     private void doTestFeatureDependency(String[] features, String[] bundles) throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data8/features.xml").toURI());
 
-        Map<String, Set<String>> requirements = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> requirements = new HashMap<>();
         for (String feature : features) {
             addToMapSet(requirements, "root", feature);
         }
 
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         for (String bundle : bundles) {
             addToMapSet(expected, "root", bundle);
         }
@@ -144,8 +144,8 @@ public class FeaturesDependenciesTest {
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data8"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 requirements,
-                Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
@@ -173,7 +173,7 @@ public class FeaturesDependenciesTest {
     }
 
     private Map<String, Set<String>> getBundleNamesPerRegions(SubsystemResolver resolver) {
-        Map<String, Set<String>> mapping = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> mapping = new HashMap<>();
         Map<String, Set<Resource>> bundles = resolver.getBundlesPerRegions();
         for (Map.Entry<String,Set<Resource>> entry : bundles.entrySet()) {
             for (Resource r : entry.getValue()) {
@@ -187,7 +187,7 @@ public class FeaturesDependenciesTest {
     private void dumpWiring(SubsystemResolver resolver) {
         System.out.println("Wiring");
         Map<Resource, List<Wire>> wiring = resolver.getWiring();
-        List<Resource> resources = new ArrayList<Resource>(wiring.keySet());
+        List<Resource> resources = new ArrayList<>(wiring.keySet());
         Collections.sort(resources, new Comparator<Resource>() {
             @Override
             public int compare(Resource o1, Resource o2) {

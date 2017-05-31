@@ -77,7 +77,7 @@ public class PackageTest extends KarafTestSupport {
     public void duplicatePackageTest() throws Exception {
         // Leaving out version to make test easier to manage
         // We currently expect no duplicate package exports
-        Map<String, Integer> expectedDups = new HashMap<String, Integer>();
+        Map<String, Integer> expectedDups = new HashMap<>();
         List<PackageVersion> packageVersionMap = packageService.getExports();
        
         for (PackageVersion pVer : packageVersionMap) {

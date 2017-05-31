@@ -79,7 +79,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
 
     public void start(Long bundleId) throws MBeanException {
         try {
-            List<Long> list = new ArrayList<Long>();
+            List<Long> list = new ArrayList<>();
             list.add(bundleId);
             webContainerService.start(list);
         } catch (Exception e) {
@@ -97,7 +97,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
 
     public void stop(Long bundleId) throws MBeanException {
         try {
-            List<Long> list = new ArrayList<Long>();
+            List<Long> list = new ArrayList<>();
             list.add(bundleId);
             webContainerService.stop(list);
         } catch (Exception e) {

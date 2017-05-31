@@ -42,7 +42,7 @@ public class InstanceSettings {
     }
 
     public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features, String address) {
-        this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, address, new HashMap<String, URL>(), new HashMap<String, URL>());
+        this(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features, address, new HashMap<>(), new HashMap<>());
     }
 
     public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features, String address, Map<String, URL> textResources, Map<String, URL> binaryResources) {
@@ -55,12 +55,12 @@ public class InstanceSettings {
         this.rmiServerPort = rmiServerPort;
         this.location = location;
         this.javaOpts = javaOpts;
-        this.featureURLs = featureURLs != null ? featureURLs : new ArrayList<String>();
-        this.features = features != null ? features : new ArrayList<String>();
+        this.featureURLs = featureURLs != null ? featureURLs : new ArrayList<>();
+        this.features = features != null ? features : new ArrayList<>();
         this.address = address;
-        this.textResources = textResources != null ? textResources : new HashMap<String, URL>();
-        this.binaryResources = binaryResources != null ? binaryResources : new HashMap<String, URL>();
-        this.profiles = profiles != null ? profiles : new ArrayList<String>();
+        this.textResources = textResources != null ? textResources : new HashMap<>();
+        this.binaryResources = binaryResources != null ? binaryResources : new HashMap<>();
+        this.profiles = profiles != null ? profiles : new ArrayList<>();
     }
 
 

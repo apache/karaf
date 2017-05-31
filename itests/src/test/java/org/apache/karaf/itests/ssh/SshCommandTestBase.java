@@ -52,7 +52,7 @@ public class SshCommandTestBase extends KarafTestSupport {
 
     @Before
     public void installSshFeature() throws Exception {
-        featuresBefore = new HashSet<Feature>(Arrays.asList(featureService.listInstalledFeatures()));
+        featuresBefore = new HashSet<>(Arrays.asList(featureService.listInstalledFeatures()));
         installAndAssertFeature("ssh");
     }
 

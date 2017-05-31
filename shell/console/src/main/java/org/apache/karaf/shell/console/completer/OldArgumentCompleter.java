@@ -56,9 +56,9 @@ public class OldArgumentCompleter implements Completer {
     final List<Completer> argsCompleters;
     final Map<String, Completer> optionalCompleters;
     final CommandWithAction function;
-    final Map<Option, Field> fields = new HashMap<Option, Field>();
-    final Map<String, Option> options = new HashMap<String, Option>();
-    final Map<Integer, Field> arguments = new HashMap<Integer, Field>();
+    final Map<Option, Field> fields = new HashMap<>();
+    final Map<String, Option> options = new HashMap<>();
+    final Map<Integer, Field> arguments = new HashMap<>();
     boolean strict = true;
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -94,7 +94,7 @@ public class OldArgumentCompleter implements Completer {
 //        options.put(HelpOption.HELP.name(), HelpOption.HELP);
         optionsCompleter = new StringsCompleter(options.keySet());
         // Build arguments completers
-        argsCompleters = new ArrayList<Completer>();
+        argsCompleters = new ArrayList<>();
 
         if (function instanceof CompletableFunction) {
             Map<String, Completer> opt;
@@ -102,7 +102,7 @@ public class OldArgumentCompleter implements Completer {
                 //
                 opt = ((CompletableFunction) function).getOptionalCompleters();
             } catch (Throwable t) {
-                opt = new HashMap<String, Completer>();
+                opt = new HashMap<>();
             }
             optionalCompleters = opt;
             List<Completer> fcl = ((CompletableFunction) function).getCompleters();
@@ -114,8 +114,8 @@ public class OldArgumentCompleter implements Completer {
                 argsCompleters.add(NullCompleter.INSTANCE);
             }
         } else {
-            optionalCompleters = new HashMap<String, Completer>();
-            final Map<Integer, Method> methods = new HashMap<Integer, Method>();
+            optionalCompleters = new HashMap<>();
+            final Map<Integer, Method> methods = new HashMap<>();
             for (Class<?> type = function.getActionClass(); type != null; type = type.getSuperclass()) {
                 for (Method method : type.getDeclaredMethods()) {
                     CompleterValues completerMethod = method.getAnnotation(CompleterValues.class);
@@ -171,7 +171,7 @@ public class OldArgumentCompleter implements Completer {
                     } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
                         argCompleter = new StringsCompleter(new String[] {"false", "true"}, false);
                     } else if (type.isAssignableFrom(Enum.class)) {
-                        Set<String> values = new HashSet<String>();
+                        Set<String> values = new HashSet<>();
                         for (Object o : EnumSet.allOf((Class<Enum>) type)) {
                             values.add(o.toString());
                         }
@@ -343,7 +343,7 @@ public class OldArgumentCompleter implements Completer {
     }
 
     protected boolean verifyCompleter(Completer completer, String argument) {
-        List<String> candidates = new ArrayList<String>();
+        List<String> candidates = new ArrayList<>();
         return completer.complete(argument, argument.length(), candidates) != -1 && !candidates.isEmpty();
     }
 

@@ -92,7 +92,7 @@ public class ResolverUtil
 
     public static List<Requirement> getDynamicRequirements(List<Requirement> reqs)
     {
-        List<Requirement> result = new ArrayList<Requirement>();
+        List<Requirement> result = new ArrayList<>();
         if (reqs != null)
         {
             for (Requirement req : reqs)

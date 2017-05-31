@@ -84,10 +84,10 @@ public class DeployerTest {
         EasyMock.expectLastCall().anyTimes();
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
-        installSupport.replaceDigraph(EasyMock.<Map<String, Map<String, Map<String, Set<String>>>>>anyObject(),
-                EasyMock.<Map<String, Set<Long>>>anyObject());
+        installSupport.replaceDigraph(EasyMock.anyObject(),
+                EasyMock.anyObject());
         EasyMock.expectLastCall();
-        callback.saveState(EasyMock.<State>anyObject());
+        callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
         installSupport.installConfigs(f100);
         EasyMock.expectLastCall();
@@ -95,9 +95,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
-                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
-                                EasyMock.<Map<Resource, Bundle>>anyObject());
+        installSupport.resolveBundles(EasyMock.anyObject(),
+                                EasyMock.anyObject(),
+                                EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
         EasyMock.expectLastCall();
@@ -107,7 +107,7 @@ public class DeployerTest {
         EasyMock.expectLastCall();
 
         Bundle bundleA = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
-        EasyMock.expect(installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.<InputStream>anyObject()))
+        EasyMock.expect(installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.anyObject()))
                 .andReturn(bundleA);
 
         c.replay();
@@ -120,7 +120,7 @@ public class DeployerTest {
         dstate.features.put(f100.getId(), f100);
         dstate.features.put(f101.getId(), f101);
         dstate.filtersPerRegion = new HashMap<>();
-        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<String, Map<String, Set<String>>>());
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
@@ -170,7 +170,7 @@ public class DeployerTest {
                 return null;
             }
         });
-        installSupport.updateBundle(EasyMock.eq(bundleA), EasyMock.<String>anyObject(), EasyMock.<InputStream>anyObject());
+        installSupport.updateBundle(EasyMock.eq(bundleA), EasyMock.anyObject(), EasyMock.anyObject());
         EasyMock.expectLastCall().andStubAnswer(new IAnswer<Object>() {
             @Override
             public Object answer() throws Throwable {
@@ -187,10 +187,10 @@ public class DeployerTest {
         installSupport.startBundle(EasyMock.eq(bundleA));
         EasyMock.expectLastCall();
 
-        installSupport.replaceDigraph(EasyMock.<Map<String, Map<String, Map<String, Set<String>>>>>anyObject(),
-                EasyMock.<Map<String, Set<Long>>>anyObject());
+        installSupport.replaceDigraph(EasyMock.anyObject(),
+                EasyMock.anyObject());
         EasyMock.expectLastCall();
-        callback.saveState(EasyMock.<State>anyObject());
+        callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
         installSupport.installConfigs(f101);
         EasyMock.expectLastCall();
@@ -198,13 +198,13 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.eq(Collections.<Bundle>singleton(bundleA)),
-                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
-                                EasyMock.<Map<Resource, Bundle>>anyObject());
+        installSupport.resolveBundles(EasyMock.eq(Collections.singleton(bundleA)),
+                                EasyMock.anyObject(),
+                                EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
         EasyMock.expectLastCall();
-        installSupport.refreshPackages(EasyMock.eq(Collections.<Bundle>singleton(bundleA)));
+        installSupport.refreshPackages(EasyMock.eq(Collections.singleton(bundleA)));
         EasyMock.expectLastCall();
         callback.callListeners(FeatureEventMatcher.eq(new FeatureEvent(FeatureEvent.EventType.FeatureUninstalled, f100, FeaturesService.ROOT_REGION, false)));
         EasyMock.expectLastCall();
@@ -227,7 +227,7 @@ public class DeployerTest {
         dstate.features.put(f100.getId(), f100);
         dstate.features.put(f101.getId(), f101);
         dstate.filtersPerRegion = new HashMap<>();
-        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<String, Map<String, Set<String>>>());
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
@@ -266,10 +266,10 @@ public class DeployerTest {
         EasyMock.expectLastCall().anyTimes();
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
-        installSupport.replaceDigraph(EasyMock.<Map<String, Map<String, Map<String, Set<String>>>>>anyObject(),
-                EasyMock.<Map<String, Set<Long>>>anyObject());
+        installSupport.replaceDigraph(EasyMock.anyObject(),
+                EasyMock.anyObject());
         EasyMock.expectLastCall();
-        callback.saveState(EasyMock.<State>anyObject());
+        callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
@@ -277,9 +277,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         installSupport.installLibraries(f1);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
-                                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
-                                EasyMock.<Map<Resource, Bundle>>anyObject());
+        installSupport.resolveBundles(EasyMock.anyObject(),
+                                EasyMock.anyObject(),
+                                EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
         EasyMock.expectLastCall();
@@ -298,7 +298,7 @@ public class DeployerTest {
         addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, serviceBundle.getBundleId());
         dstate.features = Collections.singletonMap(f1.getId(), f1);
         dstate.filtersPerRegion = new HashMap<>();
-        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<String, Map<String, Set<String>>>());
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
@@ -340,12 +340,12 @@ public class DeployerTest {
         EasyMock.expectLastCall().anyTimes();
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
-        installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.<InputStream>anyObject());
+        installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.anyObject());
         EasyMock.expectLastCall().andReturn(serviceBundle1);
-        installSupport.replaceDigraph(EasyMock.<Map<String, Map<String, Map<String, Set<String>>>>>anyObject(),
-                EasyMock.<Map<String, Set<Long>>>anyObject());
+        installSupport.replaceDigraph(EasyMock.anyObject(),
+                EasyMock.anyObject());
         EasyMock.expectLastCall();
-        callback.saveState(EasyMock.<State>anyObject());
+        callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
         installSupport.installConfigs(EasyMock.anyObject());
         EasyMock.expectLastCall();
@@ -353,9 +353,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
-                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
-                EasyMock.<Map<Resource, Bundle>>anyObject());
+        installSupport.resolveBundles(EasyMock.anyObject(),
+                EasyMock.anyObject(),
+                EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
         EasyMock.expectLastCall();
@@ -374,7 +374,7 @@ public class DeployerTest {
         dstate.features.put(f1.getId(), f1);
         dstate.features.put(f2.getId(), f2);
         dstate.filtersPerRegion = new HashMap<>();
-        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<String, Map<String, Set<String>>>());
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
         Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
@@ -402,12 +402,12 @@ public class DeployerTest {
         EasyMock.expectLastCall().anyTimes();
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
-        installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("b100"), EasyMock.<InputStream>anyObject());
+        installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("b100"), EasyMock.anyObject());
         EasyMock.expectLastCall().andReturn(serviceBundle2);
-        installSupport.replaceDigraph(EasyMock.<Map<String, Map<String, Map<String, Set<String>>>>>anyObject(),
-                EasyMock.<Map<String, Set<Long>>>anyObject());
+        installSupport.replaceDigraph(EasyMock.anyObject(),
+                EasyMock.anyObject());
         EasyMock.expectLastCall();
-        callback.saveState(EasyMock.<State>anyObject());
+        callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
         installSupport.installConfigs(f2);
         EasyMock.expectLastCall();
@@ -415,9 +415,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.<Set<Bundle>>anyObject(),
-                EasyMock.<Map<Resource, List<Wire>>>anyObject(),
-                EasyMock.<Map<Resource, Bundle>>anyObject());
+        installSupport.resolveBundles(EasyMock.anyObject(),
+                EasyMock.anyObject(),
+                EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
         EasyMock.expectLastCall();
@@ -441,7 +441,7 @@ public class DeployerTest {
         dstate.features.put(f1.getId(), f1);
         dstate.features.put(f2.getId(), f2);
         dstate.filtersPerRegion = new HashMap<>();
-        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<String, Map<String, Set<String>>>());
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
         request = new Deployer.DeploymentRequest();
         request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
@@ -524,8 +524,8 @@ public class DeployerTest {
         EasyMock.expectLastCall().atLeastOnce();
         installSupport.installLibraries(EasyMock.anyObject());
         EasyMock.expectLastCall().atLeastOnce();
-        installSupport.replaceDigraph(EasyMock.<Map<String, Map<String, Map<String, Set<String>>>>>anyObject(),
-                               EasyMock.<Map<String, Set<Long>>>anyObject());
+        installSupport.replaceDigraph(EasyMock.anyObject(),
+                               EasyMock.anyObject());
         expectLastCall().atLeastOnce();
         installSupport.resolveBundles(anyObject(Set.class), anyObject(Map.class), anyObject(Map.class));
         expectLastCall().atLeastOnce();

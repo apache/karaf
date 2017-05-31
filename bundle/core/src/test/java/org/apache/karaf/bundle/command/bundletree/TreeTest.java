@@ -40,7 +40,7 @@ public class TreeTest {
 
     @Test
     public void writeTreeWithOneChild() throws IOException {
-        Tree<String> tree = new Tree<String>("root");
+        Tree<String> tree = new Tree<>("root");
         tree.addChild("child");
 
         BufferedReader reader = read(tree);
@@ -51,7 +51,7 @@ public class TreeTest {
 
     @Test
     public void writeTreeWithOneChildAndNodeConverter() throws IOException {
-        Tree<String> tree = new Tree<String>("root");
+        Tree<String> tree = new Tree<>("root");
         tree.addChild("child");
 
         StringWriter writer = new StringWriter();
@@ -69,7 +69,7 @@ public class TreeTest {
 
     @Test
     public void writeTreeWithChildAndGrandChild() throws IOException {
-        Tree<String> tree = new Tree<String>("root");
+        Tree<String> tree = new Tree<>("root");
         Node<String> node = tree.addChild("child");
         node.addChild("grandchild");
 
@@ -82,7 +82,7 @@ public class TreeTest {
 
     @Test
     public void writeTreeWithTwoChildrenAndOneGrandchild() throws IOException {
-        Tree<String> tree = new Tree<String>("root");
+        Tree<String> tree = new Tree<>("root");
         Node<String> child = tree.addChild("child1");
         child.addChild("grandchild");
         tree.addChild("child2");
@@ -97,7 +97,7 @@ public class TreeTest {
 
     @Test
     public void flattenTree() throws IOException {
-        Tree<String> tree = new Tree<String>("root");
+        Tree<String> tree = new Tree<>("root");
         Node<String> child1 = tree.addChild("child1");
         child1.addChild("grandchild");
         Node<String> child2 = tree.addChild("child2");
@@ -114,7 +114,7 @@ public class TreeTest {
 
     @Test
     public void hasAncestor() throws IOException {
-        Tree<String> tree = new Tree<String>("root");
+        Tree<String> tree = new Tree<>("root");
         Node<String> child1 = tree.addChild("child1");
         child1.addChild("grandchild");
         Node<String> child2 = tree.addChild("child2");

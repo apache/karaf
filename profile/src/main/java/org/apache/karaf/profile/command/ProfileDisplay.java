@@ -88,10 +88,10 @@ public class ProfileDisplay implements Action {
         Map<String, Map<String, Object>> configuration = new HashMap<>(profile.getConfigurations());
         Map<String, byte[]> resources = profile.getFileConfigurations();
         Map<String,Object> agentConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
-        List<String> agentProperties = new ArrayList<String>();
-        List<String> systemProperties = new ArrayList<String>();
-        List<String> configProperties = new ArrayList<String>();
-        List<String> otherResources = new ArrayList<String>();
+        List<String> agentProperties = new ArrayList<>();
+        List<String> systemProperties = new ArrayList<>();
+        List<String> configProperties = new ArrayList<>();
+        List<String> otherResources = new ArrayList<>();
         for (Map.Entry<String, Object> entry : agentConfiguration.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();

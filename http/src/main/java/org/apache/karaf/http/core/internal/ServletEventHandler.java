@@ -28,7 +28,7 @@ import org.osgi.framework.Bundle;
 
 public class ServletEventHandler implements ServletListener {
 
-	Map<String, ServletEvent> servletEvents =  new HashMap<String, ServletEvent>();
+	Map<String, ServletEvent> servletEvents = new HashMap<>();
 	
 	public synchronized void servletEvent(ServletEvent event) {
 		servletEvents.put(event.getServletName(), event);
