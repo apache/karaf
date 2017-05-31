@@ -76,9 +76,8 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
             Bundle[] bundles = bundleContext.getBundles();
 
-            for (int i = 0; i < bundles.length; i++) {
+            for (Bundle bundle : bundles) {
                 try {
-                    Bundle bundle = bundles[i];
                     BundleInfo info = bundleService.getInfo(bundle);
                     String bundleStateString = info.getState().toString();
                     CompositeData data = new CompositeDataSupport(bundleType,

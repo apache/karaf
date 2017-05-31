@@ -420,9 +420,8 @@ public class Configuration
         {
             if ( m_adapters != null )
             {
-                for(int i=0;i<m_adapters.length;i++)
-                {
-                    m_adapters[i].destroy(m_bundleContext);
+                for (AbstractAdapter adapter : m_adapters) {
+                    adapter.destroy(m_bundleContext);
                 }
                 m_adapters = null;
             }

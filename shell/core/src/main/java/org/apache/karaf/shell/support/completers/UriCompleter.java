@@ -110,9 +110,9 @@ public class UriCompleter implements Completer {
                 String group = "";
                 String[] dirs = parts.length > 0 ? parts[0].split("\\.") : new String[] { "" };
                 if (parts.length > 0 && parts[0].endsWith(".")) {
-                    for (int i = 0; i < dirs.length; i++) {
-                        known += dirs[i] + "/";
-                        group += dirs[i] + ".";
+                    for (String dir : dirs) {
+                        known += dir + "/";
+                        group += dir + ".";
                     }
                 } else {
                     for (int i = 0; i < dirs.length - 1; i++) {

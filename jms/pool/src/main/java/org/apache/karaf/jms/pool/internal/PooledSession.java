@@ -100,13 +100,11 @@ public class PooledSession implements Session, TopicSession, QueueSession, XASes
                 getInternalSession().setMessageListener(null);
 
                 // Close any consumers and browsers that may have been created.
-                for (Iterator<MessageConsumer> iter = consumers.iterator(); iter.hasNext();) {
-                    MessageConsumer consumer = iter.next();
+                for (MessageConsumer consumer : consumers) {
                     consumer.close();
                 }
 
-                for (Iterator<QueueBrowser> iter = browsers.iterator(); iter.hasNext();) {
-                    QueueBrowser browser = iter.next();
+                for (QueueBrowser browser : browsers) {
                     browser.close();
                 }
 

@@ -80,10 +80,10 @@ public class ManageRealmCommand extends JaasCommandSupport {
                         AppConfigurationEntry[] entries = r.getEntries();
 
                         if (entries != null) {
-                            for (int j = 0; j < entries.length; j++) {
+                            for (AppConfigurationEntry entry1 : entries) {
                                 if (i == index) {
                                     realm = r;
-                                    entry = entries[j];
+                                    entry = entry1;
                                     break realms_loop;
                                 }
                                 i++;

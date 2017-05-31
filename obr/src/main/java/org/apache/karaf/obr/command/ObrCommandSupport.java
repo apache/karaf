@@ -147,9 +147,9 @@ public abstract class ObrCommandSupport implements Action {
                 if ((resources != null) && (resources.length > 0)) {
                     System.out.println("\nRequired resource(s):");
                     printUnderline(System.out, 21);
-                    for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                        System.out.println("   " + getResourceId(resources[resIdx])
-                                + " (" + resources[resIdx].getVersion() + ")");
+                    for (Resource resource : resources) {
+                        System.out.println("   " + getResourceId(resource)
+                                + " (" + resource.getVersion() + ")");
                     }
                 }
                 if (deployOptional) {
@@ -157,8 +157,8 @@ public abstract class ObrCommandSupport implements Action {
                     if ((resources != null) && (resources.length > 0)) {
                         System.out.println("\nOptional resource(s):");
                         printUnderline(System.out, 21);
-                        for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                            System.out.println("   " + getResourceId(resources[resIdx]) + " (" + resources[resIdx].getVersion() + ")");
+                        for (Resource resource : resources) {
+                            System.out.println("   " + getResourceId(resource) + " (" + resource.getVersion() + ")");
                         }
                     }
                 }
@@ -175,9 +175,9 @@ public abstract class ObrCommandSupport implements Action {
                 if ((reqs != null) && (reqs.length > 0)) {
                     System.out.println("Unsatisfied requirement(s):");
                     printUnderline(System.out, 27);
-                    for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++) {
-                        System.out.println("   " + reqs[reqIdx].getRequirement().getFilter());
-                        System.out.println("      " + getResourceId(reqs[reqIdx].getResource()));
+                    for (Reason req : reqs) {
+                        System.out.println("   " + req.getRequirement().getFilter());
+                        System.out.println("      " + getResourceId(req.getResource()));
                     }
                 } else {
                     System.out.println("Could not resolve targets.");

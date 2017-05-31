@@ -153,8 +153,8 @@ public class JaasHelper {
             ProtectionDomain[] optimized = new ProtectionDomain[domains.length];
             ProtectionDomain pd;
             int num = 0;
-            for (int i = 0; i < domains.length; i++) {
-                if ((pd = domains[i]) != null) {
+            for (ProtectionDomain domain : domains) {
+                if ((pd = domain) != null) {
                     boolean found = false;
                     for (int j = 0; j < num && !found; j++) {
                         found = (optimized[j] == pd);

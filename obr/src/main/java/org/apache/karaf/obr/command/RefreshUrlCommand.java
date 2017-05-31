@@ -53,9 +53,9 @@ public class RefreshUrlCommand extends ObrCommandSupport {
 		} else {
 			Repository[] repos = admin.listRepositories();
 			if ((repos != null) && (repos.length > 0)) {
-				for (int i = 0; i < repos.length; i++) {
-					admin.addRepository(repos[i].getURI());
-				}
+                for (Repository repo : repos) {
+                    admin.addRepository(repo.getURI());
+                }
 			}
 		}
     }

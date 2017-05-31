@@ -18,7 +18,6 @@ package org.apache.karaf.obr.command;
 
 import java.io.PrintStream;
 import java.lang.reflect.Array;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,19 +69,14 @@ public class InfoCommand extends ObrCommandSupport {
         printUnderline(out, resourceId.length());
 
         Map map = resource.getProperties();
-        for (Iterator iter = map.entrySet().iterator(); iter.hasNext(); )
-        {
-            Map.Entry entry = (Map.Entry) iter.next();
-            if (entry.getValue().getClass().isArray())
-            {
+        for (Object o : map.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
+            if (entry.getValue().getClass().isArray()) {
                 out.println(entry.getKey() + ":");
-                for (int j = 0; j < Array.getLength(entry.getValue()); j++)
-                {
+                for (int j = 0; j < Array.getLength(entry.getValue()); j++) {
                     out.println("   " + Array.get(entry.getValue(), j));
                 }
-            }
-            else
-            {
+            } else {
                 out.println(entry.getKey() + ": " + entry.getValue());
             }
         }
@@ -91,9 +85,8 @@ public class InfoCommand extends ObrCommandSupport {
         if ((reqs != null) && (reqs.length > 0))
         {
             out.println("Requires:");
-            for (int i = 0; i < reqs.length; i++)
-            {
-                out.println("   " + reqs[i].getName() + ":" + reqs[i].getFilter());
+            for (Requirement req : reqs) {
+                out.println("   " + req.getName() + ":" + req.getFilter());
             }
         }
 
@@ -101,9 +94,8 @@ public class InfoCommand extends ObrCommandSupport {
         if ((caps != null) && (caps.length > 0))
         {
             out.println("Capabilities:");
-            for (int i = 0; i < caps.length; i++)
-            {
-                out.println("   " + caps[i].getName() + ":" + caps[i].getPropertiesAsMap());
+            for (Capability cap : caps) {
+                out.println("   " + cap.getName() + ":" + cap.getPropertiesAsMap());
             }
         }
     }

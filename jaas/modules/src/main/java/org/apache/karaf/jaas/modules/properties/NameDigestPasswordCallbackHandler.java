@@ -60,21 +60,20 @@ public class NameDigestPasswordCallbackHandler implements CallbackHandler {
         this.passwordCallbackName = passwordCallbackName;
     }  
 
-    public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {  
-        for (int i = 0; i < callbacks.length; i++) {  
-            Callback callback = callbacks[i];
+    public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+        for (Callback callback : callbacks) {
             if (handleCallback(callback)) {
                 continue;
-            } else if (callback instanceof NameCallback) {  
-                ((NameCallback) callback).setName(username);  
-            } else if (callback instanceof PasswordCallback) {  
-                PasswordCallback pwCallback = (PasswordCallback) callback;  
+            } else if (callback instanceof NameCallback) {
+                ((NameCallback) callback).setName(username);
+            } else if (callback instanceof PasswordCallback) {
+                PasswordCallback pwCallback = (PasswordCallback) callback;
                 pwCallback.setPassword(password.toCharArray());
             } else if (!invokePasswordCallback(callback)) {
-                String msg = "Unsupported callback type" + callbacks[i].getClass().getName();
+                String msg = "Unsupported callback type" + callback.getClass().getName();
                 LOG.info(msg);
-                throw new UnsupportedCallbackException(callbacks[i], msg);  
-            }  
+                throw new UnsupportedCallbackException(callback, msg);
+            }
         }  
     }      
     
