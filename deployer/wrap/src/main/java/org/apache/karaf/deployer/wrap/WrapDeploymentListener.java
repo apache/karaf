@@ -37,8 +37,7 @@ public class WrapDeploymentListener implements ArtifactUrlTransformer {
             if (!artifact.getPath().endsWith(".jar")) {
                 return false;
             }
-            JarFile jar = new JarFile(artifact);
-            try {
+            try (JarFile jar = new JarFile(artifact)) {
                 // only handle non OSGi jar
                 Manifest manifest = jar.getManifest();
                 if (manifest != null &&
@@ -47,8 +46,6 @@ public class WrapDeploymentListener implements ArtifactUrlTransformer {
                     return false;
                 }
                 return true;
-            } finally {
-                jar.close();
             }
         } catch (Exception e) {
             return false;

@@ -239,12 +239,10 @@ public abstract class ObrCommandSupport implements Action {
             File sys = new File(etc, "config.properties");
             File sysTmp = new File(etc, "config.properties.tmp");
 
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sysTmp)));
             boolean modified = false;
-            try {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sysTmp)))) {
                 if (sys.exists()) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(sys)));
-                    try {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(sys)))) {
                         String line = reader.readLine();
                         while (line != null) {
                             if (line.matches("obr\\.repository\\.url[:= ].*")) {
@@ -255,8 +253,6 @@ public abstract class ObrCommandSupport implements Action {
                             writer.newLine();
                             line = reader.readLine();
                         }
-                    } finally {
-                        reader.close();
                     }
                 }
                 if (!modified) {
@@ -271,8 +267,6 @@ public abstract class ObrCommandSupport implements Action {
                     writer.newLine();
                     writer.newLine();
                 }
-            } finally {
-                writer.close();
             }
 
             sys.delete();

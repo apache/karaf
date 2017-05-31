@@ -155,8 +155,7 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
         throws BundleException, IOException {
         File location = getBundleExternalLocation(localRepository, bundle);
         if (location != null && location.exists() && location.lastModified() > bundle.getLastModified()) {
-            InputStream is = new FileInputStream(location);
-            try {
+            try (InputStream is = new FileInputStream(location)) {
                 logger.info("[Watch] Updating watched bundle: {} ({})", bundle.getSymbolicName(), bundle.getVersion());
                 if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
                     logger.info("[Watch] Bundle {} is a fragment, so it's not stopped", bundle.getSymbolicName());
@@ -175,8 +174,6 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                     bundle.update(is);
                 }
                 updated.add(bundle);
-            } finally {
-                is.close();
             }
         }
     }

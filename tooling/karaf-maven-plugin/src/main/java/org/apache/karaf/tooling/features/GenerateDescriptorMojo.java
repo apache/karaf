@@ -339,11 +339,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
             this.treeListing = dependencyHelper.getTreeListing();
             File dir = outputFile.getParentFile();
             if (dir.isDirectory() || dir.mkdirs()) {
-                PrintStream out = new PrintStream(new FileOutputStream(outputFile));
-                try {
+                try (PrintStream out = new PrintStream(new FileOutputStream(outputFile))) {
                     writeFeatures(out);
-                } finally {
-                    out.close();
                 }
                 // now lets attach it
                 projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
@@ -894,11 +891,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
         if (!file.getParentFile().exists() || !file.getParentFile().isDirectory()) {
             throw new IOException("Cannot create directory at " + file.getParent());
         }
-        FileOutputStream out = new FileOutputStream(file);
-        try {
+        try (OutputStream out = new FileOutputStream(file)) {
             JaxbUtil.marshal(features, out);
-        } finally {
-            out.close();
         }
     }
 
@@ -932,12 +926,9 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
     protected String saveTreeListing() throws IOException {
         File treeListFile = new File(filteredDependencyCache.getParentFile(), "treeListing.txt");
-        OutputStream os = new FileOutputStream(treeListFile);
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-        try {
+        try (OutputStream os = new FileOutputStream(treeListFile);
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os))) {
             writer.write(treeListing);
-        } finally {
-            writer.close();
         }
         return "\tTree listing is saved here: " + treeListFile.getAbsolutePath() + "\n";
     }

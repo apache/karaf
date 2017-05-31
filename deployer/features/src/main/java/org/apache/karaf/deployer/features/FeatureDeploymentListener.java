@@ -129,11 +129,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         File file = getPropertiesFile();
         if (file != null) {
             if (file.exists()) {
-                InputStream input = new FileInputStream(file);
-                try {
+                try (InputStream input = new FileInputStream(file)) {
                     properties.load(input);
-                } finally {
-                    input.close();
                 }
             }
         }
@@ -142,11 +139,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     private void saveProperties() throws IOException {
         File file = getPropertiesFile();
         if (file != null) {
-            OutputStream output = new FileOutputStream(file);
-            try {
+            try (OutputStream output = new FileOutputStream(file)) {
                 properties.store(output, null);
-            } finally {
-                output.close();
             }
         }
     }

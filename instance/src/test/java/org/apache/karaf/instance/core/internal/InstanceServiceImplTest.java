@@ -63,22 +63,16 @@ public class InstanceServiceImplTest {
         Properties p = new Properties();
         p.put("featuresBoot", "abc,def ");
         p.put("featuresRepositories", "somescheme://xyz");
-        OutputStream os = new FileOutputStream(f);
-        try {
+        try (OutputStream os = new FileOutputStream(f)) {
             p.store(os, "Test comment");
-        } finally {
-            os.close();
         }
 
         InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null, Arrays.asList("test"));
         as.addFeaturesFromSettings(f, s);
 
         Properties p2 = new Properties();
-        InputStream is = new FileInputStream(f);
-        try {
+        try (InputStream is = new FileInputStream(f)) {
             p2.load(is);
-        } finally {
-            is.close();
         }
         assertEquals(2, p2.size());
         assertEquals("abc,def,test", p2.get("featuresBoot"));
