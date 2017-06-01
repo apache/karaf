@@ -20,9 +20,12 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.apache.karaf.jaas.modules.ldap.LDAPLoginModule;
-
 import java.util.Map;
 
+/**
+ * Karaf JAAS backing engine factory to support basic list funcitonality
+ * for the LDAP login module.
+ */
 public class LDAPBackingEngineFactory implements BackingEngineFactory {
     @Override
     public String getModuleClass() {
