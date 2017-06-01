@@ -189,7 +189,7 @@
         <felix.framework.security.version>2.6.0</felix.framework.security.version>
         <felix.gogo.runtime.version>1.0.6</felix.gogo.runtime.version>
         <felix.gogo.jline.version>1.0.6</felix.gogo.jline.version>
-        <felix.httplite.version>0.1.5</felix.httplite.version>
+        <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
         <felix.plugin.version>3.3.0</felix.plugin.version>
         <felix.utils.version>1.10.0</felix.utils.version>
