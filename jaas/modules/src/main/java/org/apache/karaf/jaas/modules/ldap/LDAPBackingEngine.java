@@ -43,8 +43,8 @@ import java.util.regex.Pattern;
  */
 public class LDAPBackingEngine implements BackingEngine {
 
-    LDAPCache cache;
-    LDAPOptions options;
+    private LDAPCache cache;
+    private LDAPOptions options;
 
     private static Logger LOGGER = LoggerFactory.getLogger(LDAPBackingEngine.class);
 
@@ -55,12 +55,12 @@ public class LDAPBackingEngine implements BackingEngine {
 
     @Override
     public void addUser(String username, String password) {
-        throw new RuntimeException("Adding a user is not supporting in LDAP");
+        throw new UnsupportedOperationException("Adding a user is not supporting in LDAP");
     }
 
     @Override
     public void deleteUser(String username) {
-        throw new RuntimeException("Deleting a user is not supporting in LDAP");
+        throw new UnsupportedOperationException("Deleting a user is not supporting in LDAP");
     }
 
     @Override
@@ -113,7 +113,6 @@ public class LDAPBackingEngine implements BackingEngine {
                   
                     users.add(new UserPrincipal(userName));
 
-
                 }
             } finally {
                 if (namingEnumeration != null) {
@@ -124,14 +123,12 @@ public class LDAPBackingEngine implements BackingEngine {
                     }
                 }
             }
-
+            
             return users;
 
         } catch (NamingException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     @Override
@@ -148,25 +145,21 @@ public class LDAPBackingEngine implements BackingEngine {
 
     @Override
     public void addGroup(String username, String group) {
-        throw new RuntimeException("Adding a group is not supporting in LDAP");
-
+        throw new UnsupportedOperationException("Adding a group is not supporting in LDAP");
     }
 
     @Override
     public void createGroup(String group) {
-        throw new RuntimeException("Creating a group is not supporting in LDAP");
-
+        throw new UnsupportedOperationException("Creating a group is not supporting in LDAP");
     }
 
     @Override
     public void deleteGroup(String username, String group) {
-        throw new RuntimeException("Deleting a group is not supporting in LDAP");
-
+        throw new UnsupportedOperationException("Deleting a group is not supporting in LDAP");
     }
 
     @Override
     public List<RolePrincipal> listRoles(Principal principal) {
-
         try {
             String[] userAndNameSpace = cache.getUserDnAndNamespace(principal.getName());
             if (userAndNameSpace == null || userAndNameSpace.length < 2) return Collections.emptyList();
@@ -179,32 +172,25 @@ public class LDAPBackingEngine implements BackingEngine {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @Override
     public void addRole(String username, String role) {
-        throw new RuntimeException("Adding a role is not supporting in LDAP");
-
+        throw new UnsupportedOperationException("Adding a role is not supporting in LDAP");
     }
 
     @Override
     public void deleteRole(String username, String role) {
-        throw new RuntimeException("Deleting a role is not supporting in LDAP");
-
+        throw new UnsupportedOperationException("Deleting a role is not supporting in LDAP");
     }
 
     @Override
     public void addGroupRole(String group, String role) {
-        throw new RuntimeException("Adding a group role is not supporting in LDAP");
-
+        throw new UnsupportedOperationException("Adding a group role is not supporting in LDAP");
     }
 
     @Override
     public void deleteGroupRole(String group, String role) {
-        throw new RuntimeException("Deleting a group role is not supporting in LDAP");
-
+        throw new UnsupportedOperationException("Deleting a group role is not supporting in LDAP");
     }
-
-
 }
