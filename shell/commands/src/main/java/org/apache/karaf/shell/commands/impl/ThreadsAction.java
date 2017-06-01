@@ -240,8 +240,7 @@ public class ThreadsAction implements Action {
         public boolean isInteresting() {
             int nb = 0;
             StackTraceElement[] stacktrace = info.getStackTrace();
-            for (int i = 0; i < stacktrace.length; i++) {
-                StackTraceElement ste = stacktrace[i];
+            for (StackTraceElement ste : stacktrace) {
                 boolean interestingLine = true;
                 for (String pkg : packages) {
                     if (ste.getClassName().startsWith(pkg)) {

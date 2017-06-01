@@ -68,13 +68,12 @@ public class JaasTest extends KarafTestSupport {
         final String userPassRealm = "karaf";
         LoginContext lc = new LoginContext(userPassRealm, new CallbackHandler() {
             public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (int i = 0; i < callbacks.length; i++) {
-                    Callback callback = callbacks[i];
+                for (Callback callback : callbacks) {
                     if (callback instanceof PasswordCallback) {
-                        PasswordCallback passwordCallback = (PasswordCallback)callback;
+                        PasswordCallback passwordCallback = (PasswordCallback) callback;
                         passwordCallback.setPassword(userPassRealm.toCharArray());
                     } else if (callback instanceof NameCallback) {
-                        NameCallback nameCallback = (NameCallback)callback;
+                        NameCallback nameCallback = (NameCallback) callback;
                         nameCallback.setName(userPassRealm);
                     }
                 }

@@ -170,16 +170,16 @@ public class JndiServiceImpl implements JndiService {
         Context context = new InitialContext();
         String[] splitted = name.split("/");
         if (splitted.length > 0) {
-            for (int i = 0; i < splitted.length; i++) {
+            for (String split : splitted) {
                 try {
-                    Object o = context.lookup(splitted[i]);
+                    Object o = context.lookup(split);
                     if (!(o instanceof Context)) {
-                        throw new NamingException("Name " + splitted[i] + " already exists");
+                        throw new NamingException("Name " + split + " already exists");
                     }
                 } catch (NameNotFoundException e) {
-                    context.createSubcontext(splitted[i]);
+                    context.createSubcontext(split);
                 }
-                context = (Context) context.lookup(splitted[i]);
+                context = (Context) context.lookup(split);
             }
         } else {
             context.createSubcontext(name);

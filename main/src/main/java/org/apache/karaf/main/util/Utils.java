@@ -162,8 +162,7 @@ public class Utils {
         }
 
         IOException exception = null;
-        for (int i = 0; i < files.length; i++) {
-            File file = files[i];
+        for (File file : files) {
             try {
                 forceDelete(file);
             } catch (IOException ioe) {

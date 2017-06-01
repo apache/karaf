@@ -25,7 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -144,10 +143,7 @@ public abstract class MojoSupport extends AbstractMojo {
         if (dependencyManagement != null
                 && dependencyManagement.getDependencies() != null) {
             map = new HashMap();
-            for (Iterator i = dependencyManagement.getDependencies().iterator(); i
-                    .hasNext();) {
-                Dependency d = (Dependency) i.next();
-
+            for (Dependency d : dependencyManagement.getDependencies()) {
                 try {
                     VersionRange versionRange = VersionRange
                             .createFromVersionSpec(d.getVersion());
