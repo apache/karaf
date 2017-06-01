@@ -177,7 +177,7 @@
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
         <equinox.version>3.11.3</equinox.version>
         <bndlib.version>2.4.0</bndlib.version>
-        <equinox.region.version>1.1.0.v20120522-1841</equinox.region.version>
+        <equinox.region.version>1.2.101.v20150831-1342</equinox.region.version>
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
 
         <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
