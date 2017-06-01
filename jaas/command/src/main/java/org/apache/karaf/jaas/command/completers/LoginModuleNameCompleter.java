@@ -58,7 +58,7 @@ public class LoginModuleNameCompleter implements Completer {
      * @return
      */
     private List<String> findLoginModuleClassNames(JaasRealm realm) {
-        List<String> moduleClassNames = new LinkedList<String>();
+        List<String> moduleClassNames = new LinkedList<>();
         for (AppConfigurationEntry entry : realm.getEntries()) {
             String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
             if (moduleClass != null) {

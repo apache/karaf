@@ -25,7 +25,7 @@ public class GroupPrincipal implements Group, Serializable {
 
     private String name;
 
-    private Hashtable<String,Principal> members = new Hashtable<String, Principal>();
+    private Hashtable<String,Principal> members = new Hashtable<>();
 
     public GroupPrincipal(String name) {
         assert name != null;

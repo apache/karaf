@@ -67,7 +67,7 @@ public class SubsystemResolveContext extends ResolveContext {
     private final Set<Resource> mandatory = new HashSet<>();
     private final CandidateComparator candidateComparator = new CandidateComparator(mandatory);
 
-    private final Map<Resource, Subsystem> resToSub = new HashMap<Resource, Subsystem>();
+    private final Map<Resource, Subsystem> resToSub = new HashMap<>();
     private final Repository repository;
     private final Repository globalRepository;
     private final Downloader downloader;
@@ -176,7 +176,7 @@ public class SubsystemResolveContext extends ResolveContext {
 
     @Override
     public Collection<Resource> getMandatoryResources() {
-        return Collections.<Resource>singleton(root);
+        return Collections.singleton(root);
     }
 
     @Override
@@ -311,7 +311,7 @@ public class SubsystemResolveContext extends ResolveContext {
             List<Capability> identities = resource.getCapabilities(IDENTITY_NAMESPACE);
             if (identities != null && !identities.isEmpty()) {
                 Capability identity = identities.iterator().next();
-                Map<String, Object> attrs = new HashMap<String, Object>();
+                Map<String, Object> attrs = new HashMap<>();
                 attrs.put(BUNDLE_SYMBOLICNAME_ATTRIBUTE, identity.getAttributes().get(IDENTITY_NAMESPACE));
                 attrs.put(BUNDLE_VERSION_ATTRIBUTE, identity.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE));
                 return filter.isAllowed(VISIBLE_BUNDLE_NAMESPACE, attrs);
@@ -324,7 +324,7 @@ public class SubsystemResolveContext extends ResolveContext {
     class SubsystemRepository implements Repository {
 
         private final Repository repository;
-        private final Map<Subsystem, Map<Capability, Capability>> mapping = new HashMap<Subsystem, Map<Capability, Capability>>();
+        private final Map<Subsystem, Map<Capability, Capability>> mapping = new HashMap<>();
 
         public SubsystemRepository(Repository repository) {
             this.repository = repository;
@@ -333,18 +333,14 @@ public class SubsystemResolveContext extends ResolveContext {
         @Override
         public Map<Requirement, Collection<Capability>> findProviders(Collection<? extends Requirement> requirements) {
             Map<Requirement, Collection<Capability>> base = repository.findProviders(requirements);
-            Map<Requirement, Collection<Capability>> result = new HashMap<Requirement, Collection<Capability>>();
+            Map<Requirement, Collection<Capability>> result = new HashMap<>();
             for (Map.Entry<Requirement, Collection<Capability>> entry : base.entrySet()) {
-                List<Capability> caps = new ArrayList<Capability>();
+                List<Capability> caps = new ArrayList<>();
                 Subsystem ss = getSubsystem(entry.getKey().getResource());
                 while (!ss.isAcceptDependencies()) {
                     ss = ss.getParent();
                 }
-                Map<Capability, Capability> map = mapping.get(ss);
-                if (map == null) {
-                    map = new HashMap<Capability, Capability>();
-                    mapping.put(ss, map);
-                }
+                Map<Capability, Capability> map = mapping.computeIfAbsent(ss, k -> new HashMap<>());
                 for (Capability cap : entry.getValue()) {
                     Capability wrapped = map.get(cap);
                     if (wrapped == null) {

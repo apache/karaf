@@ -144,10 +144,7 @@ public abstract class MojoSupport extends AbstractMojo {
         if (dependencyManagement != null
                 && dependencyManagement.getDependencies() != null) {
             map = new HashMap();
-            for (Iterator i = dependencyManagement.getDependencies().iterator(); i
-                    .hasNext();) {
-                Dependency d = (Dependency) i.next();
-
+            for (Dependency d : dependencyManagement.getDependencies()) {
                 try {
                     VersionRange versionRange = VersionRange
                             .createFromVersionSpec(d.getVersion());

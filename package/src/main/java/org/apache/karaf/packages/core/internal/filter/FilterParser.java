@@ -45,7 +45,7 @@ public class FilterParser {
     }
     
     private Expression[] parseFilterList(ExprTokenizer tokenizer) {
-        List<Expression> exprList = new ArrayList<Expression>();
+        List<Expression> exprList = new ArrayList<>();
         while ("(".equals(tokenizer.peekNextToken())) {
             tokenizer.nextToken();
             exprList.add(parseFilterComp(tokenizer));

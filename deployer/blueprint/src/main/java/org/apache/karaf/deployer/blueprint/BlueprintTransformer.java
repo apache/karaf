@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
@@ -139,10 +138,10 @@ public class BlueprintTransformer {
             line = line.trim();
             if (line.length() > 0) {
                 String parts[] = line.split("\\s*,\\s*");
-                for (int i = 0; i < parts.length; i++) {
-                    int n = parts[i].lastIndexOf('.');
+                for (String part : parts) {
+                    int n = part.lastIndexOf('.');
                     if (n > 0) {
-                        String pkg = parts[i].substring(0, n);
+                        String pkg = part.substring(0, n);
                         if (!pkg.startsWith("java.")) {
                             refers.add(pkg);
                         }

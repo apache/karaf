@@ -16,13 +16,14 @@ package org.apache.karaf.config.core.impl;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -69,12 +70,9 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     @Override
     public List<String> getConfigs() throws MBeanException {
         try {
-            Configuration[] configurations = this.configRepo.getConfigAdmin().listConfigurations(null);
-            List<String> pids = new ArrayList<>();
-            for (int i = 0; i < configurations.length; i++) {
-                pids.add(configurations[i].getPid());
-            }
-            return pids;
+            return Arrays.stream(configRepo.getConfigAdmin().listConfigurations(null))
+                    .map(Configuration::getPid)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }

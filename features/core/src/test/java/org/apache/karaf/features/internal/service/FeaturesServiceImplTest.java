@@ -22,21 +22,31 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.*;
+import java.util.EnumSet;
 import java.util.Map;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.TestBase;
+import org.apache.karaf.features.FeaturesService.Option;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
+import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
+import org.easymock.EasyMock;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link org.apache.karaf.features.internal.service.FeaturesServiceImpl}
@@ -50,13 +60,29 @@ public class FeaturesServiceImplTest extends TestBase {
     @Before
     public void setUp() throws IOException {
         dataFile = File.createTempFile("features", null, null);
+        URL.setURLStreamHandlerFactory(protocol -> protocol.equals("custom") ? new URLStreamHandler() {
+            @Override
+            protected URLConnection openConnection(URL u) throws IOException {
+                return getClass().getResource(u.getPath()).openConnection();
+            }
+        } : null);
+    }
+    
+    @After
+    public void after() throws Exception {
+        Field field = URL.class.getDeclaredField("factory");
+        field.setAccessible(true);
+        field.set(null, null);
     }
 
     @Test
     public void testGetFeature() throws Exception {
         Feature transactionFeature = feature("transaction", "1.0.0");
         final Map<String, Map<String, Feature>> features = features(transactionFeature);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null) {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        EasyMock.replay(installSupport);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg ) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             }
@@ -67,7 +93,9 @@ public class FeaturesServiceImplTest extends TestBase {
     
     @Test
     public void testGetFeatureStripVersion() throws Exception {
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null) {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
@@ -81,7 +109,9 @@ public class FeaturesServiceImplTest extends TestBase {
     
     @Test
     public void testGetFeatureNotAvailable() throws Exception {
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null) {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
@@ -95,7 +125,9 @@ public class FeaturesServiceImplTest extends TestBase {
                 feature("transaction", "1.0.0"),
                 feature("transaction", "2.0.0")
         );
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null) {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             }
@@ -106,23 +138,73 @@ public class FeaturesServiceImplTest extends TestBase {
 
     @Test
     public void testCyclicFeatures() throws Exception {
-        URL.setURLStreamHandlerFactory(protocol -> protocol.equals("custom") ? new URLStreamHandler() {
-            @Override
-            protected URLConnection openConnection(URL u) throws IOException {
-                return getClass().getResource(u.getPath()).openConnection();
-            }
-        } : null);
-        try {
-            final FeaturesServiceImpl impl = new FeaturesServiceImpl(null, null, null, new Storage(), null, null, null, this.resolver, null, "", null, null, null, null, null, 0, 0, 0, null);
-            impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
-            impl.getFeatures();
-        } finally {
-            Field field = URL.class.getDeclaredField("factory");
-            field.setAccessible(true);
-            field.set(null, null);
-        }
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        EasyMock.replay(installSupport);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg);
+        impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
+        impl.getFeatures();
     }
 
+    @Test
+    public void testRemoveRepo1() throws Exception {
+        final FeaturesService featureService = createTestFeatureService();
+        URI repoA = URI.create("custom:remove/a.xml");
+        featureService.addRepository(repoA);
+        Feature a1Feature = featureService.getFeature("a1");
+        installFeature(featureService, a1Feature);
+        Feature b1Feature = featureService.getFeature("b1");
+        installFeature(featureService, b1Feature);
+        featureService.removeRepository(repoA);
+        assertNotInstalled(featureService, a1Feature);
+        assertNotInstalled(featureService, b1Feature);
+    }
+    
+    @Test
+    public void testRemoveRepo2() throws Exception {
+        final FeaturesService featureService = createTestFeatureService();
+        URI repoA = URI.create("custom:remove/a.xml");
+        URI repoB = URI.create("custom:remove/b.xml");
+        featureService.addRepository(repoA);
+        featureService.addRepository(repoB);
+        Feature a1Feature = featureService.getFeature("a1");
+        installFeature(featureService, a1Feature);
+        Feature b1Feature = featureService.getFeature("b1");
+        installFeature(featureService, b1Feature);
+        featureService.removeRepository(repoA);
+        assertNotInstalled(featureService, a1Feature);
+        assertInstalled(featureService, b1Feature);
+    }
+
+    private FeaturesServiceImpl createTestFeatureService() {
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        FrameworkInfo dummyInfo = new FrameworkInfo();
+        expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
+        EasyMock.replay(installSupport);
+        final FeaturesServiceImpl featureService = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                                                                 installSupport, null, cfg);
+        return featureService;
+    }
+
+    private void assertNotInstalled(FeaturesService featureService, Feature feature) {
+        assertFalse("Feature " + feature.getName() + " should not be installed anymore after removal of repo",
+                    featureService.isInstalled(feature));
+    }
+    
+    private void assertInstalled(FeaturesService featureService, Feature feature) {
+        assertTrue("Feature " + feature.getName() + " should still be installed after removal of repo",
+                    featureService.isInstalled(feature));
+    }
+
+    private void installFeature(final FeaturesService featureService, Feature a1Feature)
+        throws Exception, InterruptedException {
+        featureService.installFeature(a1Feature, EnumSet.noneOf(Option.class));
+        while (!featureService.isInstalled(a1Feature)) {
+            Thread.sleep(100);
+        }
+    }
+    
     /**
      * This test ensures that every feature get installed only once, even if it appears multiple times in the list
      * of transitive feature dependencies (KARAF-1600)

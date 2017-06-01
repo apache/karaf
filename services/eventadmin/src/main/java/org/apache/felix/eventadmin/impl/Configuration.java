@@ -179,7 +179,7 @@ public class Configuration
                     interfaceNames = new String[] {ManagedService.class.getName(), MetaTypeProvider.class.getName()};
                     service = enhancedService;
                 }
-                Dictionary<String, Object> props = new Hashtable<String, Object>();
+                Dictionary<String, Object> props = new Hashtable<>();
                 props.put( Constants.SERVICE_PID, PID );
                 m_managedServiceReg = m_bundleContext.registerService( interfaceNames, service, props );
             }
@@ -420,9 +420,8 @@ public class Configuration
         {
             if ( m_adapters != null )
             {
-                for(int i=0;i<m_adapters.length;i++)
-                {
-                    m_adapters[i].destroy(m_bundleContext);
+                for (AbstractAdapter adapter : m_adapters) {
+                    adapter.destroy(m_bundleContext);
                 }
                 m_adapters = null;
             }

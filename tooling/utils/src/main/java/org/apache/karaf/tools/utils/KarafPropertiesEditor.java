@@ -55,12 +55,7 @@ public class KarafPropertiesEditor {
 
         // organize edits by file.
         for (KarafPropertyEdit edit : edits.getEdits()) {
-            List<KarafPropertyEdit> thisFileEdits = editsByFile.get(edit.getFile());
-            if (thisFileEdits == null) {
-                thisFileEdits = new ArrayList<>();
-                editsByFile.put(edit.getFile(), thisFileEdits);
-            }
-            thisFileEdits.add(edit);
+            editsByFile.computeIfAbsent(edit.getFile(), k -> new ArrayList<>()).add(edit);
         }
 
         for (Map.Entry<String, List<KarafPropertyEdit>> fileOps : editsByFile.entrySet()) {

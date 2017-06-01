@@ -22,13 +22,12 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.apache.karaf.instance.core.InstanceSettings;
 import org.junit.Assert;
 
 public class InstanceSettingsTest extends TestCase {
     public void testInstanceSettings() {
         InstanceSettings is =
-            new InstanceSettings(1, 1, 1, null, null, Collections.<String>emptyList(), Arrays.asList("hi"));
+            new InstanceSettings(1, 1, 1, null, null, Collections.emptyList(), Arrays.asList("hi"));
         assertEquals(1, is.getSshPort());
         assertEquals(1, is.getRmiRegistryPort());
         assertEquals(1, is.getRmiServerPort());
@@ -38,7 +37,7 @@ public class InstanceSettingsTest extends TestCase {
     }
     
     public void testEqualsHashCode() {
-        testEqualsHashCode(1, 1, 1, "top", "foo", Collections.<String>emptyList(), Arrays.asList("hi"));
+        testEqualsHashCode(1, 1, 1, "top", "foo", Collections.emptyList(), Arrays.asList("hi"));
         testEqualsHashCode(0, 0, 0, null, null, null, null);
     }
 
@@ -50,7 +49,7 @@ public class InstanceSettingsTest extends TestCase {
     }
     
     public void testEqualsHashCode2() {
-        InstanceSettings is = new InstanceSettings(1, 1, 1, "top", "foo", Collections.<String>emptyList(), Arrays.asList("hi"));
+        InstanceSettings is = new InstanceSettings(1, 1, 1, "top", "foo", Collections.emptyList(), Arrays.asList("hi"));
         Assert.assertFalse(is.equals(null));
         Assert.assertFalse(is.equals(new Object()));
         assertEquals(is, is);

@@ -77,7 +77,7 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
         Dictionary<String, Object> configProps = config.getProperties();
 
-        Map<String, Dictionary<String, Object>> configMaps = new HashMap<String, Dictionary<String, Object>>();
+        Map<String, Dictionary<String, Object>> configMaps = new HashMap<>();
         for (Enumeration<String> e = configProps.keys(); e.hasMoreElements(); ) {
             String key = e.nextElement();
             String bareCommand = key;
@@ -96,7 +96,7 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
             String pid = PROXY_SERVICE_ACL_PID_PREFIX + scopeName + "." + bareCommand;
             Dictionary<String, Object> map;
             if (!configMaps.containsKey(pid)) {
-                map = new Hashtable<String, Object>();
+                map = new Hashtable<>();
                 map.put("service.guard", "(&(" +
                         CommandProcessor.COMMAND_SCOPE + "=" + scopeName + ")(" +
                         CommandProcessor.COMMAND_FUNCTION + "=" + bareCommand + "))");
@@ -232,7 +232,7 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
     }
     
     private Map<String, String> loadScopeBundleMaps() {
-        Map<String, String> scopeBundleMaps = new HashMap<String, String>();
+        Map<String, String> scopeBundleMaps = new HashMap<>();
         try {
             for (Configuration config : configAdmin.listConfigurations("(service.pid=" + ACL_SCOPE_BUNDLE_MAP + ")")) {
                 Enumeration<String> keys = config.getProperties().keys();

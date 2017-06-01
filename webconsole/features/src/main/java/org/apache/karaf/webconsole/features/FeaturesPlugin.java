@@ -31,13 +31,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.felix.utils.json.JSONWriter;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
-import org.json.JSONException;
-import org.json.JSONWriter;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -261,54 +260,49 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
 
         final JSONWriter jw = new JSONWriter(pw);
 
-        try {
+        jw.object();
+
+        jw.key("status");
+        jw.value(statusLine);
+
+        jw.key("repositories");
+        jw.array();
+        for (Repository r : repositories) {
             jw.object();
-
-            jw.key("status");
-            jw.value(statusLine);
-
-            jw.key("repositories");
+            jw.key("name");
+            String name = "";
+            if (r.getName() != null)
+                name = r.getName();
+            jw.value(name);
+            jw.key("url");
+            String uri = r.getURI().toString();
+            jw.value(uri);
+            jw.key("actions");
             jw.array();
-            for (Repository r : repositories) {
-                jw.object();
-                jw.key("name");
-                String name = "";
-                if (r.getName() != null)
-                    name = r.getName();
-                jw.value(name);
-                jw.key("url");
-                String uri = r.getURI().toString();
-                jw.value(uri);
-                jw.key("actions");
-                jw.array();
-                boolean enable = true;
-                if (uri.startsWith("bundle")) {
-                    enable = false;
-                }
-                action(jw, enable, "refreshRepository", "Refresh", "refresh");
-                action(jw, enable, "removeRepository", "Remove", "delete");
-                jw.endArray();
-                jw.endObject();
+            boolean enable = true;
+            if (uri.startsWith("bundle")) {
+                enable = false;
             }
+            action(jw, enable, "refreshRepository", "Refresh", "refresh");
+            action(jw, enable, "removeRepository", "Remove", "delete");
             jw.endArray();
-
-            jw.key("features");
-            jw.array();
-            for (ExtendedFeature f : features) {
-                featureInfo(jw, f);
-            }
-            jw.endArray();
-
             jw.endObject();
-
-        } catch (JSONException je) {
-            throw new IOException(je.toString());
         }
+        jw.endArray();
+
+        jw.key("features");
+        jw.array();
+        for (ExtendedFeature f : features) {
+            featureInfo(jw, f);
+        }
+        jw.endArray();
+
+        jw.endObject();
 
     }
 
     private List<Repository> getRepositories() {
-        List<Repository> repositories = new ArrayList<Repository>();
+        List<Repository> repositories = new ArrayList<>();
 
         if (featuresService == null) {
             this.log.error("Features service is not available");
@@ -327,7 +321,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
     }
 
     private List<ExtendedFeature> getFeatures(List<Repository> repositories) {
-        List<ExtendedFeature> features = new ArrayList<ExtendedFeature>();
+        List<ExtendedFeature> features = new ArrayList<>();
 
         if (featuresService == null) {
             this.log.error("Features service is not available");
@@ -389,7 +383,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
         buf.append(msg);
     }
 
-    private void featureInfo(JSONWriter jw, ExtendedFeature feature) throws JSONException {
+    private void featureInfo(JSONWriter jw, ExtendedFeature feature) throws IOException {
         jw.object();
         jw.key("id");
         jw.value(feature.getId());
@@ -416,7 +410,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
         jw.endObject();
     }
 
-    private void action(JSONWriter jw, boolean enabled, String op, String title, String image) throws JSONException {
+    private void action(JSONWriter jw, boolean enabled, String op, String title, String image) throws IOException {
         jw.object();
         jw.key("enabled").value(enabled);
         jw.key("op").value(op);

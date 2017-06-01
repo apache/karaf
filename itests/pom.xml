@@ -42,6 +42,12 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
@@ -49,10 +55,10 @@
             <scope>test</scope>
             <type>tar.gz</type>
             <exclusions>
-            	<exclusion>
-            		<artifactId>org.apache.karaf.client</artifactId>
-            		<groupId>org.apache.karaf</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>*</artifactId>
+                    <groupId>*</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -62,11 +68,25 @@
             <type>tar.gz</type>
             <exclusions>
                 <exclusion>
-                    <artifactId>org.apache.karaf.client</artifactId>
-                    <groupId>org.apache.karaf</groupId>
+                    <artifactId>*</artifactId>
+                    <groupId>*</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-karaf</artifactId>
+            <version>5.14.4</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+            <exclusions>
+                <exclusion>
+                    <artifactId>*</artifactId>
+                    <groupId>*</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
         <dependency>
             <groupId>org.ops4j.pax.cdi</groupId>
             <artifactId>pax-cdi-features</artifactId>
@@ -90,6 +110,14 @@
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-container-karaf</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>
+                        org.apache.felix.configadmin
+                    </artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -103,6 +131,26 @@
             <artifactId>geronimo-atinject_1.0_spec</artifactId>
             <version>1.0</version>
             <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.hamcrest</artifactId>
+            <version>1.3_1</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.fileinstall</artifactId>
         </dependency>
 
         <!-- for JmsTest -->
@@ -154,6 +202,12 @@
             <version>${jetty.version}</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -198,21 +252,23 @@
                     </execution>
                 </executions>
             </plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<systemPropertyVariables>
-						<org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkCount>1</forkCount>
+                    <reuseForks>false</reuseForks>
+                    <systemPropertyVariables>
+                        <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
                         <spring31.version>${spring31.version}</spring31.version>
                         <spring32.version>${spring32.version}</spring32.version>
                         <spring40.version>${spring40.version}</spring40.version>
                         <spring41.version>${spring41.version}</spring41.version>
                         <spring42.version>${spring42.version}</spring42.version>
                         <spring43.version>${spring43.version}</spring43.version>
-					</systemPropertyVariables>
-				</configuration>
-			</plugin>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>

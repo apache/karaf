@@ -66,7 +66,7 @@ public class JMXSecurityTest extends KarafTestSupport {
 
     @Configuration
     public Option[] config() {
-        List<Option> options = new ArrayList<Option>(Arrays.asList(super.config()));
+        List<Option> options = new ArrayList<>(Arrays.asList(super.config()));
 
         // Add some extra options used by this test...
         options.addAll(Arrays.asList(
@@ -276,12 +276,12 @@ public class JMXSecurityTest extends KarafTestSupport {
                 new Object [] {serviceMBean.toString(), "getServices", new String [] {}},
                 new String [] {String.class.getName(), String.class.getName(), String[].class.getName()}));
 
-        Map<String, List<String>> map = new HashMap<String, List<String>>();
+        Map<String, List<String>> map = new HashMap<>();
         TabularData td = (TabularData) connection.invoke(securityMBean, "canInvoke", new Object [] {map}, new String [] {Map.class.getName()});
         assertEquals(0, td.size());
 
-        Map<String, List<String>> map2 = new HashMap<String, List<String>>();
-        map2.put(systemMBean.toString(), Collections.<String>emptyList());
+        Map<String, List<String>> map2 = new HashMap<>();
+        map2.put(systemMBean.toString(), Collections.emptyList());
         map2.put(serviceMBean.toString(), Arrays.asList("getServices(boolean)", "getServices(long)", "getServices(long,boolean)", "getServices()"));
         TabularData td2 = (TabularData) connection.invoke(securityMBean, "canInvoke", new Object [] {map2}, new String [] {Map.class.getName()});
         assertEquals(5, td2.size());
@@ -311,7 +311,7 @@ public class JMXSecurityTest extends KarafTestSupport {
         assertEquals("", cd5.get("Method"));
         assertTrue((Boolean) cd5.get("CanInvoke"));
 
-        Map<String, List<String>> map3 = new HashMap<String, List<String>>();
+        Map<String, List<String>> map3 = new HashMap<>();
         map3.put(serviceMBean.toString(), Collections.singletonList("getServices"));
         TabularData td3 = (TabularData) connection.invoke(securityMBean, "canInvoke", new Object [] {map3}, new String [] {Map.class.getName()});
         assertEquals(1, td3.size());
@@ -321,7 +321,7 @@ public class JMXSecurityTest extends KarafTestSupport {
         assertEquals("getServices", cd6.get("Method"));
         assertTrue((Boolean) cd6.get("CanInvoke"));
 
-        Map<String, List<String>> map4 = new HashMap<String, List<String>>();
+        Map<String, List<String>> map4 = new HashMap<>();
         map4.put(systemMBean.toString(), Collections.singletonList("halt"));
         TabularData td4 = (TabularData) connection.invoke(securityMBean, "canInvoke", new Object [] {map4}, new String [] {Map.class.getName()});
         assertEquals(1, td4.size());
@@ -363,7 +363,7 @@ public class JMXSecurityTest extends KarafTestSupport {
         else
             assertNull(m2.get("x"));
 
-        Map<String, String> newProps = new HashMap<String, String>();
+        Map<String, String> newProps = new HashMap<>();
         newProps.put("a.b.c", "abc");
         newProps.put("d.e.f", "def");
         assertJmxInvoke(shouldSucceed, connection, mbean, "update", new Object [] {pid, newProps}, new String [] {String.class.getName(), Map.class.getName()});
@@ -407,7 +407,7 @@ public class JMXSecurityTest extends KarafTestSupport {
         TabularType tt = new TabularType("PROPERTIES", "X", ct, new String [] {"Key"});
 
         TabularDataSupport tds = new TabularDataSupport(tt);
-        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> data = new HashMap<>();
         data.put("Key", "foo");
         data.put("Value", "bar");
         data.put("Type", "String");
@@ -428,7 +428,7 @@ public class JMXSecurityTest extends KarafTestSupport {
         assertJmxInvoke(shouldSucceed, connection, mbean, "delete", new Object [] {pid}, new String [] {String.class.getName()});
 
         TabularDataSupport tds2 = new TabularDataSupport(tt);
-        Map<String, Object> data2 = new HashMap<String, Object>();
+        Map<String, Object> data2 = new HashMap<>();
         data2.put("Key", "a.b.c");
         data2.put("Value", "d.e.f");
         data2.put("Type", "String");

@@ -51,6 +51,6 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
         addOption(FeaturesService.Option.Simulate, simulate);
         addOption(FeaturesService.Option.Verbose, verbose);
         addOption(FeaturesService.Option.NoAutoRefreshBundles, noRefresh);
-        admin.uninstallFeatures(new HashSet<String>(features), region, options);
+        admin.uninstallFeatures(new HashSet<>(features), region, options);
     }
 }

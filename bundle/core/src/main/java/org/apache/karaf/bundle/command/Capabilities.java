@@ -155,18 +155,12 @@ public class Capabilities extends BundlesCommand {
     {
         // Aggregate matching capabilities.
         Map<BundleCapability, List<BundleWire>> map =
-            new HashMap<BundleCapability, List<BundleWire>>();
+                new HashMap<>();
         for (BundleWire wire : wires)
         {
             if (matchNamespace(namespace, wire.getCapability().getNamespace()))
             {
-                List<BundleWire> dependents = map.get(wire.getCapability());
-                if (dependents == null)
-                {
-                    dependents = new ArrayList<BundleWire>();
-                    map.put(wire.getCapability(), dependents);
-                }
-                dependents.add(wire);
+                map.computeIfAbsent(wire.getCapability(), k -> new ArrayList<>()).add(wire);
             }
         }
         return map;

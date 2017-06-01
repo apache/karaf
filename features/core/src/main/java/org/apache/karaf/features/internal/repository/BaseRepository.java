@@ -43,8 +43,8 @@ public class BaseRepository implements Repository {
     protected final Map<String, CapabilitySet> capSets;
 
     public BaseRepository() {
-        this.resources = new ArrayList<Resource>();
-        this.capSets = new HashMap<String, CapabilitySet>();
+        this.resources = new ArrayList<>();
+        this.capSets = new HashMap<>();
     }
 
     public BaseRepository(Collection<Resource> resources) {
@@ -57,12 +57,7 @@ public class BaseRepository implements Repository {
     protected void addResource(Resource resource) {
         for (Capability cap : resource.getCapabilities(null)) {
             String ns = cap.getNamespace();
-            CapabilitySet set = capSets.get(ns);
-            if (set == null) {
-                set = new CapabilitySet(Collections.singletonList(ns));
-                capSets.put(ns, set);
-            }
-            set.addCapability(cap);
+            capSets.computeIfAbsent(ns, n -> new CapabilitySet(Collections.singletonList(n))).addCapability(cap);
         }
         resources.add(resource);
     }
@@ -73,7 +68,7 @@ public class BaseRepository implements Repository {
 
     @Override
     public Map<Requirement, Collection<Capability>> findProviders(Collection<? extends Requirement> requirements) {
-        Map<Requirement, Collection<Capability>> result = new HashMap<Requirement, Collection<Capability>>();
+        Map<Requirement, Collection<Capability>> result = new HashMap<>();
         for (Requirement requirement : requirements) {
             CapabilitySet set = capSets.get(requirement.getNamespace());
             if (set != null) {
@@ -88,7 +83,7 @@ public class BaseRepository implements Repository {
                 }
                 result.put(requirement, set.match(sf, true));
             } else {
-                result.put(requirement, Collections.<Capability>emptyList());
+                result.put(requirement, Collections.emptyList());
             }
         }
         return result;

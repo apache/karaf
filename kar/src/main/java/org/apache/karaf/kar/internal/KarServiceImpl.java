@@ -168,7 +168,7 @@ public class KarServiceImpl implements KarService {
 
 
     private List<URI> readFromFile(File repoListFile) {
-        ArrayList<URI> uriList = new ArrayList<URI>();
+        ArrayList<URI> uriList = new ArrayList<>();
         FileReader fr = null;
         try {
             fr = new FileReader(repoListFile);
@@ -237,7 +237,7 @@ public class KarServiceImpl implements KarService {
     
     @Override
     public List<String> list() throws Exception {
-        List<String> kars = new ArrayList<String>();
+        List<String> kars = new ArrayList<>();
         for (File kar : storage.listFiles()) {
             if (kar.isDirectory()) {
                 kars.add(kar.getName());
@@ -310,10 +310,10 @@ public class KarServiceImpl implements KarService {
             Manifest manifest = createNonAutoStartManifest(repo.getURI());
             jos = new JarOutputStream(new BufferedOutputStream(fos, 100000), manifest);
             
-            Map<URI, Integer> locationMap = new HashMap<URI, Integer>();
+            Map<URI, Integer> locationMap = new HashMap<>();
             copyResourceToJar(jos, repo.getURI(), locationMap);
         
-            Map<String, Feature> featureMap = new HashMap<String, Feature>();
+            Map<String, Feature> featureMap = new HashMap<>();
             for (Feature feature : repo.getFeatures()) {
                 featureMap.put(feature.getName(), feature);
             }
@@ -338,7 +338,7 @@ public class KarServiceImpl implements KarService {
     }
 
     private Set<Feature> getFeatures(Map<String, Feature> featureMap, List<String> features, int depth) {
-        Set<Feature> featureSet = new HashSet<Feature>();
+        Set<Feature> featureSet = new HashSet<>();
         if (depth > 5) {
             // Break after some recursions to avoid endless loops 
             return featureSet;
@@ -355,7 +355,7 @@ public class KarServiceImpl implements KarService {
             } else {
                 featureSet.add(feature);
                 List<Dependency> deps = feature.getDependencies();
-                List<String> depNames = new ArrayList<String>();
+                List<String> depNames = new ArrayList<>();
                 for (Dependency dependency : deps) {
                     depNames.add(dependency.getName());
                 }

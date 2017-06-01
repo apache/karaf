@@ -89,10 +89,10 @@ public class InfoAction extends SubsystemSupport implements Action {
 
     protected String generateFormattedOutput(Subsystem subsystem) {
         StringBuilder output = new StringBuilder();
-        Map<String, Object> otherAttribs = new TreeMap<String, Object>();
-        Map<String, Object> subsystemAttribs = new TreeMap<String, Object>();
-        Map<String, Object> serviceAttribs = new TreeMap<String, Object>();
-        Map<String, Object> packagesAttribs = new TreeMap<String, Object>();
+        Map<String, Object> otherAttribs = new TreeMap<>();
+        Map<String, Object> subsystemAttribs = new TreeMap<>();
+        Map<String, Object> serviceAttribs = new TreeMap<>();
+        Map<String, Object> packagesAttribs = new TreeMap<>();
         Map<String, String> dict = subsystem.getSubsystemHeaders(null);
 
         // do an initial loop and separate the attributes in different groups
@@ -159,7 +159,7 @@ public class InfoAction extends SubsystemSupport implements Action {
             output.append('\n');
         }
 
-        Map<String, ClauseFormatter> formatters = new HashMap<String, ClauseFormatter>();
+        Map<String, ClauseFormatter> formatters = new HashMap<>();
         /*
         formatters.put(REQUIRE_BUNDLE_ATTRIB, new ClauseFormatter() {
             public void pre(Clause clause, StringBuilder output) {

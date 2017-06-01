@@ -31,8 +31,8 @@ import org.apache.karaf.shell.api.console.Registry;
 public class RegistryImpl implements Registry {
 
     private final Registry parent;
-    private final Map<Object, Object> services = new LinkedHashMap<Object, Object>();
-    private final Map<String, List<Command>> commands = new HashMap<String, List<Command>>();
+    private final Map<Object, Object> services = new LinkedHashMap<>();
+    private final Map<String, List<Command>> commands = new HashMap<>();
 
     public RegistryImpl(Registry parent) {
         this.parent = parent;
@@ -63,7 +63,7 @@ public class RegistryImpl implements Registry {
     @Override
     public <T> void register(Callable<T> factory, Class<T> clazz) {
         synchronized (services) {
-            services.put(clazz, new Factory<T>(clazz, factory));
+            services.put(clazz, new Factory<>(clazz, factory));
         }
     }
 
@@ -74,12 +74,7 @@ public class RegistryImpl implements Registry {
             if (service instanceof Command) {
                 Command cmd = (Command) service;
                 String key = cmd.getScope() + ":" + cmd.getName();
-                List<Command> cmds = commands.get(key);
-                if (cmds == null) {
-                    cmds = new ArrayList<Command>();
-                    commands.put(key, cmds);
-                }
-                cmds.add(cmd);
+                commands.computeIfAbsent(key, k -> new ArrayList<>()).add(cmd);
             }
         }
     }
@@ -138,7 +133,7 @@ public class RegistryImpl implements Registry {
 
     @Override
     public <T> List<T> getServices(Class<T> clazz) {
-        List<T> list = new ArrayList<T>();
+        List<T> list = new ArrayList<>();
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {

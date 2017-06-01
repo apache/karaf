@@ -60,7 +60,7 @@ public class ListServices implements Action {
             listNames();
             return null;
         }
-        List<ServiceReference<?>> serviceRefs = new ArrayList<ServiceReference<?>>();
+        List<ServiceReference<?>> serviceRefs = new ArrayList<>();
         Bundle[] bundles = bundleContext.getBundles();
         for (Bundle bundle : bundles) {
             ServiceReference<?>[] services = bundle.getRegisteredServices();
@@ -86,7 +86,7 @@ public class ListServices implements Action {
     
     private void listNames() {
         Map<String, Integer> serviceNames = getServiceNamesMap(bundleContext);
-        ArrayList<String> serviceNamesList = new ArrayList<String>(serviceNames.keySet());
+        ArrayList<String> serviceNamesList = new ArrayList<>(serviceNames.keySet());
         Collections.sort(serviceNamesList);
         for (String name : serviceNamesList) {
             System.out.println(name + " (" + serviceNames.get(name) + ")");
@@ -94,7 +94,7 @@ public class ListServices implements Action {
     }
     
     public static Map<String, Integer> getServiceNamesMap(BundleContext bundleContext) {
-        Map<String, Integer> serviceNames = new HashMap<String, Integer>();
+        Map<String, Integer> serviceNames = new HashMap<>();
         Bundle[] bundles = bundleContext.getBundles();
         for (Bundle bundle : bundles) {
             ServiceReference<?>[] services = bundle.getRegisteredServices();
@@ -103,8 +103,7 @@ public class ListServices implements Action {
                     String[] names = (String[])serviceReference.getProperty(Constants.OBJECTCLASS);
                     if (names != null) {
                     	for (String name : names) {
-                    		int curCount = (serviceNames.containsKey(name)) ? serviceNames.get(name) : 0;
-                    		serviceNames.put(name, curCount + 1);
+                            serviceNames.merge(name, 1, (a, b) -> a + b);
                     	}
                     }
                 }

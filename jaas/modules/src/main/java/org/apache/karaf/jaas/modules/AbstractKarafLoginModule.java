@@ -33,7 +33,7 @@ import org.osgi.framework.BundleContext;
  */
 public abstract class AbstractKarafLoginModule implements LoginModule {
 
-    protected Set<Principal> principals = new HashSet<Principal>();
+    protected Set<Principal> principals = new HashSet<>();
     protected Subject subject;
     protected String user;
     protected CallbackHandler callbackHandler;

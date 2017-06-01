@@ -44,7 +44,7 @@ public class LogServiceLog4j1Impl implements LogServiceInternal {
             String root = getLevelFromProperty((String) config.get(ROOT_LOGGER_PREFIX));
             loggers.put(ROOT_LOGGER, root);
             for (Enumeration<String> e = config.keys(); e.hasMoreElements(); ) {
-                String prop = (String) e.nextElement();
+                String prop = e.nextElement();
                 if (prop.startsWith(LOGGER_PREFIX)) {
                     String val = getLevelFromProperty((String) config.get(prop));
                     loggers.put(prop.substring(LOGGER_PREFIX.length()), val);

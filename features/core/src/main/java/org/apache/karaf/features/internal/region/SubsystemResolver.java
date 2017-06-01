@@ -168,7 +168,7 @@ public class SubsystemResolver {
         if (root != null) {
             return root.collectPrerequisites();
         }
-        return new HashSet<String>();
+        return new HashSet<>();
     }
 
     public Map<Resource, List<Wire>> resolve(
@@ -272,8 +272,8 @@ public class SubsystemResolver {
         Requirement req = new RequirementImpl(
                 null,
                 IDENTITY_NAMESPACE,
-                Collections.<String, String>emptyMap(),
-                Collections.<String, Object>emptyMap(),
+                Collections.emptyMap(),
+                Collections.emptyMap(),
                 new SimpleFilter(null, null, SimpleFilter.MATCH_ALL));
         Collection<Capability> identities = repository.findProviders(Collections.singleton(req)).get(req);
         List<Object> resources = new ArrayList<>();
@@ -310,12 +310,7 @@ public class SubsystemResolver {
     private void addBundleInfos(Subsystem subsystem) {
         if (subsystem != null) {
             String region = getFlatSubsystemsMap().get(subsystem.getName());
-            Map<String, BundleInfo> bis = bundleInfos.get(region);
-            if (bis == null) {
-                bis = new HashMap<>();
-                bundleInfos.put(region, bis);
-            }
-            bis.putAll(subsystem.getBundleInfos());
+            bundleInfos.computeIfAbsent(region, k -> new HashMap<>()).putAll(subsystem.getBundleInfos());
             for (Subsystem child : subsystem.getChildren()) {
                 addBundleInfos(child);
             }

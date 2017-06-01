@@ -30,8 +30,8 @@ public class CreateCommand extends JmsCommandSupport {
     @Argument(index = 0, name = "name", description = "The JMS connection factory name", required = true, multiValued = false)
     String name;
 
-    @Option(name = "-t", aliases = { "--type" }, description = "The JMS connection factory type (ActiveMQ or WebsphereMQ)", required = false, multiValued = false)
-    @Completion(value = StringsCompleter.class, values = { "activemq", "webspheremq" })
+    @Option(name = "-t", aliases = { "--type" }, description = "The JMS connection factory type (ActiveMQ, Artemis or WebsphereMQ)", required = false, multiValued = false)
+    @Completion(value = StringsCompleter.class, values = { "activemq", "artemis", "webspheremq" })
     String type = "ActiveMQ";
 
     @Option(name = "--url", description = "URL of the JMS broker. For WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = false, multiValued = false)

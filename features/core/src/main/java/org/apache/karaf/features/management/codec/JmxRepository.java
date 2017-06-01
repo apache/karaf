@@ -101,7 +101,7 @@ public class JmxRepository {
         try {
             String description = "This type identify a Karaf repository";
             String[] itemNames = FeaturesServiceMBean.REPOSITORY;
-            OpenType[] itemTypes = new OpenType[itemNames.length];
+            OpenType<?>[] itemTypes = new OpenType[itemNames.length];
             String[] itemDescriptions = new String[itemNames.length];
             itemTypes[0] = SimpleType.STRING;
             itemTypes[1] = SimpleType.STRING;

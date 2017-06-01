@@ -49,7 +49,7 @@ public class EncryptionSupport {
 
     public Encryption getEncryption() {
         if (encryption == null) {
-            Map<String, String> encOpts = new HashMap<String, String>();
+            Map<String, String> encOpts = new HashMap<>();
             for (String key : options.keySet()) {
                 if (key.startsWith("encryption.")) {
                     encOpts.put(key.substring("encryption.".length()), options.get(key).toString());

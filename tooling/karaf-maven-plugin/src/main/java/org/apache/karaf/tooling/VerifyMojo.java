@@ -75,6 +75,7 @@ import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.State;
+import org.apache.karaf.features.internal.service.StaticInstallSupport;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.profile.assembly.CustomDownloadManager;
@@ -101,8 +102,6 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Requirement;
-import org.osgi.resource.Resource;
-import org.osgi.resource.Wire;
 import org.osgi.service.resolver.ResolutionException;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
@@ -417,7 +416,7 @@ public class VerifyMojo extends MojoSupport {
         try {
             Bundle systemBundle = getSystemBundle(getMetadata(properties, "metadata#"));
             DummyDeployCallback callback = new DummyDeployCallback(systemBundle, repositories.values());
-            Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback);
+            Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback, callback);
 
 
             // Install framework
@@ -625,11 +624,8 @@ public class VerifyMojo extends MojoSupport {
                 key = key.substring(prefix.length());
                 String[] parts = key.split("#");
                 if (parts.length == 3) {
-                    Map<VersionRange, Map<String, String>> ranges = result.get(parts[0]);
-                    if (ranges == null) {
-                        ranges = new HashMap<>();
-                        result.put(parts[0], ranges);
-                    }
+                    Map<VersionRange, Map<String, String>> ranges =
+                            result.computeIfAbsent(parts[0], k -> new HashMap<>());
                     String version = parts[1];
                     if (!version.startsWith("[") && !version.startsWith("(")) {
                         Processor processor = new Processor();
@@ -638,12 +634,7 @@ public class VerifyMojo extends MojoSupport {
                         version = macro.process("${range;[==,=+)}");
                     }
                     VersionRange range = new VersionRange(version);
-                    Map<String, String> hdrs = ranges.get(range);
-                    if (hdrs == null) {
-                        hdrs = new HashMap<>();
-                        ranges.put(range, hdrs);
-                    }
-                    hdrs.put(parts[2], val);
+                    ranges.computeIfAbsent(range, k -> new HashMap<>()).put(parts[2], val);
                 }
             }
         }
@@ -756,7 +747,7 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    public static class DummyDeployCallback implements Deployer.DeployCallback {
+    public static class DummyDeployCallback extends StaticInstallSupport implements Deployer.DeployCallback {
 
         private final Bundle systemBundle;
         private final Deployer.DeploymentState dstate;
@@ -785,10 +776,6 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
-        public void print(String message, boolean verbose) {
-        }
-
-        @Override
         public void saveState(State state) {
             dstate.state.replace(state);
         }
@@ -798,7 +785,11 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
-        public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        public void installConfigs(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        }
+        
+        @Override
+        public void installLibraries(org.apache.karaf.features.Feature feature) throws IOException {
         }
 
         @Override
@@ -833,39 +824,6 @@ public class VerifyMojo extends MojoSupport {
             }
         }
 
-        @Override
-        public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void uninstall(Bundle bundle) throws BundleException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void startBundle(Bundle bundle) throws BundleException {
-        }
-
-        @Override
-        public void stopBundle(Bundle bundle, int options) throws BundleException {
-        }
-
-        @Override
-        public void setBundleStartLevel(Bundle bundle, int startLevel) {
-        }
-
-        @Override
-        public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
-        }
-
-        @Override
-        public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
-        }
-
-        @Override
-        public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
-        }
     }
 
     public class MavenResolverLog extends org.apache.felix.resolver.Logger {

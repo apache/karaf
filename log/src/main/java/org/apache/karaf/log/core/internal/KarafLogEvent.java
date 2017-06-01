@@ -46,6 +46,7 @@ public class KarafLogEvent implements PaxLoggingEvent {
         this.timeStamp = event.getTimeStamp();
         this.fQNOfLoggerClass = event.getFQNOfLoggerClass();
         this.properties = new HashMap(event.getProperties());
+        this.locationInformation = event.getLocationInformation();
     }
 
     @Override
@@ -86,7 +87,7 @@ public class KarafLogEvent implements PaxLoggingEvent {
 
     @Override
     public boolean locationInformationExists() {
-        return false;
+        return this.locationInformation != null;
     }
 
     @Override

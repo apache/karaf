@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -47,6 +46,7 @@ import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.State;
+import org.apache.karaf.features.internal.service.StaticInstallSupport;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.util.maven.Parser;
 import org.osgi.framework.Bundle;
@@ -54,12 +54,10 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.resource.Resource;
-import org.osgi.resource.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssemblyDeployCallback implements Deployer.DeployCallback {
+public class AssemblyDeployCallback extends StaticInstallSupport implements Deployer.DeployCallback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
 
@@ -114,10 +112,6 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     }
 
     @Override
-    public void print(String message, boolean verbose) {
-    }
-
-    @Override
     public void saveState(State state) {
         dstate.state.replace(state);
     }
@@ -127,13 +121,8 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     }
 
     @Override
-    public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
-        // Check blacklist
-        if (Blacklist.isFeatureBlacklisted(builder.getBlacklistedFeatures(), feature.getName(), feature.getVersion())) {
-            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
-                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
-            }
-        }
+    public void installConfigs(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        assertNotBlacklisted(feature);
         // Install
         Downloader downloader = manager.createDownloader();
         for (Config config : ((Feature) feature).getConfig()) {
@@ -173,6 +162,13 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                 Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
             });
         }
+    }
+
+    
+    @Override
+    public void installLibraries(org.apache.karaf.features.Feature feature) throws IOException {
+        assertNotBlacklisted(feature);
+        Downloader downloader = manager.createDownloader();
         List<String> libraries = new ArrayList<>();
         for (Library library : ((Feature) feature).getLibraries()) {
             String lib = library.getLocation() +
@@ -190,6 +186,14 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             downloader.await();
         } catch (Exception e) {
             throw new IOException("Error downloading configuration files", e);
+        }
+    }
+    
+    private void assertNotBlacklisted(org.apache.karaf.features.Feature feature) {
+        if (Blacklist.isFeatureBlacklisted(builder.getBlacklistedFeatures(), feature.getName(), feature.getVersion())) {
+            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
+                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
+            }
         }
     }
 
@@ -250,38 +254,8 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     }
 
     @Override
-    public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void uninstall(Bundle bundle) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void startBundle(Bundle bundle) throws BundleException {
-    }
-
-    @Override
-    public void stopBundle(Bundle bundle, int options) throws BundleException {
-    }
-
-    @Override
     public void setBundleStartLevel(Bundle bundle, int startLevel) {
         bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
-    }
-
-    @Override
-    public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
-    }
-
-    @Override
-    public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
-    }
-
-    @Override
-    public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
     }
 
     private String substFinalName(String finalname) {
@@ -302,4 +276,5 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
         }
         return finalname;
     }
+
 }

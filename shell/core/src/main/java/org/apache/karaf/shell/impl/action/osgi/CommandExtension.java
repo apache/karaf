@@ -58,7 +58,7 @@ public class CommandExtension implements Extension {
     private final Registry registry;
     private final CountDownLatch started;
     private final AggregateServiceTracker tracker;
-    private final List<Class> classes = new ArrayList<Class>();
+    private final List<Class> classes = new ArrayList<>();
     private Manager manager;
 
 

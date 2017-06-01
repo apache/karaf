@@ -186,7 +186,7 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setKeyExchangeFactories(SshUtils.buildKexAlgorithms(kexAlgorithms));
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
         server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(new ShellCommandFactory(sessionFactory)).build());
-        server.setSubsystemFactories(Arrays.<NamedFactory<org.apache.sshd.server.Command>>asList(new SftpSubsystemFactory()));
+        server.setSubsystemFactories(Arrays.asList(new SftpSubsystemFactory()));
         server.setKeyPairProvider(keyPairProvider);
         server.setPasswordAuthenticator(authenticator);
         server.setPublickeyAuthenticator(authenticator);

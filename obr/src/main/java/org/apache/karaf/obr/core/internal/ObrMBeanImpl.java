@@ -16,8 +16,9 @@
  */
 package org.apache.karaf.obr.core.internal;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -58,12 +59,9 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
     }
 
     public List<String> getUrls() {
-        Repository[] repositories = repositoryAdmin.listRepositories();
-        List<String> urls = new ArrayList<String>();
-        for (int i = 0; i < repositories.length; i++) {
-            urls.add(repositories[i].getURI());
-        }
-        return urls;
+        return Arrays.stream(repositoryAdmin.listRepositories())
+                .map(Repository::getURI)
+                .collect(Collectors.toList());
     }
 
     public TabularData getBundles() throws MBeanException {
@@ -77,11 +75,11 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
             TabularData table = new TabularDataSupport(tableType);
 
             Resource[] resources = repositoryAdmin.discoverResources("(|(presentationname=*)(symbolicname=*))");
-            for (int i = 0; i < resources.length; i++) {
+            for (Resource resource : resources) {
                 try {
                     CompositeData data = new CompositeDataSupport(bundleType,
                             new String[]{"presentationname", "symbolicname", "version"},
-                            new Object[]{resources[i].getPresentationName(), resources[i].getSymbolicName(), resources[i].getVersion().toString()});
+                            new Object[]{resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString()});
                     table.put(data);
                 } catch (Exception e) {
                     e.printStackTrace();

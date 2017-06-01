@@ -35,7 +35,7 @@ public class ServletServiceImpl implements ServletService {
 
     @Override
     public List<ServletInfo> getServlets() {
-        List<ServletInfo> servletInfos = new ArrayList<ServletInfo>();
+        List<ServletInfo> servletInfos = new ArrayList<>();
         Collection<ServletEvent> events = servletEventHandler.getServletEvents();
         for (ServletEvent event : events) {
             Servlet servlet = event.getServlet();
@@ -52,7 +52,7 @@ public class ServletServiceImpl implements ServletService {
 
             String alias = event.getAlias() != null ? event.getAlias() : " ";
 
-            String[] urls = (String[])(event.getUrlParameter() != null ? event.getUrlParameter() : new String[] {""});
+            String[] urls = event.getUrlParameter() != null ? event.getUrlParameter() : new String[] {""};
             ServletInfo info = new ServletInfo();
             info.setBundleId(event.getBundle().getBundleId());
             info.setName(servletName);

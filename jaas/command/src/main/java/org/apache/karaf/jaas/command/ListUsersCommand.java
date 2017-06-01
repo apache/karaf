@@ -67,7 +67,7 @@ public class ListUsersCommand extends JaasCommandSupport {
         table.column("Role");
 
         for (UserPrincipal user : users) {
-            List<String> reportedRoles = new ArrayList<String>();
+            List<String> reportedRoles = new ArrayList<>();
             String userName = user.getName();
 
             for (GroupPrincipal group : engine.listGroups(user)) {
@@ -95,7 +95,7 @@ public class ListUsersCommand extends JaasCommandSupport {
     }
 
     private List<String> displayGroupRoles(BackingEngine engine, String userName, GroupPrincipal group, ShellTable table) {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         List<RolePrincipal> roles = engine.listRoles(group);
 
         if (roles != null && roles.size() >= 1) {

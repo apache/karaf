@@ -56,7 +56,7 @@ public abstract class BundlesCommand implements Action {
         if (bundles.isEmpty()) {
             throw new IllegalArgumentException("No matching bundles");
         }
-        List<Exception> exceptions = new ArrayList<Exception>();
+        List<Exception> exceptions = new ArrayList<>();
         for (Bundle bundle : bundles) {
             try {
                 executeOnBundle(bundle);

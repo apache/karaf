@@ -29,7 +29,7 @@ import org.osgi.framework.BundleListener;
 public class WebEventHandler implements WebListener, BundleListener {
 
     BundleContext bundleContext;
-    private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();
+    private final Map<Long, WebEvent> bundleEvents = new HashMap<>();
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;

@@ -28,7 +28,7 @@ public class SubsystemCompleter extends SubsystemSupport implements Completer {
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        List<String> strings = new ArrayList<String>();
+        List<String> strings = new ArrayList<>();
         for (Subsystem ss : getSubsystems()) {
             strings.add(Long.toString(ss.getSubsystemId()));
             strings.add(ss.getSymbolicName() + "/" + ss.getVersion());

@@ -122,7 +122,7 @@ public final class ResourceBuilder {
         if (uri != null) {
             Map<String, Object> attrs = new HashMap<>();
             attrs.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, uri);
-            resource.addCapability(new CapabilityImpl(resource, ContentNamespace.CONTENT_NAMESPACE, Collections.<String, String>emptyMap(), attrs));
+            resource.addCapability(new CapabilityImpl(resource, ContentNamespace.CONTENT_NAMESPACE, Collections.emptyMap(), attrs));
         }
 
         // Add a bundle and host capability to all
@@ -190,7 +190,7 @@ public final class ResourceBuilder {
         // Parse Bundle-RequiredExecutionEnvironment.
         //
         List<Requirement> breeReqs =
-                parseBreeHeader((String) headerMap.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT), resource);
+                parseBreeHeader(headerMap.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT), resource);
 
         //
         // Parse Export-Package.
@@ -377,7 +377,7 @@ public final class ResourceBuilder {
                             resource,
                             ServiceNamespace.SERVICE_NAMESPACE,
                             dirs,
-                            Collections.<String, Object>emptyMap(),
+                            Collections.emptyMap(),
                             SimpleFilter.parse(filter)));
                 }
             }
@@ -422,7 +422,7 @@ public final class ResourceBuilder {
                                 resource,
                                 BundleRevision.PACKAGE_NAMESPACE,
                                 newDirs,
-                                Collections.<String, Object>emptyMap(),
+                                Collections.emptyMap(),
                                 sf)
                 );
             }
@@ -850,7 +850,7 @@ public final class ResourceBuilder {
     }
 
     private static List<Requirement> parseBreeHeader(String header, Resource resource) {
-        List<String> filters = new ArrayList<String>();
+        List<String> filters = new ArrayList<>();
         for (String entry : parseDelimitedString(header, ",")) {
             List<String> names = parseDelimitedString(entry, "/");
             List<String> left = parseDelimitedString(names.get(0), "-");
@@ -930,11 +930,11 @@ public final class ResourceBuilder {
             }
 
             SimpleFilter sf = SimpleFilter.parse(reqFilter);
-            return Collections.<Requirement>singletonList(new RequirementImpl(
+            return Collections.singletonList(new RequirementImpl(
                     resource,
                     ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE,
                     Collections.singletonMap(ExecutionEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, reqFilter),
-                    Collections.<String, Object>emptyMap(),
+                    Collections.emptyMap(),
                     sf));
         }
     }

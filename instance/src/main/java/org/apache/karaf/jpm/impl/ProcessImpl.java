@@ -53,7 +53,7 @@ public class ProcessImpl implements Process {
 
     public boolean isRunning() throws IOException {
         if (ScriptUtils.isWindows()) {
-            Map<String, String> props = new HashMap<String, String>();
+            Map<String, String> props = new HashMap<>();
             props.put("${pid}", Integer.toString(pid));
             int ret = ScriptUtils.execute("running", props);
             return ret == 0;
@@ -75,7 +75,7 @@ public class ProcessImpl implements Process {
     public void destroy() throws IOException {
         int ret;
         if (ScriptUtils.isWindows()) {
-            Map<String, String> props = new HashMap<String, String>();
+            Map<String, String> props = new HashMap<>();
             props.put("${pid}", Integer.toString(pid));
             ret = ScriptUtils.execute("destroy", props);
         } else {
@@ -114,7 +114,7 @@ public class ProcessImpl implements Process {
         //File error = File.createTempFile("jpm.", ".error");
         File pidFile = File.createTempFile("jpm.", ".pid");
         try {
-            Map<String, String> props = new HashMap<String, String>();
+            Map<String, String> props = new HashMap<>();
             //props.put("${in.file}", input.getCanonicalPath());
             //props.put("${out.file}", output.getCanonicalPath());
             //props.put("${err.file}", error.getCanonicalPath());

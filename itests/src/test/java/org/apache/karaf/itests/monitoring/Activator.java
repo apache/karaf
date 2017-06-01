@@ -16,28 +16,23 @@
  */
 package org.apache.karaf.itests.monitoring;
 
-import java.util.List;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 public class Activator implements BundleActivator {
 
-    private ServiceRegistration<List> registration;
-    private ServiceMonitor service;
+    private ServiceMonitor serviceMonitor;
 
     @Override
     public void start(BundleContext context) throws Exception {
-        service = new ServiceMonitor(context.getBundle(0L).getBundleContext());
-        registration = context.registerService(List.class, service.getServices(), null);
-        context.addServiceListener(service::addServiceEvent);
+        serviceMonitor = new ServiceMonitor();
+        context.registerService(ServiceMonitor.class, serviceMonitor, null);
+        context.addServiceListener(serviceMonitor);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        context.removeServiceListener(service::addServiceEvent);
-        registration.unregister();
+        context.removeServiceListener(serviceMonitor);
     }
 
 }

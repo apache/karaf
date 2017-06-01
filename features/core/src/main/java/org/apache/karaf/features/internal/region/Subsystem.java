@@ -540,7 +540,7 @@ public class Subsystem extends ResourceImpl {
             while ((entry = zis.getNextEntry()) != null) {
                 if (MANIFEST_NAME.equals(entry.getName())) {
                     Attributes attributes = new Manifest(zis).getMainAttributes();
-                    Map<java.lang.String, java.lang.String> headers = new HashMap<java.lang.String, java.lang.String>();
+                    Map<java.lang.String, java.lang.String> headers = new HashMap<>();
                     for (Map.Entry attr : attributes.entrySet()) {
                         headers.put(attr.getKey().toString(), attr.getValue().toString());
                     }
@@ -561,11 +561,7 @@ public class Subsystem extends ResourceImpl {
 
     private void doAddDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
         String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
-        DependencyInfo info = dependencies.get(id);
-        if (info == null) {
-            info = new DependencyInfo();
-            dependencies.put(id, info);
-        }
+        DependencyInfo info = dependencies.computeIfAbsent(id, k -> new DependencyInfo());
         info.resource = resource;
         info.mandatory |= mandatory;
         info.start |= start;

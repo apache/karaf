@@ -58,7 +58,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuredSessionFactoryImpl.class);
 
     private BundleContext bundleContext;
-    private Map<String, Dictionary<String, Object>> scopes = new HashMap<String, Dictionary<String, Object>>();
+    private Map<String, Dictionary<String, Object>> scopes = new HashMap<>();
     private SingleServiceTracker<ConfigurationAdmin> configAdminTracker;
     private ServiceRegistration<ConfigurationListener> registration;
 
@@ -93,7 +93,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     protected boolean isVisible(Command command) {
         Dictionary<String, Object> config = getScopeConfig(command.getScope());
         if (config != null) {
-            List<String> roles = new ArrayList<String>();
+            List<String> roles = new ArrayList<>();
             ACLConfigurationParser.getRolesForInvocation(command.getName(), null, null, config, roles);
             if (roles.isEmpty()) {
                 return true;
@@ -115,7 +115,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
             if (!isVisible(command)) {
                 throw new CommandNotFoundException(command.getScope() + ":" + command.getName());
             }
-            List<String> roles = new ArrayList<String>();
+            List<String> roles = new ArrayList<>();
             ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(command.getName(), new Object[] { arguments.toString() }, null, config, roles);
             if (s == ACLConfigurationParser.Specificity.NO_MATCH) {
                 return;

@@ -272,7 +272,11 @@ public class ConsoleSessionImpl implements Session {
 
     public void close() {
         if (running) {
-            reader.getHistory().save();
+            try {
+                reader.getHistory().save();
+            } catch (IOException e) {
+                // ignore
+            }
 
             running = false;
             if (thread != Thread.currentThread()) {

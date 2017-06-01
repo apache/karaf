@@ -40,7 +40,7 @@ public class ScriptJob implements Job {
     @Override
     public void execute(JobContext context) {
         try {
-            script.execute(session, Collections.<Object>singletonList(context));
+            script.execute(session, Collections.singletonList(context));
         } catch (Exception e) {
             LOGGER.warn("Error executing script", e);
         }

@@ -112,12 +112,7 @@ public final class MapUtils {
 
     public static <S, T> void add(Map<S, Set<T>> from, Map<S, Set<T>> toAdd) {
         for (Map.Entry<S, Set<T>> entry : toAdd.entrySet()) {
-            Set<T> s = from.get(entry.getKey());
-            if (s == null) {
-                s = new HashSet<>();
-                from.put(entry.getKey(), s);
-            }
-            s.addAll(entry.getValue());
+            from.computeIfAbsent(entry.getKey(), k -> new HashSet<>()).addAll(entry.getValue());
         }
     }
 
@@ -145,7 +140,9 @@ public final class MapUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+     "unchecked", "rawtypes"
+    })
     public static <S> S copy(S obj) {
         if (obj instanceof List) {
             List r = new ArrayList();
@@ -169,6 +166,9 @@ public final class MapUtils {
         return obj;
     }
 
+    @SuppressWarnings({
+     "rawtypes", "unchecked"
+    })
     public static <S> void copy(S s1, S s2) {
         if (s1 instanceof Collection) {
             for (Object o : (Collection) s1) {
@@ -196,12 +196,7 @@ public final class MapUtils {
     }
 
     public static <S, T> void addToMapSet(Map<S, Set<T>> map, S key, T value) {
-        Set<T> values = map.get(key);
-        if (values == null) {
-            values = new HashSet<>();
-            map.put(key, values);
-        }
-        values.add(value);
+        map.computeIfAbsent(key, k -> new HashSet<>()).add(value);
     }
 
     public static <S, T> void removeFromMapSet(Map<S, Set<T>> map, S key, T value) {

@@ -48,7 +48,7 @@ public class XmlRepository extends BaseRepository {
     protected final String url;
     protected final long expiration;
     protected final boolean ignoreFailures;
-    protected final Map<String, XmlLoader> loaders = new HashMap<String, XmlLoader>();
+    protected final Map<String, XmlLoader> loaders = new HashMap<>();
     protected final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public XmlRepository(String url, long expiration, boolean ignoreFailures) {
@@ -102,7 +102,7 @@ public class XmlRepository extends BaseRepository {
     private boolean hasResource(String type, String name, Version version) {
         CapabilitySet set = capSets.get(IDENTITY_NAMESPACE);
         if (set != null) {
-            Map<String, Object> attrs = new HashMap<String, Object>();
+            Map<String, Object> attrs = new HashMap<>();
             attrs.put(CAPABILITY_TYPE_ATTRIBUTE, type);
             attrs.put(IDENTITY_NAMESPACE, name);
             attrs.put(CAPABILITY_VERSION_ATTRIBUTE, version);
@@ -148,11 +148,7 @@ public class XmlRepository extends BaseRepository {
     private boolean checkAndLoadReferrals(String url, int hopCount) {
         boolean modified = false;
         if (hopCount > 0) {
-            XmlLoader loader = loaders.get(url);
-            if (loader == null) {
-                loader = new XmlLoader(url, expiration);
-                loaders.put(url, loader);
-            }
+            XmlLoader loader = loaders.computeIfAbsent(url, u -> new XmlLoader(u, expiration));
             modified = loader.checkAndLoadCache();
             for (StaxParser.Referral referral : loader.xml.referrals) {
                 modified |= checkAndLoadReferrals(referral.url, Math.min(referral.depth, hopCount - 1));

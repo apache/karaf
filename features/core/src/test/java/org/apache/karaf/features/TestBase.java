@@ -37,7 +37,7 @@ public class TestBase {
         Bundle bundle = EasyMock.createNiceMock(Bundle.class);
         
         // Be aware that this means all bundles are treated as different
-        expect(bundle.compareTo(EasyMock.<Bundle>anyObject())).andReturn(1).anyTimes();
+        expect(bundle.compareTo(EasyMock.anyObject())).andReturn(1).anyTimes();
 
         expect(bundle.getBundleId()).andReturn(id).anyTimes();
         expect(bundle.getSymbolicName()).andReturn(symbolicName).anyTimes();
@@ -50,7 +50,7 @@ public class TestBase {
     }
     
     public Dictionary<String, String> headers(String ... keyAndHeader) {
-        Hashtable<String, String> headersTable = new Hashtable<String, String>();
+        Hashtable<String, String> headersTable = new Hashtable<>();
         int c=0;
         while (c < keyAndHeader.length) {
             String key = keyAndHeader[c++];
@@ -61,7 +61,7 @@ public class TestBase {
     }
     
     public Map<String, Map<String, Feature>> features(Feature ... features) {
-        final Map<String, Map<String, Feature>> featuresMap = new HashMap<String, Map<String,Feature>>();
+        final Map<String, Map<String, Feature>> featuresMap = new HashMap<>();
         for (Feature feature : features) {
             Map<String, Feature> featureVersion = getOrCreate(featuresMap, feature);
             featureVersion.put(feature.getVersion(), feature);
@@ -70,12 +70,7 @@ public class TestBase {
     }
     
     private Map<String, Feature> getOrCreate(final Map<String, Map<String, Feature>> featuresMap, Feature feature) {
-        Map<String, Feature> featureVersion = featuresMap.get(feature.getName());
-        if (featureVersion == null) {
-            featureVersion = new HashMap<String, Feature>();
-            featuresMap.put(feature.getName(), featureVersion);
-        }
-        return featureVersion;
+        return featuresMap.computeIfAbsent(feature.getName(), k -> new HashMap<>());
     }
 
     public Feature feature(String name) {
@@ -87,19 +82,19 @@ public class TestBase {
     }
     
     public Set<Bundle> setOf(Bundle ... elements) {
-        return new HashSet<Bundle>(Arrays.asList(elements));
+        return new HashSet<>(Arrays.asList(elements));
     }
     
     public Set<Long> setOf(Long ... elements) {
-        return new HashSet<Long>(Arrays.asList(elements));
+        return new HashSet<>(Arrays.asList(elements));
     }
     
     public Set<String> setOf(String ... elements) {
-        return new HashSet<String>(asList(elements));
+        return new HashSet<>(asList(elements));
     }
     
     public Set<Feature> setOf(Feature ... elements) {
-        return new HashSet<Feature>(Arrays.asList(elements));
+        return new HashSet<>(Arrays.asList(elements));
     }
 
 }

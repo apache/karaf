@@ -52,11 +52,11 @@ public class SubsystemTest {
     public void test1() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root", "f1");
         addToMapSet(features, "root/apps1", "f2");
 
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root", "a/1.0.0");
         addToMapSet(expected, "root", "c/1.0.0");
         addToMapSet(expected, "root/apps1", "b/1.0.0");
@@ -64,8 +64,8 @@ public class SubsystemTest {
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data1"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
-                         Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                         Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
@@ -77,12 +77,12 @@ public class SubsystemTest {
 
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data2/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root/apps1", "f1");
         addToMapSet(features, "root/apps1", "f3");
         addToMapSet(features, "root/apps2", "f1");
 
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root/apps1", "c/1.0.0");
         addToMapSet(expected, "root/apps1", "b/1.0.0");
         addToMapSet(expected, "root/apps1", "e/1.0.0");
@@ -95,8 +95,8 @@ public class SubsystemTest {
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data2"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
-                         Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                         Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
@@ -107,16 +107,16 @@ public class SubsystemTest {
     public void testOverrides() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data3/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root/apps1", "f1");
 
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root/apps1", "a/1.0.1");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data3"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
-                         Collections.<String, Set<BundleRevision>>emptyMap());
+                         Collections.emptyMap());
         resolver.resolve(Collections.singleton("b"),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
@@ -128,16 +128,16 @@ public class SubsystemTest {
     public void testConditionalUnsatisfiedWithOptional() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data4/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root/apps1", "f1");
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root/apps1", "a/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data4"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
-                         Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                         Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
@@ -148,18 +148,18 @@ public class SubsystemTest {
     public void testConditionalSatisfiedWithOptional() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data4/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root/apps1", "f1");
         addToMapSet(features, "root/apps1", "f2");
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root/apps1", "a/1.0.0");
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data4"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                          features,
-                         Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                         Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                          FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
@@ -170,18 +170,18 @@ public class SubsystemTest {
     public void testBundle() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root/apps1", "bundle:a");
         addToMapSet(features, "root/apps1", "bundle:c;dependency=true");
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root/apps1", "a/1.0.0");
         addToMapSet(expected, "root/apps1", "c/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data1"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 features,
-                Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
@@ -192,17 +192,17 @@ public class SubsystemTest {
     public void testFeatureOptional() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data5/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root", "f1");
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root", "a/1.0.0");
         addToMapSet(expected, "root", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data5"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 features,
-                Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
@@ -213,18 +213,18 @@ public class SubsystemTest {
     public void testFeatureOptionalAlreadyProvided() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data5/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root", "f1");
         addToMapSet(features, "root", "f3");
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root", "a/1.0.0");
         addToMapSet(expected, "root", "c/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data5"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 features,
-                Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
@@ -235,18 +235,18 @@ public class SubsystemTest {
     public void testFeatureOptionalAlreadyProvided2() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data6/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root", "pax-http");
         addToMapSet(features, "root", "pax-http-tomcat");
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root", "a/1.0.0");
         addToMapSet(expected, "root", "c/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data6"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 features,
-                Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
@@ -257,11 +257,11 @@ public class SubsystemTest {
     public void testResourceRepositories() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data7/features.xml").toURI());
 
-        Map<String, Set<String>> features = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root", "f1");
         addToMapSet(features, "root/apps1", "f2");
 
-        Map<String, Set<String>> expected = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expected = new HashMap<>();
         addToMapSet(expected, "root", "a/1.0.0");
         addToMapSet(expected, "root", "c/1.0.0");
         addToMapSet(expected, "root/apps1", "b/1.0.0");
@@ -269,8 +269,8 @@ public class SubsystemTest {
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data7"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
                 features,
-                Collections.<String, Set<BundleRevision>>emptyMap());
-        resolver.resolve(Collections.<String>emptySet(),
+                Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
                 FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
@@ -298,7 +298,7 @@ public class SubsystemTest {
     }
 
     private Map<String, Set<String>> getBundleNamesPerRegions(SubsystemResolver resolver) {
-        Map<String, Set<String>> mapping = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> mapping = new HashMap<>();
         Map<String, Set<Resource>> bundles = resolver.getBundlesPerRegions();
         for (Map.Entry<String,Set<Resource>> entry : bundles.entrySet()) {
             for (Resource r : entry.getValue()) {
@@ -312,7 +312,7 @@ public class SubsystemTest {
     private void dumpWiring(SubsystemResolver resolver) {
         System.out.println("Wiring");
         Map<Resource, List<Wire>> wiring = resolver.getWiring();
-        List<Resource> resources = new ArrayList<Resource>(wiring.keySet());
+        List<Resource> resources = new ArrayList<>(wiring.keySet());
         Collections.sort(resources, new Comparator<Resource>() {
             @Override
             public int compare(Resource o1, Resource o2) {

@@ -34,6 +34,7 @@
     <name>Apache Karaf :: Features</name>
 
 	<modules>
-		<module>core</module>
+        <module>core</module>
+        <module>pool</module>
 	</modules>
 </project>

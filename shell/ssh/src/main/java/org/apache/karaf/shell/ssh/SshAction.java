@@ -246,9 +246,9 @@ public class SshAction implements Action {
                         if (ctype != null) {
                             channel.setEnv("LC_CTYPE", ctype.toString());
                         }
-                        channel.setIn(new NoCloseInputStream(System.in));
-                        channel.setOut(new NoCloseOutputStream(System.out));
-                        channel.setErr(new NoCloseOutputStream(System.err));
+                        channel.setIn(new NoCloseInputStream(jlineTerminal.input()));
+                        channel.setOut(new NoCloseOutputStream(jlineTerminal.output()));
+                        channel.setErr(new NoCloseOutputStream(jlineTerminal.output()));
                         channel.open().verify();
                         SignalListener signalListener = signal -> {
                             try {

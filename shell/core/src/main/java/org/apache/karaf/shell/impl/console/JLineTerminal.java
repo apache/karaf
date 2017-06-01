@@ -49,6 +49,7 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
         this.terminal = terminal;
         for (Signal signal : Signal.values()) {
             terminal.handle(signal, this::handle);
+            handlers.put(signal, SignalHandler.SIG_DFL);
         }
     }
 

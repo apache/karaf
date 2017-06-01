@@ -34,6 +34,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 
+@SuppressWarnings("rawtypes")
 public class CapabilitySet {
 
     private static final Class<?>[] STRING_CLASS = new Class[] {String.class};
@@ -45,7 +46,7 @@ public class CapabilitySet {
         indices = new TreeMap<>();
         for (int i = 0; (indexProps != null) && (i < indexProps.size()); i++) {
             indices.put(
-                    indexProps.get(i), new HashMap<Object, Set<Capability>>());
+                    indexProps.get(i), new HashMap<>());
         }
     }
 
@@ -96,12 +97,7 @@ public class CapabilitySet {
 
     private void indexCapability(
             Map<Object, Set<Capability>> index, Capability cap, Object capValue) {
-        Set<Capability> caps = index.get(capValue);
-        if (caps == null) {
-            caps = new HashSet<>();
-            index.put(capValue, caps);
-        }
-        caps.add(cap);
+        index.computeIfAbsent(capValue, k -> new HashSet<>()).add(cap);
     }
 
     public void removeCapability(Capability cap) {

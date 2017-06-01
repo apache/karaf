@@ -120,7 +120,7 @@ public class SpringTransformer {
 
     public static Set<String> analyze(Source source) throws Exception {
 
-        Set<String> refers = new TreeSet<String>();
+        Set<String> refers = new TreeSet<>();
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         Result r = new StreamResult(bout);
@@ -136,12 +136,12 @@ public class SpringTransformer {
             line = line.trim();
             if (line.length() > 0) {
                 String parts[] = line.split("\\s*,\\s*");
-                for (int i = 0; i < parts.length; i++) {
-                    int n = parts[i].lastIndexOf('.');
+                for (String part : parts) {
+                    int n = part.lastIndexOf('.');
                     if (n > 0) {
-                        String pkg = parts[i].substring(0, n);
+                        String pkg = part.substring(0, n);
                         if (!pkg.startsWith("java.")) {
-                            refers.add(parts[i].substring(0, n));
+                            refers.add(part.substring(0, n));
                         }
                     }
                 }

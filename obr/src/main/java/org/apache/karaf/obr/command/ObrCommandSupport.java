@@ -147,9 +147,9 @@ public abstract class ObrCommandSupport implements Action {
                 if ((resources != null) && (resources.length > 0)) {
                     System.out.println("\nRequired resource(s):");
                     printUnderline(System.out, 21);
-                    for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                        System.out.println("   " + getResourceId(resources[resIdx])
-                                + " (" + resources[resIdx].getVersion() + ")");
+                    for (Resource resource : resources) {
+                        System.out.println("   " + getResourceId(resource)
+                                + " (" + resource.getVersion() + ")");
                     }
                 }
                 if (deployOptional) {
@@ -157,8 +157,8 @@ public abstract class ObrCommandSupport implements Action {
                     if ((resources != null) && (resources.length > 0)) {
                         System.out.println("\nOptional resource(s):");
                         printUnderline(System.out, 21);
-                        for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                            System.out.println("   " + getResourceId(resources[resIdx]) + " (" + resources[resIdx].getVersion() + ")");
+                        for (Resource resource : resources) {
+                            System.out.println("   " + getResourceId(resource) + " (" + resource.getVersion() + ")");
                         }
                     }
                 }
@@ -175,9 +175,9 @@ public abstract class ObrCommandSupport implements Action {
                 if ((reqs != null) && (reqs.length > 0)) {
                     System.out.println("Unsatisfied requirement(s):");
                     printUnderline(System.out, 27);
-                    for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++) {
-                        System.out.println("   " + reqs[reqIdx].getRequirement().getFilter());
-                        System.out.println("      " + getResourceId(reqs[reqIdx].getResource()));
+                    for (Reason req : reqs) {
+                        System.out.println("   " + req.getRequirement().getFilter());
+                        System.out.println("      " + getResourceId(req.getResource()));
                     }
                 } else {
                     System.out.println("Could not resolve targets.");
@@ -239,12 +239,10 @@ public abstract class ObrCommandSupport implements Action {
             File sys = new File(etc, "config.properties");
             File sysTmp = new File(etc, "config.properties.tmp");
 
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sysTmp)));
             boolean modified = false;
-            try {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sysTmp)))) {
                 if (sys.exists()) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(sys)));
-                    try {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(sys)))) {
                         String line = reader.readLine();
                         while (line != null) {
                             if (line.matches("obr\\.repository\\.url[:= ].*")) {
@@ -255,8 +253,6 @@ public abstract class ObrCommandSupport implements Action {
                             writer.newLine();
                             line = reader.readLine();
                         }
-                    } finally {
-                        reader.close();
                     }
                 }
                 if (!modified) {
@@ -271,8 +267,6 @@ public abstract class ObrCommandSupport implements Action {
                     writer.newLine();
                     writer.newLine();
                 }
-            } finally {
-                writer.close();
             }
 
             sys.delete();

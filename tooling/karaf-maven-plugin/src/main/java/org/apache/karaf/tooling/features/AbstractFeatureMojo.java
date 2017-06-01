@@ -90,7 +90,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
 
     public AbstractFeatureMojo() {
         super();
-        descriptorArtifacts = new HashSet<Artifact>();
+        descriptorArtifacts = new HashSet<>();
     }
 
     protected void addFeatureRepo(String featureUrl) throws MojoExecutionException {
@@ -228,17 +228,17 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     }
 
     protected Set<Feature> resolveFeatures() throws MojoExecutionException {
-        Set<Feature> featuresSet = new HashSet<Feature>();
+        Set<Feature> featuresSet = new HashSet<>();
         try {
-            Set<String> artifactsToCopy = new HashSet<String>();
-            Map<String, Feature> featuresMap = new HashMap<String, Feature>();
+            Set<String> artifactsToCopy = new HashSet<>();
+            Map<String, Feature> featuresMap = new HashMap<>();
             for (String uri : descriptors) {
                 retrieveDescriptorsRecursively(uri, artifactsToCopy, featuresMap);
             }
     
             // no features specified, handle all of them
             if (features == null) {
-                features = new ArrayList<String>(featuresMap.keySet());
+                features = new ArrayList<>(featuresMap.keySet());
             }
             
             addFeatures(features, featuresSet, featuresMap, addTransitiveFeatures);

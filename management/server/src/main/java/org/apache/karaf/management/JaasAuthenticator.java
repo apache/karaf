@@ -58,13 +58,13 @@ public class JaasAuthenticator implements JMXAuthenticator {
             Subject subject = new Subject();
             LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
                 public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (int i = 0; i < callbacks.length; i++) {
-                        if (callbacks[i] instanceof NameCallback) {
-                            ((NameCallback) callbacks[i]).setName(params[0]);
-                        } else if (callbacks[i] instanceof PasswordCallback) {
-                            ((PasswordCallback) callbacks[i]).setPassword((params[1].toCharArray()));
+                    for (Callback callback : callbacks) {
+                        if (callback instanceof NameCallback) {
+                            ((NameCallback) callback).setName(params[0]);
+                        } else if (callback instanceof PasswordCallback) {
+                            ((PasswordCallback) callback).setPassword((params[1].toCharArray()));
                         } else {
-                            throw new UnsupportedCallbackException(callbacks[i]);
+                            throw new UnsupportedCallbackException(callback);
                         }
                     }
                 }

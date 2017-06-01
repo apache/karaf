@@ -40,7 +40,7 @@ public class SshUtils {
 
     public static <S> List<NamedFactory<S>> filter(Class<S> type,
             Collection<NamedFactory<S>> factories, String[] names) {
-        List<NamedFactory<S>> list = new ArrayList<NamedFactory<S>>();
+        List<NamedFactory<S>> list = new ArrayList<>();
         for (String name : names) {
             name = name.trim();
             boolean found = false;

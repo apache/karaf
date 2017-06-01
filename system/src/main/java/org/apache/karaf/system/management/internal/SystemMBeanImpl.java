@@ -154,7 +154,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
     @Override
     public Map<String, String> getProperties(boolean unset, boolean dumpToFile) throws MBeanException {
         try {
-            Map<String, String> result = new HashMap<String, String>();
+            Map<String, String> result = new HashMap<>();
 
             Properties props = (Properties) java.lang.System.getProperties().clone();
 
@@ -211,28 +211,24 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
 
     private void printOrderedProperties(Properties props, PrintStream out) {
         Set<Object> keys = props.keySet();
-        Vector<String> order = new Vector<String>(keys.size());
-        for (Iterator<Object> i = keys.iterator(); i.hasNext(); ) {
-            Object str = (Object) i.next();
+        List<String> order = new ArrayList<>(keys.size());
+        for (Object str : keys) {
             order.add((String) str);
         }
         Collections.sort(order);
-        for (Iterator<String> i = order.iterator(); i.hasNext(); ) {
-            String key = (String) i.next();
+        for (String key : order) {
             out.println(key + "=" + props.getProperty(key));
         }
     }
 
     private void printOrderedProperties(Properties props, Map<String, String> result) {
         Set<Object> keys = props.keySet();
-        Vector<String> order = new Vector<String>(keys.size());
-        for (Iterator<Object> i = keys.iterator(); i.hasNext(); ) {
-            Object str = (Object) i.next();
+        List<String> order = new ArrayList<>(keys.size());
+        for (Object str : keys) {
             order.add((String) str);
         }
         Collections.sort(order);
-        for (Iterator<String> i = order.iterator(); i.hasNext(); ) {
-            String key = (String) i.next();
+        for (String key : order) {
             result.put(key, props.getProperty(key));
         }
     }

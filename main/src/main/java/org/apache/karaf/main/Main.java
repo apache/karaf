@@ -443,7 +443,7 @@ public class Main {
     }
 
     private ClassLoader createClassLoader(ArtifactResolver resolver) throws Exception {
-        List<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<>();
         urls.add(resolver.resolve(config.frameworkBundle).toURL());
         File[] libs = new File(config.karafHome, "lib").listFiles();
         if (libs != null) {
@@ -494,7 +494,7 @@ public class Main {
     
     public List<BundleInfo> readBundlesFromStartupProperties(File startupPropsFile) {
         Properties startupProps = PropertiesLoader.loadPropertiesOrFail(startupPropsFile);
-        List<BundleInfo> bundeList = new ArrayList<BundleInfo>();
+        List<BundleInfo> bundeList = new ArrayList<>();
         for (String key : startupProps.keySet()) {
             try {
                 BundleInfo bi = new BundleInfo();
@@ -534,12 +534,12 @@ public class Main {
     }
 
     private boolean isNotFragment(Bundle b) {
-        String fragmentHostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
+        String fragmentHostHeader = b.getHeaders().get(Constants.FRAGMENT_HOST);
         return fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0;
     }
 
     private List<File> getBundleRepos() {
-        List<File> bundleDirs = new ArrayList<File>();
+        List<File> bundleDirs = new ArrayList<>();
         File homeSystemRepo = new File(config.karafHome, config.defaultRepo);
         if (!homeSystemRepo.isDirectory()) {
             throw new RuntimeException("system repo folder not found: " + homeSystemRepo.getAbsolutePath());

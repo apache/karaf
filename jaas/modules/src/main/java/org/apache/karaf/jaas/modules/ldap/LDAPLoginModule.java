@@ -106,7 +106,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             tmpPassword = new char[0];
         }
         String password = new String(tmpPassword);
-        principals = new HashSet<Principal>();
+        principals = new HashSet<>();
 
         LDAPCache cache = LDAPCache.getCache(options);
 

@@ -129,11 +129,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         File file = getPropertiesFile();
         if (file != null) {
             if (file.exists()) {
-                InputStream input = new FileInputStream(file);
-                try {
+                try (InputStream input = new FileInputStream(file)) {
                     properties.load(input);
-                } finally {
-                    input.close();
                 }
             }
         }
@@ -142,11 +139,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     private void saveProperties() throws IOException {
         File file = getPropertiesFile();
         if (file != null) {
-            OutputStream output = new FileOutputStream(file);
-            try {
+            try (OutputStream output = new FileOutputStream(file)) {
                 properties.store(output, null);
-            } finally {
-                output.close();
             }
         }
     }
@@ -199,7 +193,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             Bundle bundle = bundleEvent.getBundle();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
                 try {
-                    List<URL> urls = new ArrayList<URL>();
+                    List<URL> urls = new ArrayList<>();
                     Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                     while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                         URL url = (URL) featuresUrlEnumeration.nextElement();
@@ -208,8 +202,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                             URI needRemovedRepo = null;
                             for (Repository repo : featuresService.listRepositories()) {
                                 if (repo.getURI().equals(url.toURI())) {
-                                    Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
-                                    Set<String> autoInstallFeatures = new HashSet<String>();
+                                    Set<Feature> features = new HashSet<>(Arrays.asList(repo.getFeatures()));
+                                    Set<String> autoInstallFeatures = new HashSet<>();
                                     for(Feature feature:features) {
                                         if(feature.getInstall() != null && feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
                                             if (!featuresService.isInstalled(feature)) {

@@ -125,8 +125,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
     public void setKeyPasswords(String keyPasswords) {
         if (keyPasswords != null) {
             String[] keys = keyPasswords.split("\\]\\!\\[");
-            for (int i = 0; i < keys.length; i++) {
-                String key = keys[i];
+            for (String key : keys) {
                 int pos = key.indexOf('=');
                 if (pos > 0) {
                     this.keyPasswords.put(key.substring(0, pos), key.substring(pos + 1).toCharArray());

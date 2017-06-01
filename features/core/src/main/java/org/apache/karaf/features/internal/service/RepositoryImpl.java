@@ -21,7 +21,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.URI;
+import java.util.Set;
 
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
@@ -32,16 +36,22 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
 public class RepositoryImpl implements Repository {
 
     private final URI uri;
-    private final String blacklisted;
+    private final Clause[] blacklisted;
     private Features features;
 
     public RepositoryImpl(URI uri) {
-        this(uri, null);
+        this(uri, (Clause[]) null);
     }
 
     public RepositoryImpl(URI uri, String blacklisted) {
         this.uri = uri;
-        this.blacklisted = blacklisted;
+        Set<String> blacklistStrings = Blacklist.loadBlacklist(blacklisted);
+        this.blacklisted = Parser.parseClauses(blacklistStrings.toArray(new String[blacklistStrings.size()]));
+    }
+
+    public RepositoryImpl(URI uri, Clause[] blacklisted) {
+        this.uri = uri;
+        this.blacklisted = blacklisted != null ? blacklisted : new Clause[0];
     }
 
     public URI getURI() {
@@ -69,10 +79,10 @@ public class RepositoryImpl implements Repository {
                 .toArray(URI[]::new);
     }
 
-    public org.apache.karaf.features.Feature[] getFeatures() throws IOException {
+    public Feature[] getFeatures() throws IOException {
         load();
         return features.getFeature()
-                .toArray(new org.apache.karaf.features.Feature[features.getFeature().size()]);
+                .toArray(new Feature[features.getFeature().size()]);
     }
 
 
@@ -106,6 +116,32 @@ public class RepositoryImpl implements Repository {
             return super.read(b, off, len);
         }
     }
+    
+    @Override
+    public int hashCode() {
+        return uri.hashCode();
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RepositoryImpl other = (RepositoryImpl)obj;
+        if (uri == null) {
+            if (other.uri != null)
+                return false;
+        } else if (!uri.equals(other.uri))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return getURI().toString();
+    }
 }
 

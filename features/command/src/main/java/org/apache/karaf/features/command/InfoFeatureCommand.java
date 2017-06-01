@@ -219,7 +219,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 
             if (resolved != null) {
                 if (bundle) {
-                    List<String> bundleLocation = new LinkedList<String>();
+                    List<String> bundleLocation = new LinkedList<>();
                     List<BundleInfo> bundles = resolved.getBundles();
                     for (BundleInfo bundleInfo : bundles) {
                         bundleLocation.add(bundleInfo.getLocation());
@@ -240,8 +240,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
                 }
                 prefix += "   ";
                 List<Dependency> dependencies = resolved.getDependencies();
-                for (int i = 0, j = dependencies.size(); i < j; i++) {
-                    Dependency toDisplay = dependencies.get(i);
+                for (Dependency toDisplay : dependencies) {
                     unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix + 1);
                 }
 

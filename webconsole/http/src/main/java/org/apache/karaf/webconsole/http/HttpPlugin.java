@@ -31,10 +31,9 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.felix.utils.json.JSONWriter;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
-import org.json.JSONException;
-import org.json.JSONWriter;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
@@ -149,63 +148,58 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
         final String statusLine = this.getStatusLine(servlets, web);
         final JSONWriter jw = new JSONWriter(pw);
 
-        try {
+        jw.object();
+
+        jw.key("status");
+        jw.value(statusLine);
+
+        jw.key("contexts");
+        jw.array();
+        for (ServletDetails servlet : servlets) {
             jw.object();
-
-            jw.key("status");
-            jw.value(statusLine);
-
-            jw.key("contexts");
+            jw.key("id");
+            jw.value(servlet.getId());
+            jw.key("servlet");
+            jw.value(servlet.getServlet());
+            jw.key("servletName");
+            jw.value(servlet.getServletName());
+            jw.key("state");
+            jw.value(servlet.getState());
+            jw.key("alias");
+            jw.value(servlet.getAlias());
+            jw.key("urls");
             jw.array();
-            for (ServletDetails servlet : servlets) {
-                jw.object();
-                jw.key("id");
-                jw.value(servlet.getId());
-                jw.key("servlet");
-                jw.value(servlet.getServlet());
-                jw.key("servletName");
-                jw.value(servlet.getServletName());
-                jw.key("state");
-                jw.value(servlet.getState());
-                jw.key("alias");
-                jw.value(servlet.getAlias());
-                jw.key("urls");
-                jw.array();
-                for (String url : servlet.getUrls()) {
-                    jw.value(url);
-                }
-                jw.endArray();
-                jw.endObject();
+            for (String url : servlet.getUrls()) {
+                jw.value(url);
             }
             jw.endArray();
-
-            jw.key("web");
-            jw.array();
-            for (WebDetail webDetail : web) {
-                jw.object();
-                jw.key("id");
-                jw.value(webDetail.getBundleId());
-                jw.key("bundlestate");
-                jw.value(webDetail.getState());
-                jw.key("contextpath");
-                jw.value(webDetail.getContextPath());
-                jw.key("state");
-                jw.value(webDetail.getWebState());
-                jw.endObject();
-            }
-            jw.endArray();
-
             jw.endObject();
-        } catch (JSONException je) {
-            throw new IOException(je.toString());
         }
+        jw.endArray();
 
+        jw.key("web");
+        jw.array();
+        for (WebDetail webDetail : web) {
+            jw.object();
+            jw.key("id");
+            jw.value(webDetail.getBundleId());
+            jw.key("bundlestate");
+            jw.value(webDetail.getState());
+            jw.key("contextpath");
+            jw.value(webDetail.getContextPath());
+            jw.key("state");
+            jw.value(webDetail.getWebState());
+            jw.endObject();
+        }
+        jw.endArray();
+
+        jw.endObject();
     }
 
     protected List<ServletDetails> getServletDetails() {
 
         Collection<ServletEvent> events = servletEventHandler.getServletEvents();
-        List<ServletDetails> result = new ArrayList<ServletDetails>(events.size());
+        List<ServletDetails> result = new ArrayList<>(events.size());
 
         for (ServletEvent event : events) {
             Servlet servlet = event.getServlet();
@@ -221,7 +215,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
 
             String alias = event.getAlias() != null ? event.getAlias() : " ";
 
-            String[] urls = (String[]) (event.getUrlParameter() != null ? event.getUrlParameter() : new String[]{""});
+            String[] urls = event.getUrlParameter() != null ? event.getUrlParameter() : new String[]{""};
 
             ServletDetails details = new ServletDetails();
             details.setId(event.getBundle().getBundleId());
@@ -238,7 +232,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     protected List<WebDetail> getWebDetails() {
         Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
 
-        List<WebDetail> result = new ArrayList<WebDetail>();
+        List<WebDetail> result = new ArrayList<>();
 
         for (WebEvent event : bundleEvents.values()) {
 
@@ -270,14 +264,9 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     }
 
     public String getStatusLine(List<ServletDetails> servlets, List<WebDetail> web) {
-        Map<String, Integer> states = new HashMap<String, Integer>();
+        Map<String, Integer> states = new HashMap<>();
         for (ServletDetails servlet : servlets) {
-            Integer count = states.get(servlet.getState());
-            if (count == null) {
-                states.put(servlet.getState(), 1);
-            } else {
-                states.put(servlet.getState(), 1 + count);
-            }
+            states.merge(servlet.getState(), 1, (a, b) -> a + b);
         }
         StringBuilder stateSummary = new StringBuilder();
         boolean first = true;

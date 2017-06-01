@@ -61,7 +61,7 @@ public class JdbcServiceImpl implements JdbcService {
         if (datasources().contains(name)) {
             throw new IllegalArgumentException("There is already a DataSource with the name " + name);
         }
-        Dictionary<String, String> properties = new Hashtable<String, String>();
+        Dictionary<String, String> properties = new Hashtable<>();
         properties.put(DataSourceFactory.JDBC_DATASOURCE_NAME, name);
         put(properties, DataSourceFactory.OSGI_JDBC_DRIVER_NAME, driverName);
         put(properties, DataSourceFactory.OSGI_JDBC_DRIVER_CLASS, driverClass);
@@ -108,14 +108,13 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public Map<String, List<String>> query(String datasource, String query) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
-        try {
-            Map<String, List<String>> map = new HashMap<String, List<String>>();
+        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
+            Map<String, List<String>> map = new HashMap<>();
             Statement statement = jdbcConnector.createStatement();
             ResultSet resultSet = jdbcConnector.register(statement.executeQuery(query));
             ResultSetMetaData metaData = resultSet.getMetaData();
             for (int c = 1; c <= metaData.getColumnCount(); c++) {
-                map.put(metaData.getColumnLabel(c), new ArrayList<String>());
+                map.put(metaData.getColumnLabel(c), new ArrayList<>());
             }
             while (resultSet.next()) {
                 for (int c = 1; c <= metaData.getColumnCount(); c++) {
@@ -123,32 +122,25 @@ public class JdbcServiceImpl implements JdbcService {
                 }
             }
             return map;
-        } finally {
-            jdbcConnector.close();
         }
     }
 
     @Override
     public void execute(String datasource, String command) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
-        try {
+        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             jdbcConnector.createStatement().execute(command);
-        } finally {
-            jdbcConnector.close();
         }
     }
 
     @Override
     public Map<String, List<String>> tables(String datasource) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
-        try {
-
+        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
             ResultSet resultSet = jdbcConnector.register(dbMetaData.getTables(null, null, null, null));
             ResultSetMetaData metaData = resultSet.getMetaData();
-            Map<String, List<String>> map = new HashMap<String, List<String>>();
+            Map<String, List<String>> map = new HashMap<>();
             for (int c = 1; c <= metaData.getColumnCount(); c++) {
-                map.put(metaData.getColumnLabel(c), new ArrayList<String>());
+                map.put(metaData.getColumnLabel(c), new ArrayList<>());
             }
             while (resultSet.next()) {
                 for (int c = 1; c <= metaData.getColumnCount(); c++) {
@@ -156,17 +148,14 @@ public class JdbcServiceImpl implements JdbcService {
                 }
             }
             return map;
-        } finally {
-            jdbcConnector.close();
         }
     }
 
     @Override
     public Map<String, String> info(String datasource) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
-        try {
+        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, String> map = new HashMap<>();
             map.put("db.product", dbMetaData.getDatabaseProductName());
             map.put("db.version", dbMetaData.getDatabaseProductVersion());
             map.put("url", dbMetaData.getURL());
@@ -177,8 +166,6 @@ public class JdbcServiceImpl implements JdbcService {
         } catch (Exception e) {
             LOGGER.error("Can't get information about datasource {}", datasource, e);
             throw e;
-        } finally {
-            jdbcConnector.close();
         }
     }
 

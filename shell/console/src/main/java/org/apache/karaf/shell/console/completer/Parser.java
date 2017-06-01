@@ -136,7 +136,7 @@ public class Parser {
     }
 
     public List<List<List<String>>> program() {
-        program = new ArrayList<List<List<String>>>();
+        program = new ArrayList<>();
         ws();
         if (!eof()) {
             program.add(pipeline());
@@ -161,7 +161,7 @@ public class Parser {
     }
 
     public List<List<String>> pipeline() {
-        statements = new ArrayList<List<String>>();
+        statements = new ArrayList<>();
         statements.add(statement());
         while (peek() == '|') {
             current++;
@@ -170,7 +170,7 @@ public class Parser {
                 statements.add(statement());
             }
             else {
-                statements.add(new ArrayList<String>());
+                statements.add(new ArrayList<>());
                 break;
             }
         }
@@ -180,7 +180,7 @@ public class Parser {
     }
 
     public List<String> statement() {
-        statement = new ArrayList<String>();
+        statement = new ArrayList<>();
         statement.add(value());
         while (!eof()) {
             ws();

@@ -683,7 +683,7 @@ public class InstanceServiceImpl implements InstanceService {
             oldLocation.renameTo(newLocation);
             // create the properties map including the instance name and instance location
             // TODO: replacing is bad, we should re-extract the needed files
-            HashMap<String, String> props = new HashMap<String, String>();
+            HashMap<String, String> props = new HashMap<>();
             props.put(oldName, newName);
             props.put(oldLocationPath, newLocation.getPath());
             // replace all references to the "old" name by the new one in etc/system.properties
@@ -738,7 +738,7 @@ public class InstanceServiceImpl implements InstanceService {
             // create the properties map including the instance name, location, ssh and rmi port numbers
             // TODO: replacing stuff anywhere is not really good, we might end up replacing unwanted stuff
             // TODO: if no ports are overriden, shouldn't we choose new ports ?
-            HashMap<String, String> props = new HashMap<String, String>();
+            HashMap<String, String> props = new HashMap<>();
             props.put(name, cloneName);
             props.put(locationPath, cloneLocationPath);
             if (settings.getSshPort() > 0)
@@ -1007,8 +1007,7 @@ public class InstanceServiceImpl implements InstanceService {
             if (files == null) {
                 result = false;
             } else {
-                for (int i = 0; i < files.length; i++) {
-                    File file = files[i];
+                for (File file : files) {
                     if (file.getName().equals(".") || file.getName().equals("..")) {
                         continue;
                     }

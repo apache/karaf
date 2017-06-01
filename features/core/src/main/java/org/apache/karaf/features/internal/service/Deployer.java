@@ -61,7 +61,6 @@ import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.BundleNamespace;
@@ -110,28 +109,14 @@ import static org.osgi.framework.namespace.IdentityNamespace.TYPE_BUNDLE;
 public class Deployer {
 
     public interface DeployCallback {
-
         void print(String message, boolean verbose);
-
         void saveState(State state);
         void persistResolveRequest(DeploymentRequest request) throws IOException;
-        void installFeature(Feature feature) throws IOException, InvalidSyntaxException;
         void callListeners(DeploymentEvent deployEvent);
         void callListeners(FeatureEvent featureEvent);
-
-        Bundle installBundle(String region, String uri, InputStream is) throws BundleException;
-        void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException;
-        void uninstall(Bundle bundle) throws BundleException;
-        void startBundle(Bundle bundle) throws BundleException;
-        void stopBundle(Bundle bundle, int options) throws BundleException;
-        void setBundleStartLevel(Bundle bundle, int startLevel);
-
-        void refreshPackages(Collection<Bundle> bundles) throws InterruptedException;
-        void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd);
-
-        void replaceDigraph(Map<String, Map<String,Map<String,Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException;
     }
 
+    @SuppressWarnings("serial")
     public static class CircularPrerequisiteException extends Exception {
         private final Set<String> prereqs;
 
@@ -145,6 +130,7 @@ public class Deployer {
         }
     }
 
+    @SuppressWarnings("serial")
     public static class PartialDeploymentException extends Exception {
         private final Set<String> missing;
 
@@ -198,11 +184,13 @@ public class Deployer {
 
     private final DownloadManager manager;
     private final Resolver resolver;
+    private final BundleInstallSupport installSupport;
     private final DeployCallback callback;
 
-    public Deployer(DownloadManager manager, Resolver resolver, DeployCallback callback) {
+    public Deployer(DownloadManager manager, Resolver resolver, BundleInstallSupport installSupport, DeployCallback callback) {
         this.manager = manager;
         this.resolver = resolver;
+        this.installSupport = installSupport;
         this.callback = callback;
     }
 
@@ -328,11 +316,7 @@ public class Deployer {
         }
         for (Map.Entry<String, Set<String>> entry : newFeatures.entrySet()) {
             for (String feature : entry.getValue()) {
-                Map<String, String> map = stateFeatures.get(entry.getKey());
-                if (map == null) {
-                    map = new HashMap<>();
-                    stateFeatures.put(entry.getKey(), map);
-                }
+                Map<String, String> map = stateFeatures.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
                 map.put(feature, noStart ? FeatureState.Installed.name() : FeatureState.Started.name());
             }
         }
@@ -574,13 +558,13 @@ public class Deployer {
         // #9: start bundles in order
         // #10: send events
         //
-
+        Bundle serviceBundle = dstate.serviceBundle;
         //
         // Handle updates on the FeaturesService bundle
         //
         Deployer.RegionDeployment rootRegionDeployment = deployment.regions.get(ROOT_REGION);
         // We don't support uninstalling the bundle
-        if (rootRegionDeployment != null && rootRegionDeployment.toDelete.contains(dstate.serviceBundle)) {
+        if (rootRegionDeployment != null && rootRegionDeployment.toDelete.contains(serviceBundle)) {
             throw new UnsupportedOperationException("Uninstalling the FeaturesService bundle is not supported");
         }
 
@@ -594,33 +578,33 @@ public class Deployer {
         //  - start the bundle
         //  - exit
         // When restarting, the resolution will be attempted again
-        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(dstate.serviceBundle)) {
+        if (rootRegionDeployment != null && rootRegionDeployment.toUpdate.containsKey(serviceBundle)) {
             callback.persistResolveRequest(request);
             // If the bundle is updated because of a different checksum,
             // save the new checksum persistently
-            if (deployment.bundleChecksums.containsKey(dstate.serviceBundle.getBundleId())) {
+            if (deployment.bundleChecksums.containsKey(serviceBundle.getBundleId())) {
                 State state = dstate.state.copy();
-                state.bundleChecksums.put(dstate.serviceBundle.getBundleId(),
-                                          deployment.bundleChecksums.get(dstate.serviceBundle.getBundleId()));
+                state.bundleChecksums.put(serviceBundle.getBundleId(),
+                                          deployment.bundleChecksums.get(serviceBundle.getBundleId()));
                 callback.saveState(state);
             }
-            Resource resource = rootRegionDeployment.toUpdate.get(dstate.serviceBundle);
+            Resource resource = rootRegionDeployment.toUpdate.get(serviceBundle);
             String uri = getUri(resource);
             print("The FeaturesService bundle needs is being updated with " + uri, verbose);
             toRefresh.clear();
-            toRefresh.put(dstate.serviceBundle, "FeaturesService bundle is being updated");
+            toRefresh.put(serviceBundle, "FeaturesService bundle is being updated");
             computeBundlesToRefresh(toRefresh,
                     dstate.bundles.values(),
-                    Collections.<Resource, Bundle>emptyMap(),
-                    Collections.<Resource, List<Wire>>emptyMap());
-            callback.stopBundle(dstate.serviceBundle, STOP_TRANSIENT);
+                    Collections.emptyMap(),
+                    Collections.emptyMap());
+            installSupport.stopBundle(serviceBundle, STOP_TRANSIENT);
             try (
                     InputStream is = getBundleInputStream(resource, providers)
             ) {
-                callback.updateBundle(dstate.serviceBundle, uri, is);
+                installSupport.updateBundle(serviceBundle, uri, is);
             }
-            callback.refreshPackages(toRefresh.keySet());
-            callback.startBundle(dstate.serviceBundle);
+            installSupport.refreshPackages(toRefresh.keySet());
+            installSupport.startBundle(serviceBundle);
             return;
         }
 
@@ -646,7 +630,7 @@ public class Deployer {
                     print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                     // If the bundle start level will be changed, stop it persistently to
                     // avoid a restart when the start level is actually changed
-                    callback.stopBundle(bundle, toUpdateStartLevel.containsKey(bundle) ? 0 : STOP_TRANSIENT);
+                    installSupport.stopBundle(bundle, toUpdateStartLevel.containsKey(bundle) ? 0 : STOP_TRANSIENT);
                     toStop.remove(bundle);
                 }
             }
@@ -668,7 +652,7 @@ public class Deployer {
                 Deployer.RegionDeployment regionDeployment = entry.getValue();
                 for (Bundle bundle : regionDeployment.toDelete) {
                     print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
-                    callback.uninstall(bundle);
+                    installSupport.uninstall(bundle);
                     removeFromMapSet(managedBundles, name, bundle.getBundleId());
                 }
             }
@@ -694,11 +678,7 @@ public class Deployer {
             // Update managed regions
             for (Region computedRegion : computedDigraph.getRegions()) {
                 String name = computedRegion.getName();
-                Map<String, Map<String, Set<String>>> policy = policies.get(name);
-                if (policy == null) {
-                    policy = new HashMap<>();
-                    policies.put(name, policy);
-                }
+                Map<String, Map<String, Set<String>>> policy = policies.computeIfAbsent(name, k -> new HashMap<>());
                 for (RegionDigraph.FilteredRegion fr : computedRegion.getEdges()) {
                     String r2 = fr.getRegion().getName();
                     Map<String, Set<String>> filters = new HashMap<>();
@@ -712,7 +692,7 @@ public class Deployer {
                 }
             }
             // Apply all changes
-            callback.replaceDigraph(policies, bundles);
+            installSupport.replaceDigraph(policies, bundles);
         }
 
 
@@ -736,7 +716,7 @@ public class Deployer {
                     try (
                             InputStream is = getBundleInputStream(resource, providers)
                     ) {
-                        callback.updateBundle(bundle, uri, is);
+                        installSupport.updateBundle(bundle, uri, is);
                     }
                     toStart.add(bundle);
                 }
@@ -748,7 +728,7 @@ public class Deployer {
         for (Map.Entry<Bundle, Integer> entry : toUpdateStartLevel.entrySet()) {
             Bundle bundle = entry.getKey();
             int sl = entry.getValue();
-            callback.setBundleStartLevel(bundle, sl);
+            bundle.adapt(BundleStartLevel.class).setStartLevel(sl);
         }
         //
         // Install bundles
@@ -773,7 +753,7 @@ public class Deployer {
                     try (
                             ChecksumUtils.CRCInputStream is = new ChecksumUtils.CRCInputStream(getBundleInputStream(resource, providers))
                     ) {
-                        bundle = callback.installBundle(name, uri, is);
+                        bundle = installSupport.installBundle(name, uri, is);
                         crc = is.getCRC();
                     }
                     addToMapSet(managedBundles, name, bundle.getBundleId());
@@ -805,7 +785,8 @@ public class Deployer {
 
             // Set start levels after install to avoid starting before all bundles are installed
             for (Bundle bundle : customStartLevels.keySet()) {
-                callback.setBundleStartLevel(bundle, customStartLevels.get(bundle));
+                int startLevel = customStartLevels.get(bundle);
+                bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
             }
         }
 
@@ -827,12 +808,14 @@ public class Deployer {
             Set<String> featureIds = flatten(newFeatures);
             for (Feature feature : dstate.features.values()) {
                 if (featureIds.contains(feature.getId())) {
-                    callback.installFeature(feature);
+                    installSupport.installConfigs(feature);
+                    installSupport.installLibraries(feature);
                 }
                 for (Conditional cond : feature.getConditional()) {
                     Feature condFeature = cond.asFeature();
                     if (featureIds.contains(condFeature.getId())) {
-                        callback.installFeature(condFeature);
+                        installSupport.installConfigs(condFeature);
+                        installSupport.installLibraries(condFeature);
                     }
                 }
             }
@@ -855,7 +838,7 @@ public class Deployer {
                     List<Bundle> bs = getBundlesToStop(toStop);
                     for (Bundle bundle : bs) {
                         print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
-                        callback.stopBundle(bundle, STOP_TRANSIENT);
+                        installSupport.stopBundle(bundle, STOP_TRANSIENT);
                         toStop.remove(bundle);
                         toStart.add(bundle);
                     }
@@ -869,10 +852,10 @@ public class Deployer {
                     print("    " + bundle.getSymbolicName() + "/" + bundle.getVersion() + " (" + entry.getValue() + ")", verbose);
                 }
                 // Ensure all classes are loaded in case the bundle will be refreshed
-                if (dstate.serviceBundle != null && toRefresh.containsKey(dstate.serviceBundle)) {
-                    ensureAllClassesLoaded(dstate.serviceBundle);
+                if (serviceBundle != null && toRefresh.containsKey(serviceBundle)) {
+                    ensureAllClassesLoaded(serviceBundle);
                 }
-                callback.refreshPackages(toRefresh.keySet());
+                installSupport.refreshPackages(toRefresh.keySet());
 
             }
         }
@@ -882,7 +865,7 @@ public class Deployer {
         toResolve.addAll(toRefresh.keySet());
         removeBundlesInState(toResolve, UNINSTALLED);
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
-        callback.resolveBundles(toResolve, resolver.getWiring(), deployment.resToBnd);
+        installSupport.resolveBundles(toResolve, resolver.getWiring(), deployment.resToBnd);
         callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
 
         // Compute bundles to start
@@ -892,11 +875,11 @@ public class Deployer {
             List<Exception> exceptions = new ArrayList<>();
             print("Starting bundles:", verbose);
             while (!toStart.isEmpty()) {
-                List<Bundle> bs = getBundlesToStart(toStart, dstate.serviceBundle);
+                List<Bundle> bs = getBundlesToStart(toStart, serviceBundle);
                 for (Bundle bundle : bs) {
                     print("  " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
                     try {
-                        callback.startBundle(bundle);
+                        installSupport.startBundle(bundle);
                     } catch (BundleException e) {
                         exceptions.add(e);
                     }
@@ -981,7 +964,7 @@ public class Deployer {
         // Compute the new list of fragments
         Map<Bundle, Set<Resource>> newFragments = new HashMap<>();
         for (Bundle bundle : bundles) {
-            newFragments.put(bundle, new HashSet<Resource>());
+            newFragments.put(bundle, new HashSet<>());
         }
         if (resolution != null) {
             for (Resource res : resolution.keySet()) {
@@ -1397,6 +1380,7 @@ public class Deployer {
         return sorted;
     }
 
+    @SuppressWarnings("rawtypes")
     protected List<Bundle> getBundlesToStop(Collection<Bundle> bundles) {
         SortedMap<Integer, Set<Bundle>> bundlesPerStartLevel = new TreeMap<>();
         for (Bundle bundle : bundles) {
@@ -1449,7 +1433,7 @@ public class Deployer {
         return bundlesToDestroy;
     }
 
-    private static int getServiceUsage(ServiceReference ref, Collection<Bundle> bundles) {
+    private static int getServiceUsage(ServiceReference<?> ref, Collection<Bundle> bundles) {
         Bundle[] usingBundles = ref.getUsingBundles();
         int nb = 0;
         if (usingBundles != null) {

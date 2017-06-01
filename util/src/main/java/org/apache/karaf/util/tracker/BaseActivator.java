@@ -49,7 +49,7 @@ public class BaseActivator implements BundleActivator, Runnable {
     protected BundleContext bundleContext;
 
     protected ExecutorService executor = new ThreadPoolExecutor(0, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>());
+            new LinkedBlockingQueue<>());
     private AtomicBoolean scheduled = new AtomicBoolean();
 
     private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);

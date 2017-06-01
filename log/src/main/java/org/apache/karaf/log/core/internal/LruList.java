@@ -43,7 +43,7 @@ public class LruList implements PaxAppender {
         }
         elements = new PaxLoggingEvent[size];
         maxElements = elements.length;
-        appenders = new ArrayList<PaxAppender>();
+        appenders = new ArrayList<>();
     }
 
     public synchronized int size() {

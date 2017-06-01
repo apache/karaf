@@ -43,7 +43,7 @@ public class LogEntry implements Action {
     @Reference
     LogService logService;
 
-    private final Map<String,Integer> mappings = new HashMap<String,Integer>();
+    private final Map<String,Integer> mappings = new HashMap<>();
 
     public LogEntry() {
         mappings.put("ERROR", 1);

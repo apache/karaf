@@ -70,7 +70,7 @@ public class ManageRealmCommandTest {
 
         // prepare command
         cmd.index = index;
-        cmd.setRealms(Arrays.<JaasRealm> asList(realms));
+        cmd.setRealms(Arrays.asList(realms));
         cmd.setSession(session);
 
         for (Config realm : realms)

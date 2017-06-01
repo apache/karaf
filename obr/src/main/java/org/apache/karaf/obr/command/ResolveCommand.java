@@ -57,7 +57,7 @@ public class ResolveCommand extends ObrCommandSupport {
     List<String> requirements;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-        List<Repository> repositories = new ArrayList<Repository>();
+        List<Repository> repositories = new ArrayList<>();
         repositories.add(admin.getSystemRepository());
         if (!noLocal) {
             repositories.add(admin.getLocalRepository());
@@ -75,10 +75,10 @@ public class ResolveCommand extends ObrCommandSupport {
             if ((resources != null) && (resources.length > 0)) {
                 System.out.println("Required resource(s):");
                 printUnderline(System.out, 21);
-                for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                    System.out.println("   " + resources[resIdx].getPresentationName() + " (" + resources[resIdx].getVersion() + ")");
+                for (Resource resource : resources) {
+                    System.out.println("   " + resource.getPresentationName() + " (" + resource.getVersion() + ")");
                     if (why) {
-                        Reason[] req = resolver.getReason(resources[resIdx]);
+                        Reason[] req = resolver.getReason(resource);
                         for (int reqIdx = 0; req != null && reqIdx < req.length; reqIdx++) {
                             if (!req[reqIdx].getRequirement().isOptional()) {
                                 Resource r = req[reqIdx].getResource();
@@ -97,11 +97,11 @@ public class ResolveCommand extends ObrCommandSupport {
                 System.out.println();
                 System.out.println("Optional resource(s):");
                 printUnderline(System.out, 21);
-                for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                    System.out.println("   " + resources[resIdx].getPresentationName()
-                        + " (" + resources[resIdx].getVersion() + ")");
+                for (Resource resource : resources) {
+                    System.out.println("   " + resource.getPresentationName()
+                            + " (" + resource.getVersion() + ")");
                     if (why) {
-                        Reason[] req = resolver.getReason(resources[resIdx]);
+                        Reason[] req = resolver.getReason(resource);
                         for (int reqIdx = 0; req != null && reqIdx < req.length; reqIdx++) {
                             if (!req[reqIdx].getRequirement().isOptional()) {
                                 Resource r = req[reqIdx].getResource();
@@ -132,9 +132,9 @@ public class ResolveCommand extends ObrCommandSupport {
             if ((reqs != null) && (reqs.length > 0)) {
                 System.out.println("Unsatisfied requirement(s):");
                 printUnderline(System.out, 27);
-                for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++) {
-                    System.out.println("   " + reqs[reqIdx].getRequirement().getName() + ":" + reqs[reqIdx].getRequirement().getFilter());
-                    System.out.println("      " +reqs[reqIdx].getResource().getPresentationName());
+                for (Reason req : reqs) {
+                    System.out.println("   " + req.getRequirement().getName() + ":" + req.getRequirement().getFilter());
+                    System.out.println("      " + req.getResource().getPresentationName());
                 }
             } else {
                 System.out.println("Could not resolve targets.");

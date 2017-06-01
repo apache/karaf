@@ -57,19 +57,12 @@ public class Blacklist {
     }
 
     public static void blacklist(Features features, Collection<String> blacklist) {
-        if (!blacklist.isEmpty()) {
-            Clause[] clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
-            blacklist(features, clauses);
-        }
+        Clause[] clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
+        blacklist(features, clauses);
     }
 
     public static void blacklist(Features features, Clause[] clauses) {
-        for (Iterator<Feature> iterator = features.getFeature().iterator(); iterator.hasNext(); ) {
-            Feature feature = iterator.next();
-            if (blacklist(feature, clauses)) {
-                iterator.remove();
-            }
-        }
+        features.getFeature().removeIf(feature -> blacklist(feature, clauses));
     }
 
     public static boolean blacklist(Feature feature, Clause[] clauses) {

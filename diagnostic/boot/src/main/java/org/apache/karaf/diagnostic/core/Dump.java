@@ -45,7 +45,7 @@ public final class Dump {
     }
 
     public static void dump(BundleContext bundleContext, DumpDestination destination, boolean noThreadDump, boolean noHeapDump) {
-        List<DumpProvider> providers = new ArrayList<DumpProvider>();
+        List<DumpProvider> providers = new ArrayList<>();
         providers.add(new EnvironmentDumpProvider(bundleContext));
         providers.add(new MemoryDumpProvider());
         if (!noThreadDump) providers.add(new ThreadDumpProvider());

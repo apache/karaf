@@ -99,7 +99,7 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
                     if (serviceReferences != null) {
                         for (ServiceReference reference : serviceReferences) {
                             String[] interfaces = (String[]) reference.getProperty("objectClass");
-                            List<String> properties = new ArrayList<String>();
+                            List<String> properties = new ArrayList<>();
                             for (String key : reference.getPropertyKeys()) {
                                 properties.add(key + " = " + reference.getProperty(key));
                             }
