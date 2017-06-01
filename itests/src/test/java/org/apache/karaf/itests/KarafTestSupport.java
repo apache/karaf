@@ -274,10 +274,10 @@ public class KarafTestSupport {
 
         FutureTask<String> commandFuture;
         if (principals.length == 0) {
-            commandFuture = new FutureTask<String>(commandCallable);
+            commandFuture = new FutureTask<>(commandCallable);
         } else {
             // If principals are defined, run the command callable via Subject.doAs()
-            commandFuture = new FutureTask<String>(new Callable<String>() {
+            commandFuture = new FutureTask<>(new Callable<String>() {
                 @Override
                 public String call() throws Exception {
                     Subject subject = new Subject();
@@ -390,7 +390,7 @@ public class KarafTestSupport {
     }
 
     protected void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
-        ServiceTracker<Object, Object> st = new ServiceTracker<Object, Object>(bundleContext, bundleContext.createFilter(filter), null);
+        ServiceTracker<Object, Object> st = new ServiceTracker<>(bundleContext, bundleContext.createFilter(filter), null);
         try {
             st.open();
             st.waitForService(timeout);
@@ -438,7 +438,7 @@ public class KarafTestSupport {
      */
     @SuppressWarnings("rawtypes")
     private static Collection<ServiceReference> asCollection(ServiceReference[] references) {
-        return references != null ? Arrays.asList(references) : Collections.<ServiceReference>emptyList();
+        return references != null ? Arrays.asList(references) : Collections.emptyList();
     }
 
     public JMXConnector getJMXConnector() throws Exception {
@@ -447,7 +447,7 @@ public class KarafTestSupport {
 
     public JMXConnector getJMXConnector(String userName, String passWord) throws Exception {
         JMXServiceURL url = new JMXServiceURL(getJmxServiceUrl());
-        Hashtable<String, Object> env = new Hashtable<String, Object>();
+        Hashtable<String, Object> env = new Hashtable<>();
         String[] credentials = new String[]{ userName, passWord };
         env.put("jmx.remote.credentials", credentials);
         JMXConnector connector = JMXConnectorFactory.connect(url, env);
@@ -496,9 +496,9 @@ public class KarafTestSupport {
     }
 
     public void assertFeaturesInstalled(String ... expectedFeatures) throws Exception {
-        Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures));
+        Set<String> expectedFeaturesSet = new HashSet<>(Arrays.asList(expectedFeatures));
         Feature[] features = featureService.listInstalledFeatures();
-        Set<String> installedFeatures = new HashSet<String>();
+        Set<String> installedFeatures = new HashSet<>();
         for (Feature feature : features) {
             installedFeatures.add(feature.getName());
         }

@@ -50,7 +50,7 @@ public class Activator extends BaseActivator {
 
         final BundleServiceImpl bundleService = new BundleServiceImpl(bundleContext);
         register(BundleService.class, bundleService);
-        bundleStateServicesTracker = new ServiceTracker<BundleStateService, BundleStateService>(
+        bundleStateServicesTracker = new ServiceTracker<>(
                 bundleContext, BundleStateService.class, new ServiceTrackerCustomizer<BundleStateService, BundleStateService>() {
             @Override
             public BundleStateService addingService(ServiceReference<BundleStateService> reference) {

@@ -120,7 +120,7 @@ public class LDAPOptions {
     }
 
     private Map<String, Set<String>> parseRoleMapping(String option) {
-        Map<String, Set<String>> roleMapping = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> roleMapping = new HashMap<>();
         if (option != null) {
             LOGGER.debug("Parse role mapping {}", option);
             String[] mappings = option.split(";");

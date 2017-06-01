@@ -339,7 +339,7 @@ public class Dependency30Helper implements DependencyHelper {
         id = MavenUtil.mvnToAether(id);
         ArtifactRequest request = new ArtifactRequest();
         request.setArtifact(new DefaultArtifact(id));
-        request.setRepositories((List<RemoteRepository>) projectRepositories);
+        request.setRepositories(projectRepositories);
 
         log.debug("Resolving artifact " + id + " from " + projectRepositories);
 

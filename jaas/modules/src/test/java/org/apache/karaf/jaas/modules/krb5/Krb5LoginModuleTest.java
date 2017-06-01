@@ -422,7 +422,7 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
     private String createKeytab() throws Exception {
         File file = folder.newFile("test.keytab");
 
-        List<KeytabEntry> entries = new ArrayList<KeytabEntry>();
+        List<KeytabEntry> entries = new ArrayList<>();
 
         entries.add(createKeytabEntry());
 

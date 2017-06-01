@@ -34,7 +34,7 @@ import org.apache.karaf.shell.api.console.Terminal;
  */
 class MockCommandSession implements Session {
 
-    private Map<String, Object> properties = new HashMap<String, Object>();
+    private Map<String, Object> properties = new HashMap<>();
 
     public void close() {
         // not implemented

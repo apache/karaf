@@ -199,7 +199,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             Bundle bundle = bundleEvent.getBundle();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
                 try {
-                    List<URL> urls = new ArrayList<URL>();
+                    List<URL> urls = new ArrayList<>();
                     Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                     while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                         URL url = (URL) featuresUrlEnumeration.nextElement();
@@ -208,8 +208,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                             URI needRemovedRepo = null;
                             for (Repository repo : featuresService.listRepositories()) {
                                 if (repo.getURI().equals(url.toURI())) {
-                                    Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
-                                    Set<String> autoInstallFeatures = new HashSet<String>();
+                                    Set<Feature> features = new HashSet<>(Arrays.asList(repo.getFeatures()));
+                                    Set<String> autoInstallFeatures = new HashSet<>();
                                     for(Feature feature:features) {
                                         if(feature.getInstall() != null && feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
                                             if (!featuresService.isInstalled(feature)) {

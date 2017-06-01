@@ -347,7 +347,7 @@ public class ConnectorServerFactory {
         }
 
         public ServerSocket createServerSocket(int port) throws IOException {
-            ServerSocket serverSocket = (ServerSocket) ServerSocketFactory.getDefault().createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
+            ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
             return serverSocket;
         }
     }

@@ -116,7 +116,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
             public Object addingService(ServiceReference<Object> reference) {
                 Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
                 Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
-                List<Object> commands = new ArrayList<Object>();
+                List<Object> commands = new ArrayList<>();
 
                 if (scope != null && function != null) {
                     if (function.getClass().isArray()) {

@@ -41,9 +41,9 @@ public class Services extends BundlesCommand {
     @Option(name = "-p", aliases = {}, description = "Shows the properties of the services", required = false, multiValued = false)
     boolean showProperties = false;
 
-    Set<String> hidden = new HashSet<String>(Arrays.asList(new String[] {
-        "org.apache.felix.service.command.Function",
-        "org.apache.karaf.shell.console.Completer"
+    Set<String> hidden = new HashSet<>(Arrays.asList(new String[] {
+            "org.apache.felix.service.command.Function",
+            "org.apache.karaf.shell.console.Completer"
     }));
 
     @Override

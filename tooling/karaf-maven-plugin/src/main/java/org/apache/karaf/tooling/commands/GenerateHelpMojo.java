@@ -111,7 +111,7 @@ public class GenerateHelpMojo extends AbstractMojo {
                 helpPrinter = new DocBookCommandHelpPrinter();
             }
 
-            Map<String, Set<String>> commands = new TreeMap<String, Set<String>>();
+            Map<String, Set<String>> commands = new TreeMap<>();
 
             String commandSuffix = null;
             if (FORMAT_ASCIIDOC.equals(format)) {
@@ -167,7 +167,7 @@ public class GenerateHelpMojo extends AbstractMojo {
         Exception, MojoFailureException {
         ClassFinder finder;
         if ("project".equals(classloaderType)) {
-            List<URL> urls = new ArrayList<URL>();
+            List<URL> urls = new ArrayList<>();
             for (Object object : project.getCompileClasspathElements()) {
                 String path = (String) object;
                 urls.add(new File(path).toURI().toURL());

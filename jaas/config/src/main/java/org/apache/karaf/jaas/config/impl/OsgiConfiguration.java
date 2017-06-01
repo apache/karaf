@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class OsgiConfiguration extends Configuration {
 
-    private final List<JaasRealm> realms = new CopyOnWriteArrayIdentityList<JaasRealm>();
+    private final List<JaasRealm> realms = new CopyOnWriteArrayIdentityList<>();
     private Configuration defaultConfiguration;
 
     public void init() {

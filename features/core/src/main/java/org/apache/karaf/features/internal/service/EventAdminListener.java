@@ -39,7 +39,7 @@ public class EventAdminListener implements FeaturesListener {
     private final ServiceTracker<EventAdmin, EventAdmin> tracker;
 
     public EventAdminListener(BundleContext context) {
-        tracker = new ServiceTracker<EventAdmin, EventAdmin>(context, EventAdmin.class.getName(), null);
+        tracker = new ServiceTracker<>(context, EventAdmin.class.getName(), null);
         tracker.open();
     }
 
@@ -49,7 +49,7 @@ public class EventAdminListener implements FeaturesListener {
             if (eventAdmin == null) {
                 return;
             }
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Dictionary<String, Object> props = new Hashtable<>();
             props.put(EventConstants.TYPE, event.getType());
             props.put(EventConstants.EVENT, event);
             props.put(EventConstants.TIMESTAMP, System.currentTimeMillis());
@@ -78,7 +78,7 @@ public class EventAdminListener implements FeaturesListener {
             if (eventAdmin == null) {
                 return;
             }
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Dictionary<String, Object> props = new Hashtable<>();
             props.put(EventConstants.TYPE, event.getType());
             props.put(EventConstants.EVENT, event);
             props.put(EventConstants.TIMESTAMP, System.currentTimeMillis());

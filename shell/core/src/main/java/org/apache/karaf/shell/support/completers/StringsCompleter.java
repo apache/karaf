@@ -44,7 +44,7 @@ public class StringsCompleter
     }
 
     public StringsCompleter(final boolean caseSensitive) {
-        this.strings = new TreeSet<String>(new Comparator<String>() {
+        this.strings = new TreeSet<>(new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
                 return caseSensitive ? o1.compareTo(o2) : o1.compareToIgnoreCase(o2);

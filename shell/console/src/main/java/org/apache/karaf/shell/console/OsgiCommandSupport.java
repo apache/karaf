@@ -63,7 +63,7 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
 
     protected <T> List<T> getAllServices(Class<T> clazz, String filter) throws InvalidSyntaxException {
         Collection<ServiceReference<T>> references = getBundleContext().getServiceReferences(clazz, filter);
-        List<T> services = new ArrayList<T>();
+        List<T> services = new ArrayList<>();
         if (references != null) {
             for (ServiceReference<T> ref : references) {
                 T t = getService(clazz, ref);
@@ -86,7 +86,7 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
         T t = getBundleContext().getService(reference);
         if (t != null) {
             if (usedReferences == null) {
-                usedReferences = new ArrayList<ServiceReference<?>>();
+                usedReferences = new ArrayList<>();
             }
             usedReferences.add(reference);
         }

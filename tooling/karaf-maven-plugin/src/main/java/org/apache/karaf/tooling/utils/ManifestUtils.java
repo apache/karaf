@@ -45,7 +45,7 @@ public class ManifestUtils {
      * @return the list of imports
      */
     public static List<Clause> getImports(Manifest manifest) {
-    	List<Clause> result = new LinkedList<Clause>();
+    	List<Clause> result = new LinkedList<>();
     	Clause[] clauses = Parser.parseHeader(getHeader(Constants.IMPORT_PACKAGE, manifest));
     	for (Clause clause : clauses) {
     		result.add(clause);
@@ -60,7 +60,7 @@ public class ManifestUtils {
      * @return the list of non-optional imports
      */
     public static List<Clause> getMandatoryImports(Manifest manifest) {
-        List<Clause> result = new LinkedList<Clause>();
+        List<Clause> result = new LinkedList<>();
         for (Clause clause : getImports(manifest)) {
             if (!isOptional(clause)) {
                 result.add(clause);
@@ -76,7 +76,7 @@ public class ManifestUtils {
      * @return the list of exports
      */
     public static List<Clause> getExports(Manifest manifest) {
-    	List<Clause> result = new LinkedList<Clause>();
+    	List<Clause> result = new LinkedList<>();
     	Clause[] clauses = Parser.parseHeader(getHeader(Constants.EXPORT_PACKAGE, manifest));
     	for (Clause clause : clauses) {
     		result.add(clause);

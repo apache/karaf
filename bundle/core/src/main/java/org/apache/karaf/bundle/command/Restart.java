@@ -38,7 +38,7 @@ public class Restart extends BundlesCommand {
             System.err.println("No bundles specified.");
             return null;
         }
-        List<Exception> exceptions = new ArrayList<Exception>();
+        List<Exception> exceptions = new ArrayList<>();
         for (Bundle bundle : bundles) {
             try {
                 bundle.stop(Bundle.STOP_TRANSIENT);

@@ -109,10 +109,10 @@ public class InstanceServiceImplTest {
     public void testTextResources() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
         service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
-        Map<String, URL> textResources = new HashMap<String, URL>();
+        Map<String, URL> textResources = new HashMap<>();
         textResources.put("etc/myresource", getClass().getClassLoader().getResource("myresource"));
 
-        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null, null, textResources, new HashMap<String, URL>());
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null, null, textResources, new HashMap<>());
         Instance instance = service.createInstance(getName(), settings, false);
 
         assertFileExists(instance.getLocation(), "etc/myresource");

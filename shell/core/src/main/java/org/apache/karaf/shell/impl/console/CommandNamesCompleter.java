@@ -34,7 +34,7 @@ public class CommandNamesCompleter extends org.apache.karaf.shell.support.comple
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         // TODO: optimize
         List<Command> list = session.getRegistry().getCommands();
-        Set<String> names = new HashSet<String>();
+        Set<String> names = new HashSet<>();
         for (Command command : list) {
             names.add(command.getScope() + ":" + command.getName());
             names.add(command.getName());

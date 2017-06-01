@@ -59,7 +59,7 @@ public class Content {
      */
     public List<Config> getConfig() {
         if (config == null) {
-            config = new ArrayList<Config>();
+            config = new ArrayList<>();
         }
         return this.config;
     }
@@ -140,19 +140,19 @@ public class Content {
     }
 
     public List<org.apache.karaf.features.Dependency> getDependencies() {
-        return Collections.<org.apache.karaf.features.Dependency>unmodifiableList(getFeature());
+        return Collections.unmodifiableList(getFeature());
     }
 
     public List<BundleInfo> getBundles() {
-        return Collections.<BundleInfo>unmodifiableList(getBundle());
+        return Collections.unmodifiableList(getBundle());
     }
 
     public List<ConfigInfo> getConfigurations() {
-    	return Collections.<ConfigInfo>unmodifiableList(getConfig());
+    	return Collections.unmodifiableList(getConfig());
     }
 
     public List<ConfigFileInfo> getConfigurationFiles() {
-        return Collections.<ConfigFileInfo>unmodifiableList(getConfigfile());
+        return Collections.unmodifiableList(getConfigfile());
     }
 
 }

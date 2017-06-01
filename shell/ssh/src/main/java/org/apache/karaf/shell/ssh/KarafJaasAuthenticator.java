@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyAuthenticator {
 
-    public static final Session.AttributeKey<Subject> SUBJECT_ATTRIBUTE_KEY = new Session.AttributeKey<Subject>();
+    public static final Session.AttributeKey<Subject> SUBJECT_ATTRIBUTE_KEY = new Session.AttributeKey<>();
     private final Logger LOGGER = LoggerFactory.getLogger(KarafJaasAuthenticator.class);
 
     private String realm;

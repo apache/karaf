@@ -64,7 +64,7 @@ public class ShowBundleTree extends BundleCommand {
         long start = System.currentTimeMillis();
         // let's do the real work here
         printHeader(bundle);
-        tree = new Tree<Bundle>(bundle);
+        tree = new Tree<>(bundle);
         createTree(bundle);
         printTree(tree);
         printDuplicatePackages(tree);
@@ -126,7 +126,7 @@ public class ShowBundleTree extends BundleCommand {
      */
     private void printDuplicatePackages(Tree<Bundle> tree) {
         Set<Bundle> bundles = tree.flatten();
-        Map<String, Set<Bundle>> exports = new HashMap<String, Set<Bundle>>();
+        Map<String, Set<Bundle>> exports = new HashMap<>();
 
         for (Bundle bundle : bundles) {
             for (BundleRevision revision : bundle.adapt(BundleRevisions.class).getRevisions()) {
@@ -230,7 +230,7 @@ public class ShowBundleTree extends BundleCommand {
     */
     private void createNode(Node<Bundle> node) {
         Bundle bundle = node.getValue();
-        Collection<Bundle> exporters = new HashSet<Bundle>();
+        Collection<Bundle> exporters = new HashSet<>();
         exporters.addAll(bundleService.getWiredBundles(bundle).values());
 
         for (Bundle exporter : exporters) {

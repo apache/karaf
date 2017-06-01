@@ -34,9 +34,9 @@ public class ActionMetaDataFactory {
 
     public ActionMetaData create(Class<? extends Action> actionClass) {
         Command command = getCommand(actionClass);
-        Map<Option, Field> options = new HashMap<Option, Field>();
-        Map<Argument, Field> arguments = new HashMap<Argument, Field>();
-        List<Argument> orderedArguments = new ArrayList<Argument>();
+        Map<Option, Field> options = new HashMap<>();
+        Map<Argument, Field> arguments = new HashMap<>();
+        List<Argument> orderedArguments = new ArrayList<>();
 
         for (Class<?> type = actionClass; type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {

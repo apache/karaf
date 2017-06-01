@@ -138,7 +138,7 @@ public class MetaCommand extends ConfigCommandSupport {
                 return;
             }
             Configuration config = configRepository.getConfigAdmin().getConfiguration(pid);
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Dictionary<String, Object> props = new Hashtable<>();
             for (AttributeDefinition attr : attrs) {
                 String valueStr = getDefaultValueStr(attr.getDefaultValue());
                 if (valueStr != null) {

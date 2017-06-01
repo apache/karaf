@@ -45,7 +45,7 @@ public class RunIfRule implements MethodRule {
     }
 
     public Statement apply(Statement base, FrameworkMethod method, Object target) {
-        List<RunIf> ignores = findRunIfs(method.getAnnotations(), new ArrayList<RunIf>(), new HashSet<Class>());
+        List<RunIf> ignores = findRunIfs(method.getAnnotations(), new ArrayList<>(), new HashSet<>());
         if (ignores.isEmpty()) {
             return base;
         }

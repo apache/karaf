@@ -28,7 +28,7 @@ public class ExprTokenizer {
     public ExprTokenizer(String expr) {
         this.expr = expr;
         this.currentPos = 0;
-        operatorMap = new HashMap<Character, String>();
+        operatorMap = new HashMap<>();
         for (String operator : operators) {
             operatorMap.put(operator.charAt(0), operator);
         }

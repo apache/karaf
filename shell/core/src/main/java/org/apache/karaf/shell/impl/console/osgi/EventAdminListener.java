@@ -36,7 +36,7 @@ public class EventAdminListener implements CommandSessionListener, Closeable
 
     public EventAdminListener(BundleContext bundleContext)
     {
-        tracker = new ServiceTracker<EventAdmin, EventAdmin>(bundleContext, EventAdmin.class.getName(), null);
+        tracker = new ServiceTracker<>(bundleContext, EventAdmin.class.getName(), null);
         tracker.open();
     }
 
@@ -48,7 +48,7 @@ public class EventAdminListener implements CommandSessionListener, Closeable
         if (command.toString().trim().length() > 0) {
             EventAdmin admin = tracker.getService();
             if (admin != null) {
-                Map<String, Object> props = new HashMap<String, Object>();
+                Map<String, Object> props = new HashMap<>();
                 props.put("command", command.toString());
                 Event event = new Event("org/apache/karaf/shell/console/EXECUTING", props);
                 admin.postEvent(event);

@@ -33,7 +33,7 @@ public class SimpleLoggerFactory implements ILoggerFactory {
   Map<String, Logger> loggerMap;
 
   public SimpleLoggerFactory() {
-    loggerMap = new HashMap<String, Logger>();
+    loggerMap = new HashMap<>();
   }
 
   /**
@@ -43,7 +43,7 @@ public class SimpleLoggerFactory implements ILoggerFactory {
     Logger slogger = null;
     // protect against concurrent access of the loggerMap
     synchronized (this) {
-      slogger = (Logger) loggerMap.get(name);
+      slogger = loggerMap.get(name);
       if (slogger == null) {
         slogger = new SimpleLogger(name);
         loggerMap.put(name, slogger);

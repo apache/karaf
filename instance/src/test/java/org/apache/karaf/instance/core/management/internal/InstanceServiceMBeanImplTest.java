@@ -36,7 +36,7 @@ public class InstanceServiceMBeanImplTest extends TestCase {
 
     public void testCreateInstance() throws Exception {
         final InstanceSettings instanceSettings = new InstanceSettings(123, 456,789, "somewhere", "someopts",
-                Collections.<String>emptyList(), Arrays.asList("webconsole", "funfeat"), "localhost");
+                Collections.emptyList(), Arrays.asList("webconsole", "funfeat"), "localhost");
         
         final Instance inst = EasyMock.createMock(Instance.class);
         EasyMock.expect(inst.getPid()).andReturn(42);
@@ -52,7 +52,7 @@ public class InstanceServiceMBeanImplTest extends TestCase {
     
     public void testCreateInstance2() throws Exception {
         final InstanceSettings instanceSettings = new InstanceSettings(0, 0, 0, null, null,
-                Collections.<String>emptyList(), Collections.<String>emptyList(), "localhost");
+                Collections.emptyList(), Collections.emptyList(), "localhost");
         
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
         EasyMock.expect(instanceService.createInstance("t1", instanceSettings, false)).andReturn(null);

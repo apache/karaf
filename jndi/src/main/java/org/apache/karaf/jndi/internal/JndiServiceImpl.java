@@ -49,7 +49,7 @@ public class JndiServiceImpl implements JndiService {
 
     @Override
     public Map<String, String> names(String name) throws Exception {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         if (name.startsWith(OSGI_JNDI_CONTEXT_PREFIX)) {
             // OSGi service binding
             // make a lookup using directly the OSGi service
@@ -104,7 +104,7 @@ public class JndiServiceImpl implements JndiService {
     }
 
     public List<String> contexts(String name) throws Exception {
-        List<String> contexts = new ArrayList<String>();
+        List<String> contexts = new ArrayList<>();
         Context context = new InitialContext();
         NamingEnumeration<NameClassPair> pairs = context.list(name);
         while (pairs.hasMoreElements()) {
