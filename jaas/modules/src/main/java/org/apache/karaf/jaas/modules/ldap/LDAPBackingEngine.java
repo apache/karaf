@@ -37,7 +37,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by andyphillips404 on 5/31/17.
+ * Karaf JAAS backing engine to support basic list funcitonality
+ * for the LDAP login module.  Modification is not supported
+ * at this time
  */
 public class LDAPBackingEngine implements BackingEngine {
 
