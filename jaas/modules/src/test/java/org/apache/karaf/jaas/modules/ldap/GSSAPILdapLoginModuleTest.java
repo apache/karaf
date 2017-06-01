@@ -47,17 +47,13 @@ import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.login.LoginException;
@@ -199,19 +195,8 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         Properties options = ldapLoginModuleOptions();
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("hnelson");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
-        module.initialize(subject, cb, null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("hnelson", "secret"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login());
@@ -260,19 +245,8 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         Properties options = ldapLoginModuleOptions();
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("hnelson0");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
-        module.initialize(subject, cb, null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("hnelson0", "secret"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login()); // should throw LoginException
@@ -284,19 +258,8 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         Properties options = ldapLoginModuleOptions();
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("hnelson");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("secret0".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
-        module.initialize(subject, cb, null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("hnelson", "secret0"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login());
@@ -308,19 +271,8 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         Properties options = ldapLoginModuleOptions();
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("test");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("test".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
-        module.initialize(subject, cb, null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("test", "test"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertFalse(module.login());
@@ -333,19 +285,8 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         options.remove(GSSAPILdapLoginModule.REALM_PROPERTY);
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("hnelson0");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
-        module.initialize(subject, cb, null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("hnelson0", "secret"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login()); // should throw LoginException

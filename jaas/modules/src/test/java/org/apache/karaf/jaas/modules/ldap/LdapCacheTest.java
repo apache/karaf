@@ -21,11 +21,7 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,6 +39,7 @@ import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,17 +92,7 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
     public void testAdminLogin() throws Exception {
         Properties options = ldapLoginModuleOptions();
         LDAPLoginModule module = new LDAPLoginModule();
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("admin");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("admin123".toCharArray());
-                    }
-                }
-            }
-        };
+        CallbackHandler cb = new NamePasswordCallbackHandler("admin", "admin123");
         Subject subject = new Subject();
         module.initialize(subject, cb, null, options);
 
