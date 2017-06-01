@@ -15,7 +15,6 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,17 +22,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.sql.DataSource;
 
 import org.apache.derby.jdbc.EmbeddedDataSource40;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -115,7 +110,7 @@ public class JdbcLoginModuleTest {
         JDBCLoginModule module = new JDBCLoginModule();
 
         Subject subject = new Subject();
-        module.initialize(subject, getCallbackHandler("abc", "xyz"), null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("abc", "xyz"), null, options);
 
         module.login();
         module.commit();
@@ -137,7 +132,7 @@ public class JdbcLoginModuleTest {
         JDBCLoginModule module = new JDBCLoginModule();
 
         Subject subject = new Subject();
-        module.initialize(subject, getCallbackHandler("abc", "xyz"), null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("abc", "xyz"), null, options);
 
         module.login();
         module.commit();
@@ -217,20 +212,5 @@ public class JdbcLoginModuleTest {
         assertTrue(engine.listRoles(new UserPrincipal("abc")).isEmpty());
         assertTrue(engine.listRoles(new GroupPrincipal("group1")).isEmpty());
         assertTrue(engine.listGroups(new UserPrincipal("abc")).isEmpty());
-    }
-
-    private CallbackHandler getCallbackHandler(final String user, final String password) {
-        return new CallbackHandler() {
-                @Override
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback cb : callbacks) {
-                        if (cb instanceof NameCallback) {
-                            ((NameCallback) cb).setName(user);
-                        } else if (cb instanceof PasswordCallback) {
-                            ((PasswordCallback) cb).setPassword(password.toCharArray());
-                        }
-                    }
-                }
-            };
     }
 }
