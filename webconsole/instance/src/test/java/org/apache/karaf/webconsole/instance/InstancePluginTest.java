@@ -34,7 +34,6 @@ import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
 import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 
 public class InstancePluginTest extends TestCase {
     public void testParseStringList() throws Exception {
@@ -72,12 +71,9 @@ public class InstancePluginTest extends TestCase {
         params.put("featureURLs", "http://someURL");
         params.put("features", "abc,def");
         HttpServletRequest req = EasyMock.createMock(HttpServletRequest.class);
-        EasyMock.expect(req.getParameter(EasyMock.anyObject())).andAnswer(new IAnswer<String>() {
-            public String answer() throws Throwable {
-                return params.get(EasyMock.getCurrentArguments()[0]);
-            }
-        }).anyTimes();
-        
+        EasyMock.expect(req.getParameter(EasyMock.anyObject())).andAnswer(
+                () -> params.get(EasyMock.getCurrentArguments()[0])).anyTimes();
+
         HttpServletResponse res = EasyMock.createNiceMock(HttpServletResponse.class);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter pw = new PrintWriter(baos);

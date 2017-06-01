@@ -160,12 +160,9 @@ public class DeployerTest {
         EasyMock.expectLastCall();
 
         installSupport.stopBundle(EasyMock.eq(bundleA), anyInt());
-        EasyMock.expectLastCall().andStubAnswer(new IAnswer<Object>() {
-            @Override
-            public Object answer() throws Throwable {
-                bundleA.state = Bundle.RESOLVED;
-                return null;
-            }
+        EasyMock.expectLastCall().andStubAnswer(() -> {
+            bundleA.state = Bundle.RESOLVED;
+            return null;
         });
         installSupport.updateBundle(EasyMock.eq(bundleA), EasyMock.anyObject(), EasyMock.anyObject());
         EasyMock.expectLastCall().andStubAnswer(new IAnswer<Object>() {

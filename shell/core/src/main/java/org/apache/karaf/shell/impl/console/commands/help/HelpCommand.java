@@ -178,16 +178,14 @@ public class HelpCommand implements Command {
         Map<String,String> props = new HashMap<>();
         props.put("data", "${" + path + "}");
         final List<HelpProvider> providers = session.getRegistry().getServices(HelpProvider.class);
-        InterpolationHelper.performSubstitution(props, new InterpolationHelper.SubstitutionCallback() {
-            public String getValue(final String key) {
-                for (HelpProvider hp : providers) {
-                    String result = hp.getHelp(session, key);
-                    if (result != null) {
-                        return removeNewLine(result);
-                    }
+        InterpolationHelper.performSubstitution(props, key -> {
+            for (HelpProvider hp : providers) {
+                String result = hp.getHelp(session, key);
+                if (result != null) {
+                    return removeNewLine(result);
                 }
-                return null;
             }
+            return null;
         });
         return props.get("data");
     }

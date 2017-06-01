@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -345,12 +344,10 @@ public class Main {
                 new Class<?>[] {
                     signalHandlerClass
                 },
-                new InvocationHandler() {
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    (proxy, method, args) -> {
                         Main.this.destroy();
                         return null;
                     }
-                }
             );
 
             signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(
@@ -650,15 +647,13 @@ public class Main {
             exiting = true;
 
             if (framework.getState() == Bundle.ACTIVE || framework.getState() == Bundle.STARTING) {
-                new Thread() {
-                    public void run() {
-                        try {
-                            framework.stop();
-                        } catch (BundleException e) {
-                            System.err.println("Error stopping karaf: " + e.getMessage());
-                        }
+                new Thread(() -> {
+                    try {
+                        framework.stop();
+                    } catch (BundleException e) {
+                        System.err.println("Error stopping karaf: " + e.getMessage());
                     }
-                }.start();
+                }).start();
             }
 
             int step = 5000;      

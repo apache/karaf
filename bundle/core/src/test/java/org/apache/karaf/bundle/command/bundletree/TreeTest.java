@@ -28,13 +28,11 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Set;
 
-import org.apache.karaf.bundle.command.bundletree.Node;
-import org.apache.karaf.bundle.command.bundletree.Tree;
 import org.junit.Test;
 
 /**
- * Test cases for {@link org.apache.karaf.shell.dev.util.Tree}
- * and {@link org.apache.karaf.shell.dev.util.Node}
+ * Test cases for {@link org.apache.karaf.bundle.command.bundletree.Tree}
+ * and {@link org.apache.karaf.bundle.command.bundletree.Node}
  */
 public class TreeTest {
 
@@ -55,11 +53,7 @@ public class TreeTest {
         tree.addChild("child");
 
         StringWriter writer = new StringWriter();
-        tree.write(new PrintWriter(writer), new Tree.Converter<String>() {
-            public String toString(Node<String> node) {
-                return "my " + node.getValue();
-            }
-        });
+        tree.write(new PrintWriter(writer), node -> "my " + node.getValue());
 
         BufferedReader reader = new BufferedReader(new StringReader(writer.getBuffer().toString()));
 

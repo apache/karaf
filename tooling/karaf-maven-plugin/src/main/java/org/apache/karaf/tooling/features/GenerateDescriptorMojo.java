@@ -33,7 +33,6 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -771,17 +770,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 }
             }
 
-            Collections.sort(feature.getBundle(), new Comparator<Bundle>() {
-
-                public int compare(Bundle bundle, Bundle bundle1) {
-                    return bundle.getLocation().compareTo(bundle1.getLocation());
-                }
-            });
-            Collections.sort(feature.getFeature(), new Comparator<Dependency>() {
-                public int compare(Dependency dependency, Dependency dependency1) {
-                    return dependency.getName().compareTo(dependency1.getName());
-                }
-            });
+            feature.getBundle().sort(Comparator.comparing(Bundle::getLocation));
+            feature.getFeature().sort(Comparator.comparing(Dependency::getName));
 
             if (dependencyCache.exists()) {
                 //filter dependencies file

@@ -103,11 +103,7 @@ public class LogTail extends DisplayLog {
             out.flush();
             // Tail
             final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<>();
-            PaxAppender appender = new PaxAppender() {
-                public void doAppend(PaxLoggingEvent event) {
-                        queue.add(event);
-                }
-            };
+            PaxAppender appender = queue::add;
             try {
                 logService.addAppender(appender);
                 while (doDisplay) {

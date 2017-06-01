@@ -144,11 +144,7 @@ public class InfoAction implements Action {
                 if (keys.size() > 0) {
                     System.out.println(section);
 
-                    Collections.sort(keys, new Comparator<Object>() {
-                        public int compare(Object o1, Object o2) {
-                            return String.valueOf(o1).compareTo(String.valueOf(o2));
-                        }
-                    });
+                    keys.sort(Comparator.comparing(String::valueOf));
 
                     for (Object key : keys) {
                         printValue(String.valueOf(key), maxNameLen, String.valueOf(properties.get(section).get(key)));

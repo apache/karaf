@@ -15,13 +15,11 @@
  */
 package org.apache.karaf.jaas.command;
 
-import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 import java.util.List;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -55,17 +53,15 @@ public class SudoCommand implements Action {
     @Override
     public Object execute() throws Exception {
         Subject subject = new Subject();
-        LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback callback : callbacks) {
-                    if (callback instanceof NameCallback) {
-                        ((NameCallback) callback).setName(user);
-                    } else if (callback instanceof PasswordCallback) {
-                        String password = SudoCommand.this.session.readLine("Password: ", '*');
-                        ((PasswordCallback) callback).setPassword(password.toCharArray());
-                    } else {
-                        throw new UnsupportedCallbackException(callback);
-                    }
+        LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
+            for (Callback callback : callbacks) {
+                if (callback instanceof NameCallback) {
+                    ((NameCallback) callback).setName(user);
+                } else if (callback instanceof PasswordCallback) {
+                    String password = SudoCommand.this.session.readLine("Password: ", '*');
+                    ((PasswordCallback) callback).setPassword(password.toCharArray());
+                } else {
+                    throw new UnsupportedCallbackException(callback);
                 }
             }
         });
@@ -78,12 +74,7 @@ public class SudoCommand implements Action {
             }
             sb.append(s);
         }
-        JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
-            @Override
-            public Object run() throws Exception {
-                return session.execute(sb);
-            }
-        });
+        JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> session.execute(sb));
 
         loginContext.logout();
         return null;

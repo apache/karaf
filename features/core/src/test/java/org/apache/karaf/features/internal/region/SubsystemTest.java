@@ -341,12 +341,7 @@ public class SubsystemTest {
         System.out.println("Wiring");
         Map<Resource, List<Wire>> wiring = resolver.getWiring();
         List<Resource> resources = new ArrayList<>(wiring.keySet());
-        Collections.sort(resources, new Comparator<Resource>() {
-            @Override
-            public int compare(Resource o1, Resource o2) {
-                return getName(o1).compareTo(getName(o2));
-            }
-        });
+        resources.sort(Comparator.comparing(this::getName));
         for (Resource resource : resources) {
             System.out.println("    " + getName(resource));
             for (Wire wire : wiring.get(resource)) {

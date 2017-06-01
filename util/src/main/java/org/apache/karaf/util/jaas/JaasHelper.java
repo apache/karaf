@@ -89,14 +89,8 @@ public class JaasHelper {
         // set up the new Subject-based AccessControlContext for doPrivileged
         final AccessControlContext currentAcc = AccessController.getContext();
         final AccessControlContext newAcc = AccessController.doPrivileged
-                (new PrivilegedAction<AccessControlContext>() {
-                    public AccessControlContext run() {
-                        if (subject == null)
-                            return new AccessControlContext(currentAcc, null);
-                        else
-                            return new AccessControlContext(currentAcc, new OsgiSubjectDomainCombiner(subject));
-                    }
-                });
+                ((PrivilegedAction<AccessControlContext>) () -> new AccessControlContext(currentAcc,
+                        subject != null ? new OsgiSubjectDomainCombiner(subject) : null));
         // call doPrivileged and push this new context on the stack
         return AccessController.doPrivileged(action, newAcc);
     }
@@ -109,14 +103,8 @@ public class JaasHelper {
         // set up the new Subject-based AccessControlContext for doPrivileged
         final AccessControlContext currentAcc = AccessController.getContext();
         final AccessControlContext newAcc = AccessController.doPrivileged
-                (new PrivilegedAction<AccessControlContext>() {
-                    public AccessControlContext run() {
-                        if (subject == null)
-                            return new AccessControlContext(currentAcc, null);
-                        else
-                            return new AccessControlContext(currentAcc, new OsgiSubjectDomainCombiner(subject));
-                    }
-                });
+                ((PrivilegedAction<AccessControlContext>) () -> new AccessControlContext(currentAcc,
+                        subject != null ? new OsgiSubjectDomainCombiner(subject) : null));
         // call doPrivileged and push this new context on the stack
         return AccessController.doPrivileged(action, newAcc);
     }

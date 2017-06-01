@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.karaf.config.core.impl.MetaServiceCaller;
-import org.apache.karaf.config.core.impl.MetatypeCallable;
 import org.apache.karaf.shell.api.action.lifecycle.Init;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -34,7 +33,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.service.metatype.MetaTypeInformation;
-import org.osgi.service.metatype.MetaTypeService;
 
 @Service
 public class MetaCompleter implements Completer, BundleListener {
@@ -60,27 +58,23 @@ public class MetaCompleter implements Completer, BundleListener {
     }
 
     private synchronized void updateMeta() {
-        List<String> pids = MetaServiceCaller.withMetaTypeService(context, new MetatypeCallable<List<String>>() {
+        List<String> pids = MetaServiceCaller.withMetaTypeService(context, metatypeService -> {
+            List<String> pids1 = new ArrayList<>();
+            Bundle[] bundles = context.getBundles();
+            for (Bundle bundle : bundles) {
 
-            @Override
-            public List<String> callWith(MetaTypeService metatypeService) {
-                List<String> pids = new ArrayList<>();
-                Bundle[] bundles = context.getBundles();
-                for (Bundle bundle : bundles) {
-                    
-                    MetaTypeInformation info = metatypeService.getMetaTypeInformation(bundle);
-                    if (info == null) {
-                        continue;
-                    }
-                    if (info.getFactoryPids() != null) {
-                        pids.addAll(Arrays.asList(info.getFactoryPids()));
-                    }
-                    if (info.getPids() != null) {
-                        pids.addAll(Arrays.asList(info.getPids()));
-                    }
+                MetaTypeInformation info = metatypeService.getMetaTypeInformation(bundle);
+                if (info == null) {
+                    continue;
                 }
-                return pids;
+                if (info.getFactoryPids() != null) {
+                    pids1.addAll(Arrays.asList(info.getFactoryPids()));
+                }
+                if (info.getPids() != null) {
+                    pids1.addAll(Arrays.asList(info.getPids()));
+                }
             }
+            return pids1;
         });
         if (pids != null) {
             delegate.getStrings().clear();

@@ -26,7 +26,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -160,13 +159,8 @@ public class GuardingFindHookTest {
 
         BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
         EasyMock.expect(bc.getBundle()).andReturn(bundle).anyTimes();
-        EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(new IAnswer<Filter>() {
-            @Override
-            public Filter answer() throws Throwable {
-                Filter filter = FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0]);
-                return filter;
-            }
-        }).anyTimes();
+        EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(
+                () -> FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0])).anyTimes();
         EasyMock.replay(bc);
 
         EasyMock.expect(bundle.getBundleContext()).andReturn(bc).anyTimes();
@@ -201,12 +195,8 @@ public class GuardingFindHookTest {
 
         BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
         EasyMock.expect(bc.getBundle()).andReturn(b).anyTimes();
-        EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(new IAnswer<Filter>() {
-            @Override
-            public Filter answer() throws Throwable {
-                return FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0]);
-            }
-        }).anyTimes();
+        EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(
+                () -> FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0])).anyTimes();
         String cmFilter = "(&(objectClass=" + ConfigurationAdmin.class.getName() + ")"
                 + "(!(" + GuardProxyCatalog.PROXY_SERVICE_KEY + "=*)))";
         bc.addServiceListener(EasyMock.isA(ServiceListener.class), EasyMock.eq(cmFilter));
@@ -223,18 +213,10 @@ public class GuardingFindHookTest {
         ServiceReference<Object> sr = EasyMock.createMock(ServiceReference.class);
 
         // Make sure the properties are 'live' in that if they change the reference changes too
-        EasyMock.expect(sr.getPropertyKeys()).andAnswer(new IAnswer<String[]>() {
-            @Override
-            public String[] answer() throws Throwable {
-                return Collections.list(props.keys()).toArray(new String [] {});
-            }
-        }).anyTimes();
-        EasyMock.expect(sr.getProperty(EasyMock.isA(String.class))).andAnswer(new IAnswer<Object>() {
-            @Override
-            public Object answer() throws Throwable {
-                return props.get(EasyMock.getCurrentArguments()[0]);
-            }
-        }).anyTimes();
+        EasyMock.expect(sr.getPropertyKeys()).andAnswer(
+                () -> Collections.list(props.keys()).toArray(new String[] {})).anyTimes();
+        EasyMock.expect(sr.getProperty(EasyMock.isA(String.class))).andAnswer(
+                () -> props.get(EasyMock.getCurrentArguments()[0])).anyTimes();
         EasyMock.replay(sr);
         return sr;
     }

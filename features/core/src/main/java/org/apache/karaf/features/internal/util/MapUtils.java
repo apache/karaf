@@ -74,21 +74,11 @@ public final class MapUtils {
     }
 
     public static <S, T, U> Function<S, U> compose(final Function<S, T> f1, final Function<T, U> f2) {
-        return new Function<S, U>() {
-            @Override
-            public U apply(S s) {
-                return f2.apply(f1.apply(s));
-            }
-        };
+        return s -> f2.apply(f1.apply(s));
     }
 
     public static <T, U> MapUtils.Function<T, U> map(final Map<T, U> map) {
-        return new MapUtils.Function<T, U>() {
-            @Override
-            public U apply(T t) {
-                return map.get(t);
-            }
-        };
+        return map::get;
     }
 
     public static <S, T> boolean contains(Map<S, Set<T>> mapset, S key, T val) {

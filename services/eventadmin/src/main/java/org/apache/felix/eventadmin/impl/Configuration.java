@@ -34,7 +34,6 @@ import org.apache.felix.eventadmin.impl.util.LogWrapper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.metatype.MetaTypeProvider;
@@ -194,20 +193,13 @@ public class Configuration
     {
         // do this in the background as we don't want to stop
         // the config admin
-        new Thread()
-        {
-
-            @Override
-            public void run()
+        new Thread(() -> {
+            synchronized ( Configuration.this )
             {
-                synchronized ( Configuration.this )
-                {
-                    Configuration.this.configure( config );
-                    Configuration.this.startOrUpdate();
-                }
+                Configuration.this.configure( config );
+                Configuration.this.startOrUpdate();
             }
-
-        }.start();
+        }).start();
 
     }
 
@@ -485,14 +477,7 @@ public class Configuration
     {
         try
         {
-            return new ManagedService()
-            {
-                @Override
-                public void updated( Dictionary<String, ?> properties ) throws ConfigurationException
-                {
-                    updateFromConfigAdmin(properties);
-                }
-            };
+            return (ManagedService) this::updateFromConfigAdmin;
         }
         catch (Throwable t)
         {

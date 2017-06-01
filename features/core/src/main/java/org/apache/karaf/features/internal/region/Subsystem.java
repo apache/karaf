@@ -43,7 +43,6 @@ import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Library;
 import org.apache.karaf.features.ScopeFilter;
-import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
@@ -397,44 +396,28 @@ public class Subsystem extends ResourceImpl {
         for (Map.Entry<BundleInfo, Conditional> entry : infos.entrySet()) {
             final BundleInfo bi = entry.getKey();
             final String loc = bi.getLocation();
-            downloader.download(loc, new DownloadCallback() {
-                @Override
-                public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider), removeServiceRequirements);
-                    bundles.put(loc, res);
-                }
+            downloader.download(loc, provider -> {
+                bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements));
             });
         }
         for (Clause bundle : Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
             final String loc = bundle.getName();
-            downloader.download(loc, new DownloadCallback() {
-                @Override
-                public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider), removeServiceRequirements);
-                    bundles.put(loc, res);
-                }
+            downloader.download(loc, provider -> {
+                bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements));
             });
         }
         for (String override : overrides) {
             final String loc = Overrides.extractUrl(override);
-            downloader.download(loc, new DownloadCallback() {
-                @Override
-                public void downloaded(StreamProvider provider) throws Exception {
-                    ResourceImpl res = createResource(loc, getMetadata(provider), removeServiceRequirements);
-                    bundles.put(loc, res);
-                }
+            downloader.download(loc, provider -> {
+                bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements));
             });
         }
         if (feature != null) {
             for (Library library : feature.getLibraries()) {
                 if (library.isExport()) {
                     final String loc = library.getLocation();
-                    downloader.download(loc, new DownloadCallback() {
-                        @Override
-                        public void downloaded(StreamProvider provider) throws Exception {
-                            ResourceImpl res = createResource(loc, getMetadata(provider), removeServiceRequirements);
-                            bundles.put(loc, res);
-                        }
+                    downloader.download(loc, provider -> {
+                        bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements));
                     });
                 }
             }

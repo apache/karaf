@@ -40,14 +40,11 @@ public class Activator extends BaseActivator {
         ServletServiceImpl servletService = new ServletServiceImpl(servletEventHandler);
         register(ServletService.class, servletService);
 
-        listener = new BundleListener() {
-            @Override
-            public void bundleChanged(BundleEvent event) {
-                if (event.getType() == BundleEvent.UNINSTALLED
-                        || event.getType() == BundleEvent.UNRESOLVED
-                        || event.getType() == BundleEvent.STOPPED) {
-                    servletEventHandler.removeEventsForBundle(event.getBundle());
-                }
+        listener = event -> {
+            if (event.getType() == BundleEvent.UNINSTALLED
+                    || event.getType() == BundleEvent.UNRESOLVED
+                    || event.getType() == BundleEvent.STOPPED) {
+                servletEventHandler.removeEventsForBundle(event.getBundle());
             }
         };
         bundleContext.addBundleListener(listener);
