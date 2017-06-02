@@ -55,7 +55,7 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
  * these methods of {@code maven-core} APIs which directly references Eclipse Aether classes.</p>
  *
  * <p>When {@code karaf-maven-plugin} switches to {@code maven-core:3.1.0+}, reflection should be use for Sonatype
- * Aether in {@link Dependency30Helper} and this class will use Maven API directly.</p>
+ * Aether in {@code Dependency30Helper} and this class will use Maven API directly.</p>
  */
 public class Dependency31Helper implements DependencyHelper {
 
