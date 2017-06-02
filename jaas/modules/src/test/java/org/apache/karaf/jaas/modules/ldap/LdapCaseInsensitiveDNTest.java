@@ -25,19 +25,8 @@ import java.io.IOException;
 import java.security.Principal;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.directory.api.ldap.model.constants.SchemaConstants;
-import org.apache.directory.api.ldap.model.message.ModifyRequest;
-import org.apache.directory.api.ldap.model.message.ModifyRequestImpl;
-import org.apache.directory.api.ldap.model.name.Dn;
-import org.apache.directory.ldap.client.api.LdapConnection;
-import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
@@ -47,7 +36,7 @@ import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-import org.apache.karaf.jaas.modules.ldap.LdapLoginModuleTest;
+import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,19 +81,8 @@ public class LdapCaseInsensitiveDNTest extends LdapLoginModuleTest {
     public void testCaseInsensitiveDN() throws Exception {
         Properties options = ldapLoginModuleOptions();
         LDAPLoginModule module = new LDAPLoginModule();
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("admin");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("admin123".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
-        module.initialize(subject, cb, null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("admin", "admin123"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login());

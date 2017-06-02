@@ -52,6 +52,7 @@ import org.apache.directory.shared.kerberos.KerberosUtils;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
 import org.apache.directory.shared.kerberos.components.EncryptionKey;
 import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
+import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,11 +60,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.login.Configuration;
@@ -233,21 +229,10 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
 
     @Test
     public void testLoginSuccess() throws Exception {
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("hnelson");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
 
         Krb5LoginModule module = new Krb5LoginModule();
-        module.initialize(subject, cb, null, new HashMap<>());
+        module.initialize(subject, new NamePasswordCallbackHandler("hnelson", "secret"), null, new HashMap<>());
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
 
@@ -283,21 +268,10 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
 
     @Test(expected = LoginException.class)
     public void testLoginUsernameFailure() throws Exception {
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("hnelson0");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("secret".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
 
         Krb5LoginModule module = new Krb5LoginModule();
-        module.initialize(subject, cb, null, new HashMap<>());
+        module.initialize(subject, new NamePasswordCallbackHandler("hnelson0", "secret"), null, new HashMap<>());
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
 
@@ -307,21 +281,10 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
 
     @Test(expected = LoginException.class)
     public void testLoginPasswordFailure() throws Exception {
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("hnelson");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("secret0".toCharArray());
-                    }
-                }
-            }
-        };
         Subject subject = new Subject();
 
         Krb5LoginModule module = new Krb5LoginModule();
-        module.initialize(subject, cb, null, new HashMap<>());
+        module.initialize(subject, new NamePasswordCallbackHandler("hnelson", "secret0"), null, new HashMap<>());
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
 

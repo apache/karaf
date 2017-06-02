@@ -31,6 +31,7 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -49,20 +50,8 @@ public class PropertiesLoginModuleTest {
             PropertiesLoginModule module = new PropertiesLoginModule();
             Map<String, String> options = new HashMap<>();
             options.put(PropertiesLoginModule.USER_FILE, f.getAbsolutePath());
-            CallbackHandler cb = new CallbackHandler() {
-                @Override
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback cb : callbacks) {
-                        if (cb instanceof NameCallback) {
-                            ((NameCallback) cb).setName("abc");
-                        } else if (cb instanceof PasswordCallback) {
-                            ((PasswordCallback) cb).setPassword("xyz".toCharArray());
-                        }
-                    }
-                }
-            };
             Subject subject = new Subject();
-            module.initialize(subject, cb, null, options);
+            module.initialize(subject, new NamePasswordCallbackHandler("abc", "xyz"), null, options);
 
             Assert.assertEquals("Precondition", 0, subject.getPrincipals().size());
             Assert.assertTrue(module.login());
@@ -105,19 +94,7 @@ public class PropertiesLoginModuleTest {
             PropertiesLoginModule module = new PropertiesLoginModule();
             Map<String, String> options = new HashMap<>();
             options.put(PropertiesLoginModule.USER_FILE, f.getAbsolutePath());
-            CallbackHandler cb = new CallbackHandler() {
-                @Override
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback cb : callbacks) {
-                        if (cb instanceof NameCallback) {
-                            ((NameCallback) cb).setName("abc");
-                        } else if (cb instanceof PasswordCallback) {
-                            ((PasswordCallback) cb).setPassword("abc".toCharArray());
-                        }
-                    }
-                }
-            };
-            module.initialize(new Subject(), cb, null, options);
+            module.initialize(new Subject(), new NamePasswordCallbackHandler("abc", "abc"), null, options);
             try {
                 module.login();
                 Assert.fail("The login should have failed as the passwords didn't match");
@@ -146,20 +123,8 @@ public class PropertiesLoginModuleTest {
             PropertiesLoginModule module = new PropertiesLoginModule();
             Map<String, String> options = new HashMap<>();
             options.put(PropertiesLoginModule.USER_FILE, f.getAbsolutePath());
-            CallbackHandler cb = new CallbackHandler() {
-                @Override
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback cb : callbacks) {
-                        if (cb instanceof NameCallback) {
-                            ((NameCallback) cb).setName("pqr");
-                        } else if (cb instanceof PasswordCallback) {
-                            ((PasswordCallback) cb).setPassword("abc".toCharArray());
-                        }
-                    }
-                }
-            };
             Subject subject = new Subject();
-            module.initialize(subject, cb, null, options);
+            module.initialize(subject, new NamePasswordCallbackHandler("pqr", "abc"), null, options);
 
             Assert.assertEquals("Precondition", 0, subject.getPrincipals().size());
             Assert.assertTrue(module.login());
@@ -214,19 +179,7 @@ public class PropertiesLoginModuleTest {
             PropertiesLoginModule module = new PropertiesLoginModule();
             Map<String, String> options = new HashMap<>();
             options.put(PropertiesLoginModule.USER_FILE, f.getAbsolutePath());
-            CallbackHandler cb = new CallbackHandler() {
-                @Override
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback cb : callbacks) {
-                        if (cb instanceof NameCallback) {
-                            ((NameCallback) cb).setName(name);
-                        } else if (cb instanceof PasswordCallback) {
-                            ((PasswordCallback) cb).setPassword("group".toCharArray());
-                        }
-                    }
-                }
-            };
-            module.initialize(new Subject(), cb, null, options);
+            module.initialize(new Subject(), new NamePasswordCallbackHandler(name, "group"), null, options);
             try {
                 module.login();
                 Assert.fail("The login should have failed as you cannot log in under a group name directly");
