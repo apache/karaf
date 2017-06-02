@@ -150,6 +150,7 @@
                             org.apache.karaf.service.guard.tools,
                             org.apache.karaf.shell.impl.*,
                             org.apache.karaf.util,
+                            org.apache.karaf.util.filesstream,
                             org.apache.karaf.util.jaas,
                             org.apache.karaf.util.tracker,
                             org.apache.felix.utils.properties,

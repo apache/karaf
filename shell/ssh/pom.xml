@@ -142,6 +142,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.util,
+                            org.apache.karaf.util.filesstream,
                             org.apache.karaf.util.jaas,
                         </Private-Package>
                     </instructions>

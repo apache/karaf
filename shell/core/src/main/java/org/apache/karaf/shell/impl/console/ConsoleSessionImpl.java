@@ -57,6 +57,7 @@ import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.support.completers.UriCompleter;
+import org.apache.karaf.util.filesstream.FilesStream;
 import org.jline.builtins.Completers;
 import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
