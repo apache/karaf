@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
-import org.apache.karaf.features.internal.util.JsonReader;
-import org.apache.karaf.features.internal.util.JsonWriter;
+import org.apache.karaf.util.json.JsonReader;
+import org.apache.karaf.util.json.JsonWriter;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;

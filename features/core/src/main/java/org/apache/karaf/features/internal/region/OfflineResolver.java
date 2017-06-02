@@ -33,7 +33,7 @@ import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
-import org.apache.karaf.features.internal.util.JsonReader;
+import org.apache.karaf.util.json.JsonReader;
 import org.osgi.framework.BundleException;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;

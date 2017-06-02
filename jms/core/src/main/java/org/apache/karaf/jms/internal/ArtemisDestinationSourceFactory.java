@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.jms.internal;
 
+import org.apache.karaf.util.json.JsonReader;
+
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;

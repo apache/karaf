@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.features.internal.util;
+package org.apache.karaf.util.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
