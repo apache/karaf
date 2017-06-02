@@ -130,8 +130,8 @@ Apache Karaf features configuration is located in the `etc/org.apache.karaf.feat
 
 This configuration file contains the two properties to use to define boot features:
 
-* `featuresRepositories` contains a list (coma separated) of features repositories (features XML) URLs.
-* `featuresBoot` contains a list (come separated) of features to install at boot.
+* `featuresRepositories` contains a list (comma-separated) of features repositories (features XML) URLs.
+* `featuresBoot` contains a list (comma-separated) of features to install at boot.
 
 ==== Features upgrade
 
