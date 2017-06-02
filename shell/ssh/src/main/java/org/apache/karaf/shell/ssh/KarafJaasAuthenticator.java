@@ -65,16 +65,14 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
     public boolean authenticate(final String username, final String password, final ServerSession session) {
         try {
             Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback callback : callbacks) {
-                        if (callback instanceof NameCallback) {
-                            ((NameCallback) callback).setName(username);
-                        } else if (callback instanceof PasswordCallback) {
-                            ((PasswordCallback) callback).setPassword(password.toCharArray());
-                        } else {
-                            throw new UnsupportedCallbackException(callback);
-                        }
+            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
+                for (Callback callback : callbacks) {
+                    if (callback instanceof NameCallback) {
+                        ((NameCallback) callback).setName(username);
+                    } else if (callback instanceof PasswordCallback) {
+                        ((PasswordCallback) callback).setPassword(password.toCharArray());
+                    } else {
+                        throw new UnsupportedCallbackException(callback);
                     }
                 }
             });
@@ -102,16 +100,14 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
     public boolean authenticate(final String username, final PublicKey key, final ServerSession session) {
         try {
             Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback callback : callbacks) {
-                        if (callback instanceof NameCallback) {
-                            ((NameCallback) callback).setName(username);
-                        } else if (callback instanceof PublickeyCallback) {
-                            ((PublickeyCallback) callback).setPublicKey(key);
-                        } else {
-                            throw new UnsupportedCallbackException(callback);
-                        }
+            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
+                for (Callback callback : callbacks) {
+                    if (callback instanceof NameCallback) {
+                        ((NameCallback) callback).setName(username);
+                    } else if (callback instanceof PublickeyCallback) {
+                        ((PublickeyCallback) callback).setPublicKey(key);
+                    } else {
+                        throw new UnsupportedCallbackException(callback);
                     }
                 }
             });

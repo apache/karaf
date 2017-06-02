@@ -44,7 +44,7 @@ import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShellCommand implements Command, Runnable, SessionAware {
+public class ShellCommand implements Command, SessionAware {
 
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String EXEC_INIT_SCRIPT = "karaf.exec.init.script";
@@ -93,7 +93,7 @@ public class ShellCommand implements Command, Runnable, SessionAware {
 
     public void start(final Environment env) throws IOException {
         this.env = env;
-        new Thread(this).start();
+        new Thread(this::run).start();
     }
 
     public void run() {
@@ -108,15 +108,13 @@ public class ShellCommand implements Command, Runnable, SessionAware {
                 Object result;
                 if (subject != null) {
                     try {
-                        result = JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
-                            public Object run() throws Exception {
-                                String scriptFileName = System.getProperty(EXEC_INIT_SCRIPT);
-                                if (scriptFileName == null) {
-                                    scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-                                }
-                                executeScript(scriptFileName, session);
-                                return session.execute(command);
+                        result = JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
+                            String scriptFileName = System.getProperty(EXEC_INIT_SCRIPT);
+                            if (scriptFileName == null) {
+                                scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
                             }
+                            executeScript(scriptFileName, session);
+                            return session.execute(command);
                         });
                     } catch (PrivilegedActionException e) {
                         throw e.getException();

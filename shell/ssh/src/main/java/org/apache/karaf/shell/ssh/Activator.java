@@ -21,7 +21,7 @@ package org.apache.karaf.shell.ssh;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
@@ -184,8 +184,8 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setCipherFactories(SshUtils.buildCiphers(ciphers));
         server.setKeyExchangeFactories(SshUtils.buildKexAlgorithms(kexAlgorithms));
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
-        server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(new ShellCommandFactory(sessionFactory)).build());
-        server.setSubsystemFactories(Arrays.asList(new SftpSubsystemFactory()));
+        server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(cmd -> new ShellCommand(sessionFactory, cmd)).build());
+        server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
         server.setKeyPairProvider(keyPairProvider);
         server.setPasswordAuthenticator(authenticator);
         server.setPublickeyAuthenticator(authenticator);
@@ -194,7 +194,7 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setAgentFactory(KarafAgentFactory.getInstance());
         server.setTcpipForwardingFilter(AcceptAllForwardingFilter.INSTANCE);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
-        server.getProperties().put(SshServer.NIO_WORKERS, new Integer(nioWorkers).toString());
+        server.getProperties().put(SshServer.NIO_WORKERS, Integer.toString(nioWorkers));
         if (moduliUrl != null) {
             server.getProperties().put(SshServer.MODULI_URL, moduliUrl);
         }

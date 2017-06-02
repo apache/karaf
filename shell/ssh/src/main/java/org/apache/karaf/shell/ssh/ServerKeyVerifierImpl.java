@@ -32,7 +32,7 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 	private final boolean quiet;
 
     private final static String keyChangedMessage =
-            " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
+            		" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
                     " @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!      @ \n" +
                     " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
                     "IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
