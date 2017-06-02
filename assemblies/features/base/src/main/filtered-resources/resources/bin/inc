@@ -290,6 +290,7 @@ setupDefaults() {
         JAVA_DEBUG_PORT="${DEFAULT_JAVA_DEBUG_PORT}"
     fi
     DEFAULT_JAVA_DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${JAVA_DEBUG_PORT}"
+    DEFAULT_JAVA_DEBUGS_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=${JAVA_DEBUG_PORT}"
 
     ##
     ## TODO: Move to conf/profiler/yourkit.{sh|cmd}
