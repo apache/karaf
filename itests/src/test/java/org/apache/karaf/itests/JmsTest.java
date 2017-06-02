@@ -65,7 +65,7 @@ public class JmsTest extends KarafTestSupport {
 
     @Before
     public void setup() throws Exception {
-        await("ActiveMQ transport up").atMost(30, SECONDS).until(() -> jmsTransportPresent());
+        await("ActiveMQ transport up").atMost(30, SECONDS).until(this::jmsTransportPresent);
         mbeanServer = ManagementFactory.getPlatformMBeanServer();
         objName = new ObjectName("org.apache.karaf:type=jms,name=root");
     }

@@ -248,16 +248,8 @@ public class InfoAction extends SubsystemSupport implements Action {
         String name = clause.getName();
         Directive[] directives = clause.getDirectives();
         Attribute[] attributes = clause.getAttributes();
-        Arrays.sort(directives, new Comparator<Directive>() {
-            public int compare(Directive o1, Directive o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        Arrays.sort(attributes, new Comparator<Attribute>() {
-            public int compare(Attribute o1, Attribute o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        Arrays.sort(directives, Comparator.comparing(Directive::getName));
+        Arrays.sort(attributes, Comparator.comparing(Attribute::getName));
         builder.append(name);
         for (int i = 0; directives != null && i < directives.length; i++) {
             builder.append(";");

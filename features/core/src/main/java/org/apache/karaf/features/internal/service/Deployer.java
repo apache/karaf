@@ -1123,7 +1123,7 @@ public class Deployer {
             }
         }
         List<Resource> sorted = new ArrayList<>(wires.keySet());
-        Collections.sort(sorted, (r1, r2) -> wires.get(r1).size() - wires.get(r2).size());
+        sorted.sort(Comparator.comparingInt(r2 -> wires.get(r2).size()));
         for (Resource r : sorted) {
             print("    " + ResolverUtil.getSymbolicName(r) + " / " + ResolverUtil.getVersion(r), true);
             for (Resource w : wires.get(r)) {
@@ -1310,30 +1310,15 @@ public class Deployer {
     }
 
     protected <T> MapUtils.Function<Bundle, T> adapt(final Class<T> clazz) {
-        return new MapUtils.Function<Bundle, T>() {
-            @Override
-            public T apply(Bundle bundle) {
-                return bundle.adapt(clazz);
-            }
-        };
+        return bundle -> bundle.adapt(clazz);
     }
 
     protected MapUtils.Function<Bundle, Long> bundleId() {
-        return new MapUtils.Function<Bundle, Long>() {
-            @Override
-            public Long apply(Bundle bundle) {
-                return bundle.getBundleId();
-            }
-        };
+        return Bundle::getBundleId;
     }
 
     protected MapUtils.Function<Resource, String> featureId() {
-        return new MapUtils.Function<Resource, String>() {
-            @Override
-            public String apply(Resource resource) {
-                return getFeatureId(resource);
-            }
-        };
+        return ResourceUtils::getFeatureId;
     }
 
     protected boolean isUpdateable(Resource resource) {
@@ -1404,12 +1389,7 @@ public class Deployer {
             }
         }
         if (!bundlesToDestroy.isEmpty()) {
-            Collections.sort(bundlesToDestroy, new Comparator<Bundle>() {
-                @Override
-                public int compare(Bundle b1, Bundle b2) {
-                    return Long.compare(b2.getLastModified(), b1.getLastModified());
-                }
-            });
+            bundlesToDestroy.sort((b1, b2) -> Long.compare(b2.getLastModified(), b1.getLastModified()));
             LOGGER.debug("Selected bundles {} for destroy (no services in use)", bundlesToDestroy);
         } else {
             ServiceReference ref = null;

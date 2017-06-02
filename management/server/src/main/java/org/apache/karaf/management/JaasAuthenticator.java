@@ -18,13 +18,10 @@ package org.apache.karaf.management;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 
-import java.io.IOException;
 import java.security.Principal;
 
 import javax.management.remote.JMXAuthenticator;
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -56,16 +53,14 @@ public class JaasAuthenticator implements JMXAuthenticator {
         }
         try {
             Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback callback : callbacks) {
-                        if (callback instanceof NameCallback) {
-                            ((NameCallback) callback).setName(params[0]);
-                        } else if (callback instanceof PasswordCallback) {
-                            ((PasswordCallback) callback).setPassword((params[1].toCharArray()));
-                        } else {
-                            throw new UnsupportedCallbackException(callback);
-                        }
+            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
+                for (int i = 0; i < callbacks.length; i++) {
+                    if (callbacks[i] instanceof NameCallback) {
+                        ((NameCallback) callbacks[i]).setName(params[0]);
+                    } else if (callbacks[i] instanceof PasswordCallback) {
+                        ((PasswordCallback) callbacks[i]).setPassword((params[1].toCharArray()));
+                    } else {
+                        throw new UnsupportedCallbackException(callbacks[i]);
                     }
                 }
             });

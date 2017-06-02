@@ -25,7 +25,6 @@ import java.util.Hashtable;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -36,7 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
-import org.apache.felix.webconsole.internal.servlet.Base64;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -102,16 +100,14 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
     public Subject doAuthenticate(final String username, final String password) {
         try {
             Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback callback : callbacks) {
-                        if (callback instanceof NameCallback) {
-                            ((NameCallback) callback).setName(username);
-                        } else if (callback instanceof PasswordCallback) {
-                            ((PasswordCallback) callback).setPassword(password.toCharArray());
-                        } else {
-                            throw new UnsupportedCallbackException(callback);
-                        }
+            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
+                for (Callback callback : callbacks) {
+                    if (callback instanceof NameCallback) {
+                        ((NameCallback) callback).setName(username);
+                    } else if (callback instanceof PasswordCallback) {
+                        ((PasswordCallback) callback).setPassword(password.toCharArray());
+                    } else {
+                        throw new UnsupportedCallbackException(callback);
                     }
                 }
             });

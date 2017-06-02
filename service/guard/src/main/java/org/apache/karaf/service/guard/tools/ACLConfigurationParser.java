@@ -281,11 +281,9 @@ public class ACLConfigurationParser {
     }
 
     private static List<String> getMethodNameWildcardRoles(Dictionary<String, Object> properties, String methodName) {
-        SortedMap<String, String> wildcardRules = new TreeMap<>(new Comparator<String>() {
-            public int compare(String s1, String s2) {
-                // returns longer entries before shorter ones...
-                return s2.length() - s1.length();
-            }
+        SortedMap<String, String> wildcardRules = new TreeMap<>((s1, s2) -> {
+            // returns longer entries before shorter ones...
+            return s2.length() - s1.length();
         });
         
         for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {

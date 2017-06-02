@@ -29,7 +29,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.BundleContext;
 
@@ -53,11 +52,9 @@ public class KarafOsgiManager extends OsgiManager {
         Object obj = req.getAttribute(SUBJECT_RUN_AS);
         if (obj instanceof Subject) {
             try {
-                JaasHelper.doAs((Subject) obj, new PrivilegedExceptionAction<Object>() {
-                    public Object run() throws Exception {
-                        doService((HttpServletRequest) req, (HttpServletResponse) res);
-                        return null;
-                    }
+                JaasHelper.doAs((Subject) obj, (PrivilegedExceptionAction<Object>) () -> {
+                    doService((HttpServletRequest) req, (HttpServletResponse) res);
+                    return null;
                 });
             } catch (PrivilegedActionException e) {
                 Exception cause = e.getException();

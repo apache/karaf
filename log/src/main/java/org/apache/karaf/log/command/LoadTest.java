@@ -43,12 +43,9 @@ public class LoadTest implements Action {
         Thread[] th = new Thread[threads];
         for (int i = 0; i < threads; i++) {
             final int idxThread = i;
-            th[i] = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for (int i = 0; i < messages; i++) {
-                        LOGGER.info("Message {} / {}", idxThread, i);
-                    }
+            th[i] = new Thread(() -> {
+                for (int i1 = 0; i1 < messages; i1++) {
+                    LOGGER.info("Message {} / {}", idxThread, i1);
                 }
             });
         }

@@ -103,19 +103,16 @@ public class ShowBundleTree extends BundleCommand {
      */
     private void printTree(Tree<Bundle> tree) {
         System.out.printf("%n");
-        tree.write(System.out, new Tree.Converter<Bundle>() {
-
-            public String toString(Node<Bundle> node) {
-                if (versions) {
-                    return String.format("%s / [%s] [%s]",
-                            node.getValue().getSymbolicName(),
-                            node.getValue().getVersion().toString(),
-                            node.getValue().getBundleId());
-                } else {
-                    return String.format("%s [%s]",
-                            node.getValue().getSymbolicName(),
-                            node.getValue().getBundleId());
-                }
+        tree.write(System.out, node -> {
+            if (versions) {
+                return String.format("%s / [%s] [%s]",
+                        node.getValue().getSymbolicName(),
+                        node.getValue().getVersion().toString(),
+                        node.getValue().getBundleId());
+            } else {
+                return String.format("%s [%s]",
+                        node.getValue().getSymbolicName(),
+                        node.getValue().getBundleId());
             }
         });
     }

@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
@@ -100,12 +99,7 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                 @Override
                 public Completer getCompleter(final boolean scoped) {
                     final ArgumentCompleter completer = new ArgumentCompleter(oldCommand, getScope(), getName(), scoped);
-                    return new Completer() {
-                        @Override
-                        public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-                            return completer.complete(session, commandLine, candidates);
-                        }
-                    };
+                    return completer::complete;
                 }
 
                 @Override
@@ -155,12 +149,7 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                 @Override
                 public Completer getCompleter(final boolean scoped) {
                     final OldArgumentCompleter completer = new OldArgumentCompleter(oldCommand, getScope(), getName(), scoped);
-                    return new Completer() {
-                        @Override
-                        public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-                            return completer.complete(session, commandLine, candidates);
-                        }
-                    };
+                    return completer::complete;
                 }
 
                 @Override

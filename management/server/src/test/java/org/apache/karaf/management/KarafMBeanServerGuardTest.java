@@ -462,12 +462,10 @@ public class KarafMBeanServerGuardTest extends TestCase {
     public void testCurrentUserHasRole() throws Exception {
         Subject subject = loginWithTestRoles("test");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                assertTrue(JaasHelper.currentUserHasRole("test"));
-                assertFalse(JaasHelper.currentUserHasRole("toast"));
-                return null;
-            }
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            assertTrue(JaasHelper.currentUserHasRole("test"));
+            assertFalse(JaasHelper.currentUserHasRole("toast"));
+            return null;
         });
     }
 
@@ -478,12 +476,10 @@ public class KarafMBeanServerGuardTest extends TestCase {
         lm.login();
         lm.commit();
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                assertTrue(JaasHelper.currentUserHasRole(TestRolePrincipal.class.getCanonicalName() + ":foo"));
-                assertFalse(JaasHelper.currentUserHasRole("foo"));
-                return null;
-            }
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            assertTrue(JaasHelper.currentUserHasRole(TestRolePrincipal.class.getCanonicalName() + ":foo"));
+            assertFalse(JaasHelper.currentUserHasRole("foo"));
+            return null;
         });
     }
 
@@ -497,33 +493,31 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                Method im = MBeanServer.class.getMethod("invoke", ObjectName.class, String.class, Object[].class, String[].class);
+
+                ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
+
+                // The following operation should not throw an exception
+                guard.invoke(null, im, new Object[]{on, "someMethod", new Object[]{"test"}, new String[]{"java.lang.String"}});
+
                 try {
-                    Method im = MBeanServer.class.getMethod("invoke", ObjectName.class, String.class, Object[].class, String[].class);
-
-                    ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-
-                    // The following operation should not throw an exception
-                    guard.invoke(null, im, new Object[]{on, "someMethod", new Object[]{"test"}, new String[]{"java.lang.String"}});
-
-                    try {
-                        guard.invoke(null, im, new Object[]{on, "someOtherMethod", new Object[]{}, new String[]{}});
-                        fail("Should not have allowed the invocation");
-                    } catch (SecurityException se) {
-                        // good
-                    }
-
-                    try {
-                        guard.invoke(null, im, new Object[]{on, "somemethingElse", new Object[]{}, new String[]{}});
-                        fail("Should not have allowed the invocation");
-                    } catch (SecurityException se) {
-                        // good
-                    }
-                    return null;
-                } catch (Throwable ex) {
-                    throw new RuntimeException(ex);
+                    guard.invoke(null, im, new Object[]{on, "someOtherMethod", new Object[]{}, new String[]{}});
+                    fail("Should not have allowed the invocation");
+                } catch (SecurityException se) {
+                    // good
                 }
+
+                try {
+                    guard.invoke(null, im, new Object[]{on, "somemethingElse", new Object[]{}, new String[]{}});
+                    fail("Should not have allowed the invocation");
+                } catch (SecurityException se) {
+                    // good
+                }
+                return null;
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
@@ -553,26 +547,24 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                Method im = MBeanServer.class.getMethod("getAttribute", ObjectName.class, String.class);
+
+                // The following operations should not throw an exception
+                guard.invoke(mbs, im, new Object[]{on, "Toast"});
+                guard.invoke(mbs, im, new Object[]{on, "TestAttr"});
+
                 try {
-                    Method im = MBeanServer.class.getMethod("getAttribute", ObjectName.class, String.class);
-
-                    // The following operations should not throw an exception
-                    guard.invoke(mbs, im, new Object[]{on, "Toast"});
-                    guard.invoke(mbs, im, new Object[]{on, "TestAttr"});
-
-                    try {
-                        guard.invoke(mbs, im, new Object[]{on, "Butter"});
-                        fail("Should not have allowed the invocation");
-                    } catch (SecurityException se) {
-                        // good
-                    }
-
-                    return null;
-                } catch (Throwable ex) {
-                    throw new RuntimeException(ex);
+                    guard.invoke(mbs, im, new Object[]{on, "Butter"});
+                    fail("Should not have allowed the invocation");
+                } catch (SecurityException se) {
+                    // good
                 }
+
+                return null;
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
@@ -601,26 +593,24 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                Method im = MBeanServer.class.getMethod("getAttributes", ObjectName.class, String[].class);
+
+                // The following operations should not throw an exception
+                guard.invoke(mbs, im, new Object[]{on, new String[]{"Toast"}});
+                guard.invoke(mbs, im, new Object[]{on, new String[]{"TestSomething", "Toast"}});
+
                 try {
-                    Method im = MBeanServer.class.getMethod("getAttributes", ObjectName.class, String[].class);
-
-                    // The following operations should not throw an exception
-                    guard.invoke(mbs, im, new Object[]{on, new String[]{"Toast"}});
-                    guard.invoke(mbs, im, new Object[]{on, new String[]{"TestSomething", "Toast"}});
-
-                    try {
-                        guard.invoke(mbs, im, new Object[]{on, new String[]{"Butter", "Toast"}});
-                        fail("Should not have allowed the invocation");
-                    } catch (SecurityException se) {
-                        // good
-                    }
-
-                    return null;
-                } catch (Throwable ex) {
-                    throw new RuntimeException(ex);
+                    guard.invoke(mbs, im, new Object[]{on, new String[]{"Butter", "Toast"}});
+                    fail("Should not have allowed the invocation");
+                } catch (SecurityException se) {
+                    // good
                 }
+
+                return null;
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
@@ -651,26 +641,24 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                Method im = MBeanServer.class.getMethod("getAttributes", ObjectName.class, String[].class);
+
+                // The following operations should not throw an exception
+                guard.invoke(mbs, im, new Object[]{on, new String[]{"Toast"}});
+                guard.invoke(mbs, im, new Object[]{on, new String[]{"TestSomething", "Toast"}});
+
                 try {
-                    Method im = MBeanServer.class.getMethod("getAttributes", ObjectName.class, String[].class);
-
-                    // The following operations should not throw an exception
-                    guard.invoke(mbs, im, new Object[]{on, new String[]{"Toast"}});
-                    guard.invoke(mbs, im, new Object[]{on, new String[]{"TestSomething", "Toast"}});
-
-                    try {
-                        guard.invoke(mbs, im, new Object[]{on, new String[]{"Butter", "Toast"}});
-                        fail("Should not have allowed the invocation");
-                    } catch (SecurityException se) {
-                        // good
-                    }
-
-                    return null;
-                } catch (Throwable ex) {
-                    throw new RuntimeException(ex);
+                    guard.invoke(mbs, im, new Object[]{on, new String[]{"Butter", "Toast"}});
+                    fail("Should not have allowed the invocation");
+                } catch (SecurityException se) {
+                    // good
                 }
+
+                return null;
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
@@ -700,33 +688,31 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                Method im = MBeanServer.class.getMethod("setAttribute", ObjectName.class, Attribute.class);
+
+                // The following operations should not throw an exception
+                guard.invoke(mbs, im, new Object[]{on, new Attribute("Something", "v1")});
+                guard.invoke(mbs, im, new Object[]{on, new Attribute("Value", 42L)});
+
                 try {
-                    Method im = MBeanServer.class.getMethod("setAttribute", ObjectName.class, Attribute.class);
-
-                    // The following operations should not throw an exception
-                    guard.invoke(mbs, im, new Object[]{on, new Attribute("Something", "v1")});
-                    guard.invoke(mbs, im, new Object[]{on, new Attribute("Value", 42L)});
-
-                    try {
-                        guard.invoke(mbs, im, new Object[]{on, new Attribute("Other", Boolean.TRUE)});
-                        fail("Should not have allowed the invocation");
-                    } catch (SecurityException se) {
-                        // good
-                    }
-
-                    try {
-                        guard.invoke(mbs, im, new Object[]{on, new Attribute("NonExistent", "v4")});
-                        fail("Should not have found the MBean Declaration");
-                    } catch (IllegalStateException ise) {
-                        // good
-                    }
-
-                    return null;
-                } catch (Throwable ex) {
-                    throw new RuntimeException(ex);
+                    guard.invoke(mbs, im, new Object[]{on, new Attribute("Other", Boolean.TRUE)});
+                    fail("Should not have allowed the invocation");
+                } catch (SecurityException se) {
+                    // good
                 }
+
+                try {
+                    guard.invoke(mbs, im, new Object[]{on, new Attribute("NonExistent", "v4")});
+                    fail("Should not have found the MBean Declaration");
+                } catch (IllegalStateException ise) {
+                    // good
+                }
+
+                return null;
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
@@ -756,37 +742,35 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                Method im = MBeanServer.class.getMethod("setAttributes", ObjectName.class, AttributeList.class);
+
+                // The following operations should not throw an exception
+                Attribute a1 = new Attribute("Something", "v1");
+                Attribute a2 = new Attribute("Value", 42L);
+                guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a1))});
+                guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a2, a1))});
+
+                Attribute a3 = new Attribute("Other", Boolean.TRUE);
                 try {
-                    Method im = MBeanServer.class.getMethod("setAttributes", ObjectName.class, AttributeList.class);
-
-                    // The following operations should not throw an exception
-                    Attribute a1 = new Attribute("Something", "v1");
-                    Attribute a2 = new Attribute("Value", 42L);
-                    guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a1))});
-                    guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a2, a1))});
-
-                    Attribute a3 = new Attribute("Other", Boolean.TRUE);
-                    try {
-                        guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a1, a3))});
-                        fail("Should not have allowed the invocation");
-                    } catch (SecurityException se) {
-                        // good
-                    }
-
-                    try {
-                        Attribute a4 = new Attribute("NonExistent", "v4");
-                        guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a4))});
-                        fail("Should not have found the MBean Declaration");
-                    } catch (IllegalStateException ise) {
-                        // good
-                    }
-
-                    return null;
-                } catch (Throwable ex) {
-                    throw new RuntimeException(ex);
+                    guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a1, a3))});
+                    fail("Should not have allowed the invocation");
+                } catch (SecurityException se) {
+                    // good
                 }
+
+                try {
+                    Attribute a4 = new Attribute("NonExistent", "v4");
+                    guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a4))});
+                    fail("Should not have found the MBean Declaration");
+                } catch (IllegalStateException ise) {
+                    // good
+                }
+
+                return null;
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
@@ -826,16 +810,14 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(mbs, on));
-                    assertFalse(guard.canInvoke(mbs, on2));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(mbs, on));
+                assertFalse(guard.canInvoke(mbs, on2));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -869,15 +851,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertFalse(guard.canInvoke(mbs, on));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertFalse(guard.canInvoke(mbs, on));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -909,15 +889,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(mbs, on, "doit"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(mbs, on, "doit"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -950,15 +928,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertFalse(guard.canInvoke(mbs, on, "doit"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertFalse(guard.canInvoke(mbs, on, "doit"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -984,15 +960,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertFalse(guard.canInvoke(mbs, on, "doit"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertFalse(guard.canInvoke(mbs, on, "doit"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1020,15 +994,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(mbs, on, "getFoo"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(mbs, on, "getFoo"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1056,15 +1028,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertFalse(guard.canInvoke(mbs, on, "getFoo"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertFalse(guard.canInvoke(mbs, on, "getFoo"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1093,15 +1063,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(mbs, on, "isFoo"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(mbs, on, "isFoo"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1130,15 +1098,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertFalse(guard.canInvoke(mbs, on, "isFoo"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertFalse(guard.canInvoke(mbs, on, "isFoo"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1166,15 +1132,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(mbs, on, "setFoo"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(mbs, on, "setFoo"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1202,15 +1166,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertFalse(guard.canInvoke(mbs, on, "setFoo"));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertFalse(guard.canInvoke(mbs, on, "setFoo"));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1240,15 +1202,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(mbs, on));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(mbs, on));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1278,15 +1238,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertFalse(guard.canInvoke(mbs, on));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertFalse(guard.canInvoke(mbs, on));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1316,15 +1274,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(mbs, on));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(mbs, on));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1354,15 +1310,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(mbs, on));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(mbs, on));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1392,15 +1346,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertFalse(guard.canInvoke(mbs, on));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertFalse(guard.canInvoke(mbs, on));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1422,20 +1374,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(null, on, "dodo", new String[]{"java.lang.String"}));
-                    assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String", "java.lang.String"}));
-                    assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String"}));
-                    assertFalse(guard.canInvoke(null, on, "doit", new String[]{"int"}));
-                    assertFalse(guard.canInvoke(null, on, "doit", new String[]{}));
-                    assertFalse(guard.canInvoke(null, on, "uuuh", new String[]{"java.lang.String"}));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(null, on, "dodo", new String[]{"java.lang.String"}));
+                assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String", "java.lang.String"}));
+                assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String"}));
+                assertFalse(guard.canInvoke(null, on, "doit", new String[]{"int"}));
+                assertFalse(guard.canInvoke(null, on, "doit", new String[]{}));
+                assertFalse(guard.canInvoke(null, on, "uuuh", new String[]{"java.lang.String"}));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }
@@ -1457,20 +1407,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, new PrivilegedAction<Void>() {
-            public Void run() {
-                try {
-                    assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String"}));
-                    assertTrue(guard.canInvoke(null, on, "doit", new String[]{}));
-                    assertTrue(guard.canInvoke(null, on, "doit", new String[]{"int"}));
-                    assertFalse(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String", "java.lang.String"}));
-                    assertFalse(guard.canInvoke(null, on, "dodo", new String[]{"java.lang.String"}));
-                    assertFalse(guard.canInvoke(null, on, "uuuh", new String[]{"java.lang.String"}));
+        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+            try {
+                assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String"}));
+                assertTrue(guard.canInvoke(null, on, "doit", new String[]{}));
+                assertTrue(guard.canInvoke(null, on, "doit", new String[]{"int"}));
+                assertFalse(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String", "java.lang.String"}));
+                assertFalse(guard.canInvoke(null, on, "dodo", new String[]{"java.lang.String"}));
+                assertFalse(guard.canInvoke(null, on, "uuuh", new String[]{"java.lang.String"}));
 
-                    return null;
-                } catch (Throwable th) {
-                    throw new RuntimeException(th);
-                }
+                return null;
+            } catch (Throwable th) {
+                throw new RuntimeException(th);
             }
         });
     }

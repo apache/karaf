@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.jpa.hibernate.impl;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import javax.management.MBeanServer;
@@ -105,12 +103,8 @@ public class StatisticsPublisher implements ServiceTrackerCustomizer<EntityManag
     }
 
     private Object getStatisticsMBean(final Statistics statistics) {
-        return Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { StatisticsMXBean.class }, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                return method.invoke(statistics, args);
-            }
-        });
+        return Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { StatisticsMXBean.class },
+                (proxy, method, args) -> method.invoke(statistics, args));
     }
 
     @Override

@@ -108,11 +108,7 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                 if (!updated.isEmpty()) {
                     try {
                         final CountDownLatch latch = new CountDownLatch(1);
-                        wiring.refreshBundles(updated, new FrameworkListener() {
-                            public void frameworkEvent(FrameworkEvent event) {
-                                latch.countDown();
-                            }
-                        });
+                        wiring.refreshBundles(updated, (FrameworkListener) event -> latch.countDown());
                         latch.await();
                     } catch (InterruptedException e) {
                         running.set(false);

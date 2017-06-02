@@ -20,11 +20,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.hooks.service.EventListenerHook;
 import org.osgi.framework.hooks.service.FindHook;
@@ -50,12 +48,8 @@ public class ActivatorTest {
 
             BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
             EasyMock.expect(bc.getBundle()).andReturn(b).anyTimes();
-            EasyMock.expect(bc.createFilter(EasyMock.anyObject(String.class))).andAnswer(new IAnswer<Filter>() {
-                @Override
-                public Filter answer() throws Throwable {
-                    return FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0]);
-                }
-            }).anyTimes();
+            EasyMock.expect(bc.createFilter(EasyMock.anyObject(String.class))).andAnswer(
+                    () -> FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0])).anyTimes();
 
             EasyMock.expect(bc.registerService(
                     EasyMock.eq(EventListenerHook.class), EasyMock.isA(EventListenerHook.class), EasyMock.isNull(Dictionary.class)))

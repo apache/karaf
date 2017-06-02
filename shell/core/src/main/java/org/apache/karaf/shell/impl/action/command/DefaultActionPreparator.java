@@ -29,7 +29,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -301,11 +300,7 @@ public class DefaultActionPreparator {
         Command command = action.getClass().getAnnotation(Command.class);
         if (command != null) {
             List<Argument> argumentsSet = new ArrayList<Argument>(arguments.keySet());
-            Collections.sort(argumentsSet, new Comparator<Argument>() {
-                public int compare(Argument o1, Argument o2) {
-                    return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
-                }
-            });
+            argumentsSet.sort(Comparator.comparing(Argument::index));
             Set<Option> optionsSet = new HashSet<Option>(options.keySet());
             optionsSet.add(HelpOption.HELP);
             if (command != null && (command.description() != null || command.name() != null)) {

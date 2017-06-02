@@ -363,11 +363,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         if (command != null) {
             
             List<Argument> arguments = new ArrayList<>(argsMap.keySet());
-            Collections.sort(arguments, new Comparator<Argument>() {
-                public int compare(Argument o1, Argument o2) {
-                    return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
-                }
-            });
+            arguments.sort(Comparator.comparing(Argument::index));
             Set<Option> options = new HashSet<>(optionsMap.keySet());
             options.add(HELP);
             boolean globalScope = NameScoping.isGlobalScope(session, command.scope());

@@ -63,27 +63,25 @@ public class LocalConsoleManager {
                 .build();
 
         final Subject subject = createLocalKarafSubject();    
-        this.session = JaasHelper.doAs(subject, new PrivilegedAction<Session>() {
-            public Session run() {
-                String encoding = getEncoding();
-                session = sessionFactory.create(
-                                      terminal.input(),
-                                      new PrintStream(terminal.output()),
-                                      new PrintStream(terminal.output()),
-                                      new JLineTerminal(terminal),
-                                      encoding, 
-                                      LocalConsoleManager.this::close);
-                registration = bundleContext.registerService(Session.class, session, null);
-                String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
-                boolean delayconsole = Boolean.parseBoolean(System.getProperty(KARAF_DELAY_CONSOLE));
-                if (delayconsole) {
-                    DelayedStarted watcher = new DelayedStarted(session, name, bundleContext, System.in);
-                    new Thread(watcher).start();
-                } else {
-                    new Thread(session, name).start();
-                }
-                return session;
+        this.session = JaasHelper.doAs(subject, (PrivilegedAction<Session>) () -> {
+            String encoding = getEncoding();
+            session = sessionFactory.create(
+                                  terminal.input(),
+                                  new PrintStream(terminal.output()),
+                                  new PrintStream(terminal.output()),
+                                  new JLineTerminal(terminal),
+                                  encoding,
+                                  LocalConsoleManager.this::close);
+            registration = bundleContext.registerService(Session.class, session, null);
+            String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
+            boolean delayconsole = Boolean.parseBoolean(System.getProperty(KARAF_DELAY_CONSOLE));
+            if (delayconsole) {
+                DelayedStarted watcher = new DelayedStarted(session, name, bundleContext, System.in);
+                new Thread(watcher).start();
+            } else {
+                new Thread(session, name).start();
             }
+            return session;
         });
         // TODO: register the local session so that ssh can add the agent
 //        registration = bundleContext.register(CommandSession.class, console.getSession(), null);

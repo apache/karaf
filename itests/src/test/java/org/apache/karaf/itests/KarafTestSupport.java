@@ -256,20 +256,17 @@ public class KarafTestSupport {
         final SessionFactory sessionFactory = getOsgiService(SessionFactory.class);
         final Session session = sessionFactory.create(System.in, printStream, System.err);
 
-        final Callable<String> commandCallable = new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                try {
-                    if (!silent) {
-                        System.err.println(command);
-                    }
-                    session.execute(command);
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage(), e);
+        final Callable<String> commandCallable = () -> {
+            try {
+                if (!silent) {
+                    System.err.println(command);
                 }
-                printStream.flush();
-                return byteArrayOutputStream.toString();
+                session.execute(command);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
             }
+            printStream.flush();
+            return byteArrayOutputStream.toString();
         };
 
         FutureTask<String> commandFuture;
@@ -277,18 +274,10 @@ public class KarafTestSupport {
             commandFuture = new FutureTask<>(commandCallable);
         } else {
             // If principals are defined, run the command callable via Subject.doAs()
-            commandFuture = new FutureTask<>(new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    Subject subject = new Subject();
-                    subject.getPrincipals().addAll(Arrays.asList(principals));
-                    return Subject.doAs(subject, new PrivilegedExceptionAction<String>() {
-                        @Override
-                        public String run() throws Exception {
-                            return commandCallable.call();
-                        }
-                    });
-                }
+            commandFuture = new FutureTask<>(() -> {
+                Subject subject = new Subject();
+                subject.getPrincipals().addAll(Arrays.asList(principals));
+                return Subject.doAs(subject, (PrivilegedExceptionAction<String>) commandCallable::call);
             });
         }
 

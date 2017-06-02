@@ -65,35 +65,31 @@ public class SystemServiceImpl implements SystemService {
     }
 
     private void shutdown(final long sleep) {
-        new Thread() {
-            public void run() {
-                try {
-                    sleepWithMsg(sleep, "Shutdown in " + sleep / 1000 / 60 + " minute(s)");
-                    getBundleContext().getBundle(0).stop();
-                } catch (Exception e) {
-                    LOGGER.error("Halt error", e);
-                }
+        new Thread(() -> {
+            try {
+                sleepWithMsg(sleep, "Shutdown in " + sleep / 1000 / 60 + " minute(s)");
+                getBundleContext().getBundle(0).stop();
+            } catch (Exception e) {
+                LOGGER.error("Halt error", e);
             }
-        }.start();
+        }).start();
     }
 
     private void reboot(final long sleep, final Swipe clean) {
-        new Thread() {
-            public void run() {
-                try {
-                    sleepWithMsg(sleep, "Reboot in " + sleep / 1000 / 60 + " minute(s)");
-                    System.setProperty("karaf.restart", "true");
-                    if (clean.equals(Swipe.ALL)) {
-                        System.setProperty("karaf.clean.all", "true");
-                    } else if (clean.equals(Swipe.CACHE)) {
-                        System.setProperty("karaf.clean.cache", "true");
-                    }
-                    bundleContext.getBundle(0).stop();
-                } catch (Exception e) {
-                    LOGGER.error("Reboot error", e);
+        new Thread(() -> {
+            try {
+                sleepWithMsg(sleep, "Reboot in " + sleep / 1000 / 60 + " minute(s)");
+                System.setProperty("karaf.restart", "true");
+                if (clean.equals(Swipe.ALL)) {
+                    System.setProperty("karaf.clean.all", "true");
+                } else if (clean.equals(Swipe.CACHE)) {
+                    System.setProperty("karaf.clean.cache", "true");
                 }
+                bundleContext.getBundle(0).stop();
+            } catch (Exception e) {
+                LOGGER.error("Reboot error", e);
             }
-        }.start();
+        }).start();
     }
     
     private void sleepWithMsg(final long sleep, String msg)

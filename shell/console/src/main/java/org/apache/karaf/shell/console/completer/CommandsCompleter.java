@@ -39,7 +39,6 @@ import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.SessionProperties;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -311,11 +310,9 @@ public class CommandsCompleter implements Completer {
             if (context == null) {
                 throw new IllegalStateException("Bundle is stopped");
             }
-            listener = new ServiceListener() {
-                public void serviceChanged(ServiceEvent event) {
-                    synchronized (CommandsCompleter.this) {
-                        commands.clear();
-                    }
+            listener = event -> {
+                synchronized (CommandsCompleter.this) {
+                    commands.clear();
                 }
             };
             context.addServiceListener(listener,

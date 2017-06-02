@@ -548,28 +548,25 @@ public class GuardProxyCatalog implements ServiceListener {
         }
 
         private Thread newProxyProducingThread(final ProxyManager proxyManager) {
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (runProxyCreator) {
-                        CreateProxyRunnable proxyCreator = null;
-                        try {
-                            proxyCreator = createProxyQueue.take(); // take waits until there is something on the queue
-                        } catch (InterruptedException ie) {
-                            // part of normal behaviour
-                        }
+            Thread t = new Thread(() -> {
+                while (runProxyCreator) {
+                    CreateProxyRunnable proxyCreator = null;
+                    try {
+                        proxyCreator = createProxyQueue.take(); // take waits until there is something on the queue
+                    } catch (InterruptedException ie) {
+                        // part of normal behaviour
+                    }
 
-                        if (proxyCreator != null) {
-                            try {
-                                proxyCreator.run(proxyManager);
-                            } catch (Exception e) {
-                                LOG.warn("Problem creating secured service proxy", e);
-                            }
+                    if (proxyCreator != null) {
+                        try {
+                            proxyCreator.run(proxyManager);
+                        } catch (Exception e) {
+                            LOG.warn("Problem creating secured service proxy", e);
                         }
                     }
-                    // finished running
-                    proxyCreatorThread = null;
                 }
+                // finished running
+                proxyCreatorThread = null;
             });
             t.setName(PROXY_CREATOR_THREAD_NAME);
             t.setDaemon(true);
