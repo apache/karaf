@@ -211,38 +211,38 @@ public class SubsystemResolveContext extends ResolveContext {
                     Resource resource = cap.getResource();
                     String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
                     if (!providers.contains(resource)) {
-                        Set<Resource> newRes = new HashSet<>();
+                        Set<Resource> oldRes = new HashSet<>(providers);
+                        providers.clear();
                         String r1 = getRegion(resource).getName();
                         boolean superceded = false;
-                        for (Resource r : providers) {
+                        for (Resource r : oldRes) {
                             String id2 = ResolverUtil.getSymbolicName(r) + "|" + ResolverUtil.getVersion(r);
                             if (id.equals(id2)) {
                                 String r2 = getRegion(r).getName();
                                 if (r1.equals(r2)) {
                                     if (r instanceof BundleRevision) {
-                                        newRes.add(r);
+                                        providers.add(r);
                                         superceded = true;
                                     } else if (resource instanceof BundleRevision) {
-                                        newRes.add(resource);
+                                        providers.add(resource);
                                     } else {
                                         throw new InternalError();
                                     }
                                 } else if (r1.startsWith(r2)) {
-                                    newRes.add(r);
+                                    providers.add(r);
                                     superceded = true;
                                 } else if (r2.startsWith(r1)) {
-                                    newRes.add(resource);
+                                    providers.add(resource);
                                 } else {
-                                    newRes.add(r);
+                                    providers.add(r);
                                 }
                             } else {
-                                newRes.add(r);
+                                providers.add(r);
                             }
                         }
                         if (!superceded) {
-                            newRes.add(resource);
+                            providers.add(resource);
                         }
-                        providers = newRes;
                     }
                 }
                 for (Iterator<Capability> it = caps.iterator(); it.hasNext();) {
