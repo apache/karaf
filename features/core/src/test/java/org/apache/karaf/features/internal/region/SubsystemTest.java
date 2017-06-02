@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.resolver.ResolverImpl;
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
@@ -268,6 +269,34 @@ public class SubsystemTest {
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data7"));
         resolver.prepare(Arrays.asList(repo.getFeatures()),
+                features,
+                Collections.emptyMap());
+        resolver.resolve(Collections.emptySet(),
+                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null, null, null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void testMultipleVersionsForFeatureDependency() throws Exception {
+        RepositoryImpl repo1 = new RepositoryImpl(getClass().getResource("data9/pax-web-6.0.3.xml").toURI());
+        RepositoryImpl repo2 = new RepositoryImpl(getClass().getResource("data9/pax-web-6.0.4.xml").toURI());
+        List<Feature> allFeatures = new ArrayList<>();
+        allFeatures.addAll(Arrays.asList(repo1.getFeatures()));
+        allFeatures.addAll(Arrays.asList(repo2.getFeatures()));
+
+        Map<String, Set<String>> features = new HashMap<>();
+        addToMapSet(features, "root", "pax-war-tomcat");
+
+        Map<String, Set<String>> expected = new HashMap<>();
+        addToMapSet(expected, "root", "pax-url-war/2.5.0");
+        addToMapSet(expected, "root", "pax-web-extender-war/6.0.4");
+        addToMapSet(expected, "root", "pax-web-tomcat/6.0.4");
+        addToMapSet(expected, "root", "pax-web-api/6.0.4");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data9"));
+        resolver.prepare(allFeatures,
                 features,
                 Collections.emptyMap());
         resolver.resolve(Collections.emptySet(),

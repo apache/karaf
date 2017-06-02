@@ -88,7 +88,12 @@ public class TestDownloadManager implements DownloadManager, Downloader {
             byte[] data = null;
             IOException exception = null;
             try {
-                Manifest man = new Manifest(loader.getResourceAsStream(dir + "/" + location + ".mf"));
+                String loc = dir + "/" + location + ".mf";
+                InputStream is = loader.getResourceAsStream(loc);
+                if (is == null) {
+                    throw new IllegalStateException("Could not find resource: " + loc);
+                }
+                Manifest man = new Manifest(is);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 JarOutputStream jos = new JarOutputStream(baos, man);
                 jos.close();

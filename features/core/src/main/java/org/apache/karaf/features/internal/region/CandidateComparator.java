@@ -19,7 +19,8 @@ package org.apache.karaf.features.internal.region;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
+import java.util.function.ToIntFunction;
 
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.osgi.framework.Version;
@@ -28,15 +29,14 @@ import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.resource.Capability;
-import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
 public class CandidateComparator implements Comparator<Capability> {
 
-    private final Set<Resource> mandatory;
+    private final ToIntFunction<Resource> cost;
 
-    public CandidateComparator(Set<Resource> mandatory) {
-        this.mandatory = mandatory;
+    public CandidateComparator(ToIntFunction<Resource> cost) {
+        this.cost = cost;
     }
 
     public int compare(Capability cap1, Capability cap2) {
@@ -49,11 +49,9 @@ public class CandidateComparator implements Comparator<Capability> {
         }
         // Always prefer mandatory resources
         if (c == 0) {
-            if (mandatory.contains(cap1.getResource()) && !mandatory.contains(cap2.getResource())) {
-                c = -1;
-            } else if (!mandatory.contains(cap1.getResource()) && mandatory.contains(cap2.getResource())) {
-                c = 1;
-            }
+            int c1 = cost.applyAsInt(cap1.getResource());
+            int c2 = cost.applyAsInt(cap2.getResource());
+            c = Integer.compare(c1, c2);
         }
         // Compare revision capabilities.
         if ((c == 0) && cap1.getNamespace().equals(BundleNamespace.BUNDLE_NAMESPACE)) {
@@ -88,14 +86,13 @@ public class CandidateComparator implements Comparator<Capability> {
             // Resources looks like identical, but it required by different features/subsystems/regions
             // so use this difference for deterministic heuristic
             if (c == 0) {
-                final List<Requirement> reqs1 = resource1.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE);
-                final List<Requirement> reqs2 = resource2.getRequirements(IdentityNamespace.IDENTITY_NAMESPACE);
-                if (!reqs1.isEmpty() && !reqs2.isEmpty()) {
-                    Requirement identityReq1 = reqs1.get(0);
-                    Requirement identityReq2 = reqs2.get(0);
-                    Object identity1 = identityReq1.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE);
-                    Object identity2 = identityReq2.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE);
-                    c = String.valueOf(identity1).compareTo(String.valueOf(identity2));
+                String o1 = ResolverUtil.getOwnerName(resource1);
+                String o2 = ResolverUtil.getOwnerName(resource2);
+                if (o1 != null && o2 != null) {
+                    // In case the owners are the same but with different version, prefer the latest one
+                    // TODO: this may not be fully correct, as we'd need to separate names/versions
+                    // TODO: and do a real version comparison
+                    c = - o1.compareTo(o2);
                 }
             }
         }

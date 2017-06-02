@@ -1,0 +1,6 @@
+Manifest-Version: 1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: pax-web-api
+Bundle-Version: 6.0.3
+Export-Package: org.ops4j.pax.web.api;version=6.0.3
+
