@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.impl.console;
+package org.apache.karaf.util.filesstream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -32,11 +35,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public final class FilesStream {
 
-final class FilesStream {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleSessionImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FilesStream.class);
 
     private FilesStream() {
 	}
@@ -49,7 +50,7 @@ final class FilesStream {
      * @param fileNames list of names 
      * @return Paths to the scripts 
      */
-	static Stream<Path> stream(String fileNames) {
+	public static Stream<Path> stream(String fileNames) {
         if (fileNames == null) {
             return Stream.empty();
         }

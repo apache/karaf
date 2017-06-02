@@ -18,15 +18,12 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.io.CharArrayWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
@@ -37,6 +34,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.util.StreamUtils;
+import org.apache.karaf.util.filesstream.FilesStream;
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -152,30 +150,18 @@ public class ShellCommand implements Command, Runnable, SessionAware {
     public void destroy() {
 	}
 
-    private void executeScript(String scriptFileName, Session session) {
-        if (scriptFileName != null) {
-            Reader r = null;
-            try {
-                File scriptFile = new File(scriptFileName);
-                r = new InputStreamReader(new FileInputStream(scriptFile));
-                CharArrayWriter w = new CharArrayWriter();
-                int n;
-                char[] buf = new char[8192];
-                while ((n = r.read(buf)) > 0) {
-                    w.write(buf, 0, n);
-                }
-                session.execute(new String(w.toCharArray()));
-            } catch (Exception e) {
-                LOGGER.debug("Error in initialization script", e);
-            } finally {
-                if (r != null) {
-                    try {
-                        r.close();
-                    } catch (IOException e) {
-                        // Ignore
-                    }
-                }
-            }
+    private void executeScript(String names, Session session) {
+        FilesStream.stream(names).forEach(p -> doExecuteScript(session, p));
+    }
+
+    private void doExecuteScript(Session session, Path scriptFileName) {
+        try {
+            String script = String.join("\n",
+                    Files.readAllLines(scriptFileName));
+            session.execute(script);
+        } catch (Exception e) {
+            LOGGER.debug("Error in initialization script {}", scriptFileName, e);
+            System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
         }
     }
 
