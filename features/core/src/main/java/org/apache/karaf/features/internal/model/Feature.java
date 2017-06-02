@@ -391,10 +391,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         if (name != null ? !name.equals(feature.name) : feature.name != null) {
             return false;
         }
-        if (version != null ? !version.equals(feature.version) : feature.version != null) {
-            return false;
-        }
-        return true;
+        return version != null ? version.equals(feature.version) : feature.version == null;
     }
 
     @Override

@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 public @interface Option
 {
-    public static final String DEFAULT_STRING= "DEFAULT";
+    String DEFAULT_STRING= "DEFAULT";
 
     /**
      * The name of this option.  Usually starting with a '-'.

@@ -47,7 +47,7 @@ public class InstancePluginTest extends TestCase {
     @SuppressWarnings("unchecked")
     private List<String> testParseStringList(String s) throws Exception {
         InstancePlugin ap = new InstancePlugin();
-        Method m = ap.getClass().getDeclaredMethod("parseStringList", new Class [] {String.class});
+        Method m = ap.getClass().getDeclaredMethod("parseStringList", String.class);
         m.setAccessible(true);
         return (List<String>) m.invoke(ap, s);
     }

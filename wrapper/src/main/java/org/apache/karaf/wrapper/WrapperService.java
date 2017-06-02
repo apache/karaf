@@ -28,7 +28,7 @@ public interface WrapperService {
      *
      * @throws Exception If the wrapper install fails.
      */
-    public void install() throws Exception;
+    void install() throws Exception;
 
     /**
      * Install the Karaf container as a system service in the OS.
@@ -40,7 +40,7 @@ public interface WrapperService {
      * @return An array containing the wrapper configuration file (index 0) and the service file (index 1).
      * @throws Exception If the wrapper install fails.
      */
-    public File[] install(String name, String displayName, String description, String startType) throws Exception;
+    File[] install(String name, String displayName, String description, String startType) throws Exception;
     
     /**
      * Install the Karaf container as a system service in the OS.
@@ -54,6 +54,6 @@ public interface WrapperService {
      * @return An array containing the wrapper configuration file (index 0) and the service file (index 1).
      * @throws Exception If the wrapper install fails.
      */
-    public File[] install(String name, String displayName, String description, String startType, String[] envs, String[] includes) throws Exception;
+    File[] install(String name, String displayName, String description, String startType, String[] envs, String[] includes) throws Exception;
 
 }

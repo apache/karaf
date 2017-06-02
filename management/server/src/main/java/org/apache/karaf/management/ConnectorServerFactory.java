@@ -44,7 +44,7 @@ import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 public class ConnectorServerFactory {
 
-    private enum AuthenticatorType {NONE, PASSWORD, CERTIFICATE};
+    private enum AuthenticatorType {NONE, PASSWORD, CERTIFICATE}
 
     private MBeanServer server;
     private KarafMBeanServerGuard guard;

@@ -62,7 +62,7 @@ public enum RolePolicy {
         }
     }
 
-    private RolePolicy(String value) {
+    RolePolicy(String value) {
         this.value = value;
     }
 

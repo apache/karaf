@@ -17,7 +17,6 @@
 package org.apache.karaf.tooling.tracker;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;

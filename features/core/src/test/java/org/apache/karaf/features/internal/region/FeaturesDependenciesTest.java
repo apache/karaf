@@ -32,7 +32,6 @@ import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.junit.Test;
 import org.osgi.framework.namespace.IdentityNamespace;
-import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
@@ -45,7 +44,7 @@ import static org.junit.Assert.assertEquals;
 
 public class FeaturesDependenciesTest {
 
-    Logger logger = LoggerFactory.getLogger(FeaturesDependenciesTest.class);;
+    Logger logger = LoggerFactory.getLogger(FeaturesDependenciesTest.class);
     Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
 
     @Test

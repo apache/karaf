@@ -41,10 +41,10 @@ public class Services extends BundlesCommand {
     @Option(name = "-p", aliases = {}, description = "Shows the properties of the services", required = false, multiValued = false)
     boolean showProperties = false;
 
-    Set<String> hidden = new HashSet<>(Arrays.asList(new String[] {
+    Set<String> hidden = new HashSet<>(Arrays.asList(
             "org.apache.felix.service.command.Function",
             "org.apache.karaf.shell.console.Completer"
-    }));
+    ));
 
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {

@@ -32,7 +32,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.OperationNotSupportedException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;

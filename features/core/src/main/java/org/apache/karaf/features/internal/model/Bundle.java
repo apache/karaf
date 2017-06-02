@@ -167,10 +167,7 @@ public class Bundle implements BundleInfo {
         if ((startLevel != null ? startLevel : 0) != (bundle.startLevel != null ? bundle.startLevel : 0)) {
             return false;
         }
-        if (value != null ? !value.equals(bundle.value) : bundle.value != null) {
-            return false;
-        }
-        return true;
+        return value != null ? value.equals(bundle.value) : bundle.value == null;
     }
 
     @Override

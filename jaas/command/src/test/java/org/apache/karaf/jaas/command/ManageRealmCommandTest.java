@@ -18,7 +18,6 @@ package org.apache.karaf.jaas.command;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.config.impl.Config;
 import org.apache.karaf.jaas.config.impl.Module;
 import org.apache.karaf.shell.api.console.Session;

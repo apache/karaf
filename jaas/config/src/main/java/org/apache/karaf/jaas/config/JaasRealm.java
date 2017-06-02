@@ -20,9 +20,9 @@ import javax.security.auth.login.AppConfigurationEntry;
 
 public interface JaasRealm {
 
-    public String getName();
+    String getName();
 
-    public int getRank();
+    int getRank();
 
-    public AppConfigurationEntry[] getEntries();
+    AppConfigurationEntry[] getEntries();
 }

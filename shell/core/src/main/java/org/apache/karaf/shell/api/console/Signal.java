@@ -70,7 +70,7 @@ public enum Signal {
 
     private final int numeric;
 
-    private Signal(int numeric) {
+    Signal(int numeric) {
         this.numeric = numeric;
     }
 

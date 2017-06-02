@@ -33,7 +33,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 import java.util.jar.JarInputStream;
 

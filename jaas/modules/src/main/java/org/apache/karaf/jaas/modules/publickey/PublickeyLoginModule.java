@@ -20,7 +20,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.Principal;
 import java.security.PublicKey;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAKey;

@@ -43,7 +43,6 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.HelpOption;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.commands.ansi.SimpleAnsi;
 import org.apache.karaf.shell.console.Completer;
 
 public class ActionMetaData {

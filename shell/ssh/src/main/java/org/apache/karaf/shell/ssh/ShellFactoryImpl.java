@@ -24,14 +24,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
-import java.security.PrivilegedAction;
 import java.util.Map;
 
 import javax.security.auth.Subject;
 
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
-import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.apache.sshd.common.Factory;
@@ -109,7 +107,7 @@ public class ShellFactoryImpl implements Factory<Command> {
                 JaasHelper.runAs(subject, () ->
                     new Thread(shell, "Karaf ssh console user " + ShellUtil.getCurrentUserName()).start());
             } catch (Exception e) {
-                throw (IOException) new IOException("Unable to start shell").initCause(e);
+                throw new IOException("Unable to start shell", e);
             }
         }
 

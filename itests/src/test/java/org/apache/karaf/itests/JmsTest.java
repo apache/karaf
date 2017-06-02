@@ -27,17 +27,12 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.jms.ConnectionFactory;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -111,7 +106,7 @@ public class JmsTest extends KarafTestSupport {
         invoke("delete", JMX_CF_NAME);
     }
 
-    public boolean jmsTransportPresent() throws UnknownHostException, IOException {
+    public boolean jmsTransportPresent() throws IOException {
         try (Socket socket = new Socket("localhost", 61616)) {
             return true;
         } catch (Exception e) {
@@ -125,8 +120,7 @@ public class JmsTest extends KarafTestSupport {
         return output;
     }
 
-    private void checkJMXCreateConnectionFactory() throws Exception, AttributeNotFoundException,
-        MBeanException, InstanceNotFoundException, ReflectionException {
+    private void checkJMXCreateConnectionFactory() throws Exception {
         invoke("create", JMX_CF_NAME, "activemq", "tcp://localhost:61616", "karaf", "karaf");
         waitForConnectionFactory("name=" + JMX_CF_NAME);
         @SuppressWarnings("unchecked")

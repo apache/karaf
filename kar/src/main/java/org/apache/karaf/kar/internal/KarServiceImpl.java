@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -365,7 +364,7 @@ public class KarServiceImpl implements KarService {
         return featureSet;
     }
 
-    private Manifest createNonAutoStartManifest(URI repoUri) throws UnsupportedEncodingException, IOException {
+    private Manifest createNonAutoStartManifest(URI repoUri) throws IOException {
         String manifestSt = "Manifest-Version: 1.0\n" +
             Kar.MANIFEST_ATTR_KARAF_FEATURE_START +": false\n" +
             Kar.MANIFEST_ATTR_KARAF_FEATURE_REPOS + ": " + repoUri.toString() + "\n";

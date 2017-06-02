@@ -19,7 +19,6 @@ package org.apache.karaf.features.internal.region;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.ToIntFunction;
 
 import org.apache.karaf.features.internal.resolver.ResolverUtil;

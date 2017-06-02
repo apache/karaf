@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 public @interface Argument
 {
-    public static final String DEFAULT_STRING= "DEFAULT";
+    String DEFAULT_STRING= "DEFAULT";
 
     String DEFAULT = "##default";
 

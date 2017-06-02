@@ -58,7 +58,7 @@ public class FeaturesServiceTest extends TestBase {
             + "</features>";
 
     File dataFile;
-    Logger logger = LoggerFactory.getLogger(FeaturesServiceTest.class);;
+    Logger logger = LoggerFactory.getLogger(FeaturesServiceTest.class);
     Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
 
     @Before

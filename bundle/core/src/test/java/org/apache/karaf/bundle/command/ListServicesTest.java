@@ -45,14 +45,14 @@ public class ListServicesTest {
     @Test
     public void listAllLong() throws Exception {
         System.out.println("listAllLong");
-        listServices.ids = Arrays.asList(new String[]{"1", "2"});
+        listServices.ids = Arrays.asList("1", "2");
         listServices.execute();
     }
 
     @Test
     public void listAllLongServiceUse() throws Exception {
         System.out.println("listAllLongServicesUse");
-        listServices.ids = Arrays.asList(new String[]{"1", "2"});
+        listServices.ids = Arrays.asList("1", "2");
         listServices.inUse = true;
         listServices.execute();
     }

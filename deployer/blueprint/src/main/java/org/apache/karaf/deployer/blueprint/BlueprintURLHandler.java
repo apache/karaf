@@ -19,9 +19,6 @@ package org.apache.karaf.deployer.blueprint;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -78,7 +75,7 @@ public class BlueprintURLHandler extends AbstractURLStreamHandlerService {
                 return new ByteArrayInputStream(os.toByteArray());
             } catch (Exception e) {
                 logger.error("Error opening blueprint xml url", e);
-                throw (IOException) new IOException("Error opening blueprint xml url").initCause(e);
+                throw new IOException("Error opening blueprint xml url", e);
             }
         }
     }

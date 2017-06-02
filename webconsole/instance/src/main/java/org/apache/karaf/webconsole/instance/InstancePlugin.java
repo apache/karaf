@@ -230,7 +230,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
         }
     }
 
-    private void instanceInfo(JSONWriter jw, Instance instance) throws IOException, Exception {
+    private void instanceInfo(JSONWriter jw, Instance instance) throws Exception {
         jw.object();
         jw.key("pid");
         jw.value(instance.getPid());

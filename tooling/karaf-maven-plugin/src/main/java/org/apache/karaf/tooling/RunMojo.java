@@ -26,9 +26,6 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.karaf.features.BootFinished;
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeaturesListener;
-import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.main.Main;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
@@ -43,7 +40,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 
 import java.io.*;
 import java.util.regex.Matcher;

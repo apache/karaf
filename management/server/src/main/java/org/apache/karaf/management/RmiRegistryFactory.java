@@ -20,7 +20,6 @@ import org.osgi.framework.BundleContext;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
@@ -34,9 +33,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-
-import javax.net.ServerSocketFactory;
-import javax.net.SocketFactory;
 
 public class RmiRegistryFactory {
 

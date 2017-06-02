@@ -128,7 +128,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
 
     public boolean isComponentActive(String componentName) throws MBeanException {
         try {
-            return (componentState(componentName) == Component.STATE_ACTIVE) ? true : false;
+            return componentState(componentName) == Component.STATE_ACTIVE;
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }

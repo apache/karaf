@@ -25,11 +25,7 @@ public class StoppedInstanceCompleter extends InstanceCompleter {
     
     protected boolean acceptsInstance(Instance instance) {
         try {
-            if (instance.getState().equals(Instance.STOPPED)) {
-                return true;
-            } else {
-                return false;
-            }
+            return instance.getState().equals(Instance.STOPPED);
         } catch (Exception e) {
             return false;
         }

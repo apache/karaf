@@ -32,7 +32,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.*;
 
 /**

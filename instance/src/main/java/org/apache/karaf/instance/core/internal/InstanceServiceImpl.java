@@ -1058,7 +1058,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     protected static Properties loadPropertiesFile(URL configPropURL) throws Exception {
         try (
-            InputStream is = configPropURL.openConnection().getInputStream();
+            InputStream is = configPropURL.openConnection().getInputStream()
         ){
             Properties configProps = new Properties();
             configProps.load(is);

@@ -17,7 +17,6 @@
  */
 package org.apache.karaf.deployer.features;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;

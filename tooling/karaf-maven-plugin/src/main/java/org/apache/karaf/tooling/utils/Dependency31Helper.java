@@ -183,7 +183,7 @@ public class Dependency31Helper implements DependencyHelper {
 
     private static class Scanner {
 
-        private static enum Accept {
+        private enum Accept {
             ACCEPT(true, true),
             PROVIDED(true, false),
             STOP(false, false);
@@ -191,7 +191,7 @@ public class Dependency31Helper implements DependencyHelper {
             private final boolean more;
             private final boolean local;
 
-            private Accept(boolean more, boolean local) {
+            Accept(boolean more, boolean local) {
                 this.more = more;
                 this.local = local;
             }

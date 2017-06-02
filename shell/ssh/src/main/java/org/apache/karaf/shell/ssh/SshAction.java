@@ -304,7 +304,7 @@ public class SshAction implements Action {
         return term != null ? term.getHeight() : 25;
     }
 
-    private static ClientSession connectWithRetries(SshClient client, String username, String host, int port, int maxAttempts) throws Exception, InterruptedException {
+    private static ClientSession connectWithRetries(SshClient client, String username, String host, int port, int maxAttempts) throws Exception {
         ClientSession session = null;
         int retries = 0;
         do {

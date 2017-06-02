@@ -22,17 +22,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.karaf.shell.api.console.Terminal;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Size;
 import org.jline.terminal.impl.AbstractTerminal;
 import org.jline.utils.InfoCmp;
-import org.jline.utils.InfoCmp.Capability;
 import org.jline.utils.NonBlockingReader;
 
 public class KarafTerminal extends AbstractTerminal implements org.jline.terminal.Terminal {

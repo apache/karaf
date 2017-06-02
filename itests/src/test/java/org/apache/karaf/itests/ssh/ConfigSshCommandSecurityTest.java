@@ -13,8 +13,6 @@
  */
 package org.apache.karaf.itests.ssh;
 
-import java.io.IOException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +53,7 @@ public class ConfigSshCommandSecurityTest extends SshCommandTestBase {
         testConfigEdits("karaf", Result.OK, "org.apache.karaf.service.acl.test_" + counter++, true);
     }
 
-    private void testConfigEdits(String user, Result expectedEditResult, String pid, boolean isAdmin) throws Exception, IOException {
+    private void testConfigEdits(String user, Result expectedEditResult, String pid, boolean isAdmin) throws Exception {
         assertCommand(user, "config:edit " + pid + "\n" +
                 "config:property-set x y\n" +
                 "config:property-set a b\n" +
@@ -120,7 +118,7 @@ public class ConfigSshCommandSecurityTest extends SshCommandTestBase {
         testConfigEditsNoSession("karaf", Result.OK, "org.apache.karaf.service.acl.test_" + counter++);
     }
 
-    private void testConfigEditsNoSession(String user, Result expectedResult, String pid) throws Exception, IOException {
+    private void testConfigEditsNoSession(String user, Result expectedResult, String pid) throws Exception {
         assertCommand(user, "config:property-set -p " + pid + " a.b.c d.e.f", expectedResult);
         assertCommand(user, "config:property-append -p " + pid + " a.b.c .g.h", expectedResult);
 

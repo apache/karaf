@@ -27,12 +27,10 @@ import org.apache.felix.gogo.runtime.EOFError;
 import org.apache.felix.gogo.runtime.Parser.Program;
 import org.apache.felix.gogo.runtime.Parser.Statement;
 import org.apache.felix.gogo.runtime.SyntaxError;
-import org.apache.felix.gogo.runtime.Token;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.parsing.DefaultParser;
 import org.jline.reader.ParsedLine;
 
 public class KarafParser implements org.jline.reader.Parser {

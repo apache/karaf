@@ -22,7 +22,6 @@ import javax.security.auth.login.AppConfigurationEntry;
 
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 public class KarafRealm implements JaasRealm {

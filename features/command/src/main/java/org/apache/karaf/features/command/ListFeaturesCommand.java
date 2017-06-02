@@ -101,7 +101,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     }
 
     private boolean isInstalledViaDeployDir(String st) {
-        return (st == null || st.length() <= 1) ? false : (st.charAt(st.length() - 1) == '*');
+        return st != null && st.length() > 1 && st.charAt(st.length() - 1) == '*';
     }
 
     class FeatureComparator implements Comparator<Feature> {

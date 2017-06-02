@@ -53,7 +53,7 @@ public class BundleInfoImpl implements BundleInfo {
         bundleStateMap.put(Bundle.RESOLVED, BundleState.Resolved);
         bundleStateMap.put(Bundle.STARTING, BundleState.Starting);
         bundleStateMap.put(Bundle.STOPPING, BundleState.Stopping);
-    };
+    }
 
     public BundleInfoImpl(Bundle bundle, BundleState extState) {
         BundleStartLevel bsl = bundle.adapt(BundleStartLevel.class);

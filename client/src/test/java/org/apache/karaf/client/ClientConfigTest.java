@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.client;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;

@@ -29,7 +29,7 @@ public class ACLConfigurationParser {
         NAME_MATCH,
         WILDCARD_MATCH,
         NO_MATCH
-    };
+    }
 
     static String compulsoryRoles;
     

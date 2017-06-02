@@ -241,7 +241,7 @@ public class JndiServiceImpl implements JndiService {
                 ServiceReference<?>[] services = bundle.getRegisteredServices();
                 if (services != null) {
                     for (ServiceReference service : services) {
-                        if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY) != null && ((String) service.getProperty(OSGI_JNDI_SERVICE_PROPERTY)).equals(name.substring(OSGI_JNDI_CONTEXT_PREFIX.length() + 1))) {
+                        if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY) != null && service.getProperty(OSGI_JNDI_SERVICE_PROPERTY).equals(name.substring(OSGI_JNDI_CONTEXT_PREFIX.length() + 1))) {
                             Object actualService = bundleContext.getService(service);
                             try {
                                 if (proxyManager.isProxy(actualService)) {

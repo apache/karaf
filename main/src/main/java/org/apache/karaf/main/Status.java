@@ -72,7 +72,7 @@ public class Status {
         }
     }
 
-    private static int getPortFromShutdownPortFile(String portFile) throws FileNotFoundException, IOException {
+    private static int getPortFromShutdownPortFile(String portFile) throws IOException {
         int port;
         BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
         String portStr = r.readLine();

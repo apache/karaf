@@ -65,10 +65,7 @@ public class Capability implements org.apache.karaf.features.Capability {
             return false;
         }
         Capability bundle = (Capability) o;
-        if (value != null ? !value.equals(bundle.value) : bundle.value != null) {
-            return false;
-        }
-        return true;
+        return value != null ? value.equals(bundle.value) : bundle.value == null;
     }
 
     @Override

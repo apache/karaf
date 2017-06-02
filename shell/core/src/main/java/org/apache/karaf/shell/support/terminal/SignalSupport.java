@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.support.terminal;
 
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

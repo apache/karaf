@@ -17,7 +17,6 @@
 package org.apache.karaf.packages.core.internal;
 
 import java.util.List;
-import java.util.SortedMap;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;

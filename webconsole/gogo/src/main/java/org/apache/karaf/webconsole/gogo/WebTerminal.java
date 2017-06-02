@@ -21,7 +21,6 @@ package org.apache.karaf.webconsole.gogo;
  import java.io.OutputStream;
  import java.util.EnumSet;
 
- import org.apache.karaf.shell.api.console.Signal;
  import org.apache.karaf.shell.api.console.SignalListener;
  import org.apache.karaf.shell.api.console.Terminal;
  import org.jline.terminal.impl.ExternalTerminal;

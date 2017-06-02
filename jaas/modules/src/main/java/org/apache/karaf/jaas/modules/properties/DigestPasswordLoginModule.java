@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.MessageDigest;
-import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
 import javax.security.auth.Subject;

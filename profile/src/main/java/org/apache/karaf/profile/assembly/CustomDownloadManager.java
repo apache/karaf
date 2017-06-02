@@ -19,7 +19,6 @@ package org.apache.karaf.profile.assembly;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.impl.AbstractDownloadTask;
 import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;

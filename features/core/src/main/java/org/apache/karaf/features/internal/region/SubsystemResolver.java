@@ -222,12 +222,7 @@ public class SubsystemResolver {
         // Remove wiring to the fake environment resource
         if (environmentResource != null) {
             for (List<Wire> wires : wiring.values()) {
-                for (Iterator<Wire> iterator = wires.iterator(); iterator.hasNext();) {
-                    Wire wire = iterator.next();
-                    if (wire.getProvider() == environmentResource) {
-                        iterator.remove();
-                    }
-                }
+                wires.removeIf(wire -> wire.getProvider() == environmentResource);
             }
         }
         // Fragments are always wired to their host only, so create fake wiring to
@@ -470,7 +465,7 @@ public class SubsystemResolver {
         }
     }
 
-    private Requirement getSubsystemRequirement(Resource resource) {
+    static Requirement getSubsystemRequirement(Resource resource) {
         for (Requirement requirement : resource.getRequirements(null)) {
             if (IDENTITY_NAMESPACE.equals(requirement.getNamespace())
                     && TYPE_SUBSYSTEM.equals(requirement.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE))) {

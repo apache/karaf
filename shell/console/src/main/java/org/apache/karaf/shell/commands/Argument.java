@@ -31,7 +31,7 @@ import java.lang.annotation.ElementType;
 @Deprecated
 public @interface Argument
 {
-    public static final String DEFAULT_STRING= "DEFAULT";
+    String DEFAULT_STRING= "DEFAULT";
 
     String DEFAULT = "##default";
 

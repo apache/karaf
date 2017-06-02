@@ -751,7 +751,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
     @Parameter
     protected Map<String, String> systemProperties;
 
-    private void checkChanges(Features newFeatures, ObjectFactory objectFactory) throws Exception, IOException, JAXBException, XMLStreamException {
+    private void checkChanges(Features newFeatures, ObjectFactory objectFactory) throws Exception {
         if (checkDependencyChange) {
             //combine all the dependencies to one feature and strip out versions
             Features features = objectFactory.createFeaturesRoot();

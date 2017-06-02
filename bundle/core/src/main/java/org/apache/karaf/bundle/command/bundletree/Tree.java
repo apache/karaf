@@ -93,9 +93,9 @@ public class Tree<T> extends Node<T> {
      *
      * @param <T> the object type for the node value
      */
-    public static interface Converter<T> {
+    public interface Converter<T> {
 
-        public String toString(Node<T> node);
+        String toString(Node<T> node);
 
     }
 }

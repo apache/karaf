@@ -25,11 +25,7 @@ public class StartedInstanceCompleter extends InstanceCompleter {
 
     protected boolean acceptsInstance(Instance instance) {
         try {
-            if (instance.getState().equals(Instance.STARTED)) {
-                return true;
-            } else {
-                return false;
-            }
+            return instance.getState().equals(Instance.STARTED);
         } catch (Exception e) {
             return false;
         }

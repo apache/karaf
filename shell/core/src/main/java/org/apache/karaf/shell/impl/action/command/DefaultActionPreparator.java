@@ -112,7 +112,7 @@ public class DefaultActionPreparator {
                 paramValue = (String)param;
             }
             if (param instanceof Token) {
-                paramValue = ((Token)param).toString();
+                paramValue = param.toString();
             }
 
             if (processOptions

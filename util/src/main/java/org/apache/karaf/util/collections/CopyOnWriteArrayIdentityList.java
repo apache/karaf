@@ -282,10 +282,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
                 return false;
             }
         }
-        if (ourIt.hasNext()) {
-            return false;
-        }
-        return true;
+        return !ourIt.hasNext();
     }
 
     public E get(int index) {
@@ -740,10 +737,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         }
 
         public boolean hasNext() {
-            if (current < size) {
-                return true;
-            }
-            return false;
+            return current < size;
         }
 
         public boolean hasPrevious() {

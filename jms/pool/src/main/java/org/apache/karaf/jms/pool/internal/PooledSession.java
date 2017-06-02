@@ -46,7 +46,6 @@ import javax.jms.TopicSubscriber;
 import javax.jms.XASession;
 import javax.transaction.xa.XAResource;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PooledSession implements Session, TopicSession, QueueSession, XASession {

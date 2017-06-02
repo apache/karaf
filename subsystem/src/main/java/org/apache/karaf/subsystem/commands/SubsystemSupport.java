@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.osgi.service.subsystem.Subsystem;
-import org.osgi.service.subsystem.SubsystemConstants;
 
 public abstract class SubsystemSupport {
 

@@ -17,7 +17,6 @@
 package org.apache.karaf.scheduler;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import org.quartz.SchedulerException;

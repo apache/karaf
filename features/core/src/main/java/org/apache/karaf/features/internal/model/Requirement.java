@@ -63,10 +63,7 @@ public class Requirement implements org.apache.karaf.features.Requirement {
             return false;
         }
         Requirement bundle = (Requirement) o;
-        if (value != null ? !value.equals(bundle.value) : bundle.value != null) {
-            return false;
-        }
-        return true;
+        return value != null ? value.equals(bundle.value) : bundle.value == null;
     }
 
     @Override

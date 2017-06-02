@@ -20,7 +20,6 @@ package org.apache.karaf.tooling.commands;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import java.util.TreeSet;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -163,8 +161,8 @@ public class GenerateHelpMojo extends AbstractMojo {
         }
     }
 
-    private ClassFinder createFinder(String classloaderType) throws DependencyResolutionRequiredException, MalformedURLException,
-        Exception, MojoFailureException {
+    private ClassFinder createFinder(String classloaderType) throws
+            Exception {
         ClassFinder finder;
         if ("project".equals(classloaderType)) {
             List<URL> urls = new ArrayList<>();

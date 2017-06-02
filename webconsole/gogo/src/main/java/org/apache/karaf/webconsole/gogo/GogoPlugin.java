@@ -201,7 +201,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 throw e;
             } catch (Exception e) {
                 e.printStackTrace();
-                throw (IOException) new IOException().initCause(e);
+                throw new IOException(e);
             }
             new Thread(this).start();
         }

@@ -22,7 +22,6 @@ import org.apache.karaf.tooling.VerifyMojo;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertFalse;

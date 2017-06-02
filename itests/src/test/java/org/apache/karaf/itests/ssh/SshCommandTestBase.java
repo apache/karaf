@@ -43,7 +43,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @ExamReactorStrategy(PerClass.class)
 public class SshCommandTestBase extends KarafTestSupport {
 
-    enum Result { OK, NOT_FOUND, NO_CREDENTIALS };
+    enum Result { OK, NOT_FOUND, NO_CREDENTIALS }
 
     private SshClient client;
     private ClientChannel channel;
@@ -88,7 +88,7 @@ public class SshCommandTestBase extends KarafTestSupport {
         System.out.println(new String(out.toByteArray()));
     }
 
-    String assertCommand(String user, String command, Result result) throws Exception, IOException {
+    String assertCommand(String user, String command, Result result) throws Exception {
         if (!command.endsWith("\n"))
             command += "\n";
 

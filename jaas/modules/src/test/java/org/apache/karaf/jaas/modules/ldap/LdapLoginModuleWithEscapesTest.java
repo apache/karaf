@@ -56,7 +56,7 @@ public class LdapLoginModuleWithEscapesTest extends LdapLoginModuleTest {
             FileInputStream inputStream = new FileInputStream(f);
             String content = IOUtils.toString(inputStream, "UTF-8");
             inputStream.close();
-            content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
+            content = content.replaceAll("portno", "" + getLdapServer().getPort());
 
             File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldap.properties");
             FileOutputStream outputStream = new FileOutputStream(f2);

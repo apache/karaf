@@ -26,7 +26,6 @@ import org.apache.karaf.jaas.modules.ldap.LDAPCache;
 import org.apache.karaf.jaas.modules.properties.AutoEncryptionSupport;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 import org.apache.karaf.jaas.modules.publickey.PublickeyBackingEngineFactory;
-import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;

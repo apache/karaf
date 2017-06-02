@@ -31,7 +31,7 @@ public interface JndiMBean {
      * @return The MBean attribute containing the {@link Map} of names/class names.
      * @throws MBeanException If the MBean fails.
      */
-    public Map<String, String> getNames() throws MBeanException;
+    Map<String, String> getNames() throws MBeanException;
 
     /**
      * Get a list of JNDI sub-contexts (as attribute).
@@ -39,7 +39,7 @@ public interface JndiMBean {
      * @return The MBean attribute containing the {@link List} of sub-contexts.
      * @throws MBeanException If the MBean fails.
      */
-    public List<String> getContexts() throws MBeanException;
+    List<String> getContexts() throws MBeanException;
 
     /**
      * Get a {@link Map} of JNDI names/class names children of a given base context.
@@ -48,7 +48,7 @@ public interface JndiMBean {
      * @return The {@link Map} of names/class names.
      * @throws MBeanException If the MBean fails.
      */
-    public Map<String, String> getNames(String context) throws MBeanException;
+    Map<String, String> getNames(String context) throws MBeanException;
 
     /**
      * Get a {@link List} of JNDI sub-contexts children of a given base context.
@@ -57,7 +57,7 @@ public interface JndiMBean {
      * @return The {@link List} of sub-contexts.
      * @throws MBeanException If the MBean fails.
      */
-    public List<String> getContexts(String context) throws MBeanException;
+    List<String> getContexts(String context) throws MBeanException;
 
     /**
      * Create a JNDI sub-context.
@@ -65,7 +65,7 @@ public interface JndiMBean {
      * @param context The JNDI sub-context name.
      * @throws MBeanException If the MBean fails.
      */
-    public void create(String context) throws MBeanException;
+    void create(String context) throws MBeanException;
 
     /**
      * Delete a JNDI sub-context.
@@ -73,7 +73,7 @@ public interface JndiMBean {
      * @param context The JNDI sub-context name.
      * @throws MBeanException If the MBean fails.
      */
-    public void delete(String context) throws MBeanException;
+    void delete(String context) throws MBeanException;
 
     /**
      * Create another JNDI name (alias) for a given one.
@@ -82,7 +82,7 @@ public interface JndiMBean {
      * @param alias The JNDI alias name.
      * @throws MBeanException If the MBean fails.
      */
-    public void alias(String name, String alias) throws MBeanException;
+    void alias(String name, String alias) throws MBeanException;
 
     /**
      * Bind an OSGi service with a JNDI name.
@@ -91,7 +91,7 @@ public interface JndiMBean {
      * @param name The JNDI name.
      * @throws MBeanException If the MBean fails.
      */
-    public void bind(Long serviceId, String name) throws MBeanException;
+    void bind(Long serviceId, String name) throws MBeanException;
 
     /**
      * Unbind a given JNDI name.
@@ -99,6 +99,6 @@ public interface JndiMBean {
      * @param name The JNDI name.
      * @throws MBeanException If the MBean fails.
      */
-    public void unbind(String name) throws MBeanException;
+    void unbind(String name) throws MBeanException;
 
 }

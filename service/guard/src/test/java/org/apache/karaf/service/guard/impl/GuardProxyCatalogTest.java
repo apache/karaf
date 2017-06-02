@@ -280,7 +280,7 @@ public class GuardProxyCatalogTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testAssignRoles3() throws Exception {
-        abstract class MyAbstractClass implements TestServiceAPI, TestServiceAPI2 {};
+        abstract class MyAbstractClass implements TestServiceAPI, TestServiceAPI2 {}
 
         Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, "foobar");
@@ -406,7 +406,7 @@ public class GuardProxyCatalogTest {
             public String doit() {
                 return "Doing it";
             }
-        };
+        }
 
         Dictionary<String, Object> c1 = new Hashtable<>();
         c1.put(Constants.SERVICE_PID, "foobar");
@@ -613,7 +613,7 @@ public class GuardProxyCatalogTest {
             public String getName() {
                 return "role1";
             }
-        };
+        }
 
         Dictionary<String, Object> c1 = new Hashtable<>();
         c1.put(Constants.SERVICE_PID, "foobar");

@@ -18,7 +18,6 @@ package org.apache.karaf.config.command;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Properties;
 
 import org.apache.karaf.config.command.completers.ConfigurationCompleter;
 import org.apache.karaf.shell.api.action.Completion;
@@ -68,11 +67,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      * @return <code>true</code> if the configuration requires an update, <code>false</code> else.
      */
     protected boolean requiresUpdate(String pid) {
-        if (pid != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return pid != null;
     }
 
     /**

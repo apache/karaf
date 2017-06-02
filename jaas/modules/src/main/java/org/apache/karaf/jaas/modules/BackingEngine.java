@@ -24,7 +24,7 @@ import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 
 public interface BackingEngine {
 
-    static final String GROUP_PREFIX = "_g_:";
+    String GROUP_PREFIX = "_g_:";
     
     /**
      * Create a new user.

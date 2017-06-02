@@ -25,7 +25,6 @@ import org.apache.karaf.diagnostic.management.internal.DiagnosticDumpMBeanImpl;
 import org.apache.karaf.diagnostic.common.FeaturesDumpProvider;
 import org.apache.karaf.diagnostic.common.LogDumpProvider;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

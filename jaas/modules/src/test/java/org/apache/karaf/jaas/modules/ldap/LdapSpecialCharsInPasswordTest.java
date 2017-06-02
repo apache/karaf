@@ -65,7 +65,7 @@ public class LdapSpecialCharsInPasswordTest extends LdapLoginModuleTest {
             FileInputStream inputStream = new FileInputStream(f);
             String content = IOUtils.toString(inputStream, "UTF-8");
             inputStream.close();
-            content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
+            content = content.replaceAll("portno", "" + getLdapServer().getPort());
 
             File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldap_special_char_in_password.properties");
             FileOutputStream outputStream = new FileOutputStream(f2);
@@ -86,7 +86,7 @@ public class LdapSpecialCharsInPasswordTest extends LdapLoginModuleTest {
     
     @Before
     public void changeAdminPassword() throws Exception {
-        LdapConnection connection = new LdapNetworkConnection( "localhost", super.getLdapServer().getPort() );
+        LdapConnection connection = new LdapNetworkConnection( "localhost", getLdapServer().getPort() );
         connection.bind( "uid=admin,ou=system", "secret");
         Dn adminDn = new Dn( "uid=admin,ou=system" );
         ModifyRequest modReq = new ModifyRequestImpl();
@@ -96,7 +96,7 @@ public class LdapSpecialCharsInPasswordTest extends LdapLoginModuleTest {
         connection.close();
         
         // check that we actually changed the admin connection password
-        connection = new LdapNetworkConnection( "localhost", super.getLdapServer().getPort() );
+        connection = new LdapNetworkConnection( "localhost", getLdapServer().getPort() );
         connection.bind( "uid=admin,ou=system", NEW_CONNECTION_PASSWORD);
         connection.close();
     }

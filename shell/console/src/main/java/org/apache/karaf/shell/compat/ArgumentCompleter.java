@@ -35,7 +35,6 @@ import java.util.Set;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.karaf.shell.commands.CompleterValues;
 import org.apache.karaf.shell.commands.HelpOption;

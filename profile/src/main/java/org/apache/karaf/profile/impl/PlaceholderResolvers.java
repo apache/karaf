@@ -21,8 +21,6 @@ import java.util.Map;
 import org.apache.karaf.profile.PlaceholderResolver;
 import org.osgi.framework.BundleContext;
 
-import static org.apache.karaf.profile.impl.Utils.assertNotNull;
-
 public final class PlaceholderResolvers {
 
     private PlaceholderResolvers() { }

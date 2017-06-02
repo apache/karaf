@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -245,12 +244,7 @@ public class SubsystemResolveContext extends ResolveContext {
                         }
                     }
                 }
-                for (Iterator<Capability> it = caps.iterator(); it.hasNext();) {
-                    Capability cap = it.next();
-                    if (!providers.contains(cap.getResource())) {
-                        it.remove();
-                    }
-                }
+                caps.removeIf(cap -> !providers.contains(cap.getResource()));
             }
             // Sort caps
             if (distance != null) {

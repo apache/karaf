@@ -57,7 +57,6 @@ import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.channel.PtyMode;
 import org.apache.sshd.common.config.keys.FilePasswordProvider;
-import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.io.NoCloseInputStream;
 import org.jline.terminal.Attributes;
@@ -278,7 +277,7 @@ public class Main {
         client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
     }
 
-    private static ClientSession connectWithRetries(SshClient client, ClientConfig config) throws Exception, InterruptedException {
+    private static ClientSession connectWithRetries(SshClient client, ClientConfig config) throws Exception {
         ClientSession session = null;
         int retries = 0;
         do {

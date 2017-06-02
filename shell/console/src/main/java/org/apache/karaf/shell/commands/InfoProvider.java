@@ -24,8 +24,8 @@ import java.util.Properties;
 @Deprecated
 public interface InfoProvider {
 
-	public String getName();
+	String getName();
 
-	public Properties getProperties();
+	Properties getProperties();
 
 }

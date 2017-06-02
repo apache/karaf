@@ -18,6 +18,7 @@ package org.apache.karaf.jaas.boot.principal;
 
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.Objects;
 
 public class RolePrincipal implements Principal, Serializable {
     private static final long serialVersionUID = 1L;
@@ -36,18 +37,14 @@ public class RolePrincipal implements Principal, Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RolePrincipal)) return false;
-
+        if (o == null || getClass() != o.getClass()) return false;
         RolePrincipal that = (RolePrincipal) o;
-
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-
-        return true;
+        return Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return name != null ? name.hashCode() : 0;
+        return Objects.hash(name);
     }
 
     @Override

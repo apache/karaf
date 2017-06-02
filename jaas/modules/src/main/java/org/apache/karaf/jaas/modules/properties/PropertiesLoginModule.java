@@ -18,7 +18,6 @@ package org.apache.karaf.jaas.modules.properties;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
 import javax.security.auth.Subject;

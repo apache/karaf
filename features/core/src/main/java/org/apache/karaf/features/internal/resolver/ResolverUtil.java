@@ -30,7 +30,6 @@ import org.osgi.resource.Resource;
 
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
-import static org.osgi.service.subsystem.SubsystemConstants.SUBSYSTEM_TYPE;
 
 public class ResolverUtil
 {

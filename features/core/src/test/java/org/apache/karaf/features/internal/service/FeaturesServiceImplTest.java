@@ -34,7 +34,6 @@ import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.easymock.EasyMock;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.resolver.Resolver;
@@ -53,7 +52,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class FeaturesServiceImplTest extends TestBase {
 
-    Logger logger = LoggerFactory.getLogger(FeaturesServiceImplTest.class);;
+    Logger logger = LoggerFactory.getLogger(FeaturesServiceImplTest.class);
     Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
     File dataFile;
 
@@ -198,7 +197,7 @@ public class FeaturesServiceImplTest extends TestBase {
     }
 
     private void installFeature(final FeaturesService featureService, Feature a1Feature)
-        throws Exception, InterruptedException {
+        throws Exception {
         featureService.installFeature(a1Feature, EnumSet.noneOf(Option.class));
         while (!featureService.isInstalled(a1Feature)) {
             Thread.sleep(100);
