@@ -1,0 +1,5 @@
+Manifest-Version: 1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: pax-web-jetty
+Bundle-Version: 6.0.3
+

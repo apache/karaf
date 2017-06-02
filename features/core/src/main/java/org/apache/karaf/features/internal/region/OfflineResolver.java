@@ -76,8 +76,7 @@ public class OfflineResolver {
 
         Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_ERROR));
         Map<Resource, List<Wire>> wiring = resolver.resolve(new ResolveContext() {
-            private final Set<Resource> mandatory = new HashSet<>();
-            private final CandidateComparator candidateComparator = new CandidateComparator(mandatory);
+            private final CandidateComparator candidateComparator = new CandidateComparator(r -> 0);
 
             @Override
             public Collection<Resource> getMandatoryResources() {

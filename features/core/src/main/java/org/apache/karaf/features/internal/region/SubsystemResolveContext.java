@@ -20,11 +20,13 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.karaf.features.FeaturesService;
@@ -64,8 +66,8 @@ public class SubsystemResolveContext extends ResolveContext {
 
     private final Subsystem root;
     private final Map<String, Region> regions;
-    private final Set<Resource> mandatory = new HashSet<>();
-    private final CandidateComparator candidateComparator = new CandidateComparator(mandatory);
+    private final Map<Resource, Integer> distance;
+    private final CandidateComparator candidateComparator = new CandidateComparator(this::getResourceCost);
 
     private final Map<Resource, Subsystem> resToSub = new HashMap<Resource, Subsystem>();
     private final Repository repository;
@@ -89,7 +91,7 @@ public class SubsystemResolveContext extends ResolveContext {
         // Add a heuristic to sort capabilities :
         //  if a capability comes from a resource which needs to be installed,
         //  prefer that one over any capabilities from other resources
-        findMandatory();
+        distance = computeDistances(root);
     }
     
     public Repository getRepository() {
@@ -100,58 +102,52 @@ public class SubsystemResolveContext extends ResolveContext {
         return globalRepository;
     }
 
-    void findMandatory() {
-        mandatory.add(root);
-        int nbMandatory;
-        // Iterate while we find more mandatory resources
-        do {
-            nbMandatory = mandatory.size();
-            for (Resource res : new ArrayList<>(mandatory)) {
-                // Check mandatory requirements of mandatory resources
-                for (Requirement req : res.getRequirements(null)) {
-                    if (isOptional(req) || isDynamic(req)) {
-                        continue;
-                    }
-                    List<Capability> caps = findProviders(req);
-                    // If there's a single provider for any kind of mandatory requirement,
-                    // this means the resource is also mandatory
-                    if (caps.size() == 1) {
-                        mandatory.add(caps.get(0).getResource());
-                    } else {
-                        // In case there are multiple providers
-                        // check if there is a single provider which has
-                        // a mandatory identity requirement on a mandatory
-                        // resource, in which case we also assume this one
-                        // is mandatory
-                        Set<Resource> mand = new HashSet<>();
-                        for (Capability cap : caps) {
-                            Resource r = cap.getResource();
-                            if (mandatory.contains(r)) {
-                                mand.add(r);
-                            } else {
-                                for (Requirement req2 : r.getRequirements(null)) {
-                                    if (!IDENTITY_NAMESPACE.equals(req2.getNamespace()) || isOptional(req2) || isDynamic(req2)) {
-                                        continue;
-                                    }
-                                    List<Capability> caps2 = findProviders(req2);
-                                    if (caps2.size() == 1) {
-                                        Resource r2 =  caps2.get(0).getResource();
-                                        if (mandatory.contains(r2)) {
-                                            mand.add(r);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (mand.size() == 1) {
-                            mandatory.add(mand.iterator().next());
-                        } else {
-                            mand.clear();
-                        }
+    private Map<Resource, Integer> computeDistances(Resource root) {
+        Map<Resource, Integer> distance = new HashMap<>();
+        Set<Resource> settledNodes = new HashSet<>();
+        distance.put(root, 0);
+        List<Resource> unSettledNodes = new ArrayList<>();
+        unSettledNodes.add(root);
+
+        while (!unSettledNodes.isEmpty()) {
+            unSettledNodes.sort(Comparator.comparingInt(r -> distance.getOrDefault(r, Integer.MAX_VALUE)));
+            Resource node = unSettledNodes.remove(0);
+            if (settledNodes.add(node)) {
+                Map<Resource, Integer> edge = computeEdges(node);
+                for (Resource target : edge.keySet()) {
+                    int d = distance.getOrDefault(node, Integer.MAX_VALUE) + edge.get(target);
+                    distance.merge(target, d, Math::min);
+                    if (!settledNodes.contains(target)) {
+                        unSettledNodes.add(target);
                     }
                 }
             }
-        } while (mandatory.size() != nbMandatory);
+        }
+        return distance;
+    }
+
+    private Map<Resource, Integer> computeEdges(Resource resource) {
+        Map<Resource, Integer> edges = new HashMap<>();
+        String owner = ResolverUtil.getOwnerName(resource);
+        for (Requirement req : resource.getRequirements(null)) {
+            if (isOptional(req) || isDynamic(req)) {
+                continue;
+            }
+            List<Capability> caps = findProviders(req);
+            for (Capability cap : caps) {
+                Resource r = cap.getResource();
+                // If there's a single provider for any kind of mandatory requirement,
+                // this means the resource is also mandatory.
+                // Else prefer resources from the same subsystem (with the same owner).
+                int v = (caps.size() == 1) ? 0 : (Objects.equals(ResolverUtil.getOwnerName(r), owner)) ? 1 : 10;
+                edges.merge(r, v, Math::min);
+            }
+        }
+        return edges;
+    }
+
+    private int getResourceCost(Resource resource) {
+        return distance.getOrDefault(resource, Integer.MAX_VALUE);
     }
 
     static boolean isOptional(Requirement req) {
@@ -257,7 +253,9 @@ public class SubsystemResolveContext extends ResolveContext {
                 }
             }
             // Sort caps
-            Collections.sort(caps, candidateComparator);
+            if (distance != null) {
+                caps.sort(candidateComparator);
+            }
         }
         return caps;
     }
