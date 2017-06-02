@@ -50,7 +50,10 @@ if { %(max_colors >= 256) } {
 }
 
 setopt group
+setopt auto-fresh-line
 keymap "^[OA" up-line-or-search
+keymap "^[[A" up-line-or-search
 keymap "^[OB" down-line-or-search
+keymap "^[[B" down-line-or-search
 
 
