@@ -202,7 +202,7 @@ public class Main {
                 System.err.println("Error occurred shutting down framework: " + ex);
                 ex.printStackTrace();
             } finally {
-                if (restartJvm) {
+                if (restartJvm && restart) {
                     System.exit(10);
                 } else if (!restart) {
                     System.exit(main.getExitCode());
