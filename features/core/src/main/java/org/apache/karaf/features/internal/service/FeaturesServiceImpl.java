@@ -63,6 +63,7 @@ import org.apache.karaf.features.internal.download.DownloadManagers;
 import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.util.JsonReader;
 import org.apache.karaf.features.internal.util.JsonWriter;
+import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.bundles.BundleUtils;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.eclipse.equinox.region.Region;
@@ -253,7 +254,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.scheduleMaxRun = scheduleMaxRun;
         this.blacklisted = blacklisted;
         this.configCfgStore = configCfgStore;
-        this.executor = Executors.newSingleThreadExecutor();
+        this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("features"));
         loadState();
         checkResolve();
     }
