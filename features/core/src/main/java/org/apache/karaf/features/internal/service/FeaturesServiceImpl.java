@@ -62,6 +62,7 @@ import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
 import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
+import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.json.JsonReader;
 import org.apache.karaf.util.json.JsonWriter;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
@@ -137,7 +138,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.globalRepository = globalRepository;
         this.repositories = new RepositoryCache(cfg.blacklisted);
         this.cfg = cfg;
-        this.executor = Executors.newSingleThreadExecutor();
+        this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("features"));
         loadState();
         checkResolve();
     }
