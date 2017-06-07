@@ -193,6 +193,12 @@
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main
                         </Main-Class>
+                        <!--
+                           - Work around for KARAF-5180 / FELIX-5649
+                          -->
+                        <_removeheaders>
+                            Require-Capability
+                        </_removeheaders>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
