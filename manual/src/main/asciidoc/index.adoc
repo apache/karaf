@@ -86,6 +86,8 @@ include::user-guide/monitoring.adoc[]
 
 include::user-guide/webconsole.adoc[]
 
+include::user-guide/scheduler.adoc[]
+
 include::user-guide/tuning.adoc[]
 
 == Developer Guide
