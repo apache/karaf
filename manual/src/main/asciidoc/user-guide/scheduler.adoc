@@ -1,0 +1,157 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== Scheduler
+
+Apache Karaf provides an optional Scheduler which provides a Service Listener which listens for Runnable Services and schedules their execution, based  on the service properties.
+
+This Scheduler implementation uses the Quartz Scheduler library to understand cron-like expressions.
+
+==== Installation
+
+To enable the Apache Karaf Scheduler, you just have to install the `scheduler` feature:
+
+----
+karaf@root()> feature:install scheduler
+----
+
+The `scheduler` feature automatically installs the `scheduler` Gogo command group, too:
+
+----
+scheduler:list
+scheduler:schedule
+scheduler:unschedule
+----
+
+==== Configuration
+
+All jobs allow configuration using service properties:
+
+.Scheduler properties
+[width="100%",cols="3,2,10",options="header"]
+|=========================================================
+|Property |Default |Description
+
+|Scheduler.PROPERTY_SCHEDULER_PERIOD | - |
+Defines the period for a job. The period is expressed in seconds. This property needs to be of type Long.
+
+|Scheduler.PROPERTY_SCHEDULER_IMMEDIATE |false |
+Define if a periodically job should be scheduled immediate.
+Default is to not startup immediate, the job is started the first time after the period has expired.
+This property needs to be of type Boolean.
+
+|Scheduler.PROPERTY_SCHEDULER_EXPRESSION | - |
+Define the cron expression for a job. Must be a Quartz compatible expression.
+
+|Scheduler.PROPERTY_SCHEDULER_CONCURRENT | - |
+Define if the job can be run concurrently.
+
+|Scheduler.PROPERTY_SCHEDULER_NAME |-  |
+Define the job name.
+
+|=========================================================
+
+
+==== Schedule a new Job using the Whitebox-Service paradigm (recommended)
+This example uses Declarative Services to register a Service of Type "org.apache.karaf.scheduler.Job" so that it is recognized by the Scheduler Service.
+
+Alternatively, jobs can be registered as type "Runnable" in a more API neutral way. In this case you won't get the "JobContext" information though.
+----
+@Component (immediate = true, property = {
+        Scheduler.PROPERTY_SCHEDULER_EXPRESSION + "=0 0/10 * * * ?",
+} )
+public class SchedulerPing implements Job {
+
+    @Override
+    public void execute(JobContext context) {
+        // ..
+    }
+}
+----
+
+This will register a Job with the WhiteboxHandler. You can verify that the job is registered:
+
+----
+karaf@root()> scheduler:list
+Name                   │ Schedule
+───────────────────────┼─────────────────────
+Registered Service.185 │ cron(0 0/10 * * * ?)
+----
+
+
+
+==== Schedule a new Job using the Gogo Shell
+----
+karaf@root()> scheduler:schedule --help
+DESCRIPTION
+        scheduler:schedule
+
+	Schedule a script execution
+
+SYNTAX
+        scheduler:schedule [options] script
+
+ARGUMENTS
+        script
+                The script to schedule
+
+OPTIONS
+        --at
+                Absolute date in ISO format (ex: 2014-05-13T13:56:45)
+        --concurrent
+                Should jobs run concurrently or not (defaults to false)
+        --period
+                Time during executions (in seconds)
+        --times
+                Number of times this job should be executed
+                (defaults to -1)
+        --cron
+                The cron expression
+        --help
+                Display this help message
+        --name
+                Name of this job
+
+----
+
+For example:
+----
+tbd
+----
+
+==== Schedule a new Job using the Scheduler Service
+
+Recommendation: Before using this low level api for registering jobs, consider using the whitebox approach instead.
+
+----
+..
+import org.apache.karaf.scheduler.Scheduler;
+
+@Component
+public class Demo {
+
+  @Reference Scheduler scheduler;
+
+  public void useScheduler()
+  {
+    schedule(new MyJob(), scheduler.EXPR("0 0/10 * * * ?"));
+  }
+
+  class MyJob implements Job {
+    ..
+  }
+
+}
+
+----
