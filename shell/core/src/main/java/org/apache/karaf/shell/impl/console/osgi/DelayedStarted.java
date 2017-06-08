@@ -31,10 +31,11 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 class DelayedStarted extends Thread implements FrameworkListener {
     private static final String SYSTEM_PROP_KARAF_CONSOLE_STARTED = "karaf.console.started";
 
-	private final AtomicBoolean started = new AtomicBoolean(false);
+    private final AtomicBoolean started = new AtomicBoolean(false);
+    private final AtomicBoolean stopped = new AtomicBoolean(false);
     private final InputStream in;
-	private final Runnable console;
-	private final BundleContext bundleContext;
+    private final Runnable console;
+    private final BundleContext bundleContext;
 
     DelayedStarted(Runnable console, String name, BundleContext bundleContext, InputStream in) {
         super(name);
@@ -53,7 +54,7 @@ class DelayedStarted extends Thread implements FrameworkListener {
 
     public void run() {
         try {
-            while (!started.get()) {
+            while (!started.get() && !stopped.get()) {
                 if (in.available() == 0) {
                     Thread.sleep(10);
                 }
@@ -69,10 +70,17 @@ class DelayedStarted extends Thread implements FrameworkListener {
             // Ignore
         }
 
-        // Signal to the main module that it can stop displaying the startup progress
-        System.setProperty(SYSTEM_PROP_KARAF_CONSOLE_STARTED, "true");
-        this.bundleContext.removeFrameworkListener(this);
-        console.run();
+
+        if (!stopped.get()) {
+            // Signal to the main module that it can stop displaying the startup progress
+            System.setProperty(SYSTEM_PROP_KARAF_CONSOLE_STARTED, "true");
+            this.bundleContext.removeFrameworkListener(this);
+            console.run();
+        }
+    }
+
+    public void stopDelayed() {
+        stopped.set(true);
     }
 
     public void frameworkEvent(FrameworkEvent event) {

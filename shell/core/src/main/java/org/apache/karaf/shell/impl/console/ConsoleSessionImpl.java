@@ -84,6 +84,8 @@ public class ConsoleSessionImpl implements Session {
     // Input stream
     volatile boolean running;
 
+    private AtomicBoolean closed = new AtomicBoolean(false);
+
     final SessionFactory factory;
     final ThreadIO threadIO;
     final InputStream in;
@@ -272,11 +274,13 @@ public class ConsoleSessionImpl implements Session {
     }
 
     public void close() {
-        if (running) {
-            try {
-                reader.getHistory().save();
-            } catch (IOException e) {
-                // ignore
+        if (closed.compareAndSet(false, true)) {
+            if (running) {
+                try {
+                    reader.getHistory().save();
+                } catch (IOException e) {
+                    // ignore
+                }
             }
 
             running = false;
@@ -293,9 +297,9 @@ public class ConsoleSessionImpl implements Session {
                     // Ignore
                 }
             }
+            if (session != null)
+                session.close();
         }
-        if (session != null)
-            session.close();
     }
 
     public void run() {
