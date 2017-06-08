@@ -45,16 +45,14 @@ public class GetLogLevel implements Action {
 
     @Override
     public Object execute() throws Exception {
-        if (logger == null) {
+        if (logger == null || logger.equals("ALL")) {
             Map<String, String> loggers = logService.getLevel("ALL");
             ShellTable table = new ShellTable();
             table.column("Logger");
             table.column("Level");
             loggers.forEach((n, l) -> table.addRow().addContent(n, l));
             table.print(System.out, !noFormat);
-        }
-        else
-        {
+        } else {
             Map<String, String> loggers = logService.getLevel( logger );
             String level = loggers.get( logger );
             System.out.println( level );
