@@ -239,17 +239,19 @@ public class ThreadsAction implements Action {
 
         public boolean isInteresting() {
             int nb = 0;
-            StackTraceElement[] stacktrace = info.getStackTrace();
-            for (StackTraceElement ste : stacktrace) {
-                boolean interestingLine = true;
-                for (String pkg : packages) {
-                    if (ste.getClassName().startsWith(pkg)) {
-                        interestingLine = false;
-                        break;
+            if (info != null && info.getStackTrace() != null) {
+                StackTraceElement[] stacktrace = info.getStackTrace();
+                for (StackTraceElement ste : stacktrace) {
+                    boolean interestingLine = true;
+                    for (String pkg : packages) {
+                        if (ste.getClassName().startsWith(pkg)) {
+                            interestingLine = false;
+                            break;
+                        }
                     }
-                }
-                if (interestingLine) {
-                    nb++;
+                    if (interestingLine) {
+                        nb++;
+                    }
                 }
             }
             return nb >= threshold;
