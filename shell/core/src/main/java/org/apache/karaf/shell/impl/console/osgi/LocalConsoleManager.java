@@ -50,6 +50,8 @@ public class LocalConsoleManager {
     private ServiceRegistration<?> registration;
     private boolean closing;
 
+    private DelayedStarted watcher;
+
     public LocalConsoleManager(BundleContext bundleContext,
                                SessionFactory sessionFactory) throws Exception {
         this.bundleContext = bundleContext;
@@ -77,8 +79,8 @@ public class LocalConsoleManager {
                 String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
                 boolean delayconsole = Boolean.parseBoolean(System.getProperty(KARAF_DELAY_CONSOLE));
                 if (delayconsole) {
-                    DelayedStarted watcher = new DelayedStarted(session, name, bundleContext, System.in);
-                    new Thread(watcher).start();
+                    watcher = new DelayedStarted(session, name, bundleContext, System.in);
+                    new Thread(watcher, name).start();
                 } else {
                     new Thread(session, name).start();
                 }
@@ -153,6 +155,9 @@ public class LocalConsoleManager {
         // osgi framework isn't stopped
         if (session != null) {
             session.close();
+        }
+        if (watcher != null) {
+            watcher.stopDelayed();
         }
     }
 
