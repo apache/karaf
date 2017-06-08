@@ -45,7 +45,7 @@ public class GetLogLevel implements Action {
 
     @Override
     public Object execute() throws Exception {
-        if (logger == null || logger.equals("ALL")) {
+        if (logger == null || logger.equalsIgnoreCase("ALL")) {
             Map<String, String> loggers = logService.getLevel("ALL");
             ShellTable table = new ShellTable();
             table.column("Logger");
