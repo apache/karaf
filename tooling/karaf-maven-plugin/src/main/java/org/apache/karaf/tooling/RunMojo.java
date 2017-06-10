@@ -131,7 +131,7 @@ public class RunMojo extends MojoSupport {
         }
     }
 
-    private void deploy(BundleContext bundleContext) throws MojoExecutionException {
+    void deploy(BundleContext bundleContext) throws MojoExecutionException {
         if (deployProjectArtifact) {
             File artifact = project.getArtifact().getFile();
             if (artifact != null && artifact.exists()) {
