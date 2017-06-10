@@ -26,6 +26,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.karaf.features.BootFinished;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.main.Main;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
@@ -37,11 +38,15 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import java.io.*;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -134,7 +139,10 @@ public class RunMojo extends MojoSupport {
     void deploy(BundleContext bundleContext) throws MojoExecutionException {
         if (deployProjectArtifact) {
             File artifact = project.getArtifact().getFile();
-            if (artifact != null && artifact.exists()) {
+            File attachedFeatureFile = getAttachedFeatureFile(project);
+            boolean artifactExists = artifact != null && artifact.exists();
+            boolean attachedFeatureFileExists = attachedFeatureFile != null && attachedFeatureFile.exists();
+            if (artifactExists) {
                 if (project.getPackaging().equals("bundle")) {
                     try {
                         Bundle bundle = bundleContext.installBundle(artifact.toURI().toURL().toString());
@@ -145,6 +153,8 @@ public class RunMojo extends MojoSupport {
                 } else {
                     throw new MojoExecutionException("Packaging " + project.getPackaging() + " is not supported");
                 }
+            } else if (attachedFeatureFileExists) {
+                addFeaturesAttachmentAsFeatureRepository(bundleContext, attachedFeatureFile);
             } else {
                 throw new MojoExecutionException("Project artifact doesn't exist");
             }
@@ -162,16 +172,14 @@ public class RunMojo extends MojoSupport {
         return;
     }
 
-    private static void extractTarGzDistribution(File sourceDistribution, File _targetFolder)
-            throws IOException {
+    private static void extractTarGzDistribution(File sourceDistribution, File _targetFolder) throws IOException {
         File uncompressedFile = File.createTempFile("uncompressedTarGz-", ".tar");
         extractGzArchive(new FileInputStream(sourceDistribution), uncompressedFile);
         extract(new TarArchiveInputStream(new FileInputStream(uncompressedFile)), _targetFolder);
         FileUtils.forceDelete(uncompressedFile);
     }
 
-    private static void extractZipDistribution(File sourceDistribution, File _targetFolder)
-            throws IOException {
+    private static void extractZipDistribution(File sourceDistribution, File _targetFolder) throws IOException {
         extract(new ZipArchiveInputStream(new FileInputStream(sourceDistribution)), _targetFolder);
     }
 
@@ -295,6 +303,37 @@ public class RunMojo extends MojoSupport {
 
     private static boolean present(String part) {
         return part != null && !part.isEmpty();
+    }
+
+    private File getAttachedFeatureFile(MavenProject project) {
+        List<Artifact> attachedArtifacts = project.getAttachedArtifacts();
+        for (Artifact artifact : attachedArtifacts) {
+            if ("features".equals(artifact.getClassifier()) && "xml".equals(artifact.getType())) {
+                return artifact.getFile();
+            }
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void addFeaturesAttachmentAsFeatureRepository(BundleContext bundleContext, File attachedFeatureFile) throws MojoExecutionException {
+        // Use reflection because the returned services use the OSGi classloader
+    	ServiceReference ref = bundleContext.getServiceReference(FeaturesService.class);
+        if (ref != null) {
+            Object featureService = bundleContext.getService(ref);
+            try {
+            	Class serviceClass = featureService.getClass();
+            	Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
+                addRepositoryMethod.invoke(featureService, attachedFeatureFile.toURI());
+            } catch (Exception e) {
+                throw new MojoExecutionException("Failed to register attachment as feature repository", e);
+            }
+        } else {
+            throw new MojoExecutionException("Failed to find the FeatureService when adding a feature repository");
+        }
+
+
     }
 
 }
