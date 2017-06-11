@@ -25,6 +25,7 @@
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
+    <repository>mvn:org.apache.aries.jpa/jpa-features/${aries.jpa.version}/xml/features</repository>
     
     <feature name="transaction-api" version="1.2.0">
         <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
@@ -87,24 +88,6 @@
         <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.1</bundle>
     </feature>
     
-    <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.version}">
-        <details>JPA implementation provided by Apache Aries JPA 2.x. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
-        <feature version="[1.1,2)">transaction-api</feature>
-        <feature dependency="true">openjpa</feature>
-        <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
-	    <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
-        <bundle dependency="true">mvn:org.osgi/org.osgi.service.jpa/${org.osgi.service.jpa.version}</bundle>
-        <bundle dependency="true">mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
-        <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.api/${aries.jpa.version}</bundle>
-        <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.version}</bundle>
-        <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.support/${aries.jpa.version}</bundle>
-        <conditional>
-            <condition>aries-blueprint</condition>
-            <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint/${aries.jpa.version}</bundle>
-        </conditional>
-    </feature>
-
     <feature name="openjpa" description="Apache OpenJPA 2.4.x persistence engine support" version="2.4.1">
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature>jndi</feature>
