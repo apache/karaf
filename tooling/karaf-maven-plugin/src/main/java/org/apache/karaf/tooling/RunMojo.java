@@ -75,6 +75,12 @@ public class RunMojo extends MojoSupport {
     private boolean deployProjectArtifact = true;
 
     /**
+     * Comma-separated list of features to install.
+     */
+    @Parameter(defaultValue = "")
+    private String featuresToInstall = null;
+
+    /**
      * Define if the Karaf container keep running or stop just after the goal execution
      */
     @Parameter(defaultValue = "true")
@@ -326,6 +332,14 @@ public class RunMojo extends MojoSupport {
             	Class serviceClass = featureService.getClass();
             	Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
                 addRepositoryMethod.invoke(featureService, attachedFeatureFile.toURI());
+
+                if (featuresToInstall != null) {
+                    Method installFeatureMethod = serviceClass.getMethod("installFeature", String.class);
+                    String[] features = featuresToInstall.split(" *, *");
+                    for (String feature : features) {
+                        installFeatureMethod.invoke(featureService, feature);
+                    }
+                }
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to register attachment as feature repository", e);
             }

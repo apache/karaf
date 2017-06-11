@@ -208,7 +208,7 @@ public class RunMojoTest extends EasyMockSupport {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testDeployWithPomArtifactAndAttachedFeatureXml() throws Exception {
+    public void testDeployWithPomArtifactAndAttachedFeatureXmlAndNoFeatures() throws Exception {
         File artifactFeaturesAttachmentFile = File.createTempFile("someproject-features", ".xml");
         try {
             FeaturesService featureService = niceMock(FeaturesService.class);
@@ -237,6 +237,59 @@ public class RunMojoTest extends EasyMockSupport {
         } finally {
             artifactFeaturesAttachmentFile.delete();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testDeployWithPomArtifactAndAttachedFeatureXml() throws Exception {
+        File artifactFeaturesAttachmentFile = File.createTempFile("someproject-features", ".xml");
+        try {
+            FeaturesService featureService = niceMock(FeaturesService.class);
+            replay(featureService);
+            ServiceReference<FeaturesService> ref = niceMock(ServiceReference.class);
+            BundleContext context = niceMock(BundleContext.class);
+            expect(context.getServiceReference(eq(FeaturesService.class))).andReturn(ref);
+            expect(context.getService(eq(ref))).andReturn(featureService);
+            replay(context);
+            Artifact artifact = niceMock(Artifact.class);
+            replay(artifact);
+            Artifact artifactFeaturesAttachment = mock(Artifact.class);
+            expect(artifactFeaturesAttachment.getFile()).andReturn(artifactFeaturesAttachmentFile);
+            expect(artifactFeaturesAttachment.getClassifier()).andReturn("features");
+            expect(artifactFeaturesAttachment.getType()).andReturn("xml");
+            replay(artifactFeaturesAttachment);
+
+            RunMojo mojo = new RunMojo();
+            MavenProject project = new MavenProject();
+            project.setPackaging("pom");
+            project.setArtifact(artifact);
+            project.addAttachedArtifact(artifactFeaturesAttachment);
+            setInheritedPrivateField(mojo, "project", project);
+            setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+            mojo.deploy(context);
+            verify(context);
+        } finally {
+            artifactFeaturesAttachmentFile.delete();
+        }
+    }
+
+    /**
+     * Just check the string split behaviour on various feature strings.
+     */
+    @Test
+    public void testStringSplit() {
+    	String[] split1 = "liquibase-core, ukelonn-db-derby-test, ukelonn".split(" *, *");
+    	assertEquals(3, split1.length);
+    	String[] split2 = "liquibase-core".split(" *, *");
+    	assertEquals(1, split2.length);
+    	String[] split3 = " ".split(" *, *");
+    	assertEquals(1, split3.length);
+    	String[] split4 = " , ".split(" *, *");
+    	assertEquals(0, split4.length);
+    	String[] split5 = "liquibase-core, ".split(" *, *");
+    	assertEquals(1, split5.length);
+    	String[] split6 = "liquibase-core, , ".split(" *, *");
+    	assertEquals(1, split6.length);
     }
 
     private void setPrivateField(Object obj, String fieldName, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
