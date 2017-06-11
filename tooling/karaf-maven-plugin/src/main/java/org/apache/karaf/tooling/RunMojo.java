@@ -75,6 +75,13 @@ public class RunMojo extends MojoSupport {
     private boolean deployProjectArtifact = true;
 
     /**
+     * A list of URLs referencing feature repositories that will be added
+     * to the karaf instance started by this goal.
+     */
+    @Parameter
+    private String[] featureRepositories = null;
+
+    /**
      * Comma-separated list of features to install.
      */
     @Parameter(defaultValue = "")
@@ -332,6 +339,12 @@ public class RunMojo extends MojoSupport {
             	Class serviceClass = featureService.getClass();
             	Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
                 addRepositoryMethod.invoke(featureService, attachedFeatureFile.toURI());
+
+                if (featureRepositories != null) {
+                    for (String featureRepo : featureRepositories) {
+                    	addRepositoryMethod.invoke(featureService, URI.create(featureRepo));
+                    }
+                }
 
                 if (featuresToInstall != null) {
                     Method installFeatureMethod = serviceClass.getMethod("installFeature", String.class);

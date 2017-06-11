@@ -266,6 +266,8 @@ public class RunMojoTest extends EasyMockSupport {
             project.addAttachedArtifact(artifactFeaturesAttachment);
             setInheritedPrivateField(mojo, "project", project);
             setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+            String[] featureRepos = { "mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features" };
+            setPrivateField(mojo, "featureRepositories", featureRepos);
             mojo.deploy(context);
             verify(context);
         } finally {
