@@ -27,7 +27,6 @@ By default, Apache Karaf uses:
 * `-Xms128M`
 * `-Xmx512M`
 * `-XX:+UnlockDiagnosticVMOptions`
-* `-XX:+UnsyncloadClass`
 
 On Sun/Oracle JVM:
 
