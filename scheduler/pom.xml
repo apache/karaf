@@ -32,7 +32,7 @@
     <artifactId>org.apache.karaf.scheduler.core</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Scheduler :: Core</name>
-    <description>This bundle provides a Service Listener which listnes for Runnable Services and schedules their execution, based  on the service properties</description>
+    <description>This bundle provides a Service Listener which listens for Runnable Services and schedules their execution, based  on the service properties</description>
 
     <build>
         <resources>
