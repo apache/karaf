@@ -95,7 +95,7 @@ Definition of the Feature.
         <xs:attribute name="install" type="tns:install">
             <xs:annotation>
                 <xs:documentation><![CDATA[
-Marks if the feaute will be automatically started when thrown to the deploy folder.
+Marks if the feature will be automatically started when thrown to the deploy folder.
                 ]]>
                 </xs:documentation>
             </xs:annotation>

@@ -274,15 +274,19 @@ public class KarServiceImpl implements KarService {
                 if (repository.getURI().equals(karFeatureRepoUri)) {
                     try {
                         for (Feature feature : repository.getFeatures()) {
-                            try {
-                                LOGGER.debug("noAutoRefreshBundles is " + isNoAutoRefreshBundles());
-                                if (isNoAutoRefreshBundles()) {
-                                    featuresService.installFeature(feature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-                                } else {
-                                    featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                            if (feature.getInstall() == null || !feature.getInstall().equals("manual")) {
+                                try {
+                                    LOGGER.debug("noAutoRefreshBundles is " + isNoAutoRefreshBundles());
+                                    if (isNoAutoRefreshBundles()) {
+                                        featuresService.installFeature(feature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+                                    } else {
+                                        featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                                    }
+                                } catch (Exception e) {
+                                    LOGGER.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
                                 }
-                            } catch (Exception e) {
-                                LOGGER.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                            } else {
+                                LOGGER.warn("Feature " + feature.getName() + "/" + feature.getVersion() + " has install flag set to \"manual\", so it's not automatically installed");
                             }
                         }
                     } catch (Exception e) {
@@ -426,10 +430,12 @@ public class KarServiceImpl implements KarService {
                 if (repository.getURI().equals(karFeatureRepoUri)) {
                     try {
                         for (Feature feature : repository.getFeatures()) {
-                            try {
-                                featuresService.uninstallFeature(feature.getName(), feature.getVersion());
-                            } catch (Exception e) {
-                                LOGGER.warn("Unable to uninstall Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                            if (feature.getInstall() == null || !feature.getInstall().equals("manual")) {
+                                try {
+                                    featuresService.uninstallFeature(feature.getName(), feature.getVersion());
+                                } catch (Exception e) {
+                                    LOGGER.warn("Unable to uninstall Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                                }
                             }
                         }
                     } catch (Exception e) {
