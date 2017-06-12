@@ -138,7 +138,11 @@ public class RunMojo extends MojoSupport {
                     bootFinished = bundleContext.getService(ref);
                 }
             }
-            deploy(bundleContext);
+
+            Object featureService = findFeatureService(bundleContext);
+            addFeatureRepositories(featureService);
+            deploy(bundleContext, featureService);
+            addFeatures(featureService);
             if (keepRunning)
                 main.awaitShutdown();
             main.destroy();
@@ -149,7 +153,22 @@ public class RunMojo extends MojoSupport {
         }
     }
 
-    void deploy(BundleContext bundleContext) throws MojoExecutionException {
+    void addFeatureRepositories(Object featureService) throws MojoExecutionException {
+    	if (featureRepositories != null) {
+            try {
+            	Class<? extends Object> serviceClass = featureService.getClass();
+                Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
+
+                for (String featureRepo : featureRepositories) {
+                    addRepositoryMethod.invoke(featureService, URI.create(featureRepo));
+                }
+            } catch (Exception e) {
+                throw new MojoExecutionException("Failed to add feature repositories to karaf", e);
+            }
+    	}
+    }
+
+    void deploy(BundleContext bundleContext, Object featureService) throws MojoExecutionException {
         if (deployProjectArtifact) {
             File artifact = project.getArtifact().getFile();
             File attachedFeatureFile = getAttachedFeatureFile(project);
@@ -167,11 +186,26 @@ public class RunMojo extends MojoSupport {
                     throw new MojoExecutionException("Packaging " + project.getPackaging() + " is not supported");
                 }
             } else if (attachedFeatureFileExists) {
-                addFeaturesAttachmentAsFeatureRepository(bundleContext, attachedFeatureFile);
+                addFeaturesAttachmentAsFeatureRepository(featureService, attachedFeatureFile);
             } else {
                 throw new MojoExecutionException("Project artifact doesn't exist");
             }
         }
+    }
+
+    void addFeatures(Object featureService) throws MojoExecutionException {
+    	if (featuresToInstall != null) {
+            try {
+            	Class<? extends Object> serviceClass = featureService.getClass();
+                Method installFeatureMethod = serviceClass.getMethod("installFeature", String.class);
+                String[] features = featuresToInstall.split(" *, *");
+                for (String feature : features) {
+                    installFeatureMethod.invoke(featureService, feature);
+                }
+            } catch (Exception e) {
+                throw new MojoExecutionException("Failed to add features to karaf", e);
+            }
+    	}
     }
 
     public static void extract(File sourceFile, File targetFolder) throws IOException {
@@ -329,38 +363,30 @@ public class RunMojo extends MojoSupport {
         return null;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void addFeaturesAttachmentAsFeatureRepository(BundleContext bundleContext, File attachedFeatureFile) throws MojoExecutionException {
-        // Use reflection because the returned services use the OSGi classloader
+    @SuppressWarnings({ "rawtypes", "unchecked" }) Object findFeatureService(BundleContext bundleContext) {
+        // Use Object as the service type and use reflection when calling the service,
+    	// because the returned services use the OSGi classloader
     	ServiceReference ref = bundleContext.getServiceReference(FeaturesService.class);
         if (ref != null) {
             Object featureService = bundleContext.getService(ref);
+            return featureService;
+        }
+
+        return null;
+    }
+
+    private void addFeaturesAttachmentAsFeatureRepository(Object featureService, File attachedFeatureFile) throws MojoExecutionException {
+        if (featureService != null) {
             try {
-            	Class serviceClass = featureService.getClass();
+            	Class<? extends Object> serviceClass = featureService.getClass();
             	Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
                 addRepositoryMethod.invoke(featureService, attachedFeatureFile.toURI());
-
-                if (featureRepositories != null) {
-                    for (String featureRepo : featureRepositories) {
-                    	addRepositoryMethod.invoke(featureService, URI.create(featureRepo));
-                    }
-                }
-
-                if (featuresToInstall != null) {
-                    Method installFeatureMethod = serviceClass.getMethod("installFeature", String.class);
-                    String[] features = featuresToInstall.split(" *, *");
-                    for (String feature : features) {
-                        installFeatureMethod.invoke(featureService, feature);
-                    }
-                }
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to register attachment as feature repository", e);
             }
         } else {
             throw new MojoExecutionException("Failed to find the FeatureService when adding a feature repository");
         }
-
-
     }
 
 }

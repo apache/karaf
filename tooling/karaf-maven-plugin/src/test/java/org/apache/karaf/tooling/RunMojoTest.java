@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
-
 import org.apache.karaf.features.FeaturesService;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -24,11 +23,60 @@ import org.osgi.framework.ServiceReference;
 public class RunMojoTest extends EasyMockSupport {
 
     @Test
+    public void testAddFeatureRepositoriesWithNullRepoList() throws MojoExecutionException {
+        FeaturesService featureService = mock(FeaturesService.class);
+        replay(featureService);
+
+        RunMojo mojo = new RunMojo();
+        mojo.addFeatureRepositories(featureService);
+        verify(featureService); // Non-nice easymock mock will fail on any call
+    }
+
+    @Test
+    public void testAddFeatureRepositoriesWithEmptyRepoListAndNullFeatureService() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MojoExecutionException  {
+        RunMojo mojo = new RunMojo();
+        String[] empty = new String[0];
+        setPrivateField(mojo, "featureRepositories", empty);
+        try {
+            mojo.addFeatureRepositories(null);
+            fail("Expected MojoExecutionException to be thrown");
+        } catch(MojoExecutionException e) {
+            assertEquals("Failed to add feature repositories to karaf", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAddFeatureRepositoriesWithEmptyRepoList() throws MojoExecutionException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        FeaturesService featureService = mock(FeaturesService.class);
+        replay(featureService);
+
+        RunMojo mojo = new RunMojo();
+        String[] empty = new String[0];
+        setPrivateField(mojo, "featureRepositories", empty);
+        mojo.addFeatureRepositories(featureService);
+        verify(featureService); // Non-nice easymock mock will fail on any call
+    }
+
+    @Test
+    public void testAddFeatureRepositories() throws Exception {
+        FeaturesService featureService = niceMock(FeaturesService.class);
+        featureService.addRepository(anyObject(URI.class));
+        EasyMock.expectLastCall().once();
+        replay(featureService);
+
+        RunMojo mojo = new RunMojo();
+        String[] features = { "liquibase-core", "ukelonn" };
+        setPrivateField(mojo, "featureRepositories", features);
+        mojo.addFeatureRepositories(featureService);
+        verify(featureService);
+    }
+
+    @Test
     public void testDeployWithDeployProjectArtifactFalse() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MojoExecutionException {
         BundleContext context = mock(BundleContext.class);
         RunMojo mojo = new RunMojo();
         setPrivateField(mojo, "deployProjectArtifact", false);
-        mojo.deploy(context);
+        mojo.deploy(context, null);
     }
 
     @Test
@@ -40,7 +88,7 @@ public class RunMojoTest extends EasyMockSupport {
         project.setArtifact(artifact);
         setInheritedPrivateField(mojo, "project", project);
         try {
-            mojo.deploy(context);
+            mojo.deploy(context, null);
             fail("Expected MojoExecutionException");
         } catch (MojoExecutionException e) {
             assertEquals("Project artifact doesn't exist", e.getMessage());
@@ -59,7 +107,7 @@ public class RunMojoTest extends EasyMockSupport {
         project.setArtifact(artifact);
         setInheritedPrivateField(mojo, "project", project);
         try {
-            mojo.deploy(context);
+            mojo.deploy(context, null);
             fail("Expected MojoExecutionException");
         } catch (MojoExecutionException e) {
             assertEquals("Project artifact doesn't exist", e.getMessage());
@@ -80,7 +128,7 @@ public class RunMojoTest extends EasyMockSupport {
         project.setArtifact(artifact);
         setInheritedPrivateField(mojo, "project", project);
         try {
-            mojo.deploy(context);
+            mojo.deploy(context, null);
             fail("Expected MojoExecutionException");
         } catch (MojoExecutionException e) {
             assertEquals("Packaging jar is not supported", e.getMessage());
@@ -102,7 +150,7 @@ public class RunMojoTest extends EasyMockSupport {
         project.setArtifact(artifact);
         setInheritedPrivateField(mojo, "project", project);
         try {
-            mojo.deploy(context);
+            mojo.deploy(context, null);
             fail("Expected MojoExecutionException");
         } catch (MojoExecutionException e) {
             assertEquals("Can't deploy project artifact in container", e.getMessage());
@@ -126,7 +174,7 @@ public class RunMojoTest extends EasyMockSupport {
             project.setArtifact(artifact);
             setInheritedPrivateField(mojo, "project", project);
             replay(bundle);
-            mojo.deploy(context);
+            mojo.deploy(context, null);
             verify(bundle);
         } finally {
             artifactFile.delete();
@@ -157,7 +205,7 @@ public class RunMojoTest extends EasyMockSupport {
             setInheritedPrivateField(mojo, "project", project);
             replay(bundle);
             try {
-                mojo.deploy(context);
+                mojo.deploy(context, null);
                 fail("Expected MojoExecutionException");
             } catch (MojoExecutionException e) {
                 assertEquals("Failed to find the FeatureService when adding a feature repository", e.getMessage());
@@ -196,7 +244,7 @@ public class RunMojoTest extends EasyMockSupport {
             project.addAttachedArtifact(artifactFeaturesAttachment);
             setInheritedPrivateField(mojo, "project", project);
             try {
-                mojo.deploy(context);
+                mojo.deploy(context, featureService);
                 fail("Expected MojoExecutionException");
             } catch (MojoExecutionException e) {
                 assertEquals("Failed to register attachment as feature repository", e.getMessage());
@@ -232,8 +280,8 @@ public class RunMojoTest extends EasyMockSupport {
             project.setArtifact(artifact);
             project.addAttachedArtifact(artifactFeaturesAttachment);
             setInheritedPrivateField(mojo, "project", project);
-            mojo.deploy(context);
-            verify(context);
+            mojo.deploy(context, featureService);
+            verify(featureService);
         } finally {
             artifactFeaturesAttachmentFile.delete();
         }
@@ -268,8 +316,8 @@ public class RunMojoTest extends EasyMockSupport {
             setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
             String[] featureRepos = { "mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features" };
             setPrivateField(mojo, "featureRepositories", featureRepos);
-            mojo.deploy(context);
-            verify(context);
+            mojo.deploy(context, featureService);
+            verify(featureService);
         } finally {
             artifactFeaturesAttachmentFile.delete();
         }
@@ -292,6 +340,67 @@ public class RunMojoTest extends EasyMockSupport {
     	assertEquals(1, split5.length);
     	String[] split6 = "liquibase-core, , ".split(" *, *");
     	assertEquals(1, split6.length);
+    }
+
+    @Test
+    public void testAddFeaturesNullFeaturesToInstall() throws MojoExecutionException {
+        FeaturesService featureService = mock(FeaturesService.class);
+        replay(featureService);
+
+        RunMojo mojo = new RunMojo();
+        mojo.addFeatures(featureService);
+        verify(featureService); // Non-nice easymock mock will fail on any call
+    }
+
+    @Test
+    public void testAddFeaturesNullFeatureService() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        RunMojo mojo = new RunMojo();
+        setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+
+        try {
+            mojo.addFeatures(null);
+        } catch (MojoExecutionException e) {
+            assertEquals("Failed to add features to karaf", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAddFeatures() throws Exception {
+        FeaturesService featureService = mock(FeaturesService.class);
+        featureService.installFeature(anyString());
+        EasyMock.expectLastCall().times(3);
+        replay(featureService);
+
+        RunMojo mojo = new RunMojo();
+        setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+        mojo.addFeatures(featureService);
+        verify(featureService);
+    }
+
+    @Test
+    public void testFindFeatureServiceNullServiceRef() {
+        BundleContext context = niceMock(BundleContext.class);
+        replay(context);
+
+        RunMojo mojo = new RunMojo();
+        Object service = mojo.findFeatureService(context);
+        assertNull(service);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testFindFeatureService() {
+        FeaturesService featureService = niceMock(FeaturesService.class);
+        replay(featureService);
+        ServiceReference<FeaturesService> ref = niceMock(ServiceReference.class);
+        BundleContext context = niceMock(BundleContext.class);
+        expect(context.getServiceReference(eq(FeaturesService.class))).andReturn(ref);
+        expect(context.getService(eq(ref))).andReturn(featureService);
+        replay(context);
+
+        RunMojo mojo = new RunMojo();
+        Object service = mojo.findFeatureService(context);
+        assertNotNull(service);
     }
 
     private void setPrivateField(Object obj, String fieldName, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
