@@ -201,6 +201,7 @@ public class RunMojo extends MojoSupport {
                 String[] features = featuresToInstall.split(" *, *");
                 for (String feature : features) {
                     installFeatureMethod.invoke(featureService, feature);
+                    Thread.sleep(1000L);
                 }
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to add features to karaf", e);
