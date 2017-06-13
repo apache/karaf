@@ -93,8 +93,7 @@ public class InstanceServiceImplTest {
 
         assertFileExists(instance.getLocation(), "etc/java.util.logging.properties");
         assertFileExists(instance.getLocation(), "etc/org.apache.karaf.features.cfg");
-        assertFileExists(instance.getLocation(), "etc/org.apache.felix.fileinstall-deploy.cfg");
-        assertFileExists(instance.getLocation(), "etc/org.apache.karaf.log.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.apache.karaf.shell.cfg");
         assertFileExists(instance.getLocation(), "etc/org.apache.karaf.management.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
