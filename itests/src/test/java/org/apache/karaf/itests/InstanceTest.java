@@ -13,9 +13,6 @@
  */
 package org.apache.karaf.itests;
 
-import static org.junit.Assert.assertTrue;
-
-
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -35,7 +32,6 @@ import java.lang.management.ManagementFactory;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class InstanceTest extends KarafTestSupport {
-    
 
     @Test
     public void createDestroyCommand() throws Exception {
@@ -89,12 +85,6 @@ public class InstanceTest extends KarafTestSupport {
         assertContains("Stopped", output);
     }
 
-    @Test
-    public void createStartConnectCommand() throws Exception {
-        System.out.println(executeCommand("instance:create itestCSCC"));
-        assertContains("itestCSCC", executeCommand("instance:list"));
-    }
-
     private int getInstancesNum(MBeanServerConnection connection, ObjectName name) throws Exception {
         TabularData instances = (TabularData) connection.getAttribute(name, "Instances");
         return instances.size();
@@ -118,11 +108,9 @@ public class InstanceTest extends KarafTestSupport {
 
     @Test
     public void renameCommand() throws Exception {
-        System.out.println(executeCommand("instance:create itest777"));
-        System.out.println(executeCommand("instance:rename itest777 new_itest"));
-        String instanceListOutput = executeCommand("instance:list");
-        System.out.println(instanceListOutput);
-        assertTrue(instanceListOutput.contains("new_itest"));
+        executeCommand("instance:create itest777");
+        executeCommand("instance:rename itest777 new_itest");
+        assertContains("new_itest", executeCommand("instance:list"));
     }
 
     @Test

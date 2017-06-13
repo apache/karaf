@@ -319,6 +319,7 @@ public class InstanceServiceImpl implements InstanceService {
 
                 mkdir(karafBase, "bin", printOutput);
                 mkdir(karafBase, "etc", printOutput);
+                mkdir(karafBase, "etc/scripts", printOutput);
                 mkdir(karafBase, "system", printOutput);
                 mkdir(karafBase, "deploy", printOutput);
                 mkdir(karafBase, "data", printOutput);
@@ -334,18 +335,13 @@ public class InstanceServiceImpl implements InstanceService {
                     "etc/distribution.info",
                     "etc/equinox-debug.properties",
                     "etc/java.util.logging.properties",
-                    "etc/jmx.acl.cfg",
                     "etc/jre.properties",
                     "etc/keys.properties",
-                    "etc/org.apache.felix.fileinstall-deploy.cfg",
-                    "etc/org.apache.karaf.features.repos.cfg",
-                    "etc/org.apache.karaf.jaas.cfg",
-                    "etc/org.apache.karaf.kar.cfg",
-                    "etc/org.apache.karaf.log.cfg",
                     "etc/org.ops4j.pax.logging.cfg",
                     "etc/org.ops4j.pax.url.mvn.cfg",
                     "etc/shell.init.script",
                     "etc/users.properties",
+                    "etc/scripts/shell.completion.script",
                     FEATURES_CFG
                 };
                 copyResourcesToDir(resources, karafBase, textResources, printOutput);
@@ -1174,7 +1170,7 @@ public class InstanceServiceImpl implements InstanceService {
     
     private void copyFilteredResourceToDir(String resource, File target, Map<String, URL> resources, Map<String, String> props, boolean printOutput) throws IOException {
         File outFile = new File(target, resource);
-        if( !outFile.exists() ) {
+        if (!outFile.exists()) {
             logDebug("Creating file: %s", printOutput, outFile.getPath());
             try (
                 InputStream is = getResourceStream(resource, resources);
