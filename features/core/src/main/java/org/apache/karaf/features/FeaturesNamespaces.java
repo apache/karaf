@@ -34,6 +34,11 @@ public interface FeaturesNamespaces {
 
     String URI_CURRENT = URI_1_5_0;
 
+    String[] SUPPORTED_URIS = {
+            URI_1_0_0, URI_1_1_0, URI_1_2_0, URI_1_2_1,
+            URI_1_3_0, URI_1_4_0, URI_1_5_0
+    };
+
     QName FEATURES_0_0_0 = new QName("features");
     QName FEATURES_1_0_0 = new QName(URI_1_0_0, "features");
     QName FEATURES_1_1_0 = new QName(URI_1_1_0, "features");

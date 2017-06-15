@@ -101,24 +101,14 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
 
     private boolean isKnownFeaturesURI(String uri){
     	if(uri == null){
-    		return true;
+    		return false;
     	}
-    	if(FeaturesNamespaces.URI_0_0_0.equalsIgnoreCase(uri)){
-    		return true;
-    	}
-    	if(FeaturesNamespaces.URI_1_0_0.equalsIgnoreCase(uri)){
-    		return true;
-    	}
-    	if(FeaturesNamespaces.URI_1_1_0.equalsIgnoreCase(uri)){
-    		return true;
-    	}
-        if(FeaturesNamespaces.URI_1_2_0.equalsIgnoreCase(uri)){
-            return true;
+    	for (String ns : FeaturesNamespaces.SUPPORTED_URIS) {
+            if (ns.equalsIgnoreCase(uri)){
+                return true;
+            }
         }
-        if(FeaturesNamespaces.URI_1_3_0.equalsIgnoreCase(uri)){
-            return true;
-        }
-        return FeaturesNamespaces.URI_CURRENT.equalsIgnoreCase(uri);
+        return false;
     }
 
     private void loadProperties() throws IOException {
