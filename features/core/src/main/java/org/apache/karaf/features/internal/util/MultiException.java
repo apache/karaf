@@ -61,4 +61,15 @@ public class MultiException extends Exception {
             throw new MultiException(sb.toString(), exceptions);
         }
     }
+
+    @Override
+    public String getMessage() {
+        StringBuilder sb = new StringBuilder(super.getMessage());
+        sb.append(":");
+        for (Throwable e : getSuppressed()) {
+            sb.append("\n\t");
+            sb.append(e.getMessage());
+        }
+        return sb.toString();
+    }
 }
