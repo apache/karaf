@@ -91,7 +91,11 @@ checkRootInstance() {
       if [ "${ROOT_INSTANCE_PID}" -ne "0" ]; then
           if ps p "${ROOT_INSTANCE_PID}" > /dev/null
           then
-              ROOT_INSTANCE_RUNNING=true
+              MAIN=org.apache.karaf.main.Main
+              PID_COMMAND=$(ps p "${ROOT_INSTANCE_PID}" o args | sed 1d)
+              if [ "${PID_COMMAND#*$MAIN}" != "$PID_COMMAND" ]; then
+                ROOT_INSTANCE_RUNNING=true
+              fi
           fi
       fi
    fi
