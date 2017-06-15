@@ -26,6 +26,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.karaf.features.BootFinished;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.main.Main;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
@@ -37,11 +38,15 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import java.io.*;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -68,6 +73,19 @@ public class RunMojo extends MojoSupport {
      */
     @Parameter(defaultValue = "true")
     private boolean deployProjectArtifact = true;
+
+    /**
+     * A list of URLs referencing feature repositories that will be added
+     * to the karaf instance started by this goal.
+     */
+    @Parameter
+    private String[] featureRepositories = null;
+
+    /**
+     * Comma-separated list of features to install.
+     */
+    @Parameter(defaultValue = "")
+    private String featuresToInstall = null;
 
     /**
      * Define if the Karaf container keep running or stop just after the goal execution
@@ -120,7 +138,11 @@ public class RunMojo extends MojoSupport {
                     bootFinished = bundleContext.getService(ref);
                 }
             }
-            deploy(bundleContext);
+
+            Object featureService = findFeatureService(bundleContext);
+            addFeatureRepositories(featureService);
+            deploy(bundleContext, featureService);
+            addFeatures(featureService);
             if (keepRunning)
                 main.awaitShutdown();
             main.destroy();
@@ -131,10 +153,28 @@ public class RunMojo extends MojoSupport {
         }
     }
 
-    private void deploy(BundleContext bundleContext) throws MojoExecutionException {
+    void addFeatureRepositories(Object featureService) throws MojoExecutionException {
+    	if (featureRepositories != null) {
+            try {
+            	Class<? extends Object> serviceClass = featureService.getClass();
+                Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
+
+                for (String featureRepo : featureRepositories) {
+                    addRepositoryMethod.invoke(featureService, URI.create(featureRepo));
+                }
+            } catch (Exception e) {
+                throw new MojoExecutionException("Failed to add feature repositories to karaf", e);
+            }
+    	}
+    }
+
+    void deploy(BundleContext bundleContext, Object featureService) throws MojoExecutionException {
         if (deployProjectArtifact) {
             File artifact = project.getArtifact().getFile();
-            if (artifact != null && artifact.exists()) {
+            File attachedFeatureFile = getAttachedFeatureFile(project);
+            boolean artifactExists = artifact != null && artifact.exists();
+            boolean attachedFeatureFileExists = attachedFeatureFile != null && attachedFeatureFile.exists();
+            if (artifactExists) {
                 if (project.getPackaging().equals("bundle")) {
                     try {
                         Bundle bundle = bundleContext.installBundle(artifact.toURI().toURL().toString());
@@ -145,10 +185,28 @@ public class RunMojo extends MojoSupport {
                 } else {
                     throw new MojoExecutionException("Packaging " + project.getPackaging() + " is not supported");
                 }
+            } else if (attachedFeatureFileExists) {
+                addFeaturesAttachmentAsFeatureRepository(featureService, attachedFeatureFile);
             } else {
                 throw new MojoExecutionException("Project artifact doesn't exist");
             }
         }
+    }
+
+    void addFeatures(Object featureService) throws MojoExecutionException {
+    	if (featuresToInstall != null) {
+            try {
+            	Class<? extends Object> serviceClass = featureService.getClass();
+                Method installFeatureMethod = serviceClass.getMethod("installFeature", String.class);
+                String[] features = featuresToInstall.split(" *, *");
+                for (String feature : features) {
+                    installFeatureMethod.invoke(featureService, feature);
+                    Thread.sleep(1000L);
+                }
+            } catch (Exception e) {
+                throw new MojoExecutionException("Failed to add features to karaf", e);
+            }
+    	}
     }
 
     public static void extract(File sourceFile, File targetFolder) throws IOException {
@@ -162,16 +220,14 @@ public class RunMojo extends MojoSupport {
         return;
     }
 
-    private static void extractTarGzDistribution(File sourceDistribution, File _targetFolder)
-            throws IOException {
+    private static void extractTarGzDistribution(File sourceDistribution, File _targetFolder) throws IOException {
         File uncompressedFile = File.createTempFile("uncompressedTarGz-", ".tar");
         extractGzArchive(new FileInputStream(sourceDistribution), uncompressedFile);
         extract(new TarArchiveInputStream(new FileInputStream(uncompressedFile)), _targetFolder);
         FileUtils.forceDelete(uncompressedFile);
     }
 
-    private static void extractZipDistribution(File sourceDistribution, File _targetFolder)
-            throws IOException {
+    private static void extractZipDistribution(File sourceDistribution, File _targetFolder) throws IOException {
         extract(new ZipArchiveInputStream(new FileInputStream(sourceDistribution)), _targetFolder);
     }
 
@@ -295,6 +351,43 @@ public class RunMojo extends MojoSupport {
 
     private static boolean present(String part) {
         return part != null && !part.isEmpty();
+    }
+
+    private File getAttachedFeatureFile(MavenProject project) {
+        List<Artifact> attachedArtifacts = project.getAttachedArtifacts();
+        for (Artifact artifact : attachedArtifacts) {
+            if ("features".equals(artifact.getClassifier()) && "xml".equals(artifact.getType())) {
+                return artifact.getFile();
+            }
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" }) Object findFeatureService(BundleContext bundleContext) {
+        // Use Object as the service type and use reflection when calling the service,
+    	// because the returned services use the OSGi classloader
+    	ServiceReference ref = bundleContext.getServiceReference(FeaturesService.class);
+        if (ref != null) {
+            Object featureService = bundleContext.getService(ref);
+            return featureService;
+        }
+
+        return null;
+    }
+
+    private void addFeaturesAttachmentAsFeatureRepository(Object featureService, File attachedFeatureFile) throws MojoExecutionException {
+        if (featureService != null) {
+            try {
+            	Class<? extends Object> serviceClass = featureService.getClass();
+            	Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
+                addRepositoryMethod.invoke(featureService, attachedFeatureFile.toURI());
+            } catch (Exception e) {
+                throw new MojoExecutionException("Failed to register attachment as feature repository", e);
+            }
+        } else {
+            throw new MojoExecutionException("Failed to find the FeatureService when adding a feature repository");
+        }
     }
 
 }
