@@ -225,8 +225,8 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
     if "%ROOT_INSTANCE_PID%" == "~13" SET CHECK_RUNNING_CONDITION=false
     if "%ROOT_INSTANCE_PID%" == "0" SET CHECK_RUNNING_CONDITION=false
     if "%CHECK_RUNNING_CONDITION%" == "true" (
-        tasklist /fi "PID eq %ROOT_INSTANCE_PID%" | find ":" > NUL
-        if errorlevel 1 set ROOT_INSTANCE_RUNNING=true
+        tasklist /FI "PID eq %ROOT_INSTANCE_PID%" 2>NUL | find /I /N "java.exe" > NUL
+        if not errorlevel 1 set ROOT_INSTANCE_RUNNING=true
     )
 
 
