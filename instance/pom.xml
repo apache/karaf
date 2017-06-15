@@ -126,7 +126,9 @@
                                 <resource>
                                     <directory>${project.basedir}/../assemblies/features/base/src/main/resources</directory>
                                     <excludes>
-                                        <exclude>**/system.properties</exclude>
+                                        <exclude>**/etc/system.properties</exclude>
+                                        <exclude>**/etc/org.apache.karaf.shell.cfg</exclude>
+                                        <exclude>**/etc/org.apache.karaf.management.cfg</exclude>
                                     </excludes>
                                 </resource>
                                 <resource>
@@ -143,25 +145,6 @@
                                 </resource>
                             </resources>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <useDefaultDelimiters>false</useDefaultDelimiters>
-                    <delimiters>
-                        <delimiter>@@</delimiter>
-                    </delimiters>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>filter</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>resources</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
