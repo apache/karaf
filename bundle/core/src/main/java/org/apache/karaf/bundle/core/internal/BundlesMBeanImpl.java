@@ -143,10 +143,18 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void update(String bundleId) throws MBeanException {
-        update(bundleId, null);
+        update(bundleId, null, false);
+    }
+
+    public void update(String bundleId, boolean refresh) throws MBeanException {
+        update(bundleId, null, refresh);
     }
 
     public void update(String bundleId, String location) throws MBeanException {
+        update(bundleId, location, false);
+    }
+
+    public void update(String bundleId, String location, boolean refresh) throws MBeanException {
         try {
             List<Bundle> bundles = selectBundles(bundleId);
 
@@ -163,6 +171,11 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
             InputStream is = new URL(location).openStream();
             bundles.get(0).update(is);
+
+            if (refresh) {
+                FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
+                wiring.refreshBundles(null);
+            }
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
