@@ -25,11 +25,13 @@ import java.net.URL;
 
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.util.bundles.BundleUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 @Command(scope = "bundle", name = "update", description = "Update bundle.")
 @Service
@@ -37,6 +39,9 @@ public class Update extends BundleCommand {
 
     @Argument(index = 1, name = "location", description = "The bundles update location", required = false, multiValued = false)
     URI location;
+
+    @Option(name = "-r", aliases = { "--refresh" }, description = "Perform a refresh after the bundle update", required = false, multiValued = false)
+    boolean refresh;
 
     protected Object doExecute(Bundle bundle) throws Exception {
         if (location != null) {
@@ -48,6 +53,10 @@ public class Update extends BundleCommand {
             } else {
                 bundle.update();
             }
+        }
+        if (refresh) {
+            FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
+            wiring.refreshBundles(null);
         }
         return null;
     }
