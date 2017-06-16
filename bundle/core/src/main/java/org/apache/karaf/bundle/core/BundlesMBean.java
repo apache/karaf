@@ -33,7 +33,9 @@ public interface BundlesMBean {
     void refresh(String bundleId) throws MBeanException;
 
     void update(String bundleId) throws MBeanException;
+    void update(String bundleId, boolean refresh) throws MBeanException;
     void update(String bundleId, String location) throws MBeanException;
+    void update(String bundleId, String location, boolean refresh) throws MBeanException;
 
     void resolve() throws MBeanException;
     void resolve(String bundleId) throws MBeanException;

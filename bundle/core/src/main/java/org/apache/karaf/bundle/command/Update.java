@@ -31,6 +31,7 @@ import org.apache.karaf.util.bundles.BundleUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 @Command(scope = "bundle", name = "update", description = "Update bundle.")
 @Service
@@ -42,6 +43,9 @@ public class Update extends BundleCommand {
     @Option(name = "--raw", description = "Do not update the bundles's Bundle-UpdateLocation manifest header")
     boolean raw;
 
+    @Option(name = "-r", aliases = { "--refresh" }, description = "Perform a refresh after the bundle update", required = false, multiValued = false)
+    boolean refresh;
+
     protected Object doExecute(Bundle bundle) throws Exception {
         if (location != null) {
             update(bundle, location.toURL());
@@ -52,6 +56,10 @@ public class Update extends BundleCommand {
             } else {
                 bundle.update();
             }
+        }
+        if (refresh) {
+            FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
+            wiring.refreshBundles(null);
         }
         return null;
     }
