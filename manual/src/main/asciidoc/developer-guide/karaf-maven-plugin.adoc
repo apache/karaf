@@ -479,6 +479,14 @@ The example below create archives for the given Karaf instance:
 |`targetFile`
 |`File`
 |The target file to set as the project's artifact. Default value: ${project.file}
+
+|`archiveZip`
+|`Boolean`
+|Switches creation of *.zip artifact on or off. Default value: true
+
+|`archiveTarGz`
+|`Boolean`
+|Switches creation of *.tar.gz artifact on or off. Default value: true
 |===
 
 ===== `karaf:assembly`
