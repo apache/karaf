@@ -28,7 +28,7 @@ import org.apache.maven.settings.Proxy;
 
 @Command(scope = "maven", name = "summary", description = "Maven configuration summary.")
 @Service
-public class SummaryCommand extends MavenConfigurationSupport {
+public class SummaryCommand extends MavenSecuritySupport {
 
     @Option(name = "-p", aliases = { "--property-ids" }, description = "Use PID property identifiers instead of their names", required = false, multiValued = false)
     boolean propertyIds;

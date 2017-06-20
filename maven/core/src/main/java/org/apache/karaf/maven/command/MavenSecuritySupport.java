@@ -16,20 +16,16 @@
  */
 package org.apache.karaf.maven.command;
 
-import java.util.Dictionary;
-
-import org.apache.karaf.maven.core.MavenRepositoryURL;
 import org.apache.karaf.shell.api.action.Option;
 
-public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport {
+public abstract class MavenSecuritySupport extends MavenConfigurationSupport {
+
+    @Option(name = "-x", aliases = { "--show-passwords" }, description = "Do not hide passwords related to Maven encryption", required = false, multiValued = false)
+    boolean showPasswords;
 
     @Override
-    public void doAction(String prefix, Dictionary<String, Object> config) throws Exception {
-        edit();
-
-        session.execute("maven:repository-list");
+    protected boolean showPasswords() {
+        return showPasswords;
     }
-
-    protected abstract void edit();
 
 }

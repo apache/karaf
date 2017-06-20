@@ -28,7 +28,7 @@ import org.apache.maven.settings.Server;
 
 @Command(scope = "maven", name = "repository-list", description = "Maven repository summary.")
 @Service
-public class RepositoryListCommand extends MavenConfigurationSupport {
+public class RepositoryListCommand extends MavenSecuritySupport {
 
     @Option(name = "-v", aliases = { "--verbose" }, description = "Show additional information (policies, source)", required = false, multiValued = false)
     boolean verbose;

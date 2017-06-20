@@ -27,7 +27,7 @@ import org.apache.maven.settings.Proxy;
 
 @Command(scope = "maven", name = "http-proxy", description = "Manage HTTP proxy configuration for Maven remote repositories")
 @Service
-public class HttpProxyCommand extends MavenConfigurationSupport {
+public class HttpProxyCommand extends MavenSecuritySupport {
 
     @Option(name = "--add", description = "Adds HTTP proxy configuration to Maven settings", required = false, multiValued = false)
     boolean add;

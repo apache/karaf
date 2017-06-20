@@ -53,9 +53,11 @@ public class SettingsTest {
         // non-master password ('mvn -ep admin')
         DefaultPlexusCipher plexusCipher = new DefaultPlexusCipher();
         System.out.println(plexusCipher.decrypt("{EhjazkVpkMoHjAgaUKX+UxeXn9lsJGHst2uFKmhNZ8U=}", "admin"));
+        System.out.println(plexusCipher.decrypt("{oWE12FbirwYHNit93TAMA+OC/GJge2r9FuzI8kOuHlA=}", "settings.security"));
 
         // master password (`mvn -emp admin`)
         PBECipher cipher = new PBECipher();
+        System.out.println(cipher.decrypt64("EhjazkVpkMoHjAgaUKX+UxeXn9lsJGHst2uFKmhNZ8U=","admin"));
         System.out.println(cipher.decrypt64("oWE12FbirwYHNit93TAMA+OC/GJge2r9FuzI8kOuHlA=","settings.security"));
     }
 

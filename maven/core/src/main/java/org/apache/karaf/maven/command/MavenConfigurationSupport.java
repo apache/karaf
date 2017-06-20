@@ -17,10 +17,13 @@
 package org.apache.karaf.maven.command;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -28,10 +31,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.apache.karaf.maven.core.MavenRepositoryURL;
 import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.table.Row;
@@ -71,6 +75,12 @@ public abstract class MavenConfigurationSupport implements Action {
     protected static final String PID = "org.ops4j.pax.url.mvn";
 
     protected static final String PATTERN_PID_PROPERTY = "Explicit %s PID configuration (%s)";
+
+    protected static final String PATTERN_SECURITY_SETTINGS = "maven-security-settings-%d.xml";
+    protected static final Pattern RE_SECURITY_SETTINGS = Pattern.compile("maven-security-settings-(\\d+)\\.xml");
+    protected static final String PATTERN_SETTINGS = "maven-settings-%d.xml";
+    protected static final Pattern RE_SETTINGS = Pattern.compile("maven-settings-(\\d+)\\.xml");
+    private static final int MAX_SEQUENCE_SIZE = 10;
 
     protected static final String PROPERTY_LOCAL_REPOSITORY = "localRepository";
     protected static final String PROPERTY_DEFAULT_REPOSITORIES = "defaultRepositories";
@@ -122,9 +132,6 @@ public abstract class MavenConfigurationSupport implements Action {
     @Reference
     protected Session session;
 
-    @Option(name = "-x", aliases = { "--show-passwords" }, description = "Do not hide passwords related to Maven encryption", required = false, multiValued = false)
-    boolean showPasswords;
-
     @Override
     final public Object execute() throws Exception {
         Configuration c = cm.getConfiguration(PID);
@@ -144,7 +151,7 @@ public abstract class MavenConfigurationSupport implements Action {
 
                 localRepository = localRepository((String) c.getProperties().get(PID + "." + PROPERTY_LOCAL_REPOSITORY));
 
-                if (showPasswords) {
+                if (showPasswords()) {
                     decryptSettings();
                 }
 
@@ -556,6 +563,49 @@ public abstract class MavenConfigurationSupport implements Action {
                 row.addContent(password == null ? "" : password);
             }
         }
+    }
+
+    /**
+     * Asks for confirmation (user has to press <code>y</code>) after presenting a prompt
+     * @param prompt
+     * @return
+     */
+    protected boolean confirm(String prompt) throws IOException {
+        String response = session.readLine(prompt, null);
+        return "y".equals(response);
+    }
+
+    /**
+     * Returns new {@link File} that's part of fixed-size sequence. Keeps the sequence bounded.
+     * @param dataDir
+     * @param pattern
+     * @param fileNameFormat
+     * @return
+     */
+    protected File nextSequenceFile(File dataDir, Pattern pattern, String fileNameFormat) {
+        File[] files = dataDir.listFiles((dir, name) -> pattern.matcher(name).matches());
+        File result = null;
+        if (files != null && files.length > 0) {
+            List<String> names = new ArrayList<>(Arrays.stream(files).map(File::getName)
+                    .collect(TreeSet<String>::new, TreeSet::add, TreeSet::addAll));
+
+            names.add(String.format(fileNameFormat, new Date().getTime()));
+
+            while (names.size() > MAX_SEQUENCE_SIZE) {
+                String name = names.remove(0);
+                new File(dataDir, name).delete();
+            }
+            result = new File(dataDir, names.get(names.size() - 1));
+        }
+        if (result == null) {
+            result = new File(dataDir, String.format(fileNameFormat, new Date().getTime()));
+        }
+
+        return result;
+    }
+
+    protected boolean showPasswords() {
+        return false;
     }
 
     protected static class SourceAnd<T> {
