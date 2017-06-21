@@ -17,6 +17,7 @@
 package org.apache.karaf.maven.command;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -54,6 +55,8 @@ import org.apache.maven.settings.building.SettingsProblem;
 import org.apache.maven.settings.crypto.DefaultSettingsDecrypter;
 import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecryptionResult;
+import org.apache.maven.settings.io.xpp3.SettingsXpp3Writer;
+import org.ops4j.pax.url.mvn.ServiceConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -170,8 +173,8 @@ public abstract class MavenConfigurationSupport implements Action {
     /**
      * Performs command action on <strong>existing</strong> <code>org.ops4j.pax.url.mvn</code>
      * PID configuration
-     * @param prefix
-     * @param config
+     * @param prefix prefix for properties inside <code>org.ops4j.pax.url.mvn</code> PID
+     * @param config <code>org.ops4j.pax.url.mvn</code> PID configuration taken from {@link ConfigurationAdmin}
      */
     abstract protected void doAction(String prefix, Dictionary<String, Object> config) throws Exception;
 
@@ -491,17 +494,19 @@ public abstract class MavenConfigurationSupport implements Action {
 
                             if (repo.getReleases() != null) {
                                 if (!repo.getReleases().isEnabled()) {
-                                    builder.append("@noreleases");
+                                    builder.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_DISALLOW_RELEASES);
                                 }
-                                addPolicy(builder, repo.getReleases().getUpdatePolicy(), "releasesUpdate");
+                                SourceAnd<String> up = updatePolicy(repo.getReleases().getUpdatePolicy());
+                                addPolicy(builder, "".equals(up.val()) ? "never" : up.val(), ServiceConstants.OPTION_RELEASES_UPDATE);
                                 // not used in pax-url-aether
                                 //addPolicy(builder, repo.getReleases().getChecksumPolicy(), "releasesChecksum");
                             }
                             if (repo.getSnapshots() != null) {
                                 if (repo.getSnapshots().isEnabled()) {
-                                    builder.append("@snapshots");
+                                    builder.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
                                 }
-                                addPolicy(builder, repo.getSnapshots().getUpdatePolicy(), "snapshotsUpdate");
+                                SourceAnd<String> up = updatePolicy(repo.getSnapshots().getUpdatePolicy());
+                                addPolicy(builder, "".equals(up.val()) ? "never" : up.val(), ServiceConstants.OPTION_SNAPSHOTS_UPDATE);
                                 // not used in pax-url-aether
                                 //addPolicy(builder, repo.getSnapshots().getChecksumPolicy(), "snapshotsChecksum");
                             }
@@ -679,6 +684,27 @@ public abstract class MavenConfigurationSupport implements Action {
         }
 
         return result;
+    }
+
+    /**
+     * Stores changed {@link org.apache.maven.settings.Settings} in new settings.xml file and updates
+     * <code>org.ops4j.pax.url.mvn.settings</code> property. Does <string>not</string> update
+     * {@link org.osgi.service.cm.ConfigurationAdmin} config.
+     * @param prefix
+     * @param config
+     */
+    protected void updateSettings(String prefix, Dictionary<String, Object> config) throws IOException {
+        File dataDir = context.getDataFile(".");
+        if (!dataDir.isDirectory()) {
+            throw new RuntimeException("Can't access data directory for " + context.getBundle().getSymbolicName() + " bundle");
+        }
+        File newSettingsFile = nextSequenceFile(dataDir, RE_SETTINGS, PATTERN_SETTINGS);
+        config.put(prefix + PROPERTY_SETTINGS_FILE, newSettingsFile.getCanonicalPath());
+
+        try (FileWriter fw = new FileWriter(newSettingsFile)) {
+            new SettingsXpp3Writer().write(fw, mavenSettings);
+        }
+        System.out.println("New settings stored in \"" + newSettingsFile.getCanonicalPath() + "\"");
     }
 
     /**

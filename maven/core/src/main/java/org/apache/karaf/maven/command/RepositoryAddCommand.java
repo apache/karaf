@@ -16,26 +16,17 @@
  */
 package org.apache.karaf.maven.command;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.karaf.maven.core.MavenRepositoryURL;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.maven.settings.Server;
-import org.apache.maven.settings.io.xpp3.SettingsXpp3Writer;
 import org.ops4j.pax.url.mvn.ServiceConstants;
 import org.osgi.service.cm.Configuration;
 
@@ -58,36 +49,27 @@ public class RepositoryAddCommand extends RepositoryEditCommandSupport {
     @Option(name = "-cp", aliases = { "--checksum-policy" }, description = "Checksum policy for repository (ignore, warn (default), fail)", required = false, multiValued = false)
     String checksumPolicy = "warn";
 
-    @Argument(description = "Repository URI. It may be file:// based, http(s):// based, may use other known protocol or even property placeholders (like ${karaf.base})")
-    String uri;
-
     @Option(name = "-u", aliases = { "--username" }, description = "Username for remote repository", required = false, multiValued = false)
     String username;
 
     @Option(name = "-p", aliases = { "--password" }, description = "Password for remote repository (may be encrypted, see \"maven:password -ep\")", required = false, multiValued = false)
     String password;
 
+    @Argument(description = "Repository URI. It may be file:// based, http(s):// based, may use other known protocol or even property placeholders (like ${karaf.base})")
+    String uri;
+
     @Override
-    protected void edit(String prefix, Dictionary<String, Object> config) throws Exception {
-        MavenRepositoryURL[] repositories = repositories(config, !defaultRepository);
+    protected void edit(String prefix, Dictionary<String, Object> config,
+                        MavenRepositoryURL[] allRepos, MavenRepositoryURL[] pidRepos, MavenRepositoryURL[] settingsRepos) throws Exception {
 
-        MavenRepositoryURL[] repositoriesFromPidProperty = Arrays.stream(repositories)
-                .filter((repo) -> repo.getFrom() == MavenRepositoryURL.FROM.PID)
-                .toArray(MavenRepositoryURL[]::new);
-
-        if (idx > repositoriesFromPidProperty.length) {
+        if (idx > pidRepos.length) {
             // TOCONSIDER: should we allow to add repository to settings.xml too?
             System.err.printf("List of %s repositories has %d elements. Can't insert at position %s.\n",
-                    (defaultRepository ? "default" : "remote"), repositories.length, id);
+                    (defaultRepository ? "default" : "remote"), pidRepos.length, id);
             return;
         }
 
-        if (id == null || "".equals(id.trim())) {
-            System.err.println("Please specify ID of repository");
-            return;
-        }
-
-        Optional<MavenRepositoryURL> first = Arrays.stream(repositories)
+        Optional<MavenRepositoryURL> first = Arrays.stream(allRepos)
                 .filter((repo) -> id.equals(repo.getId())).findAny();
         if (first.isPresent()) {
             System.err.printf("Repository with ID \"%s\" is already configured for URL %s\n", id, first.get().getURL());
@@ -106,34 +88,8 @@ public class RepositoryAddCommand extends RepositoryEditCommandSupport {
             return;
         }
 
-        if (uri == null || "".equals(uri.trim())) {
-            System.err.println("Please specify repository location");
-            return;
-        }
-        String urlResolved = InterpolationHelper.substVars(uri, "uri", null, null, context);
-        URL url = null;
-        try {
-            url = new URL(urlResolved);
-            urlResolved = url.toString();
-
-            if ("file".equals(url.getProtocol()) && new File(url.toURI()).isDirectory()) {
-                System.err.println("Location \"" + urlResolved + "\" is not accessible");
-                return;
-            }
-        } catch (MalformedURLException e) {
-            // a directory?
-            File location = new File(urlResolved);
-            if (!location.exists() || !location.isDirectory()) {
-                System.err.println("Location \"" + urlResolved + "\" is not accessible");
-                return;
-            } else {
-                url = location.toURI().toURL();
-                urlResolved = url.toString();
-            }
-        }
-
-        if (defaultRepository && !"file".equals(url.getProtocol())) {
-            System.err.println("Default repositories should be locally accessible (use file:// protocol or normal directory path)");
+        SourceAnd<String> urlResolved = validateRepositoryURL(uri, defaultRepository);
+        if (!urlResolved.valid) {
             return;
         }
 
@@ -152,43 +108,15 @@ public class RepositoryAddCommand extends RepositoryEditCommandSupport {
         }
 
         // credentials for remote repository can be stored only in settings.xml
-
         if (!defaultRepository && hasCredentials) {
-            if (!confirm("Maven settings will be updated and org.ops4j.pax.url.mvn.settings property will change. Continue? (y/N) ")) {
+            if (!updateCredentials(force, id, username, password, prefix, config)) {
                 return;
             }
-
-            File dataDir = context.getDataFile(".");
-            if (!dataDir.isDirectory()) {
-                System.err.println("Can't access data directory for " + context.getBundle().getSymbolicName() + " bundle");
-                return;
-            }
-
-            Optional<Server> existingServer = mavenSettings.getServers().stream()
-                    .filter((s) -> id.equals(s.getId())).findAny();
-            Server server = null;
-            if (existingServer.isPresent()) {
-                server = existingServer.get();
-            } else {
-                server = new Server();
-                server.setId(id);
-                mavenSettings.getServers().add(server);
-            }
-            server.setUsername(username);
-            server.setPassword(password);
-
-            // prepare configadmin configuration update
-            File newSettingsFile = nextSequenceFile(dataDir, RE_SETTINGS, PATTERN_SETTINGS);
-            config.put(prefix + PROPERTY_SETTINGS_FILE, newSettingsFile.getCanonicalPath());
-
-            try (FileWriter fw = new FileWriter(newSettingsFile)) {
-                new SettingsXpp3Writer().write(fw, mavenSettings);
-            }
-            System.out.println("New settings stored in \"" + newSettingsFile.getCanonicalPath() + "\"");
+            updateSettings(prefix, config);
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(urlResolved);
+        sb.append(urlResolved.val());
         sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ID + "=" + id);
         if (snapshots) {
             sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
@@ -200,21 +128,14 @@ public class RepositoryAddCommand extends RepositoryEditCommandSupport {
         sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_CHECKSUM + "=" + checksumPolicy);
 
         MavenRepositoryURL newRepository = new MavenRepositoryURL(sb.toString());
-        List<MavenRepositoryURL> newRepos = new LinkedList<>(Arrays.asList(repositoriesFromPidProperty));
+        List<MavenRepositoryURL> newRepos = new LinkedList<>(Arrays.asList(pidRepos));
         if (idx >= 0) {
             newRepos.add(idx, newRepository);
         } else {
             newRepos.add(newRepository);
         }
 
-        String newList = newRepos.stream().map(MavenRepositoryURL::asRepositorySpec)
-                .collect(Collectors.joining(","));
-
-        if (defaultRepository) {
-            config.put(prefix + PROPERTY_DEFAULT_REPOSITORIES, newList);
-        } else {
-            config.put(prefix + PROPERTY_REPOSITORIES, newList);
-        }
+        updatePidRepositories(prefix, config, defaultRepository, newRepos, settingsRepos.length > 0);
 
         Configuration cmConfig = cm.getConfiguration(PID);
         cmConfig.update(config);

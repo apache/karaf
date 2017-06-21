@@ -61,7 +61,7 @@ public class MavenRepositoryURL
     /**
      * Repository URL.
      */
-    private final URL m_repositoryURL;
+    private URL m_repositoryURL;
     /**
      * Repository file (only if URL is a file URL).
      */
@@ -69,27 +69,27 @@ public class MavenRepositoryURL
     /**
      * True if the repository contains snapshots.
      */
-    private final boolean m_snapshotsEnabled;
+    private boolean m_snapshotsEnabled;
     /**
      * True if the repository contains releases.
      */
-    private final boolean m_releasesEnabled;
+    private boolean m_releasesEnabled;
     /**
      * Repository update policy
      */
-    private final String m_releasesUpdatePolicy;
+    private String m_releasesUpdatePolicy;
     /**
      * Repository update policy
      */
-    private final String m_snapshotsUpdatePolicy;
+    private String m_snapshotsUpdatePolicy;
     /**
      * Repository checksum policy
      */
-    private final String m_releasesChecksumPolicy;
+    private String m_releasesChecksumPolicy;
     /**
      * Repository checksum policy
      */
-    private final String m_snapshotsChecksumPolicy;
+    private String m_snapshotsChecksumPolicy;
 
     private final boolean m_multi;
     /**
@@ -288,6 +288,10 @@ public class MavenRepositoryURL
         return m_repositoryURL;
     }
 
+    public void setURL(URL url) {
+        this.m_repositoryURL = url;
+    }
+
     /**
      * Getter.
      *
@@ -308,6 +312,11 @@ public class MavenRepositoryURL
         return m_releasesEnabled;
     }
 
+    public void setReleasesEnabled(boolean enabled)
+    {
+        m_releasesEnabled = enabled;
+    }
+
     /**
      * Getter.
      *
@@ -316,6 +325,11 @@ public class MavenRepositoryURL
     public boolean isSnapshotsEnabled()
     {
         return m_snapshotsEnabled;
+    }
+
+    public void setSnapshotsEnabled(boolean enabled)
+    {
+        m_snapshotsEnabled = enabled;
     }
 
     public String getReleasesUpdatePolicy() {
@@ -332,6 +346,22 @@ public class MavenRepositoryURL
 
     public String getSnapshotsChecksumPolicy() {
         return m_snapshotsChecksumPolicy;
+    }
+
+    public void setReleasesUpdatePolicy(String policy) {
+        m_releasesUpdatePolicy = policy;
+    }
+
+    public void setSnapshotsUpdatePolicy(String policy) {
+        m_snapshotsUpdatePolicy = policy;
+    }
+
+    public void setReleasesChecksumPolicy(String policy) {
+        m_releasesChecksumPolicy = policy;
+    }
+
+    public void setSnapshotsChecksumPolicy(String policy) {
+        m_snapshotsChecksumPolicy = policy;
     }
 
     public FROM getFrom() {
@@ -402,7 +432,7 @@ public class MavenRepositoryURL
             }
         }
         if (m_snapshotsEnabled && m_releasesEnabled) {
-            // compact snapshots & release update & checksum policies?
+            // compact snapshots & release update & checksum policies
             if (m_releasesUpdatePolicy != null && Objects.equals(m_releasesUpdatePolicy, m_snapshotsUpdatePolicy)) {
                 sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_UPDATE + "=" + m_releasesUpdatePolicy);
             }
