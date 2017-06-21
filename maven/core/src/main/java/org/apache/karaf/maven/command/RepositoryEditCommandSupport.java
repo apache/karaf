@@ -23,13 +23,27 @@ import org.apache.karaf.shell.api.action.Option;
 
 public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport {
 
-    @Override
-    public void doAction(String prefix, Dictionary<String, Object> config) throws Exception {
-        edit();
+    @Option(name = "-id", description = "Identifier of repository", required = true, multiValued = false)
+    String id;
 
-        session.execute("maven:repository-list");
+    @Option(name = "-d", aliases = { "--default" }, description = "Edit default repository instead of remote one", required = false, multiValued = false)
+    boolean defaultRepository = false;
+
+    boolean success = false;
+
+    @Override
+    public final void doAction(String prefix, Dictionary<String, Object> config) throws Exception {
+        edit(prefix, config);
+
+        if (success) {
+            if (showPasswords) {
+                session.execute("maven:repository-list -x");
+            } else {
+                session.execute("maven:repository-list");
+            }
+        }
     }
 
-    protected abstract void edit();
+    protected abstract void edit(String prefix, Dictionary<String, Object> config) throws Exception;
 
 }

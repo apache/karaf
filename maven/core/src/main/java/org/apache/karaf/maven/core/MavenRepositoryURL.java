@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Objects;
 
 import org.ops4j.pax.url.mvn.ServiceConstants;
 import org.slf4j.Logger;
@@ -365,6 +366,52 @@ public class MavenRepositoryURL
             .append( ",releases=" ).append( m_releasesEnabled )
             .append( ",snapshots=" ).append( m_snapshotsEnabled )
             .toString();
+    }
+
+    public String asRepositorySpec() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(m_repositoryURL.toString());
+        if (m_id != null) {
+            sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ID + "=" + m_id);
+        }
+        if (!m_releasesEnabled) {
+            sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_DISALLOW_RELEASES);
+        }
+        if (m_snapshotsEnabled) {
+            sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
+        }
+        if (m_releasesEnabled) {
+            if (!m_snapshotsEnabled) {
+                if (m_releasesUpdatePolicy != null) {
+                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_RELEASES_UPDATE + "=" + m_releasesUpdatePolicy);
+                }
+                if (m_releasesChecksumPolicy != null) {
+                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_RELEASES_CHECKSUM + "=" + m_releasesChecksumPolicy);
+                }
+            }
+        }
+        if (m_snapshotsEnabled) {
+            if (!m_releasesEnabled) {
+                if (m_snapshotsUpdatePolicy != null) {
+                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_SNAPSHOTS_UPDATE + "=" + m_snapshotsUpdatePolicy);
+                }
+                if (m_snapshotsChecksumPolicy != null) {
+                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_SNAPSHOTS_CHECKSUM + "=" + m_snapshotsChecksumPolicy);
+                }
+            }
+        }
+        if (m_snapshotsEnabled && m_releasesEnabled) {
+            // compact snapshots & release update & checksum policies?
+            if (m_releasesUpdatePolicy != null && Objects.equals(m_releasesUpdatePolicy, m_snapshotsUpdatePolicy)) {
+                sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_UPDATE + "=" + m_releasesUpdatePolicy);
+            }
+            if (m_releasesChecksumPolicy != null && Objects.equals(m_releasesChecksumPolicy, m_snapshotsChecksumPolicy)) {
+                sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_CHECKSUM + "=" + m_releasesChecksumPolicy);
+            }
+        }
+
+        return sb.toString();
     }
 
     public static enum FROM {

@@ -32,6 +32,8 @@ public class SettingsTest {
         Settings settings = new Settings();
         Server s = new Server();
         s.setId("id");
+        s.setUsername("admin");
+        s.setPassword("admin");
         settings.getServers().add(s);
 
         new DefaultSettingsWriter().write(System.out, null, settings);

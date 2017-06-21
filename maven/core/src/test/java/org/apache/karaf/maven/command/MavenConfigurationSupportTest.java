@@ -22,11 +22,13 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.regex.Pattern;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import shaded.org.apache.commons.io.FileUtils;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class MavenConfigurationSupportTest {
 
@@ -42,19 +44,19 @@ public class MavenConfigurationSupportTest {
         };
 
         File newFile = support.nextSequenceFile(dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
-        assertThat(newFile.getName(), equalTo("file-0001.txt"));
+        assertTrue(Pattern.compile("^file-\\d+\\.txt$").matcher(newFile.getName()).matches());
 
         try (FileWriter fw = new FileWriter(new File(dataDir, "file-abcd.txt"))) {
             fw.write("~");
         }
         newFile = support.nextSequenceFile(dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
-        assertThat(newFile.getName(), equalTo("file-0001.txt"));
+        assertTrue(Pattern.compile("^file-\\d+\\.txt$").matcher(newFile.getName()).matches());
 
         try (FileWriter fw = new FileWriter(new File(dataDir, "file-0004.txt"))) {
             fw.write("~");
         }
         newFile = support.nextSequenceFile(dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
-        assertThat(newFile.getName(), equalTo("file-0005.txt"));
+        assertTrue(Pattern.compile("^file-\\d+\\.txt$").matcher(newFile.getName()).matches());
     }
 
 }

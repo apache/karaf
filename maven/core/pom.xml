@@ -66,6 +66,11 @@
             <artifactId>maven-embedder</artifactId>
             <version>3.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -111,6 +116,7 @@
                             *,
                         </Import-Package>
                         <Private-Package>
+                            org.apache.felix.utils.properties;-split-package:=merge-first,
                             org.apache.karaf.maven.command,
                             org.apache.karaf.maven.core,
                             org.apache.maven.settings.*;-split-package:=merge-first,

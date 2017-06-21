@@ -460,7 +460,7 @@ public abstract class MavenConfigurationSupport implements Action {
         String[] repositories = listOfValues((String) config.get(property));
 
         if (remote) {
-            if (repositories.length == 0 || repositories.length > 0 && repositories[0].charAt(0) == '+') {
+            if (repositories.length == 0 || repositories[0].charAt(0) == '+') {
                 if (repositories.length > 0) {
                     repositories[0] = repositories[0].substring(1);
                 }
@@ -604,13 +604,92 @@ public abstract class MavenConfigurationSupport implements Action {
         return result;
     }
 
+    /**
+     * This method controls whether passwords are tried to be decrypted.
+     * @return
+     */
     protected boolean showPasswords() {
         return false;
     }
 
+    /**
+     * Parses update policy value and returns {@link SourceAnd}<code>&lt;String&gt;</code> about the value
+     * @param policy
+     * @return
+     */
+    protected SourceAnd<String> updatePolicy(String policy) {
+        SourceAnd<String> result = new SourceAnd<>();
+        result.value = policy;
+
+        if (policy == null || "".equals(policy.trim())) {
+            result.value = "";
+            result.valid = false;
+            result.source = "Implicit \"never\", but doesn't override repository-specific value";
+            return result;
+        }
+
+        result.source = String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_GLOBAL_UPDATE_POLICY);
+        if ("always".equals(policy) || "never".equals(policy) || "daily".equals(policy)) {
+            // ok
+            result.valid = true;
+        } else if (policy.startsWith("interval")) {
+            int minutes = 1440;
+            try {
+                String n = policy.substring("interval".length() + 1);
+                minutes = Integer.parseInt(n);
+                result.valid = true;
+            } catch (Exception e) {
+                result.valid = false;
+                result.value = "interval:1440";
+                result.source = "Implicit \"interval:1440\" (error parsing \"" + policy + "\")";
+            }
+        } else {
+            result.valid = false;
+            result.value = "never";
+            result.source = "Implicit \"never\" (unknown value \"" + policy + "\")";
+        }
+
+        return result;
+    }
+
+    /**
+     * Parses checksum policy value and returns {@link SourceAnd}<code>&lt;String&gt;</code> about the value
+     * @param policy
+     * @return
+     */
+    protected SourceAnd<String> checksumPolicy(String policy) {
+        SourceAnd<String> result = new SourceAnd<>();
+        result.value = policy;
+
+        if (policy == null || "".equals(policy.trim())) {
+            result.valid = false;
+            result.value = "warn";
+            result.source = "Default \"warn\"";
+            return result;
+        }
+
+        result.source = String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_GLOBAL_CHECKSUM_POLICY);
+        if ("ignore".equals(policy) || "warn".equals(policy) || "fail".equals(policy)) {
+            // ok
+            result.valid = true;
+        } else {
+            result.valid = false;
+            result.value = "warn";
+            result.source = "Implicit \"warn\" (unknown value \"" + policy + "\")";
+        }
+
+        return result;
+    }
+
+    /**
+     * Handy class containing value and information about its origin. <code>valid</code> may be used to indicate
+     * if the value is correct. It may be implicit, but the interpretation of <code>valid </code> is not defined.
+     * @param <T>
+     */
     protected static class SourceAnd<T> {
         String source;
         T value;
+        boolean valid;
 
         public SourceAnd() {
         }

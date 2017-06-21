@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.maven.command;
 
+import java.util.Dictionary;
+
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
@@ -24,7 +26,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 public class RepositoryRemoveCommand extends RepositoryEditCommandSupport {
 
     @Override
-    protected void edit() {
+    protected void edit(String prefix, Dictionary<String, Object> config) throws Exception {
 
     }
 

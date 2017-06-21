@@ -61,6 +61,7 @@ public class PasswordCommand extends MavenConfigurationSupport {
             }
             String password = session.readLine("Password to encrypt: ", '*');
             System.out.println("Encrypted password: " + cipher.encryptAndDecorate(password, masterPassword));
+            System.out.println("You can use this encrypted password when defining repositories and proxies");
             return;
         }
 
@@ -79,6 +80,7 @@ public class PasswordCommand extends MavenConfigurationSupport {
                 File dataDir = context.getDataFile(".");
                 if (!dataDir.isDirectory()) {
                     System.err.println("Can't access data directory for " + context.getBundle().getSymbolicName() + " bundle");
+                    return;
                 }
                 File newSecuritySettingsFile = nextSequenceFile(dataDir, RE_SECURITY_SETTINGS, PATTERN_SECURITY_SETTINGS);
                 try (FileWriter fw = new FileWriter(newSecuritySettingsFile)) {
