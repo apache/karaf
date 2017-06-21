@@ -29,6 +29,7 @@
             <protocol>http</protocol>
             <username>username</username>
             <password>password</password>
+            <nonProxyHosts></nonProxyHosts>
         </proxy>
     </proxies>
 
