@@ -177,6 +177,11 @@
 						<artifactId>org.apache.karaf.subsystem.core</artifactId>
 						<version>${project.version}</version>
 					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.maven</groupId>
+						<artifactId>org.apache.karaf.maven.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
 					<!-- Additional Required Dependencies -->
 					<dependency>
 						<groupId>org.apache.felix</groupId>
