@@ -955,7 +955,28 @@
         </config>
         <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
     </feature>
-    
+
+    <feature name="maven" description="Commands for Maven configuration of services from pax-url-aether" version="${project.version}">
+        <feature>shell</feature>
+        <bundle start-level="30" start="true">mvn:org.apache.karaf.maven/org.apache.karaf.maven.core/${project.version}</bundle>
+        <config name="org.apache.karaf.command.acl.maven">
+            #
+            # This configuration file defines the ACLs for maven configuration commands
+            #
+            summary[/.*[-][x].*/] = admin
+            summary = viewer
+            http-proxy-list[/.*[-][x].*/] = admin
+            http-proxy-list = viewer
+            repository-list[/.*[-][x].*/] = admin
+            repository-list = viewer
+            http-proxy = admin
+            password = admin
+            repository-add = admin
+            repository-change = admin
+            repository-remove = admin
+        </config>
+    </feature>
+
     <feature name="standard" description="Wrap feature describing all features part of a standard distribution" version="${project.version}">
         <feature>wrap</feature>
         <feature>aries-blueprint</feature>
