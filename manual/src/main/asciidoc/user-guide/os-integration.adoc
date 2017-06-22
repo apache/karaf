@@ -26,7 +26,7 @@ The above methods allow you to directly integrate Apache Karaf:
 * like a native Windows Service
 * like a Unix daemon process
 
-===== Service Wrapper
+==== Service Wrapper
 
 The "Service Wrapper" correctly handles "user's log outs" under Windows, service dependencies, and the ability to run services which interact with the desktop.
 
@@ -34,7 +34,7 @@ It also includes advanced fault detection software which monitors an application
 The "Service Wrapper" is able to detect crashes, freezes, out of memory and other exception events, then automatically react by restarting Apache Karaf with a minimum of delay.
 It guarantees the maximum possible uptime of Apache Karaf.
 
-====== Supported platforms
+===== Supported platforms
 
 * Windows 8, 7, 2008 R2, 2003, Vista (32 and 64 bits architecture)
 * Linux RedHat Enterprise Linux, Debian, CentOS, Fedora, Ubuntu (32 and 64 bits architecture)
@@ -45,7 +45,7 @@ It guarantees the maximum possible uptime of Apache Karaf.
 * SGI Irix
 * MacOS X
 
-====== Installation
+===== Installation
 
 Apache Karaf Service Wrapper is an optional feature. You have to install the "Service Wrapper" installer first.
 
@@ -377,7 +377,7 @@ wrapper.ntservice.starttype=AUTO_START
 wrapper.ntservice.interactive=false
 ----
 
-===== Service Script Templates
+==== Service Script Templates
 
 By using the "Service Script Templates", you can run Apache Karaf with the help of operating system specific init scripts.
 
@@ -390,7 +390,7 @@ You can find these templates under the bin/contrib directory.
 
 {nbsp} +
 
-====== Unix
+===== Unix
 
 The karaf-service.sh utility helps you to generate ready to use scripts by automatically identify the operating system, the default init system and the template to use.
 
@@ -419,7 +419,7 @@ Command line option, Environment variable, Description
 
 {nbsp} +
 
-====== Systemd
+===== Systemd
 
 When karaf-service.sh detect Systemd, it generates three files:
 
@@ -442,7 +442,7 @@ $ systemctl enable karaf-4.service
 
 {nbsp} +
 
-====== SysV
+===== SysV
 
 When karaf-service.sh detect a SysV system, it generates two files:
 
@@ -466,7 +466,7 @@ To enable service startup upon boot, please consult your operating system init g
 
 {nbsp} +
 
-====== Solaris SMF
+===== Solaris SMF
 
 When karaf-service.sh detect a Solaris system, it generates a single file:
 
@@ -486,7 +486,7 @@ The generated SMF descriptor is defined as transient so the start method is exec
 
 {nbsp} +
 
-====== Windows
+===== Windows
 
 Installation of Apache Karaf as windows service is supported through https://github.com/kohsuke/winsw[winsw].
 
