@@ -164,20 +164,23 @@ public class Main {
             session.auth().verify();
 
             int exitStatus = 0;
-            try (Terminal terminal = TerminalBuilder.terminal()) {
-                Attributes attributes = terminal.enterRawMode();
-                try {
-                    ClientChannel channel;
-                    if (config.getCommand().length() > 0) {
-                        ChannelExec exec = session.createExecChannel(config.getCommand() + "\n");
-                        channel = exec;
-                        channel.setIn(new ByteArrayInputStream(new byte[0]));
-                        exec.setAgentForwarding(true);
-                    } else {
-                        ChannelShell shell = session.createShellChannel();
-                        channel = shell;
-                        channel.setIn(new NoCloseInputStream(terminal.input()));
-
+            try (Terminal terminal = TerminalBuilder.builder()
+                        .nativeSignals(true)
+                        .signalHandler(Terminal.SignalHandler.SIG_IGN)
+                        .build()) {
+                if (config.getCommand().length() > 0) {
+                    ChannelExec channel = session.createExecChannel(config.getCommand() + "\n");
+                    channel.setIn(new ByteArrayInputStream(new byte[0]));
+                    channel.setAgentForwarding(true);
+                    NoCloseOutputStream output = new NoCloseOutputStream(terminal.output());
+                    channel.setOut(output);
+                    channel.setErr(output);
+                    channel.open().verify();
+                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
+                } else {
+                    ChannelShell channel = session.createShellChannel();
+                    Attributes attributes = terminal.enterRawMode();
+                    try {
                         Map<PtyMode, Integer> modes = new HashMap<>();
                         // Control chars
                         modes.put(PtyMode.VINTR, attributes.getControlChar(ControlChar.VINTR));
@@ -223,30 +226,67 @@ public class Main {
                         modes.put(PtyMode.OCRNL, getFlag(attributes, OutputFlag.OCRNL));
                         modes.put(PtyMode.ONOCR, getFlag(attributes, OutputFlag.ONOCR));
                         modes.put(PtyMode.ONLRET, getFlag(attributes, OutputFlag.ONLRET));
-                        shell.setPtyModes(modes);
-                        shell.setPtyColumns(terminal.getWidth());
-                        shell.setPtyLines(terminal.getHeight());
-                        shell.setAgentForwarding(true);
+                        channel.setPtyModes(modes);
+                        channel.setPtyColumns(terminal.getWidth());
+                        channel.setPtyLines(terminal.getHeight());
+                        channel.setAgentForwarding(true);
+                        channel.setEnv("TERM", terminal.getType());
                         String ctype = System.getenv("LC_CTYPE");
                         if (ctype == null) {
                             ctype = Locale.getDefault().toString() + "."
                                     + System.getProperty("input.encoding", Charset.defaultCharset().name());
                         }
-                        shell.setEnv("LC_CTYPE", ctype);
+                        channel.setEnv("LC_CTYPE", ctype);
+                        channel.setIn(new NoCloseInputStream(terminal.input()));
+                        channel.setOut(new NoCloseOutputStream(terminal.output()));
+                        channel.setErr(new NoCloseOutputStream(terminal.output()));
+                        channel.open().verify();
+                        Terminal.SignalHandler prevWinchHandler = terminal.handle(Terminal.Signal.WINCH, signal -> {
+                            try {
+                                Size size = terminal.getSize();
+                                channel.sendWindowChange(size.getColumns(), size.getRows());
+                            } catch (IOException e) {
+                                // Ignore
+                            }
+                        });
+                        Terminal.SignalHandler prevQuitHandler = terminal.handle(Terminal.Signal.QUIT, signal -> {
+                            try {
+                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VQUIT));
+                                channel.getInvertedIn().flush();
+                            } catch (IOException e) {
+                                // Ignore
+                            }
+                        });
+                        Terminal.SignalHandler prevIntHandler = terminal.handle(Terminal.Signal.INT, signal -> {
+                            try {
+                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VINTR));
+                                channel.getInvertedIn().flush();
+                            } catch (IOException e) {
+                                // Ignore
+                            }
+                        });
+                        Terminal.SignalHandler prevStopHandler = terminal.handle(Terminal.Signal.TSTP, signal -> {
+                            try {
+                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VDSUSP));
+                                channel.getInvertedIn().flush();
+                            } catch (IOException e) {
+                                // Ignore
+                            }
+                        });
+                        try {
+                            channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
+                        } finally {
+                            terminal.handle(Terminal.Signal.WINCH, prevWinchHandler);
+                            terminal.handle(Terminal.Signal.INT, prevIntHandler);
+                            terminal.handle(Terminal.Signal.TSTP, prevStopHandler);
+                            terminal.handle(Terminal.Signal.QUIT, prevQuitHandler);
+                        }
+                        if (channel.getExitStatus() != null) {
+                            exitStatus = channel.getExitStatus();
+                        }
+                    } finally {
+                        terminal.setAttributes(attributes);
                     }
-                    NoCloseOutputStream output = new NoCloseOutputStream(terminal.output());
-                    channel.setOut(output);
-                    channel.setErr(output);
-                    channel.open().verify();
-                    if (channel instanceof PtyCapableChannelSession) {
-                        registerSignalHandler(terminal, (PtyCapableChannelSession) channel);
-                    }
-                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
-                    if (channel.getExitStatus() != null) {
-                        exitStatus = channel.getExitStatus();
-                    }
-                } finally {
-                    terminal.setAttributes(attributes);
                 }
             }
             System.exit(exitStatus);

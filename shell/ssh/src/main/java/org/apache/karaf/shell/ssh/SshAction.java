@@ -22,9 +22,11 @@ import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -189,8 +191,8 @@ public class SshAction implements Action {
                     channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                 } else if (session.getTerminal() != null) {
                     final ChannelShell channel = sshSession.createShellChannel();
-                    final org.jline.terminal.Terminal jlineTerminal = (org.jline.terminal.Terminal) session.get(".jline.terminal");
-                    Attributes attributes = jlineTerminal.enterRawMode();
+                    final org.jline.terminal.Terminal terminal = (org.jline.terminal.Terminal) session.get(".jline.terminal");
+                    Attributes attributes = terminal.enterRawMode();
                     try {
                         Map<PtyMode, Integer> modes = new HashMap<>();
                         // Control chars
@@ -242,30 +244,58 @@ public class SshAction implements Action {
                         channel.setPtyLines(getTermHeight());
                         channel.setAgentForwarding(true);
                         channel.setEnv("TERM", session.getTerminal().getType());
-                        Object ctype = session.get("LC_CTYPE");
-                        if (ctype != null) {
-                            channel.setEnv("LC_CTYPE", ctype.toString());
+                        String ctype = (String) session.get("LC_CTYPE");
+                        if (ctype == null) {
+                            ctype = Locale.getDefault().toString() + "."
+                                    + System.getProperty("input.encoding", Charset.defaultCharset().name());
                         }
-                        channel.setIn(new NoCloseInputStream(jlineTerminal.input()));
-                        channel.setOut(new NoCloseOutputStream(jlineTerminal.output()));
-                        channel.setErr(new NoCloseOutputStream(jlineTerminal.output()));
+                        channel.setEnv("LC_CTYPE", ctype);
+                        channel.setIn(new NoCloseInputStream(terminal.input()));
+                        channel.setOut(new NoCloseOutputStream(terminal.output()));
+                        channel.setErr(new NoCloseOutputStream(terminal.output()));
                         channel.open().verify();
-                        SignalListener signalListener = signal -> {
+                        org.jline.terminal.Terminal.SignalHandler prevWinchHandler = terminal.handle(org.jline.terminal.Terminal.Signal.WINCH, signal -> {
                             try {
-                                Size size = jlineTerminal.getSize();
+                                Size size = terminal.getSize();
                                 channel.sendWindowChange(size.getColumns(), size.getRows());
                             } catch (IOException e) {
                                 // Ignore
                             }
-                        };
-                        session.getTerminal().addSignalListener(signalListener, Signal.WINCH);
+                        });
+                        org.jline.terminal.Terminal.SignalHandler prevQuitHandler = terminal.handle(org.jline.terminal.Terminal.Signal.QUIT, signal -> {
+                            try {
+                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VQUIT));
+                                channel.getInvertedIn().flush();
+                            } catch (IOException e) {
+                                // Ignore
+                            }
+                        });
+                        org.jline.terminal.Terminal.SignalHandler prevIntHandler = terminal.handle(org.jline.terminal.Terminal.Signal.INT, signal -> {
+                            try {
+                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VINTR));
+                                channel.getInvertedIn().flush();
+                            } catch (IOException e) {
+                                // Ignore
+                            }
+                        });
+                        org.jline.terminal.Terminal.SignalHandler prevStopHandler = terminal.handle(org.jline.terminal.Terminal.Signal.TSTP, signal -> {
+                            try {
+                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VDSUSP));
+                                channel.getInvertedIn().flush();
+                            } catch (IOException e) {
+                                // Ignore
+                            }
+                        });
                         try {
                             channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                         } finally {
-                            session.getTerminal().removeSignalListener(signalListener);
+                            terminal.handle(org.jline.terminal.Terminal.Signal.WINCH, prevWinchHandler);
+                            terminal.handle(org.jline.terminal.Terminal.Signal.INT, prevIntHandler);
+                            terminal.handle(org.jline.terminal.Terminal.Signal.TSTP, prevStopHandler);
+                            terminal.handle(org.jline.terminal.Terminal.Signal.QUIT, prevQuitHandler);
                         }
                     } finally {
-                        jlineTerminal.setAttributes(attributes);
+                        terminal.setAttributes(attributes);
                     }
                 } else {
                     throw new IllegalStateException("No terminal for interactive ssh session");
