@@ -108,6 +108,8 @@ class StoredWiringResolver implements ResolverHook {
     }
 
     synchronized void delete(Bundle bundle) {
-        wiring.get(bundle.getBundleId()).delete(path);
+        if (wiring.get(bundle.getBundleId()) != null) {
+            wiring.get(bundle.getBundleId()).delete(path);
+        }
     }
 }
