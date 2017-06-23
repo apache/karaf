@@ -60,6 +60,7 @@ import org.apache.sshd.common.config.keys.FilePasswordProvider;
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.io.NoCloseInputStream;
+import org.apache.sshd.common.util.io.NoCloseOutputStream;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Attributes.ControlChar;
 import org.jline.terminal.Attributes.InputFlag;
@@ -233,8 +234,9 @@ public class Main {
                         }
                         shell.setEnv("LC_CTYPE", ctype);
                     }
-                    channel.setOut(terminal.output());
-                    channel.setErr(terminal.output());
+                    NoCloseOutputStream output = new NoCloseOutputStream(terminal.output());
+                    channel.setOut(output);
+                    channel.setErr(output);
                     channel.open().verify();
                     if (channel instanceof PtyCapableChannelSession) {
                         registerSignalHandler(terminal, (PtyCapableChannelSession) channel);
