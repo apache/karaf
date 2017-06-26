@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,7 +164,7 @@ public class Builder {
     String mavenRepositories;
     Map<String, String> config = new LinkedHashMap<>();
     Map<String, String> system = new LinkedHashMap<>();
-    List<String> pidsToExtract;
+    List<String> pidsToExtract = new LinkedList<>();
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
@@ -381,7 +382,11 @@ public class Builder {
     }
 
     public Builder pidsToExtract(List<String> pidsToExtract) {
-        this.pidsToExtract = pidsToExtract;
+        if (pidsToExtract != null) {
+            for (String pid : pidsToExtract) {
+                this.pidsToExtract.add(pid.trim());
+            }
+        }
         return this;
     }
 

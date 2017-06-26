@@ -22,10 +22,15 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Constants;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class BuilderTest {
 
@@ -55,6 +60,20 @@ public class BuilderTest {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @Test
+    public void testPidsToExtract() {
+        String pidsToExtract = "\n" +
+                "                        !jmx.acl.*,\n" +
+                "                        !org.apache.karaf.command.acl.*,\n" +
+                "                        *\n" +
+                "                    ";
+        List<String> p2e = Arrays.asList(pidsToExtract.split(","));
+        Builder builder = Builder.newInstance().pidsToExtract(p2e);
+        assertThat(builder.getPidsToExtract().get(0), equalTo("!jmx.acl.*"));
+        assertThat(builder.getPidsToExtract().get(1), equalTo("!org.apache.karaf.command.acl.*"));
+        assertThat(builder.getPidsToExtract().get(2), equalTo("*"));
     }
 
     @Test
