@@ -286,7 +286,9 @@ goto :EOF
 
 :CLASSPATH_END
 
-SET CHECK_ROOT_INSTANCE_RUNNING=true
+if "%CHECK_ROOT_INSTANCE_RUNNING%" == "" (
+    SET CHECK_ROOT_INSTANCE_RUNNING=true
+)
 
 rem Execute the JVM or the load the profiler
 if "%KARAF_PROFILER%" == "" goto :RUN
@@ -399,7 +401,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" ^
         %KARAF_OPTS% %MAIN% %ARGS%
     ) else (
-        echo There is a Root instance already running with name %ROOT_INSTANCE_NAME% and pid %ROOT_INSTANCE_PID%
+        echo There is a Root instance already running with name %ROOT_INSTANCE_NAME% and pid %ROOT_INSTANCE_PID%. If you know what you are doing and want to force the run anyway, SET CHECK_ROOT_INSTANCE_RUNNING=false and re run the command.
         goto :END
     )
 
