@@ -1725,6 +1725,11 @@
                 <artifactId>awaitility</artifactId>
                 <version>3.0.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.jboss.narayana.osgi</groupId>
+                <artifactId>narayana-osgi-jta</artifactId>
+                <version>${narayana.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
