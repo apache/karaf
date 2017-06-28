@@ -1730,6 +1730,11 @@
                 <artifactId>narayana-osgi-jta</artifactId>
                 <version>${narayana.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate.validator.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
