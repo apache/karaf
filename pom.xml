@@ -144,6 +144,7 @@
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
         <asm.version>5.2</asm.version>
         <asm.springsource.version>1.5.3</asm.springsource.version>
+        <awaitility.version>3.0.0</awaitility.version>
         <cglib.bundle.version>3.2.4_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
         
@@ -1723,7 +1724,7 @@
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
-                <version>3.0.0</version>
+                <version>${awaitility.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.narayana.osgi</groupId>
