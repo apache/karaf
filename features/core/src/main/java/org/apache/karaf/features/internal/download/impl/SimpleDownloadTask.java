@@ -60,7 +60,7 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
             }
 
             URL urlObj = new URL(url);
-            File file = new File(basePath, getFileName(urlObj.getFile()));
+            File file = new File(basePath, getFileName(urlObj));
             if (file.exists()) {
                 return file;
             }
@@ -92,14 +92,17 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
     }
 
     // we only want the filename itself, not the whole path
-    private String getFileName(String url) {
+    private String getFileName(URL urlObj) {
+        String url = urlObj.getFile();
         // ENTESB-1394: we do not want all these decorators from wrap: protocol
         // or any inlined maven repos
         url = DownloadManagerHelper.stripUrl(url);
         url = DownloadManagerHelper.removeInlinedMavenRepositoryUrl(url);
         int unixPos = url.lastIndexOf('/');
         int windowsPos = url.lastIndexOf('\\');
-        return url.substring(Math.max(unixPos, windowsPos) + 1);
+        url = url.substring(Math.max(unixPos, windowsPos) + 1);
+        url = Integer.toHexString(urlObj.toString().hashCode()) + "-" + url;
+        return url;
     }
 
     protected File downloadBlueprintOrSpring() throws Exception {
