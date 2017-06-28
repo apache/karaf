@@ -17,10 +17,10 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -34,7 +34,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class RepoRefreshCommand extends FeaturesCommandSupport {
     
-    @Argument(index = 0, name = "Feature name or uri", description = "Shortcut name of the feature repository or the full URI", required = false, multiValued = false)
+    @Argument(index = 0, name = "repository", description = "Shortcut name of the feature repository or the full URI", required = false, multiValued = false)
     @Completion(InstalledRepoUriCompleter.class)
     private String nameOrUrl;
     
@@ -43,22 +43,12 @@ public class RepoRefreshCommand extends FeaturesCommandSupport {
 
     @Override
     protected void doExecute(FeaturesService featuresService) throws Exception {
-        List<URI> uris = new ArrayList<>();
+        Set<URI> uris = new LinkedHashSet<>();
     	if (nameOrUrl != null) {
-    		String effectiveVersion = (version == null) ? "LATEST" : version;
-        	URI uri = featuresService.getRepositoryUriFor(nameOrUrl, effectiveVersion);
-        	if (uri == null) {
-                // add regex support on installed repositories
-                Pattern pattern = Pattern.compile(nameOrUrl);
-                for (Repository repository : featuresService.listRepositories()) {
-                    URI u = repository.getURI();
-                    Matcher matcher = pattern.matcher(u.toString());
-                    if (matcher.matches()) {
-                        uris.add(u);
-                    }
-                }
-        	} else {
-                uris.add(uri);
+    	    uris = selectRepositories(nameOrUrl, version);
+            if (uris.isEmpty()) {
+                System.err.println("No matching repository for " + nameOrUrl + (version != null ? " / " + version : ""));
+                return;
             }
     	} else {
             Repository[] repos = featuresService.listRepositories();
@@ -66,13 +56,12 @@ public class RepoRefreshCommand extends FeaturesCommandSupport {
                 uris.add(repo.getURI());
             }
     	}
-        for (URI uri : uris) {
-            try {
-                System.out.println("Refreshing feature url " + uri);
-                featuresService.refreshRepository(uri);
-            } catch (Exception e) {
-                System.err.println("Error refreshing " + uri.toString() + ": " + e.getMessage());
-            }
+        String uriString = uris.stream().map(URI::toString).collect(Collectors.joining(", "));
+        try {
+            System.out.println("Refreshing feature url: " + uriString);
+            featuresService.refreshRepositories(uris);
+        } catch (Exception e) {
+            System.err.println("Error refreshing " + uriString + ": " + e.getMessage());
         }
     }
 

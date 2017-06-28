@@ -82,7 +82,7 @@ public class FeaturesServiceImplTest extends TestBase {
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         EasyMock.replay(installSupport);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg ) {
-            protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
+            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
                 return features;
             }
         };
@@ -95,7 +95,7 @@ public class FeaturesServiceImplTest extends TestBase {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
         BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
-            protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
+            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
         };
@@ -111,7 +111,7 @@ public class FeaturesServiceImplTest extends TestBase {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
         BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
-            protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
+            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
                 return features(feature("transaction", "1.0.0"));
             }
         };
@@ -127,7 +127,7 @@ public class FeaturesServiceImplTest extends TestBase {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
         BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
-            protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
+            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
                 return features;
             }
         };
@@ -142,7 +142,7 @@ public class FeaturesServiceImplTest extends TestBase {
         EasyMock.replay(installSupport);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg);
         impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
-        impl.getFeatures();
+        impl.getFeatureCache();
     }
 
     @Test

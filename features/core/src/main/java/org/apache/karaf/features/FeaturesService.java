@@ -146,6 +146,8 @@ public interface FeaturesService {
 
     Feature[] getFeatures(String name) throws Exception;
 
+    void refreshRepositories(Set<URI> uris) throws Exception;
+
     void refreshRepository(URI uri) throws Exception;
 
     URI getRepositoryUriFor(String name, String version);

@@ -19,12 +19,14 @@ package org.apache.karaf.features.command;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.command.completers.InstalledRepoNameCompleter;
+import org.apache.karaf.features.command.completers.InstalledRepoUriCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -35,41 +37,32 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class RepoRemoveCommand extends FeaturesCommandSupport {
 
-    @Argument(index = 0, name = "repository", description = "Name or url of the repository to remove.", required = true, multiValued = false)
-    @Completion(InstalledRepoNameCompleter.class)
-    private String repository;
+	@Argument(index = 0, name = "repository", description = "Shortcut name of the feature repository or the full URI", required = true, multiValued = false)
+	@Completion(InstalledRepoUriCompleter.class)
+	private String nameOrUrl;
+
+	@Argument(index = 1, name = "Feature version", description = "The version of the feature if using the feature name. Should be empty if using the uri", required = false, multiValued = false)
+	private String version;
 
     @Option(name = "-u", aliases = { "--uninstall-all" }, description = "Uninstall all features from the repository", required = false, multiValued = false)
     private boolean uninstall;
 
     protected void doExecute(FeaturesService featuresService) throws Exception {
-		List<URI> uris = new ArrayList<>();
-		Pattern pattern = Pattern.compile(repository);
-		for (Repository r : featuresService.listRepositories()) {
-			if (r.getName() != null && !r.getName().isEmpty()) {
-				// repository has a name, try regex on the name
-				Matcher nameMatcher = pattern.matcher(r.getName());
-				if (nameMatcher.matches()) {
-					uris.add(r.getURI());
-				} else {
-					// the name regex doesn't match, fallback to repository URI regex
-					Matcher uriMatcher = pattern.matcher(r.getURI().toString());
-					if (uriMatcher.matches()) {
-						uris.add(r.getURI());
-					}
-				}
-			} else {
-				// the repository name is not defined, use repository URI regex
-				Matcher uriMatcher = pattern.matcher(r.getURI().toString());
-				if (uriMatcher.matches()) {
-					uris.add(r.getURI());
-				}
+    	URI uri;
+		{
+			Set<URI> uris = selectRepositories(nameOrUrl, version);
+			if (uris.isEmpty()) {
+				System.err.println("No matching repository for " + nameOrUrl + (version != null ? " / " + version : ""));
+				return;
 			}
+			if (uris.size() > 1) {
+				System.err.println("Multiple matching repositories for " + nameOrUrl + (version != null ? " / " + version : ""));
+				return;
+			}
+			uri = uris.iterator().next();
 		}
 
-		for (URI uri : uris) {
-			System.out.println("Removing features repository " + uri);
-			featuresService.removeRepository(uri, uninstall);
-		}
+		System.out.println("Removing features repository: " + uri);
+		featuresService.removeRepository(uri, uninstall);
     }
 }

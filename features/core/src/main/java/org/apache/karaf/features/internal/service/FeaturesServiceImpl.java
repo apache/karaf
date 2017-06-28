@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -347,7 +348,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void addRepository(URI uri, boolean install) throws Exception {
-        Repository repository = repositories.loadAndValidate(uri);
+        Repository repository = repositories.create(uri, true, true);
         synchronized (lock) {
             repositories.addRepository(repository);
             featureCache = null;
@@ -375,18 +376,27 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void removeRepository(URI uri, boolean uninstall) throws Exception {
+        // This will also ensure the cache is loaded
         Repository repo = getRepository(uri);
         if (repo == null) {
             return;
         }
 
-        Set<Repository> repos = getReposToRemove(repo);
-
-        Set<String> features = new HashSet<>();
-        for (Repository tranRepo : repos) {
-            features.addAll(getRequiredFeatureIds(tranRepo));
+        Set<Repository> repos;
+        Set<String> features;
+        synchronized (lock) {
+            repos = repositories.getRepositoryClosure(repo);
+            List<Repository> required = new ArrayList<>(Arrays.asList(repositories.listMatchingRepositories(state.repositories)));
+            required.remove(repo);
+            for (Repository rep : required) {
+                repos.removeAll(repositories.getRepositoryClosure(rep));
+            }
+            features = new HashSet<>();
+            for (Repository tranRepo : repos) {
+                features.addAll(getRequiredFeatureIds(tranRepo));
+            }
         }
-        
+
         if (!features.isEmpty()) {
             if (uninstall) {
                 uninstallFeatures(features, EnumSet.noneOf(Option.class));
@@ -408,25 +418,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
     }
 
-    private Set<Repository> getReposToRemove(Repository repo) throws Exception {
-        Set<Repository> repos = repositories.tranGetRepositories(repo);
-        synchronized (lock) {
-            repos.removeAll(getRequiredRepos());
-        }
-        repos.add(repo);
-        return repos;
-    }
-    
-    private Set<Repository> getRequiredRepos() throws Exception {
-        synchronized (lock) {
-            Set<Repository> repos = new HashSet<>();
-            for (String  repoURI : state.repositories) {
-                repos.add(repositories.getRepository(URI.create(repoURI)));
-            }
-            return repos;
-        }
-    }
-
     private Set<String> getRequiredFeatureIds(Repository repo) throws Exception {
         synchronized (lock) {
             return Stream.of(repo.getFeatures())
@@ -443,13 +434,22 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void refreshRepository(URI uri) throws Exception {
-        removeRepository(uri, false);
-        addRepository(uri, false);
+        refreshRepositories(Collections.singleton(uri));
+    }
+
+    @Override
+    public void refreshRepositories(Set<URI> uris) throws Exception {
+        synchronized (lock) {
+            for (URI uri : uris) {
+                repositories.removeRepository(uri);
+            }
+            featureCache = null;
+        }
     }
 
     @Override
     public Repository[] listRepositories() throws Exception {
-        makeSureFeatureCacheLoaded();
+        ensureCacheLoaded();
         synchronized (lock) {
             return repositories.listRepositories();
         }
@@ -457,31 +457,32 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Repository[] listRequiredRepositories() throws Exception {
-        makeSureFeatureCacheLoaded();
+        ensureCacheLoaded();
         synchronized (lock) {
-            return repositories.listRequiredRepositories(state.repositories);
+            return repositories.listMatchingRepositories(state.repositories);
         }
     }
 
     @Override
     public Repository getRepository(String name) throws Exception {
-        makeSureFeatureCacheLoaded();
+        ensureCacheLoaded();
         synchronized (lock) {
-            return repositories.getRepository(name);
+            return repositories.getRepositoryByName(name);
         }
     }
 
     @Override
     public Repository getRepository(URI uri) throws Exception {
-        makeSureFeatureCacheLoaded();
+        ensureCacheLoaded();
         synchronized (lock) {
-            return repositories.getRepository(uri);
+            return repositories.getRepository(uri.toString());
         }
     }
 
     @Override
     public String getRepositoryName(URI uri) throws Exception {
-        return repositories.getRepositoryName(uri);
+        Repository repo = getRepository(uri);
+        return (repo != null) ? repo.getName() : null;
     }
 
     //
@@ -520,7 +521,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     public Feature[] getFeatures(String name, String version) throws Exception {
         List<Feature> features = new ArrayList<>();
         Pattern pattern = Pattern.compile(name);
-        Map<String, Map<String, Feature>> allFeatures = getFeatures();
+        Map<String, Map<String, Feature>> allFeatures = getFeatureCache();
         for (String featureName : allFeatures.keySet()) {
             Matcher matcher = pattern.matcher(featureName);
             if (matcher.matches()) {
@@ -567,18 +568,18 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Feature[] listFeatures() throws Exception {
-        Map<String, Map<String, Feature>> allFeatures = getFeatures();
+        Map<String, Map<String, Feature>> allFeatures = getFeatureCache();
         return flattenFeatures(allFeatures);
     }
     
-    private void makeSureFeatureCacheLoaded() throws Exception {
-        getFeatures();
+    private void ensureCacheLoaded() throws Exception {
+        getFeatureCache();
     }
 
     /**
      * Should not be called while holding a lock.
      */
-    protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
+    protected Map<String, Map<String, Feature>> getFeatureCache() throws Exception {
         Set<String> uris;
         synchronized (lock) {
             if (featureCache != null) {
@@ -586,20 +587,39 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
             uris = new TreeSet<>(state.repositories);
         }
-        repositories.loadDependent(uris);
-        Map<String, Map<String, Feature>> map = createFeatureCacheInternal();
-        synchronized (lock) {
-            if (uris.equals(state.repositories)) {
-                // Only update cache if list of repositories was not changed in the mean time
-                featureCache = map;
+        //the outer map's key is feature name, the inner map's key is feature version
+        Map<String, Map<String, Feature>> map = new HashMap<>();
+        // Two phase load:
+        // * first load dependent repositories
+        Set<String> loaded = new HashSet<>();
+        List<String> toLoad = new ArrayList<>(uris);
+        while (!toLoad.isEmpty()) {
+            String uri = toLoad.remove(0);
+            Repository repo;
+            synchronized (lock) {
+                repo = repositories.getRepository(uri);
+            }
+            try {
+                if (repo == null) {
+                    repo = repositories.create(URI.create(uri), true, false);
+                    synchronized (lock) {
+                        repositories.addRepository(repo);
+                    }
+                }
+                if (loaded.add(uri)) {
+                    for (URI u : repo.getRepositories()) {
+                        toLoad.add(u.toString());
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Can't load features repository {}", uri, e);
             }
         }
-        return map;
-    }
-
-    private Map<String, Map<String, Feature>> createFeatureCacheInternal() throws Exception {
-        Map<String, Map<String, Feature>> map = new HashMap<>();
-        Repository[] repos= repositories.listRepositories();
+        List<Repository> repos;
+        synchronized (lock) {
+            repos = Arrays.asList(repositories.listRepositories());
+        }
+        // * then load all features
         for (Repository repo : repos) {
             for (Feature f : repo.getFeatures()) {
                 if (map.get(f.getName()) == null) {
@@ -611,16 +631,21 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 }
             }
         }
+        synchronized (lock) {
+            if (uris.equals(state.repositories)) {
+                featureCache = map;
+            }
+        }
         return map;
     }
 
-    //
+   //
     // Installed features
     //
 
     @Override
     public Feature[] listInstalledFeatures() throws Exception {
-        Map<String, Map<String, Feature>> allFeatures = getFeatures();
+        Map<String, Map<String, Feature>> allFeatures = getFeatureCache();
         synchronized (lock) {
             return flattenFeatures(allFeatures, this::isInstalled);
         }
@@ -628,7 +653,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Feature[] listRequiredFeatures() throws Exception {
-        Map<String, Map<String, Feature>> allFeatures = getFeatures();
+        Map<String, Map<String, Feature>> allFeatures = getFeatureCache();
         synchronized (lock) {
             return flattenFeatures(allFeatures, this::isRequired);
         }
@@ -764,7 +789,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             region = ROOT_REGION;
         }
         Set<String> fl = required.computeIfAbsent(region, k -> new HashSet<>());
-        Map<String, Map<String, Feature>> allFeatures = getFeatures();
+        Map<String, Map<String, Feature>> allFeatures = getFeatureCache();
         List<String> featuresToAdd = new ArrayList<>();
         List<String> featuresToRemove = new ArrayList<>();
         for (String feature : features) {
@@ -965,7 +990,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         dstate.bundles = info.bundles;
         // Features
         dstate.features = new HashMap<>();
-        for (Map<String, Feature> m : getFeatures().values()) {
+        for (Map<String, Feature> m : getFeatureCache().values()) {
             for (Feature feature : m.values()) {
                 String id = feature.getId();
                 dstate.features.put(id, feature);

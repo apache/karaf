@@ -17,7 +17,10 @@
 package org.apache.karaf.features.internal.service;
 
 import java.net.URI;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,11 +30,9 @@ import java.util.Set;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.karaf.features.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RepositoryCache {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryCache.class);
+
     private final Map<String, Repository> repositoryCache = new HashMap<>();
     private final Clause[] blacklisted;
     
@@ -39,27 +40,24 @@ public class RepositoryCache {
         this.blacklisted = loadBlacklist(blacklisted);
     }
     
-    private Clause[] loadBlacklist(String blacklisted) {
+    private static Clause[] loadBlacklist(String blacklisted) {
         Set<String> blacklistStrings = Blacklist.loadBlacklist(blacklisted);
         return Parser.parseClauses(blacklistStrings.toArray(new String[blacklistStrings.size()]));
     }
     
-    public Repository load(URI uri) throws Exception {
-        return new RepositoryImpl(uri, blacklisted);
-    }
-
-    public Repository loadAndValidate(URI uri) throws Exception {
+    public Repository create(URI uri, boolean load, boolean validate) throws Exception {
         RepositoryImpl repo = new RepositoryImpl(uri, blacklisted);
-        repo.load(true);
+        if (load)
+            repo.load(validate);
         return repo;
     }
 
-    public synchronized void addRepository(Repository repository) throws Exception {
+    public void addRepository(Repository repository) throws Exception {
         String repoUriSt = repository.getURI().toString();
         repositoryCache.put(repoUriSt, repository);
     }
 
-    public synchronized  void removeRepository(URI repositoryUri) throws Exception {
+    public void removeRepository(URI repositoryUri) throws Exception {
         List<String> toRemove = new ArrayList<>();
         toRemove.add(repositoryUri.toString());
         while (!toRemove.isEmpty()) {
@@ -72,21 +70,17 @@ public class RepositoryCache {
         }
     }
 
-    public  synchronized Repository[] listRepositories() {
+    public Repository[] listRepositories() {
         return repositoryCache.values().toArray(new Repository[repositoryCache.size()]);
     }
 
-    public  synchronized Repository[] listRequiredRepositories(Set<String> topLevelRepoUris) throws Exception {
-        List<Repository> repos = new ArrayList<>();
-        for (Map.Entry<String, Repository> entry : repositoryCache.entrySet()) {
-            if (topLevelRepoUris.contains(entry.getKey())) {
-                repos.add(entry.getValue());
-            }
-        }
-        return repos.toArray(new Repository[repos.size()]);
+    public Repository[] listMatchingRepositories(Set<String> uris) throws Exception {
+        return repositoryCache.values().stream()
+                .filter(r -> uris.contains(r.getURI().toString()))
+                .toArray(Repository[]::new);
     }
 
-    public synchronized Repository getRepository(String name) throws Exception {
+    public Repository getRepositoryByName(String name) throws Exception {
         for (Repository repo : this.repositoryCache.values()) {
             if (name.equals(repo.getName())) {
                 return repo;
@@ -95,60 +89,25 @@ public class RepositoryCache {
         return null;
     }
 
-    public  synchronized Repository getRepository(URI uri) throws Exception {
-        for (Repository repo : this.repositoryCache.values()) {
-            if (repo.getURI().equals(uri)) {
-                return repo;
-            }
-        }
-        return null;
+    public Repository getRepository(String uri) {
+        return repositoryCache.get(uri);
     }
 
-    public String getRepositoryName(URI uri) throws Exception {
-        Repository repo = getRepository(uri);
-        return (repo != null) ? repo.getName() : null;
-    }
-    
-    public synchronized void loadDependent(Set<String> topLevelRepoUris) {
-        Set<String> loaded = new HashSet<>();
-        List<String> toLoad = new ArrayList<>(topLevelRepoUris);
-        while (!toLoad.isEmpty()) {
-            String uri = toLoad.remove(0);
-            Repository repo = repositoryCache.get(uri);
-            try {
-                if (repo == null) {
-                    repo = load(URI.create(uri));
-                    repositoryCache.put(uri, repo);
+    /**
+     * Returns a set containing the given repository and all its dependencies recursively
+     */
+    public Set<Repository> getRepositoryClosure(Repository repo) throws Exception {
+        Set<Repository> closure = new HashSet<>();
+        Deque<Repository> remaining = new ArrayDeque<>(Collections.singleton(repo));
+        while (!remaining.isEmpty()) {
+            Repository rep = remaining.removeFirst();
+            if (closure.add(rep)) {
+                for (URI uri : rep.getRepositories()) {
+                    remaining.add(getRepository(uri.toString()));
                 }
-                if (loaded.add(uri)) {
-                    for (URI u : repo.getRepositories()) {
-                        toLoad.add(u.toString());
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Can't load features repository {}", uri, e);
             }
         }
-    }
-
-    public Set<Repository> getRepositories(Repository repo) throws Exception {
-        HashSet<Repository> repos = new HashSet<>();
-        for (URI repoURI : repo.getRepositories()) {
-            repos.add(load(repoURI));
-        }
-        return repos;
-    }
-    
-    public Set<Repository> tranGetRepositories(Repository repo) throws Exception {
-        HashSet<Repository> repos = new HashSet<>();
-        repos.add(repo);
-        Set<Repository> deps = getRepositories(repo);
-        for (Repository depRepo : deps) {
-            if (!repos.contains(depRepo)) {
-                repos.addAll(tranGetRepositories(depRepo));
-            }
-        }
-        return repos;
+        return closure;
     }
 
 }

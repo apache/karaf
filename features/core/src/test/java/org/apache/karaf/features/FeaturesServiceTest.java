@@ -116,7 +116,7 @@ public class FeaturesServiceTest extends TestBase {
         assertNotNull(repositories);
         assertEquals(1, repositories.length);
         assertNotNull(repositories[0]);
-        Feature[] features = repositories[0].getFeatures();
+        Feature[] features = repositories[0].getFeatureCache();
         assertNotNull(features);
         assertEquals(1, features.length);
         assertNotNull(features[0]);

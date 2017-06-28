@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.felix.utils.manifest.Clause;
@@ -116,27 +117,18 @@ public class RepositoryImpl implements Repository {
             return super.read(b, off, len);
         }
     }
-    
+
     @Override
-    public int hashCode() {
-        return uri.hashCode();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RepositoryImpl that = (RepositoryImpl) o;
+        return Objects.equals(uri, that.uri);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RepositoryImpl other = (RepositoryImpl)obj;
-        if (uri == null) {
-            if (other.uri != null)
-                return false;
-        } else if (!uri.equals(other.uri))
-            return false;
-        return true;
+    public int hashCode() {
+        return Objects.hash(uri);
     }
 
     @Override
