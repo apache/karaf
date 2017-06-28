@@ -40,9 +40,46 @@ The `war` feature provides:
 
 ===== Configuration
 
-The default port used by the WebContainer is 8181.
+The default port used by the WebContainer is 8181. Note: the connector is actually bound only when at least a servlet or webapplication is using it.
+It means that just installing the `http` or `war` feature doesn't bind the connector.
 
-The WebContainer configuration is in the `etc/jetty.xml` configuration file.
+By default, Karaf creates an internal Jetty connector that you can configure via `etc/org.ops4j.pax.web.cfg`:
+
+```
+org.osgi.service.http.port=8181
+```
+
+Note: if you want to use port numbers < 1024, remember you have to run with root privileges.
+
+It's possible to enable HTTPs "internal" connector. The first step is to create a keystore containing a server certificate.
+For instance the following command creates a keystore with a self-signed certificate:
+
+```
+keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore -storepass karaf1234 -validity 360 -keysize 2048
+```
+
+Now, we can enable and configure the HTTPs connector with this keystore in `etc/org.ops4j.pax.web.cfg`:
+
+```
+org.osgi.service.http.port.secure=8443
+org.osgi.service.http.secure.enabled=true
+org.ops4j.pax.web.ssl.keystore=/path/to/keystore
+org.ops4j.pax.web.ssl.password=foo
+org.ops4j.pax.web.ssl.keypassword=karaf1234
+```
+
+It's possible to use only HTTPs and to disable the HTTP using:
+
+```
+org.osgi.service.http.enabled=false
+```
+
+```
+org.osgi.service.https.enabled=true
+
+```
+
+As an alternative to the default connectors, it is possible to configure additional connectors in the `etc/jetty.xml` configuration file.
 
 The `etc/jetty.xml` is a standard Eclipse Jetty configuration file.
 
