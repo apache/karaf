@@ -793,7 +793,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         List<String> featuresToAdd = new ArrayList<>();
         List<String> featuresToRemove = new ArrayList<>();
         for (String feature : features) {
-            feature = normalize(feature);
+            if (!feature.contains(VERSION_SEPARATOR)) {
+                feature += "/0.0.0";
+            }
             String name = feature.substring(0, feature.indexOf(VERSION_SEPARATOR));
             String version = feature.substring(feature.indexOf(VERSION_SEPARATOR) + 1);
             Pattern pattern = Pattern.compile(name);
@@ -837,10 +839,18 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
         }
         featuresToAdd = new ArrayList<>(new LinkedHashSet<>(featuresToAdd));
-        print("Adding features: " + join(featuresToAdd), options.contains(Option.Verbose));
+        List<String> featuresToDisplay = new ArrayList<>();
         for (String feature : featuresToAdd) {
             fl.add(FEATURE_OSGI_REQUIREMENT_PREFIX + feature);
+            String v = feature.substring(feature.indexOf(VERSION_SEPARATOR) + VERSION_SEPARATOR.length());
+            VersionRange vr = new VersionRange(v, true);
+            if (vr.isPointVersion()) {
+                v = feature.substring(0, feature.indexOf(VERSION_SEPARATOR) + VERSION_SEPARATOR.length())
+                        + vr.getCeiling().toString();
+            }
+            featuresToDisplay.add(v);
         }
+        print("Adding features: " + join(featuresToDisplay), options.contains(Option.Verbose));
         Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
         doProvisionInThread(required, stateChanges, state, options);
     }
