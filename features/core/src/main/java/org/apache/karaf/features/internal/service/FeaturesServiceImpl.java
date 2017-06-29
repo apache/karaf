@@ -22,9 +22,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -505,14 +507,28 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return;
         }
 
-        Set<String> features = new HashSet<>();
+        Set<Repository> repos;
+        Set<String> features;
         synchronized (lock) {
-            for (Feature feature : repo.getFeatures()) {
-                if (isRequired(feature)) {
-                    features.add(feature.getId());
+            repos = getRepositoryClosure(repo);
+            List<Repository> required = new ArrayList<>();
+            for (String r : state.repositories) {
+                required.add(repositoryCache.get(r));
+            }
+            required.remove(repo);
+            for (Repository rep : required) {
+                repos.removeAll(getRepositoryClosure(rep));
+            }
+            features = new HashSet<>();
+            for (Repository tranRepo : repos) {
+                for (Feature f : tranRepo.getFeatures()) {
+                    if (isRequired(f)) {
+                        features.add(f.getId());
+                    }
                 }
             }
         }
+
         if (!features.isEmpty()) {
             if (uninstall) {
                 uninstallFeatures(features, EnumSet.noneOf(Option.class));
@@ -542,6 +558,20 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             saveState();
         }
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
+    }
+
+    private Set<Repository> getRepositoryClosure(Repository repo) throws Exception {
+        Set<Repository> closure = new HashSet<>();
+        Deque<Repository> remaining = new ArrayDeque<>(Collections.singleton(repo));
+        while (!remaining.isEmpty()) {
+            Repository rep = remaining.removeFirst();
+            if (closure.add(rep)) {
+                for (URI uri : rep.getRepositories()) {
+                    remaining.add(this.repositoryCache.get(uri.toString()));
+                }
+            }
+        }
+        return closure;
     }
 
     @Override
