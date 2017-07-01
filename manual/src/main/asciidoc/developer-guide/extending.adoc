@@ -284,7 +284,7 @@ public class SimpleNameCompleter implements Completer {
         delegate.getStrings().add("Mike");
         delegate.getStrings().add("Eric");
         delegate.getStrings().add("Jenny");
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 
 }
