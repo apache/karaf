@@ -29,6 +29,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <additional.bundle/>
     </properties>
     <dependencies>
         <dependency>
@@ -55,6 +56,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <finalName>${project.artifactId}</finalName>
+                    <installedBundles>
+                        <installedBundle>${additional.bundle}</installedBundle>
+                    </installedBundles>
                     <bootFeatures>
                         <feature>bundle</feature>
                         <feature>config</feature>
@@ -75,4 +79,14 @@
             </plugin>
         </plugins>
     </build>
+    
+    <profiles>
+        <profile>
+            <id>add-bundle</id>
+            <properties>
+                <additional.bundle>additional-bundle-name</additional.bundle>
+            </properties>
+        </profile>
+    </profiles>
+    
 </project>
