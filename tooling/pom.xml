@@ -33,6 +33,10 @@
     <packaging>pom</packaging>
     <name>Apache Karaf :: Tooling</name>
 
+    <properties>
+        <maven.version>3.5.0</maven.version>
+    </properties>
+
     <modules>
         <module>utils</module>
         <module>karaf-services-maven-plugin</module>
