@@ -20,7 +20,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
@@ -55,13 +57,18 @@ public abstract class UrlLoader {
             }
         }
         try {
-            URLConnection connection = new java.net.URL(url).openConnection();
+            URL u = new java.net.URL(url);
+            URLConnection connection = u.openConnection();
             if (connection instanceof HttpURLConnection) {
                 HttpURLConnection con = (HttpURLConnection) connection;
                 if (lastModified > 0) {
                     con.setIfModifiedSince(lastModified);
                 }
                 con.setRequestProperty(HEADER_ACCEPT_ENCODING, GZIP);
+                if (u.getUserInfo() != null)  {
+                    String encoded = java.util.Base64.getEncoder().encodeToString((u.getUserInfo()).getBytes(StandardCharsets.UTF_8));
+                    connection.setRequestProperty("Authorization", "Basic " + encoded);
+                }
                 int rc = con.getResponseCode();
                 if (rc == HTTP_NOT_MODIFIED) {
                     lastChecked = time;
