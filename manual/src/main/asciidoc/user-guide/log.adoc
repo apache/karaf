@@ -173,7 +173,24 @@ levels:
 * `CONFIG`
 * `FINE`
 * `FINER`
-* `FINEST`  (lowest value)
+* `FINEST` (lowest value)
+
+Additionally, de-facto standard log4j(2) levels can be used:
+
+* `TRACE`
+* `DEBUG`
+* `INFO`
+* `WARN`
+* `ERROR`
+* `OFF`
+* `DEFAULT`
+
+And because `org.ops4j.pax.loggin` PID uses `karaf.log.console` property, it's in fact better to use log4j levels instead:
+
+[source,options="nowrap"]
+----
+log4j2.rootLogger.appenderRef.Console.filter.threshold.level = ${karaf.log.console:-OFF}
+----
 
 For example, setting `karaf.log.console` to `INFO` (or lower) will turn on these logs when starting Karaf:
 
