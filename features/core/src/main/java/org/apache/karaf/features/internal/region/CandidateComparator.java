@@ -81,9 +81,7 @@ public class CandidateComparator implements Comparator<Capability> {
             final Resource resource2 = cap2.getResource();
             String n1 = ResolverUtil.getSymbolicName(resource1);
             String n2 = ResolverUtil.getSymbolicName(resource2);
-            if (n1 != null && n2 != null) {
-                c = n2.compareTo(n1);
-            }
+            c = n1.compareTo(n2);
             // Resources looks like identical, but it required by different features/subsystems/regions
             // so use this difference for deterministic heuristic
             if (c == 0) {
@@ -93,7 +91,7 @@ public class CandidateComparator implements Comparator<Capability> {
                     // In case the owners are the same but with different version, prefer the latest one
                     // TODO: this may not be fully correct, as we'd need to separate names/versions
                     // TODO: and do a real version comparison
-                    c = o2.compareTo(o1);
+                    c = - o1.compareTo(o2);
                 }
             }
         }
