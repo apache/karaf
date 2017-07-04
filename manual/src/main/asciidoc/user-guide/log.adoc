@@ -160,6 +160,32 @@ A default configuration in `etc/log4j2.xml` could be:
 </Configuration>
 ----
 
+==== `karaf.log.console` property
+
+Before Karaf starts _proper_ logging facilities (pax-logging), it may configure `java.util.logging`. Standard
+Java logging is used initially by `Main` class and `org.apache.karaf.main.lock.Lock` implementations.
+In order to configure logging level, please set system property `karaf.log.console` to one of standard JUL
+levels:
+
+* `SEVERE` (highest value)
+* `WARNING`
+* `INFO`
+* `CONFIG`
+* `FINE`
+* `FINER`
+* `FINEST`  (lowest value)
+
+For example, setting `karaf.log.console` to `INFO` (or lower) will turn on these logs when starting Karaf:
+
+[source,options="nowrap"]
+----
+Jul 04, 2017 7:53:18 AM org.apache.karaf.main.Main launch
+INFO: Installing and starting initial bundles
+Jul 04, 2017 7:53:18 AM org.apache.karaf.main.Main launch
+INFO: All initial bundles installed and set to start
+...
+----
+
 ==== Commands
 
 Instead of changing the `etc/org.ops4j.pax.logging.cfg` file, Apache Karaf provides a set of commands allowing to
