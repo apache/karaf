@@ -29,7 +29,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
@@ -574,7 +576,8 @@ public class AssemblyMojo extends MojoSupport {
     }
 
     private List<String> nonNullList(List<String> list) {
-        return list == null ? new ArrayList<>() : list;
+        final List<String> nonNullList = list == null ? new ArrayList<>() : list;
+        return nonNullList.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
 }
