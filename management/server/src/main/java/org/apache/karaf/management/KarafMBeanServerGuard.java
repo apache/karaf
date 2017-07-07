@@ -25,6 +25,7 @@ import javax.management.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,6 +47,8 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     private static final String JMX_ACL_PID_PREFIX = "jmx.acl";
     
     private static final String JMX_ACL_WHITELIST = "jmx.acl.whitelist";
+    
+    private static final String JMX_ACL_DETAILED_MESSAGE = "jmx.acl.detailed.message";
 
     private static final String JMX_OBJECTNAME_PROPERTY_WILDCARD = "_";
 
@@ -332,7 +335,57 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             if (JaasHelper.currentUserHasRole(role))
                 return;
         }
+        if (Boolean.valueOf(System.getProperty(JMX_ACL_DETAILED_MESSAGE, "false"))) {
+            printDetailedMessage(context, objectName, operationName, params, signature);
+        }
         throw new SecurityException("Insufficient roles/credentials for operation");
+    }
+
+    private void printDetailedMessage(BulkRequestContext context, ObjectName objectName,
+                                      String operationName, Object[] params, String[] signature) throws IOException {
+        String expectedRoles = "";
+        for (String role : getRequiredRoles(context, objectName, operationName, params, signature)) {
+            if (expectedRoles.length() != 0) {
+                expectedRoles = expectedRoles + ", " + role;
+            } else {
+                expectedRoles = role;
+            }
+        }
+        String currentRoles = "";
+        for (Principal p : context.getPrincipals()) {
+            if (!p.getClass().getName().endsWith("RolePrincipal")) {
+                continue;
+            }
+            if (currentRoles.length() != 0) {
+                currentRoles = currentRoles + ", " + p.getName();
+            } else {
+                currentRoles = p.getName();
+            }
+        }
+        String matchedPid = null;
+        for (String pid : iterateDownPids(getNameSegments(objectName))) {
+            String generalPid = getGeneralPid(context.getAllPids(), pid);
+            if (generalPid.length() > 0) {
+                Dictionary<String, Object> config = context.getConfiguration(generalPid);
+                List<String> roles = new ArrayList<>();
+                ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(operationName, params, signature, config, roles);
+                if (s != ACLConfigurationParser.Specificity.NO_MATCH) {
+                    matchedPid = generalPid;
+                    break;
+                }
+            }
+        }
+        if (matchedPid == null) {
+            //can't find the matched PID, use the most specific one
+            matchedPid = iterateDownPids(getNameSegments(objectName)).get(0);
+        }
+        LOG.debug("The current roles are \'" + currentRoles 
+                  + "\', however the expected roles are \'"
+                  + expectedRoles 
+                  + "\'. To make the call pass RBAC check, please add current role into entry \'"
+                  + operationName + "\' of file "
+                  + matchedPid + ".cfg"
+                  );
     }
 
     List<String> getRequiredRoles(ObjectName objectName, String methodName, String[] signature) throws IOException {
