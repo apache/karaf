@@ -45,6 +45,7 @@ public class ClientConfig {
     private String keyFile = null;
     private String command;
     private boolean interactiveMode = false;
+    private boolean inputPassword = false;
 
     public ClientConfig(String[] args) throws IOException {
         Properties shellCfg = loadProps(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"), null);
@@ -125,6 +126,16 @@ public class ClientConfig {
                     } else {
                         retryAttempts = Integer.parseInt(args[i]);
                     }
+                    
+                } else if (args[i].equals("-p")) {
+                    if (args.length <= ++i) {
+                        System.err.println("miss the password");
+                        System.exit(1);
+                    } else {
+                        password = args[i];
+                        interactiveMode = false;
+                        inputPassword = true;
+                    }
                 } else if (args[i].equals("-d")) {
                     if (args.length <= ++i) {
                         System.err.println("miss the delay in seconds");
@@ -185,9 +196,9 @@ public class ClientConfig {
                     user = users.iterator().next();
                 }
             }
-            if (interactiveMode) {
+            if (interactiveMode && !inputPassword) {
                 password = null;
-            } else {
+            } else if (!inputPassword) {
                 password = usersCfg.get(user);
                 if (password != null && password.contains(ROLE_DELIMITER)) {
                     password = password.substring(0, password.indexOf(ROLE_DELIMITER));
@@ -202,6 +213,7 @@ public class ClientConfig {
         System.out.println("  -a [port]     specify the port to connect to");
         System.out.println("  -h [host]     specify the host to connect to");
         System.out.println("  -u [user]     specify the user name");
+        System.out.println("  -p [password] specify the password (optional, if not provided, the password is prompted)");
         System.out.println("  --help        shows this help message");
         System.out.println("  -v            raise verbosity");
         System.out.println("  -l            set client logging level. Set to 0 for ERROR logging and up to 4 for TRACE");
