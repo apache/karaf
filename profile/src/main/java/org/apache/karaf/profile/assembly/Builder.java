@@ -45,6 +45,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
@@ -174,6 +175,8 @@ public class Builder {
     private Map<String, Profile> allProfiles;
     private KarafPropertyEdits propertyEdits;
     private Map<String, String> translatedUrls;
+
+    private Function<MavenResolver, MavenResolver> resolverWrapper = null;
 
     public static Builder newInstance() {
         return new Builder();
@@ -336,6 +339,11 @@ public class Builder {
         return this;
     }
 
+    public Builder resolverWrapper(Function<MavenResolver, MavenResolver> wrapper) {
+        this.resolverWrapper = wrapper;
+        return this;
+    }
+
     public Builder staticFramework() {
         // TODO: load this from resources
         return staticFramework("4.0.0-SNAPSHOT");
@@ -471,6 +479,9 @@ public class Builder {
             props.put(Builder.ORG_OPS4J_PAX_URL_MVN_PID + ".repositories", mavenRepositories);
         }
         MavenResolver resolver = MavenResolvers.createMavenResolver(props, ORG_OPS4J_PAX_URL_MVN_PID);
+        if (resolverWrapper != null) {
+            resolver = resolverWrapper.apply(resolver);
+        }
         executor = Executors.newScheduledThreadPool(8);
         manager = new CustomDownloadManager(resolver, executor, null, translatedUrls);
         this.resolver = new ResolverImpl(new Slf4jResolverLog(LOGGER));
