@@ -187,6 +187,10 @@ public class KarafTestSupport {
         String rmiRegistryPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_REG_PORT), Integer.parseInt(MAX_RMI_REG_PORT)));
         String rmiServerPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_SERVER_PORT), Integer.parseInt(MAX_RMI_SERVER_PORT)));
         String sshPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_SSH_PORT), Integer.parseInt(MAX_SSH_PORT)));
+        String localRepository = System.getProperty("org.ops4j.pax.url.mvn.localRepository");
+        if (localRepository == null) {
+            localRepository = "";
+        }
 
         return new Option[]{
             //KarafDistributionOption.debugConfiguration("8889", true),
@@ -204,6 +208,7 @@ public class KarafTestSupport {
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
             editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
+            editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.localRepository", localRepository),
             editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
             editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version")),
             editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version")),
