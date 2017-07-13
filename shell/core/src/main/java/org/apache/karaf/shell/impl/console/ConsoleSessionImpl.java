@@ -365,7 +365,13 @@ public class ConsoleSessionImpl implements Session {
                         session.getConsole().println(session.format(result, Converter.INSPECT));
                     }
                 } catch (Throwable t) {
-                    ShellUtil.logException(this, t);
+                    if (!(command.endsWith("logout") && t instanceof InterruptedException)) {
+                        //command logout will interrupt this seesion thread, so this exception
+                        //is expected, don't need log it as a error message
+                        ShellUtil.logException(this, t);
+                    } else {
+                        LOGGER.debug("a console session is closed as the peer just logout");
+                    }
                 }
             }
             close();
