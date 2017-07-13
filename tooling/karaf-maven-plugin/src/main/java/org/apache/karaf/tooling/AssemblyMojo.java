@@ -37,15 +37,18 @@ import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
 import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.karaf.tooling.utils.ReactorMavenResolver;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.repository.internal.MavenWorkspaceReader;
 
 /**
  * Creates a customized Karaf distribution by installing features and setting up
@@ -258,6 +261,9 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     protected Map<String, String> system;
 
+    @Component(role = MavenWorkspaceReader.class, hint = "reactor")
+    protected MavenWorkspaceReader reactor;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -322,6 +328,7 @@ public class AssemblyMojo extends MojoSupport {
         builder.offline(mavenSession.isOffline());
         builder.localRepository(localRepo.getBasedir());
         builder.mavenRepositories(remote.toString());
+        builder.resolverWrapper((resolver) -> new ReactorMavenResolver(reactor, resolver));
         builder.javase(javase);
 
         // Set up config and system props

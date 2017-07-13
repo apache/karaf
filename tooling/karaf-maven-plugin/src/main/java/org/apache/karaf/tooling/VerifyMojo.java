@@ -80,14 +80,17 @@ import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.profile.assembly.CustomDownloadManager;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.karaf.tooling.utils.ReactorMavenResolver;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.internal.MavenWorkspaceReader;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
@@ -148,6 +151,9 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
+    @Component(role = MavenWorkspaceReader.class, hint = "reactor")
+    protected MavenWorkspaceReader reactor;
+
     @Parameter(property = "skip", defaultValue = "${features.verify.skip}")
     protected boolean skip;
 
@@ -189,7 +195,7 @@ public class VerifyMojo extends MojoSupport {
         config.put("maven.localRepository", localRepo.getBasedir());
         config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
         // TODO: add more configuration bits ?
-        resolver = MavenResolvers.createMavenResolver(config, "maven");
+        resolver = new ReactorMavenResolver(reactor, MavenResolvers.createMavenResolver(config, "maven"));
         doExecute();
     }
 
