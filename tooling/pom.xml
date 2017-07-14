@@ -35,6 +35,7 @@
 
     <properties>
         <maven.version>3.5.0</maven.version>
+        <maven.resolver.version>1.0.3</maven.resolver.version>
     </properties>
 
     <modules>

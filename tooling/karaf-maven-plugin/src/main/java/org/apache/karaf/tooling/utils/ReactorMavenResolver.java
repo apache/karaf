@@ -20,9 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import org.apache.maven.repository.internal.MavenWorkspaceReader;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.repository.WorkspaceReader;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.ServiceConstants;
 import org.ops4j.pax.url.mvn.internal.Parser;
@@ -32,10 +32,10 @@ import org.ops4j.pax.url.mvn.internal.Parser;
  */
 public class ReactorMavenResolver implements MavenResolver {
 
-    private final MavenWorkspaceReader reactor;
+    private final WorkspaceReader reactor;
     private final MavenResolver fallback;
 
-    public ReactorMavenResolver(MavenWorkspaceReader reactor, MavenResolver fallback) {
+    public ReactorMavenResolver(WorkspaceReader reactor, MavenResolver fallback) {
         this.reactor = reactor;
         this.fallback = fallback;
     }

@@ -48,7 +48,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.repository.internal.MavenWorkspaceReader;
+import org.eclipse.aether.repository.WorkspaceReader;
 
 /**
  * Creates a customized Karaf distribution by installing features and setting up
@@ -261,8 +261,8 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     protected Map<String, String> system;
 
-    @Component(role = MavenWorkspaceReader.class, hint = "reactor")
-    protected MavenWorkspaceReader reactor;
+    @Component(role = WorkspaceReader.class, hint = "reactor")
+    protected WorkspaceReader reactor;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {

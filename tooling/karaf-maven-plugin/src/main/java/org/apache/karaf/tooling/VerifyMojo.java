@@ -90,7 +90,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.internal.MavenWorkspaceReader;
+import org.eclipse.aether.repository.WorkspaceReader;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
@@ -151,8 +151,8 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
-    @Component(role = MavenWorkspaceReader.class, hint = "reactor")
-    protected MavenWorkspaceReader reactor;
+    @Component(role = WorkspaceReader.class, hint = "reactor")
+    protected WorkspaceReader reactor;
 
     @Parameter(property = "skip", defaultValue = "${features.verify.skip}")
     protected boolean skip;
