@@ -206,7 +206,7 @@ public class KarafTestSupport {
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
             editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
-            editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.localRepository", localRepository);
+            editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.localRepository", localRepository),
             editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
             editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version")),
             editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version")),
