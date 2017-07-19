@@ -63,8 +63,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
-            <artifactId>maven-embedder</artifactId>
-            <version>3.0.3</version>
+            <artifactId>maven-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -113,6 +112,10 @@
                             !org.codehaus.plexus*,
                             !org.sonatype.aether*,
                             !org.sonatype.guice*,
+                            !org.eclipse.aether*,
+                            !org.eclipse.sisu*,
+                            !javax.inject*,
+                            !com.google.common.collect,
                             *,
                         </Import-Package>
                         <Private-Package>
@@ -122,6 +125,7 @@
                             org.apache.maven.settings.*;-split-package:=merge-first,
                             org.apache.maven.execution;-split-package:=merge-first,
                             org.apache.maven.model;-split-package:=merge-first,
+                            org.apache.maven.building;-split-package:=merge-first,
                             org.codehaus.plexus.component.annotations,
                             org.sonatype.plexus.components.sec.dispatcher*,
                             org.sonatype.plexus.components.cipher,

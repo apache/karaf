@@ -168,6 +168,12 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.httplite.complete</artifactId>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- package deps -->

@@ -959,6 +959,7 @@
     <feature name="maven" description="Commands for Maven configuration of services from pax-url-aether" version="${project.version}">
         <feature>shell</feature>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.maven/org.apache.karaf.maven.core/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.commons/commons-lang3/${commons-lang3.version}</bundle>
         <config name="org.apache.karaf.command.acl.maven">
             #
             # This configuration file defines the ACLs for maven configuration commands

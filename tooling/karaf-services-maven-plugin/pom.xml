@@ -117,6 +117,10 @@
                     <groupId>org.apache.felix</groupId>
                     <artifactId>org.apache.felix.bundlerepository</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.aether</groupId>
+                    <artifactId>aether-util</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
