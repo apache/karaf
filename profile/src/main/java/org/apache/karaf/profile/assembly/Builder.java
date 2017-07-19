@@ -508,6 +508,7 @@ public class Builder {
         //
         // Propagate feature installation from repositories
         //
+        LOGGER.info("   Loading repositories");
         Map<String, Stage> features = new LinkedHashMap<>(this.features);
         Map<String, Features> karRepositories = loadRepositories(manager, repositories.keySet(), false);
         for (String repo : repositories.keySet()) {
@@ -798,6 +799,7 @@ public class Builder {
         Downloader downloader = manager.createDownloader();
 
         // Load startup repositories
+        LOGGER.info("   Loading repositories");
         Map<String, Features> installedRepositories = loadRepositories(manager, installedEffective.getRepositories(), true);
         // Compute startup feature dependencies
         Set<Feature> allInstalledFeatures = new HashSet<>();
@@ -843,6 +845,7 @@ public class Builder {
         Profile bootOverlay = Profiles.getOverlay(bootProfile, allProfiles, environment);
         Profile bootEffective = Profiles.getEffective(bootOverlay, false);
         // Load startup repositories
+        LOGGER.info("   Loading repositories");
         Map<String, Features> bootRepositories = loadRepositories(manager, bootEffective.getRepositories(), true);
         // Compute startup feature dependencies
         Set<Feature> allBootFeatures = new HashSet<>();
@@ -1365,6 +1368,7 @@ public class Builder {
                 public void downloaded(final StreamProvider provider) throws Exception {
                     String url = provider.getUrl();
                     if (Blacklist.isBlacklisted(clausesRepos, url, TYPE_REPOSITORY)) {
+                        LOGGER.info("      feature repository " + url + " is blacklisted");
                         return;
                     }
                     synchronized (loaded) {
@@ -1373,6 +1377,7 @@ public class Builder {
                                 synchronized (provider) {
                                     Path path = pathFromProviderUrl(url);
                                     Files.createDirectories(path.getParent());
+                                    LOGGER.info("      adding feature repository: " + url);
                                     Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
                                 }
                             }
