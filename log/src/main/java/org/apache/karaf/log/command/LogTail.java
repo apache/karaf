@@ -41,8 +41,10 @@ public class LogTail extends DisplayLog {
     @Override
     public Object execute() throws Exception {
         int minLevel = getMinLevel(level);
+        // Do not use System.out as it may write to the wrong console depending on the thread that calls our log handler
         PrintStream out = session.getConsole();
         display(out, minLevel);
+        out.flush();
         PaxAppender appender = event -> printEvent(out, event, minLevel);
         ServiceTracker<LogService, LogService> tracker = new ServiceTracker<LogService, LogService>(context, LogService.class, null) {
             

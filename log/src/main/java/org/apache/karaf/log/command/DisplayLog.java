@@ -74,12 +74,10 @@ public class DisplayLog implements Action {
     }
 
     protected void display(final PrintStream out, int minLevel) {
-        
         Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
         for (PaxLoggingEvent event : le) {
             printEvent(out, event, minLevel);
         }
-        out.flush();
     }
 
     protected static int getMinLevel(String levelSt) {
