@@ -16,12 +16,7 @@
  */
 package org.apache.karaf.log.command;
 
-import java.io.IOException;
 import java.io.PrintStream;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.api.action.Command;
@@ -29,7 +24,9 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.ops4j.pax.logging.spi.PaxAppender;
-import org.ops4j.pax.logging.spi.PaxLoggingEvent;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 @Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
 @Service
@@ -39,96 +36,46 @@ public class LogTail extends DisplayLog {
     Session session;
 
     @Reference
-    LogService logService;
-
-    private ExecutorService executorService = Executors.newFixedThreadPool(2);
+    BundleContext context;
 
     @Override
     public Object execute() throws Exception {
-        PrintEventThread printThread = new PrintEventThread();
-        ReadKeyBoardThread readKeyboardThread = new ReadKeyBoardThread(Thread.currentThread());
-        executorService.execute(printThread);
-        executorService.execute(readKeyboardThread);
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                Thread.sleep(200);
-            } catch (java.lang.InterruptedException e) {
-                break;
+        int minLevel = getMinLevel(level);
+        PrintStream out = session.getConsole();
+        display(out, minLevel);
+        PaxAppender appender = event -> printEvent(out, event, minLevel);
+        ServiceTracker<LogService, LogService> tracker = new ServiceTracker<LogService, LogService>(context, LogService.class, null) {
+            
+            @Override
+            public LogService addingService(ServiceReference<LogService> reference) {
+                LogService service = super.addingService(reference);
+                service.addAppender(appender);
+                return service;
             }
-        }
-        printThread.abort();
-        readKeyboardThread.abort();
-        executorService.shutdownNow();  
-        return null;      
-    }
-   
-    class ReadKeyBoardThread implements Runnable {
-        private Thread sessionThread;
-        boolean readKeyboard = true;
-        public ReadKeyBoardThread(Thread thread) {
-            this.sessionThread = thread;
-        }
 
-        public void abort() {
-            readKeyboard = false;            
-        }
-
-        public void run() {
-            while (readKeyboard) {
-                try {
-                    int c = session.getKeyboard().read();
-                    if (c < 0) {
-                        sessionThread.interrupt();
-                        break;
-                    }
-                } catch (IOException e) {
-                    break;
-                }
-                
-            }
-        }
-    } 
-    
-    class PrintEventThread implements Runnable {
-
-        PrintStream out = System.out;
-        boolean doDisplay = true;
-
-        public void run() {
-            int minLevel = getMinLevel(level);
-            Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
-            for (PaxLoggingEvent event : le) {
-                printEvent(out, event, minLevel);
-            }
-            out.flush();
-            // Tail
-            final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
-            PaxAppender appender = new PaxAppender() {
-                public void doAppend(PaxLoggingEvent event) {
-                        queue.add(event);
+            @Override
+            public void removedService(ServiceReference<LogService> reference, LogService service) {
+                service.removeAppender(appender);
+                synchronized (LogTail.this) {
+                    LogTail.this.notifyAll();
                 }
             };
-            try {
-                logService.addAppender(appender);
-                while (doDisplay) {
-                    printEvent(out, queue.take(), minLevel);
-                    if (queue.isEmpty()) {
-                        out.flush();
-                    }
-                }
-            } catch (InterruptedException e) {
-                // Ignore
-            } finally {
-                logService.removeAppender(appender);
+        };
+        tracker.open();
+        
+        try {
+            synchronized (this) {
+                wait();
             }
-            out.println();
-            
+            out.println("Stopping tail as log.core bundle was stopped.");
+        } catch (InterruptedException e) {
+            // Ignore as it will happen if the user breaks the tail using Ctrl-C
+        } finally {
+            tracker.close();
         }
+        out.println();
 
-        public void abort() {
-            doDisplay = false;
-        }
-
+        return null;
     }
 
 }

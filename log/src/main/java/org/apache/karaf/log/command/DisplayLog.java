@@ -66,18 +66,20 @@ public class DisplayLog implements Action {
 
     @Override
     public Object execute() throws Exception {
-
-        int minLevel = getMinLevel(level);
-
-
         final PrintStream out = System.out;
+        int minLevel = getMinLevel(level);
+        display(out, minLevel);
+        out.println();
+        return null;
+    }
 
+    protected void display(final PrintStream out, int minLevel) {
+        
         Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
         for (PaxLoggingEvent event : le) {
             printEvent(out, event, minLevel);
         }
-        out.println();
-        return null;
+        out.flush();
     }
 
     protected static int getMinLevel(String levelSt) {
