@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.log.core.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.karaf.log.core.LogEventFormatter;
 import org.apache.karaf.log.core.internal.layout.PatternConverter;
 import org.apache.karaf.log.core.internal.layout.PatternParser;
@@ -23,79 +26,19 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 public class LogEventFormatterImpl implements LogEventFormatter {
 
-    protected String pattern;
-    protected String fatalColor;
-    protected String errorColor;
-    protected String warnColor;
-    protected String infoColor;
-    protected String debugColor;
-    protected String traceColor;
-
-    private static final String FATAL = "fatal";
-    private static final String ERROR = "error";
-    private static final String WARN = "warn";
-    private static final String INFO = "info";
-    private static final String DEBUG = "debug";
-    private static final String TRACE = "trace";
-
-    private static final char FIRST_ESC_CHAR = 27;
-    private static final char SECOND_ESC_CHAR = '[';
-    private static final char COMMAND_CHAR = 'm';
-
-    public String getPattern() {
-        return pattern;
-    }
+    private String pattern;
+    private Map<Integer, String> level2Color = new HashMap<>();
 
     public void setPattern(String pattern) {
         this.pattern = pattern;
     }
 
-    public String getFatalColor() {
-        return fatalColor;
-    }
-
-    public void setFatalColor(String fatalColor) {
-        this.fatalColor = fatalColor;
-    }
-
-    public String getErrorColor() {
-        return errorColor;
-    }
-
-    public void setErrorColor(String errorColor) {
-        this.errorColor = errorColor;
-    }
-
-    public String getWarnColor() {
-        return warnColor;
-    }
-
-    public void setWarnColor(String warnColor) {
-        this.warnColor = warnColor;
-    }
-
-    public String getInfoColor() {
-        return infoColor;
-    }
-
-    public void setInfoColor(String infoColor) {
-        this.infoColor = infoColor;
-    }
-
-    public String getDebugColor() {
-        return debugColor;
-    }
-
-    public void setDebugColor(String debugColor) {
-        this.debugColor = debugColor;
-    }
-
-    public String getTraceColor() {
-        return traceColor;
-    }
-
-    public void setTraceColor(String traceColor) {
-        this.traceColor = traceColor;
+    public void setColor(int level, String color) {
+        if (color != null && color.length() > 0) {
+            this.level2Color.put(level, color);
+        } else {
+            this.level2Color.remove(level);
+        }
     }
 
     /* (non-Javadoc)
@@ -106,13 +49,7 @@ public class LogEventFormatterImpl implements LogEventFormatter {
         final PatternConverter cnv = new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
         String color = getColor(event, noColor);
         StringBuffer sb = new StringBuffer();
-        sb.setLength(0);
-        if (color != null) {
-            sb.append(FIRST_ESC_CHAR);
-            sb.append(SECOND_ESC_CHAR);
-            sb.append(color);
-            sb.append(COMMAND_CHAR);
-        }
+        color(sb, color);
         for (PatternConverter pc = cnv; pc != null; pc = pc.next) {
             pc.format(sb, event);
         }
@@ -121,37 +58,25 @@ public class LogEventFormatterImpl implements LogEventFormatter {
                 sb.append(r).append('\n');
             }
         }
-        if (color != null) {
-            sb.append(FIRST_ESC_CHAR);
-            sb.append(SECOND_ESC_CHAR);
-            sb.append("0");
-            sb.append(COMMAND_CHAR);
-        }
+        color(sb, "0");
         return sb.toString();
     }
 
-    private String getColor(PaxLoggingEvent event, boolean noColor) {
-        String color = null;
-        if (!noColor && event != null && event.getLevel() != null && event.getLevel().toString() != null) {
-            String lvl = event.getLevel().toString().toLowerCase();
-            if (FATAL.equals(lvl)) {
-                color = fatalColor;
-            } else if (ERROR.equals(lvl)) {
-                color = errorColor;
-            } else if (WARN.equals(lvl)) {
-                color = warnColor;
-            } else if (INFO.equals(lvl)) {
-                color = infoColor;
-            } else if (DEBUG.equals(lvl)) {
-                color = debugColor;
-            } else if (TRACE.equals(lvl)) {
-                color = traceColor;
-            }
-            if (color != null && color.length() == 0) {
-                color = null;
-            }
+    private void color(StringBuffer sb, String color) {
+        if (color != null) {
+            sb.append((char)27);
+            sb.append('[');
+            sb.append(color);
+            sb.append('m');
         }
-        return color;
+    }
+
+    private String getColor(PaxLoggingEvent event, boolean noColor) {
+        if (!noColor && event != null && event.getLevel() != null && event.getLevel().toString() != null) {
+            return level2Color.get(event.getLevel().toInt());
+        } else {
+            return null;
+        }
     }
 
 }
