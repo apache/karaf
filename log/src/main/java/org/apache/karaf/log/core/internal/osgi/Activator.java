@@ -29,6 +29,7 @@ import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.ops4j.pax.logging.PaxLogger;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
@@ -48,7 +49,6 @@ public class Activator extends BaseActivator implements ManagedService {
 
         int size = getInt("size", 500);
         String pattern = getString("pattern", "%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n");
-        String fatalColor = getString("fatalColor", "31");
         String errorColor = getString("errorColor", "31");
         String warnColor = getString("warnColor", "35");
         String infoColor = getString("infoColor", "36");
@@ -62,12 +62,11 @@ public class Activator extends BaseActivator implements ManagedService {
 
         LogEventFormatterImpl formatter = new LogEventFormatterImpl();
         formatter.setPattern(pattern);
-        formatter.setFatalColor(fatalColor);
-        formatter.setErrorColor(errorColor);
-        formatter.setWarnColor(warnColor);
-        formatter.setInfoColor(infoColor);
-        formatter.setDebugColor(debugColor);
-        formatter.setTraceColor(traceColor);
+        formatter.setColor(PaxLogger.LEVEL_ERROR, errorColor);
+        formatter.setColor(PaxLogger.LEVEL_WARNING, warnColor);
+        formatter.setColor(PaxLogger.LEVEL_INFO, infoColor);
+        formatter.setColor(PaxLogger.LEVEL_DEBUG, debugColor);
+        formatter.setColor(PaxLogger.LEVEL_TRACE, traceColor);
         register(LogEventFormatter.class, formatter);
 
         LogServiceImpl logService = new LogServiceImpl(configurationAdmin, events);
