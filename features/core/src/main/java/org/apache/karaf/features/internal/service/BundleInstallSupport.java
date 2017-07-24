@@ -58,7 +58,7 @@ public interface BundleInstallSupport {
                         Map<String, Set<Long>> bundles)
         throws BundleException, InvalidSyntaxException;
 
-    void saveState();
+    void saveDigraph();
 
     RegionDigraph getDiGraphCopy() throws BundleException;
     

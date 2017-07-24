@@ -218,7 +218,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     state.bundleChecksums.clear();
                 }
                 storage.save(state);
-                installSupport.saveState();
+                installSupport.saveDigraph();
             }
         } catch (IOException e) {
             LOGGER.warn("Error saving FeaturesService state", e);

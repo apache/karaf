@@ -139,7 +139,7 @@ public class Activator extends BaseActivator {
                     systemBundleContext,
                     configInstaller,
                     dg);
-        register(RegionDigraphPersistence.class, () -> installSupport.saveState());
+        register(RegionDigraphPersistence.class, () -> installSupport.saveDigraph());
 
         FeatureRepoFinder featureFinder = new FeatureRepoFinder();
         register(ManagedService.class, featureFinder, FeatureRepoFinder.getServiceProperties());
@@ -302,7 +302,7 @@ public class Activator extends BaseActivator {
             featuresService = null;
         }
         if (installSupport != null) {
-            installSupport.saveState();
+            installSupport.saveDigraph();
         }
     }
 

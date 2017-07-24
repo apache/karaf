@@ -74,7 +74,7 @@ public abstract class StaticInstallSupport implements BundleInstallSupport {
     }
 
     @Override
-    public void saveState() {
+    public void saveDigraph() {
     }
 
     @Override

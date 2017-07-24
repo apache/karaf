@@ -226,7 +226,7 @@ public class FeaturesServiceImplTest extends TestBase {
             }
 
             @Override
-            protected void saveState() {
+            protected void saveDigraph() {
 
             }
 

@@ -279,10 +279,10 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     }
     
     /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#saveState()
+     * @see org.apache.karaf.features.internal.service.Regions#saveDigraph()
      */
     @Override
-    public void saveState() {
+    public void saveDigraph() {
         DigraphHelper.saveDigraph(getDataFile(DigraphHelper.DIGRAPH_FILE), digraph);
     }
     
