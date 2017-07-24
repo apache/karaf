@@ -101,6 +101,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.main*,
+                            org.apache.karaf.jpm*,
                             org.apache.felix.utils.properties;-split-package:=merge-first,
                             org.apache.karaf.util.config,
                             org.apache.karaf.util.maven,
