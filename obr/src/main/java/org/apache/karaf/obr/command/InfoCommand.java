@@ -62,6 +62,7 @@ public class InfoCommand extends ObrCommandSupport {
 
     private void printResource(PrintStream out, Resource resource)
     {
+      if (out != null && resource != null) {
         // OBR R5 per Spec has no presentation name
         String resourceId = getResourceId(resource);
 
@@ -70,42 +71,34 @@ public class InfoCommand extends ObrCommandSupport {
         printUnderline(out, resourceId.length());
 
         Map map = resource.getProperties();
-        for (Iterator iter = map.entrySet().iterator(); iter.hasNext(); )
-        {
-            Map.Entry entry = (Map.Entry) iter.next();
-            if (entry.getValue().getClass().isArray())
-            {
-                out.println(entry.getKey() + ":");
-                for (int j = 0; j < Array.getLength(entry.getValue()); j++)
-                {
-                    out.println("   " + Array.get(entry.getValue(), j));
-                }
+        for (Iterator iter = map.entrySet().iterator(); iter.hasNext(); ) {
+          Map.Entry entry = (Map.Entry) iter.next();
+          if (entry.getValue().getClass().isArray()) {
+            out.println(entry.getKey() + ":");
+            for (int j = 0; j < Array.getLength(entry.getValue()); j++) {
+              out.println("   " + Array.get(entry.getValue(), j));
             }
-            else
-            {
-                out.println(entry.getKey() + ": " + entry.getValue());
-            }
+          } else {
+            out.println(entry.getKey() + ": " + entry.getValue());
+          }
         }
 
         Requirement[] reqs = resource.getRequirements();
-        if ((reqs != null) && (reqs.length > 0))
-        {
-            out.println("Requires:");
-            for (int i = 0; i < reqs.length; i++)
-            {
-                out.println("   " + reqs[i].getName() + ":" + reqs[i].getFilter());
-            }
+        if ((reqs != null) && (reqs.length > 0)) {
+          out.println("Requires:");
+          for (int i = 0; i < reqs.length; i++) {
+            out.println("   " + reqs[i].getName() + ":" + reqs[i].getFilter());
+          }
         }
 
         Capability[] caps = resource.getCapabilities();
-        if ((caps != null) && (caps.length > 0))
-        {
-            out.println("Capabilities:");
-            for (int i = 0; i < caps.length; i++)
-            {
-                out.println("   " + caps[i].getName() + ":" + caps[i].getPropertiesAsMap());
-            }
+        if ((caps != null) && (caps.length > 0)) {
+          out.println("Capabilities:");
+          for (int i = 0; i < caps.length; i++) {
+            out.println("   " + caps[i].getName() + ":" + caps[i].getPropertiesAsMap());
+          }
         }
+      }
     }
 
 }
