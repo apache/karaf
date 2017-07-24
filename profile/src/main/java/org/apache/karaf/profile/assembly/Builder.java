@@ -1421,7 +1421,7 @@ public class Builder {
                     Collection<String> optionals) throws Exception {
         BundleRevision systemBundle = getSystemBundle();
         AssemblyDeployCallback callback = new AssemblyDeployCallback(manager, this, systemBundle, repositories);
-        Deployer deployer = new Deployer(manager, resolver, callback, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         // Install framework
         Deployer.DeploymentRequest request = createDeploymentRequest();

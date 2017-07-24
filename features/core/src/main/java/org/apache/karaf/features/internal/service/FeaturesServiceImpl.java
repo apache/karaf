@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +71,12 @@ import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.resolver.Resolver;
@@ -1045,7 +1051,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 try {
                     Deployer.DeploymentState dstate = getDeploymentState(state);
                     Deployer.DeploymentRequest request = getDeploymentRequest(requirements, stateChanges, options, outputFile);
-                    new Deployer(manager, this.resolver, this.installSupport, this).deploy(dstate, request);
+                    new Deployer(manager, this.resolver, this).deploy(dstate, request);
                     break;
                 } catch (Deployer.PartialDeploymentException e) {
                     if (!prereqs.containsAll(e.getMissing())) {
@@ -1102,6 +1108,61 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     @Override
     public void persistResolveRequest(Deployer.DeploymentRequest request) throws IOException {
         writeResolve(request.requirements, request.options);
+    }
+
+    @Override
+    public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
+        installSupport.refreshPackages(bundles);
+    }
+
+    @Override
+    public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+        return installSupport.installBundle(region, uri, is);
+    }
+
+    @Override
+    public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
+        installSupport.updateBundle(bundle, uri, is);
+    }
+
+    @Override
+    public void uninstall(Bundle bundle) throws BundleException {
+        installSupport.uninstall(bundle);
+    }
+
+    @Override
+    public void startBundle(Bundle bundle) throws BundleException {
+        installSupport.startBundle(bundle);
+    }
+
+    @Override
+    public void stopBundle(Bundle bundle, int options) throws BundleException {
+        installSupport.stopBundle(bundle, options);
+    }
+
+    @Override
+    public void setBundleStartLevel(Bundle bundle, int startLevel) {
+        installSupport.setBundleStartLevel(bundle, startLevel);
+    }
+
+    @Override
+    public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
+        installSupport.resolveBundles(bundles, wiring, resToBnd);
+    }
+
+    @Override
+    public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
+        installSupport.replaceDigraph(policies, bundles);
+    }
+
+    @Override
+    public void installConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+        installSupport.installConfigs(feature);
+    }
+
+    @Override
+    public void installLibraries(Feature feature) throws IOException {
+        installSupport.installLibraries(feature);
     }
 
     private Pattern getFeaturePattern(String name, String version) {

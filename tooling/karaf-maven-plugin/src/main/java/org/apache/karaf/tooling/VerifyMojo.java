@@ -422,7 +422,7 @@ public class VerifyMojo extends MojoSupport {
         try {
             Bundle systemBundle = getSystemBundle(getMetadata(properties, "metadata#"));
             DummyDeployCallback callback = new DummyDeployCallback(systemBundle, repositories.values());
-            Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback, callback);
+            Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback);
 
 
             // Install framework

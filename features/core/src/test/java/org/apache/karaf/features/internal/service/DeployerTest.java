@@ -19,11 +19,13 @@ package org.apache.karaf.features.internal.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.Manifest;
@@ -37,7 +39,6 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.support.TestBundle;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
-import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IArgumentMatcher;
@@ -45,6 +46,9 @@ import org.easymock.IMocksControl;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +56,6 @@ import org.slf4j.LoggerFactory;
 import static org.apache.karaf.features.FeaturesService.*;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.easymock.EasyMock.anyInt;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.expectLastCall;
 import static org.junit.Assert.fail;
 
 public class DeployerTest {
@@ -74,25 +76,24 @@ public class DeployerTest {
         Feature f101 = repo.getFeatures()[1];
 
         Deployer.DeployCallback callback = c.createMock(Deployer.DeployCallback.class);
-        BundleInstallSupport installSupport = c.createMock(BundleInstallSupportImpl.class);
-        Deployer deployer = new Deployer(manager, resolver, installSupport, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
         EasyMock.expectLastCall().anyTimes();
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
-        installSupport.replaceDigraph(EasyMock.anyObject(),
+        callback.replaceDigraph(EasyMock.anyObject(),
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
-        installSupport.installConfigs(f100);
+        callback.installConfigs(f100);
         EasyMock.expectLastCall();
-        installSupport.installLibraries(f100);
+        callback.installLibraries(f100);
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.anyObject(),
+        callback.resolveBundles(EasyMock.anyObject(),
                                 EasyMock.anyObject(),
                                 EasyMock.anyObject());
         EasyMock.expectLastCall();
@@ -104,7 +105,7 @@ public class DeployerTest {
         EasyMock.expectLastCall();
 
         Bundle bundleA = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
-        EasyMock.expect(installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.anyObject()))
+        EasyMock.expect(callback.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.anyObject()))
                 .andReturn(bundleA);
 
         c.replay();
@@ -149,8 +150,7 @@ public class DeployerTest {
         Feature f101 = repo.getFeatures()[1];
 
         Deployer.DeployCallback callback = c.createMock(Deployer.DeployCallback.class);
-        BundleInstallSupport installSupport = c.createMock(BundleInstallSupportImpl.class);
-        Deployer deployer = new Deployer(manager, resolver, installSupport, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         final TestBundle bundleA = createTestBundle(1L, Bundle.ACTIVE, dataDir, "a100");
 
@@ -159,12 +159,12 @@ public class DeployerTest {
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
 
-        installSupport.stopBundle(EasyMock.eq(bundleA), anyInt());
+        callback.stopBundle(EasyMock.eq(bundleA), anyInt());
         EasyMock.expectLastCall().andStubAnswer(() -> {
             bundleA.state = Bundle.RESOLVED;
             return null;
         });
-        installSupport.updateBundle(EasyMock.eq(bundleA), EasyMock.anyObject(), EasyMock.anyObject());
+        callback.updateBundle(EasyMock.eq(bundleA), EasyMock.anyObject(), EasyMock.anyObject());
         EasyMock.expectLastCall().andStubAnswer(new IAnswer<Object>() {
             @Override
             public Object answer() throws Throwable {
@@ -178,27 +178,27 @@ public class DeployerTest {
                 return null;
             }
         });
-        installSupport.startBundle(EasyMock.eq(bundleA));
+        callback.startBundle(EasyMock.eq(bundleA));
         EasyMock.expectLastCall();
 
-        installSupport.replaceDigraph(EasyMock.anyObject(),
+        callback.replaceDigraph(EasyMock.anyObject(),
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
-        installSupport.installConfigs(f101);
+        callback.installConfigs(f101);
         EasyMock.expectLastCall();
-        installSupport.installLibraries(f101);
+        callback.installLibraries(f101);
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.eq(Collections.singleton(bundleA)),
+        callback.resolveBundles(EasyMock.eq(Collections.singleton(bundleA)),
                                 EasyMock.anyObject(),
                                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
         EasyMock.expectLastCall();
-        installSupport.refreshPackages(EasyMock.eq(Collections.singleton(bundleA)));
+        callback.refreshPackages(EasyMock.eq(Collections.singleton(bundleA)));
         EasyMock.expectLastCall();
         callback.callListeners(FeatureEventMatcher.eq(new FeatureEvent(FeatureEvent.EventType.FeatureUninstalled, f100, FeaturesService.ROOT_REGION, false)));
         EasyMock.expectLastCall();
@@ -253,25 +253,24 @@ public class DeployerTest {
         Bundle serviceBundle = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
 
         Deployer.DeployCallback callback = c.createMock(Deployer.DeployCallback.class);
-        BundleInstallSupport installSupport = c.createMock(BundleInstallSupportImpl.class);
-        Deployer deployer = new Deployer(manager, resolver, installSupport, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
         EasyMock.expectLastCall().anyTimes();
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
-        installSupport.replaceDigraph(EasyMock.anyObject(),
+        callback.replaceDigraph(EasyMock.anyObject(),
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.installConfigs(f1);
+        callback.installConfigs(f1);
         EasyMock.expectLastCall();
-        installSupport.installLibraries(f1);
+        callback.installLibraries(f1);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.anyObject(),
+        callback.resolveBundles(EasyMock.anyObject(),
                                 EasyMock.anyObject(),
                                 EasyMock.anyObject());
         EasyMock.expectLastCall();
@@ -327,27 +326,26 @@ public class DeployerTest {
         Bundle serviceBundle2 = createTestBundle(2, Bundle.ACTIVE, dataDir, "b100");
 
         Deployer.DeployCallback callback = c.createMock(Deployer.DeployCallback.class);
-        BundleInstallSupport installSupport = c.createMock(BundleInstallSupportImpl.class);
-        Deployer deployer = new Deployer(manager, resolver, installSupport, callback);
+        Deployer deployer = new Deployer(manager, resolver, callback);
 
         callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
         EasyMock.expectLastCall().anyTimes();
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
-        installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.anyObject());
+        callback.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.anyObject());
         EasyMock.expectLastCall().andReturn(serviceBundle1);
-        installSupport.replaceDigraph(EasyMock.anyObject(),
+        callback.replaceDigraph(EasyMock.anyObject(),
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
-        installSupport.installConfigs(EasyMock.anyObject());
+        callback.installConfigs(EasyMock.anyObject());
         EasyMock.expectLastCall();
-        installSupport.installLibraries(EasyMock.anyObject());
+        callback.installLibraries(EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.anyObject(),
+        callback.resolveBundles(EasyMock.anyObject(),
                 EasyMock.anyObject(),
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
@@ -396,20 +394,20 @@ public class DeployerTest {
         EasyMock.expectLastCall().anyTimes();
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
         EasyMock.expectLastCall();
-        installSupport.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("b100"), EasyMock.anyObject());
+        callback.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("b100"), EasyMock.anyObject());
         EasyMock.expectLastCall().andReturn(serviceBundle2);
-        installSupport.replaceDigraph(EasyMock.anyObject(),
+        callback.replaceDigraph(EasyMock.anyObject(),
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
         EasyMock.expectLastCall();
-        installSupport.installConfigs(f2);
+        callback.installConfigs(f2);
         EasyMock.expectLastCall();
-        installSupport.installLibraries(f2);
+        callback.installLibraries(f2);
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
-        installSupport.resolveBundles(EasyMock.anyObject(),
+        callback.resolveBundles(EasyMock.anyObject(),
                 EasyMock.anyObject(),
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
@@ -509,21 +507,8 @@ public class DeployerTest {
         request.stateChanges = Collections.emptyMap();
         request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
 
-        MyDeployCallback callback = new MyDeployCallback(dstate);
-        BundleInstallSupport installSupport = c.createMock(BundleInstallSupportImpl.class);
-        Capture<String> capture = Capture.newInstance();
-        installSupport.installBundle(EasyMock.anyString(), EasyMock.capture(capture), anyObject(InputStream.class));
-        EasyMock.expectLastCall().andAnswer(() -> bundles.get(capture.getValue())).atLeastOnce();
-        installSupport.installConfigs(EasyMock.anyObject());
-        EasyMock.expectLastCall().atLeastOnce();
-        installSupport.installLibraries(EasyMock.anyObject());
-        EasyMock.expectLastCall().atLeastOnce();
-        installSupport.replaceDigraph(EasyMock.anyObject(),
-                               EasyMock.anyObject());
-        expectLastCall().atLeastOnce();
-        installSupport.resolveBundles(anyObject(Set.class), anyObject(Map.class), anyObject(Map.class));
-        expectLastCall().atLeastOnce();
-        Deployer deployer = new Deployer(manager, resolver, installSupport, callback);
+        MyDeployCallback callback = new MyDeployCallback(dstate, bundles);
+        Deployer deployer = new Deployer(manager, resolver, callback);
         c.replay();
 
         for (int i = 1; i <= 4; i++) {
@@ -586,9 +571,11 @@ public class DeployerTest {
 
     private static class MyDeployCallback implements Deployer.DeployCallback {
         final Deployer.DeploymentState dstate;
+        final Map<String, Bundle> bundles;
 
-        public MyDeployCallback(Deployer.DeploymentState dstate) {
+        public MyDeployCallback(Deployer.DeploymentState dstate, Map<String, Bundle> bundles) {
             this.dstate = dstate;
+            this.bundles = bundles;
         }
 
         @Override
@@ -612,5 +599,59 @@ public class DeployerTest {
         public void callListeners(DeploymentEvent deployEvent) {
         }
 
+        @Override
+        public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+            return bundles.get(uri);
+        }
+
+        @Override
+        public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
+
+        }
+
+        @Override
+        public void uninstall(Bundle bundle) throws BundleException {
+
+        }
+
+        @Override
+        public void startBundle(Bundle bundle) throws BundleException {
+
+        }
+
+        @Override
+        public void stopBundle(Bundle bundle, int options) throws BundleException {
+
+        }
+
+        @Override
+        public void setBundleStartLevel(Bundle bundle, int startLevel) {
+
+        }
+
+        @Override
+        public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
+
+        }
+
+        @Override
+        public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
+
+        }
+
+        @Override
+        public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
+
+        }
+
+        @Override
+        public void installConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+
+        }
+
+        @Override
+        public void installLibraries(Feature feature) throws IOException {
+
+        }
     }
 }
