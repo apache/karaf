@@ -59,43 +59,42 @@ public class InfoCommand extends ObrCommandSupport {
         }
     }
 
-    private void printResource(PrintStream out, Resource resource)
-    {
-        // OBR R5 per Spec has no presentation name
-        String resourceId = getResourceId(resource);
+    private void printResource(PrintStream out, Resource resource) {
+        if (out != null && resource != null) {
+            // OBR R5 per Spec has no presentation name
+            String resourceId = getResourceId(resource);
 
-        printUnderline(out, resourceId.length());
-        out.println(resourceId);
-        printUnderline(out, resourceId.length());
+            printUnderline(out, resourceId.length());
+            out.println(resourceId);
+            printUnderline(out, resourceId.length());
 
-        Map map = resource.getProperties();
-        for (Object o : map.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
-            if (entry.getValue().getClass().isArray()) {
-                out.println(entry.getKey() + ":");
-                for (int j = 0; j < Array.getLength(entry.getValue()); j++) {
-                    out.println("   " + Array.get(entry.getValue(), j));
+            Map map = resource.getProperties();
+            for (Object o : map.entrySet()) {
+                Map.Entry entry = (Map.Entry) o;
+                if (entry.getValue().getClass().isArray()) {
+                    out.println(entry.getKey() + ":");
+                    for (int j = 0; j < Array.getLength(entry.getValue()); j++) {
+                        out.println("   " + Array.get(entry.getValue(), j));
+                    }
+                } else {
+                    out.println(entry.getKey() + ": " + entry.getValue());
                 }
-            } else {
-                out.println(entry.getKey() + ": " + entry.getValue());
             }
-        }
 
-        Requirement[] reqs = resource.getRequirements();
-        if ((reqs != null) && (reqs.length > 0))
-        {
-            out.println("Requires:");
-            for (Requirement req : reqs) {
-                out.println("   " + req.getName() + ":" + req.getFilter());
+            Requirement[] reqs = resource.getRequirements();
+            if ((reqs != null) && (reqs.length > 0)) {
+                out.println("Requires:");
+                for (Requirement req : reqs) {
+                    out.println("   " + req.getName() + ":" + req.getFilter());
+                }
             }
-        }
 
-        Capability[] caps = resource.getCapabilities();
-        if ((caps != null) && (caps.length > 0))
-        {
-            out.println("Capabilities:");
-            for (Capability cap : caps) {
-                out.println("   " + cap.getName() + ":" + cap.getPropertiesAsMap());
+            Capability[] caps = resource.getCapabilities();
+            if ((caps != null) && (caps.length > 0)) {
+                out.println("Capabilities:");
+                for (Capability cap : caps) {
+                    out.println("   " + cap.getName() + ":" + cap.getPropertiesAsMap());
+                }
             }
         }
     }
