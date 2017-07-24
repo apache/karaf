@@ -86,10 +86,6 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         this.digraph = digraph;
     }
     
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#print(java.lang.String, boolean)
-     */
-    @Override
     public void print(String message, boolean verbose) {
         LOGGER.info(message);
         if (verbose) {
@@ -97,9 +93,6 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#refreshPackages(java.util.Collection)
-     */
     @Override
     public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -113,9 +106,6 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         latch.await();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#installBundle(java.lang.String, java.lang.String, java.io.InputStream)
-     */
     @Override
     public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
         if (FeaturesService.ROOT_REGION.equals(region)) {
@@ -125,9 +115,6 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#updateBundle(org.osgi.framework.Bundle, java.lang.String, java.io.InputStream)
-     */
     @Override
     public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
         // We need to wrap the bundle to insert a Bundle-UpdateLocation header
@@ -140,9 +127,6 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#uninstall(org.osgi.framework.Bundle)
-     */
     @Override
     public void uninstall(Bundle bundle) throws BundleException {
         bundle.uninstall();
@@ -155,25 +139,16 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#stopBundle(org.osgi.framework.Bundle, int)
-     */
     @Override
     public void stopBundle(Bundle bundle, int options) throws BundleException {
         bundle.stop(options);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#setBundleStartLevel(org.osgi.framework.Bundle, int)
-     */
     @Override
     public void setBundleStartLevel(Bundle bundle, int startLevel) {
         bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#resolveBundles(java.util.Set, java.util.Map, java.util.Map)
-     */
     @Override
     public void resolveBundles(Set<Bundle> bundles, final Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
         // Make sure it's only used for us
@@ -240,9 +215,6 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#replaceDigraph(java.util.Map, java.util.Map)
-     */
     @Override
     public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
         RegionDigraph temp = digraph.copy();
@@ -278,17 +250,11 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         digraph.replace(temp);
     }
     
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#saveDigraph()
-     */
     @Override
     public void saveDigraph() {
         DigraphHelper.saveDigraph(getDataFile(DigraphHelper.DIGRAPH_FILE), digraph);
     }
     
-    /* (non-Javadoc)
-     * @see org.apache.karaf.features.internal.service.Regions#getGraph()
-     */
     @Override
     public RegionDigraph getDiGraphCopy() throws BundleException {
         return digraph.copy();
