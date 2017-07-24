@@ -19,7 +19,6 @@
 package org.apache.karaf.main.lock;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,6 +29,8 @@ import java.util.logging.Logger;
 
 import org.apache.karaf.main.ConfigProperties;
 import org.apache.karaf.main.util.BootstrapLogManager;
+
+import javax.sql.DataSource;
 
 /**
  * <p>This class is the base class used to provide a master/slave configuration for
@@ -127,22 +128,26 @@ public class GenericJDBCLock implements Lock {
 
     final Logger LOG = Logger.getLogger(this.getClass().getName());
 
-    public static final String PROPERTY_LOCK_URL               = "karaf.lock.jdbc.url";
-    public static final String PROPERTY_LOCK_JDBC_DRIVER       = "karaf.lock.jdbc.driver";
-    public static final String PROPERTY_LOCK_JDBC_USER         = "karaf.lock.jdbc.user";
-    public static final String PROPERTY_LOCK_JDBC_PASSWORD     = "karaf.lock.jdbc.password";
-    public static final String PROPERTY_LOCK_JDBC_TABLE        = "karaf.lock.jdbc.table";
-    public static final String PROPERTY_LOCK_JDBC_TABLE_ID     = "karaf.lock.jdbc.table_id";
-    public static final String PROPERTY_LOCK_JDBC_CLUSTERNAME  = "karaf.lock.jdbc.clustername";
+    public static final String PROPERTY_LOCK_URL                = "karaf.lock.jdbc.url";
+    public static final String PROPERTY_LOCK_JDBC_DRIVER        = "karaf.lock.jdbc.driver";
+    public static final String PROPERTY_LOCK_JDBC_USER          = "karaf.lock.jdbc.user";
+    public static final String PROPERTY_LOCK_JDBC_PASSWORD      = "karaf.lock.jdbc.password";
+    public static final String PROPERTY_LOCK_JDBC_TABLE         = "karaf.lock.jdbc.table";
+    public static final String PROPERTY_LOCK_JDBC_TABLE_ID      = "karaf.lock.jdbc.table_id";
+    public static final String PROPERTY_LOCK_JDBC_CLUSTERNAME   = "karaf.lock.jdbc.clustername";
+    public static final String PROPERTY_LOCK_JDBC_CACHE         = "karaf.lock.jdbc.cache";
+    public static final String PROPERTY_LOCK_JDBC_VALID_TIMEOUT = "karaf.lock.jdbc.valid_timeout";
 
     public static final String DEFAULT_PASSWORD = "";
     public static final String DEFAULT_USER = "";
     public static final String DEFAULT_TABLE = "KARAF_LOCK";
     public static final String DEFAULT_TABLE_ID = "KARAF_NODE_ID";
     public static final String DEFAULT_CLUSTERNAME = "karaf";
+    public static final String DEFAULT_CACHE = "true";
+    public static final String DEFAULT_VALID_TIMEOUT = "0";
 
     final GenericStatements statements;
-    Connection lockConnection;
+    DataSource dataSource;
     String url;
     String driver;
     String user;
@@ -179,6 +184,13 @@ public class GenericJDBCLock implements Lock {
 
         this.statements = createStatements();
 
+        String url = this.url;
+        if (url.toLowerCase().startsWith("jdbc:derby")) {
+            url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
+        }
+        boolean cacheEnabled = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_JDBC_CACHE, DEFAULT_CACHE));
+        int validTimeout = Integer.parseInt(props.getProperty(PROPERTY_LOCK_JDBC_VALID_TIMEOUT, DEFAULT_VALID_TIMEOUT));
+        this.dataSource = new GenericDataSource(driver, url, user, password, cacheEnabled, validTimeout);
         init();
     }
     
@@ -188,15 +200,16 @@ public class GenericJDBCLock implements Lock {
      * @return An instance of a JDBCStatement object.
      */
     GenericStatements createStatements() {
-        GenericStatements statements = new GenericStatements(table, table_id, clusterName);
-        return statements;
+        return new GenericStatements(table, table_id, clusterName);
     }
     
     void init() {
         try {
             createDatabase();
-            createSchema();
-            generateUniqueId();
+            try (Connection connection = getConnection()) {
+                createSchema(connection);
+                generateUniqueId(connection);
+            }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error occured while attempting to obtain connection", e);
         }
@@ -209,43 +222,28 @@ public class GenericJDBCLock implements Lock {
     /**
      * This method is called to check and create the required schemas that are used by this instance.
      */
-    void createSchema() {
-        if (schemaExists()) {
-            return;
-        }
-
-        String[] createStatments = this.statements.getLockCreateSchemaStatements(System.currentTimeMillis());
-        Statement statement = null;
-        Connection connection = null;
-
+    void createSchema(Connection connection) {
         try {
-            connection = getConnection();
-            statement = connection.createStatement();
-            connection.setAutoCommit(false);
-
-            for (String stmt : createStatments) {
-                LOG.info("Executing statement: " + stmt);
-                statement.execute(stmt);
+            if (schemaExists(connection)) {
+                return;
             }
+            try (Statement statement = connection.createStatement()) {
+                connection.setAutoCommit(false);
 
-            connection.commit();
+                String[] createStatements = this.statements.getLockCreateSchemaStatements(System.currentTimeMillis());
+                for (String stmt : createStatements) {
+                    LOG.info("Executing statement: " + stmt);
+                    statement.execute(stmt);
+                }
+
+                connection.commit();
+                connection.setAutoCommit(true);
+            } catch (Exception e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Could not create schema", e );
-            try {
-                // Rollback transaction if and only if there was a failure...
-                if (connection != null)
-                    connection.rollback();
-            } catch (Exception ie) {
-                // Do nothing....
-            }
-        } finally {
-            closeSafely(statement);
-            try {
-                // Reset the auto commit to true
-                connection.setAutoCommit(true);
-            } catch (SQLException ignored) {
-                LOG.log(Level.FINE, "Exception while setting the connection auto commit", ignored);
-            }
         }
     }
 
@@ -254,9 +252,9 @@ public class GenericJDBCLock implements Lock {
      *
      * @return True, if the schemas are available else false.
      */
-    boolean schemaExists() {
-        return schemaExist(this.statements.getLockTableName())
-                && schemaExist(this.statements.getLockIdTableName());
+    boolean schemaExists(Connection connection) {
+        return schemaExist(connection, this.statements.getLockTableName())
+                && schemaExist(connection, this.statements.getLockIdTableName());
     }
 
     /**
@@ -265,16 +263,12 @@ public class GenericJDBCLock implements Lock {
      * @param tableName The name of the table to determine if it exists.
      * @return True, if the table exists else false.
      */
-    private boolean schemaExist(String tableName) {
-        ResultSet rs = null;
+    private boolean schemaExist(Connection connection, String tableName) {
         boolean schemaExists = false;
-        try {
-            rs = getConnection().getMetaData().getTables(null, null, tableName, new String[] {"TABLE"});
+        try (ResultSet rs = connection.getMetaData().getTables(null, null, tableName, new String[] {"TABLE"})) {
             schemaExists = rs.next();
         } catch (Exception ignore) {
             LOG.log(Level.SEVERE, "Error testing for db table", ignore);
-        } finally {
-            closeSafely(rs);
         }
         return schemaExists;
     }
@@ -283,23 +277,18 @@ public class GenericJDBCLock implements Lock {
      * This method will generate a unique id for this instance that is part of an active set of instances.
      * This method uses a simple algorithm to insure that the id will be unique for all cases.
      */
-    void generateUniqueId() {
-        boolean uniqueIdSet = false;
+    void generateUniqueId(Connection connection) {
         String selectString = this.statements.getLockIdSelectStatement();
-        PreparedStatement selectStatement = null, updateStatement = null;
-        try {
-            selectStatement = getConnection().prepareStatement(selectString);
+        try (PreparedStatement selectStatement = connection.prepareStatement(selectString)) {
 
-            // This loop can only be performed for so long and the chances that this will be 
+            boolean uniqueIdSet = false;
+            // This loop can only be performed for so long and the chances that this will be
             // looping for more than a few times is unlikely since there will always be at
             // least one instance that is successful.
             while (!uniqueIdSet) {
 
-                ResultSet rs = null;
-
-                try {
-                    // Get the current ID from the karaf ids table
-                    rs = selectStatement.executeQuery();
+                // Get the current ID from the karaf ids table
+                try (ResultSet rs = selectStatement.executeQuery()) {
 
                     // Check if we were able to retrieve the result...
                     if (rs.next()) {
@@ -308,76 +297,30 @@ public class GenericJDBCLock implements Lock {
                         
 						String updateString = this.statements.getLockIdUpdateIdStatement(currentId + 1, currentId);
 
-						updateStatement = getConnection().prepareStatement(updateString);
-                        
-                        int count = updateStatement.executeUpdate();
-                        
-                        // Set the uniqueId if and only if is it greater that zero
-                        uniqueId = ( uniqueIdSet = count > 0 ) ? currentId + 1 : 0;
-                        
-                        if (count > 1) {
-                            LOG.severe("OOPS there are more than one row within the table ids...");
+						try (PreparedStatement updateStatement = connection.prepareStatement(updateString)) {
+
+                            int count = updateStatement.executeUpdate();
+
+                            // Set the uniqueId if and only if is it greater that zero
+                            uniqueId = (uniqueIdSet = count > 0) ? currentId + 1 : 0;
+
+                            if (count > 1) {
+                                LOG.severe("OOPS there are more than one row within the table ids...");
+                            }
                         }
                     } else {
                         LOG.severe("No rows were found....");
                     }
                 } catch (SQLException e) {
                     LOG.log(Level.SEVERE, "Received an SQL exception while processing result set", e);
-                } finally {
-                    this.closeSafely(rs);
                 }
             }
         } catch (SQLException e) {
             LOG.log(Level.SEVERE, "Received an SQL exception while generating a prepate statement", e);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Received an exception while trying to get a reference to a connection", e);
-        } finally {
-            closeSafely(selectStatement);
         }
         LOG.info("INSTANCE unique id: " + uniqueId);
     }
     
-    /**
-     * This method is called to determine if this instance JDBC connection is
-     * still connected.
-     *
-     * @return True, if the connection is still connected else false.
-     * @throws SQLException If an SQL error occurs while checking if the lock is connected to the database.
-     */
-    boolean isConnected() throws SQLException {
-        return lockConnection != null && !lockConnection.isClosed();
-    }
-
-    /**
-     * This method is called to safely close a Statement.
-     *
-     * @param preparedStatement The statement to be closed.
-     */
-    void closeSafely(Statement preparedStatement) {
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                LOG.log(Level.SEVERE, "Failed to close statement", e);
-            }
-        }
-    }
-
-    /**
-     * This method is called to safely close a ResultSet instance.
-     *
-     * @param rs The result set to be closed.
-     */
-    void closeSafely(ResultSet rs) {
-        if (rs != null) {
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                LOG.log(Level.SEVERE, "Error occured while releasing ResultSet", e);
-            }
-        }
-    }
-
     /**
      * This method will return an active connection for this given jdbc driver.
      *
@@ -385,50 +328,7 @@ public class GenericJDBCLock implements Lock {
      * @throws Exception If the JDBC connection can't be retrieved.
      */
     protected Connection getConnection() throws Exception {
-        if (!isConnected()) {
-            lockConnection = createConnection(driver, url, user, password);
-        }
-
-        return lockConnection;
-    }
-
-    /**
-     * Create a new JDBC connection.
-     *
-     * @param driver The fully qualified driver class name.
-     * @param url The database connection URL.
-     * @param username The username for the database.
-     * @param password  The password for the database.
-     * @return a new JDBC connection.
-     * @throws Exception If the JDBC connection can't be created.
-     */
-    protected Connection createConnection(String driver, String url, String username, String password) throws Exception {
-        if (url.toLowerCase().startsWith("jdbc:derby")) {
-            url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
-        }
-
-        try {
-            return doCreateConnection(driver, url, username, password);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error occured while setting up JDBC connection", e);
-            throw e;
-        }
-    }
-
-    /**
-     * This method could be used to inject a mock JDBC connection for testing purposes.
-     *
-     * @param driver The fully qualified driver class name.
-     * @param url The database connection URL.
-     * @param username The username for the database.
-     * @param password The password for the database.
-     * @return a new JDBC connection.
-     * @throws ClassNotFoundException If the JDBC driver class is not found.
-     * @throws SQLException If the JDBC connection can't be created.
-     */
-    protected Connection doCreateConnection(String driver, String url, String username, String password) throws ClassNotFoundException, SQLException {
-        Class.forName(driver);
-        return DriverManager.getConnection(url, username, password);
+        return dataSource.getConnection();
     }
 
     /**
@@ -441,61 +341,60 @@ public class GenericJDBCLock implements Lock {
      * @see org.apache.karaf.main.lock.Lock#lock()
      */
     public boolean lock() throws Exception {
-       
-        // Try to acquire/update the lock state
-        boolean lockAquired = acquireLock(statements.getLockUpdateIdStatement(uniqueId, ++state, lock_delay, uniqueId));
-        
-        if (!lockAquired) {
-            
-            String lockSelectStatement = statements.getLockSelectStatement();
-            PreparedStatement statement = null;
-            ResultSet rs = null;
-            
-            try {
-                statement = getConnection().prepareStatement(lockSelectStatement);
-                // Get the current master id and compare with information that we have locally....
-                rs = statement.executeQuery();
-                
-                if (rs.next()) {
-                    int currentId = statements.getIdFromLockSelectStatement(rs); // The current master unique id or 0
-                    int currentState = statements.getStateFromLockSelectStatement(rs); // The current master state or whatever
-                    
-                    if (this.currentId == currentId) {
-                        // It is the same instance that locked the table
-                        if (this.currentState == currentState) {
-                            // Its state has not been updated....
-                            if ( (this.currentStateTime + this.currentLockDelay + this.currentLockDelay) < System.currentTimeMillis() ) {
-                                // The state was not been updated for more than twice the lock_delay value of the current master...
-                                // Try to steal the lock....
-                                lockAquired = acquireLock(statements.getLockUpdateIdStatementToStealLock(uniqueId, state, lock_delay, currentId, currentState));
+        try (Connection connection = getConnection()) {
+            // Try to acquire/update the lock state
+            boolean lockAquired = acquireLock(connection, statements.getLockUpdateIdStatement(uniqueId, ++state, lock_delay, uniqueId));
+
+            if (!lockAquired) {
+
+                String lockSelectStatement = statements.getLockSelectStatement();
+
+                try (PreparedStatement statement = connection.prepareStatement(lockSelectStatement)) {
+                    // Get the current master id and compare with information that we have locally....
+                    try (ResultSet rs = statement.executeQuery()) {
+
+                        if (rs.next()) {
+                            int currentId = statements.getIdFromLockSelectStatement(rs); // The current master unique id or 0
+                            int currentState = statements.getStateFromLockSelectStatement(rs); // The current master state or whatever
+
+                            if (this.currentId == currentId) {
+                                // It is the same instance that locked the table
+                                if (this.currentState == currentState) {
+                                    // Its state has not been updated....
+                                    if ((this.currentStateTime + this.currentLockDelay + this.currentLockDelay) < System.currentTimeMillis()) {
+                                        // The state was not been updated for more than twice the lock_delay value of the current master...
+                                        // Try to steal the lock....
+                                        lockAquired = acquireLock(connection, statements.getLockUpdateIdStatementToStealLock(uniqueId, state, lock_delay, currentId, currentState));
+                                    }
+                                } else {
+                                    // Set the current time to be used to determine if we can
+                                    // try to steal the lock later...
+                                    this.currentStateTime = System.currentTimeMillis();
+                                    this.currentState = currentState;
+                                }
+                            } else {
+                                // This is a different currentId that is being used...
+                                // at this time, it does not matter if the new master id is zero we can try to acquire it
+                                // during the next lock call...
+                                this.currentId = currentId;
+                                this.currentState = currentState;
+                                // Update the current state time since this is a new lock service...
+                                this.currentStateTime = System.currentTimeMillis();
+                                // Get the lock delay value which is specific to the current master...
+                                this.currentLockDelay = statements.getLockDelayFromLockSelectStatement(rs);
                             }
-                        } else {
-                            // Set the current time to be used to determine if we can 
-                            // try to steal the lock later...
-                            this.currentStateTime = System.currentTimeMillis();
-                            this.currentState = currentState;
                         }
-                    } else {
-                        // This is a different currentId that is being used...
-                        // at this time, it does not matter if the new master id is zero we can try to acquire it
-                        // during the next lock call...
-                        this.currentId = currentId;
-                        this.currentState = currentState;
-                        // Update the current state time since this is a new lock service...
-                        this.currentStateTime = System.currentTimeMillis();
-                        // Get the lock delay value which is specific to the current master...
-                        this.currentLockDelay = statements.getLockDelayFromLockSelectStatement(rs);
                     }
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE, "Unable to determine if the lock was obtain", e);
                 }
-            } catch( Exception e ) {
-                LOG.log(Level.SEVERE, "Unable to determine if the lock was obtain", e);
-            } finally {
-                closeSafely(statement);
-                closeSafely(rs);
             }
+
+            return lockAquired;
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error while trying to obtain the lock", e);
+            return false;
         }
-        
-        return lockAquired;
     }
 
     /**
@@ -506,22 +405,15 @@ public class GenericJDBCLock implements Lock {
      * @param lockUpdateIdStatement The sql statement used to execute the update.
      * @return True, if the row was updated else false.
      */
-    private boolean acquireLock(String lockUpdateIdStatement) {
-        PreparedStatement preparedStatement = null;
-        boolean lockAquired = false;
-        
-        try {
-            preparedStatement = getConnection().prepareStatement(lockUpdateIdStatement);
+    private boolean acquireLock(Connection connection, String lockUpdateIdStatement) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(lockUpdateIdStatement)) {
             // This will only update the row that contains the ID of 0 or curId
-            lockAquired = preparedStatement.executeUpdate() > 0;
+            return preparedStatement.executeUpdate() > 0;
         } catch (Exception e) {
             // Do we want to display this message everytime???
             LOG.log(Level.WARNING, "Failed to acquire database lock", e);
-        } finally {
-            closeSafely(preparedStatement);
+            return false;
         }
-        
-        return lockAquired;
     }
 
     /**
@@ -532,27 +424,15 @@ public class GenericJDBCLock implements Lock {
      * @see org.apache.karaf.main.lock.Lock#release()
      */
     public void release() throws Exception {
-        if (isConnected()) {
+        try (Connection connection = getConnection()) {
             String lockResetIdStatement = statements.getLockResetIdStatement(uniqueId);
-            PreparedStatement preparedStatement = null;
-            
-            try {
-                preparedStatement = getConnection().prepareStatement(lockResetIdStatement);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(lockResetIdStatement)) {
                 // This statement will set the ID to 0 and allow others to steal the lock...
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                LOG.log(Level.SEVERE, "Exception while rollbacking the connection on release", e);
-            } finally {
-                closeSafely(preparedStatement);
-                try {
-                    getConnection().close();
-                } catch (SQLException ignored) {
-                    LOG.log(Level.FINE, "Exception while closing connection on release", ignored);
-                }
             }
+        } catch (SQLException e) {
+            LOG.log(Level.SEVERE, "Exception while releasing lock", e);
         }
-        
-        lockConnection = null;
     }
 
     /**
@@ -565,11 +445,6 @@ public class GenericJDBCLock implements Lock {
      *
      */
     public boolean isAlive() throws Exception {
-        if (!isConnected()) { 
-            LOG.severe("Lost lock!");
-            return false; 
-        }
-
         return lock();
     }
 
