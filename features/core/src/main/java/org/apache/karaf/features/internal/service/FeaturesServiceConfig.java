@@ -18,20 +18,20 @@ package org.apache.karaf.features.internal.service;
 
 public class FeaturesServiceConfig {
 
-    public String overrides;
+    public final String overrides;
     
     /**
      * Range to use when a version is specified on a feature dependency.
      * The default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_FEATURE_RESOLUTION_RANGE}
      */
-    public String featureResolutionRange;
+    public final String featureResolutionRange;
     
     /**
      * Range to use when verifying if a bundle should be updated or
      * new bundle installed.
      * The default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_BUNDLE_UPDATE_RANGE}
      */
-    public String bundleUpdateRange;
+    public final String bundleUpdateRange;
     
     /**
      * Use CRC to check snapshot bundles and update them if changed.
@@ -40,18 +40,34 @@ public class FeaturesServiceConfig {
      * - always : always update snapshots
      * - crc : use CRC to detect changes
      */
-    public String updateSnapshots;
+    public final String updateSnapshots;
     
-    public int downloadThreads = 1;
+    public final int downloadThreads;
     
-    public long scheduleDelay;
+    public final long scheduleDelay;
     
-    public int scheduleMaxRun;
+    public final int scheduleMaxRun;
     
     /**
      * Service requirements enforcement
      */
-    public String serviceRequirements;
+    public final String serviceRequirements;
     
-    public String blacklisted;
+    public final String blacklisted;
+
+    public FeaturesServiceConfig() {
+        this(null, null, null, null, 1, 0, 0, null, null);
+    }
+
+    public FeaturesServiceConfig(String overrides, String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun, String blacklisted, String serviceRequirements) {
+        this.overrides = overrides;
+        this.featureResolutionRange = featureResolutionRange;
+        this.bundleUpdateRange = bundleUpdateRange;
+        this.updateSnapshots = updateSnapshots;
+        this.downloadThreads = downloadThreads;
+        this.scheduleDelay = scheduleDelay;
+        this.scheduleMaxRun = scheduleMaxRun;
+        this.blacklisted = blacklisted;
+        this.serviceRequirements = serviceRequirements;
+    }
 }
