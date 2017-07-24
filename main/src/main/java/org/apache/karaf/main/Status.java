@@ -18,6 +18,8 @@
  */
 package org.apache.karaf.main;
 
+import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
+
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
@@ -67,8 +69,16 @@ public class Status {
                 }
             }
         } else {
-            System.err.println("Unable to find port...");
-            System.exit(2);
+            // using the pid file
+            int pid = getPidFromPidFile(config.pidFile);
+            org.apache.karaf.jpm.Process process = new ProcessBuilderFactoryImpl().newBuilder().attach(pid);
+            if (process.isRunning()) {
+                System.out.println("Running ... (pid " + pid + ")");
+                System.exit(0);
+            } else {
+                System.out.println("Not Running ...");
+                System.exit(1);
+            }
         }
     }
 
@@ -79,6 +89,15 @@ public class Status {
         port = Integer.parseInt(portStr);
         r.close();
         return port;
+    }
+
+    private static int getPidFromPidFile(String pidFile) throws IOException {
+        int pid;
+        BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(pidFile)));
+        String pidString = r.readLine();
+        pid = Integer.parseInt(pidString);
+        r.close();
+        return pid;
     }
 
 }
