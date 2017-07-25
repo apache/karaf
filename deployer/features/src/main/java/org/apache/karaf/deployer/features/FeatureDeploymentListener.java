@@ -23,25 +23,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
+import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.features.FeaturesService;
@@ -50,9 +52,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+
+import static org.apache.karaf.features.FeaturesService.ROOT_REGION;
 
 /**
  * A deployment listener able to hot deploy a feature descriptor
@@ -63,7 +64,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
 
     private final Logger logger = LoggerFactory.getLogger(FeatureDeploymentListener.class);
 
-    private DocumentBuilderFactory dbf;
+    private XMLInputFactory xif;
     private FeaturesService featuresService;
     private BundleContext bundleContext;
     private Properties properties = new Properties();
@@ -144,9 +145,9 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     public boolean canHandle(File artifact) {
         try {
             if (artifact.isFile() && artifact.getName().endsWith(".xml")) {
-                Document doc = parse(artifact);
-                String name = doc.getDocumentElement().getLocalName();
-                String uri  = doc.getDocumentElement().getNamespaceURI();
+                QName qname = getRootElementName(artifact);
+                String name = qname.getLocalPart();
+                String uri  = qname.getNamespaceURI();
                 if ("features".equals(name) ) {
                 	if(isKnownFeaturesURI(uri)){
                         return true;
@@ -176,125 +177,94 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         }
     }
 
-    public void bundleChanged(BundleEvent bundleEvent) {
-            Bundle bundle = bundleEvent.getBundle();
-            if (bundleEvent.getType() == BundleEvent.RESOLVED) {
-                try {
-                    List<URL> urls = new ArrayList<>();
-                    Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
-                    while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
-                        URL url = (URL) featuresUrlEnumeration.nextElement();
-                        try {
-                            featuresService.addRepository(url.toURI());
-                            URI needRemovedRepo = null;
-                            for (Repository repo : featuresService.listRepositories()) {
-                                if (repo.getURI().equals(url.toURI())) {
-                                    Set<Feature> features = new HashSet<>(Arrays.asList(repo.getFeatures()));
-                                    Set<String> autoInstallFeatures = new HashSet<>();
-                                    for(Feature feature:features) {
-                                        if(feature.getInstall() != null && feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
-                                            if (!featuresService.isInstalled(feature)) {
-                                                autoInstallFeatures.add(feature.getId());
-                                            }
-                                        }
-                                    }
-                                    if (!autoInstallFeatures.isEmpty()) {
-                                        featuresService.installFeatures(autoInstallFeatures, EnumSet.noneOf(FeaturesService.Option.class));
-                                    }
-                                } else {
-                                    //remove older out-of-data feature repo
-                                    if (repo.getURI().toString().contains(FEATURE_PATH)) {
-                                        String featureFileName = repo.getURI().toString();
-                                        featureFileName = featureFileName.substring(featureFileName.lastIndexOf('/') + 1);
-                                        String newFeatureFileName = url.toURI().toString();
-                                        newFeatureFileName = newFeatureFileName.substring(newFeatureFileName.lastIndexOf('/') + 1);
-                                        if (featureFileName.equals(newFeatureFileName)) {
-                                            needRemovedRepo = repo.getURI();
-                                        }
-                                    }
-                                }
-
-                            }
-                            urls.add(url);
-                            if (needRemovedRepo != null) {
-                                featuresService.removeRepository(needRemovedRepo);
-                            }
-                        } catch (Exception e) {
-                            logger.error("Unable to install features", e);
-                        }
-                    }
-                    synchronized (this) {
-                        String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
-                        String old = (String) properties.get(prefix + ".count");
-                        if (old != null && urls.isEmpty()) {
-                            properties.remove(prefix + ".count");
-                            saveProperties();
-                        } else if (!urls.isEmpty()) {
-                            properties.put(prefix + ".count", Integer.toString(urls.size()));
-                            for (int i = 0; i < urls.size(); i++) {
-                                properties.put(prefix + ".url." + i, urls.get(i).toExternalForm());
-                            }
-                            saveProperties();
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.error("Unable to install deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
-                }
-            } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
-                try {
-                    synchronized (this) {
-                        String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
-                        String countStr = (String) properties.remove(prefix + ".count");
-                        if (countStr != null) {
-                            int count = Integer.parseInt(countStr);
-                            for (int i = 0; i < count; i++) {
-                                URL url = new URL((String) properties.remove(prefix + ".url." + i));
-                                for (Repository repo : featuresService.listRepositories()) {
-                                    try {
-                                        if (repo.getURI().equals(url.toURI())) {
-                                            for (Feature f : repo.getFeatures()) {
-                                                try {
-                                                    featuresService.uninstallFeature(f.getName(), f.getVersion());
-                                                } catch (Exception e) {
-                                                    logger.error("Unable to uninstall feature: " + f.getName(), e);
-                                                }
-                                            }
-                                        }
-                                    } catch (Exception e) {
-                                        logger.error("Unable to uninstall features: " + url, e);
-                                    }
-                                }
-                                try {
-                                    featuresService.removeRepository(url.toURI());
-                                } catch (URISyntaxException e) {
-                                    logger.error("Unable to remove repository: " + url, e);
-                                }
-                            }
-                            saveProperties();
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.error("Unable to uninstall deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
+    public synchronized void bundleChanged(BundleEvent bundleEvent) {
+        // Only handle resolved and uninstalled events
+        if (bundleEvent.getType() != BundleEvent.RESOLVED
+                && bundleEvent.getType() != BundleEvent.UNINSTALLED) {
+            return;
+        }
+        Bundle bundle = bundleEvent.getBundle();
+        try {
+            // Remove previous informations
+            List<URI> repsToRemove = new ArrayList<>();
+            List<String> reqsToRemove = new ArrayList<>();
+            // Remove old properties
+            String prefix = "bundle." + bundle.getBundleId();
+            String countStr = (String) properties.remove(prefix + ".reps.count");
+            if (countStr != null) {
+                int count = Integer.parseInt(countStr);
+                for (int i = 0; i < count; i++) {
+                    String rep = (String) properties.remove(prefix + ".reps.item" + i);
+                    repsToRemove.add(URI.create(rep));
                 }
             }
+            countStr = (String) properties.remove(prefix + ".reqs.count");
+            if (countStr != null) {
+                int count = Integer.parseInt(countStr);
+                for (int i = 0; i < count; i++) {
+                    String req = (String) properties.remove(prefix + ".reqs.item" + i);
+                    reqsToRemove.add(req);
+                }
+            }
+            saveProperties();
+
+            // Compute new informations
+            List<URI> repsToAdd = new ArrayList<>();
+            List<String> reqsToAdd = new ArrayList<>();
+            if (bundleEvent.getType() == BundleEvent.RESOLVED) {
+                Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
+                while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
+                    URL url = (URL) featuresUrlEnumeration.nextElement();
+                    URI uri = url.toURI();
+                    repsToAdd.add(uri);
+                    Repository rep = featuresService.createRepository(uri);
+                    Stream.of(rep.getFeatures())
+                            .filter(f -> f.getInstall() == null || Feature.DEFAULT_INSTALL_MODE.equals(f.getInstall()))
+                            .map(f -> "feature:" + f.getName() + "/" + new VersionRange(f.getVersion(), true))
+                            .forEach(reqsToAdd::add);
+                }
+                if (!repsToAdd.isEmpty()) {
+                    properties.put(prefix + ".reps.count", Integer.toString(repsToAdd.size()));
+                    for (int i = 0; i < repsToAdd.size(); i++) {
+                        properties.put(prefix + ".reps.item" + i, repsToAdd.get(i).toASCIIString());
+                    }
+                    properties.put(prefix + ".reqs.count", Integer.toString(reqsToAdd.size()));
+                    for (int i = 0; i < reqsToAdd.size(); i++) {
+                        properties.put(prefix + ".reqs.item" + i, reqsToAdd.get(i));
+                    }
+                }
+            }
+            saveProperties();
+
+            // Call features service
+            List<Repository> requiredRepos = Arrays.asList(featuresService.listRequiredRepositories());
+            Set<URI> requiredReposUris = requiredRepos.stream()
+                    .map(Repository::getURI).collect(Collectors.toSet());
+            requiredReposUris.removeAll(repsToRemove);
+            requiredReposUris.addAll(repsToAdd);
+
+            Map<String, Set<String>> requirements = featuresService.listRequirements();
+            requirements.get(ROOT_REGION).removeAll(reqsToRemove);
+            requirements.get(ROOT_REGION).addAll(reqsToAdd);
+
+            if (!reqsToRemove.isEmpty() || !reqsToAdd.isEmpty()) {
+                featuresService.updateReposAndRequirements(requiredReposUris, requirements, EnumSet.noneOf(FeaturesService.Option.class));
+            }
+        } catch (Exception e) {
+            logger.error("Unable to update deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
+        }
     }
 
-    protected Document parse(File artifact) throws Exception {
-        if (dbf == null) {
-            dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
+    private QName getRootElementName(File artifact) throws Exception {
+        if (xif == null) {
+            xif = XMLInputFactory.newFactory();
+            xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
         }
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        db.setErrorHandler(new ErrorHandler() {
-            public void warning(SAXParseException exception) throws SAXException {
-            }
-            public void error(SAXParseException exception) throws SAXException {
-            }
-            public void fatalError(SAXParseException exception) throws SAXException {
-                throw exception;
-            }
-        });
-        return db.parse(artifact);
+        try (InputStream is = new FileInputStream(artifact)) {
+            XMLStreamReader sr = xif.createXMLStreamReader(is);
+            sr.nextTag();
+            return sr.getName();
+        }
     }
 
 }

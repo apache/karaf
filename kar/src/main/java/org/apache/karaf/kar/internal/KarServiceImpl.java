@@ -274,7 +274,7 @@ public class KarServiceImpl implements KarService {
                 if (repository.getURI().equals(karFeatureRepoUri)) {
                     try {
                         for (Feature feature : repository.getFeatures()) {
-                            if (feature.getInstall() == null || !feature.getInstall().equals("manual")) {
+                            if (feature.getInstall() == null || Feature.DEFAULT_INSTALL_MODE.equals(feature.getInstall())) {
                                 try {
                                     LOGGER.debug("noAutoRefreshBundles is " + isNoAutoRefreshBundles());
                                     if (isNoAutoRefreshBundles()) {
@@ -430,7 +430,7 @@ public class KarServiceImpl implements KarService {
                 if (repository.getURI().equals(karFeatureRepoUri)) {
                     try {
                         for (Feature feature : repository.getFeatures()) {
-                            if (feature.getInstall() == null || !feature.getInstall().equals("manual")) {
+                            if (feature.getInstall() == null || Feature.DEFAULT_INSTALL_MODE.equals(feature.getInstall())) {
                                 try {
                                     featuresService.uninstallFeature(feature.getName(), feature.getVersion());
                                 } catch (Exception e) {

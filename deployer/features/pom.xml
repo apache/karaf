@@ -105,6 +105,7 @@
                             org.apache.karaf.deployer.features,
                             org.apache.karaf.deployer.features.osgi,
                             org.apache.karaf.util,
+                            org.apache.felix.utils.version
                         </Private-Package>
                     </instructions>
                 </configuration>

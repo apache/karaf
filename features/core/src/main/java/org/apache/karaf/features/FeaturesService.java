@@ -126,6 +126,12 @@ public interface FeaturesService {
 
     void updateFeaturesState(Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options) throws Exception;
 
+    void updateReposAndRequirements(Set<URI> repos,
+                                    Map<String, Set<String>> requirements,
+                                    EnumSet<Option> options) throws Exception;
+
+    Repository createRepository(URI uri) throws Exception;
+
     Feature[] listFeatures() throws Exception;
 
     Feature[] listRequiredFeatures() throws Exception;

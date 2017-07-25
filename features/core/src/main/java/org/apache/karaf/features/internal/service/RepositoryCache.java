@@ -39,7 +39,11 @@ public class RepositoryCache {
     public RepositoryCache(String blacklisted) {
         this.blacklisted = loadBlacklist(blacklisted);
     }
-    
+
+    public Clause[] getBlacklisted() {
+        return blacklisted;
+    }
+
     private static Clause[] loadBlacklist(String blacklisted) {
         Set<String> blacklistStrings = Blacklist.loadBlacklist(blacklisted);
         return Parser.parseClauses(blacklistStrings.toArray(new String[blacklistStrings.size()]));

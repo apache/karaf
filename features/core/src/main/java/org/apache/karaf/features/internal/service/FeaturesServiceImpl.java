@@ -42,12 +42,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
@@ -178,7 +180,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         // Resolve
         try {
             Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-            doProvisionInThread(requestedFeatures, stateChanges, copyState(), options);
+            doProvisionInThread(requestedFeatures, stateChanges, copyState(), getFeaturesById(), options);
         } catch (Exception e) {
             LOGGER.warn("Error updating state", e);
         }
@@ -645,6 +647,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         return map;
     }
 
+    protected Map<String, Feature> getFeaturesById() throws Exception {
+        return getFeatureCache().values().stream().flatMap(m -> m.values().stream())
+                .collect(Collectors.toMap(Feature::getId, Function.identity()));
+    }
+
    //
     // Installed features
     //
@@ -858,7 +865,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
         print("Adding features: " + join(featuresToDisplay), options.contains(Option.Verbose));
         Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(required, stateChanges, state, options);
+        doProvisionInThread(required, stateChanges, state, getFeaturesById(), options);
     }
 
     @Override
@@ -909,13 +916,13 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             required.remove(region);
         }
         Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(required, stateChanges, state, options);
+        doProvisionInThread(required, stateChanges, state, getFeaturesById(), options);
     }
 
     @Override
     public void updateFeaturesState(Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options) throws Exception {
         State state = copyState();
-        doProvisionInThread(copy(state.requirements), stateChanges, state, options);
+        doProvisionInThread(copy(state.requirements), stateChanges, state, getFeaturesById(), options);
     }
 
     @Override
@@ -924,7 +931,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Map<String, Set<String>> required = copy(state.requirements);
         add(required, requirements);
         Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(required, stateChanges, state, options);
+        doProvisionInThread(required, stateChanges, state, getFeaturesById(), options);
     }
 
     @Override
@@ -933,7 +940,63 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Map<String, Set<String>> required = copy(state.requirements);
         remove(required, requirements);
         Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(required, stateChanges, state, options);
+        doProvisionInThread(required, stateChanges, state, getFeaturesById(), options);
+    }
+
+    @Override
+    public void updateReposAndRequirements(Set<URI> repos, Map<String, Set<String>> requirements, EnumSet<Option> options) throws Exception {
+        State stateCopy;
+        synchronized (lock) {
+            // Remove repo
+            Set<String> reps = repos.stream().map(URI::toString).collect(Collectors.toSet());
+            Set<String> toRemove = diff(state.repositories, reps);
+            Set<String> toAdd = diff(reps, state.repositories);
+            state.repositories.removeAll(toRemove);
+            state.repositories.addAll(toAdd);
+            featureCache = null;
+            for (String uri : toRemove) {
+                repositories.removeRepository(URI.create(uri));
+            }
+            for (String uri : toAdd) {
+                repositories.addRepository(createRepository(URI.create(uri)));
+            }
+            saveState();
+            stateCopy = state.copy();
+        }
+        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
+        doProvisionInThread(requirements, stateChanges, stateCopy, getFeaturesById(), options);
+    }
+
+    private <T> Set<T> diff(Set<T> s1, Set<T> s2) {
+        Set<T> s = new HashSet<>(s1);
+        s.removeAll(s2);
+        return s;
+    }
+
+    @Override
+    public Repository createRepository(URI uri) throws Exception {
+        return repositories.create(uri, true, true);
+    }
+
+    private Map<String, Feature> loadAllFeatures(Set<URI> uris) throws Exception {
+        //the outer map's key is feature name, the inner map's key is feature version
+        Map<String, Feature> map = new HashMap<>();
+        // Two phase load:
+        // * first load dependent repositories
+        Set<URI> loaded = new HashSet<>();
+        List<URI> toLoad = new ArrayList<>(uris);
+        Clause[] blacklisted = repositories.getBlacklisted();
+        while (!toLoad.isEmpty()) {
+            URI uri = toLoad.remove(0);
+            if (loaded.add(uri)) {
+                Repository repo = new RepositoryImpl(uri, blacklisted);
+                Collections.addAll(toLoad, repo.getRepositories());
+                for (Feature f : repo.getFeatures()) {
+                    map.put(f.getId(), f);
+                }
+            }
+        }
+        return map;
     }
 
     @Override
@@ -974,12 +1037,13 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private void doProvisionInThread(final Map<String, Set<String>> requirements,
                                     final Map<String, Map<String, FeatureState>> stateChanges,
                                     final State state,
+                                    final Map<String, Feature> featureById,
                                     final EnumSet<Option> options) throws Exception {
         try {
             final String outputFile = this.outputFile.get();
             this.outputFile.set(null);
             executor.submit(() -> {
-                doProvision(requirements, stateChanges, state, options, outputFile);
+                doProvision(requirements, stateChanges, state, featureById, options, outputFile);
                 return null;
             }).get();
         } catch (ExecutionException e) {
@@ -996,7 +1060,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
-    private Deployer.DeploymentState getDeploymentState(State state) throws Exception {
+    private Deployer.DeploymentState getDeploymentState(State state, Map<String, Feature> featuresById) throws Exception {
         Deployer.DeploymentState dstate = new Deployer.DeploymentState();
         dstate.state = state;
         FrameworkInfo info = installSupport.getInfo();
@@ -1005,13 +1069,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         dstate.currentStartLevel = info.currentStartLevel;
         dstate.bundles = info.bundles;
         // Features
-        dstate.features = new HashMap<>();
-        for (Map<String, Feature> m : getFeatureCache().values()) {
-            for (Feature feature : m.values()) {
-                String id = feature.getId();
-                dstate.features.put(id, feature);
-            }
-        }
+        dstate.features = featuresById;
         RegionDigraph regionDigraph = installSupport.getDiGraphCopy();
         dstate.bundlesPerRegion = DigraphHelper.getBundlesPerRegion(regionDigraph);
         dstate.filtersPerRegion = DigraphHelper.getPolicies(regionDigraph);
@@ -1034,10 +1092,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     private void doProvision(Map<String, Set<String>> requirements,                // all requirements
-                            Map<String, Map<String, FeatureState>> stateChanges,  // features state changes
-                            State state,                                          // current state
-                            EnumSet<Option> options,                              // installation options
-                            String outputFile                                     // file to store the resolution or null
+                             Map<String, Map<String, FeatureState>> stateChanges,  // features state changes
+                             State state,                                          // current state
+                             Map<String, Feature> featuresById,                    // features by id
+                             EnumSet<Option> options,                              // installation options
+                             String outputFile                                     // file to store the resolution or null
     ) throws Exception {
 
         Dictionary<String, String> props = getMavenConfig();
@@ -1049,7 +1108,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             Set<String> prereqs = new HashSet<>();
             while (true) {
                 try {
-                    Deployer.DeploymentState dstate = getDeploymentState(state);
+                    Deployer.DeploymentState dstate = getDeploymentState(state, featuresById);
                     Deployer.DeploymentRequest request = getDeploymentRequest(requirements, stateChanges, options, outputFile);
                     new Deployer(manager, this.resolver, this).deploy(dstate, request);
                     break;
