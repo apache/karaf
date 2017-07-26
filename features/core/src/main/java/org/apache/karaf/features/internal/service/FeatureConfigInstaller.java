@@ -255,7 +255,7 @@ public class FeatureConfigInstaller {
             } else {
                 cfgFile = new File(storage, pid + ".cfg");
             }
-            Configuration cfg = findExistingConfiguration(configAdmin, factoryPid, pid);
+            Configuration cfg = findExistingConfiguration(configAdmin, pid, factoryPid);
             // update the cfg file depending of the configuration
             if (cfg != null && cfg.getProperties() != null) {
                 Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
