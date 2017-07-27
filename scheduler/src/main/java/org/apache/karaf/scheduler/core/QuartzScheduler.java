@@ -25,6 +25,7 @@ import java.util.UUID;
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
+import org.apache.karaf.scheduler.SchedulerError;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -205,7 +206,7 @@ public class QuartzScheduler implements Scheduler {
      * @throws SchedulerException if the job can't be scheduled
      * @throws IllegalArgumentException If the preconditions are not met
      */
-    public void schedule(final Object job, final ScheduleOptions options) throws IllegalArgumentException, SchedulerException {
+    public void schedule(final Object job, final ScheduleOptions options) throws IllegalArgumentException, SchedulerError {
         this.checkJob(job);
 
         if ( !(options instanceof InternalScheduleOptions)) {
@@ -251,7 +252,11 @@ public class QuartzScheduler implements Scheduler {
         final JobDetail detail = this.createJobDetail(name, jobDataMap, opts.canRunConcurrently);
 
         this.logger.debug("Scheduling job {} with name {} and trigger {}", job, name, trigger);
-        s.scheduleJob(detail, trigger);
+        try {
+            s.scheduleJob(detail, trigger);
+        } catch (SchedulerException ex) {
+            throw new SchedulerError(ex);
+        }
     }
 
     /**
@@ -276,20 +281,24 @@ public class QuartzScheduler implements Scheduler {
     }
 
     @Override
-    public Map<Object, ScheduleOptions> getJobs() throws SchedulerException {
-        Map<Object, ScheduleOptions> jobs = new HashMap<>();
-        org.quartz.Scheduler s = this.scheduler;
-        if (s != null) {
-            for (String group : s.getJobGroupNames()) {
-                for (JobKey key : s.getJobKeys(GroupMatcher.jobGroupEquals(group))) {
-                    JobDetail detail = s.getJobDetail(key);
-                    ScheduleOptions options = (ScheduleOptions) detail.getJobDataMap().get(DATA_MAP_OPTIONS);
-                    Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
-                    jobs.put(job, options);
+    public Map<Object, ScheduleOptions> getJobs() throws SchedulerError {
+        try {
+            Map<Object, ScheduleOptions> jobs = new HashMap<>();
+            org.quartz.Scheduler s = this.scheduler;
+            if (s != null) {
+                for (String group : s.getJobGroupNames()) {
+                    for (JobKey key : s.getJobKeys(GroupMatcher.jobGroupEquals(group))) {
+                        JobDetail detail = s.getJobDetail(key);
+                        ScheduleOptions options = (ScheduleOptions) detail.getJobDataMap().get(DATA_MAP_OPTIONS);
+                        Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
+                        jobs.put(job, options);
+                    }
                 }
             }
+            return jobs;
+        } catch (SchedulerException ex) {
+            throw new SchedulerError(ex);
         }
-        return jobs;
     }
 
 }
