@@ -27,11 +27,11 @@ import org.ops4j.pax.logging.spi.PaxAppender;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 @Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
 @Service
 public class LogTail extends DisplayLog {
-
     @Reference
     Session session;
 
@@ -45,26 +45,10 @@ public class LogTail extends DisplayLog {
         PrintStream out = session.getConsole();
         display(out, minLevel);
         out.flush();
-        PaxAppender appender = event -> printEvent(out, event, minLevel);
-        ServiceTracker<LogService, LogService> tracker = new ServiceTracker<LogService, LogService>(context, LogService.class, null) {
-            
-            @Override
-            public LogService addingService(ServiceReference<LogService> reference) {
-                LogService service = super.addingService(reference);
-                service.addAppender(appender);
-                return service;
-            }
 
-            @Override
-            public void removedService(ServiceReference<LogService> reference, LogService service) {
-                service.removeAppender(appender);
-                synchronized (LogTail.this) {
-                    LogTail.this.notifyAll();
-                }
-            };
-        };
+        PaxAppender appender = event -> printEvent(out, event, minLevel);
+        ServiceTracker<LogService, LogService> tracker = new LogServiceTracker(context, LogService.class, null, appender);
         tracker.open();
-        
         try {
             synchronized (this) {
                 wait();
@@ -76,8 +60,38 @@ public class LogTail extends DisplayLog {
             tracker.close();
         }
         out.println();
-
         return null;
+    }
+    
+    private synchronized void stopTail() {
+        notifyAll();
+    }
+
+    /**
+     * Track LogService dynamically so we can react when the log core bundle stops even while we block for the tail
+     */
+    private final class LogServiceTracker extends ServiceTracker<LogService, LogService> {
+        private final PaxAppender appender;
+    
+        private LogServiceTracker(BundleContext context, Class<LogService> clazz,
+                                  ServiceTrackerCustomizer<LogService, LogService> customizer,
+                                  PaxAppender appender) {
+            super(context, clazz, customizer);
+            this.appender = appender;
+        }
+    
+        @Override
+        public LogService addingService(ServiceReference<LogService> reference) {
+            LogService service = super.addingService(reference);
+            service.addAppender(appender);
+            return service;
+        }
+    
+        @Override
+        public void removedService(ServiceReference<LogService> reference, LogService service) {
+            service.removeAppender(appender);
+            stopTail();
+        }
     }
 
 }
