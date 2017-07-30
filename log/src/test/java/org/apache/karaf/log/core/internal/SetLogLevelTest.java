@@ -52,7 +52,7 @@ public class SetLogLevelTest extends TestCase {
         configuration.update(properties);        
         ConfigurationAdmin configAdmin = EasyMock.createMock(ConfigurationAdmin.class);
         EasyMock.expect(configAdmin.getConfiguration(LogServiceImpl.CONFIGURATION_PID, null)).andReturn(configuration);
-        logService = new LogServiceImpl(configAdmin, new LruList(100));
+        logService = new LogServiceImpl(configAdmin, 100);
         logMBean = new LogMBeanImpl(logService);
         EasyMock.replay(configAdmin);
         EasyMock.replay(configuration);

@@ -61,7 +61,6 @@ public class KarafLogEvent implements PaxLoggingEvent {
 
     @Override
     public String getLoggerName() {
-        // TODO Auto-generated method stub
         return this.loggerName;
     }
 

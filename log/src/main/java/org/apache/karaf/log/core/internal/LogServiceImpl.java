@@ -18,7 +18,9 @@ package org.apache.karaf.log.core.internal;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.karaf.log.core.Level;
 import org.apache.karaf.log.core.LogService;
@@ -27,16 +29,19 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-public class LogServiceImpl implements LogService {
+public class LogServiceImpl implements LogService, PaxAppender {
 
     static final String CONFIGURATION_PID = "org.ops4j.pax.logging";
 
     private final ConfigurationAdmin configAdmin;
-    private final LruList events;
+    private final CircularBuffer<PaxLoggingEvent> buffer;
+    private List<PaxAppender> appenders;
+    
 
-    public LogServiceImpl(ConfigurationAdmin configAdmin, LruList events) {
+    public LogServiceImpl(ConfigurationAdmin configAdmin, int size) {
         this.configAdmin = configAdmin;
-        this.events = events;
+        this.appenders = new CopyOnWriteArrayList<>();
+        this.buffer = new CircularBuffer<>(size, PaxLoggingEvent.class);
     }
 
     private LogServiceInternal getDelegate(Dictionary<String, Object> config) {
@@ -113,17 +118,17 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public Iterable<PaxLoggingEvent> getEvents() {
-        return events.getElements();
+        return buffer.getElements();
     }
 
     @Override
     public Iterable<PaxLoggingEvent> getEvents(int maxNum) {
-        return events.getElements(maxNum);
+        return buffer.getElements(maxNum);
     }
 
     @Override
     public void clearEvents() {
-        events.clear();
+        buffer.clear();
     }
     
     @Override
@@ -150,12 +155,26 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public void addAppender(PaxAppender appender) {
-        events.addAppender(appender);
+        this.appenders.add(appender);
     }
 
     @Override
     public void removeAppender(PaxAppender appender) {
-        events.removeAppender(appender);
+        this.appenders.remove(appender);
+    }
+
+    @Override
+    public synchronized void doAppend(PaxLoggingEvent event) {
+        event.getProperties(); // ensure MDC properties are copied
+        KarafLogEvent eventCopy = new KarafLogEvent(event);
+        this.buffer.add(eventCopy);
+        for (PaxAppender appender : appenders) {
+            try {
+                appender.doAppend(eventCopy);
+            } catch (Throwable t) {
+                // Ignore
+            }
+        }
     }
 
 }
