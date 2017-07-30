@@ -23,7 +23,6 @@ import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.log.core.internal.LogEventFormatterImpl;
 import org.apache.karaf.log.core.internal.LogMBeanImpl;
 import org.apache.karaf.log.core.internal.LogServiceImpl;
-import org.apache.karaf.log.core.internal.LruList;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
@@ -55,11 +54,6 @@ public class Activator extends BaseActivator implements ManagedService {
         String debugColor = getString("debugColor", "39");
         String traceColor = getString("traceColor", "39");
 
-        LruList events = new LruList(size);
-        Hashtable<String, Object> props = new Hashtable<>();
-        props.put("org.ops4j.pax.logging.appender.name", "VmLogAppender");
-        register(PaxAppender.class, events, props);
-
         LogEventFormatterImpl formatter = new LogEventFormatterImpl();
         formatter.setPattern(pattern);
         formatter.setColor(PaxLogger.LEVEL_ERROR, errorColor);
@@ -69,7 +63,10 @@ public class Activator extends BaseActivator implements ManagedService {
         formatter.setColor(PaxLogger.LEVEL_TRACE, traceColor);
         register(LogEventFormatter.class, formatter);
 
-        LogServiceImpl logService = new LogServiceImpl(configurationAdmin, events);
+        LogServiceImpl logService = new LogServiceImpl(configurationAdmin, size);
+        Hashtable<String, Object> props = new Hashtable<>();
+        props.put("org.ops4j.pax.logging.appender.name", "VmLogAppender");
+        register(PaxAppender.class, logService, props);
         register(LogService.class, logService);
 
         LogMBeanImpl securityMBean = new LogMBeanImpl(logService);
