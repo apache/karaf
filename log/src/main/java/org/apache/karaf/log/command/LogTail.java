@@ -40,6 +40,9 @@ public class LogTail extends DisplayLog {
 
     @Override
     public Object execute() throws Exception {
+        if (entries == 0) {
+            entries = 50;
+        }
         int minLevel = getMinLevel(level);
         // Do not use System.out as it may write to the wrong console depending on the thread that calls our log handler
         PrintStream out = session.getConsole();
