@@ -72,6 +72,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConsoleSessionImpl implements Session {
 
+    private static final String SUPPRESS_WELCOME = "karaf.shell.suppress.welcome";
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String SHELL_HISTORY_MAXSIZE = "karaf.shell.history.maxSize";
     public static final String PROMPT = "PROMPT";
@@ -307,9 +308,12 @@ public class ConsoleSessionImpl implements Session {
             threadIO.setStreams(session.getKeyboard(), out, err);
             thread = Thread.currentThread();
             running = true;
-            Properties brandingProps = Branding.loadBrandingProperties(terminal);
-            welcome(brandingProps);
-            setSessionProperties(brandingProps);
+            if (System.getProperty(SUPPRESS_WELCOME) == null) {
+                Properties brandingProps = Branding.loadBrandingProperties(terminal);
+                welcome(brandingProps);
+                setSessionProperties(brandingProps);
+                System.setProperty(SUPPRESS_WELCOME, "true");
+            }
 
             AtomicBoolean reading = new AtomicBoolean();
 
