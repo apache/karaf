@@ -119,9 +119,12 @@ public class CommandExtension implements Extension {
 
     public void destroy() {
         try {
-            started.await(5000, TimeUnit.MILLISECONDS);
+            if (started.getCount() > 0) {
+                // Check to avoid InterruptedException in case we do not have to wait at all
+                started.await(5000, TimeUnit.MILLISECONDS);
+            }
         } catch (InterruptedException e) {
-            LOGGER.warn("The wait for bundle being started before destruction has been interrupted.", e);
+            LOGGER.warn("The wait for bundle " + bundle.getSymbolicName() + " being started before destruction has been interrupted.", e);
         }
         tracker.close();
     }
