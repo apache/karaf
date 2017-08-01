@@ -23,6 +23,7 @@ import java.security.PublicKey;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -45,48 +46,46 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
 
     private String realm;
 
-    public KarafJaasAuthenticator() {
-    }
-
     public KarafJaasAuthenticator(String realm) {
         this.realm = realm;
     }
 
-    public String getRealm() {
-        return realm;
-    }
-
-    public void setRealm(String realm) {
-        this.realm = realm;
-    }
-
     public boolean authenticate(final String username, final String password, final ServerSession session) {
+        CallbackHandler callbackHandler = callbacks -> {
+            for (Callback callback : callbacks) {
+                if (callback instanceof NameCallback) {
+                    ((NameCallback) callback).setName(username);
+                } else if (callback instanceof PasswordCallback) {
+                    ((PasswordCallback) callback).setPassword(password.toCharArray());
+                } else {
+                    throw new UnsupportedCallbackException(callback);
+                }
+            }
+        };
+        return doLogin(session, callbackHandler);
+    }
+
+    public boolean authenticate(final String username, final PublicKey key, final ServerSession session) {
+        CallbackHandler callbackHandler = callbacks -> {
+            for (Callback callback : callbacks) {
+                if (callback instanceof NameCallback) {
+                    ((NameCallback) callback).setName(username);
+                } else if (callback instanceof PublickeyCallback) {
+                    ((PublickeyCallback) callback).setPublicKey(key);
+                } else {
+                    throw new UnsupportedCallbackException(callback);
+                }
+            }
+        };
+        return doLogin(session, callbackHandler);
+    }
+
+    private boolean doLogin(final ServerSession session, CallbackHandler callbackHandler) {
         try {
             Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
-                for (Callback callback : callbacks) {
-                    if (callback instanceof NameCallback) {
-                        ((NameCallback) callback).setName(username);
-                    } else if (callback instanceof PasswordCallback) {
-                        ((PasswordCallback) callback).setPassword(password.toCharArray());
-                    } else {
-                        throw new UnsupportedCallbackException(callback);
-                    }
-                }
-            });
+            LoginContext loginContext = new LoginContext(realm, subject, callbackHandler);
             loginContext.login();
-
-            int roleCount = 0;
-            for (Principal principal : subject.getPrincipals()) {
-                if (principal instanceof RolePrincipal) {
-                    roleCount++;
-                }
-            }
-
-            if (roleCount == 0) {
-                throw new FailedLoginException("User doesn't have role defined");
-            }
-
+            assertRolePresent(subject);
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
         } catch (Exception e) {
@@ -95,38 +94,15 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
         }
     }
 
-    public boolean authenticate(final String username, final PublicKey key, final ServerSession session) {
-        try {
-            Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
-                for (Callback callback : callbacks) {
-                    if (callback instanceof NameCallback) {
-                        ((NameCallback) callback).setName(username);
-                    } else if (callback instanceof PublickeyCallback) {
-                        ((PublickeyCallback) callback).setPublicKey(key);
-                    } else {
-                        throw new UnsupportedCallbackException(callback);
-                    }
-                }
-            });
-            loginContext.login();
-
-            int roleCount = 0;
-            for (Principal principal : subject.getPrincipals()) {
-                if (principal instanceof RolePrincipal) {
-                    roleCount++;
-                }
+    private void assertRolePresent(Subject subject) throws FailedLoginException {
+        int roleCount = 0;
+        for (Principal principal : subject.getPrincipals()) {
+            if (principal instanceof RolePrincipal) {
+                roleCount++;
             }
-
-            if (roleCount == 0) {
-                throw new FailedLoginException("User doesn't have role defined");
-            }
-
-            session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
-            return true;
-        } catch (Exception e) {
-            LOGGER.debug("User authentication failed with " + e.getMessage(), e);
-            return false;
+        }
+        if (roleCount == 0) {
+            throw new FailedLoginException("User doesn't have role defined");
         }
     }
 
