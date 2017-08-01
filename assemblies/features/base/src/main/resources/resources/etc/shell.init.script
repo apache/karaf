@@ -35,7 +35,7 @@ env = { shell:set $args }
 edit = { shell:nano $args }
 more = { shell:less -F $args }
 
-prompt = "[1m${USER}[0m@${APPLICATION}(${SUBSHELL})> "
+\#prompt = { "[1m${USER}[0m@${APPLICATION}(${SUBSHELL})> "?};
 
 __load_class = {
   (($.reader class) classLoader) loadClass $1
