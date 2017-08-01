@@ -38,105 +38,104 @@ import org.slf4j.LoggerFactory;
 import java.util.Base64;
 
 public class KnownHostsManager {
-	Logger LOG = LoggerFactory.getLogger(KnownHostsManager.class);
-	
-	private final File knownHosts;
+    Logger LOG = LoggerFactory.getLogger(KnownHostsManager.class);
 
-	public KnownHostsManager(File knownHosts) {
-		this.knownHosts = knownHosts;
-		this.knownHosts.getParentFile().mkdirs();
-		if (!this.knownHosts.exists()) {
-			try {
-				knownHosts.createNewFile();
-			} catch (IOException e) {
-				throw new RuntimeException("Error creating file for known hosts at: " + knownHosts);
-			}
-		}
-	}
-	
-	public PublicKey getKnownKey(SocketAddress remoteAddress, String checkAlgorithm) throws InvalidKeySpecException {
-		FileReader fr = null;
-		BufferedReader reader = null;
-		try {
-			fr = new FileReader(knownHosts);
-			reader = new BufferedReader(fr);
-			return getKnownKeyInternal(remoteAddress, checkAlgorithm, reader);
-		} catch (IOException e) {
-			throw new RuntimeException("Error reading known_hosts " + knownHosts, e);
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
-		} finally {
-			close(reader);
-			close(fr);
-		}
-	}
+    private final File knownHosts;
 
-	private PublicKey getKnownKeyInternal(SocketAddress remoteAddress,
-			String checkAlgorithm, BufferedReader reader) throws IOException,
-			NoSuchAlgorithmException, InvalidKeySpecException {
-		String checkServerAddress = getAddressString(remoteAddress);
+    public KnownHostsManager(File knownHosts) {
+        this.knownHosts = knownHosts;
+        this.knownHosts.getParentFile().mkdirs();
+        if (!this.knownHosts.exists()) {
+            try {
+                knownHosts.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException("Error creating file for known hosts at: " + knownHosts);
+            }
+        }
+    }
 
-		String line = reader.readLine();
-		while (line != null) {
-			String[] lineParts = line.split(" ");
-			String serverAddress = lineParts[0];
-			String algorithm = lineParts[1];
-			if (checkServerAddress.equals(serverAddress) && checkAlgorithm.equals(algorithm)) {
-				byte[] key = Base64.getDecoder().decode(lineParts[2].getBytes());
-				KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
-				X509EncodedKeySpec keySpec = new X509EncodedKeySpec(key);
-				return keyFactory.generatePublic(keySpec);
-			}
-			line = reader.readLine();
-		}
-		return null;
-	}
-	
-	public void storeKeyForHost(SocketAddress remoteAddress,
-			PublicKey serverKey) {
-		FileWriter ps = null;
-		BufferedWriter bw = null;
-		try {
-			ps = new FileWriter(knownHosts, true);
-			bw = new BufferedWriter(ps);
-			writeKey(bw, remoteAddress, serverKey);
-		} catch (Exception e) {
-			throw new RuntimeException("Error storing key for host" + remoteAddress, e);
-		} finally {
-			close(bw);
-			close(ps);
-		}
-	}
+    public PublicKey getKnownKey(SocketAddress remoteAddress, String checkAlgorithm)
+        throws InvalidKeySpecException {
+        FileReader fr = null;
+        BufferedReader reader = null;
+        try {
+            fr = new FileReader(knownHosts);
+            reader = new BufferedReader(fr);
+            return getKnownKeyInternal(remoteAddress, checkAlgorithm, reader);
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading known_hosts " + knownHosts, e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close(reader);
+            close(fr);
+        }
+    }
 
-	private void writeKey(BufferedWriter bw, SocketAddress remoteAddress,
-			PublicKey serverKey) throws IOException {
-		bw.append(getAddressString(remoteAddress));
-		bw.append(" ");
-		bw.append(serverKey.getAlgorithm());
-		bw.append(" ");
-		serverKey.getEncoded();
-		bw.append(new String(Base64.getEncoder().encode(serverKey.getEncoded()), "UTF-8"));
+    private PublicKey getKnownKeyInternal(SocketAddress remoteAddress, String checkAlgorithm,
+                                          BufferedReader reader)
+        throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String checkServerAddress = getAddressString(remoteAddress);
+
+        String line = reader.readLine();
+        while (line != null) {
+            String[] lineParts = line.split(" ");
+            String serverAddress = lineParts[0];
+            String algorithm = lineParts[1];
+            if (checkServerAddress.equals(serverAddress) && checkAlgorithm.equals(algorithm)) {
+                byte[] key = Base64.getDecoder().decode(lineParts[2].getBytes());
+                KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
+                X509EncodedKeySpec keySpec = new X509EncodedKeySpec(key);
+                return keyFactory.generatePublic(keySpec);
+            }
+            line = reader.readLine();
+        }
+        return null;
+    }
+
+    public void storeKeyForHost(SocketAddress remoteAddress, PublicKey serverKey) {
+        FileWriter ps = null;
+        BufferedWriter bw = null;
+        try {
+            ps = new FileWriter(knownHosts, true);
+            bw = new BufferedWriter(ps);
+            writeKey(bw, remoteAddress, serverKey);
+        } catch (Exception e) {
+            throw new RuntimeException("Error storing key for host" + remoteAddress, e);
+        } finally {
+            close(bw);
+            close(ps);
+        }
+    }
+
+    private void writeKey(BufferedWriter bw, SocketAddress remoteAddress, PublicKey serverKey)
+        throws IOException {
+        bw.append(getAddressString(remoteAddress));
+        bw.append(" ");
+        bw.append(serverKey.getAlgorithm());
+        bw.append(" ");
+        serverKey.getEncoded();
+        bw.append(new String(Base64.getEncoder().encode(serverKey.getEncoded()), "UTF-8"));
         bw.append("\n");
-	}
+    }
 
-	String getAddressString(SocketAddress address) {
-		if (address instanceof InetSocketAddress) {
-			InetSocketAddress inetAddress = (InetSocketAddress) address;
-			return String.format("%s,%s:%s", inetAddress.getHostName(),
-					inetAddress.getAddress().getHostAddress(),
-					inetAddress.getPort());
-		}
-		return "";
-	}
-	
-	private void close(Closeable closeable) {
-		if (closeable != null) {
-			try {
-				closeable.close();
-			} catch (IOException e) {
-				LOG.warn("Error closing: " + e.getMessage(), e);
-			}
-		}
-	}
+    String getAddressString(SocketAddress address) {
+        if (address instanceof InetSocketAddress) {
+            InetSocketAddress inetAddress = (InetSocketAddress)address;
+            return String.format("%s,%s:%s", inetAddress.getHostName(),
+                                 inetAddress.getAddress().getHostAddress(), inetAddress.getPort());
+        }
+        return "";
+    }
+
+    private void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                LOG.warn("Error closing: " + e.getMessage(), e);
+            }
+        }
+    }
 
 }
