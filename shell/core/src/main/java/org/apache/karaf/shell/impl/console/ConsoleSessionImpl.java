@@ -341,33 +341,11 @@ public class ConsoleSessionImpl implements Session {
             String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
             executeScript(scriptFileName);
             while (running) {
-                String command = null;
-                reading.set(true);
-                try {
-                    command = reader.readLine(getPrompt(), getRPrompt(), null, null);
-                } catch (EndOfFileException e) {
-                    break;
-                } catch (UserInterruptException e) {
-                    // Ignore, loop again
-                    continue;
-                } catch (Throwable t) {
-                    ShellUtil.logException(this, t);
-                } finally {
-                    reading.set(false);
-                }
+                String command = readCommand(reading);
                 if (command == null) {
                     break;
                 }
-                try {
-                    Object result = session.execute(command);
-                    if (result != null) {
-                        session.getConsole().println(session.format(result, Converter.INSPECT));
-                    }
-                } catch (InterruptedException e) {
-                    LOGGER.debug("Console session is closed");
-                } catch (Throwable t) {
-                    ShellUtil.logException(this, t);
-                }
+                execute(command);
             }
             close();
         } finally {
@@ -398,6 +376,36 @@ public class ConsoleSessionImpl implements Session {
     private boolean isLocal() {
         Boolean isLocal = (Boolean)session.get(Session.IS_LOCAL);
         return isLocal != null && isLocal;
+    }
+
+    private String readCommand(AtomicBoolean reading) throws UserInterruptException {
+        String command = null;
+        reading.set(true);
+        try {
+            command = reader.readLine(getPrompt(), getRPrompt(), null, null);
+        } catch (EndOfFileException e) {
+            command = null;
+        } catch (UserInterruptException e) {
+            command = ""; // Do nothing
+        } catch (Throwable t) {
+            ShellUtil.logException(this, t);
+        } finally {
+            reading.set(false);
+        }
+        return command;
+    }
+
+    private void execute(String command) {
+        try {
+            Object result = session.execute(command);
+            if (result != null) {
+                session.getConsole().println(session.format(result, Converter.INSPECT));
+            }
+        } catch (InterruptedException e) {
+            LOGGER.debug("Console session is closed");
+        } catch (Throwable t) {
+            ShellUtil.logException(this, t);
+        }
     }
 
     private String getStatusLine(Job job, int width, String status) {
@@ -500,8 +508,6 @@ public class ConsoleSessionImpl implements Session {
             System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
         }
     }
-
-
 
     protected void welcome(Properties brandingProps) {
         String welcome = brandingProps.getProperty("welcome");
