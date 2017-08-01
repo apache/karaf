@@ -308,12 +308,7 @@ public class ConsoleSessionImpl implements Session {
             threadIO.setStreams(session.getKeyboard(), out, err);
             thread = Thread.currentThread();
             running = true;
-            if (System.getProperty(SUPPRESS_WELCOME) == null) {
-                Properties brandingProps = Branding.loadBrandingProperties(terminal);
-                welcome(brandingProps);
-                setSessionProperties(brandingProps);
-                System.setProperty(SUPPRESS_WELCOME, "true");
-            }
+            welcomeBanner();
 
             AtomicBoolean reading = new AtomicBoolean();
 
@@ -382,6 +377,27 @@ public class ConsoleSessionImpl implements Session {
                 // Ignore
             }
         }
+    }
+
+    /**
+     * On the local console we only show the welcome banner once. This allows to suppress the banner
+     * on refreshs of the shell core bundle. 
+     * On ssh we show it every time.
+     */
+    private void welcomeBanner() {
+        if (!isLocal() || System.getProperty(SUPPRESS_WELCOME) == null) {
+            Properties brandingProps = Branding.loadBrandingProperties(terminal);
+            welcome(brandingProps);
+            setSessionProperties(brandingProps);
+            if (isLocal()) {
+                System.setProperty(SUPPRESS_WELCOME, "true");
+            }
+        }
+    }
+
+    private boolean isLocal() {
+        Boolean isLocal = (Boolean)session.get(Session.IS_LOCAL);
+        return isLocal != null && isLocal;
     }
 
     private String getStatusLine(Job job, int width, String status) {

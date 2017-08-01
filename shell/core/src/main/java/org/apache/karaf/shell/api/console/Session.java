@@ -51,6 +51,7 @@ public interface Session extends Runnable, Closeable {
     String PRINT_STACK_TRACES = "karaf.printStackTraces";
     String LAST_EXCEPTION = "karaf.lastException";
     String IGNORE_INTERRUPTS = "karaf.ignoreInterrupts";
+    String IS_LOCAL = "karaf.shell.local";
     String COMPLETION_MODE = "karaf.completionMode";
 
     String COMPLETION_MODE_GLOBAL = "global";
