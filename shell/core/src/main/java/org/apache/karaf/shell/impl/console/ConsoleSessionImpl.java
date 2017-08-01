@@ -144,32 +144,12 @@ public class ConsoleSessionImpl implements Session {
                 jlineTerminal.output());
 
         // Completers
-        Completers.CompletionEnvironment env = new Completers.CompletionEnvironment() {
-            @Override
-            public Map<String, List<Completers.CompletionData>> getCompletions() {
-                return Shell.getCompletions(session);
-            }
-            @Override
-            public Set<String> getCommands() {
-                return Shell.getCommands(session);
-            }
-            @Override
-            public String resolveCommand(String command) {
-                return Shell.resolve(session, command);
-            }
-            @Override
-            public String commandName(String command) {
-                int idx = command.indexOf(':');
-                return idx >= 0 ? command.substring(idx + 1) : command;
-            }
-            @Override
-            public Object evaluate(LineReader reader, ParsedLine line, String func) throws Exception {
-                session.put(Shell.VAR_COMMAND_LINE, line);
-                return session.execute(func);
-            }
-        };
-        Completer builtinCompleter = new org.jline.builtins.Completers.Completer(env);
+        Completer builtinCompleter = createBuiltinCompleter();
         CommandsCompleter commandsCompleter = new CommandsCompleter(factory, this);
+        Completer completer =  (rdr, line, candidates) -> {
+            builtinCompleter.complete(rdr, line, candidates);
+            commandsCompleter.complete(rdr, line, candidates);
+        };
 
         // Console reader
         reader = LineReaderBuilder.builder()
@@ -178,10 +158,7 @@ public class ConsoleSessionImpl implements Session {
                     .variables(((CommandSessionImpl) session).getVariables())
                     .highlighter(new org.apache.felix.gogo.jline.Highlighter(session))
                     .parser(new KarafParser(this))
-                    .completer((rdr, line, candidates) -> {
-                        builtinCompleter.complete(rdr, line, candidates);
-                        commandsCompleter.complete(rdr, line, candidates);
-                    })
+                    .completer(completer)
                     .build();
 
         // History
@@ -233,6 +210,34 @@ public class ConsoleSessionImpl implements Session {
         session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
 
 
+    }
+
+    private Completer createBuiltinCompleter() {
+        Completers.CompletionEnvironment env = new Completers.CompletionEnvironment() {
+            @Override
+            public Map<String, List<Completers.CompletionData>> getCompletions() {
+                return Shell.getCompletions(session);
+            }
+            @Override
+            public Set<String> getCommands() {
+                return Shell.getCommands(session);
+            }
+            @Override
+            public String resolveCommand(String command) {
+                return Shell.resolve(session, command);
+            }
+            @Override
+            public String commandName(String command) {
+                int idx = command.indexOf(':');
+                return idx >= 0 ? command.substring(idx + 1) : command;
+            }
+            @Override
+            public Object evaluate(LineReader reader, ParsedLine line, String func) throws Exception {
+                session.put(Shell.VAR_COMMAND_LINE, line);
+                return session.execute(func);
+            }
+        };
+        return new org.jline.builtins.Completers.Completer(env);
     }
 
     /**
