@@ -32,7 +32,7 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 	private final boolean quiet;
 
     private final static String keyChangedMessage =
-            		" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
+                    " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
                     " @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!      @ \n" +
                     " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
                     "IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
@@ -44,60 +44,59 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
                     "RSA host key has changed and you have requested strict checking.\n" +
                     "Host key verification failed.";
 
-	public ServerKeyVerifierImpl(KnownHostsManager knownHostsManager, boolean quiet) {
-		this.knownHostsManager = knownHostsManager;
-		this.quiet = quiet;
-	}
+    public ServerKeyVerifierImpl(KnownHostsManager knownHostsManager, boolean quiet) {
+        this.knownHostsManager = knownHostsManager;
+        this.quiet = quiet;
+    }
 
-	@Override
-	public boolean verifyServerKey(ClientSession sshClientSession,
-			SocketAddress remoteAddress, PublicKey serverKey) {
-		PublicKey knownKey;
-		try {
-			knownKey = knownHostsManager.getKnownKey(remoteAddress, serverKey.getAlgorithm());
-		} catch (InvalidKeySpecException e) {
-			System.err.println("Invalid key stored for host " + remoteAddress + ". Terminating session.");
-			return false;
-		}
-		if (knownKey == null) {
-			boolean confirm;
-			if (!quiet) {
-				System.out.println("Connecting to unknown server. Add this server to known hosts ? (y/n)");
-				confirm = getConfirmation();
-			} else {
-				System.out.println("Connecting to unknown server. Automatically adding to known hosts.");
-				confirm = true;
-			}
-			if (confirm) {
-				knownHostsManager.storeKeyForHost(remoteAddress, serverKey);
-				System.out.println("Storing the server key in known_hosts.");
-			} else {
-				System.out.println("Aborting connection");
-			}
-			return confirm;
-		}
-		
-		boolean verifed = (knownKey.equals(serverKey));
-		if (!verifed) {
-			System.err.println("Server key for host " + remoteAddress + " does not match the stored key !! Terminating session.");
+    @Override
+    public boolean verifyServerKey(ClientSession sshClientSession, SocketAddress remoteAddress,
+                                   PublicKey serverKey) {
+        PublicKey knownKey;
+        try {
+            knownKey = knownHostsManager.getKnownKey(remoteAddress, serverKey.getAlgorithm());
+        } catch (InvalidKeySpecException e) {
+            System.err.println("Invalid key stored for host " + remoteAddress + ". Terminating session.");
+            return false;
+        }
+        if (knownKey == null) {
+            boolean confirm;
+            if (!quiet) {
+                System.out.println("Connecting to unknown server. Add this server to known hosts ? (y/n)");
+                confirm = getConfirmation();
+            } else {
+                System.out.println("Connecting to unknown server. Automatically adding to known hosts.");
+                confirm = true;
+            }
+            if (confirm) {
+                knownHostsManager.storeKeyForHost(remoteAddress, serverKey);
+                System.out.println("Storing the server key in known_hosts.");
+            } else {
+                System.out.println("Aborting connection");
+            }
+            return confirm;
+        }
+
+        boolean verifed = (knownKey.equals(serverKey));
+        if (!verifed) {
+            System.err.println("Server key for host " + remoteAddress
+                               + " does not match the stored key !! Terminating session.");
             System.err.println(keyChangedMessage);
-		}
-		return verifed;
-	}
+        }
+        return verifed;
+    }
 
-	private boolean getConfirmation() {
-		int ch;
-		try {
-			do {
-				ch = System.in.read();
-			} while (ch != 'y' && ch != 'n');
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		boolean confirm = ch == 'y';
-		return confirm;
-	}
-
-
+    private boolean getConfirmation() {
+        int ch;
+        try {
+            do {
+                ch = System.in.read();
+            } while (ch != 'y' && ch != 'n');
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        boolean confirm = ch == 'y';
+        return confirm;
+    }
 
 }
