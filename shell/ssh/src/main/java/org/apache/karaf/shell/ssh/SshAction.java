@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.ssh;
 
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -36,8 +35,6 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.api.console.Signal;
-import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.client.channel.ClientChannelEvent;
@@ -352,16 +349,6 @@ public class SshAction implements Action {
             }
         } while (session == null);
         return session;
-    }
-
-    private void close(Closeable is) {
-        if (is != null) {
-            try {
-                is.close();
-            } catch (IOException e1) {
-                // Ignore
-            }
-        }
     }
 
 }
