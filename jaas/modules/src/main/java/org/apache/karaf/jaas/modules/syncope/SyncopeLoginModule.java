@@ -14,6 +14,7 @@
  */
 package org.apache.karaf.jaas.modules.syncope;
 
+import org.apache.felix.utils.json.JSONParser;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -42,14 +43,17 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
     private final static Logger LOGGER = LoggerFactory.getLogger(SyncopeLoginModule.class);
 
     public final static String ADDRESS = "address";
+    public final static String VERSION = "version";
     public final static String ADMIN_USER = "admin.user"; // for the backing engine
     public final static String ADMIN_PASSWORD = "admin.password"; // for the backing engine
 
     private String address;
+    private String version;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         address = (String) options.get(ADDRESS);
+        version = (String) options.get(VERSION);
     }
 
     public boolean login() throws LoginException {
@@ -80,7 +84,11 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
         Credentials creds = new UsernamePasswordCredentials(user, password);
         client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
         HttpGet get = new HttpGet(address + "/users/self");
-        get.setHeader("Content-Type", "application/xml");
+        if (version.equals("2.x") || version.equals("2")) {
+            get.setHeader("Content-Type", "application/json");
+        } else {
+            get.setHeader("Content-Type", "application/xml");
+        }
         List<String> roles = new ArrayList<>();
         try {
             CloseableHttpResponse response = client.execute(get);
@@ -93,7 +101,11 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
             LOGGER.debug("Populating principals with user");
             principals.add(new UserPrincipal(user));
             LOGGER.debug("Retrieving user {} roles", user);
-            roles = extractingRoles(EntityUtils.toString(response.getEntity()));
+            if (version.equals("2.x") || version.equals("2")) {
+                roles = extractingRolesSyncope2(EntityUtils.toString(response.getEntity()));
+            } else {
+                roles = extractingRolesSyncope1(EntityUtils.toString(response.getEntity()));
+            }
         } catch (Exception e) {
             LOGGER.error("User {} authentication failed", user, e);
             throw new LoginException("User " + user + " authentication failed: " + e.getMessage());
@@ -108,13 +120,13 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
     }
 
     /**
-     * Extract the user roles from the Syncope entity response.
+     * Extract the user roles from the XML provided by Syncope 1.x.
      *
      * @param response the HTTP response from Syncope.
      * @return the list of user roles.
      * @throws Exception in case of extraction failure.
      */
-    protected List<String> extractingRoles(String response) throws Exception {
+    protected List<String> extractingRolesSyncope1(String response) throws Exception {
         List<String> roles = new ArrayList<>();
         if (response != null && !response.isEmpty()) {
             // extract the <memberships> element if it exists
@@ -139,6 +151,22 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
                 }
             }
 
+        }
+        return roles;
+    }
+
+    /**
+     * Extract the user roles from the JSON provided by Syncope 2.x.
+     *
+     * @param response the HTTP response from Syncope.
+     * @return the list of user roles.
+     * @throws Exception in case of extractiong failure.
+     */
+    protected List<String> extractingRolesSyncope2(String response) throws Exception {
+        List<String> roles = new ArrayList<>();
+        if (response != null && !response.isEmpty()) {
+            JSONParser parser = new JSONParser(response);
+            return (List<String>) parser.getParsed().get("roles");
         }
         return roles;
     }
