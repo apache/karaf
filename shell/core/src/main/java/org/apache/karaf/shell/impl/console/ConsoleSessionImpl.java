@@ -285,7 +285,7 @@ public class ConsoleSessionImpl implements Session {
             }
 
             running = false;
-            if (thread != Thread.currentThread()) {
+            if (thread != Thread.currentThread() && thread != null) {
                 thread.interrupt();
             }
             if (closeCallback != null) {
