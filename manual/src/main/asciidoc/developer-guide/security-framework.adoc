@@ -610,6 +610,9 @@ The Syncope login module just requires one parameter:
 |`address`
 |Location of the Syncope REST API
 
+|`version`
+| Syncope backend version (could by "1.x" or "2.x"
+
 |`admin.user`
 |Admin username to administrate Syncope (only required by the backend engine)
 
@@ -623,6 +626,7 @@ The following snippet shows how to use Syncope with the karaf realm:
 <jaas:config name="karaf" rank="2">
   <jaas:module className="org.apache.karaf.jaas.modules.syncope.SyncopeLoginModule" flags="required">
     address=http://localhost:9080/syncope/cxf
+    version=1.x
     admin.user=admin
     admin.password=password
   </jaas:module>
@@ -647,6 +651,7 @@ For instance, the following blueprint descriptor enables the SyncopeLoginModule 
         <jaas:module className="org.apache.karaf.jaas.modules.syncope.SyncopeLoginModule"
                      flags="required">
            address=http://localhost:9080/syncope/cxf
+           version=1.x
            admin.user=admin
            admin.password=password
         </jaas:module>

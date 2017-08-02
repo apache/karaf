@@ -24,7 +24,7 @@ import java.util.List;
 public class SyncopeLoginModuleTest {
 
     @Test
-    public void testRolesExtraction() throws Exception {
+    public void testRolesExtractionSyncope1() throws Exception {
         String syncopeResponse = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
                 "<user>\n" +
                 "    <attributes>\n" +
@@ -96,7 +96,48 @@ public class SyncopeLoginModuleTest {
                 "    <username>karaf</username>\n" +
                 "</user>\n";
         SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
-        List<String> roles = syncopeLoginModule.extractingRoles(syncopeResponse);
+        List<String> roles = syncopeLoginModule.extractingRolesSyncope1(syncopeResponse);
+        Assert.assertEquals(2, roles.size());
+        Assert.assertEquals("admin", roles.get(0));
+        Assert.assertEquals("another", roles.get(1));
+    }
+
+    @Test
+    public void testRolesExtractionSyncope2() throws Exception {
+        String syncopeResponse = "{\n" + "\n"
+                + "   \"@class\":\"org.apache.syncope.common.lib.to.UserTO\",\n" + "\n"
+                + "   \"creator\":\"admin\",\n" + "\n"
+                + "   \"creationDate\":\"2017-07-31T08:36:41.000+0000\",\n" + "\n"
+                + "   \"lastModifier\":\"admin\",\n" + "\n"
+                + "   \"lastChangeDate\":\"2017-08-01T08:46:19.236+0000\",\n" + "\n"
+                + "   \"key\":\"e5a131b0-eb66-4115-a131-b0eb66511579\",\n" + "\n"
+                + "   \"type\":\"USER\",\n" + "\n" + "   \"realm\":\"/karaf\",\n" + "\n"
+                + "   \"status\":\"created\",\n" + "\n" + "   \"password\":null,\n" + "\n"
+                + "   \"token\":null,\n" + "\n" + "   \"tokenExpireTime\":null,\n" + "\n"
+                + "   \"username\":\"karaf\",\n" + "\n"
+                + "   \"lastLoginDate\":\"2017-08-01T08:46:19.224+0000\",\n" + "\n"
+                + "   \"changePwdDate\":null,\n" + "\n" + "   \"failedLogins\":0,\n" + "\n"
+                + "   \"securityQuestion\":null,\n" + "\n" + "   \"securityAnswer\":null,\n" + "\n"
+                + "   \"mustChangePassword\":false,\n" + "\n" + "   \"auxClasses\":[\n" + "\n"
+                + " \n" + "\n" + "   ],\n" + "\n" + "   \"plainAttrs\":[\n" + "\n" + " \n" + "\n"
+                + "   ],\n" + "\n" + "   \"derAttrs\":[\n" + "\n" + " \n" + "\n" + "   ],\n" + "\n"
+                + "   \"virAttrs\":[\n" + "\n" + " \n" + "\n" + "   ],\n" + "\n"
+                + "   \"resources\":[\n" + "\n" + " \n" + "\n" + "   ],\n" + "\n"
+                + "   \"roles\":[\n" + "\n" + "      \"admin\", \"another\"\n" + "\n" + "   ],\n" +
+                "\n"
+                + "   \"dynRoles\":[\n" + "\n" + "      \"admin\"\n" + "\n" + "   ],\n" + "\n"
+                + "   \"relationships\":[\n" + "\n" + " \n" + "\n" + "   ],\n" + "\n"
+                + "   \"memberships\":[\n" + "\n" + "      {\n" + "\n"
+                + "         \"type\":\"Membership\",\n" + "\n"
+                + "         \"rightType\":\"GROUP\",\n" + "\n"
+                + "         \"rightKey\":\"3847aa78-3202-4d8f-87aa-7832026d8fba\",\n" + "\n"
+                + "         \"groupName\":\"manager\",\n" + "\n" + "         \"plainAttrs\":[\n"
+                + "\n" + " \n" + "\n" + "         ],\n" + "\n" + "         \"derAttrs\":[\n" + "\n"
+                + " \n" + "\n" + "         ],\n" + "\n" + "         \"virAttrs\":[\n" + "\n" + " \n"
+                + "\n" + "         ]\n" + "\n" + "      }\n" + "\n" + "   ],\n" + "\n"
+                + "   \"dynGroups\":[\n" + "\n" + " \n" + "\n" + "   ]\n" + "\n" + "}";
+        SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
+        List<String> roles = syncopeLoginModule.extractingRolesSyncope2(syncopeResponse);
         Assert.assertEquals(2, roles.size());
         Assert.assertEquals("admin", roles.get(0));
         Assert.assertEquals("another", roles.get(1));

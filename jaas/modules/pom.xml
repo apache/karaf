@@ -155,6 +155,7 @@
                         <Private-Package>
                             org.apache.karaf.jaas.modules.impl,
                             org.apache.felix.utils.properties,
+                            org.apache.felix.utils.json,
                             org.apache.karaf.util,
                             org.apache.http*,
                             org.apache.commons.codec*
