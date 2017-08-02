@@ -82,7 +82,7 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public void delete(String name) throws Exception {
-        String filter = String.format("(%s=%s)", DataSourceFactory.JDBC_DATASOURCE_NAME, name);
+        String filter = String.format("(&(service.factoryPid=org.ops4j.datasource)(%s=%s))", DataSourceFactory.JDBC_DATASOURCE_NAME, name);
         Configuration[] configs = configAdmin.listConfigurations(filter);
         for (Configuration config : configs) {
             config.delete();

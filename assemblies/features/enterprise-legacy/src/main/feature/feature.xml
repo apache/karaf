@@ -29,7 +29,7 @@
 
     <feature name="transaction" description="OSGi Transaction Manager" version="${aries.transaction.manager.version}">
         <details>JTA implementation provided by Apache Aries Transaction</details>
-        <feature version="${aries.transaction.manager.version}">transaction-manager-geronimo</feature>
+        <feature version="${geronimo.transaction.manager.version}">transaction-manager-geronimo</feature>
     </feature>
 
     <feature name="jpa" description="OSGi Persistence Container" version="${aries.jpa.container.context.version}">

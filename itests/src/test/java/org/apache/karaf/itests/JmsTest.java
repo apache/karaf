@@ -72,7 +72,7 @@ public class JmsTest extends KarafTestSupport {
 
     @Test(timeout = 60000)
     public void testCommands() throws Exception {
-        execute("jms:create -t ActiveMQ -u karaf -p karaf --url tcp://localhost:61616 test");
+        execute("jms:create -t activemq -u karaf -p karaf --url tcp://localhost:61616 test");
         waitForConnectionFactory("name=test");
 
         assertThat(execute("jms:connectionfactories"), containsString("jms/test"));
