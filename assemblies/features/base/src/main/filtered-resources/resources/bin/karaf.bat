@@ -387,19 +387,45 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%CHECK_ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%IS_RUNNABLE%" == "true" (
-    "%JAVA%" %JAVA_OPTS% %OPTS% ^
-        -classpath "%CLASSPATH%" ^
-        -Djava.endorsed.dirs="%JAVA_HOME%\jre\lib\endorsed;%JAVA_HOME%\lib\endorsed;%KARAF_HOME%\lib\endorsed" ^
-        -Djava.ext.dirs="%JAVA_HOME%\jre\lib\ext;%JAVA_HOME%\lib\ext;%KARAF_HOME%\lib\ext" ^
-        -Dkaraf.instances="%KARAF_HOME%\instances" ^
-        -Dkaraf.home="%KARAF_HOME%" ^
-        -Dkaraf.base="%KARAF_BASE%" ^
-        -Dkaraf.etc="%KARAF_ETC%" ^
-        -Dkaraf.restart.jvm.supported=true ^
-        -Djava.io.tmpdir="%KARAF_DATA%\tmp" ^
-        -Dkaraf.data="%KARAF_DATA%" ^
-        -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" ^
-        %KARAF_OPTS% %MAIN% %ARGS%
+        for /f tokens^=2-5^ delims^=.-_^" %%j in ('%JAVA% -fullversion 2^>^&1') do set "JAVA_VERSION=%%k%"
+        if "%JAVA_VERSION%" GTR 8 (
+            "%JAVA%" %JAVA_OPTS% %OPTS% ^
+                --add-opens java.base/java.security=ALL-UNNAMED ^
+                --add-opens java.base/java.net=ALL-UNNAMED ^
+                --add-opens java.base/java.lang=ALL-UNNAMED ^
+                --add-opens java.base/java.util=ALL-UNNAMED ^
+                --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED ^
+                --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED ^
+                --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED ^
+                --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED ^
+                --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED ^
+                --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED ^
+                --add-modules java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws ^
+                -classpath "%CLASSPATH%" ^
+                -Dkaraf.instances="%KARAF_HOME%\instances" ^
+                -Dkaraf.home="%KARAF_HOME%" ^
+                -Dkaraf.base="%KARAF_BASE%" ^
+                -Dkaraf.etc="%KARAF_ETC%" ^
+                -Dkaraf.restart.jvm.supported=true ^
+                -Djava.io.tmpdir="%KARAF_DATA%\tmp" ^
+                -Dkaraf.data="%KARAF_DATA%" ^
+                -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" ^
+                %KARAF_OPTS% %MAIN% %ARGS%
+        ) else (
+            "%JAVA%" %JAVA_OPTS% %OPTS% ^
+                -classpath "%CLASSPATH%" ^
+                -Djava.endorsed.dirs="%JAVA_HOME%\jre\lib\endorsed;%JAVA_HOME%\lib\endorsed;%KARAF_HOME%\lib\endorsed" ^
+                -Djava.ext.dirs="%JAVA_HOME%\jre\lib\ext;%JAVA_HOME%\lib\ext;%KARAF_HOME%\lib\ext" ^
+                -Dkaraf.instances="%KARAF_HOME%\instances" ^
+                -Dkaraf.home="%KARAF_HOME%" ^
+                -Dkaraf.base="%KARAF_BASE%" ^
+                -Dkaraf.etc="%KARAF_ETC%" ^
+                -Dkaraf.restart.jvm.supported=true ^
+                -Djava.io.tmpdir="%KARAF_DATA%\tmp" ^
+                -Dkaraf.data="%KARAF_DATA%" ^
+                -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" ^
+                %KARAF_OPTS% %MAIN% %ARGS%
+        )
     ) else (
         echo There is a Root instance already running with name %ROOT_INSTANCE_NAME% and pid %ROOT_INSTANCE_PID%. If you know what you are doing and want to force the run anyway, SET CHECK_ROOT_INSTANCE_RUNNING=false and re run the command.
         goto :END
