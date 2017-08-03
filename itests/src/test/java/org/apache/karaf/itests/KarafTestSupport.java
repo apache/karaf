@@ -203,6 +203,7 @@ public class KarafTestSupport {
             mavenBundle().groupId("org.awaitility").artifactId("awaitility").versionAsInProject(),
             mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").versionAsInProject(),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
+            replaceConfigurationFile("etc/host.key", getConfigFile("/etc/host.key")),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "updateSnapshots", "none"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", httpPort),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
@@ -214,7 +215,8 @@ public class KarafTestSupport {
             editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version")),
             editConfigurationFilePut("etc/system.properties", "spring41.version", System.getProperty("spring41.version")),
             editConfigurationFilePut("etc/system.properties", "spring42.version", System.getProperty("spring42.version")),
-            editConfigurationFilePut("etc/system.properties", "spring43.version", System.getProperty("spring43.version"))
+            editConfigurationFilePut("etc/system.properties", "spring43.version", System.getProperty("spring43.version")),
+            editConfigurationFilePut("etc/branding.properties", "welcome", "") // No welcome banner
         };
     }
 
