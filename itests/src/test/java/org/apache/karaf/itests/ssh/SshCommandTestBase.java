@@ -31,6 +31,7 @@ import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
+import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Assert;
@@ -123,9 +124,12 @@ public class SshCommandTestBase extends KarafTestSupport {
         client = SshClient.setUpDefaultClient();
         client.start();
         String sshPort = getSshPort();
-        ConnectFuture future = client.connect(username, "localhost", Integer.parseInt(sshPort));
-        future.await();
-        session = future.getSession();
+        Awaitility.await().ignoreExceptions().until(() -> {
+            ConnectFuture future = client.connect(username, "localhost", Integer.parseInt(sshPort));
+            future.await();
+            session = future.getSession();
+            return true;
+        });
 
         Set<ClientSessionEvent> ret = EnumSet.of(ClientSessionEvent.WAIT_AUTH);
         while (ret.contains(ClientSessionEvent.WAIT_AUTH)) {
