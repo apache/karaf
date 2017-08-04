@@ -32,6 +32,7 @@ import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
 public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
     private File keyFile;
     private String password;
+    private KeyPair cachedKey;
 
     public OpenSSHKeyPairProvider(File keyFile) {
         this.keyFile = keyFile;
@@ -39,8 +40,12 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
 
     @Override
     public Iterable<KeyPair> loadKeys() {
+        if (cachedKey != null) {
+            return singleton(cachedKey);
+        }
         try (FileInputStream is = new FileInputStream(keyFile)) {
             KeyPair kp = getKeyPair(is);
+            cachedKey = kp;
             return singleton(kp);
         } catch (Exception e) {
             throw new RuntimeException(e);
