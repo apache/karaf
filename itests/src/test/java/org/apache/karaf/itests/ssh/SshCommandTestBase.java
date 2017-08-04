@@ -18,12 +18,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.karaf.features.Feature;
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
@@ -32,8 +29,6 @@ import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
 import org.awaitility.Awaitility;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -49,18 +44,6 @@ public class SshCommandTestBase extends KarafTestSupport {
     private SshClient client;
     private ClientChannel channel;
     private ClientSession session;
-    private HashSet<Feature> featuresBefore;
-
-    @Before
-    public void installSshFeature() throws Exception {
-        featuresBefore = new HashSet<>(Arrays.asList(featureService.listInstalledFeatures()));
-        installAndAssertFeature("ssh");
-    }
-
-    @After
-    public void uninstallSshFeature() throws Exception {
-        uninstallNewFeatures(featuresBefore);
-    }
 
     void addUsers(String manageruser, String vieweruser) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
