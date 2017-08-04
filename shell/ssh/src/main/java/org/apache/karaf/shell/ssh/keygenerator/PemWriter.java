@@ -40,8 +40,8 @@ public class PemWriter {
         Collection<Object> items = new ArrayList<>();
         items.add(new PEMItem(kp.getPrivate().getEncoded(), "PRIVATE KEY"));
         byte[] bytes = PEMUtil.encode(items);
-        FileOutputStream os = new FileOutputStream(keyFile);
-        os.write(bytes);
-        os.close();
+        try (FileOutputStream os = new FileOutputStream(keyFile)) {
+            os.write(bytes);
+        }
     }
 }

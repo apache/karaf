@@ -111,18 +111,18 @@ public class SshCommandTestBase extends KarafTestSupport {
             ConnectFuture future = client.connect(username, "localhost", Integer.parseInt(sshPort));
             future.await();
             session = future.getSession();
+            Set<ClientSessionEvent> ret = EnumSet.of(ClientSessionEvent.WAIT_AUTH);
+            while (ret.contains(ClientSessionEvent.WAIT_AUTH)) {
+                session.addPasswordIdentity(password);
+                session.auth().verify();
+                ret = session.waitFor(EnumSet.of(ClientSessionEvent.WAIT_AUTH, ClientSessionEvent.CLOSED, ClientSessionEvent.AUTHED), 0);
+            }
+            if (ret.contains(ClientSessionEvent.CLOSED)) {
+                throw new Exception("Could not open SSH channel");
+            }
             return true;
         });
 
-        Set<ClientSessionEvent> ret = EnumSet.of(ClientSessionEvent.WAIT_AUTH);
-        while (ret.contains(ClientSessionEvent.WAIT_AUTH)) {
-            session.addPasswordIdentity(password);
-            session.auth().verify();
-            ret = session.waitFor(EnumSet.of(ClientSessionEvent.WAIT_AUTH, ClientSessionEvent.CLOSED, ClientSessionEvent.AUTHED), 0);
-        }
-        if (ret.contains(ClientSessionEvent.CLOSED)) {
-            throw new Exception("Could not open SSH channel");
-        }
         channel = session.createChannel("shell");
         PipedOutputStream pipe = new PipedOutputStream();
         channel.setIn(new PipedInputStream(pipe));

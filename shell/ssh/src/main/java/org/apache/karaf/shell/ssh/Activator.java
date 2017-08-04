@@ -166,7 +166,6 @@ public class Activator extends BaseActivator implements ManagedService {
         
         Path serverKeyPath = Paths.get(hostKey);
         if (!serverKeyPath.toFile().exists()) {
-            
             createServerKey(serverKeyPath.toFile(), algorithm, keySize);
         }
 
