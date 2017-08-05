@@ -18,22 +18,16 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyPair;
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
-import org.apache.karaf.shell.ssh.keygenerator.OpenSSHKeyPairGenerator;
 import org.apache.karaf.shell.ssh.keygenerator.OpenSSHKeyPairProvider;
-import org.apache.karaf.shell.ssh.keygenerator.PemWriter;
 import org.apache.karaf.shell.support.RegexCommandLoggingFilter;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
@@ -65,7 +59,6 @@ public class Activator extends BaseActivator implements ManagedService {
     ServiceTracker<Session, Session> sessionTracker;
     SessionFactory sessionFactory;
     SshServer server;
-    ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void doOpen() throws Exception {
@@ -113,8 +106,7 @@ public class Activator extends BaseActivator implements ManagedService {
         sessionFactory = sf;
         sessionFactory.getRegistry().getService(Manager.class).register(SshAction.class);
         if (Boolean.parseBoolean(bundleContext.getProperty("karaf.startRemoteShell"))) {
-            // Start server in background as key generation might take some time
-            executor.submit(() -> createAndRunSshServer());
+            createAndRunSshServer();
         }
     }
 
@@ -165,11 +157,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String moduliUrl       = getString("moduli-url", null);
         
         Path serverKeyPath = Paths.get(hostKey);
-        if (!serverKeyPath.toFile().exists()) {
-            createServerKey(serverKeyPath.toFile(), algorithm, keySize);
-        }
-
-        KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverKeyPath.toFile());
+        KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverKeyPath.toFile(), algorithm, keySize);
         KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator(sshRealm);
         UserAuthFactoriesFactory authFactoriesFactory = new UserAuthFactoriesFactory();
         authFactoriesFactory.setAuthMethods(authMethods);
@@ -201,14 +189,6 @@ public class Activator extends BaseActivator implements ManagedService {
         return server;
     }
 
-    private void createServerKey(File keyFile, String algorithm, int keySize) {
-        try {
-            logger.info("Creating ssh server key at " + keyFile);
-            KeyPair kp = new OpenSSHKeyPairGenerator(algorithm, keySize).generate();
-            new PemWriter(keyFile).writeKeyPair(algorithm, kp);
-        } catch (Exception e) {
-            throw new RuntimeException("Key file generation failed", e);
-        }
-    }
+
 
 }

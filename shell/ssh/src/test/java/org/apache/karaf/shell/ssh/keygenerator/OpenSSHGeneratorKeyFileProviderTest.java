@@ -37,7 +37,7 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         new PemWriter(temp).writeKeyPair(KeyUtils.RSA_ALGORITHM, kp);
 
         //File path = new File("/home/cschneider/.ssh/id_rsa");
-        OpenSSHKeyPairProvider prov = new OpenSSHKeyPairProvider(temp);
+        OpenSSHKeyPairProvider prov = new OpenSSHKeyPairProvider(temp, KeyUtils.RSA_ALGORITHM, 1024);
         KeyPair keys = prov.loadKeys().iterator().next();
         Assert.assertNotNull(keys);
         Assert.assertTrue("Loaded key is not RSA Key", keys.getPrivate() instanceof RSAPrivateCrtKey);

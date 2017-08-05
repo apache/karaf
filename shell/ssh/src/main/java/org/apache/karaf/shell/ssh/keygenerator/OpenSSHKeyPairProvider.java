@@ -28,20 +28,30 @@ import java.security.KeyPair;
 
 import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenSSHKeyPairProvider.class);
     private File keyFile;
     private String password;
     private KeyPair cachedKey;
+    private String algorithm;
+    private int keySize;
 
-    public OpenSSHKeyPairProvider(File keyFile) {
+    public OpenSSHKeyPairProvider(File keyFile, String algorithm, int keySize) {
         this.keyFile = keyFile;
+        this.algorithm = algorithm;
+        this.keySize = keySize;
     }
 
     @Override
-    public Iterable<KeyPair> loadKeys() {
+    public synchronized Iterable<KeyPair> loadKeys() {
         if (cachedKey != null) {
             return singleton(cachedKey);
+        }
+        if (!keyFile.exists()) {
+            createServerKey();
         }
         try (FileInputStream is = new FileInputStream(keyFile)) {
             KeyPair kp = getKeyPair(is);
@@ -58,4 +68,13 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
         return kp;
     }
     
+    private void createServerKey() {
+        try {
+            LOGGER.info("Creating ssh server key at " + keyFile);
+            KeyPair kp = new OpenSSHKeyPairGenerator(algorithm, keySize).generate();
+            new PemWriter(keyFile).writeKeyPair(algorithm, kp);
+        } catch (Exception e) {
+            throw new RuntimeException("Key file generation failed", e);
+        }
+    }
 }
