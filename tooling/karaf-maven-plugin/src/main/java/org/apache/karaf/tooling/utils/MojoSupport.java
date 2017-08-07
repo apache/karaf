@@ -275,9 +275,12 @@ public abstract class MojoSupport extends AbstractMojo {
         //check if the resourceLocation descriptor contains also remote repository information.
         ArtifactRepository repo = null;
         if (resourceLocation.startsWith("http://")) {
-            final int repoDelimIntex = resourceLocation.indexOf('!');
-            String repoUrl = resourceLocation.substring(0, repoDelimIntex);
-
+            final int repoDelimIndex = resourceLocation.indexOf('!');
+            String repoUrl = resourceLocation.substring(0, repoDelimIndex);
+            int paramIndex = repoUrl.indexOf("@");
+            if (paramIndex >= 0) {
+                repoUrl = repoUrl.substring(0, paramIndex);
+            }
             repo = new DefaultArtifactRepository(
                     repoUrl,
                     repoUrl,
@@ -286,9 +289,9 @@ public abstract class MojoSupport extends AbstractMojo {
             if (mavenProxy != null) {
                 repo.setProxy(mavenProxy);
             }
-            resourceLocation = resourceLocation.substring(repoDelimIntex + 1);
-
+            resourceLocation = resourceLocation.substring(repoDelimIndex + 1);
         }
+
         String[] parts = resourceLocation.split("/");
         String groupId = parts[0];
         String artifactId = parts[1];
