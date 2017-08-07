@@ -28,7 +28,7 @@
     <repository>mvn:org.ops4j.pax.transx/pax-transx-features/${pax.transx.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
     <repository>mvn:org.apache.aries.jpa/jpa-features/${aries.jpa.version}/xml/features</repository>
-    
+
     <feature name="transaction-api" version="1.2.0">
         <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
@@ -102,7 +102,7 @@
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-validation_1.0_spec/1.1</bundle>
         <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.1</bundle>
     </feature>
-    
+
     <feature name="openjpa" description="Apache OpenJPA 2.4.x persistence engine support" version="2.4.1">
         <details>Enable Apache OpenJPA as persistence engine.</details>
         <feature>jndi</feature>
@@ -138,7 +138,6 @@
         <details>Eclipselink persistence engine.</details>
         <bundle dependency="true">mvn:org.eclipse.persistence/javax.persistence/2.1.0</bundle>
         <feature version="[2,3)">transaction</feature>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/${commons-dbcp.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.asm/${eclipselink.version}</bundle>
