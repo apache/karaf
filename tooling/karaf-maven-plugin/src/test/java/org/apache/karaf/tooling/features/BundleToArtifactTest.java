@@ -30,7 +30,9 @@ import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.handler.manager.DefaultArtifactHandlerManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.junit.Assert;
 import org.junit.Test;
+
 
 public class BundleToArtifactTest extends MojoSupport {
 
@@ -66,22 +68,33 @@ public class BundleToArtifactTest extends MojoSupport {
     @Test
     public void testURLWithClassifier() throws Exception {
         Artifact artifact = resourceToArtifact("mvn:org.foo/bar/1.0/kar/type", false);
-        assert artifact.getGroupId().equals("org.foo");
-        assert artifact.getArtifactId().equals("bar");
-        assert artifact.getBaseVersion().equals("1.0");
-        assert artifact.getType().equals("kar");
-        assert artifact.getRepository() == null;
-        assert artifact.getClassifier().equals("type");
+        Assert.assertEquals("org.foo", artifact.getGroupId());
+        Assert.assertEquals("bar", artifact.getArtifactId());
+        Assert.assertEquals("1.0", artifact.getBaseVersion());
+        Assert.assertEquals("kar", artifact.getType());
+        Assert.assertNull(artifact.getRepository());
+        Assert.assertEquals("type", artifact.getClassifier());
     }
 
     @Test
     public void testRemoteRepoURL() throws Exception {
         Artifact artifact = resourceToArtifact("mvn:http://baz.com!org.foo/bar/1.0/kar", false);
-        assert artifact.getGroupId().equals("org.foo");
-        assert artifact.getArtifactId().equals("bar");
-        assert artifact.getBaseVersion().equals("1.0");
-        assert artifact.getType().equals("kar");
-        assert artifact.getRepository().getUrl().equals("http://baz.com");
-        assert artifact.getClassifier() == null;
+        Assert.assertEquals("org.foo", artifact.getGroupId());
+        Assert.assertEquals("bar", artifact.getArtifactId());
+        Assert.assertEquals("1.0", artifact.getBaseVersion());
+        Assert.assertEquals("kar", artifact.getType());
+        Assert.assertEquals("http://baz.com", artifact.getRepository().getUrl());
+        Assert.assertNull(artifact.getClassifier());
+    }
+    
+    @Test
+    public void testRemoteRepoURLWithId() throws Exception {
+        Artifact artifact = resourceToArtifact("mvn:http://baz.com@id=baz!org.foo/bar/1.0/kar", false);
+        Assert.assertEquals("org.foo", artifact.getGroupId());
+        Assert.assertEquals("bar", artifact.getArtifactId());
+        Assert.assertEquals("1.0", artifact.getBaseVersion());
+        Assert.assertEquals("kar", artifact.getType());
+        Assert.assertEquals("http://baz.com", artifact.getRepository().getUrl());
+        Assert.assertNull(artifact.getClassifier());
     }
 }
