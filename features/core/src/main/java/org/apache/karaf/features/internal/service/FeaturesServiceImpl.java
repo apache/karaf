@@ -891,10 +891,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     }
                 }
             } else {
-                // Match on name and version
-                String name = feature.substring(0, feature.indexOf(VERSION_SEPARATOR));
-                String version = feature.substring(feature.indexOf(VERSION_SEPARATOR) + 1);
-                Pattern pattern = getFeaturePattern(name, version);
+                Pattern pattern = getNameAndVersionPattern(feature);
                 for (String f : fl) {
                     Matcher matcher = pattern.matcher(f);
                     if (matcher.matches()) {
@@ -917,6 +914,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
         Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
         doProvisionInThread(required, stateChanges, state, getFeaturesById(), options);
+    }
+
+    private Pattern getNameAndVersionPattern(String feature) {
+        String name = feature.substring(0, feature.indexOf(VERSION_SEPARATOR));
+        String version = feature.substring(feature.indexOf(VERSION_SEPARATOR) + 1);
+        return getFeaturePattern(name, version);
     }
 
     @Override
