@@ -28,7 +28,10 @@ public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
     public final Set<String> repositories = new TreeSet<>();
+    
+    // Map from region name to Set of feature requirements (name/version range)
     public final Map<String, Set<String>> requirements = new HashMap<>();
+    // Map from region name to Set of feature id (name/version)
     public final Map<String, Set<String>> installedFeatures = new HashMap<>();
     
     // State of features by region and feature id (name/version)
