@@ -92,6 +92,15 @@ public interface Scheduler {
     Map<Object, ScheduleOptions> getJobs() throws SchedulerError;
 
     /**
+     * Triggers a scheduled job.
+     *
+     * @param jobName The name of the job.
+     * @return <code>true</code> if the job was triggered, otherwise <code>false</code>
+     * @throws SchedulerError  if the job can't be triggered.
+     */
+    boolean trigger(String jobName) throws SchedulerError;
+
+    /**
      * Create a schedule options to fire a job immediately and only once.
      *
      * @return The corresponding {@link ScheduleOptions}.
