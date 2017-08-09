@@ -73,32 +73,27 @@ public class FeaturesServiceImplTest extends TestBase {
         field.setAccessible(true);
         field.set(null, null);
     }
+    
+    @Test
+    public void testListFeatureWithoutVersion() throws Exception {
+        Feature transactionFeature = feature("transaction", "1.0.0");
+        FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
+        assertNotNull(impl.getFeatures("transaction", null));
+        assertSame(transactionFeature, impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0]);
+    }
 
     @Test
     public void testGetFeature() throws Exception {
         Feature transactionFeature = feature("transaction", "1.0.0");
-        final Map<String, Map<String, Feature>> features = features(transactionFeature);
-        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
-        EasyMock.replay(installSupport);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg ) {
-            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
-                return features;
-            }
-        };
+        FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
         assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
         assertSame(transactionFeature, impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0]);
     }
     
     @Test
     public void testGetFeatureStripVersion() throws Exception {
-        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
-            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
-                return features(feature("transaction", "1.0.0"));
-            }
-        };
+        Feature transactionFeature = feature("transaction", "1.0.0");
+        FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
         Feature[] features = impl.getFeatures("transaction", "  1.0.0  ");
         assertEquals(1, features.length);
         Feature feature = features[0];
@@ -108,29 +103,15 @@ public class FeaturesServiceImplTest extends TestBase {
     
     @Test
     public void testGetFeatureNotAvailable() throws Exception {
-        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
-            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
-                return features(feature("transaction", "1.0.0"));
-            }
-        };
+        Feature transactionFeature = feature("transaction", "1.0.0");
+        FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
         assertEquals(0, impl.getFeatures("activemq", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION).length);
     }
     
     @Test
     public void testGetFeatureHighestAvailable() throws Exception {
-        final Map<String, Map<String, Feature>> features = features(
-                feature("transaction", "1.0.0"),
-                feature("transaction", "2.0.0")
-        );
-        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        BundleInstallSupport installSupport = EasyMock.mock(BundleInstallSupport.class);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg) {
-            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
-                return features;
-            }
-        };
+        FeaturesServiceImpl impl = featuresServiceWithFeatures(feature("transaction", "1.0.0"),
+                                                               feature("transaction", "2.0.0"));
         assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
         assertEquals("2.0.0", impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0].getVersion());
     }
@@ -173,6 +154,19 @@ public class FeaturesServiceImplTest extends TestBase {
         featureService.removeRepository(repoA);
         assertNotInstalled(featureService, a1Feature);
         assertInstalled(featureService, b1Feature);
+    }
+
+    private FeaturesServiceImpl featuresServiceWithFeatures(Feature... staticFeatures) {
+        final Map<String, Map<String, Feature>> features = features(staticFeatures);
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        EasyMock.replay(installSupport);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg ) {
+            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
+                return features;
+            }
+        };
+        return impl;
     }
 
     private FeaturesServiceImpl createTestFeatureService() {
