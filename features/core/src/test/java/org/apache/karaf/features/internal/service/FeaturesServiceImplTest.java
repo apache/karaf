@@ -125,7 +125,7 @@ public class FeaturesServiceImplTest extends TestBase {
         impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
         impl.getFeatureCache();
     }
-
+    
     @Test
     public void testRemoveRepo1() throws Exception {
         final FeaturesService featureService = createTestFeatureService();
@@ -138,6 +138,29 @@ public class FeaturesServiceImplTest extends TestBase {
         featureService.removeRepository(repoA);
         assertNotInstalled(featureService, a1Feature);
         assertNotInstalled(featureService, b1Feature);
+    }
+    
+    @Test
+    public void testGetFeatureWithVersion() throws Exception {
+        final FeaturesService featureService = createTestFeatureService();
+        URI repoA = URI.create("custom:f09.xml");
+        featureService.addRepository(repoA);
+        Feature feature = featureService.getFeature("test", "1.0.0");
+        assertEquals("1.0.0", feature.getVersion());
+    }
+
+    @Test
+    public void testInstallAndUpdate() throws Exception {
+        final FeaturesService featureService = createTestFeatureService();
+        URI repoA = URI.create("custom:f09.xml");
+        featureService.addRepository(repoA);
+        Feature test100 = featureService.getFeature("test", "1.0.0");
+        installFeature(featureService, test100);
+        assertInstalled(featureService, test100);
+        Feature test110 = featureService.getFeature("test", "1.1.0");
+        featureService.installFeature(test110, EnumSet.of(Option.Upgrade));
+        waitInstalled(featureService, test110);
+        assertNotInstalled(featureService, test100);
     }
     
     @Test
@@ -175,9 +198,8 @@ public class FeaturesServiceImplTest extends TestBase {
         FrameworkInfo dummyInfo = new FrameworkInfo();
         expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
         EasyMock.replay(installSupport);
-        final FeaturesServiceImpl featureService = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
-                                                                 installSupport, null, cfg);
-        return featureService;
+        return new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                                       installSupport, null, cfg);
     }
 
     private void assertNotInstalled(FeaturesService featureService, Feature feature) {
@@ -190,11 +212,21 @@ public class FeaturesServiceImplTest extends TestBase {
                     featureService.isInstalled(feature));
     }
 
-    private void installFeature(final FeaturesService featureService, Feature a1Feature)
+    private void installFeature(final FeaturesService featureService, Feature feature)
         throws Exception {
-        featureService.installFeature(a1Feature, EnumSet.noneOf(Option.class));
-        while (!featureService.isInstalled(a1Feature)) {
+        featureService.installFeature(feature, EnumSet.noneOf(Option.class));
+        waitInstalled(featureService, feature);
+    }
+
+    private void waitInstalled(final FeaturesService featureService, Feature feature)
+        throws InterruptedException {
+        int count = 40;
+        while (!featureService.isInstalled(feature) && count > 0) {
             Thread.sleep(100);
+            count --;
+        }
+        if (count == 0) {
+            throw new RuntimeException("Feature " + feature + " not installed.");
         }
     }
     
