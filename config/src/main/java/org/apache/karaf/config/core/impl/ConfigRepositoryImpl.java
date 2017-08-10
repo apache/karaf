@@ -63,15 +63,12 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public void update(String pid, Dictionary<String, Object> properties) throws IOException {
         LOGGER.trace("Update configuration {}", pid);
         Configuration cfg = configAdmin.getConfiguration(pid, null);
-        if (storage != null) {
-            // Check, whether a file location is already provided.
-            if (properties.get(FILEINSTALL_FILE_NAME) == null) {
-                String cfgFileName = pid + ".cfg";
-                File cfgFile = new File(storage, cfgFileName);
-                properties.put(FILEINSTALL_FILE_NAME, cfgFile.getCanonicalFile().toURI().toString());
-            }
-        }
         cfg.update(properties);
+        try {
+            updateStorage(pid, properties);
+        } catch (Exception e) {
+            LOGGER.warn("Can't update cfg file", e);
+        }
     }
 
     /* (non-Javadoc)
@@ -212,7 +209,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             }
             config.update(properties);
             String pid = config.getPid();
-//            updateStorage(pid, properties);
+            updateStorage(pid, properties);
             return pid;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
