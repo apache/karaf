@@ -22,6 +22,15 @@ import org.osgi.framework.VersionRange;
 
 /**
  * Requirement for a feature
+ * 
+ * <p>The syntax of a requirement as a String is name[/versionRange].
+ * If no versionRange is given then a range of [0,) is assumeed which matches all versions.
+ * 
+ * <p>
+ * - name: Can be a feature name or a glob like myfeat*
+ * - versionRange: version or range
+ * - version: Will specify a specific version. Like [version,version]. An exemption is 0.0.0 which matches all versions.
+ * - range: Like defined in OSGi VersionRange. Example: [1.0.0, 1.1.0)  
  */
 public class FeatureReq {
     public static final String VERSION_SEPARATOR = "/";
@@ -57,7 +66,10 @@ public class FeatureReq {
     }
 
     private static VersionRange exactVersion(String versionRange) {
-        return new VersionRange(VersionRange.LEFT_CLOSED, new Version(versionRange), new Version(versionRange), VersionRange.RIGHT_CLOSED);
+        return new VersionRange(VersionRange.LEFT_CLOSED, 
+                                new Version(versionRange), 
+                                new Version(versionRange), 
+                                VersionRange.RIGHT_CLOSED);
     }
 
     public FeatureReq(String name, VersionRange versionRange) {
