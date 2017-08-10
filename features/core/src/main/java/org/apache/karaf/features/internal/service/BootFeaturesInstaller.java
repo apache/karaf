@@ -90,17 +90,7 @@ public class BootFeaturesInstaller {
 
     protected void installBootFeatures() {
         try {
-            for (String repo : repositories) {
-                repo = repo.trim();
-                if (!repo.isEmpty()) {
-                    repo = separatorsToUnix(repo);
-                    try {
-                        featuresService.addRepository(URI.create(repo));
-                    } catch (Exception e) {
-                        LOGGER.error("Error installing boot feature repository " + repo, e);
-                    }
-                }
-            }
+            addRepositories();
 
             List<Set<String>> stagedFeatures = parseBootFeatures(features);
             for (Set<String> features : stagedFeatures) {
@@ -121,6 +111,20 @@ public class BootFeaturesInstaller {
                 }
             }
             LOGGER.error("Error installing boot features", e);
+        }
+    }
+
+    private void addRepositories() {
+        for (String repo : repositories) {
+            repo = repo.trim();
+            if (!repo.isEmpty()) {
+                repo = separatorsToUnix(repo);
+                try {
+                    featuresService.addRepository(URI.create(repo));
+                } catch (Exception e) {
+                    LOGGER.error("Error installing boot feature repository " + repo, e);
+                }
+            }
         }
     }
 

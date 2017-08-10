@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.karaf.features.FeaturesService.Option;
 import org.apache.karaf.features.TestBase;
@@ -40,6 +42,8 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
 public class BootFeaturesInstallerTest extends TestBase {
+
+    private static final String INEXISTANT_REPO = "mvn:inexistent/features/1.0/xml/features";
 
     @Test
     public void testParser() {
@@ -92,15 +96,19 @@ public class BootFeaturesInstallerTest extends TestBase {
     @Test
     public void testStartDoesNotFailWithOneInvalidUri() throws Exception {
         FeaturesServiceImpl impl = createStrictMock(FeaturesServiceImpl.class);
-        impl.addRepository(URI.create("mvn:inexistent/features/1.0/xml/features"));
-        expectLastCall().andThrow(new IllegalArgumentException());
+        impl.addRepository(URI.create(INEXISTANT_REPO));
+        expectLastCall().andThrow(new IllegalArgumentException("Part of the test. Can be ignored."));
 
         impl.bootDone();
         expectLastCall();
 
         replay(impl);
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, new String[] { "mvn:inexistent/features/1.0/xml/features" }, "", false);
+        String[] repositories = new String[] { INEXISTANT_REPO };
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, repositories, "", false);
+        Logger logger = Logger.getLogger(BootFeaturesInstaller.class.getName());
+        logger.setLevel(Level.OFF); // Switch off to suppress logging of IllegalArgumentException
         bootFeatures.installBootFeatures();
+        logger.setLevel(Level.INFO);
         verify(impl);
     }
 
