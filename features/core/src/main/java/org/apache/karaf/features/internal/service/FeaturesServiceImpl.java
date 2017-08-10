@@ -83,6 +83,8 @@ import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toSet;
 import static org.apache.karaf.features.internal.service.StateStorage.toStringStringSetMap;
 import static org.apache.karaf.features.internal.util.MapUtils.add;
 import static org.apache.karaf.features.internal.util.MapUtils.copy;
@@ -787,28 +789,39 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void installFeatures(Set<String> featuresIn, String region, EnumSet<Option> options) throws Exception {
-        Set<FeatureReq> featureReqs = new HashSet<>();
+        Set<FeatureReq> toInstall = new HashSet<>();
         for (String feature : featuresIn) {
-            featureReqs.add(new FeatureReq(feature));
+            toInstall.add(new FeatureReq(feature));
         }
         State state = copyState();
         Map<String, Set<String>> requires = copy(state.requirements);
         if (region == null || region.isEmpty()) {
             region = ROOT_REGION;
         }
-        Set<String> requiredForRegion = requires.computeIfAbsent(region, k -> new HashSet<>());
-        computeRequirements(options, featureReqs, requiredForRegion);
-        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(requires, stateChanges, state, getFeaturesById(), options);
-    }
+        Set<String> requirements = requires.computeIfAbsent(region, k -> new HashSet<>());
+        Set<FeatureReq> existingFeatures = requirements.stream().map(r -> toFeatureReq(r)).collect(toSet());
 
-    void computeRequirements(EnumSet<Option> options, Set<FeatureReq> featureReqs,
-                                 Set<String> requirements)
-        throws Exception {
+        Set<FeatureReq> toAdd = computeFeaturesToAdd(options, toInstall);
+        toAdd.stream().forEach(f -> requirements.add(toRequirement(f)));
+        print("Adding features: " + join(toAdd), options.contains(Option.Verbose));
+        
+        if (options.contains(Option.Upgrade)) {
+            Set<FeatureReq> toRemove = computeFeaturesToRemoveOnUpdate(toAdd, existingFeatures);
+            toRemove.stream().forEach(f -> requirements.remove(toRequirement(f)));
+            if (!toRemove.isEmpty()) {
+                print("Removing features: " + join(toRemove), options.contains(Option.Verbose));
+            }
+        }
+
+        doProvisionInThread(requires, emptyMap(), state, getFeaturesById(), options);
+    }
+    
+    private Set<FeatureReq> computeFeaturesToAdd(EnumSet<Option> options, 
+                                                 Set<FeatureReq> toInstall) throws Exception {
+        Feature[] installedFeatures = listInstalledFeatures();
         Map<String, Map<String, Feature>> allFeatures = getFeatureCache();
-        List<FeatureReq> featuresToAdd = new ArrayList<>();
-        List<String> featuresToRemove = new ArrayList<>();
-        for (FeatureReq feature : featureReqs) {
+        Set<FeatureReq> toAdd = new HashSet<>();
+        for (FeatureReq feature : toInstall) {
             Pattern pattern = Pattern.compile(feature.getName());
             boolean matched = false;
             for (String fKey : allFeatures.keySet()) {
@@ -816,8 +829,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 if (matcher.matches()) {
                     Feature f = getFeatureMatching(fKey, feature.getVersionRange());
                     if (f != null) {
-                        featuresToAdd.add(new FeatureReq(f));
-                        Feature[] installedFeatures = listInstalledFeatures();
+                        toAdd.add(new FeatureReq(f));
                         for (Feature installedFeature : installedFeatures) {
                             if (installedFeature.getName().equals(f.getName()) && installedFeature.getVersion().equals(f.getVersion())) {
                                 LOGGER.info("The specified feature: '{}' version '{}' {}",f.getName(),f.getVersion(),f.getVersion().endsWith("SNAPSHOT") ? "has been upgraded": "is already installed");
@@ -830,29 +842,20 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             if (!matched && !options.contains(Option.NoFailOnFeatureNotFound)) {
                 throw new IllegalArgumentException("No matching features for " + feature);
             }
-            if (options.contains(Option.Upgrade)) {
-                for (String existentFeatureReq : requirements) {
-                    FeatureReq existentFeature = getFeatureRefFromRequired(existentFeatureReq);
-                    if (existentFeature.getName().equals(feature.getName())
-                            && !featuresToAdd.contains(existentFeature)) {
-                        featuresToRemove.add(existentFeature.toString());
-                        //do not break cycle to remove all old versions of feature
-                    }
-                }
-            }
         }
-        if (!featuresToRemove.isEmpty()) {
-            print("Removing features: " + join(featuresToRemove), options.contains(Option.Verbose));
-            for (String featureReq : featuresToRemove) {
-                requirements.remove(FEATURE_OSGI_REQUIREMENT_PREFIX + featureReq);
-            }
-        }
-        List<String> featuresToDisplay = new ArrayList<>();
-        for (FeatureReq feature : featuresToAdd) {
-            requirements.add(FEATURE_OSGI_REQUIREMENT_PREFIX + feature.toString());
-            featuresToDisplay.add(feature.toString());
-        }
-        print("Adding features: " + join(featuresToDisplay), options.contains(Option.Verbose));
+        return toAdd;
+    }
+
+    private Set<FeatureReq> computeFeaturesToRemoveOnUpdate(Set<FeatureReq> featuresToAdd,
+                                             Set<FeatureReq> existingFeatures) throws Exception {
+        Set<String> namesToAdd = featuresToAdd.stream().map(f -> f.getName()).collect(toSet());
+        return existingFeatures.stream()
+            .filter(f -> namesToAdd.contains(f.getName()) && !featuresToAdd.contains(f))
+            .collect(toSet());
+    }
+
+    private String toRequirement(FeatureReq feature) {
+        return FEATURE_OSGI_REQUIREMENT_PREFIX + feature.toString();
     }
 
     @Override
@@ -866,21 +869,20 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         if (region == null || region.isEmpty()) {
             region = ROOT_REGION;
         }
-        Set<String> existingFeatures = required.computeIfAbsent(region, k -> new HashSet<>());
-        Set<String> featuresToRemove = new HashSet<>();
+        Set<String> requiredForRegion = required.computeIfAbsent(region, k -> new HashSet<>());
+        Set<FeatureReq> featuresToRemove = new HashSet<>();
         for (FeatureReq feature : featureReqs) {
             Pattern pattern = Pattern.compile(feature.getName());
-            List<String> toRemove = new ArrayList<>();
-            for (String existingFeature : existingFeatures) {
-               FeatureReq existingFeatureReq = getFeatureRefFromRequired(existingFeature);
+            List<FeatureReq> toRemove = new ArrayList<>();
+            for (String existingFeature : requiredForRegion) {
+               FeatureReq existingFeatureReq = toFeatureReq(existingFeature);
                if (existingFeatureReq != null) {
                    Matcher matcher = pattern.matcher(existingFeatureReq.getName());
                    if (matcher.matches() && feature.getVersionRange().includes(existingFeatureReq.getVersionRange().getLeft())) {
-                       toRemove.add(existingFeature);
+                       toRemove.add(existingFeatureReq);
                    }
                }
             }
-            toRemove.retainAll(existingFeatures);
 
             if (toRemove.isEmpty()) {
                 throw new IllegalArgumentException("Feature named '" + feature + "' is not installed");
@@ -888,15 +890,14 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             featuresToRemove.addAll(toRemove);
         }
         print("Removing features: " + join(featuresToRemove), options.contains(Option.Verbose));
-        existingFeatures.removeAll(featuresToRemove);
-        if (existingFeatures.isEmpty()) {
+        featuresToRemove.stream().forEach(f->requiredForRegion.remove(toRequirement(f)));
+        if (requiredForRegion.isEmpty()) {
             required.remove(region);
         }
-        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(required, stateChanges, state, getFeaturesById(), options);
+        doProvisionInThread(required, emptyMap(), state, getFeaturesById(), options);
     }
 
-    private FeatureReq getFeatureRefFromRequired(String featureReq) {
+    private FeatureReq toFeatureReq(String featureReq) {
         if (!featureReq.startsWith(FEATURE_OSGI_REQUIREMENT_PREFIX)) {
             return null;
         }
@@ -915,8 +916,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         State state = copyState();
         Map<String, Set<String>> required = copy(state.requirements);
         add(required, requirements);
-        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(required, stateChanges, state, getFeaturesById(), options);
+        doProvisionInThread(required, emptyMap(), state, getFeaturesById(), options);
     }
 
     @Override
@@ -924,8 +924,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         State state = copyState();
         Map<String, Set<String>> required = copy(state.requirements);
         remove(required, requirements);
-        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(required, stateChanges, state, getFeaturesById(), options);
+        doProvisionInThread(required, emptyMap(), state, getFeaturesById(), options);
     }
 
     @Override
@@ -948,8 +947,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             saveState();
             stateCopy = state.copy();
         }
-        Map<String, Map<String, FeatureState>> stateChanges = Collections.emptyMap();
-        doProvisionInThread(requirements, stateChanges, stateCopy, getFeaturesById(), options);
+        doProvisionInThread(requirements, emptyMap(), stateCopy, getFeaturesById(), options);
     }
 
     private <T> Set<T> diff(Set<T> s1, Set<T> s2) {
@@ -1188,9 +1186,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         installSupport.installLibraries(feature);
     }
 
-
-
-    private String join(Collection<String> list) {
-        return String.join(", ", list);
+    private String join(Collection<FeatureReq> reqs) {
+        return reqs.stream().map(f->f.toString()).collect(Collectors.joining(","));
     }
 }
