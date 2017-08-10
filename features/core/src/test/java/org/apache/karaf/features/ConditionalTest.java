@@ -16,39 +16,31 @@
  */
 package org.apache.karaf.features;
 
-import junit.framework.TestCase;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 import org.apache.karaf.features.internal.service.RepositoryImpl;
+import org.junit.Test;
 
 
-public class ConditionalTest extends TestCase {
+public class ConditionalTest {
 
+    @Test
     public void testLoad() throws Exception {
         RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f06.xml").toURI());
-        // Check repo
         Feature[] features = r.getFeatures();
-        assertNotNull(features);
         assertEquals(1, features.length);
         Feature feature = features[0];
 
-        assertNotNull(feature.getConditional());
         assertEquals(2,feature.getConditional().size());
 
-        Conditional conditional = feature.getConditional().get(0);
-        assertNotNull(conditional.getCondition());
-        assertEquals(1,conditional.getCondition().size());
-        String dependency = conditional.getCondition().get(0);
-        assertNotNull(dependency);
-        assertEquals("http", dependency);
-        assertNotNull(conditional.getBundles());
-        assertEquals(1, feature.getConditional().get(0).getBundles().size());
+        Conditional conditional1 = feature.getConditional().get(0);
+        assertThat(conditional1.getCondition(), contains("http"));
+        assertEquals(1, conditional1.getBundles().size());
 
-        conditional = feature.getConditional().get(1);
-        assertNotNull(conditional.getCondition());
-        assertEquals(1,conditional.getCondition().size());
-        dependency = conditional.getCondition().get(0);
-        assertNotNull(dependency);
-        assertEquals("req:osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(!(version>=1.7)))\"", dependency);
-
-        String wrapperName = "my6/1.5.3-beta-3".replaceAll("[^A-Za-z0-9 ]", "_");
+        Conditional conditional2 = feature.getConditional().get(1);
+        assertThat(conditional2.getCondition(), contains("req:osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(!(version>=1.7)))\""));
     }
+    
 }
