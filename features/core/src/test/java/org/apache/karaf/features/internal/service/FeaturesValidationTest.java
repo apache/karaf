@@ -16,61 +16,43 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.net.URL;
-
-import org.apache.karaf.features.Library;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.URI;
+
+import org.apache.karaf.features.Library;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.junit.Test;
+
 public class FeaturesValidationTest {
 
     @Test
     public void testNs10() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f02.xml").toURI());
-    }
-
-    @Test
-    public void testNs10Unmarshall() throws Exception {
-        URL url = getClass().getResource("f02.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Features features = unmarshalAndValidate("f02.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs10NoName() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f03.xml").toURI());
-    }
-
-    @Test
-    public void testNs10NoNameUnmarshall() throws Exception {
-        URL url = getClass().getResource("f03.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Features features = unmarshalAndValidate("f03.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs11() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f04.xml").toURI());
-    }
-
-    @Test
-    public void testNs11Unmarshall() throws Exception {
-        URL url = getClass().getResource("f04.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Features features = unmarshalAndValidate("f04.xml");;
         assertNotNull(features);
     }
 
     @Test
     public void testNs11NoName() throws Exception {
         try {
-            FeatureValidationUtil.validate(getClass().getResource("f05.xml").toURI());
+            unmarshalAndValidate("f05.xml");
             fail("Validation should have failed");
         } catch (Exception e) {
             // ok
@@ -78,26 +60,14 @@ public class FeaturesValidationTest {
     }
 
     @Test
-    public void testNs12() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f06.xml").toURI());
-    }
-
-    @Test
     public void testNs12Unmarshall() throws Exception {
-        URL url = getClass().getResource("f06.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Features features = unmarshalAndValidate("f06.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs13() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f07.xml").toURI());
-    }
-
-    @Test
-    public void testNs13Unmarshall() throws Exception {
-        URL url = getClass().getResource("f07.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Features features = unmarshalAndValidate("f07.xml");
         assertNotNull(features);
         assertEquals("2.5.6.SEC02", features.getFeature().get(0).getVersion());
         assertTrue(features.getFeature().get(1).isHidden());
@@ -107,6 +77,11 @@ public class FeaturesValidationTest {
         assertEquals(Library.TYPE_ENDORSED, features.getFeature().get(0).getLibraries().get(0).getType());
         assertFalse(features.getFeature().get(0).getLibraries().get(0).isExport());
         assertTrue(features.getFeature().get(0).getLibraries().get(0).isDelegate());
+    }
+
+    private Features unmarshalAndValidate(String path) throws Exception {
+        URI uri = getClass().getResource(path).toURI();
+        return JaxbUtil.unmarshal(uri.toASCIIString(), true);
     }
 
 }
