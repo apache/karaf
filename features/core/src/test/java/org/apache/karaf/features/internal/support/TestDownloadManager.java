@@ -38,10 +38,10 @@ public class TestDownloadManager implements DownloadManager, Downloader {
 
     private final MultiException exception = new MultiException("Error");
     private final ConcurrentMap<String, StreamProvider> providers = new ConcurrentHashMap<>();
-    private final Class loader;
+    private final Class<?> loader;
     private final String dir;
 
-    public TestDownloadManager(Class loader, String dir) {
+    public TestDownloadManager(Class<?> loader, String dir) {
         this.loader = loader;
         this.dir = dir;
     }

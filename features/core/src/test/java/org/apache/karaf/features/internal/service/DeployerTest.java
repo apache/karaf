@@ -471,7 +471,6 @@ public class DeployerTest {
         doTestPrereqOnPrereq(4);
     }
 
-    @SuppressWarnings("unchecked")
     private void doTestPrereqOnPrereq(int scenario) throws Exception {
         IMocksControl c = EasyMock.createControl();
 
