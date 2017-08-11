@@ -73,8 +73,9 @@ public class FeatureConfigInstaller {
         }
     }
 
-    private Configuration createConfiguration(ConfigurationAdmin configurationAdmin,
-                                              String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+    private Configuration createConfiguration(ConfigurationAdmin configurationAdmin, String pid,
+                                              String factoryPid)
+        throws IOException, InvalidSyntaxException {
         if (factoryPid != null) {
             return configurationAdmin.createFactoryConfiguration(pid, null);
         } else {
@@ -82,8 +83,9 @@ public class FeatureConfigInstaller {
         }
     }
 
-    private Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin,
-                                                    String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+    private Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin, String pid,
+                                                    String factoryPid)
+        throws IOException, InvalidSyntaxException {
         String filter;
         if (factoryPid == null) {
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
@@ -99,7 +101,7 @@ public class FeatureConfigInstaller {
     }
 
     public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
-    	for (ConfigInfo config : feature.getConfigurations()) {
+        for (ConfigInfo config : feature.getConfigurations()) {
             TypedProperties props = new TypedProperties();
             // trim lines
             String val = config.getValue();
@@ -108,14 +110,14 @@ public class FeatureConfigInstaller {
             } else {
                 props.load(new StringReader(val));
             }
-			String[] pid = parsePid(config.getName());
-			Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
-			if (cfg == null) {
-				Dictionary<String, Object> cfgProps = convertToDict(props);
-				cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-				String key = createConfigurationKey(pid[0], pid[1]);
-				cfgProps.put(CONFIG_KEY, key);
-				props.put(CONFIG_KEY, key);
+            String[] pid = parsePid(config.getName());
+            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
+            if (cfg == null) {
+                Dictionary<String, Object> cfgProps = convertToDict(props);
+                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
+                String key = createConfigurationKey(pid[0], pid[1]);
+                cfgProps.put(CONFIG_KEY, key);
+                props.put(CONFIG_KEY, key);
                 if (storage != null && configCfgStore) {
                     File cfgFile;
                     if (pid[1] != null) {
@@ -125,15 +127,15 @@ public class FeatureConfigInstaller {
                     }
                     cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
                 }
-				cfg.update(cfgProps);
+                cfg.update(cfgProps);
                 try {
                     updateStorage(pid[0], pid[1], props, false);
                 } catch (Exception e) {
                     LOGGER.warn("Can't update cfg file", e);
                 }
-			} else if (config.isAppend()) {
+            } else if (config.isAppend()) {
                 boolean update = false;
-				Dictionary<String,Object> properties = cfg.getProperties();
+                Dictionary<String, Object> properties = cfg.getProperties();
                 for (String key : props.keySet()) {
                     if (properties.get(key) == null) {
                         properties.put(key, props.get(key));
@@ -148,20 +150,21 @@ public class FeatureConfigInstaller {
                         LOGGER.warn("Can't update cfg file", e);
                     }
                 }
-			}
-		}
+            }
+        }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-            installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride());
+            installConfigurationFile(configFile.getLocation(), configFile.getFinalname(),
+                                     configFile.isOverride());
         }
     }
 
-	private Dictionary<String, Object> convertToDict(Map<String, Object> props) {
-		Dictionary<String, Object> cfgProps = new Hashtable<>();
+    private Dictionary<String, Object> convertToDict(Map<String, Object> props) {
+        Dictionary<String, Object> cfgProps = new Hashtable<>();
         for (Map.Entry<String, Object> e : props.entrySet()) {
             cfgProps.put(e.getKey(), e.getValue());
         }
-		return cfgProps;
-	}
+        return cfgProps;
+    }
 
     private String createConfigurationKey(String pid, String factoryPid) {
         return factoryPid == null ? pid : pid + "-" + factoryPid;
@@ -194,8 +197,8 @@ public class FeatureConfigInstaller {
         // Substitute all variables, but keep unknown ones.
         final String dummyKey = "";
         try {
-            finalname = InterpolationHelper.substVars(finalname, dummyKey, null, null, null,
-                    true, true, false);
+            finalname = InterpolationHelper.substVars(finalname, dummyKey, null, null, null, true, true,
+                                                      false);
         } catch (final IllegalArgumentException ex) {
             LOGGER.info("Substitution failed. Skip substitution of variables of configuration final name ({}).",
                     finalname);
@@ -219,7 +222,8 @@ public class FeatureConfigInstaller {
         return finalname;
     }
 
-    private void installConfigurationFile(String fileLocation, String finalname, boolean override) throws IOException {
+    private void installConfigurationFile(String fileLocation, String finalname, boolean override)
+        throws IOException {
         finalname = substFinalName(finalname);
 
         File file = new File(finalname);
@@ -256,7 +260,8 @@ public class FeatureConfigInstaller {
         }
     }
 
-    protected void updateStorage(String pid, String factoryPid, TypedProperties props, boolean append) throws Exception {
+    protected void updateStorage(String pid, String factoryPid, TypedProperties props, boolean append)
+        throws Exception {
         if (storage != null && configCfgStore) {
             // get the cfg file
             File cfgFile;
@@ -271,13 +276,13 @@ public class FeatureConfigInstaller {
                 Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
                 try {
                     if (val instanceof URL) {
-                        cfgFile = new File(((URL) val).toURI());
+                        cfgFile = new File(((URL)val).toURI());
                     }
                     if (val instanceof URI) {
-                        cfgFile = new File((URI) val);
+                        cfgFile = new File((URI)val);
                     }
                     if (val instanceof String) {
-                        cfgFile = new File(new URL((String) val).toURI());
+                        cfgFile = new File(new URL((String)val).toURI());
                     }
                 } catch (Exception e) {
                     throw new IOException(e.getMessage(), e);
@@ -289,11 +294,11 @@ public class FeatureConfigInstaller {
                 props.save(cfgFile);
             } else {
                 TypedProperties properties = new TypedProperties();
-                properties.load( cfgFile );
+                properties.load(cfgFile);
                 for (String key : props.keySet()) {
                     if (!Constants.SERVICE_PID.equals(key)
-                            && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                            && !FILEINSTALL_FILE_NAME.equals(key)) {
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FILEINSTALL_FILE_NAME.equals(key)) {
                         List<String> comments = props.getComments(key);
                         List<String> value = props.getRaw(key);
                         if (!properties.containsKey(key)) {
@@ -310,10 +315,9 @@ public class FeatureConfigInstaller {
                     // remove "removed" properties from the cfg file
                     ArrayList<String> propertiesToRemove = new ArrayList<>();
                     for (String key : properties.keySet()) {
-                        if (!props.containsKey(key)
-                                && !Constants.SERVICE_PID.equals(key)
-                                && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                                && !FILEINSTALL_FILE_NAME.equals(key)) {
+                        if (!props.containsKey(key) && !Constants.SERVICE_PID.equals(key)
+                            && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                            && !FILEINSTALL_FILE_NAME.equals(key)) {
                             propertiesToRemove.add(key);
                         }
                     }
@@ -323,7 +327,7 @@ public class FeatureConfigInstaller {
                 }
                 // save the cfg file
                 storage.mkdirs();
-                properties.save( cfgFile );
+                properties.save(cfgFile);
             }
         }
     }
