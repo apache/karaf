@@ -22,6 +22,8 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -48,7 +50,7 @@ public class AppendTest {
     @Before
     public void before() throws Exception {
         System.setProperty("karaf.data", "data");
-        System.setProperty("karaf.etc", "etc");
+        System.setProperty("karaf.etc", "target");
         RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f08.xml").toURI());
         Feature[] features = r.getFeatures();
         feature = features[0];
@@ -71,6 +73,8 @@ public class AppendTest {
 
     @Test
     public void testAppend() throws Exception {
+        File cfgFile = new File("target/org.ops4j.pax.web.cfg");
+        cfgFile.delete();
         Hashtable<String, Object> original = new Hashtable<>();
         original.put("foo", "bar");
         Configuration config = expectConfig(admin, original);
@@ -81,6 +85,9 @@ public class AppendTest {
         installer.installFeatureConfigs(feature);
         c.verify();
         assertEquals("data/pax-web-jsp", captured.getValue().get("javax.servlet.context.tempdir"));
+        Properties props = new Properties();
+        props.load(new FileInputStream(cfgFile));
+        assertEquals("data/pax-web-jsp", props.getProperty("javax.servlet.context.tempdir"));
     }
 
     private Configuration expectConfig(ConfigurationAdmin admin, Hashtable<String, Object> original)
