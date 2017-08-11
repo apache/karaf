@@ -89,10 +89,10 @@ checkRootInstance() {
       ROOT_INSTANCE_PID=$(sed -n -e '/item.0.pid/ s/.*\= *//p' "${KARAF_HOME}/instances/instance.properties")
       ROOT_INSTANCE_NAME=$(sed -n -e '/item.0.name/ s/.*\= *//p' "${KARAF_HOME}/instances/instance.properties")
       if [ "${ROOT_INSTANCE_PID}" -ne "0" ]; then
-          if ps p "${ROOT_INSTANCE_PID}" > /dev/null
+          if ps -p "${ROOT_INSTANCE_PID}" > /dev/null
           then
               MAIN=org.apache.karaf.main.Main
-              PID_COMMAND=$(ps p "${ROOT_INSTANCE_PID}" o args | sed 1d)
+              PID_COMMAND=$(ps -p "${ROOT_INSTANCE_PID}" o args | sed 1d)
               if [ "${PID_COMMAND#*$MAIN}" != "$PID_COMMAND" ]; then
                 ROOT_INSTANCE_RUNNING=true
               fi
