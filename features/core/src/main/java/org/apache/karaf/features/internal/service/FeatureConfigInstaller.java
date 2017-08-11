@@ -301,13 +301,14 @@ public class FeatureConfigInstaller {
                         && !FILEINSTALL_FILE_NAME.equals(key)) {
                         List<String> comments = props.getComments(key);
                         List<String> value = props.getRaw(key);
+                        Object writeValue = (value.size() == 1) ? value.get(0) : value;
                         if (!properties.containsKey(key)) {
-                            properties.put(key, comments, value);
+                            properties.put(key, comments, writeValue);
                         } else if (!append) {
                             if (comments.isEmpty()) {
                                 comments = properties.getComments(key);
                             }
-                            properties.put(key, comments, value);
+                            properties.put(key, comments, writeValue);
                         }
                     }
                 }

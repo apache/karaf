@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -72,9 +73,21 @@ public class AppendTest {
     }
 
     @Test
-    public void testAppend() throws Exception {
+    public void testAppendWhenFileExists() throws Exception {
+        testAppendInternal(true);
+    }
+    
+    @Test
+    public void testAppendWhenNoFileExists() throws Exception {
+        testAppendInternal(false);
+    }
+
+    private void testAppendInternal(boolean cfgFileExists) throws IOException, InvalidSyntaxException, FileNotFoundException {
         File cfgFile = new File("target/org.ops4j.pax.web.cfg");
         cfgFile.delete();
+        if (cfgFileExists) {
+            cfgFile.createNewFile();
+        }
         Hashtable<String, Object> original = new Hashtable<>();
         original.put("foo", "bar");
         Configuration config = expectConfig(admin, original);
