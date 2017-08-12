@@ -301,4 +301,22 @@ public class QuartzScheduler implements Scheduler {
         }
     }
 
+    @Override
+    public boolean trigger(String jobName) throws SchedulerError {
+        final org.quartz.Scheduler s = this.scheduler;
+        if (jobName != null && s != null) {
+            try {
+                final JobKey key = JobKey.jobKey(jobName);
+                final JobDetail jobdetail = s.getJobDetail(key);
+                if (jobdetail != null) {
+                    this.scheduler.triggerJob(key, jobdetail.getJobDataMap());
+                    return true;
+                }
+            } catch (SchedulerException ex) {
+                throw new SchedulerError(ex);
+            }
+        }
+        return false;
+    }
+
 }
