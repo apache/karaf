@@ -487,8 +487,6 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
                 if (!this.dependencyHelper.isArtifactAFeature(artifact)) {
                     String bundleName = this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(entry.getParent(), artifact));
-                    File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
-                    Manifest manifest = getManifest(bundleFile);
 
                     for (ConfigFile cf : feature.getConfigfile()) {
                         if (bundleName.equals(cf.getLocation().replace('\n', ' ').trim())) {
@@ -497,7 +495,9 @@ public class GenerateDescriptorMojo extends MojoSupport {
                         }
                     }
 
-                    if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
+                    File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
+                    Manifest manifest = getManifest(bundleFile);
+                    if (manifest == null || !ManifestUtils.isBundle(manifest)) {
                         bundleName = "wrap:" + bundleName;
                         needWrap = true;
                     }
