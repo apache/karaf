@@ -23,7 +23,6 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +30,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -601,7 +601,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
     }
 
-    private Dependency findMatchingDependency(List<Dependency> dependencies, Dependency reference) {
+    private static Dependency findMatchingDependency(List<Dependency> dependencies, Dependency reference) {
         String referenceName = reference.getName();
         for (Dependency dependency : dependencies) {
             if (referenceName.equals(dependency.getName())) {
@@ -611,7 +611,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         return null;
     }
 
-    private void mergeDependencies(Dependency target, Dependency source) {
+    private static void mergeDependencies(Dependency target, Dependency source) {
         if (target.getVersion() == null || Feature.DEFAULT_VERSION.equals(target.getVersion())) {
             target.setVersion(source.getVersion());
         }
@@ -642,30 +642,28 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
 
     private Manifest getManifest(File file) throws IOException {
-        InputStream is;
+        final InputStream is;
         try {
-            is = new BufferedInputStream(new FileInputStream(file));
+            is = Files.newInputStream(file.toPath());
         } catch (Exception e) {
             getLog().warn("Error while opening artifact", e);
             return null;
         }
 
-        try {
-            is.mark(256 * 1024);
-            JarInputStream jar = new JarInputStream(is);
-            Manifest m = jar.getManifest();
-            if (m == null) {
-                getLog().warn("Manifest not present in the first entry of the zip - " + file.getName());
+        try (BufferedInputStream bis = new BufferedInputStream(is)) {
+            bis.mark(256 * 1024);
+
+            try (JarInputStream jar = new JarInputStream(bis)) {
+                Manifest m = jar.getManifest();
+                if (m == null) {
+                    getLog().warn("Manifest not present in the first entry of the zip - " + file.getName());
+                }
+                return m;
             }
-            jar.close();
-            return m;
-        } finally {
-            // just in case when we did not open bundle
-            is.close();
         }
     }
 
-    private Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
+    private static Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
         return JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
     }
 
@@ -866,7 +864,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
     }
 
-    private Features toFeatures(Collection<Bundle> addedBundles, Collection<Dependency> addedDependencys, ObjectFactory objectFactory) {
+    private static Features toFeatures(Collection<Bundle> addedBundles, Collection<Dependency> addedDependencys, ObjectFactory objectFactory) {
         Features features = objectFactory.createFeaturesRoot();
         Feature feature = objectFactory.createFeature();
         feature.getBundle().addAll(addedBundles);
@@ -876,7 +874,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
     }
 
 
-    private void writeDependencies(Features features, File file) throws JAXBException, IOException {
+    private static void writeDependencies(Features features, File file) throws JAXBException, IOException {
         file.getParentFile().mkdirs();
         if (!file.getParentFile().exists() || !file.getParentFile().isDirectory()) {
             throw new IOException("Cannot create directory at " + file.getParent());

@@ -18,11 +18,12 @@
 package org.apache.karaf.tooling.utils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -350,11 +351,8 @@ public abstract class MojoSupport extends AbstractMojo {
         File targetDir = destFile.getParentFile();
         ensureDirExists(targetDir);
 
-        try {
-            try (
-                FileInputStream is = new FileInputStream(sourceFile);
-                FileOutputStream bos = new FileOutputStream(destFile)
-            ) {
+        try (InputStream is = Files.newInputStream(sourceFile.toPath())) {
+            try (OutputStream bos = Files.newOutputStream(destFile.toPath())) {
                 StreamUtils.copy(is, bos);
             }
         } catch (IOException e) {
