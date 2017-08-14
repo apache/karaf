@@ -16,12 +16,18 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
@@ -47,25 +53,38 @@ public class Blacklist {
     public static final String TYPE_REPOSITORY = "repository";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Blacklist.class);
-
-    private Blacklist() {
+    private Clause[] clauses;
+    
+    public Blacklist() {
+        this(Collections.emptyList());
     }
 
-    public static void blacklist(Features features, String blacklisted) {
-        Set<String> blacklist = loadBlacklist(blacklisted);
-        blacklist(features, blacklist);
+    public Blacklist(List<String> blacklist) {
+        this.clauses = org.apache.felix.utils.manifest.Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
+    }
+    
+    public Blacklist(String blacklistUrl) {
+        Set<String> blacklist = new HashSet<>();
+        if (blacklistUrl != null) {
+            try (InputStream is = new URL(blacklistUrl).openStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                reader.lines() //
+                    .map(line -> line.trim()) //
+                    .filter(line -> line.isEmpty() || line.startsWith("#")).collect(toSet());
+            } catch (FileNotFoundException e) {
+                LOGGER.debug("Unable to load blacklist bundles list", e.toString());
+            } catch (Exception e) {
+                LOGGER.debug("Unable to load blacklist bundles list", e);
+            }
+        }
+        this.clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
     }
 
-    public static void blacklist(Features features, Collection<String> blacklist) {
-        Clause[] clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
-        blacklist(features, clauses);
+    public void blacklist(Features features) {
+        features.getFeature().removeIf(feature -> blacklist(feature));
     }
 
-    public static void blacklist(Features features, Clause[] clauses) {
-        features.getFeature().removeIf(feature -> blacklist(feature, clauses));
-    }
-
-    public static boolean blacklist(Feature feature, Clause[] clauses) {
+    public boolean blacklist(Feature feature) {
         for (Clause clause : clauses) {
             // Check feature name
             if (clause.getName().equals(feature.getName())) {
@@ -83,16 +102,16 @@ public class Blacklist {
                 }
             }
             // Check bundles
-            blacklist(feature.getBundle(), clauses);
+            blacklist(feature.getBundle());
             // Check conditional bundles
             for (Conditional cond : feature.getConditional()) {
-                blacklist(cond.getBundle(), clauses);
+                blacklist(cond.getBundle());
             }
         }
         return false;
     }
 
-    private static void blacklist(List<Bundle> bundles, Clause[] clauses) {
+    private void blacklist(List<Bundle> bundles) {
         for (Iterator<Bundle> iterator = bundles.iterator(); iterator.hasNext();) {
             Bundle info = iterator.next();
             for (Clause clause : clauses) {
@@ -111,33 +130,7 @@ public class Blacklist {
         }
     }
 
-    public static Set<String> loadBlacklist(String blacklistUrl) {
-        Set<String> blacklist = new HashSet<>();
-        try {
-            if (blacklistUrl != null) {
-                try (
-                        InputStream is = new URL(blacklistUrl).openStream()
-                ) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        line = line.trim();
-                        if (!line.isEmpty() && !line.startsWith("#")) {
-                            blacklist.add(line);
-                        }
-                    }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            LOGGER.debug("Unable to load blacklist bundles list", e.toString());
-        } catch (Exception e) {
-            LOGGER.debug("Unable to load blacklist bundles list", e);
-        }
-        return blacklist;
-    }
-
-    public static boolean isFeatureBlacklisted(List<String> blacklist, String name, String version) {
-        Clause[] clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
+    public boolean isFeatureBlacklisted(String name, String version) {
         for (Clause clause : clauses) {
             if (clause.getName().equals(name)) {
                 // Check feature version
@@ -157,16 +150,11 @@ public class Blacklist {
         return false;
     }
 
-    public static boolean isBundleBlacklisted(List<String> blacklist, String uri) {
-        return isBlacklisted(blacklist, uri, TYPE_BUNDLE);
+    public boolean isBundleBlacklisted(String uri) {
+        return isBlacklisted(uri, TYPE_BUNDLE);
     }
 
-    public static boolean isBlacklisted(List<String> blacklist, String uri, String btype) {
-        Clause[] clauses = Parser.parseClauses(blacklist.toArray(new String[blacklist.size()]));
-        return isBlacklisted(clauses, uri, btype);
-    }
-
-    public static boolean isBlacklisted(Clause[] clauses, String uri, String btype) {
+    public boolean isBlacklisted(String uri, String btype) {
         for (Clause clause : clauses) {
             String url = clause.getName();
             if (clause.getAttribute(BLACKLIST_URL) != null) {

@@ -36,13 +36,13 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.internal.model.Library;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.Library;
 import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.State;
@@ -63,6 +63,8 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
 
     private final DownloadManager manager;
     private final Builder builder;
+    private Blacklist featureBlacklist;
+    private Blacklist bundleBlacklist;
     private final Path homeDirectory;
     private final int defaultStartLevel;
     private final Path etcDirectory;
@@ -72,9 +74,12 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
 
     private final Map<String, Bundle> bundles = new HashMap<>();
 
+
     public AssemblyDeployCallback(DownloadManager manager, Builder builder, BundleRevision systemBundle, Collection<Features> repositories) throws Exception {
         this.manager = manager;
         this.builder = builder;
+        this.featureBlacklist = new Blacklist(builder.getBlacklistedFeatures());
+        this.bundleBlacklist = new Blacklist(builder.getBlacklistedBundles());
         this.homeDirectory = builder.homeDirectory;
         this.etcDirectory = homeDirectory.resolve("etc");
         this.systemDirectory = homeDirectory.resolve("system");
@@ -190,7 +195,7 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
     }
     
     private void assertNotBlacklisted(org.apache.karaf.features.Feature feature) {
-        if (Blacklist.isFeatureBlacklisted(builder.getBlacklistedFeatures(), feature.getName(), feature.getVersion())) {
+        if (featureBlacklist.isFeatureBlacklisted(feature.getName(), feature.getVersion())) {
             if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
                 throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
             }
@@ -208,7 +213,7 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
     @Override
     public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
         // Check blacklist
-        if (Blacklist.isBundleBlacklisted(builder.getBlacklistedBundles(), uri)) {
+        if (bundleBlacklist.isBundleBlacklisted(uri)) {
             if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
                 throw new RuntimeException("Bundle " + uri + " is blacklisted");
             }

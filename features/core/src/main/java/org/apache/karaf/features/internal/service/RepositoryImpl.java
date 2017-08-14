@@ -22,10 +22,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.URI;
 import java.util.Objects;
-import java.util.Set;
 
-import org.apache.felix.utils.manifest.Clause;
-import org.apache.felix.utils.manifest.Parser;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
@@ -37,22 +34,16 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
 public class RepositoryImpl implements Repository {
 
     private final URI uri;
-    private final Clause[] blacklisted;
+    private final Blacklist blacklist;
     private Features features;
-
+    
     public RepositoryImpl(URI uri) {
-        this(uri, (Clause[]) null);
+        this(uri, null);
     }
 
-    public RepositoryImpl(URI uri, String blacklisted) {
+    public RepositoryImpl(URI uri, Blacklist blacklist) {
         this.uri = uri;
-        Set<String> blacklistStrings = Blacklist.loadBlacklist(blacklisted);
-        this.blacklisted = Parser.parseClauses(blacklistStrings.toArray(new String[blacklistStrings.size()]));
-    }
-
-    public RepositoryImpl(URI uri, Clause[] blacklisted) {
-        this.uri = uri;
-        this.blacklisted = blacklisted != null ? blacklisted : new Clause[0];
+        this.blacklist = blacklist;
     }
 
     public URI getURI() {
@@ -97,7 +88,9 @@ public class RepositoryImpl implements Repository {
                     InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())
             ) {
                 features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
-                Blacklist.blacklist(features, blacklisted);
+                if (blacklist != null) {
+                    blacklist.blacklist(features);
+                }
             } catch (Exception e) {
                 throw new IOException(e.getMessage() + " : " + uri, e);
             }

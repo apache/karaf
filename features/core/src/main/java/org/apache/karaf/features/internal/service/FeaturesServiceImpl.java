@@ -49,7 +49,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
@@ -145,7 +144,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.resolver = resolver;
         this.installSupport = installSupport;
         this.globalRepository = globalRepository;
-        this.repositories = new RepositoryCache(cfg.blacklisted);
+        Blacklist blacklist = new Blacklist(cfg.blacklisted);
+        this.repositories = new RepositoryCache(blacklist);
         this.cfg = cfg;
         this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("features"));
         loadState();
@@ -260,8 +260,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 repositories.addAll(state.repositories);
                 installedFeatures.putAll(copy(state.installedFeatures));
             }
+            Blacklist blacklist = new Blacklist(cfg.blacklisted);
             for (String uri : repositories) {
-                Repository repository = new RepositoryImpl(URI.create(uri), cfg.blacklisted);
+                Repository repository = new RepositoryImpl(URI.create(uri), blacklist);
                 listener.repositoryEvent(new RepositoryEvent(repository, RepositoryEvent.EventType.RepositoryAdded, true));
             }
             for (Map.Entry<String, Set<String>> entry : installedFeatures.entrySet()) {
@@ -979,27 +980,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     @Override
     public Repository createRepository(URI uri) throws Exception {
         return repositories.create(uri, true, true);
-    }
-
-    private Map<String, Feature> loadAllFeatures(Set<URI> uris) throws Exception {
-        //the outer map's key is feature name, the inner map's key is feature version
-        Map<String, Feature> map = new HashMap<>();
-        // Two phase load:
-        // * first load dependent repositories
-        Set<URI> loaded = new HashSet<>();
-        List<URI> toLoad = new ArrayList<>(uris);
-        Clause[] blacklisted = repositories.getBlacklisted();
-        while (!toLoad.isEmpty()) {
-            URI uri = toLoad.remove(0);
-            if (loaded.add(uri)) {
-                Repository repo = new RepositoryImpl(uri, blacklisted);
-                Collections.addAll(toLoad, repo.getRepositories());
-                for (Feature f : repo.getFeatures()) {
-                    map.put(f.getId(), f);
-                }
-            }
-        }
-        return map;
     }
 
     @Override
