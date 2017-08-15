@@ -17,6 +17,7 @@
 package org.apache.karaf.tooling.tracker;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -84,8 +85,8 @@ public class GenerateServiceMetadata extends AbstractMojo {
         try {
             boolean addSourceDirectory = false;
 
-            StringBuilder requirements = new StringBuilder();
-            StringBuilder capabilities = new StringBuilder();
+            List<String> requirements = new ArrayList<>();
+            List<String> capabilities = new ArrayList<>();
 
             ClassFinder finder = createFinder(classLoader);
             List<Class<?>> classes = finder.findAnnotatedClasses(Services.class);
@@ -103,28 +104,18 @@ public class GenerateServiceMetadata extends AbstractMojo {
                     activators.add(clazz);
                 }
 
-                Properties props = new Properties();
+                writeServiceProperties(clazz);
+
                 Services services = clazz.getAnnotation(Services.class);
                 if (services != null) {
                     for (RequireService req : services.requires()) {
-                        String fltWithClass = combine(req.filter(), "(objectClass=" + req.value().getName() + ")");
-                        addServiceReq(requirements, fltWithClass);
-                        props.setProperty(req.value().getName(), req.filter());
+                        requirements.add(getRequirement(req));
                     }
                     for (ProvideService cap : services.provides()) {
-                        addServiceCap(capabilities, cap);
+                        capabilities.add(getCapability(cap));
                     }
                 }
-                Managed managed = clazz.getAnnotation(Managed.class);
-                if (managed != null) {
-                    props.setProperty("pid", managed.value());
-                }
-
-                File file = new File(outputDirectory, "OSGI-INF/karaf-tracker/" + clazz.getName());
-                file.getParentFile().mkdirs();
-                try (OutputStream os = buildContext.newFileOutputStream(file)) {
-                    props.store(os, null);
-                }
+                
                 addSourceDirectory = true;
             }
 
@@ -134,8 +125,8 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 project.addResource(resource);
             }
 
-            project.getProperties().setProperty(requirementsProperty, requirements.toString());
-            project.getProperties().setProperty(capabilitiesProperty, capabilities.toString());
+            project.getProperties().setProperty(requirementsProperty, String.join(",", requirements));
+            project.getProperties().setProperty(capabilitiesProperty, String.join(",", capabilities));
             if (activators.size() == 1) {
                 project.getProperties().setProperty(activatorProperty, activators.get(0).getName());
             }
@@ -148,7 +139,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 packages.add(clazz.getPackage().getName());
             }
             if (!packages.isEmpty()) {
-                project.getProperties().setProperty("BNDExtension-Karaf-Commands", join(packages, ","));
+                project.getProperties().setProperty("BNDExtension-Karaf-Commands", String.join(",", packages));
             }
 
         } catch (Exception e) {
@@ -156,32 +147,33 @@ public class GenerateServiceMetadata extends AbstractMojo {
         }
     }
 
-    private String join(Set<String> packages, String separator) {
-        StringBuilder sb = new StringBuilder();
-        for (String pkg : packages) {
-            if (sb.length() > 0) {
-                sb.append(separator);
+    private String getRequirement(RequireService req) {
+        String fltWithClass = combine(req.filter(), "(objectClass=" + req.value().getName() + ")");
+        return "osgi.service;effective:=active;filter:=\"" + fltWithClass + "\"";
+    }
+    
+    private String getCapability(ProvideService cap) {
+        return "osgi.service;effective:=active;objectClass=" + cap.value().getName();
+    }
+
+    private void writeServiceProperties(Class<?> serviceClazz) throws IOException {
+        Properties props = new Properties();
+        Services services = serviceClazz.getAnnotation(Services.class);
+        if (services != null) {
+            for (RequireService req : services.requires()) {
+                props.setProperty(req.value().getName(), req.filter());
             }
-            sb.append(pkg);
         }
-        return sb.toString();
-    }
+        Managed managed = serviceClazz.getAnnotation(Managed.class);
+        if (managed != null) {
+            props.setProperty("pid", managed.value());
+        }
 
-    private void addServiceCap(StringBuilder capabilities, ProvideService cap) {
-        if (capabilities.length() > 0) {
-            capabilities.append(",");
+        File file = new File(outputDirectory, "OSGI-INF/karaf-tracker/" + serviceClazz.getName());
+        file.getParentFile().mkdirs();
+        try (OutputStream os = buildContext.newFileOutputStream(file)) {
+            props.store(os, null);
         }
-        capabilities.append("osgi.service;effective:=active;objectClass=")
-                    .append(cap.value().getName());
-    }
-
-    private void addServiceReq(StringBuilder requirements, String fltWithClass) {
-        if (requirements.length() > 0) {
-            requirements.append(",");
-        }
-        requirements.append("osgi.service;effective:=active;filter:=\"")
-                    .append(fltWithClass)
-                    .append("\"");
     }
 
     private String combine(String filter1, String filter2) {
