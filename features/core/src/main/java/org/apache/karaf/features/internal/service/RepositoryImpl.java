@@ -38,51 +38,44 @@ public class RepositoryImpl implements Repository {
     private Features features;
     
     public RepositoryImpl(URI uri) {
-        this(uri, null);
+        this(uri, null, false);
     }
 
-    public RepositoryImpl(URI uri, Blacklist blacklist) {
+    public RepositoryImpl(URI uri, Blacklist blacklist, boolean validate) {
         this.uri = uri;
         this.blacklist = blacklist;
+        load(validate);
     }
 
     public URI getURI() {
         return uri;
     }
 
-    public String getName() throws IOException {
-        load();
+    public String getName() {
         return features.getName();
     }
 
-    public URI[] getRepositories() throws IOException {
-        load();
+    public URI[] getRepositories() {
         return features.getRepository().stream()
                 .map(String::trim)
                 .map(URI::create)
                 .toArray(URI[]::new);
     }
 
-    public URI[] getResourceRepositories() throws IOException {
-        load();
+    public URI[] getResourceRepositories() {
         return features.getResourceRepository().stream()
                 .map(String::trim)
                 .map(URI::create)
                 .toArray(URI[]::new);
     }
 
-    public Feature[] getFeatures() throws IOException {
-        load();
+    public Feature[] getFeatures() {
         return features.getFeature()
                 .toArray(new Feature[features.getFeature().size()]);
     }
 
 
-    public void load() throws IOException {
-        load(false);
-    }
-
-    public void load(boolean validate) throws IOException {
+    private void load(boolean validate) {
         if (features == null) {
             try (
                     InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())
@@ -92,7 +85,7 @@ public class RepositoryImpl implements Repository {
                     blacklist.blacklist(features);
                 }
             } catch (Exception e) {
-                throw new IOException(e.getMessage() + " : " + uri, e);
+                throw new RuntimeException(e.getMessage() + " : " + uri, e);
             }
         }
     }

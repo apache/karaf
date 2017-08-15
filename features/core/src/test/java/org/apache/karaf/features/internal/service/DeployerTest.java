@@ -71,7 +71,6 @@ public class DeployerTest {
         TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
 
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
-        repo.load(true);
         Feature f100 = repo.getFeatures()[0];
         Feature f101 = repo.getFeatures()[1];
 
@@ -145,7 +144,6 @@ public class DeployerTest {
         TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
 
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
-        repo.load(true);
         Feature f100 = repo.getFeatures()[0];
         Feature f101 = repo.getFeatures()[1];
 
@@ -247,7 +245,6 @@ public class DeployerTest {
         TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
 
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
-        repo.load(true);
         Feature f1 = repo.getFeatures()[0];
 
         Bundle serviceBundle = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
@@ -318,7 +315,6 @@ public class DeployerTest {
         TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
 
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
-        repo.load(true);
         Feature f1 = repo.getFeatures()[0];
         Feature f2 = repo.getFeatures()[1];
 
@@ -479,7 +475,6 @@ public class DeployerTest {
         TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
 
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
-        repo.load(true);
 
         Map<String, Bundle> bundles = new HashMap<>();
         bundles.put("a100", createTestBundle(1, Bundle.ACTIVE, dataDir, "a100"));

@@ -18,14 +18,14 @@ package org.apache.karaf.features.internal.service;
 
 import static org.junit.Assert.assertTrue;
 
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
 
 import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.internal.model.Feature;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.Feature;
 import org.junit.Test;
 
 public class BlacklistTest {
@@ -56,12 +56,15 @@ public class BlacklistTest {
         assertTrue(bundles.noneMatch(b -> b.getLocation().equals(blacklisted)));
     }
 
-    private Stream<Feature> blacklistWith(String blacklistClause) {
-        URL url = getClass().getResource("f02.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
-
+    private Stream<org.apache.karaf.features.Feature> blacklistWith(String blacklistClause) {
+        URI uri;
+        try {
+            uri = getClass().getResource("f02.xml").toURI();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
         Blacklist blacklist = new Blacklist(Collections.singletonList(blacklistClause));
-        blacklist.blacklist(features);
-        return features.getFeature().stream();
+        RepositoryImpl features = new RepositoryImpl(uri, blacklist, true);
+        return Arrays.asList(features.getFeatures()).stream();
     }
 }

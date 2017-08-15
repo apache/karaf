@@ -177,9 +177,8 @@ public class RepositoryTest extends TestCase {
 
     public void testShowWrongUriInException() throws Exception {
         String uri = "src/test/resources/org/apache/karaf/shell/features/repo1.xml";
-        RepositoryImpl r = new RepositoryImpl(new URI(uri));
         try {
-            r.load();
+            new RepositoryImpl(new URI(uri));
         } catch (Exception e) {
             assertTrue(e.getMessage().contains(uri));
         }

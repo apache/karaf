@@ -38,11 +38,8 @@ public class RepositoryCache {
         this.blacklist = blacklist;
     }
 
-    public Repository create(URI uri, boolean load, boolean validate) throws Exception {
-        RepositoryImpl repo = new RepositoryImpl(uri, blacklist);
-        if (load)
-            repo.load(validate);
-        return repo;
+    public Repository create(URI uri, boolean validate) throws Exception {
+        return new RepositoryImpl(uri, blacklist, validate);
     }
 
     public void addRepository(Repository repository) throws Exception {

@@ -254,15 +254,14 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     public void registerListener(FeaturesListener listener) {
         listeners.add(listener);
         try {
-            Set<String> repositories = new TreeSet<>();
+            Set<String> repositoriesList = new TreeSet<>();
             Map<String, Set<String>> installedFeatures = new TreeMap<>();
             synchronized (lock) {
-                repositories.addAll(state.repositories);
+                repositoriesList.addAll(state.repositories);
                 installedFeatures.putAll(copy(state.installedFeatures));
             }
-            Blacklist blacklist = new Blacklist(cfg.blacklisted);
-            for (String uri : repositories) {
-                Repository repository = new RepositoryImpl(URI.create(uri), blacklist);
+            for (String uri : repositoriesList) {
+                Repository repository = repositories.create(URI.create(uri), false);
                 listener.repositoryEvent(new RepositoryEvent(repository, RepositoryEvent.EventType.RepositoryAdded, true));
             }
             for (Map.Entry<String, Set<String>> entry : installedFeatures.entrySet()) {
@@ -357,7 +356,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public void addRepository(URI uri, boolean install) throws Exception {
-        Repository repository = repositories.create(uri, true, true);
+        Repository repository = repositories.create(uri, true);
         synchronized (lock) {
             repositories.addRepository(repository);
             featureCache = null;
@@ -610,7 +609,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             }
             try {
                 if (repo == null) {
-                    repo = repositories.create(URI.create(uri), true, false);
+                    repo = repositories.create(URI.create(uri), false);
                     synchronized (lock) {
                         repositories.addRepository(repo);
                     }
@@ -979,7 +978,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     @Override
     public Repository createRepository(URI uri) throws Exception {
-        return repositories.create(uri, true, true);
+        return repositories.create(uri, true);
     }
 
     @Override

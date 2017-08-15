@@ -24,28 +24,28 @@ import static org.junit.Assert.fail;
 
 import java.net.URI;
 
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Library;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.Repository;
 import org.junit.Test;
 
 public class FeaturesValidationTest {
 
     @Test
     public void testNs10() throws Exception {
-        Features features = unmarshalAndValidate("f02.xml");
+        Repository features = unmarshalAndValidate("f02.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs10NoName() throws Exception {
-        Features features = unmarshalAndValidate("f03.xml");
+        Repository features = unmarshalAndValidate("f03.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs11() throws Exception {
-        Features features = unmarshalAndValidate("f04.xml");;
+        Repository features = unmarshalAndValidate("f04.xml");;
         assertNotNull(features);
     }
 
@@ -61,27 +61,30 @@ public class FeaturesValidationTest {
 
     @Test
     public void testNs12Unmarshall() throws Exception {
-        Features features = unmarshalAndValidate("f06.xml");
+        Repository features = unmarshalAndValidate("f06.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs13() throws Exception {
-        Features features = unmarshalAndValidate("f07.xml");
+        Repository features = unmarshalAndValidate("f07.xml");
         assertNotNull(features);
-        assertEquals("2.5.6.SEC02", features.getFeature().get(0).getVersion());
-        assertTrue(features.getFeature().get(1).isHidden());
-        assertNotNull(features.getFeature().get(1).getLibraries());
-        assertEquals(1, features.getFeature().get(0).getLibraries().size());
-        assertEquals("my-library", features.getFeature().get(0).getLibraries().get(0).getLocation());
-        assertEquals(Library.TYPE_ENDORSED, features.getFeature().get(0).getLibraries().get(0).getType());
-        assertFalse(features.getFeature().get(0).getLibraries().get(0).isExport());
-        assertTrue(features.getFeature().get(0).getLibraries().get(0).isDelegate());
+        Feature f0 = features.getFeatures()[0];
+        Feature f1 = features.getFeatures()[1];
+        assertEquals("2.5.6.SEC02", f0.getVersion());
+        assertTrue(f1.isHidden());
+        assertNotNull(f1.getLibraries());
+        assertEquals(1, f0.getLibraries().size());
+        Library lib = f0.getLibraries().get(0);
+        assertEquals("my-library", lib.getLocation());
+        assertEquals(Library.TYPE_ENDORSED, lib.getType());
+        assertFalse(lib.isExport());
+        assertTrue(lib.isDelegate());
     }
 
-    private Features unmarshalAndValidate(String path) throws Exception {
+    private Repository unmarshalAndValidate(String path) throws Exception {
         URI uri = getClass().getResource(path).toURI();
-        return JaxbUtil.unmarshal(uri.toASCIIString(), true);
+        return new RepositoryImpl(uri, null, true);
     }
 
 }
