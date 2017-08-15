@@ -17,7 +17,6 @@ package org.apache.karaf.jaas.modules.ldap;
 
 import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
 import org.apache.directory.server.core.integ.FrameworkRunner;
-import org.apache.commons.io.IOUtils;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
@@ -37,9 +36,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -59,37 +55,12 @@ import static org.junit.Assert.fail;
         "org/apache/karaf/jaas/modules/ldap/example.com.ldif"
 )
 public class LdapLoginModuleTest extends AbstractLdapTestUnit {
-    
-    private static final String PROPS_PATH = "org/apache/karaf/jaas/modules/ldap/ldap.properties";
-    private static boolean portUpdated;
 
     @Before
     public void updatePort() throws Exception {
-        if (!portUpdated) {
-            String basedir = System.getProperty("basedir");
-            if (basedir == null) {
-                basedir = new File(".").getCanonicalPath();
-            }
-
-            // Read in ldap.properties and substitute in the correct port
-            String content = readProperties(basedir + "/src/test/resources/" + PROPS_PATH);
-            content = content.replaceAll("portno", "" + getLdapServer().getPort());
-            writeProperties(basedir + "/target/test-classes/" + PROPS_PATH, content);
-            portUpdated = true;
-        }
+        LdapPropsUpdater.updatePort("org/apache/karaf/jaas/modules/ldap/ldap.properties", getLdapServer().getPort());
     }
 
-    private String readProperties(String path) throws FileNotFoundException, IOException {
-        try (FileInputStream inputStream = new FileInputStream(new File(path))) {;
-            return IOUtils.toString(inputStream, "UTF-8");
-        }
-    }
-
-    private void writeProperties(String path, String content) throws FileNotFoundException, IOException {
-        try (FileOutputStream outputStream = new FileOutputStream(new File(path))) {
-            IOUtils.write(content, outputStream, "UTF-8");
-        }
-    }
             
     @After
     public void tearDown() {

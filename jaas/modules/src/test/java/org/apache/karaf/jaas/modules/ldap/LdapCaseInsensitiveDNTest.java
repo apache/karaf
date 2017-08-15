@@ -19,20 +19,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 
 import javax.security.auth.Subject;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
 import org.apache.directory.server.core.annotations.CreateDS;
 import org.apache.directory.server.core.annotations.CreatePartition;
+import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
@@ -50,31 +47,10 @@ import org.junit.runner.RunWith;
 )
 public class LdapCaseInsensitiveDNTest extends LdapLoginModuleTest {
     
-    private static boolean portUpdated;
-    
     @Before
     @Override
     public void updatePort() throws Exception {
-        if (!portUpdated) {
-            String basedir = System.getProperty("basedir");
-            if (basedir == null) {
-                basedir = new File(".").getCanonicalPath();
-            }
-
-            // Read in ldap.properties and substitute in the correct port
-            File f = new File(basedir + "/src/test/resources/org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties");
-
-            FileInputStream inputStream = new FileInputStream(f);
-            String content = IOUtils.toString(inputStream, "UTF-8");
-            inputStream.close();
-            content = content.replaceAll("portno", "" + getLdapServer().getPort());
-
-            File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties");
-            FileOutputStream outputStream = new FileOutputStream(f2);
-            IOUtils.write(content, outputStream, "UTF-8");
-            outputStream.close();
-            portUpdated = true;
-        }
+        LdapPropsUpdater.updatePort("org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties", getLdapServer().getPort());
     }
     
     @Test

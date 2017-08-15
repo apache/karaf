@@ -23,12 +23,9 @@ import javax.naming.directory.DirContext;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
@@ -57,30 +54,9 @@ import static org.junit.Assert.assertTrue;
 )
 public class LdapCacheTest extends AbstractLdapTestUnit {
 
-    private static boolean portUpdated;
-
     @Before
     public void updatePort() throws Exception {
-        if (!portUpdated) {
-            String basedir = System.getProperty("basedir");
-            if (basedir == null) {
-                basedir = new File(".").getCanonicalPath();
-            }
-
-            // Read in ldap.properties and substitute in the correct port
-            File f = new File(basedir + "/src/test/resources/org/apache/karaf/jaas/modules/ldap/ldap.properties");
-
-            FileInputStream inputStream = new FileInputStream(f);
-            String content = IOUtils.toString(inputStream, "UTF-8");
-            inputStream.close();
-            content = content.replaceAll("portno", "" + getLdapServer().getPort());
-
-            File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldap.properties");
-            FileOutputStream outputStream = new FileOutputStream(f2);
-            IOUtils.write(content, outputStream, "UTF-8");
-            outputStream.close();
-            portUpdated = true;
-        }
+        LdapPropsUpdater.updatePort("org/apache/karaf/jaas/modules/ldap/ldap.properties", getLdapServer().getPort());
     }
 
     @After
