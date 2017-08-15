@@ -27,6 +27,7 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
+import org.apache.log4j.Level;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -202,12 +203,18 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
         module.initialize(subject, new NamePasswordCallbackHandler("admin", "blahblah"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
+        org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(LDAPLoginModule.class);
+        Level oldLevel = logger.getLevel();
+        logger.setLevel(Level.OFF);
         try {
             module.login();
             fail("Should have thrown LoginException");
         } catch (LoginException e) {
             assertTrue(e.getMessage().startsWith("Authentication failed"));
+        } finally {
+            logger.setLevel(oldLevel);
         }
+        
     }
 
     @Test
