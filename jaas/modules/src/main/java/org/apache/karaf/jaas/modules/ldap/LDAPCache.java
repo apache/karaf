@@ -165,14 +165,14 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         LOGGER.debug("  base DN: " + options.getUserBaseDn());
         LOGGER.debug("  filter: " + filter);
 
-        NamingEnumeration namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
+        NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
         try {
             if (!namingEnumeration.hasMore()) {
                 LOGGER.warn("User " + user + " not found in LDAP.");
                 return null;
             }
             LOGGER.debug("Found the user DN.");
-            SearchResult result = (SearchResult) namingEnumeration.next();
+            SearchResult result = namingEnumeration.next();
 
             // We need to do the following because slashes are handled badly. For example, when searching
             // for a user with lots of special characters like cn=admin,=+<>#;\
@@ -250,11 +250,11 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
             LOGGER.debug("  base DN: " + options.getRoleBaseDn());
             LOGGER.debug("  filter: " + filter);
 
-            NamingEnumeration namingEnumeration = context.search(options.getRoleBaseDn(), filter, controls);
+            NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getRoleBaseDn(), filter, controls);
             try {
                 List<String> rolesList = new ArrayList<>();
                 while (namingEnumeration.hasMore()) {
-                    SearchResult result = (SearchResult) namingEnumeration.next();
+                    SearchResult result = namingEnumeration.next();
                     Attributes attributes = result.getAttributes();
                     Attribute roles1 = attributes.get(options.getRoleNameAttribute());
                     if (roles1 != null) {

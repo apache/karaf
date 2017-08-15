@@ -165,13 +165,13 @@ public class LDAPOptions {
 
     protected void setupSsl(Hashtable<String, Object> env) throws NamingException {
         BundleContext bundleContext = FrameworkUtil.getBundle(LDAPOptions.class).getBundleContext();
-        ServiceReference ref = null;
+        ServiceReference<KeystoreManager> ref = null;
         try {
             LOGGER.debug("Setting up SSL");
             env.put(Context.SECURITY_PROTOCOL, "ssl");
             env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
-            ref = bundleContext.getServiceReference(KeystoreManager.class.getName());
-            KeystoreManager manager = (KeystoreManager) bundleContext.getService(ref);
+            ref = bundleContext.getServiceReference(KeystoreManager.class);
+            KeystoreManager manager = bundleContext.getService(ref);
             SSLSocketFactory factory = manager.createSSLFactory(
                     getSslProvider(), getSslProtocol(), getSslAlgorithm(), getSslKeystore(),
                     getSslKeyAlias(), getSslTrustStore(), getSslTimeout());

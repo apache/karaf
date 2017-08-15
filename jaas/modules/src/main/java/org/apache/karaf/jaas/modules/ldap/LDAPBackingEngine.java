@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -87,10 +86,10 @@ public class LDAPBackingEngine implements BackingEngine {
             LOGGER.debug("  base DN: " + options.getUserBaseDn());
             LOGGER.debug("  filter: " + filter);
 
-            NamingEnumeration namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
+            NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
             try {
                 while (namingEnumeration.hasMore()) {
-                    SearchResult result = (SearchResult) namingEnumeration.next();
+                    SearchResult result = namingEnumeration.next();
 
                     // We need to do the following because slashes are handled badly. For example, when searching
                     // for a user with lots of special characters like cn=admin,=+<>#;\
