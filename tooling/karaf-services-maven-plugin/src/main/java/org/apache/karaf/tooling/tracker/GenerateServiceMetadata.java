@@ -194,7 +194,6 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 File file = artifact.getFile();
                 if ( file != null ) {
                     urls.add( file.toURI().toURL() );
-                    System.out.println("classpath: " + file);
                 }
             }
             ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
