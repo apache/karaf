@@ -61,6 +61,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Collections;
 
@@ -342,7 +343,7 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         data += "." + Strings.lowerCaseAscii(REALM) + " = " + REALM + SystemUtils.LINE_SEPARATOR;
         data += Strings.lowerCaseAscii(REALM) + " = " + REALM + SystemUtils.LINE_SEPARATOR;
 
-        FileUtils.writeStringToFile(file, data);
+        FileUtils.writeStringToFile(file, data, Charset.defaultCharset());
 
         return file.getAbsolutePath();
     }
