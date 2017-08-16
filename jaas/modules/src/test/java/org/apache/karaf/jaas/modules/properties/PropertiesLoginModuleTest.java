@@ -16,14 +16,16 @@
  */
 package org.apache.karaf.jaas.modules.properties;
 
+import static org.apache.karaf.jaas.modules.PrincipalAssert.assertPrincipalNamed;
+
 import java.io.File;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.*;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
@@ -59,19 +61,8 @@ public class PropertiesLoginModuleTest {
 
             Assert.assertEquals(2, subject.getPrincipals().size());
 
-            boolean foundUser = false;
-            boolean foundRole = false;
-            for (Principal pr : subject.getPrincipals()) {
-                if (pr instanceof UserPrincipal) {
-                    Assert.assertEquals("abc", pr.getName());
-                    foundUser = true;
-                } else if (pr instanceof RolePrincipal) {
-                    Assert.assertEquals("myrole", pr.getName());
-                    foundRole = true;
-                }
-            }
-            Assert.assertTrue(foundUser);
-            Assert.assertTrue(foundRole);
+            assertPrincipalNamed(subject, UserPrincipal.class, "abc");
+            assertPrincipalNamed(subject, RolePrincipal.class, "myrole");
 
             Assert.assertTrue(module.logout());
             Assert.assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
@@ -131,24 +122,9 @@ public class PropertiesLoginModuleTest {
             Assert.assertTrue(module.commit());
 
             Assert.assertEquals(3, subject.getPrincipals().size());
-            boolean foundUser = false;
-            boolean foundRole = false;
-            boolean foundGroup = false;
-            for (Principal pr : subject.getPrincipals()) {
-                if (pr instanceof UserPrincipal) {
-                    Assert.assertEquals("pqr", pr.getName());
-                    foundUser = true;
-                } else if (pr instanceof GroupPrincipal) {
-                    Assert.assertEquals("group1", pr.getName());
-                    foundGroup = true;
-                } else if (pr instanceof RolePrincipal) {
-                    Assert.assertEquals("r1", pr.getName());
-                    foundRole = true;
-                }
-            }
-            Assert.assertTrue(foundUser);
-            Assert.assertTrue(foundGroup);
-            Assert.assertTrue(foundRole);
+            assertPrincipalNamed(subject, UserPrincipal.class, "pqr");
+            assertPrincipalNamed(subject, GroupPrincipal.class, "group1");
+            assertPrincipalNamed(subject, RolePrincipal.class, "r1");
         } finally {
             if (!f.delete()) {
                 Assert.fail("Could not delete temporary file: " + f);
