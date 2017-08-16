@@ -15,6 +15,16 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+
+import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttribute;
@@ -22,9 +32,6 @@ import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import java.io.File;
-import java.io.IOException;
-import java.security.Principal;
 
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
@@ -41,9 +48,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(FrameworkRunner.class)
 @CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP")})
@@ -78,42 +82,16 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
 
         assertEquals(2, subject.getPrincipals().size());
 
-        boolean foundUser = false;
-        boolean foundRole = false;
-        for (Principal pr : subject.getPrincipals()) {
-            if (pr instanceof UserPrincipal) {
-                assertEquals("admin", pr.getName());
-                foundUser = true;
-            } else if (pr instanceof RolePrincipal) {
-                assertEquals("admin", pr.getName());
-                foundRole = true;
-            }
-        }
-        assertTrue(foundUser);
-        assertTrue(foundRole);
+        assertThat(names(subject.getPrincipals(UserPrincipal.class)), containsInAnyOrder("admin"));
+        assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("admin"));
 
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
 
-        DirContext context = new LDAPCache(new LDAPOptions(options)).open();
-
-        // Make "admin" user a member of a new "another" group
-
-//        dn: cn=admin,ou=groups,dc=example,dc=com
-//        objectClass: top
-//        objectClass: groupOfNames
-//        cn: admin
-//        member: cn=admin,ou=people,dc=example,dc=com
-        Attributes entry = new BasicAttributes();
-        entry.put(new BasicAttribute("cn", "another"));
-        Attribute oc = new BasicAttribute("objectClass");
-        oc.add("top");
-        oc.add("groupOfNames");
-        entry.put(oc);
-        Attribute mb = new BasicAttribute("member");
-        mb.add("cn=admin,ou=people,dc=example,dc=com");
-        entry.put(mb);
-        context.createSubcontext("cn=another,ou=groups,dc=example,dc=com", entry);
+        LDAPCache ldapCache = new LDAPCache(new LDAPOptions(options));
+        DirContext context = ldapCache.open();
+        addUserToGroup(context, "cn=admin,ou=people,dc=example,dc=com", "another");
+        ldapCache.close();
 
         Thread.sleep(100);
 
@@ -124,6 +102,19 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
         assertTrue(module.login());
         assertTrue(module.commit());
         assertEquals("Postcondition", 3, subject.getPrincipals().size());
+    }
+
+    private void addUserToGroup(DirContext context, String userCn, String group) throws NamingException {
+        Attributes entry = new BasicAttributes();
+        entry.put(new BasicAttribute("cn", group));
+        Attribute oc = new BasicAttribute("objectClass");
+        oc.add("top");
+        oc.add("groupOfNames");
+        entry.put(oc);
+        Attribute mb = new BasicAttribute("member");
+        mb.add(userCn);
+        entry.put(mb);
+        context.createSubcontext("cn=" + group +",ou=groups,dc=example,dc=com", entry);
     }
 
     protected Properties ldapLoginModuleOptions() throws IOException {

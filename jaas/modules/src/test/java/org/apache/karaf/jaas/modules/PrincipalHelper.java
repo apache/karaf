@@ -17,24 +17,13 @@ package org.apache.karaf.jaas.modules;
 import static java.util.stream.Collectors.toList;
 
 import java.security.Principal;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import javax.security.auth.Subject;
-
-import org.junit.Assert;
-
-public class PrincipalAssert {
+public class PrincipalHelper {
     
-    public static List<String> names(List<? extends Principal> principals) {
+    public static List<String> names(Collection<? extends Principal> principals) {
         return principals.stream().map(r->r.getName()).collect(toList());
     }
     
-    public static void assertPrincipalNamed(Subject subject, Class<? extends Principal> clazz, String expectedName) {
-        Long numMatching = subject.getPrincipals(clazz).stream()
-            .filter(pr -> expectedName.equals(pr.getName()))
-            .collect(Collectors.counting());
-        Assert.assertEquals("Expected " + clazz.getSimpleName() + " principal in subject with name=" + expectedName, 
-                            1l, numMatching.intValue());
-    }
 }

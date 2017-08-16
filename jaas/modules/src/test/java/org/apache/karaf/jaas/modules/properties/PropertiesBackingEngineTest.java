@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.jaas.modules.properties;
 
-import static org.apache.karaf.jaas.modules.PrincipalAssert.names;
+import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

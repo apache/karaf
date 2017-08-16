@@ -16,7 +16,9 @@
  */
 package org.apache.karaf.jaas.modules.properties;
 
-import static org.apache.karaf.jaas.modules.PrincipalAssert.assertPrincipalNamed;
+import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,8 +63,8 @@ public class PropertiesLoginModuleTest {
 
             Assert.assertEquals(2, subject.getPrincipals().size());
 
-            assertPrincipalNamed(subject, UserPrincipal.class, "abc");
-            assertPrincipalNamed(subject, RolePrincipal.class, "myrole");
+            assertThat(names(subject.getPrincipals(UserPrincipal.class)), containsInAnyOrder("abc"));
+            assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("myrole"));
 
             Assert.assertTrue(module.logout());
             Assert.assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
@@ -122,9 +124,9 @@ public class PropertiesLoginModuleTest {
             Assert.assertTrue(module.commit());
 
             Assert.assertEquals(3, subject.getPrincipals().size());
-            assertPrincipalNamed(subject, UserPrincipal.class, "pqr");
-            assertPrincipalNamed(subject, GroupPrincipal.class, "group1");
-            assertPrincipalNamed(subject, RolePrincipal.class, "r1");
+            assertThat(names(subject.getPrincipals(UserPrincipal.class)), containsInAnyOrder("pqr"));
+            assertThat(names(subject.getPrincipals(GroupPrincipal.class)), containsInAnyOrder("group1"));
+            assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("r1"));
         } finally {
             if (!f.delete()) {
                 Assert.fail("Could not delete temporary file: " + f);
