@@ -75,9 +75,9 @@ public final class JDBCUtils {
             if (tokens.length > 1) {
                 filter = tokens[1];
             }
-            ServiceReference[] references = bc.getServiceReferences(clazz, filter);
+            ServiceReference<?>[] references = bc.getServiceReferences(clazz, filter);
             if (references != null) {
-                ServiceReference ref = references[0];
+                ServiceReference<?> ref = references[0];
                 Object ds = bc.getService(ref);
                 bc.ungetService(ref);
                 return ds;
