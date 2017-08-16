@@ -15,12 +15,14 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.Principal;
 
 import javax.security.auth.Subject;
 
@@ -65,20 +67,8 @@ public class LdapCaseInsensitiveDNTest extends LdapLoginModuleTest {
         assertTrue(module.commit());
 
         assertEquals(2, subject.getPrincipals().size());
-
-        boolean foundUser = false;
-        boolean foundRole = false;
-        for (Principal pr : subject.getPrincipals()) {
-            if (pr instanceof UserPrincipal) {
-                assertEquals("admin", pr.getName());
-                foundUser = true;
-            } else if (pr instanceof RolePrincipal) {
-                assertEquals("admin", pr.getName());
-                foundRole = true;
-            }
-        }
-        assertTrue(foundUser);
-        assertTrue(foundRole);
+        assertThat(names(subject.getPrincipals(UserPrincipal.class)), containsInAnyOrder("admin"));
+        assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("admin"));
 
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
