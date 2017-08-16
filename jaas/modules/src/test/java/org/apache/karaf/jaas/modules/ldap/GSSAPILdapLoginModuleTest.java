@@ -14,9 +14,24 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import org.apache.commons.io.FileUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.security.Principal;
+import java.util.Collections;
+
+import javax.security.auth.Subject;
+import javax.security.auth.kerberos.KerberosPrincipal;
+import javax.security.auth.kerberos.KerberosTicket;
+import javax.security.auth.login.LoginException;
+
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.apache.directory.api.ldap.model.constants.SupportedSaslMechanisms;
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.entry.Entry;
@@ -52,22 +67,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.security.auth.Subject;
-import javax.security.auth.kerberos.KerberosPrincipal;
-import javax.security.auth.kerberos.KerberosTicket;
-import javax.security.auth.login.LoginException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.Principal;
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(FrameworkRunner.class)
 @CreateDS(name = "GSSAPILdapLoginModuleTest-class",
@@ -317,34 +316,24 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
 
     private String createKrb5Conf(ChecksumType checksumType, EncryptionType encryptionType, boolean isTcp) throws IOException {
         File file = folder.newFile("krb5.conf");
-
-        String data = "";
-
-        data += "[libdefaults]" + SystemUtils.LINE_SEPARATOR;
-        data += "default_realm = " + REALM + SystemUtils.LINE_SEPARATOR;
-        data += "default_tkt_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
-        data += "default_tgs_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
-        data += "permitted_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
-        //        data += "default_checksum = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
-        //        data += "ap_req_checksum_type = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
-        data += "default-checksum_type = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
-
+        PrintStream out = new PrintStream(file);
+        out.println("[libdefaults]");
+        out.println("default_realm = " + REALM);
+        out.println("default_tkt_enctypes = " + encryptionType.getName());
+        out.println("default_tgs_enctypes = " + encryptionType.getName());
+        out.println("permitted_enctypes = " + encryptionType.getName());
+        out.println("default-checksum_type = " + checksumType.getName());
         if (isTcp) {
-            data += "udp_preference_limit = 1" + SystemUtils.LINE_SEPARATOR;
+            out.println("udp_preference_limit = 1");
         }
-
-
-        data += "[realms]" + SystemUtils.LINE_SEPARATOR;
-        data += REALM + " = {" + SystemUtils.LINE_SEPARATOR;
-        data += "kdc = " + HOSTNAME + ":" + kdcServer.getTransports()[0].getPort() + SystemUtils.LINE_SEPARATOR;
-        data += "}" + SystemUtils.LINE_SEPARATOR;
-
-        data += "[domain_realm]" + SystemUtils.LINE_SEPARATOR;
-        data += "." + Strings.lowerCaseAscii(REALM) + " = " + REALM + SystemUtils.LINE_SEPARATOR;
-        data += Strings.lowerCaseAscii(REALM) + " = " + REALM + SystemUtils.LINE_SEPARATOR;
-
-        FileUtils.writeStringToFile(file, data, Charset.defaultCharset());
-
+        out.println("[realms]");
+        out.println(REALM + " = {");
+        out.println("kdc = " + HOSTNAME + ":" + kdcServer.getTransports()[0].getPort());
+        out.println("}");
+        out.println("[domain_realm]");
+        out.println("." + Strings.lowerCaseAscii(REALM) + " = " + REALM);
+        out.println(Strings.lowerCaseAscii(REALM) + " = " + REALM);
+        out.close();
         return file.getAbsolutePath();
     }
 
