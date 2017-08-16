@@ -16,13 +16,10 @@
  */
 package org.apache.karaf.jaas.modules.krb5;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.apache.directory.api.ldap.model.constants.SupportedSaslMechanisms;
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.api.util.Strings;
 import org.apache.directory.ldap.client.api.Krb5LoginConfiguration;
 import org.apache.directory.server.annotations.CreateKdcServer;
 import org.apache.directory.server.annotations.CreateLdapServer;
@@ -35,7 +32,6 @@ import org.apache.directory.server.core.annotations.CreateIndex;
 import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.directory.server.core.kerberos.KeyDerivationInterceptor;
-import org.apache.directory.server.kerberos.kdc.AbstractKerberosITest;
 import org.apache.directory.server.kerberos.kdc.KerberosTestUtils;
 import org.apache.directory.server.kerberos.shared.crypto.encryption.KerberosKeyFactory;
 import org.apache.directory.server.kerberos.shared.keytab.Keytab;
@@ -65,8 +61,6 @@ import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginException;
 import java.io.File;
-import java.io.IOException;
-import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,8 +69,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 @RunWith(FrameworkRunner.class)
 @CreateDS(name = "Krb5LoginModuleTest-class",
@@ -130,8 +126,7 @@ import static org.junit.Assert.assertTrue;
         "objectClass: organizationalUnit",
         "ou: users"
 })
-public class Krb5LoginModuleTest extends AbstractKerberosITest {
-
+public class Krb5LoginModuleTest extends KarafKerberosITest {
 
     @Before
     public void setUp() throws Exception {
@@ -155,7 +150,6 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
 
     @Test
     public void testKeytabSuccess() throws Exception {
-
         Map<String, Object> props = new HashMap<>();
         props.put("debug", "true");
         props.put("useKeyTab", "true");
@@ -164,11 +158,9 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         props.put("doNotPrompt", "true");
         props.put("storeKey", "true");
         props.put("detailed.login.exception", "true");
-
-
         Subject subject = new Subject();
-
         Krb5LoginModule module = new Krb5LoginModule();
+
         module.initialize(subject, null, null, props);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
@@ -177,27 +169,11 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         Assert.assertTrue(module.commit());
 
         assertEquals(1, subject.getPrincipals().size());
+        assertThat(names(subject.getPrincipals(KerberosPrincipal.class)), containsInAnyOrder("hnelson@EXAMPLE.COM"));
 
-        boolean foundUser = false;
-        for (Principal pr : subject.getPrincipals()) {
-            if (pr instanceof KerberosPrincipal) {
-                assertEquals("hnelson@EXAMPLE.COM", pr.getName());
-                foundUser = true;
-                break;
-            }
-        }
-        assertTrue(foundUser);
-
-        boolean foundToken = false;
-        for (Object crd : subject.getPrivateCredentials()) {
-            if (crd instanceof KerberosTicket) {
-                assertEquals("hnelson@EXAMPLE.COM", ((KerberosTicket) crd).getClient().getName());
-                assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ((KerberosTicket) crd).getServer().getName());
-                foundToken = true;
-                break;
-            }
-        }
-        assertTrue(foundToken);
+        KerberosTicket ticket = subject.getPrivateCredentials(KerberosTicket.class).iterator().next();
+        assertEquals("hnelson@EXAMPLE.COM", ticket.getClient().getName());
+        assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ticket.getServer().getName());
 
         Assert.assertTrue(module.logout());
 
@@ -215,9 +191,7 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         props.put("storeKey", "true");
         props.put("detailed.login.exception", "true");
 
-
         Subject subject = new Subject();
-
         Krb5LoginModule module = new Krb5LoginModule();
         module.initialize(subject, null, null, props);
 
@@ -230,7 +204,6 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
     @Test
     public void testLoginSuccess() throws Exception {
         Subject subject = new Subject();
-
         Krb5LoginModule module = new Krb5LoginModule();
         module.initialize(subject, new NamePasswordCallbackHandler("hnelson", "secret"), null, new HashMap<>());
 
@@ -240,27 +213,11 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         Assert.assertTrue(module.commit());
 
         assertEquals(1, subject.getPrincipals().size());
+        assertThat(names(subject.getPrincipals(KerberosPrincipal.class)), containsInAnyOrder("hnelson@EXAMPLE.COM"));
 
-        boolean foundUser = false;
-        for (Principal pr : subject.getPrincipals()) {
-            if (pr instanceof KerberosPrincipal) {
-                assertEquals("hnelson@EXAMPLE.COM", pr.getName());
-                foundUser = true;
-                break;
-            }
-        }
-        assertTrue(foundUser);
-
-        boolean foundToken = false;
-        for (Object crd : subject.getPrivateCredentials()) {
-            if (crd instanceof KerberosTicket) {
-                assertEquals("hnelson@EXAMPLE.COM", ((KerberosTicket) crd).getClient().getName());
-                assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ((KerberosTicket) crd).getServer().getName());
-                foundToken = true;
-                break;
-            }
-        }
-        assertTrue(foundToken);
+        KerberosTicket ticket = subject.getPrivateCredentials(KerberosTicket.class).iterator().next();
+        assertEquals("hnelson@EXAMPLE.COM", ticket.getClient().getName());
+        assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ticket.getServer().getName());
 
         Assert.assertTrue(module.logout());
 
@@ -326,39 +283,6 @@ public class Krb5LoginModuleTest extends AbstractKerberosITest {
         entry.add("krb5PrincipalName", principalName);
         entry.add("krb5KeyVersionNumber", "0");
         conn.add(entry);
-    }
-
-    private String createKrb5Conf(ChecksumType checksumType, EncryptionType encryptionType, boolean isTcp) throws IOException {
-        File file = folder.newFile("krb5.conf");
-
-        String data = "";
-
-        data += "[libdefaults]" + SystemUtils.LINE_SEPARATOR;
-        data += "default_realm = " + REALM + SystemUtils.LINE_SEPARATOR;
-        data += "default_tkt_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
-        data += "default_tgs_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
-        data += "permitted_enctypes = " + encryptionType.getName() + SystemUtils.LINE_SEPARATOR;
-        //        data += "default_checksum = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
-        //        data += "ap_req_checksum_type = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
-        data += "default-checksum_type = " + checksumType.getName() + SystemUtils.LINE_SEPARATOR;
-
-        if (isTcp) {
-            data += "udp_preference_limit = 1" + SystemUtils.LINE_SEPARATOR;
-        }
-
-
-        data += "[realms]" + SystemUtils.LINE_SEPARATOR;
-        data += REALM + " = {" + SystemUtils.LINE_SEPARATOR;
-        data += "kdc = " + HOSTNAME + ":" + kdcServer.getTransports()[0].getPort() + SystemUtils.LINE_SEPARATOR;
-        data += "}" + SystemUtils.LINE_SEPARATOR;
-
-        data += "[domain_realm]" + SystemUtils.LINE_SEPARATOR;
-        data += "." + Strings.lowerCaseAscii(REALM) + " = " + REALM + SystemUtils.LINE_SEPARATOR;
-        data += Strings.lowerCaseAscii(REALM) + " = " + REALM + SystemUtils.LINE_SEPARATOR;
-
-        FileUtils.writeStringToFile(file, data);
-
-        return file.getAbsolutePath();
     }
 
     private KeytabEntry createKeytabEntry() throws ParseException {

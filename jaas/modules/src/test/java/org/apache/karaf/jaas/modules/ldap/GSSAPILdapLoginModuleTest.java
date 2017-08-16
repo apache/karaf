@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.security.Principal;
 import java.util.Collections;
 
@@ -36,7 +35,6 @@ import org.apache.directory.api.ldap.model.constants.SupportedSaslMechanisms;
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.api.util.Strings;
 import org.apache.directory.server.annotations.CreateKdcServer;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
@@ -48,7 +46,6 @@ import org.apache.directory.server.core.annotations.CreateIndex;
 import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.directory.server.core.kerberos.KeyDerivationInterceptor;
-import org.apache.directory.server.kerberos.kdc.AbstractKerberosITest;
 import org.apache.directory.server.kerberos.kdc.KerberosTestUtils;
 import org.apache.directory.server.ldap.handlers.sasl.cramMD5.CramMd5MechanismHandler;
 import org.apache.directory.server.ldap.handlers.sasl.digestMD5.DigestMd5MechanismHandler;
@@ -63,6 +60,7 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
+import org.apache.karaf.jaas.modules.krb5.KarafKerberosITest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -131,7 +129,7 @@ import org.junit.runner.RunWith;
         "cn: admin",
         "member: uid=hnelson,ou=users,dc=example,dc=com"
 })
-public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
+public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
 
     private static boolean loginConfigUpdated;
 
@@ -312,29 +310,6 @@ public class GSSAPILdapLoginModuleTest extends AbstractKerberosITest {
         String servicePrincipal = LDAP_SERVICE_NAME + "/" + HOSTNAME + "@" + REALM;
         createPrincipal("uid=ldap", "Service", "LDAP Service",
                 "ldap", "randall", servicePrincipal);
-    }
-
-    private String createKrb5Conf(ChecksumType checksumType, EncryptionType encryptionType, boolean isTcp) throws IOException {
-        File file = folder.newFile("krb5.conf");
-        PrintStream out = new PrintStream(file);
-        out.println("[libdefaults]");
-        out.println("default_realm = " + REALM);
-        out.println("default_tkt_enctypes = " + encryptionType.getName());
-        out.println("default_tgs_enctypes = " + encryptionType.getName());
-        out.println("permitted_enctypes = " + encryptionType.getName());
-        out.println("default-checksum_type = " + checksumType.getName());
-        if (isTcp) {
-            out.println("udp_preference_limit = 1");
-        }
-        out.println("[realms]");
-        out.println(REALM + " = {");
-        out.println("kdc = " + HOSTNAME + ":" + kdcServer.getTransports()[0].getPort());
-        out.println("}");
-        out.println("[domain_realm]");
-        out.println("." + Strings.lowerCaseAscii(REALM) + " = " + REALM);
-        out.println(Strings.lowerCaseAscii(REALM) + " = " + REALM);
-        out.close();
-        return file.getAbsolutePath();
     }
 
     private void createPrincipal(String rdn, String sn, String cn,
