@@ -16,6 +16,7 @@
 package org.apache.karaf.jaas.modules.ldap;
 
 import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -60,7 +61,8 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
 
     @Before
     public void updatePort() throws Exception {
-        LdapPropsUpdater.updatePort("org/apache/karaf/jaas/modules/ldap/ldap.properties", getLdapServer().getPort());
+        ldapProps("org/apache/karaf/jaas/modules/ldap/ldap.properties", 
+                  LdapLoginModuleTest::replacePort);
     }
 
     @After

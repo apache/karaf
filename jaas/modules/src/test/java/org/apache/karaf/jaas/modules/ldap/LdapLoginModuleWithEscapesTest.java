@@ -15,6 +15,8 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
+
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
@@ -36,6 +38,7 @@ public class LdapLoginModuleWithEscapesTest extends LdapLoginModuleTest {
     @Before
     @Override
     public void updatePort() throws Exception {
-        LdapPropsUpdater.updatePort("org/apache/karaf/jaas/modules/ldap/ldap.properties", getLdapServer().getPort());
+        ldapProps("org/apache/karaf/jaas/modules/ldap/ldap.properties", 
+                  LdapLoginModuleTest::replacePort);
     }
 }

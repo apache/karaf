@@ -43,6 +43,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -58,10 +59,14 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
 
     @Before
     public void updatePort() throws Exception {
-        LdapPropsUpdater.updatePort("org/apache/karaf/jaas/modules/ldap/ldap.properties", getLdapServer().getPort());
+        ldapProps("org/apache/karaf/jaas/modules/ldap/ldap.properties",
+                                   LdapLoginModuleTest::replacePort);
     }
 
-            
+    public static String replacePort(String line) {
+        return line.replaceAll("portno", "" + getLdapServer().getPort());
+    }
+    
     @After
     public void tearDown() {
         LDAPCache.clear();

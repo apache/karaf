@@ -14,13 +14,12 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
@@ -30,7 +29,6 @@ import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.login.LoginException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.directory.api.ldap.model.constants.SupportedSaslMechanisms;
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.entry.Entry;
@@ -131,8 +129,6 @@ import org.junit.runner.RunWith;
 })
 public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
 
-    private static boolean loginConfigUpdated;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -153,32 +149,13 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
 
         System.setProperty("java.security.auth.login.config", config.toString());
 
-        updatePort();
+        ldapProps("org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties",
+                  GSSAPILdapLoginModuleTest::replacePortAndAddress);
     }
 
-    public void updatePort() throws Exception {
-        if (!loginConfigUpdated) {
-            String basedir = System.getProperty("basedir");
-            if (basedir == null) {
-                basedir = new File(".").getCanonicalPath();
-            }
-
-            // Read in ldap.properties and substitute in the correct port
-            File f = new File(basedir + "/src/test/resources/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
-
-            FileInputStream inputStream = new FileInputStream(f);
-            String content = IOUtils.toString(inputStream, "UTF-8");
-            inputStream.close();
-            content = content.replaceAll("portno", "" + getLdapServer().getPort());
-            content = content.replaceAll("address", KerberosTestUtils.getHostName());
-
-            File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
-            FileOutputStream outputStream = new FileOutputStream(f2);
-            IOUtils.write(content, outputStream, "UTF-8");
-            outputStream.close();
-            loginConfigUpdated = true;
-        }
-
+    public static String replacePortAndAddress(String line) {
+        return line.replaceAll("portno", "" + getLdapServer().getPort())
+            .replaceAll("address", KerberosTestUtils.getHostName());
     }
 
     @After

@@ -15,6 +15,8 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -49,7 +51,8 @@ public class LdapSpecialCharsInPasswordTest extends LdapLoginModuleTest {
     @Before
     @Override
     public void updatePort() throws Exception {
-        LdapPropsUpdater.updatePort("org/apache/karaf/jaas/modules/ldap/ldap_special_char_in_password.properties", getLdapServer().getPort());
+        ldapProps("org/apache/karaf/jaas/modules/ldap/ldap_special_char_in_password.properties", 
+                  LdapLoginModuleTest::replacePort);
     }
 
     protected Properties ldapLoginModuleOptions() throws IOException {

@@ -16,39 +16,30 @@
 package org.apache.karaf.jaas.modules.ldap;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-
-import org.apache.commons.io.IOUtils;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class LdapPropsUpdater {
 
     private LdapPropsUpdater() {
     }
 
-    public static void updatePort(String propsPath, int port) throws IOException {
+    public static void ldapProps(String propsPath, Function<String, String> mapFunction) throws IOException {
         String basedir = System.getProperty("basedir");
         if (basedir == null) {
             basedir = new File(".").getCanonicalPath();
         }
-
-        // Read in ldap.properties and substitute in the correct port
-        String content = readProperties(basedir + "/src/test/resources/" + propsPath);
-        content = content.replaceAll("portno", "" + port);
-        writeProperties(basedir + "/target/test-classes/" + propsPath, content);
-    }
-    
-    private static String readProperties(String path) throws FileNotFoundException, IOException {
-        try (FileInputStream inputStream = new FileInputStream(new File(path))) {;
-            return IOUtils.toString(inputStream, "UTF-8");
-        }
+        Path inPath = new File(basedir + "/src/test/resources/" + propsPath).toPath();
+        List<String> lines = Files.lines(inPath, Charset.forName("UTF-8"))
+            .map(mapFunction)
+            .collect(Collectors.toList());
+        Path outPath = new File(basedir + "/target/test-classes/" + propsPath).toPath();
+        Files.write(outPath, lines, Charset.forName("UTF-8"));
     }
 
-    private static void writeProperties(String path, String content) throws FileNotFoundException, IOException {
-        try (FileOutputStream outputStream = new FileOutputStream(new File(path))) {
-            IOUtils.write(content, outputStream, "UTF-8");
-        }
-    }
 }
