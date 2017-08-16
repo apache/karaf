@@ -101,10 +101,11 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
             LOGGER.debug("Populating principals with user");
             principals.add(new UserPrincipal(user));
             LOGGER.debug("Retrieving user {} roles", user);
+            String responseSt = EntityUtils.toString(response.getEntity());
             if (version.equals("2.x") || version.equals("2")) {
-                roles = extractingRolesSyncope2(EntityUtils.toString(response.getEntity()));
+                roles = extractingRolesSyncope2(responseSt);
             } else {
-                roles = extractingRolesSyncope1(EntityUtils.toString(response.getEntity()));
+                roles = extractingRolesSyncope1(responseSt);
             }
         } catch (Exception e) {
             LOGGER.error("User {} authentication failed", user, e);
@@ -162,6 +163,7 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
      * @return the list of user roles.
      * @throws Exception in case of extractiong failure.
      */
+    @SuppressWarnings("unchecked")
     protected List<String> extractingRolesSyncope2(String response) throws Exception {
         List<String> roles = new ArrayList<>();
         if (response != null && !response.isEmpty()) {
