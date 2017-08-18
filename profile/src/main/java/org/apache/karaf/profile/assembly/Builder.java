@@ -39,6 +39,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -48,7 +49,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -794,10 +794,11 @@ public class Builder {
             allInstalledFeatures.addAll(repo.getFeature());
         }
         Set<Feature> installedFeatures = new LinkedHashSet<>();
+        Map<String, Map<Version, Feature>> featuresCache = new HashMap<>();
         // Add boot features for search
         allInstalledFeatures.addAll(allBootFeatures);
         for (String feature : installedEffective.getFeatures()) {
-            addFeatures(allInstalledFeatures, feature, installedFeatures, true);
+            addFeatures(allInstalledFeatures, feature, installedFeatures, true, featuresCache);
         }
         for (Feature feature : installedFeatures) {
             LOGGER.info("   Feature {} is defined as an installed feature", feature.getId());
@@ -869,7 +870,8 @@ public class Builder {
 
         // Compute startup feature dependencies
         Set<Feature> bootFeatures = new HashSet<>();
-        addFeatures(allBootFeatures, generated.getName(), bootFeatures, true);
+        Map<String, Map<Version, Feature>> featuresCache = new HashMap<>();
+        addFeatures(allBootFeatures, generated.getName(), bootFeatures, true, featuresCache);
         for (Feature feature : bootFeatures) {
             // the feature is a startup feature, updating startup.properties file
             LOGGER.info("   Feature " + feature.getId() + " is defined as a boot feature");
@@ -1248,14 +1250,16 @@ public class Builder {
         }
     }
 
-    private void addFeatures(Set<Feature> allFeatures, String feature, Set<Feature> features, boolean mandatory) {
+    private void addFeatures(Set<Feature> allFeatures, String feature, Set<Feature> features, boolean mandatory, Map<String, Map<Version, Feature>> featuresCache) {
         String name;
+        Version osgiVersion;
         VersionRange range;
         int idx = feature.indexOf('/');
         if (idx > 0) {
             name = feature.substring(0, idx);
             String version = feature.substring(idx + 1);
             version = version.trim();
+            osgiVersion = VersionTable.getVersion(version);
             if (version.equals(org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)) {
                 range = new VersionRange(Version.emptyVersion);
             } else {
@@ -1263,18 +1267,36 @@ public class Builder {
             }
         } else {
             name = feature;
+            osgiVersion = Version.emptyVersion;
             range = new VersionRange(Version.emptyVersion);
         }
-        Set<Feature> set = allFeatures.stream()
-                .filter(f -> f.getName().equals(name) && range.contains(VersionTable.getVersion(f.getVersion())))
-                .collect(Collectors.toSet());
+        Set<Feature> set = new HashSet<>();
+        boolean featurePresentInCache = false;
+        Optional<Map<Version, Feature>> optionalVersionFeatureMap = Optional.ofNullable(featuresCache.get(name));
+        if(optionalVersionFeatureMap.isPresent()) {
+            Optional<Feature> cachedFeature = Optional.ofNullable(optionalVersionFeatureMap.get().get(osgiVersion));
+            if(cachedFeature.isPresent()){
+                set.add(cachedFeature.get());
+                featurePresentInCache = true;
+            }
+        }
+        if(!featurePresentInCache) {
+            for (Feature f : allFeatures) {
+                if (f.getName().equals(name) && range.contains(VersionTable.getVersion(f.getVersion()))) {
+                    set.add(f);
+                    Map<Version, Feature> versionFeatureMap = Optional.ofNullable(featuresCache.get(name)).orElse(new HashMap<>());
+                    versionFeatureMap.put(osgiVersion, f);
+                    featuresCache.put(name, versionFeatureMap);
+                }
+            }
+        }
         if (mandatory && set.isEmpty()) {
             throw new IllegalStateException("Could not find matching feature for " + feature);
         }
         for (Feature f : set) {
             features.add(f);
             for (Dependency dep : f.getFeature()) {
-                addFeatures(allFeatures, dep.toString(), features, !dep.isDependency() && !dep.isPrerequisite());
+                addFeatures(allFeatures, dep.toString(), features, !dep.isDependency() && !dep.isPrerequisite(), featuresCache);
             }
         }
     }
