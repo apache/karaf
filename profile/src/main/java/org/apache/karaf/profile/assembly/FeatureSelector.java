@@ -55,9 +55,10 @@ public class FeatureSelector {
             throw new IllegalStateException("Could not find matching feature for " + feature);
         }
         for (Feature f : set) {
-            features.add(f);
-            for (Dependency dep : f.getFeature()) {
-                addFeatures(dep.toString(), features, isMandatory(dep));
+            if (features.add(f)) {
+                for (Dependency dep : f.getFeature()) {
+                    addFeatures(dep.toString(), features, isMandatory(dep));
+                }
             }
         }
     }
