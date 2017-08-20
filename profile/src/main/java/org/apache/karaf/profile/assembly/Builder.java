@@ -39,7 +39,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -56,8 +55,6 @@ import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
-import org.apache.felix.utils.version.VersionRange;
-import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Library;
 import org.apache.karaf.features.internal.download.DownloadCallback;
@@ -90,13 +87,13 @@ import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Resource;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.util.Collections.singletonList;
 import static java.util.jar.JarFile.MANIFEST_NAME;
 import static org.apache.karaf.features.internal.service.Blacklist.TYPE_REPOSITORY;
 import static org.apache.karaf.profile.assembly.Builder.Stage.Startup;
@@ -793,13 +790,11 @@ public class Builder {
         for (Features repo : installedRepositories.values()) {
             allInstalledFeatures.addAll(repo.getFeature());
         }
-        Set<Feature> installedFeatures = new LinkedHashSet<>();
-        Map<String, Map<Version, Feature>> featuresCache = new HashMap<>();
+        
         // Add boot features for search
         allInstalledFeatures.addAll(allBootFeatures);
-        for (String feature : installedEffective.getFeatures()) {
-            addFeatures(allInstalledFeatures, feature, installedFeatures, true, featuresCache);
-        }
+        FeatureSelector selector = new FeatureSelector(allInstalledFeatures);
+        Set<Feature> installedFeatures = selector.selectMatching(installedEffective.getFeatures());
         for (Feature feature : installedFeatures) {
             LOGGER.info("   Feature {} is defined as an installed feature", feature.getId());
             for (Bundle bundle : feature.getBundle()) {
@@ -869,9 +864,8 @@ public class Builder {
         Downloader downloader = manager.createDownloader();
 
         // Compute startup feature dependencies
-        Set<Feature> bootFeatures = new HashSet<>();
-        Map<String, Map<Version, Feature>> featuresCache = new HashMap<>();
-        addFeatures(allBootFeatures, generated.getName(), bootFeatures, true, featuresCache);
+        FeatureSelector selector = new FeatureSelector(allBootFeatures);
+        Set<Feature> bootFeatures = selector.selectMatching(singletonList(generated.getName()));
         for (Feature feature : bootFeatures) {
             // the feature is a startup feature, updating startup.properties file
             LOGGER.info("   Feature " + feature.getId() + " is defined as a boot feature");
@@ -1248,93 +1242,6 @@ public class Builder {
         } else {
             LOGGER.warn("Ignoring non maven artifact " + location);
         }
-    }
-
-    private void addFeatures(Set<Feature> allFeatures, String feature, Set<Feature> features, boolean mandatory, Map<String, Map<Version, Feature>> featuresCache) {
-        String name;
-        Version osgiVersion;
-        VersionRange range;
-        int idx = feature.indexOf('/');
-        if (idx > 0) {
-            name = feature.substring(0, idx);
-            String version = feature.substring(idx + 1);
-            version = version.trim();
-            osgiVersion = VersionTable.getVersion(version);
-            if (version.equals(org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)) {
-                range = new VersionRange(Version.emptyVersion);
-            } else {
-                range = new VersionRange(version, true, true);
-            }
-        } else {
-            name = feature;
-            osgiVersion = Version.emptyVersion;
-            range = new VersionRange(Version.emptyVersion);
-        }
-        Set<Feature> set = new HashSet<>();
-        boolean featurePresentInCache = false;
-        Optional<Map<Version, Feature>> optionalVersionFeatureMap = Optional.ofNullable(featuresCache.get(name));
-        if(optionalVersionFeatureMap.isPresent()) {
-            Optional<Feature> cachedFeature = Optional.ofNullable(optionalVersionFeatureMap.get().get(osgiVersion));
-            if(cachedFeature.isPresent()){
-                set.add(cachedFeature.get());
-                featurePresentInCache = true;
-            }
-        }
-        if(!featurePresentInCache) {
-            for (Feature f : allFeatures) {
-                if (f.getName().equals(name) && range.contains(VersionTable.getVersion(f.getVersion()))) {
-                    set.add(f);
-                    Map<Version, Feature> versionFeatureMap = Optional.ofNullable(featuresCache.get(name)).orElse(new HashMap<>());
-                    versionFeatureMap.put(osgiVersion, f);
-                    featuresCache.put(name, versionFeatureMap);
-                }
-            }
-        }
-        if (mandatory && set.isEmpty()) {
-            throw new IllegalStateException("Could not find matching feature for " + feature);
-        }
-        for (Feature f : set) {
-            features.add(f);
-            for (Dependency dep : f.getFeature()) {
-                addFeatures(allFeatures, dep.toString(), features, !dep.isDependency() && !dep.isPrerequisite(), featuresCache);
-            }
-        }
-    }
-
-    private String getFeatureSt(Dependency dep) {
-        String version = dep.getVersion() == null || "0.0.0".equals(dep.getVersion()) ? "" : "/" + dep.getVersion();
-        return dep.getName() + version;
-    }
-
-    /**
-     * Checks if a given feature f matches the featureRef.
-     * TODO Need to also check for version ranges. Currently ranges are ignored and all features matching the name
-     * are copied in that case.
-     *  
-     * @param f
-     * @param featureRef
-     * @return
-     */
-    private boolean matches(Feature f, Dependency featureRef) {
-        if (!f.getName().equals(featureRef.getName())) {
-            return false;
-        }
-
-        final String featureRefVersion = featureRef.getVersion();
-
-        if (featureRefVersion == null) {
-            return true;
-        }
-
-        if (featureRefVersion.equals("0.0.0")) {
-            return true;
-        }
-
-        if (featureRefVersion.startsWith("[")) {
-            return true;
-        }
-
-        return VersionUtils.versionEquals(f.getVersion(), featureRefVersion);
     }
 
     private List<String> getStaged(Stage stage, Map<String, Stage> data) {
