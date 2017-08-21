@@ -24,11 +24,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
-import org.osgi.framework.Version;
+import org.apache.karaf.features.internal.service.FeatureReq;
 
 public class FeatureSelector {
     Map<String, Set<Feature>> featuresCache;
@@ -75,28 +74,13 @@ public class FeatureSelector {
     }
 
     private Set<Feature> getMatching(String nameAndVersion) {
-        VersionRange range;
-        String name;
-        int idx = nameAndVersion.indexOf('/');
-        if (idx > 0) {
-            name = nameAndVersion.substring(0, idx);
-            String version = nameAndVersion.substring(idx + 1);
-            version = version.trim();
-            if (version.equals(org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)) {
-                range = new VersionRange(Version.emptyVersion);
-            } else {
-                range = new VersionRange(version, true, true);
-            }
-        } else {
-            name = nameAndVersion;
-            range = new VersionRange(Version.emptyVersion);
-        }
-        Set<Feature> versionToFeatures = featuresCache.get(name);
+        FeatureReq req = new FeatureReq(nameAndVersion);
+        Set<Feature> versionToFeatures = featuresCache.get(req.getName());
         if (versionToFeatures == null) {
             return Collections.emptySet();
         }
         return versionToFeatures.stream()
-            .filter(f -> f.getName().equals(name) && range.contains(VersionTable.getVersion(f.getVersion())))
+            .filter(f -> f.getName().equals(req.getName()) && req.getVersionRange().includes(VersionTable.getVersion(f.getVersion())))
             .collect(Collectors.toSet());  
     }
 }
