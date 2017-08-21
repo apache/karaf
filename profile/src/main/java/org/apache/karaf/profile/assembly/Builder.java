@@ -48,7 +48,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -63,9 +62,7 @@ import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Conditional;
-import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
-import org.apache.karaf.features.internal.model.Content;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
@@ -921,36 +918,9 @@ public class Builder {
                     }
                 }
             }
-            List<Content> contents = new ArrayList<>();
-            contents.add(feature);
-            contents.addAll(feature.getConditional());
-            for (Content content : contents) {
-                // Install config files
-                for (Config config : content.getConfig()) {
-                    if (config.isExternal()) {
-                        installer.installArtifact(config.getValue().trim());
-                    }
-                }
-                for (ConfigFile configFile : content.getConfigfile()) {
-                    installer.installArtifact(configFile.getLocation().trim());
-                }
-                // Extract configs
-                for (Config config : content.getConfig()) {
-                    if (pidMatching(config.getName())) {
-                        Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
-                        LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
-                        if (config.isExternal()) {
-                            downloader.download(config.getValue().trim(), provider -> {
-                                synchronized (provider) {
-                                    Files.copy(provider.getFile().toPath(), configFile, StandardCopyOption.REPLACE_EXISTING);
-                                }
-                            });
-                        } else {
-                            Files.write(configFile, config.getValue().getBytes());
-                        }
-                    }
-                }
-            }
+
+            new ConfigInstaller(etcDirectory, pidsToExtract)
+                .installConfigs(feature, downloader, installer);
             // Install libraries
             List<String> libraries = new ArrayList<>();
             for (Library library : feature.getLibraries()) {
@@ -1019,112 +989,7 @@ public class Builder {
         return allBootFeatures;
     }
 
-    private boolean pidMatching(String name) {
-        if (pidsToExtract == null) {
-            return true;
-        }
-        for (String p : pidsToExtract) {
-            boolean negated = false;
-            if (p.startsWith("!")) {
-                negated = true;
-                p = p.substring(1);
-            }
-            String r = globToRegex(p);
-            if (Pattern.matches(r, name)) {
-                return !negated;
-            }
-        }
-        return false;
-    }
 
-    private String globToRegex(String pattern) {
-        StringBuilder sb = new StringBuilder(pattern.length());
-        int inGroup = 0;
-        int inClass = 0;
-        int firstIndexInClass = -1;
-        char[] arr = pattern.toCharArray();
-        for (int i = 0; i < arr.length; i++) {
-            char ch = arr[i];
-            switch (ch) {
-                case '\\':
-                    if (++i >= arr.length) {
-                        sb.append('\\');
-                    } else {
-                        char next = arr[i];
-                        switch (next) {
-                            case ',':
-                                // escape not needed
-                                break;
-                            case 'Q':
-                            case 'E':
-                                // extra escape needed
-                                sb.append('\\');
-                            default:
-                                sb.append('\\');
-                        }
-                        sb.append(next);
-                    }
-                    break;
-                case '*':
-                    if (inClass == 0)
-                        sb.append(".*");
-                    else
-                        sb.append('*');
-                    break;
-                case '?':
-                    if (inClass == 0)
-                        sb.append('.');
-                    else
-                        sb.append('?');
-                    break;
-                case '[':
-                    inClass++;
-                    firstIndexInClass = i + 1;
-                    sb.append('[');
-                    break;
-                case ']':
-                    inClass--;
-                    sb.append(']');
-                    break;
-                case '.':
-                case '(':
-                case ')':
-                case '+':
-                case '|':
-                case '^':
-                case '$':
-                case '@':
-                case '%':
-                    if (inClass == 0 || (firstIndexInClass == i && ch == '^'))
-                        sb.append('\\');
-                    sb.append(ch);
-                    break;
-                case '!':
-                    if (firstIndexInClass == i)
-                        sb.append('^');
-                    else
-                        sb.append('!');
-                    break;
-                case '{':
-                    inGroup++;
-                    sb.append('(');
-                    break;
-                case '}':
-                    inGroup--;
-                    sb.append(')');
-                    break;
-                case ',':
-                    if (inGroup > 0)
-                        sb.append('|');
-                    else
-                        sb.append(',');
-                    break;
-                default:
-                    sb.append(ch);
-            }
-        }
-        return sb.toString();
-    }
 
     private String getRepos(Features rep) {
         StringBuilder repos = new StringBuilder();
