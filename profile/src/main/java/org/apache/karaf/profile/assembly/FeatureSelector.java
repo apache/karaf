@@ -41,7 +41,14 @@ public class FeatureSelector {
         }
     }
     
-    public Set<Feature> selectMatching(List<String> features) {
+    /**
+     * Features matching the given feature selectors including dependent features
+     * 
+     * @param features feature selector name, name/version, name/version-range
+     * 
+     * @return matching features 
+     */
+    public Set<Feature> getMatching(List<String> features) {
         Set<Feature> selected = new HashSet<>();
         for (String feature : features) {
             addFeatures(feature, selected, true);

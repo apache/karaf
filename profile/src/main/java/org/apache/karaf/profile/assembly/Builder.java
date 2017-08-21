@@ -802,7 +802,7 @@ public class Builder {
         // Add boot features for search
         allInstalledFeatures.addAll(allBootFeatures);
         FeatureSelector selector = new FeatureSelector(allInstalledFeatures);
-        Set<Feature> installedFeatures = selector.selectMatching(installedEffective.getFeatures());
+        Set<Feature> installedFeatures = selector.getMatching(installedEffective.getFeatures());
         ArtifactInstaller installer = new ArtifactInstaller(systemDirectory, downloader, blacklistedBundles);
         for (Feature feature : installedFeatures) {
             LOGGER.info("   Feature {} is defined as an installed feature", feature.getId());
@@ -875,7 +875,7 @@ public class Builder {
 
         // Compute startup feature dependencies
         FeatureSelector selector = new FeatureSelector(allBootFeatures);
-        Set<Feature> bootFeatures = selector.selectMatching(singletonList(generated.getName()));
+        Set<Feature> bootFeatures = selector.getMatching(singletonList(generated.getName()));
         for (Feature feature : bootFeatures) {
             // the feature is a startup feature, updating startup.properties file
             LOGGER.info("   Feature " + feature.getId() + " is defined as a boot feature");
