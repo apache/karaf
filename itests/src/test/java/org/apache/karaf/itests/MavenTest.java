@@ -18,7 +18,7 @@ package org.apache.karaf.itests;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.LinkedList;
@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +41,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -135,17 +135,6 @@ public class MavenTest /*extends KarafTestSupport*/ {
         return probe;
     }
 
-    private int getAvailablePort(int min, int max) {
-        for (int i = min; i <= max; i++) {
-            try {
-                ServerSocket socket = new ServerSocket(i);
-                return socket.getLocalPort();
-            } catch (Exception ignored) {
-            }
-        }
-        throw new IllegalStateException("Can't find available network ports");
-    }
-
     @Configuration
     public Option[] config() {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
@@ -228,9 +217,9 @@ public class MavenTest /*extends KarafTestSupport*/ {
 
     private void updateSettings() throws IOException {
         File settingsFile = new File(System.getProperty("karaf.home"), "etc/maven-settings.xml");
-        String settings = FileUtils.readFileToString(settingsFile);
+        String settings = FileUtils.readFileToString(settingsFile, Charset.forName("UTF-8"));
         settings = settings.replace("@@port@@", Integer.toString(port));
-        FileUtils.write(settingsFile, settings);
+        FileUtils.write(settingsFile, settings, Charset.forName("UTF-8"));
     }
 
     /**
