@@ -68,7 +68,7 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         user = null;
     }
 
-    public void initialize(Subject sub, CallbackHandler handler, Map options) {
+    public void initialize(Subject sub, CallbackHandler handler, Map<String, ?> options) {
         this.subject = sub;
         this.callbackHandler = handler;
         this.options = options;
@@ -81,50 +81,9 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         encryptionSupport = new EncryptionSupport(options);
     }
 
-
-    public String getEncryptedPassword(String password) {
-        Encryption encryption = encryptionSupport.getEncryption();
-        String encryptionPrefix = encryptionSupport.getEncryptionPrefix();
-        String encryptionSuffix = encryptionSupport.getEncryptionSuffix();
-
-        if (encryption == null) {
-            return password;
-        } else {
-            boolean prefix = encryptionPrefix == null || password.startsWith(encryptionPrefix);
-            boolean suffix = encryptionSuffix == null || password.endsWith(encryptionSuffix);
-            if (prefix && suffix) {
-                return password;
-            } else {
-                String p = encryption.encryptPassword(password);
-                if (encryptionPrefix != null) {
-                    p = encryptionPrefix + p;
-                }
-                if (encryptionSuffix != null) {
-                    p = p + encryptionSuffix;
-                }
-                return p;
-            }
-        }
-    }
-
     public boolean checkPassword(String plain, String encrypted) {
-        Encryption encryption = encryptionSupport.getEncryption();
-        String encryptionPrefix = encryptionSupport.getEncryptionPrefix();
-        String encryptionSuffix = encryptionSupport.getEncryptionSuffix();
-
-        if (encryption == null) {
-            return plain.equals(encrypted);
-        } else {
-            boolean prefix = encryptionPrefix == null || encrypted.startsWith(encryptionPrefix);
-            boolean suffix = encryptionSuffix == null || encrypted.endsWith(encryptionSuffix);
-            if (prefix && suffix) {
-                encrypted = encrypted.substring(encryptionPrefix != null ? encryptionPrefix.length() : 0,
-                        encrypted.length() - (encryptionSuffix != null ? encryptionSuffix.length() : 0));
-                return encryption.checkPassword(plain, encrypted);
-            } else {
-                return plain.equals(encrypted);
-            }
-        }
+        String newEncrypted = encryptionSupport.encrypt(plain);
+        return encrypted.equals(newEncrypted);
     }
 
 }

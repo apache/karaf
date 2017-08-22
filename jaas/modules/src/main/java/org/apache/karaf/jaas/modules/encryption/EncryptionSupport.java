@@ -40,7 +40,12 @@ public class EncryptionSupport {
     private String name;
 
     private Map<String, String> encOpts;
-
+    
+    public static EncryptionSupport noEncryptionSupport() {
+        Map<String, Object> options = new HashMap<>();
+        options.put("enabled", "false");
+        return new EncryptionSupport(options);
+    }
 
     public EncryptionSupport(Map<String, ?> options) {
         this.debug = Boolean.parseBoolean((String) options.get("debug"));
@@ -52,30 +57,53 @@ public class EncryptionSupport {
                 encOpts.put(key.substring("encryption.".length()), options.get(key).toString());
             }
         }
-        encryptionPrefix = encOpts.remove("prefix");
-        encryptionSuffix = encOpts.remove("suffix");
+        encryptionPrefix = defaulIfNull(encOpts.remove("prefix"), "");
+        encryptionSuffix = defaulIfNull(encOpts.remove("suffix"), "");
         enabled = Boolean.parseBoolean(encOpts.remove("enabled"));
-        if (!enabled) {
-            if (debug) {
-                logger.debug("Encryption is disabled.");
-            }
+        if (!enabled && debug) {
+            logger.debug("Encryption is disabled.");
         }
         name = encOpts.remove("name");
         if (debug) {
-            if (name != null && name.length() > 0) {
-                logger.debug("Encryption is enabled. Using service " + name + " with options " + encOpts);
-            } else {
-                logger.debug("Encryption is enabled. Using options " + encOpts);
-            }
+            logOptions();
         }
     }
-
-    public Encryption getEncryption() {
-        if (encryption != null) {
-            return encryption;
+    
+    public String encrypt(String plain) {
+        getEncryption();
+        if (encryption == null || isEncrypted(plain)) {
+            return plain;
+        } else {
+            return encryptionPrefix + encryption.encryptPassword(plain) + encryptionSuffix;
         }
-        if (!enabled) {
-            return null;
+    }
+    
+    private void logOptions() {
+        if (name != null && name.length() > 0) {
+            logger.debug("Encryption is enabled. Using service " + name + " with options " + encOpts);
+        } else {
+            logger.debug("Encryption is enabled. Using options " + encOpts);
+        }
+    }
+    
+    private String defaulIfNull(String value, String defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+    
+    private boolean isEncrypted(String password) {
+        boolean prefixPresent = "".equals(encryptionPrefix) || password.startsWith(encryptionPrefix);
+        boolean suffixPresent = "".equals(encryptionSuffix) || password.endsWith(encryptionSuffix);
+        return prefixPresent && suffixPresent;
+    }
+
+    /**
+     * @deprecated Use encrypt instead. This method will be made private
+     * @return chosen encryption
+     */
+    @Deprecated
+    public Encryption getEncryption() {
+        if (encryption != null || !enabled) {
+            return encryption;
         }
 
         ServiceTracker<EncryptionService, EncryptionService> tracker = new ServiceTracker<>(bundleContext, getFilter(), null);
@@ -130,20 +158,31 @@ public class EncryptionSupport {
         }
     }
 
+    @Deprecated
     public String getEncryptionSuffix() {
         return encryptionSuffix;
     }
 
+    @Deprecated
     public void setEncryptionSuffix(String encryptionSuffix) {
         this.encryptionSuffix = encryptionSuffix;
     }
 
+    @Deprecated
     public String getEncryptionPrefix() {
         return encryptionPrefix;
     }
 
+    @Deprecated
     public void setEncryptionPrefix(String encryptionPrefix) {
         this.encryptionPrefix = encryptionPrefix;
+    }
+    
+    /**
+     * For tests
+     */
+    void setEncryption(Encryption encryption) {
+        this.encryption = encryption;
     }
 
 }

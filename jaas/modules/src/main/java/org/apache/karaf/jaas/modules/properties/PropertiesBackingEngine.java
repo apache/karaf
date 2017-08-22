@@ -39,6 +39,7 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     public PropertiesBackingEngine(Properties users) {
         this.users = users;
+        this.encryptionSupport = EncryptionSupport.noEncryptionSupport();
     }
 
     public PropertiesBackingEngine(Properties users, EncryptionSupport encryptionSupport) {
@@ -58,25 +59,13 @@ public class PropertiesBackingEngine implements BackingEngine {
         String[] infos = null;
         StringBuffer userInfoBuffer = new StringBuffer();
 
-        String newPassword = password;
-
-        //If encryption support is enabled, encrypt password
-        if (encryptionSupport != null && encryptionSupport.getEncryption() != null) {
-            newPassword = encryptionSupport.getEncryption().encryptPassword(password);
-            if (encryptionSupport.getEncryptionPrefix() != null) {
-                newPassword = encryptionSupport.getEncryptionPrefix() + newPassword;
-            }
-            if (encryptionSupport.getEncryptionSuffix() != null) {
-                newPassword = newPassword + encryptionSupport.getEncryptionSuffix();
-            }
-        }
-
+        String encPassword = encryptionSupport.encrypt(password);
         String userInfos = users.get(username);
 
         //If user already exists, update password
         if (userInfos != null && userInfos.length() > 0) {
             infos = userInfos.split(",");
-            userInfoBuffer.append(newPassword);
+            userInfoBuffer.append(encPassword);
 
             for (int i = 1; i < infos.length; i++) {
                 userInfoBuffer.append(",");
@@ -85,7 +74,7 @@ public class PropertiesBackingEngine implements BackingEngine {
             String newUserInfo = userInfoBuffer.toString();
             users.put(username, newUserInfo);
         } else {
-            users.put(username, newPassword);
+            users.put(username, encPassword);
         }
 
         try {

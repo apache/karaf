@@ -50,6 +50,7 @@ public class JDBCBackingEngine implements BackingEngine {
 
     public JDBCBackingEngine(DataSource dataSource) {
         this.dataSource = dataSource;
+        this.encryptionSupport = EncryptionSupport.noEncryptionSupport();
     }
 
     public JDBCBackingEngine(DataSource dataSource, EncryptionSupport encryptionSupport) {
@@ -67,19 +68,10 @@ public class JDBCBackingEngine implements BackingEngine {
         if (username.startsWith(GROUP_PREFIX)) {
             throw new IllegalArgumentException("Prefix not permitted: " + GROUP_PREFIX);
         }
-        //If encryption support is enabled, encrypt password
-        if (encryptionSupport != null && encryptionSupport.getEncryption() != null) {
-            password = encryptionSupport.getEncryption().encryptPassword(password);
-            if (encryptionSupport.getEncryptionPrefix() != null) {
-                password = encryptionSupport.getEncryptionPrefix() + password;
-            }
-            if (encryptionSupport.getEncryptionSuffix() != null) {
-                password = password + encryptionSupport.getEncryptionSuffix();
-            }
-        }
+        String encPassword = encryptionSupport.encrypt(password);
         try {
             try (Connection connection = dataSource.getConnection()) {
-                rawUpdate(connection, addUserStatement, username, password);
+                rawUpdate(connection, addUserStatement, username, encPassword);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error adding user", e);
