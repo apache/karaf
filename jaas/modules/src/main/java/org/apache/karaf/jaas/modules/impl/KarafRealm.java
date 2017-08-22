@@ -34,8 +34,6 @@ public class KarafRealm implements JaasRealm {
     private static final String LOG_AUDIT_MODULE = "org.apache.karaf.jaas.modules.audit.LogAuditLoginModule";
     private static final String EVENTADMIN_AUDIT_MODULE = "org.apache.karaf.jaas.modules.audit.EventAdminAuditLoginModule";
 
-    private static final String MODULE = "org.apache.karaf.jaas.module";
-
     private final BundleContext bundleContext;
     private volatile Map<String, Object> properties;
 

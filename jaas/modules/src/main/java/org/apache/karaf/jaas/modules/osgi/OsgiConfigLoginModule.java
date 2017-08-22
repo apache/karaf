@@ -49,7 +49,7 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
         try {
             String pid = (String) options.get(PID);
             Configuration config = ConfigAdminHolder.getService().getConfiguration(pid, null);
-            Dictionary properties = config.getProperties();
+            Dictionary<String, Object> properties = config.getProperties();
 
             Callback[] callbacks = new Callback[2];
 

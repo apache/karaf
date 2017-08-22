@@ -38,7 +38,7 @@ public class EventAdminAuditLoginModule extends AbstractAuditLoginModule {
     private String topic;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler,
-                           Map sharedState, Map options) {
+                           Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, sharedState, options);
         bundleContext = (BundleContext) options.get(BundleContext.class.getName());
         topic = (String) options.get("topic");

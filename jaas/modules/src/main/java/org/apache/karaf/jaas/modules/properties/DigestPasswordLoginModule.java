@@ -54,7 +54,7 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
     private String usersFile;
     
 
-    public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
+    public void initialize(Subject sub, CallbackHandler handler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(sub,handler,options);
         usersFile = (String) options.get(USER_FILE);
         if (debug) {
@@ -89,7 +89,7 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
             System.arraycopy(b3, 0, b4, offset, b3.length);
             
             byte[] digestBytes = generateDigest(b4);
-            passwdDigest = new String(new Base64().encodeBase64(digestBytes));
+            passwdDigest = new String(Base64.encodeBase64(digestBytes));
         } catch (Exception e) {
             LOGGER.debug(e.getMessage(), e);
         }

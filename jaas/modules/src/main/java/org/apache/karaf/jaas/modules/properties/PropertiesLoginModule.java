@@ -49,7 +49,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
     private String usersFile;
     
 
-    public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
+    public void initialize(Subject sub, CallbackHandler handler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(sub,handler,options);
         usersFile = (String) options.get(USER_FILE);
         if (debug) {

@@ -38,7 +38,7 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
     private boolean enabled;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler,
-                           Map sharedState, Map options) {
+                           Map<String, ?> sharedState, Map<String, ?> options) {
         this.subject = subject;
         enabled = Boolean.parseBoolean((String) options.get("enabled"));
         handler = callbackHandler;

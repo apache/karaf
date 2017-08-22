@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 /**
  * Karaf Kerberos login module.
  */
+@SuppressWarnings("restriction")
 public class Krb5LoginModule implements LoginModule {
 
     private com.sun.security.auth.module.Krb5LoginModule loginModule = new com.sun.security.auth.module.Krb5LoginModule();

@@ -30,7 +30,7 @@ public class LogAuditLoginModule extends AbstractAuditLoginModule {
     private Logger logger;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler,
-                           Map sharedState, Map options) {
+                           Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, sharedState, options);
         level = (String) options.get(LOG_LEVEL_OPTION);
         logger = LoggerFactory.getLogger((String) options.get(LOG_LOGGER_OPTION));
