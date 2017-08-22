@@ -91,7 +91,6 @@ public class ProfileDisplay implements Action {
         List<String> agentProperties = new ArrayList<>();
         List<String> systemProperties = new ArrayList<>();
         List<String> configProperties = new ArrayList<>();
-        List<String> otherResources = new ArrayList<>();
         for (Map.Entry<String, Object> entry : agentConfiguration.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();

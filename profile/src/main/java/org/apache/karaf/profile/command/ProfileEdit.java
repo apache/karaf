@@ -407,10 +407,10 @@ public class ProfileEdit implements Action {
     }
 
     private void openInEditor(Profile profile, String resource) throws Exception {
+        /* TODO:JLINE
         String id = profile.getId();
         String location = id + " " + resource;
         //Call the editor
-        /* TODO:JLINE
         ConsoleEditor editor = editorFactory.create("simple", getTerminal());
         editor.setTitle("Profile");
         editor.setOpenEnabled(false);
@@ -462,8 +462,8 @@ public class ProfileEdit implements Action {
         try {
             Configuration[] configuration = configurationAdmin.listConfigurations("(service.pid=" + pid + ")");
             if (configuration != null && configuration.length > 0) {
-                Dictionary dictionary = configuration[0].getProperties();
-                Enumeration keyEnumeration = dictionary.keys();
+                Dictionary<String, Object> dictionary = configuration[0].getProperties();
+                Enumeration<String> keyEnumeration = dictionary.keys();
                 while (keyEnumeration.hasMoreElements()) {
                     String key = String.valueOf(keyEnumeration.nextElement());
                     //file.install.filename needs to be skipped as it specific to the current container.
