@@ -88,6 +88,7 @@ import org.slf4j.LoggerFactory;
 
 public class KarafTestSupport {
 
+    private static final EnumSet<org.apache.karaf.features.FeaturesService.Option> NO_AUTO_REFRESH = EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles);
     public static final String MIN_RMI_SERVER_PORT = "44444";
     public static final String MAX_RMI_SERVER_PORT = "66666";
     public static final String MIN_HTTP_PORT = "9080";
@@ -534,25 +535,25 @@ public class KarafTestSupport {
         Assert.assertFalse("Should not contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }
 
-	protected void assertBundleInstalled(String name) {
-	    Assert.assertNotNull("Bundle " + name + " should be installed", findBundleByName(name));
-	}
+    protected void assertBundleInstalled(String name) {
+        Assert.assertNotNull("Bundle " + name + " should be installed", findBundleByName(name));
+    }
 
-	protected void assertBundleNotInstalled(String name) {
-	    Assert.assertNull("Bundle " + name + " should not be installed", findBundleByName(name));
-	}
+    protected void assertBundleNotInstalled(String name) {
+        Assert.assertNull("Bundle " + name + " should not be installed", findBundleByName(name));
+    }
 
-	protected Bundle findBundleByName(String symbolicName) {
-	    for (Bundle bundle : bundleContext.getBundles()) {
-	        if (bundle.getSymbolicName().equals(symbolicName)) {
-	            return bundle;
-	        }
-	    }
-	    return null;
-	}
+    protected Bundle findBundleByName(String symbolicName) {
+        for (Bundle bundle : bundleContext.getBundles()) {
+            if (bundle.getSymbolicName().equals(symbolicName)) {
+                return bundle;
+            }
+        }
+        return null;
+    }
 
     protected void installAndAssertFeature(String feature) throws Exception {
-        featureService.installFeature(feature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.installFeature(feature, NO_AUTO_REFRESH);
         assertFeatureInstalled(feature);
     }
 
@@ -563,23 +564,23 @@ public class KarafTestSupport {
     protected void installAssertAndUninstallFeatures(String... feature) throws Exception {
         boolean success = false;
         Set<String> features = new HashSet<>(Arrays.asList(feature));
-    	try {
+        try {
             System.out.println("Installing " + features);
-            featureService.installFeatures(features, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-			for (String curFeature : feature) {
-			    assertFeatureInstalled(curFeature);
-			}
+            featureService.installFeatures(features, NO_AUTO_REFRESH);
+            for (String curFeature : feature) {
+                assertFeatureInstalled(curFeature);
+            }
             success = true;
-		} finally {
+        } finally {
             System.out.println("Uninstalling " + features);
             try {
-                featureService.uninstallFeatures(features, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+                featureService.uninstallFeatures(features, NO_AUTO_REFRESH);
             } catch (Exception e) {
                 if (success) {
                     throw e;
                 }
             }
-		}
+        }
     }
 
     /**
@@ -589,30 +590,30 @@ public class KarafTestSupport {
      * @param featuresBefore
      * @throws Exception
      */
-	protected void uninstallNewFeatures(Set<Feature> featuresBefore) throws Exception {
-		Feature[] features = featureService.listInstalledFeatures();
+    protected void uninstallNewFeatures(Set<Feature> featuresBefore) throws Exception {
+        Feature[] features = featureService.listInstalledFeatures();
         Set<String> uninstall = new HashSet<>();
         for (Feature curFeature : features) {
-			if (!featuresBefore.contains(curFeature)) {
+            if (!featuresBefore.contains(curFeature)) {
                 uninstall.add(curFeature.getId());
-			}
-		}
+            }
+        }
         try {
             System.out.println("Uninstalling " + uninstall);
-            featureService.uninstallFeatures(uninstall, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+            featureService.uninstallFeatures(uninstall, NO_AUTO_REFRESH);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-	}
+    }
 
     protected void close(Closeable closeAble) {
-    	if (closeAble != null) {
-    		try {
-				closeAble.close();
-			} catch (IOException e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
-    	}
+        if (closeAble != null) {
+            try {
+                closeAble.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        }
     }
 
 }
