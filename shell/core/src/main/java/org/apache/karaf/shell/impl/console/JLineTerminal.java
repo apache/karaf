@@ -38,12 +38,16 @@ import org.jline.terminal.MouseEvent;
 import org.jline.terminal.Size;
 import org.jline.utils.InfoCmp.Capability;
 import org.jline.utils.NonBlockingReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
 
     private final org.jline.terminal.Terminal terminal;
     private final ConcurrentMap<Signal, Set<SignalListener>> listeners = new ConcurrentHashMap<>();
     private final ConcurrentMap<Signal, SignalHandler> handlers = new ConcurrentHashMap<>();
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(JLineTerminal.class);
 
     public JLineTerminal(org.jline.terminal.Terminal terminal) {
         this.terminal = terminal;
@@ -277,7 +281,11 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
     protected void handle(Signal signal) {
         SignalHandler handler = handlers.get(signal);
         if (handler != null) {
-            handler.handle(signal);
+            try {
+                handler.handle(signal);
+            } catch (UnsupportedOperationException uoe) {
+                LOGGER.debug("unsupported operation", uoe);
+            }
         }
         Set<SignalListener> sl = listeners.get(signal);
         if (sl != null) {
