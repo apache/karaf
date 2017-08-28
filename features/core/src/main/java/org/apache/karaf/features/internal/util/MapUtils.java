@@ -24,14 +24,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static java.util.stream.Collectors.toSet;
 
 public final class MapUtils {
 
     private MapUtils() {
-    }
-
-    public interface Function<T, U> {
-        U apply(T t);
     }
 
     public static <S, T> Map<S, Set<T>> invert(Map<T, S> map) {
@@ -77,7 +77,7 @@ public final class MapUtils {
         return s -> f2.apply(f1.apply(s));
     }
 
-    public static <T, U> MapUtils.Function<T, U> map(final Map<T, U> map) {
+    public static <T, U> Function<T, U> map(final Map<T, U> map) {
         return map::get;
     }
 
@@ -197,6 +197,20 @@ public final class MapUtils {
                 map.remove(key);
             }
         }
+    }
+
+    public static <T> Set<T> diff(Set<T> s1, Set<T> s2) {
+        Set<T> s = new HashSet<>(s1);
+        s.removeAll(s2);
+        return s;
+    }
+
+    public static <S, T> Set<T> map(Set<S> s, Function<S, T> mapper) {
+        return s.stream().map(mapper).collect(toSet());
+    }
+
+    public static <S> Set<S> filter(Set<S> s, Predicate<S> predicate) {
+        return s.stream().filter(predicate).collect(toSet());
     }
 
 }

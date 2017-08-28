@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
@@ -1322,15 +1323,15 @@ public class Deployer {
         return result;
     }
 
-    protected <T> MapUtils.Function<Bundle, T> adapt(final Class<T> clazz) {
+    protected <T> Function<Bundle, T> adapt(final Class<T> clazz) {
         return bundle -> bundle.adapt(clazz);
     }
 
-    protected MapUtils.Function<Bundle, Long> bundleId() {
+    protected Function<Bundle, Long> bundleId() {
         return Bundle::getBundleId;
     }
 
-    protected MapUtils.Function<Resource, String> featureId() {
+    protected Function<Resource, String> featureId() {
         return ResourceUtils::getFeatureId;
     }
 
