@@ -80,7 +80,7 @@ public class FeatureSelector {
             return Collections.emptySet();
         }
         return versionToFeatures.stream()
-            .filter(f -> f.getName().equals(req.getName()) && req.getVersionRange().includes(VersionTable.getVersion(f.getVersion())))
+            .filter(f -> f.getName().equals(req.getName()) && req.getVersionRange().contains(VersionTable.getVersion(f.getVersion())))
             .collect(Collectors.toSet());  
     }
 }
