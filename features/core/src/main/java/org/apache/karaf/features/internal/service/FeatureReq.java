@@ -16,32 +16,30 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.apache.felix.utils.version.VersionRange.ANY_VERSION;
 import static org.apache.karaf.features.internal.util.MapUtils.filter;
 
 /**
  * Requirement for a feature
  * 
  * <p>The syntax of a requirement as a String is name[/versionRange].
- * If no versionRange is given then a range of [0,) is assumeed which matches all versions.
+ * If no versionRange is given then a range of [0,) is assumed which matches all versions.
  * 
  * <p>
- * - name: Can be a feature name or a glob like myfeat*
+ * - name: Can be a feature name or a regexp like myfeat.*
  * - versionRange: version or range
  * - version: Will specify a specific version. Like [version,version]. An exemption is 0.0.0 which matches all versions.
  * - range: Like defined in OSGi VersionRange. Example: [1.0.0, 1.1.0)  
@@ -50,7 +48,6 @@ public class FeatureReq {
 
     public static final String VERSION_SEPARATOR = "/";
 
-    private static final VersionRange RANGE_ALL = new VersionRange(VersionRange.LEFT_CLOSED, Version.emptyVersion, null, VersionRange.RIGHT_OPEN);
     private static final String FEATURE_OSGI_REQUIREMENT_PREFIX = "feature:";
 
     private String name;
@@ -71,7 +68,7 @@ public class FeatureReq {
     public FeatureReq(String nameAndRange) {
         String[] parts = nameAndRange.trim().split(VERSION_SEPARATOR);
         this.name = parts[0];
-        this.versionRange = (parts.length == 1) ? RANGE_ALL : range(parts[1]);
+        this.versionRange = (parts.length == 1) ? ANY_VERSION : range(parts[1]);
     }
     
     public FeatureReq(String name, String versionRange) {
@@ -98,9 +95,8 @@ public class FeatureReq {
 
     public Set<FeatureReq> getMatchingRequirements(Set<FeatureReq> reqs) {
         Pattern pattern = Pattern.compile(name);
-        // TODO: should we use the intersection of the 2 ranges ?
         return filter(reqs, fr -> pattern.matcher(fr.getName()).matches()
-                                && versionRange.includes(fr.getVersionRange().getLeft()));
+                                && versionRange.intersect(fr.getVersionRange()) != null);
     }
 
     public Stream<Feature> getMatchingFeatures(Map<String, Map<String, Feature>> allFeatures) {
@@ -122,7 +118,7 @@ public class FeatureReq {
             Version latest = Version.emptyVersion;
             for (String available : versions.keySet()) {
                 Version availableVersion = VersionTable.getVersion(available);
-                if (availableVersion.compareTo(latest) >= 0 && versionRange.includes(availableVersion)) {
+                if (availableVersion.compareTo(latest) >= 0 && versionRange.contains(availableVersion)) {
                     feature = versions.get(available);
                     latest = availableVersion;
                 }
@@ -156,24 +152,21 @@ public class FeatureReq {
 
     private static VersionRange range(String versionRange) {
         if (versionRange == null) {
-            return RANGE_ALL;
+            return ANY_VERSION;
         }
         versionRange = versionRange.trim();
         if ("0.0.0".equals(versionRange)) {
-            return RANGE_ALL;
+            return ANY_VERSION;
         }
         if (versionRange.contains(",")) {
-            return new VersionRange(versionRange);
+            return new VersionRange(versionRange, false, true);
         } else {
             return exactVersion(versionRange);
         }
     }
 
     private static VersionRange exactVersion(String versionRange) {
-        return new VersionRange(VersionRange.LEFT_CLOSED,
-                new Version(versionRange),
-                new Version(versionRange),
-                VersionRange.RIGHT_CLOSED);
+        return new VersionRange(versionRange, true, true);
     }
 
 }
