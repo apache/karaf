@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.Version;
@@ -170,9 +171,10 @@ public class FeatureReq {
     }
 
     private static VersionRange exactVersion(String versionRange) {
+        String cleanVersionRange = VersionCleaner.clean(versionRange);
         return new VersionRange(VersionRange.LEFT_CLOSED,
-                new Version(versionRange),
-                new Version(versionRange),
+                new Version(cleanVersionRange),
+                new Version(cleanVersionRange),
                 VersionRange.RIGHT_CLOSED);
     }
 
