@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.launch.Framework;
 
-class ShutdownSocketThread extends Thread {
+class ShutdownSocketThread extends Thread implements AutoCloseable {
 
 	Logger LOG = Logger.getLogger(this.getClass().getName());
 
@@ -38,12 +38,20 @@ class ShutdownSocketThread extends Thread {
     private Random random = null;
     private ServerSocket shutdownSocket;
 	private Framework framework;
+	private boolean closing;
 
     public ShutdownSocketThread(String shutdown, ServerSocket shutdownSocket, Framework framework) {
         super("Karaf Shutdown Socket Thread");
+        setDaemon(true);
 		this.shutdown = shutdown;
 		this.shutdownSocket = shutdownSocket;
 		this.framework = framework;
+    }
+
+    @Override
+    public void close() throws Exception {
+        closing = true;
+        shutdownSocket.close();
     }
 
     public void run() {
@@ -70,6 +78,9 @@ class ShutdownSocketThread extends Thread {
                                        + ace.getMessage(), ace);
                     continue;
                 } catch (IOException e) {
+                    if (closing) {
+                        return;
+                    }
                     LOG.log(Level.SEVERE, "Karaf shutdown socket: accept: ", e);
                     System.exit(1);
                 }

@@ -89,6 +89,8 @@ public class Main {
     private Lock lock;
     private KarafLockCallback lockCallback;
     private boolean exiting;
+    private AutoCloseable shutdownThread;
+    private Thread monitorThread;
     
     /**
      * <p>
@@ -284,7 +286,7 @@ public class Main {
         if (config.delayConsoleStart) {
             new StartupListener(LOG, framework.getBundleContext());
         }
-        monitor();
+        monitorThread = monitor();
         registerSignalHandler();
         watchdog();
     }
@@ -359,8 +361,8 @@ public class Main {
         }
     }
 
-    private void monitor() {
-        new Thread("Karaf Lock Monitor Thread") {
+    private Thread monitor() {
+        Thread th = new Thread("Karaf Lock Monitor Thread") {
             public void run() {
                 try {
                     doMonitor();
@@ -368,7 +370,9 @@ public class Main {
                     e.printStackTrace();
                 }
             }
-        }.start();
+        };
+        th.start();
+        return th;
     }
 
     private void doMonitor() throws Exception {
@@ -387,10 +391,16 @@ public class Main {
                     if (!lock.isAlive() || exiting) {
                         break;
                     }
-                    Thread.sleep(config.lockDelay);
+                    try {
+                        Thread.sleep(config.lockDelay);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
                 }
                 if (!exiting) {
                     lockCallback.lockLost();
+                } else {
+                    lockCallback.stopShutdownThread();
                 }
             } else {
                 if (config.lockSlaveBlock) {
@@ -401,7 +411,11 @@ public class Main {
                     lockCallback.waitingForLock();
                 }
             }
-            Thread.sleep(config.lockDelay);
+            try {
+                Thread.sleep(config.lockDelay);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
         }
     }
 
@@ -623,7 +637,7 @@ public class Main {
                 while (framework.getState() != Bundle.STARTING && framework.getState() != Bundle.ACTIVE) {
                     Thread.sleep(10);
                 }
-                monitor();
+                monitorThread = monitor();
             } else {
                 return;
             }
@@ -667,10 +681,19 @@ public class Main {
                     return true;
                 }
             }
+
             return false;
         } finally {
             if (lock != null) {
                 exiting = true;
+                if (monitorThread != null) {
+                    try {
+                        monitorThread.interrupt();
+                        monitorThread.join();
+                    } finally {
+                        monitorThread = null;
+                    }
+                }
                 lock.release();
             }
         }
@@ -681,6 +704,7 @@ public class Main {
 
         @Override
         public void lockLost() {
+            stopShutdownThread();
             if (framework.getState() == Bundle.ACTIVE) {
                 LOG.warning("Lock lost. Setting startlevel to " + config.lockStartLevel);
                 synchronized (startLevelLock) {
@@ -699,10 +723,22 @@ public class Main {
             }
         }
 
+        public void stopShutdownThread() {
+            if (shutdownThread != null) {
+                try {
+                    shutdownThread.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    shutdownThread = null;
+                }
+            }
+        }
+
         @Override
         public void lockAquired() {
             LOG.info("Lock acquired. Setting startlevel to " + config.defaultStartLevel);
-            InstanceHelper.setupShutdown(config, framework);
+            shutdownThread = InstanceHelper.setupShutdown(config, framework);
             setStartLevel(config.defaultStartLevel);
         }
 

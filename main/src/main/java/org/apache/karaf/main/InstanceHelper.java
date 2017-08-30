@@ -134,7 +134,7 @@ public class InstanceHelper {
         }
     }
 
-    static void setupShutdown(ConfigProperties config, Framework framework) {
+    static AutoCloseable setupShutdown(ConfigProperties config, Framework framework) {
         writePid(config.pidFile);
         try {
             int port = config.shutdownPort;
@@ -153,13 +153,14 @@ public class InstanceHelper {
                     w.write(Integer.toString(port));
                     w.close();
                 }
-                Thread thread = new ShutdownSocketThread(shutdown, shutdownSocket, framework);
-                thread.setDaemon(true);
+                ShutdownSocketThread thread = new ShutdownSocketThread(shutdown, shutdownSocket, framework);
                 thread.start();
+                return thread;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
 }
