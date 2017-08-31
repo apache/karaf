@@ -24,9 +24,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,12 +49,14 @@ import org.apache.felix.service.command.Function;
 import org.apache.felix.service.command.Job;
 import org.apache.felix.service.command.Job.Status;
 import org.apache.felix.service.threadio.ThreadIO;
+import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.History;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.impl.action.command.ActionCommand;
 import org.apache.karaf.shell.impl.console.parsing.CommandLineParser;
 import org.apache.karaf.shell.impl.console.parsing.KarafParser;
 import org.apache.karaf.shell.support.ShellUtil;
@@ -65,10 +69,12 @@ import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.LineReaderCallback;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
+import org.jline.utils.AttributedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -408,6 +414,18 @@ public class ConsoleSessionImpl implements Session {
         CharSequence command = null;
         reading.set(true);
         try {
+            // TODO build list as Commands are registered/unregisters in org.apache.karaf.shell.impl.action.command.ManagerImpl for example
+            // instead of going through the whole list every time
+            List<ActionCommand> censoredCommands = this.getRegistry().getCommands().stream()
+                .filter(ActionCommand.class::isInstance)
+                .map(ActionCommand.class::cast)
+                .filter(e -> getCensoredArgument(e) != null)
+                .collect(Collectors.toList());
+            AggregateLineReaderCallback aggregateLineReaderCallback = new AggregateLineReaderCallback();
+            for (ActionCommand censoredOptionsCommand : censoredCommands) {
+                Argument censoredArgument = getCensoredArgument(censoredOptionsCommand);
+                aggregateLineReaderCallback.addArgumentMask(censoredOptionsCommand.getName(), censoredArgument.index() + 1, censoredArgument.mask());
+            }
             reader.readLine(getPrompt(), getRPrompt(), null, null);
             ParsedLine pl = reader.getParsedLine();
             if (pl instanceof ParsedLineImpl) {
@@ -425,6 +443,20 @@ public class ConsoleSessionImpl implements Session {
             reading.set(false);
         }
         return command;
+    }
+
+    private Argument getCensoredArgument(ActionCommand e) {
+        for (Class<?> type = e.getActionClass(); type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                Argument argument = field.getAnnotation(Argument.class);
+                if (argument != null) {
+                    if(argument.censor()) {
+                        return argument;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void doExecute(CharSequence command) {
@@ -613,5 +645,79 @@ public class ConsoleSessionImpl implements Session {
         String[] parts = name.split("@");
         return parts[0];
     }
+    
+    private class AggregateLineReaderCallback implements LineReaderCallback{
+        
+        List<RegExpReplacer> regex = new ArrayList<>();
+        
+        public void addArgumentMask(String command, int pos, Character mask){
+            regex.add(new RegExpReplacer(command, pos, mask));
+        }
+
+        @Override
+        public String onDisplayLine(String line) {
+            for (RegExpReplacer regExpReplacer : regex) {
+                if(regExpReplacer.matches(line)) {
+                    return regExpReplacer.filter(line); 
+                }
+            }
+            return line;
+        }
+
+        @Override
+        public String onAddLineToHistory(String line) {
+            for (RegExpReplacer regExpReplacer : regex) {
+                if(regExpReplacer.matches(line)) {
+                    return regExpReplacer.filter(line);
+                }
+            }
+            return line;
+        }
+
+        @Override
+        public String onHighlightLine(String line) {
+            for (RegExpReplacer regExpReplacer : regex) {
+                if(regExpReplacer.matches(line)) {
+                    return regExpReplacer.filter(line);
+                }
+            }
+            return line;
+        }
+    }
+
+    private static class RegExpReplacer {
+        private Pattern pattern;
+        private int group = 1;
+        private Character replacement;
+
+        public RegExpReplacer(String command, int group, Character replacement) {
+            StringBuilder regex = new StringBuilder();
+            regex.append(Pattern.quote(command));
+            for (int i = 0; i < group; i++) {
+                regex.append(" +([^ ]+)");
+            }
+            this.pattern = Pattern.compile(regex.toString());
+            this.group = group;
+            this.replacement = replacement;
+        }
+        
+        public String filter(String line) {
+            Matcher m = pattern.matcher(line);
+            if( m.find() ) {
+                StringBuilder maskedLine = new StringBuilder(line);
+                for(int i = m.start(group); i < m.end(group); i++){
+                    maskedLine.replace(i,i+1, String.valueOf(replacement));
+                }
+                return maskedLine.toString();
+            } else {
+                return line;
+            }
+        }
+        
+        public boolean matches(String line){
+            return pattern.matcher(line).find();
+        }
+}
+     
 
 }
