@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.gogo.jline.ParsedLineImpl;
 import org.apache.felix.gogo.jline.Shell;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandProcessor;
@@ -346,11 +347,11 @@ public class ConsoleSessionImpl implements Session {
             String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
             executeScript(scriptFileName);
             while (running) {
-                String command = readCommand(reading);
+                CharSequence command = readCommand(reading);
                 if (command == null) {
                     break;
                 }
-                execute(command);
+                doExecute(command);
             }
             close();
         } finally {
@@ -383,11 +384,17 @@ public class ConsoleSessionImpl implements Session {
         return isLocal != null && isLocal;
     }
 
-    private String readCommand(AtomicBoolean reading) throws UserInterruptException {
-        String command = null;
+    private CharSequence readCommand(AtomicBoolean reading) throws UserInterruptException {
+        CharSequence command = null;
         reading.set(true);
         try {
-            command = reader.readLine(getPrompt(), getRPrompt(), null, null);
+            reader.readLine(getPrompt(), getRPrompt(), null, null);
+            ParsedLine pl = reader.getParsedLine();
+            if (pl instanceof ParsedLineImpl) {
+                command = ((ParsedLineImpl) pl).program();
+            } else {
+                command = pl.line();
+            }
         } catch (EndOfFileException e) {
             command = null;
         } catch (UserInterruptException e) {
@@ -400,7 +407,7 @@ public class ConsoleSessionImpl implements Session {
         return command;
     }
 
-    private void execute(String command) {
+    private void doExecute(CharSequence command) {
         try {
             Object result = session.execute(command);
             if (result != null) {
