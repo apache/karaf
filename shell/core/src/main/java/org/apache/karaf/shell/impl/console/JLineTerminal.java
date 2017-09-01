@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -184,6 +185,8 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
 
     @Override
     public SignalHandler handle(Signal signal, SignalHandler handler) {
+        Objects.requireNonNull(signal);
+        Objects.requireNonNull(handler);
         return handlers.put(signal, handler);
     }
 
@@ -280,7 +283,7 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
 
     protected void handle(Signal signal) {
         SignalHandler handler = handlers.get(signal);
-        if (handler != null) {
+        if (handler != SignalHandler.SIG_DFL && handler != SignalHandler.SIG_IGN) {
             try {
                 handler.handle(signal);
             } catch (UnsupportedOperationException uoe) {
