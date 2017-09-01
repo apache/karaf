@@ -188,13 +188,13 @@ public abstract class MojoSupport extends AbstractMojo {
 
             return getLocalRepoUrl() + "/" + dir + name;
         }
-        if (System.getProperty("os.name").startsWith("Windows") && uri.startsWith("file:")) {
-                String baseDir = uri.substring(5).replace('\\', '/').replaceAll(" ", "%20");
-                String result = baseDir;
-                if (baseDir.indexOf(":") > 0) {
-                        result = "file:///" + baseDir;
-                }
-                return result;
+        uri = uri.replaceAll(" ", "%20");
+        if (uri.startsWith("file:") && File.separatorChar != '/') {
+            String baseDir = uri.substring(5).replace(File.separatorChar, '/');
+            if (baseDir.indexOf(':') >= 0) {
+                baseDir = "///" + baseDir;
+            }
+            return "file:" + baseDir;
         }
         return uri;
     }

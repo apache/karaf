@@ -122,7 +122,10 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         if (includeMvnBasedDescriptors) {
             bundles.add(uri);
         }
-        Features repo = JaxbUtil.unmarshal(descriptor.getFile().toURI().toString(), true);
+        String uriToUse = descriptor != null
+                ? descriptor.getFile().toURI().toString()
+                : translateFromMaven(uri);
+        Features repo = JaxbUtil.unmarshal(uriToUse, true);
         for (Feature f : repo.getFeature()) {
             featuresMap.put(f.getId(), f);
         }
