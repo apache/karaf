@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.gogo.jline.ParsedLineImpl;
 import org.apache.felix.gogo.jline.Shell;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandProcessor;
@@ -341,10 +342,16 @@ public class ConsoleSessionImpl implements Session {
             String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
             executeScript(scriptFileName);
             while (running) {
-                String command = null;
+                CharSequence command = null;
                 reading.set(true);
                 try {
-                    command = reader.readLine(getPrompt(), getRPrompt(), null, null);
+                    reader.readLine(getPrompt(), getRPrompt(), null, null);
+                    ParsedLine pl = reader.getParsedLine();
+                    if (pl instanceof ParsedLineImpl) {
+                        command = ((ParsedLineImpl) pl).program();
+                    } else {
+                        command = pl.line();
+                    }
                 } catch (EndOfFileException e) {
                     break;
                 } catch (UserInterruptException e) {
