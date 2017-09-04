@@ -117,15 +117,15 @@ public class RepositoryAddCommand extends RepositoryEditCommandSupport {
 
         StringBuilder sb = new StringBuilder();
         sb.append(urlResolved.val());
-        sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ID + "=" + id);
+        sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ID + "=").append(id);
         if (snapshots) {
             sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
         }
         if (noReleases) {
             sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_DISALLOW_RELEASES);
         }
-        sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_UPDATE + "=" + updatePolicy);
-        sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_CHECKSUM + "=" + checksumPolicy);
+        sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_UPDATE + "=").append(updatePolicy);
+        sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_CHECKSUM + "=").append(checksumPolicy);
 
         MavenRepositoryURL newRepository = new MavenRepositoryURL(sb.toString());
         List<MavenRepositoryURL> newRepos = new LinkedList<>(Arrays.asList(pidRepos));

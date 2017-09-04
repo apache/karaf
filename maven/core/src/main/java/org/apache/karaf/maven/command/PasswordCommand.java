@@ -93,7 +93,6 @@ public class PasswordCommand extends MavenConfigurationSupport {
                 config.put(prefix + PROPERTY_SECURITY_FILE, newSecuritySettingsFile.getCanonicalPath());
                 cmConfig.update(config);
             }
-            return;
         }
     }
 
