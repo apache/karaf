@@ -104,7 +104,11 @@ public class ShellTableTest {
                 "----------------------+---------------------------\n" +
                 "my first column value | my second column value is\n" +
                 "                      | quite long\n",
-                baos.toString());
+                getString(baos));
 
+    }
+
+    private String getString(ByteArrayOutputStream stream) {
+        return stream.toString().replace("\r\n", "\n");
     }
 }
