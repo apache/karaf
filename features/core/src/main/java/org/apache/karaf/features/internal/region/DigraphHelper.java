@@ -180,10 +180,10 @@ public final class DigraphHelper {
             for (RegionDigraph.FilteredRegion fr : digraph.getEdges(region)) {
                 Map<String, Set<String>> policy = new HashMap<>();
                 Map<String, Collection<String>> current = fr.getFilter().getSharingPolicy();
-                for (String ns : current.keySet()) {
-                    for (String f : current.get(ns)) {
-                        addToMapSet(policy, ns, f);
-                    }
+                for (Map.Entry<String, Collection<String>> entry : current.entrySet()) {
+                	for(String f : entry.getValue()) {
+                		 addToMapSet(policy, entry.getKey(), f);
+                	}
                 }
                 edges.put(fr.getRegion().getName(), policy);
             }
