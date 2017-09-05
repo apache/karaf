@@ -106,6 +106,7 @@ public class ConsoleSessionImpl implements Session {
     final LineReader reader;
 
     private Thread thread;
+    private Properties brandingProps;
 
     public ConsoleSessionImpl(SessionFactory factory,
                               CommandProcessor processor,
@@ -141,6 +142,8 @@ public class ConsoleSessionImpl implements Session {
                 throw new RuntimeException("Unable to create terminal", e);
             }
         }
+
+        brandingProps = Branding.loadBrandingProperties(terminal);
 
         // Create session
         session = processor.createSession(jlineTerminal.input(),
@@ -390,7 +393,6 @@ public class ConsoleSessionImpl implements Session {
      */
     private void welcomeBanner() {
         if (!isLocal() || System.getProperty(SUPPRESS_WELCOME) == null) {
-            Properties brandingProps = Branding.loadBrandingProperties(terminal);
             welcome(brandingProps);
             setSessionProperties(brandingProps);
             if (isLocal()) {
@@ -578,9 +580,8 @@ public class ConsoleSessionImpl implements Session {
                     if (p != null) {
                         prompt = p.toString();
                     } else {
-                        Properties properties = Branding.loadBrandingProperties(terminal);
-                        if (properties.getProperty(var) != null) {
-                            prompt = properties.getProperty(var);
+                        if (brandingProps.getProperty(var) != null) {
+                            prompt = brandingProps.getProperty(var);
                             // we put the PROMPT in ConsoleSession to avoid to read
                             // the properties file each time.
                             session.put(var, prompt);
