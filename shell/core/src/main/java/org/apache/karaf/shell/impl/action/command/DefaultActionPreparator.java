@@ -399,12 +399,15 @@ public class DefaultActionPreparator {
     }
 
     public Object getDefaultValue(Action action, Field field) {
-        try {
-            field.setAccessible(true);
-            return field.get(action);
-        } catch (Exception e) {
-            return null;
+        if (field != null) {
+            try {
+                field.setAccessible(true);
+                return field.get(action);
+            } catch (Exception e) {
+                return null;
+            }
         }
+        return null;
     }
 
     private String loadDescription(Class<?> clazz, String desc) {
