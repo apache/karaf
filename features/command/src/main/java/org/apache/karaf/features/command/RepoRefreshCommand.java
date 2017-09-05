@@ -19,7 +19,6 @@ package org.apache.karaf.features.command;
 import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.karaf.features.FeaturesService;
