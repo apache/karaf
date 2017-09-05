@@ -213,9 +213,7 @@ public class CommandsCompleter implements Completer {
         return index > 0 ? name.substring(index + 1) : name;
     }
 
-    @SuppressWarnings({
-        "unchecked", "deprecation"
-    })
+    @SuppressWarnings("unchecked")
     protected Map<String, Completer>[] checkData() {
         // Copy the set to avoid concurrent modification exceptions
         // TODO: fix that in gogo instead

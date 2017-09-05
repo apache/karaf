@@ -42,7 +42,6 @@ public class ObjectClassCompleter implements Completer {
         this.context = context;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         Map<String, Integer> serviceNamesMap = ListServices.getServiceNamesMap(context);

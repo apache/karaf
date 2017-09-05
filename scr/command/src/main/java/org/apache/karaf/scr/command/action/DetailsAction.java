@@ -48,7 +48,6 @@ public class DetailsAction extends ScrActionSupport {
     @Completion(DetailsCompleter.class)
     String name;
 
-    @SuppressWarnings("rawtypes")
 	@Override
     protected Object doScrAction(ServiceComponentRuntime serviceComponentRuntime) throws Exception {
         if (logger.isDebugEnabled()) {

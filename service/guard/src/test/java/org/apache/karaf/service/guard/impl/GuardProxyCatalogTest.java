@@ -1167,12 +1167,11 @@ public class GuardProxyCatalogTest {
         return proxyProps;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     public Object testCreateProxy(Class<?> [] objectClasses, Object testService) throws Exception {
         return testCreateProxy(mockConfigAdminBundleContext(), objectClasses, objectClasses, testService, new HashMap<>());
     }
 
-    @SuppressWarnings("rawtypes")
     public Object testCreateProxy(BundleContext bc, Class<?> [] objectClasses, Object testService) throws Exception {
         return testCreateProxy(bc, objectClasses, objectClasses, testService, new HashMap<>());
     }
