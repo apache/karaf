@@ -457,7 +457,6 @@ public abstract class MavenConfigurationSupport implements Action {
      * @param remote
      * @return
      */
-    @SuppressWarnings("unchecked")
     protected MavenRepositoryURL[] repositories(Dictionary<String, Object> config, boolean remote) throws Exception {
         String property = remote ? PID + "." + PROPERTY_REPOSITORIES : PID + "." + PROPERTY_DEFAULT_REPOSITORIES;
         String[] repositories = listOfValues((String) config.get(property));

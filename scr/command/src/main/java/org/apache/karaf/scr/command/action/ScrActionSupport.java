@@ -70,7 +70,6 @@ public abstract class ScrActionSupport implements Action {
         return arguments.contains(ScrActionSupport.SHOW_ALL_OPTION) || arguments.contains(ScrActionSupport.SHOW_ALL_ALIAS);
     }
 
-    @SuppressWarnings("rawtypes")
     public static boolean isHiddenComponent(ComponentConfigurationDTO config) {
         boolean answer = false;
         if (config.properties != null) {
