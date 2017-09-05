@@ -144,35 +144,35 @@ public class Activator extends BaseActivator implements ManagedService {
         registerMBean(securityMBean, "type=security,area=jmx");
 
         register(MBeanServer.class, mbeanServer);
-        
-        keystoreInstanceServiceTracker = new ServiceTracker<>(
-            bundleContext, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
+
+        if (secured) {
+            keystoreInstanceServiceTracker = new ServiceTracker<>(
+                    bundleContext, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
                 @Override
                 public KeystoreInstance addingService(ServiceReference<KeystoreInstance> reference) {
-                    if (secured) {
-                        try {
-                            connectorServerFactory.init();
-                        } catch (Exception e) {
-                            LOG.error("Can't re-init JMXConnectorServer with SSL enabled when register a keystore:" + e.getMessage());
-                        }
+                    try {
+                        connectorServerFactory.init();
+                    } catch (Exception e) {
+                        LOG.error("Can't re-init JMXConnectorServer with SSL enabled when register a keystore:" + e.getMessage());
                     }
                     return null;
                 }
+
                 @Override
                 public void modifiedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
                 }
+
                 @Override
                 public void removedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
-                    if (secured) {
-                        try {
-                            connectorServerFactory.init();
-                        } catch (Exception e) {
-                            LOG.error("Can't re-init JMXConnectorServer with SSL enabled when unregister a keystore: " + e.getMessage());
-                        }
+                    try {
+                        connectorServerFactory.init();
+                    } catch (Exception e) {
+                        LOG.error("Can't re-init JMXConnectorServer with SSL enabled when unregister a keystore: " + e.getMessage());
                     }
                 }
             });
-        keystoreInstanceServiceTracker.open();
+            keystoreInstanceServiceTracker.open();
+        }
     }
 
     protected void doStop() {
@@ -202,7 +202,11 @@ public class Activator extends BaseActivator implements ManagedService {
             rmiRegistryFactory = null;
         }
         if (keystoreInstanceServiceTracker != null) {
-            keystoreInstanceServiceTracker.close();
+            try {
+                keystoreInstanceServiceTracker.close();
+            } finally {
+                keystoreInstanceServiceTracker = null;
+            }
         }
     }
 
