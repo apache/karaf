@@ -19,14 +19,22 @@ package org.apache.karaf.management;
 import org.apache.karaf.jaas.config.KeystoreManager;
 import org.apache.karaf.management.internal.MBeanInvocationHandler;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.BindException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.SocketImplFactory;
+import java.nio.channels.ServerSocketChannel;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.security.GeneralSecurityException;
+import java.util.Enumeration;
 import java.util.Map;
 
 import javax.management.JMException;
@@ -38,6 +46,7 @@ import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
@@ -50,7 +59,7 @@ public class ConnectorServerFactory {
     private KarafMBeanServerGuard guard;
     private String serviceUrl;
     private String rmiServerHost;
-    private Map environment;
+    private Map<String, Object> environment;
     private ObjectName objectName;
     private boolean threaded = false;
     private boolean daemon = false;
@@ -98,11 +107,11 @@ public class ConnectorServerFactory {
         this.rmiServerHost = rmiServerHost;
     }
 
-    public Map getEnvironment() {
+    public Map<String, Object> getEnvironment() {
         return environment;
     }
 
-    public void setEnvironment(Map environment) {
+    public void setEnvironment(Map<String, Object> environment) {
         this.environment = environment;
     }
 
@@ -229,13 +238,14 @@ public class ConnectorServerFactory {
             throw new IllegalArgumentException("server must be set");
         }
         JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
-        setupKarafRMIServerSocketFactory();
         if ( isClientAuth() ) {
             this.secured = true;
         }
 
         if ( this.secured ) {
-            this.setupSsl();
+            setupSsl();
+        } else {
+            setupKarafRMIServerSocketFactory();
         }
 
         if ( ! AuthenticatorType.PASSWORD.equals( this.authenticatorType ) ) {
@@ -304,9 +314,8 @@ public class ConnectorServerFactory {
     }
 
     private void setupSsl() throws GeneralSecurityException {
-
         SSLServerSocketFactory sssf = keystoreManager.createSSLServerFactory(null, secureProtocol, algorithm, keyStore, keyAlias, trustStore,keyStoreAvailabilityTimeout);
-        RMIServerSocketFactory rssf = new KarafSslRMIServerSocketFactory(sssf, this.isClientAuth(), getRmiServerHost());
+        RMIServerSocketFactory rssf = new KarafSslRMIServerSocketFactory(sssf, isClientAuth(), getRmiServerHost());
         RMIClientSocketFactory rcsf = new SslRMIClientSocketFactory();
         environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rssf);
         environment.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rcsf);
@@ -315,8 +324,8 @@ public class ConnectorServerFactory {
     }
 
     private void setupKarafRMIServerSocketFactory() {
-        RMIServerSocketFactory rmiServerSocketFactory = new KarafRMIServerSocketFactory(getRmiServerHost());
-        environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rmiServerSocketFactory);
+        RMIServerSocketFactory rssf = new KarafRMIServerSocketFactory(getRmiServerHost());
+        environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rssf);
     }
 
     private static class KarafSslRMIServerSocketFactory implements RMIServerSocketFactory {
@@ -331,9 +340,16 @@ public class ConnectorServerFactory {
         }
 
         public ServerSocket createServerSocket(int port) throws IOException {
-            SSLServerSocket ss = (SSLServerSocket) sssf.createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
-            ss.setNeedClientAuth(clientAuth);
-            return ss;
+            InetAddress host = InetAddress.getByName(rmiServerHost);
+            if (host.isLoopbackAddress()) {
+                final SSLServerSocket ss = (SSLServerSocket) sssf.createServerSocket(port, 50);
+                ss.setNeedClientAuth(clientAuth);
+                return new LocalOnlySSLServerSocket(ss);
+            } else {
+                final SSLServerSocket ss = (SSLServerSocket) sssf.createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
+                ss.setNeedClientAuth(clientAuth);
+                return ss;
+            }
         }
     }
 
@@ -345,10 +361,307 @@ public class ConnectorServerFactory {
         }
 
         public ServerSocket createServerSocket(int port) throws IOException {
-            ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
-            return serverSocket;
+            InetAddress host = InetAddress.getByName(rmiServerHost);
+            if (host.isLoopbackAddress()) {
+                final ServerSocket ss = ServerSocketFactory.getDefault().createServerSocket(port, 50);
+                return new LocalOnlyServerSocket(ss);
+            } else {
+                final ServerSocket ss = ServerSocketFactory.getDefault().createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
+                return ss;
+            }
         }
     }
 
+    private static class LocalOnlyServerSocket extends ServerSocket {
+
+        private final ServerSocket ss;
+
+        public LocalOnlyServerSocket(ServerSocket ss) throws IOException {
+            this.ss = ss;
+        }
+
+        @Override
+        public void bind(SocketAddress endpoint) throws IOException {
+            ss.bind(endpoint);
+        }
+
+        @Override
+        public void bind(SocketAddress endpoint, int backlog) throws IOException {
+            ss.bind(endpoint, backlog);
+        }
+
+        @Override
+        public InetAddress getInetAddress() {
+            return ss.getInetAddress();
+        }
+
+        @Override
+        public int getLocalPort() {
+            return ss.getLocalPort();
+        }
+
+        @Override
+        public SocketAddress getLocalSocketAddress() {
+            return ss.getLocalSocketAddress();
+        }
+
+        @Override
+        public Socket accept() throws IOException {
+            return checkLocal(ss.accept());
+        }
+
+        @Override
+        public void close() throws IOException {
+            ss.close();
+        }
+
+        @Override
+        public ServerSocketChannel getChannel() {
+            return ss.getChannel();
+        }
+
+        @Override
+        public boolean isBound() {
+            return ss.isBound();
+        }
+
+        @Override
+        public boolean isClosed() {
+            return ss.isClosed();
+        }
+
+        @Override
+        public void setSoTimeout(int timeout) throws SocketException {
+            ss.setSoTimeout(timeout);
+        }
+
+        @Override
+        public int getSoTimeout() throws IOException {
+            return ss.getSoTimeout();
+        }
+
+        @Override
+        public void setReuseAddress(boolean on) throws SocketException {
+            ss.setReuseAddress(on);
+        }
+
+        @Override
+        public boolean getReuseAddress() throws SocketException {
+            return ss.getReuseAddress();
+        }
+
+        @Override
+        public String toString() {
+            return ss.toString();
+        }
+
+        @Override
+        public void setReceiveBufferSize(int size) throws SocketException {
+            ss.setReceiveBufferSize(size);
+        }
+
+        @Override
+        public int getReceiveBufferSize() throws SocketException {
+            return ss.getReceiveBufferSize();
+        }
+
+        @Override
+        public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
+            ss.setPerformancePreferences(connectionTime, latency, bandwidth);
+        }
+    }
+
+    private static class LocalOnlySSLServerSocket extends SSLServerSocket {
+
+        private final SSLServerSocket ss;
+
+        public LocalOnlySSLServerSocket(SSLServerSocket ss) throws IOException {
+            this.ss = ss;
+        }
+
+        @Override
+        public void bind(SocketAddress endpoint) throws IOException {
+            ss.bind(endpoint);
+        }
+
+        @Override
+        public void bind(SocketAddress endpoint, int backlog) throws IOException {
+            ss.bind(endpoint, backlog);
+        }
+
+        @Override
+        public InetAddress getInetAddress() {
+            return ss.getInetAddress();
+        }
+
+        @Override
+        public int getLocalPort() {
+            return ss.getLocalPort();
+        }
+
+        @Override
+        public SocketAddress getLocalSocketAddress() {
+            return ss.getLocalSocketAddress();
+        }
+
+        @Override
+        public Socket accept() throws IOException {
+            return checkLocal(ss.accept());
+        }
+
+        @Override
+        public void close() throws IOException {
+            ss.close();
+        }
+
+        @Override
+        public ServerSocketChannel getChannel() {
+            return ss.getChannel();
+        }
+
+        @Override
+        public boolean isBound() {
+            return ss.isBound();
+        }
+
+        @Override
+        public boolean isClosed() {
+            return ss.isClosed();
+        }
+
+        @Override
+        public void setSoTimeout(int timeout) throws SocketException {
+            ss.setSoTimeout(timeout);
+        }
+
+        @Override
+        public int getSoTimeout() throws IOException {
+            return ss.getSoTimeout();
+        }
+
+        @Override
+        public void setReuseAddress(boolean on) throws SocketException {
+            ss.setReuseAddress(on);
+        }
+
+        @Override
+        public boolean getReuseAddress() throws SocketException {
+            return ss.getReuseAddress();
+        }
+
+        @Override
+        public String toString() {
+            return ss.toString();
+        }
+
+        @Override
+        public void setReceiveBufferSize(int size) throws SocketException {
+            ss.setReceiveBufferSize(size);
+        }
+
+        @Override
+        public int getReceiveBufferSize() throws SocketException {
+            return ss.getReceiveBufferSize();
+        }
+
+        @Override
+        public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
+            ss.setPerformancePreferences(connectionTime, latency, bandwidth);
+        }
+        public String[] getEnabledCipherSuites() {
+            return ss.getEnabledCipherSuites();
+        }
+
+        public void setEnabledCipherSuites(String[] strings) {
+            ss.setEnabledCipherSuites(strings);
+        }
+
+        public String[] getSupportedCipherSuites() {
+            return ss.getSupportedCipherSuites();
+        }
+
+        public String[] getSupportedProtocols() {
+            return ss.getSupportedProtocols();
+        }
+
+        public String[] getEnabledProtocols() {
+            return ss.getEnabledProtocols();
+        }
+
+        public void setEnabledProtocols(String[] strings) {
+            ss.setEnabledProtocols(strings);
+        }
+
+        public void setNeedClientAuth(boolean b) {
+            ss.setNeedClientAuth(b);
+        }
+
+        public boolean getNeedClientAuth() {
+            return ss.getNeedClientAuth();
+        }
+
+        public void setWantClientAuth(boolean b) {
+            ss.setWantClientAuth(b);
+        }
+
+        public boolean getWantClientAuth() {
+            return ss.getWantClientAuth();
+        }
+
+        public void setUseClientMode(boolean b) {
+            ss.setUseClientMode(b);
+        }
+
+        public boolean getUseClientMode() {
+            return ss.getUseClientMode();
+        }
+
+        public void setEnableSessionCreation(boolean b) {
+            ss.setEnableSessionCreation(b);
+        }
+
+        public boolean getEnableSessionCreation() {
+            return ss.getEnableSessionCreation();
+        }
+
+        public SSLParameters getSSLParameters() {
+            return ss.getSSLParameters();
+        }
+
+        public void setSSLParameters(SSLParameters sslParameters) {
+            ss.setSSLParameters(sslParameters);
+        }
+    }
+
+    private static Socket checkLocal(Socket socket) throws IOException {
+        InetAddress addr = socket.getInetAddress();
+        if (addr != null) {
+            if (addr.isLoopbackAddress()) {
+                return socket;
+            } else {
+                try {
+                    Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+                    while (nis.hasMoreElements()) {
+                        NetworkInterface ni = nis.nextElement();
+                        Enumeration<InetAddress> ads = ni.getInetAddresses();
+                        while (ads.hasMoreElements()) {
+                            InetAddress ad = ads.nextElement();
+                            if (ad.equals(addr)) {
+                                return socket;
+                            }
+                        }
+                    }
+                } catch (SocketException e) {
+                    // Ignore
+                }
+            }
+        }
+        try {
+            socket.close();
+        } catch (Exception e) {
+            // Ignore
+        }
+        throw new IOException("Only connections from clients running on the host where the RMI remote objects have been exported are accepted.");
+    }
 
 }
