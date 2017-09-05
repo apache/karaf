@@ -19,7 +19,6 @@ package org.apache.karaf.management;
 import org.apache.karaf.jaas.config.KeystoreManager;
 import org.apache.karaf.management.internal.MBeanInvocationHandler;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.BindException;
@@ -29,7 +28,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.SocketImplFactory;
 import java.nio.channels.ServerSocketChannel;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;

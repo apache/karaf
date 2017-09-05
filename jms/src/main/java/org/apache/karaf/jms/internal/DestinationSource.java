@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.jms.internal;
 
-import javax.jms.Connection;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
 import java.util.List;
 
 interface DestinationSource {

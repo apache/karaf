@@ -17,15 +17,8 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
-import org.apache.karaf.features.command.completers.InstalledRepoNameCompleter;
 import org.apache.karaf.features.command.completers.InstalledRepoUriCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
