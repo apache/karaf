@@ -41,7 +41,6 @@ public class AggregateCompleter implements Completer
         this.completers = completers;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         List<Candidate> cands = new ArrayList<>();
         completeCandidates(session, commandLine, cands);
