@@ -65,7 +65,7 @@ public class SshServerAction implements Action
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(idleTimeout));
         
         // nio-workes
-        server.getProperties().put(SshServer.NIO_WORKERS, new Integer(nioWorkers).toString());
+        server.getProperties().put(SshServer.NIO_WORKERS, Integer.toString(nioWorkers));
         
         // welcome banner
         if (welcomeBanner != null) {

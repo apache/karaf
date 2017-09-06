@@ -1025,7 +1025,7 @@ public class Terminal {
         String prefix = "";
         if (p.length() > 0) {
             if (p.charAt(0) >= '<' && p.charAt(0) <= '?') {
-                prefix = "" + p.charAt(0);
+                prefix = Character.toString(p.charAt(0));
                 p = p.substring(1);
             }
         }
@@ -1710,14 +1710,14 @@ public class Terminal {
                 vt100_keyfilter_escape = true;
             } else if (c == 127) {
                 if (vt100_mode_backspace) {
-                    o += (char) 8;
+                    o += Integer.toString(8);
                 } else {
-                    o += (char) 127;
+                    o += Integer.toString(127);
                 }
             } else {
-                o += c;
+                o += Integer.toString(c);
                 if (vt100_mode_lfnewline && c == 13) {
-                    o += (char) 10;
+                    o += Integer.toString(10);
                 }
             }
         }
