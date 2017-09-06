@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
@@ -79,7 +80,7 @@ public class HeadlessSessionImpl implements Session {
             session.put("USER", ShellUtil.getCurrentUserName());
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         }
-        session.currentDir(null);
+        session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
     }
 
     public CommandSession getSession() {
