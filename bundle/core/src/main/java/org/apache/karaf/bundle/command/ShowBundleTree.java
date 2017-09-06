@@ -139,15 +139,16 @@ public class ShowBundleTree extends BundleCommand {
                 }
             }
         }
-
-        for (String pkg : exports.keySet()) {
-            if (exports.get(pkg).size() > 1) {
-                System.out.printf("%n");
-                System.out.printf("WARNING: multiple bundles are exporting package %s%n", pkg);
-                for (Bundle bundle : exports.get(pkg)) {
+        
+        for(Map.Entry<String, Set<Bundle>> entry : exports.entrySet()) {
+        	Set<Bundle> bundlesExportingPkg = entry.getValue();
+        	if(bundlesExportingPkg.size() > 1) {
+        		System.out.printf("%n");
+                System.out.printf("WARNING: multiple bundles are exporting package %s%n", entry.getKey());
+                for (Bundle bundle : bundlesExportingPkg) {
                     System.out.printf("- %s%n", bundle);
                 }
-            }
+        	}
         }
     }
 

@@ -41,8 +41,7 @@ public class ListCommand extends ConfigCommandSupport {
             for (Configuration config : configs) {
                 sortedConfigs.put(config.getPid(), config);
             }
-            for (String pid : sortedConfigs.keySet()) {
-                Configuration config = sortedConfigs.get(pid);
+            for (Configuration config : sortedConfigs.values()) {
                 System.out.println("----------------------------------------------------------------");
                 System.out.println("Pid:            " + config.getPid());
                 if (config.getFactoryPid() != null) {
@@ -57,8 +56,8 @@ public class ListCommand extends ConfigCommandSupport {
                         Object key = e.nextElement();
                         sortedProps.put(key.toString(), props.get(key));
                     }
-                    for (String key : sortedProps.keySet()) {
-                        System.out.println("   " + key + " = " + displayValue(sortedProps.get(key)));
+                    for (Map.Entry<String, Object> entry : sortedProps.entrySet()) {
+                        System.out.println("   " + entry.getKey() + " = " + displayValue(entry.getValue()));
                     }
                 }
             }
