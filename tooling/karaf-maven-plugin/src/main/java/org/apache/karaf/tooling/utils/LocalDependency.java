@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.tooling.utils;
 
+import java.util.Objects;
+
 public class LocalDependency {
 	private String scope;
 	private Object artifact;
@@ -38,14 +40,19 @@ public class LocalDependency {
 	public Object getParent() {
 		return parent;
 	}
-	
+
 	@Override
-	public int hashCode() {
-		return artifact.hashCode();
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		LocalDependency that = (LocalDependency) o;
+		return Objects.equals(scope, that.scope) &&
+				Objects.equals(artifact, that.artifact) &&
+				Objects.equals(parent, that.parent);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return artifact.equals(obj);
+	public int hashCode() {
+		return Objects.hash(scope, artifact, parent);
 	}
 }

@@ -72,7 +72,7 @@ public class Dependency31Helper implements DependencyHelper {
     private final List<RemoteRepository> projectRepositories;
 
     // dependencies we are interested in
-    protected Set<LocalDependency> localDependencies;
+    protected Map<Artifact, LocalDependency> localDependencies;
     // log of what happened during search
     protected String treeListing;
 
@@ -92,8 +92,8 @@ public class Dependency31Helper implements DependencyHelper {
 	}
 
     @Override
-    public Set<LocalDependency> getLocalDependencies() {
-        return localDependencies;
+    public Collection<LocalDependency> getLocalDependencies() {
+        return localDependencies.values();
     }
 
     @Override
@@ -203,7 +203,7 @@ public class Dependency31Helper implements DependencyHelper {
         }
 
         // all the dependencies needed, with provided dependencies removed
-        private final Set<LocalDependency> localDependencies = new LinkedHashSet<>();
+        private final Map<Artifact, LocalDependency> localDependencies = new LinkedHashMap<>();
 
         // dependencies from ancestor, to be removed from localDependencies
         private final Set<Artifact> dependencies = new LinkedHashSet<>();
@@ -215,7 +215,7 @@ public class Dependency31Helper implements DependencyHelper {
                 scan(rootNode, child, Accept.ACCEPT, useTransitiveDependencies, false, "");
             }
             if (useTransitiveDependencies) {
-                localDependencies.removeAll(dependencies);
+                localDependencies.keySet().removeAll(dependencies);
             }
         }
 
@@ -231,12 +231,13 @@ public class Dependency31Helper implements DependencyHelper {
                     }
                 } else {
                     log.append(indent).append("local:").append(dependencyNode).append("\n");
-                    if (localDependencies.contains(dependencyNode.getDependency().getArtifact())) {
+                    if (localDependencies.keySet().contains(dependencyNode.getDependency().getArtifact())) {
                         log.append(indent).append("already in feature, returning:").append(dependencyNode).append("\n");
                         return;
                     }
                     // TODO resolve scope conflicts
-                    localDependencies.add(new LocalDependency(dependencyNode.getDependency().getScope(), dependencyNode.getDependency().getArtifact(), parentNode.getDependency().getArtifact()));
+                    localDependencies.put(dependencyNode.getDependency().getArtifact(),
+                            new LocalDependency(dependencyNode.getDependency().getScope(), dependencyNode.getDependency().getArtifact(), parentNode.getDependency().getArtifact()));
                     if (isFeature(dependencyNode) || !useTransitiveDependencies) {
                         isFromFeature = true;
                     }
