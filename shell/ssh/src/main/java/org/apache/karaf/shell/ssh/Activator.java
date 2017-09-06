@@ -142,6 +142,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String sshHost        = getString("sshHost", "0.0.0.0");
         long sshIdleTimeout   = getLong("sshIdleTimeout", 1800000);
         String sshRealm       = getString("sshRealm", "karaf");
+        String sshRole        = getString("sshRole", null);
         String hostKey        = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
         String hostKeyFormat  = getString("hostKeyFormat", "simple");
         String authMethods    = getString("authMethods", "keyboard-interactive,password,publickey");
@@ -172,7 +173,7 @@ public class Activator extends BaseActivator implements ManagedService {
             keyPairProvider.setAlgorithm(algorithm);
         }
 
-        KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator(sshRealm);
+        KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator(sshRealm, sshRole);
 
         UserAuthFactoriesFactory authFactoriesFactory = new UserAuthFactoriesFactory();
         authFactoriesFactory.setAuthMethods(authMethods);

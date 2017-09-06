@@ -46,12 +46,14 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
     private final Logger LOGGER = LoggerFactory.getLogger(KarafJaasAuthenticator.class);
 
     private String realm;
+    private String role;
 
     public KarafJaasAuthenticator() {
     }
 
-    public KarafJaasAuthenticator(String realm) {
+    public KarafJaasAuthenticator(String realm, String role) {
         this.realm = realm;
+        this.role = role;
     }
 
     public String getRealm() {
@@ -117,15 +119,22 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
             });
             loginContext.login();
 
+            boolean hasCorrectRole = role == null || role.isEmpty();
             int roleCount = 0;
             for (Principal principal : subject.getPrincipals()) {
                 if (principal instanceof RolePrincipal) {
+                    if (!hasCorrectRole) {
+                        hasCorrectRole = role.equals(principal.getName());
+                    }
                     roleCount++;
                 }
             }
 
             if (roleCount == 0) {
                 throw new FailedLoginException("User doesn't have role defined");
+            }
+            if (!hasCorrectRole) {
+                throw new FailedLoginException("User doesn't have the required role " + role);
             }
 
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
