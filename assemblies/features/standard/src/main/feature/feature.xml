@@ -165,6 +165,11 @@
             sshRealm = karaf
 
             #
+            # sshRole defines the role required to access the console through ssh
+            #
+            sshRole = ssh
+
+            #
             # The location of the hostKey file defines where the private/public key of the server
             # is located. If no file is at the defined location it will be ignored.
             #
