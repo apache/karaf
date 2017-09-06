@@ -32,9 +32,6 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     @Completion(ConfigurationCompleter.class)
     protected String pid;
 
-    @SuppressWarnings({
-     "rawtypes", "unchecked"
-    })
     protected Object doExecute() throws Exception {
         Dictionary<String, Object> props = getEditedProps();
         if (props == null && pid == null) {
@@ -76,7 +73,6 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      * @return the edited dictionary.
      * @throws Exception in case of configuration failure.
      */
-    @SuppressWarnings("rawtypes")
     @Override
     protected Dictionary<String, Object> getEditedProps() throws Exception {
         Dictionary<String, Object> props = this.configRepository.getConfigProperties(pid);

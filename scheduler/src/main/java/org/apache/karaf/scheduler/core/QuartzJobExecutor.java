@@ -45,7 +45,6 @@ public class QuartzJobExecutor implements Job {
         try {
             logger.debug("Executing job {} with name {}", job, data.get(QuartzScheduler.DATA_MAP_NAME));
             if (job instanceof org.apache.karaf.scheduler.Job) {
-                @SuppressWarnings("unchecked")
                 final InternalScheduleOptions options = (InternalScheduleOptions) data.get(QuartzScheduler.DATA_MAP_OPTIONS);
                 final String name = (String) data.get(QuartzScheduler.DATA_MAP_NAME);
 

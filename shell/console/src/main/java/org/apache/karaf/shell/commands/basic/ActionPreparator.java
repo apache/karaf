@@ -38,6 +38,6 @@ public interface ActionPreparator {
      * @return True if the action preparation succeed, false else.
      * @throws Exception In case of preparation failure.
      */
-    boolean prepare(@SuppressWarnings("deprecation") Action action, CommandSession session, List<Object> arguments) throws Exception;
+    boolean prepare(Action action, CommandSession session, List<Object> arguments) throws Exception;
 
 }

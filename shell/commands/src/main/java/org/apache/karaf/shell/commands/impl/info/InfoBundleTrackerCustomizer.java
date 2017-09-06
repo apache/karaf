@@ -41,7 +41,6 @@ public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer<Serv
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public ServiceRegistration<InfoProvider> addingBundle(Bundle bundle, BundleEvent event) {
         Dictionary headers = bundle.getHeaders();
         String headerEntry = (String) headers.get("Karaf-Info");
