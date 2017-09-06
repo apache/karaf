@@ -22,12 +22,9 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.regex.Pattern;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import shaded.org.apache.commons.io.FileUtils;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class MavenConfigurationSupportTest {
