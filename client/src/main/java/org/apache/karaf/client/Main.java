@@ -46,7 +46,6 @@ import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.auth.keyboard.UserInteraction;
 import org.apache.sshd.client.channel.ChannelExec;
 import org.apache.sshd.client.channel.ChannelShell;
-import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.channel.PtyCapableChannelSession;
 import org.apache.sshd.client.future.ConnectFuture;
