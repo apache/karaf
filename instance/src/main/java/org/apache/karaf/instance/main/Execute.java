@@ -163,7 +163,7 @@ public class Execute {
         if (exitAllowed) {
             System.exit(rc);
         } else {
-            throw new RuntimeException("" + rc);
+            throw new RuntimeException(Integer.toString(rc));
         }
     }
 
