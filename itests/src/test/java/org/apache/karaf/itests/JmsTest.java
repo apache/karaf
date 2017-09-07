@@ -51,6 +51,7 @@ public class JmsTest extends KarafTestSupport {
     private static final String JMX_QUEUE_NAME = "queueMBean";
     private MBeanServer mbeanServer;
     private ObjectName objName;
+    private String activemqVersion;
 
     @Configuration
     public Option[] config() {
@@ -68,6 +69,7 @@ public class JmsTest extends KarafTestSupport {
         await("ActiveMQ transport up").atMost(30, SECONDS).until(this::jmsTransportPresent);
         mbeanServer = ManagementFactory.getPlatformMBeanServer();
         objName = new ObjectName("org.apache.karaf:type=jms,name=root");
+        activemqVersion = System.getProperty("activemq.version");
     }
 
     @Test(timeout = 60000)
@@ -76,7 +78,7 @@ public class JmsTest extends KarafTestSupport {
         waitForConnectionFactory("name=test");
 
         assertThat(execute("jms:connectionfactories"), containsString("jms/test"));
-        assertThat(execute("jms:info test"), both(containsString("ActiveMQ")).and(containsString("5.14.4")));
+        assertThat(execute("jms:info test"), both(containsString("ActiveMQ")).and(containsString(activemqVersion)));
 
         execute("jms:send test queue message");
         assertThat(execute("jms:count test queue"), containsString("1"));

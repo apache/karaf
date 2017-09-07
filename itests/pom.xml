@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-karaf</artifactId>
-            <version>5.14.4</version>
+            <version>${activemq.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
             <exclusions>
@@ -266,6 +266,7 @@
                         <spring41.version>${spring41.version}</spring41.version>
                         <spring42.version>${spring42.version}</spring42.version>
                         <spring43.version>${spring43.version}</spring43.version>
+                        <activemq.version>${activemq.version}</activemq.version>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -312,6 +313,7 @@
                                 <spring32.version>${spring32.version}</spring32.version>
                                 <spring40.version>${spring40.version}</spring40.version>
                                 <spring41.version>${spring41.version}</spring41.version>
+                                <activemq.version>${activemq.version}</activemq.version>
                     		</systemPropertyVariables>
                         </configuration>
                     </plugin>

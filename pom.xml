@@ -138,6 +138,7 @@
     </prerequisites>
 
     <properties>
+        <activemq.version>5.15.0</activemq.version>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <aspectj.bundle.version>1.7.4_1</aspectj.bundle.version>
         <ant.bundle.version>1.9.7_1</ant.bundle.version>
