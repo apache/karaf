@@ -52,8 +52,10 @@ public class SshCommandTestBase extends KarafTestSupport {
                 + ";jaas:user-add " + manageruser + " " + manageruser
                 + ";jaas:role-add " + manageruser + " manager"
                 + ";jaas:role-add " + manageruser + " viewer"
+                + ";jaas:role-add " + manageruser + " ssh"
                 + ";jaas:user-add " + vieweruser + " " + vieweruser
                 + ";jaas:role-add " + vieweruser + " viewer"
+                + ";jaas:role-add " + vieweruser + " ssh"
                 + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
         pipe.flush();
         closeSshChannel(pipe);
@@ -66,6 +68,7 @@ public class SshCommandTestBase extends KarafTestSupport {
         pipe.write(("jaas:realm-manage --realm=karaf"
                 + ";jaas:user-add " + vieweruser + " " + vieweruser
                 + ";jaas:role-add " + vieweruser + " viewer"
+                + ";jaas:role-add " + vieweruser + " ssh"
                 + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
         pipe.flush();
         closeSshChannel(pipe);
