@@ -29,7 +29,7 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "feature", name = "stop", description = "Start features with the specified name and version.")
+@Command(scope = "feature", name = "stop", description = "Stop features with the specified name and version.")
 @Service
 public class StopFeaturesCommand extends FeaturesCommandSupport {
 
