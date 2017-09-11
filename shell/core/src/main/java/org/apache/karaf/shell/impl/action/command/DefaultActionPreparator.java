@@ -283,6 +283,16 @@ public class DefaultActionPreparator {
                 public Class<? extends Annotation> annotationType() {
                     return delegate.annotationType();
                 }
+
+                @Override
+                public boolean censor() {
+                    return delegate.censor();
+                }
+
+                @Override
+                public char mask() {
+                    return delegate.mask();
+                }
             };
         }
         return argument;

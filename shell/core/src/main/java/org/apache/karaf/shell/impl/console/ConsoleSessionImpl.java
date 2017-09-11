@@ -27,6 +27,8 @@ import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,8 @@ import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
+import org.apache.karaf.shell.impl.action.command.ActionCommand;
+import org.apache.karaf.shell.impl.action.command.ActionMaskingCallback;
 import org.apache.karaf.shell.impl.console.parsing.CommandLineParser;
 import org.apache.karaf.shell.impl.console.parsing.KarafParser;
 import org.apache.karaf.shell.support.ShellUtil;
@@ -105,6 +109,7 @@ public class ConsoleSessionImpl implements Session {
     final org.jline.terminal.Terminal jlineTerminal;
     final History history;
     final LineReader reader;
+    final AggregateMaskingCallback maskingCallback;
 
     private Thread thread;
     private Properties brandingProps;
@@ -158,6 +163,9 @@ public class ConsoleSessionImpl implements Session {
             builtinCompleter.complete(rdr, line, candidates);
             commandsCompleter.complete(rdr, line, candidates);
         };
+
+        // Masking
+        maskingCallback = new AggregateMaskingCallback();
 
         // Console reader
         reader = LineReaderBuilder.builder()
@@ -411,7 +419,7 @@ public class ConsoleSessionImpl implements Session {
         CharSequence command = null;
         reading.set(true);
         try {
-            reader.readLine(getPrompt(), getRPrompt(), (MaskingCallback) null, null);
+            reader.readLine(getPrompt(), getRPrompt(), maskingCallback, null);
             ParsedLine pl = reader.getParsedLine();
             if (pl instanceof ParsedLineImpl) {
                 command = ((ParsedLineImpl) pl).program();
@@ -614,6 +622,56 @@ public class ConsoleSessionImpl implements Session {
         String name = ManagementFactory.getRuntimeMXBean().getName();
         String[] parts = name.split("@");
         return parts[0];
+    }
+
+    private class AggregateMaskingCallback implements MaskingCallback {
+
+        private final List<Command> commands = new ArrayList<>();
+        private final Map<String, ActionMaskingCallback> regexs = new HashMap<>();
+
+        @Override
+        public String display(String line) {
+            return compute(line);
+        }
+
+        @Override
+        public String history(String line) {
+            return compute(line);
+        }
+
+        private String compute(String line) {
+            Collection<Command> commands;
+            boolean update;
+            synchronized (this) {
+                commands = factory.getRegistry().getCommands();
+                update = !commands.equals(this.commands);
+            }
+            if (update) {
+                Map<String, ActionMaskingCallback> regexs = new HashMap<>();
+                for (Command cmd : commands) {
+                    if (cmd instanceof ActionCommand) {
+                        ActionMaskingCallback amc = ActionMaskingCallback.build((ActionCommand) cmd);
+                        if (amc != null) {
+                            regexs.put(cmd.getScope() + ":" + cmd.getName(), amc);
+                        }
+                    }
+                }
+                synchronized (this) {
+                    this.commands.clear();
+                    this.regexs.clear();
+                    this.commands.addAll(commands);
+                    this.regexs.putAll(regexs);
+                }
+            }
+            ParsedLine pl = reader.getParser().parse(line, line.length());
+            String cmd = resolveCommand(pl.words().get(0));
+            ActionMaskingCallback repl = regexs.get(cmd);
+            if (repl != null) {
+                line = repl.filter(line, pl);
+            }
+            return line;
+        }
+
     }
 
 }
