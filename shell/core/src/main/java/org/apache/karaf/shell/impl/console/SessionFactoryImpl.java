@@ -72,7 +72,7 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         }
 
         Posix posix = new Posix(commandProcessor);
-        for (String name : new String[]{"cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "watch", "nano", "head", "tail", "clear", "wc", "date", "tmux", "ttop"}) {
+        for (String name : new String[]{"cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "nano", "head", "tail", "clear", "wc", "date", "tmux", "ttop"}) {
             register(new ShellCommand(name, null, posix, name));
         }
     }
