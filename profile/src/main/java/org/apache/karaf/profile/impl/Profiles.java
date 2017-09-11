@@ -153,6 +153,7 @@ public final class Profiles {
         assertNotNull(profile, "resolvers is null");
 
         final Map<String, TypedProperties> originals = new HashMap<>();
+        final Map<String, TypedProperties> originals2 = new HashMap<>();
         for (Map.Entry<String, byte[]> entry : profile.getFileConfigurations().entrySet()) {
             if (entry.getKey().endsWith(Profile.PROPERTIES_SUFFIX)) {
                 try {
@@ -160,6 +161,9 @@ public final class Profiles {
                     TypedProperties props = new TypedProperties(false);
                     props.load(new ByteArrayInputStream(entry.getValue()));
                     originals.put(key, props);
+                    props = new TypedProperties(false);
+                    props.load(new ByteArrayInputStream(entry.getValue()));
+                    originals2.put(key, props);
                 } catch (IOException e) {
                     throw new IllegalArgumentException("Can not load properties for " + entry.getKey());
                 }
@@ -194,9 +198,11 @@ public final class Profiles {
 
          // Force computation while preserving layout
         ProfileBuilder builder = ProfileBuilder.Factory.createFrom(profile);
-        for (Map.Entry<String, TypedProperties> cfg : originals.entrySet()) {
-            TypedProperties original = cfg.getValue();
-            builder.addFileConfiguration(cfg.getKey() + Profile.PROPERTIES_SUFFIX, Utils.toBytes(original));
+        for (String cfg : originals.keySet()) {
+            TypedProperties original = originals.get(cfg);
+            TypedProperties original2 = originals2.get(cfg);
+            original2.putAll(original);
+            builder.addFileConfiguration(cfg + Profile.PROPERTIES_SUFFIX, Utils.toBytes(original2));
         }
         // Compute the new profile
         return builder.getProfile();

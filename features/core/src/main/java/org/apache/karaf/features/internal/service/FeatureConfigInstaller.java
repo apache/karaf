@@ -290,15 +290,14 @@ public class FeatureConfigInstaller {
         for (String key : props.keySet()) {
             if (!isInternalKey(key)) {
                 List<String> comments = props.getComments(key);
-                List<String> value = props.getRaw(key);
-                Object writeValue = (value.size() == 1) ? value.get(0) : value;
+                Object value = props.get(key);
                 if (!properties.containsKey(key)) {
-                    properties.put(key, comments, writeValue);
+                    properties.put(key, comments, value);
                 } else if (!append) {
                     if (comments.isEmpty()) {
                         comments = properties.getComments(key);
                     }
-                    properties.put(key, comments, writeValue);
+                    properties.put(key, comments, value);
                 }
             }
         }
