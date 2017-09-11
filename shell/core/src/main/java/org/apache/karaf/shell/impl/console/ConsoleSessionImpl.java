@@ -64,6 +64,7 @@ import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.MaskingCallback;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal.Signal;
@@ -345,7 +346,7 @@ public class ConsoleSessionImpl implements Session {
                 CharSequence command = null;
                 reading.set(true);
                 try {
-                    reader.readLine(getPrompt(), getRPrompt(), null, null);
+                    reader.readLine(getPrompt(), getRPrompt(), (MaskingCallback) null, null);
                     ParsedLine pl = reader.getParsedLine();
                     if (pl instanceof ParsedLineImpl) {
                         command = ((ParsedLineImpl) pl).program();
