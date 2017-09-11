@@ -16,12 +16,14 @@
  */
 package org.apache.karaf.scheduler.command.support;
 
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
 
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.JobContext;
 import org.apache.karaf.shell.api.console.Function;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,18 +31,20 @@ public class ScriptJob implements Job {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScriptJob.class);
 
+    private final SessionFactory sessionFactory;
     private final Session session;
     private final Function script;
 
-    public ScriptJob(Session session, Function script) {
+    public ScriptJob(SessionFactory sessionFactory, Session session, Function script) {
+        this.sessionFactory = sessionFactory;
         this.session = session;
         this.script = script;
     }
 
     @Override
     public void execute(JobContext context) {
-        try {
-            script.execute(session, Collections.singletonList(context));
+        try (Session s = sessionFactory.create(new ByteArrayInputStream(new byte[0]), session.getConsole(), session.getConsole(), session)) {
+            script.execute(s, Collections.singletonList(context));
         } catch (Exception e) {
             LOGGER.warn("Error executing script", e);
         }
