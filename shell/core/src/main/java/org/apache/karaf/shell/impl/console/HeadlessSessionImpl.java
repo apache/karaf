@@ -72,6 +72,7 @@ public class HeadlessSessionImpl implements Session {
                 session.put(key.toString(), sysProps.get(key));
             }
         }
+        session.put(".processor", processor);
         session.put(".session", this);
         session.put(".commandSession", session);
         if (parent == null) {

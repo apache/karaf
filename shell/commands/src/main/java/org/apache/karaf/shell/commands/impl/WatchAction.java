@@ -18,8 +18,10 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +42,15 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.commands.impl.WatchAction.WatchParser;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.shell.support.completers.CommandsCompleter;
 import org.apache.karaf.shell.support.parsing.CommandLineImpl;
 import org.apache.karaf.shell.support.parsing.DefaultParser;
+import org.jline.terminal.Attributes;
+import org.jline.terminal.Terminal;
+import org.jline.utils.NonBlockingReader;
 
 @Command(scope = "shell", name = "watch", description = "Watches & refreshes the output of a command")
 @Parsing(WatchParser.class)
@@ -69,78 +75,79 @@ public class WatchAction implements Action {
 
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
+    private boolean abort;
+    private Thread reading;
+    private Thread executing;
+
     @Override
     public Object execute() throws Exception {
         if (arguments == null || arguments.length() == 0) {
             System.err.println("Argument expected");
         } else {
-            WatchTask watchTask = new WatchTask(arguments.trim());
+            WatchTask watchTask = new WatchTask();
             executorService.scheduleAtFixedRate(watchTask, 0, interval, TimeUnit.SECONDS);
             try {
-                session.getKeyboard().read();
-                watchTask.abort();
+                Terminal terminal = (Terminal) session.get(".jline.terminal");
+                Terminal.SignalHandler prev = terminal.handle(Terminal.Signal.INT, this::abort);
+                Attributes attr = terminal.enterRawMode();
+                try {
+                    reading = Thread.currentThread();
+                    while (terminal.reader().read(1) == NonBlockingReader.READ_EXPIRED);
+                } finally {
+                    reading = null;
+                    terminal.setAttributes(attr);
+                    terminal.handle(Terminal.Signal.INT, prev);
+                }
+            } catch (InterruptedIOException e) {
+                // Ignore
             } finally {
+                abort = true;
                 executorService.shutdownNow();
-                watchTask.close();
             }
         }
         return null;
     }
 
-    public class WatchTask implements Runnable {
-
-        private final String command;
-
-        Session session;
-        ByteArrayOutputStream byteArrayOutputStream = null;
-        PrintStream printStream = null;
-        boolean doDisplay = true;
-
-        public WatchTask(String command) {
-            this.command = command;
+    private void abort(Terminal.Signal signal) {
+        abort = true;
+        if (reading != null) {
+            reading.interrupt();
         }
+        if (executing != null) {
+            executing.interrupt();
+        }
+    }
+
+    public class WatchTask implements Runnable {
 
         public void run() {
             try {
-                byteArrayOutputStream = new ByteArrayOutputStream();
-                printStream = new PrintStream(byteArrayOutputStream);
-                session = sessionFactory.create(null, printStream, printStream, WatchAction.this.session);
-                String output = "";
-                try {
-                    session.execute(command);
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                PrintStream printStream = new PrintStream(byteArrayOutputStream);
+                try (Session session = sessionFactory.create(new ByteArrayInputStream(new byte[0]), printStream, printStream, WatchAction.this.session)) {
+                    executing = Thread.currentThread();
+                    session.execute(arguments.trim());
+                } catch (InterruptedException e) {
+                    abort(null);
                 } catch (Exception e) {
                     ShellUtil.logException(session, e);
+                } finally {
+                    executing = null;
                 }
-                output = byteArrayOutputStream.toString();
-                if (doDisplay) {
+                printStream.flush();
+                if (!abort) {
                     if (!append) {
                         System.out.print("\33[2J");
                         System.out.print("\33[1;1H");
                     }
-                    System.out.print(output);
+                    System.out.print(byteArrayOutputStream.toString());
                     System.out.flush();
                 }
-                byteArrayOutputStream.close();
-                session.close();
             } catch (Exception e) {
                 //Ingore
             }
         }
 
-        public void abort() {
-            doDisplay = false;
-        }
-        public void close() throws IOException {
-            if (this.session != null) {
-                this.session.close();
-            }
-            if (this.byteArrayOutputStream != null) {
-                this.byteArrayOutputStream.close();
-            }
-            if (this.printStream != null) {
-                printStream.close();
-            }
-        }
     }
 
     @Service

@@ -197,6 +197,7 @@ public class ConsoleSessionImpl implements Session {
             session.put(key.toString(), sysProps.get(key));
         }
         session.put(".session", this);
+        session.put(".processor", processor);
         session.put(".commandSession", session);
         session.put(".jline.reader", reader);
         session.put(".jline.terminal", reader.getTerminal());
