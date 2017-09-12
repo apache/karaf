@@ -40,10 +40,19 @@ public interface KarsMBean {
     /**
      * Install a KAR file from the given URL.
      *
-     * @param url the JAR URL.
+     * @param url the KAR URL.
      * @throws MBeanException in case of installation failure.
      */
     void install(String url) throws MBeanException;
+
+    /**
+     * Install a KAR file from a given URL and decide to start or not the bundles.
+     *
+     * @param url the KAR URL.
+     * @param noAutoStartBundles true to not automatically start the bundles, false else.
+     * @throws MBeanException in case of installation failure.
+     */
+    void install(String url, boolean noAutoStartBundles) throws MBeanException;
 
     /**
      * Uninstall a KAR file.
