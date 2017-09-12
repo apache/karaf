@@ -471,7 +471,7 @@ public class Deployer {
             if (bundle == null) {
                 // bundle is not present, it's provided by feature
                 // we are using bundleInfo and start flag
-                if (bundleInfo != null && bundleInfo.isStart()) {
+                if (bundleInfo != null && bundleInfo.isStart() && !noStart) {
                     states.put(resource, FeatureState.Started);
                 } else {
                     states.put(resource, FeatureState.Resolved);
