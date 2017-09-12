@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -331,20 +332,23 @@ public class VerifyMojo extends MojoSupport {
         for (String fmk : framework) {
             properties.put("feature.framework." + fmk, fmk);
         }
-        List<Exception> failures = new ArrayList<>();
+        Set<String> successes = new LinkedHashSet<>();
+        Set<String> ignored = new LinkedHashSet<>();
+        Map<String, Exception> failures = new LinkedHashMap<>();
         for (Feature feature : featuresToTest) {
+            String id = feature.getId();
             try {
-                String id = feature.getName() + "/" + feature.getVersion();
                 verifyResolution(new CustomDownloadManager(resolver, executor),
                                  repositories, Collections.singleton(id), properties);
+                successes.add(id);
                 getLog().info("Verification of feature " + id + " succeeded");
             } catch (Exception e) {
-                if (e.getCause() instanceof ResolutionException) {
+                if (e.getCause() instanceof ResolutionException || !getLog().isDebugEnabled()) {
                     getLog().warn(e.getMessage());
                 } else {
                     getLog().warn(e);
                 }
-                failures.add(e);
+                failures.put(id, e);
                 if ("first".equals(fail)) {
                     throw e;
                 }
@@ -353,9 +357,11 @@ public class VerifyMojo extends MojoSupport {
                 Set<String> ids = new LinkedHashSet<>();
                 ids.add(feature.getId());
                 ids.addAll(cond.getCondition());
+                String cid = String.join("+", ids);
                 try {
                     verifyResolution(manager, repositories, ids, properties);
-                    getLog().info("Verification of feature " + ids + " succeeded");
+                    successes.add(cid);
+                    getLog().info("Verification of feature " + cid + " succeeded");
                 } catch (Exception e) {
                     if (ignoreMissingConditions && e.getCause() instanceof ResolutionException) {
                         boolean ignore = true;
@@ -366,25 +372,31 @@ public class VerifyMojo extends MojoSupport {
                                     && cond.getCondition().contains(req.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE).toString()));
                         }
                         if (ignore) {
-                            getLog().warn("Feature resolution failed for " + ids
+                            ignored.add(cid);
+                            getLog().warn("Feature resolution failed for " + cid
                                     + "\nMessage: " + e.getCause().getMessage());
                             continue;
                         }
                     }
-                    if (e.getCause() instanceof ResolutionException) {
+                    if (e.getCause() instanceof ResolutionException || !getLog().isDebugEnabled()) {
                         getLog().warn(e.getMessage());
                     } else {
                         getLog().warn(e);
                     }
-                    failures.add(e);
+                    failures.put(cid, e);
                     if ("first".equals(fail)) {
                         throw e;
                     }
                 }
             }
         }
+        int nb = successes.size() + ignored.size() + failures.size();
+        getLog().info("Features verified: " + nb + ", failures: " + failures.size() + ", ignored: " + ignored.size());
+        if (!failures.isEmpty()) {
+            getLog().info("Failures: " + String.join(", ", failures.keySet()));
+        }
         if ("end".equals(fail) && !failures.isEmpty()) {
-            throw new MojoExecutionException("Verification failures", new MultiException("Verification failures", failures));
+            throw new MojoExecutionException("Verification failures", new MultiException("Verification failures", new ArrayList<>(failures.values())));
         }
     }
 
