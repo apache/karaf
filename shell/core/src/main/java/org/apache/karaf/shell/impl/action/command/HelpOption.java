@@ -50,6 +50,14 @@ public class HelpOption {
             return Option.DEFAULT_STRING;
         }
 
+        public boolean censor() {
+            return false;
+        }
+
+        public char mask() {
+            return 0;
+        }
+
         public Class<? extends Annotation> annotationType() {
             return Option.class;
         }

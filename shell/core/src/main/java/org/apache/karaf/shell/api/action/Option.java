@@ -94,4 +94,19 @@ public @interface Option
      * @return the option description as shown in the help.
      */
     String valueToShowInHelp() default DEFAULT_STRING;
+
+    /**
+     * Censor the argument in the console. Characters will be replaced with {@link Argument#mask()}.
+     * This is useful for hiding sensitive data like passwords.
+     *
+     * @return true if the argument should be censored in the console.
+     */
+    boolean censor() default false;
+
+    /**
+     * Character to use when censoring the argument in the console.
+     *
+     * @return the Character to use when censoring the argument in the console.
+     */
+    char mask() default '*';
 }

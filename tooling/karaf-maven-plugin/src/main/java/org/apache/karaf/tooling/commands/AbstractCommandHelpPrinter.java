@@ -58,6 +58,14 @@ public abstract class AbstractCommandHelpPrinter implements CommandHelpPrinter {
                 public Class<? extends Annotation> annotationType() {
                     return delegate.annotationType();
                 }
+
+                public boolean censor() {
+                    return delegate.censor();
+                }
+
+                public char mask() {
+                    return delegate.mask();
+                }
             };
         }
         return argument;
