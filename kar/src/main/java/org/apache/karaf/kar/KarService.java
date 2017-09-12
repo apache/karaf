@@ -37,6 +37,15 @@ public interface KarService {
      * @throws Exception in case of installation failure.
      */
     void install(URI karUri) throws Exception;
+
+    /**
+     * Install KAR from a given URI
+     *
+     * @param karUri URI of the kar to install
+     * @param noAutoStartBundles true to not start automatically the bundles, false else
+     * @throws Exception in case of installation failure
+     */
+    void install(URI karUri, boolean noAutoStartBundles) throws Exception;
     
     /**
      * Install a kar with manually given repository and 
@@ -45,9 +54,20 @@ public interface KarService {
      * @param karUri Uri of the kar to be installed
      * @param repoDir destination for the repository contents of the kar
      * @param resourceDir destination for the resource contents of the kar
-     * @throws Exception in case of installation failure.
+     * @throws Exception in case of installation failure
      */
     void install(URI karUri, File repoDir, File resourceDir) throws Exception;
+
+    /**
+     * Install a kar with manually given repository and resource directories.
+     *
+     * @param karUri Uri of the kar to be installed.
+     * @param repoDir destination for the repository contents of the kar
+     * @param resourceDir destination for the resource contents of the kar
+     * @param noAutoStartBundles true to not start automatically the bundles, false else
+     * @throws Exception in case of installation failure
+     */
+    void install(URI karUri, File repoDir, File resourceDir, boolean noAutoStartBundles) throws Exception;
 
     /**
      * Uninstall the given KAR

@@ -227,6 +227,8 @@ The KAR file is uncompressed and populated the `KARAF_BASE/system` folder.
 The Apache Karaf KAR service is looking for features XML files in the KAR file, registers the features XML and automatically
 installs all features described in the features repositories present in the KAR file.
 
+Optionally, you can control if the bundles should be automatically started or not using `--no-start` option.
+
 ===== `kar:uninstall`
 
 The `kar:uninstall` command uninstall a KAR file (identified by a name).
@@ -275,6 +277,17 @@ You can change the behaviours of the KAR deployer in the `etc/org.apache.karaf.k
 # the features contained in a KAR file
 #
 noAutoRefreshBundles=false
+
+#
+# Enable or disable the automatic start of the bundles when installing
+# the features contained in a KAR file
+#
+noAutoStartBundles=false
+
+#
+# Directory where the kar are stored (when downloaded from Maven for instance)
+#
+#karStorage=${karaf.data}/kar
 ----
 
 By default, when the KAR deployer install features, by default, it refresh the bundles already installed.
@@ -293,6 +306,7 @@ The `Kars` attributes provides the list of KAR files (name) installed.
 ===== Operations
 
 * `install(url)` installs the KAR file at the given `url`.
+* `install(url, noAutoStartBundles)` installs the KAR file at the given `url`, deciding if you want to automatically start the bundles or not.
 * `create(repository, features)` creates a KAR file using the given features `repository` name, and optionally the
 list of `features` to include in the KAR file.
 * `uninstall(name)` uninstalls a KAR file with the given `name`.
