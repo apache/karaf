@@ -209,7 +209,7 @@
         <felix.scr.compat.version>1.0.4</felix.scr.compat.version>
         <felix.scr.webconsole.plugin.version>2.0.6</felix.scr.webconsole.plugin.version>
         <felix.scr.annotation.version>1.12.0</felix.scr.annotation.version>
-        <felix.resolver.version>1.12.0</felix.resolver.version>
+        <felix.resolver.version>1.14.0</felix.resolver.version>
 
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
