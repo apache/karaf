@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -704,9 +706,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Map<String, Map<String, Feature>> map = new HashMap<>();
         // Two phase load:
         // * first load dependent repositories
-        List<String> toLoad = new ArrayList<>(uris);
+        Queue<String> toLoad = new ArrayDeque<>(uris);
         while (!toLoad.isEmpty()) {
-            String uri = toLoad.remove(0);
+            String uri = toLoad.remove();
             Repository repo;
             synchronized (lock) {
                 repo = repositoryCache.get(uri);
