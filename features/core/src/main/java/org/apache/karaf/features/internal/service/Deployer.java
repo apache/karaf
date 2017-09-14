@@ -452,9 +452,6 @@ public class Deployer {
                 } else {
                     states.put(resource, FeatureState.Resolved);
                 }
-            } else {
-                // if the bundle is already there, just ignore changing state by feature
-                states.remove(resource);
             }
         }
         // Only keep bundles resources
