@@ -50,7 +50,9 @@ public final class DownloadManagerHelper {
         if (strippedUrl.contains("#")) {
             strippedUrl = strippedUrl.substring(0, strippedUrl.indexOf('#'));
         }
-
+        if (strippedUrl.contains(";")) {
+            strippedUrl = strippedUrl.substring(0, strippedUrl.indexOf(';'));
+        }
         return strippedUrl;
     }
 
