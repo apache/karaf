@@ -69,8 +69,9 @@ public class Blacklist {
             try (InputStream is = new URL(blacklistUrl).openStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
                 reader.lines() //
-                    .map(line -> line.trim()) //
-                    .filter(line -> line.isEmpty() || line.startsWith("#")).collect(toSet());
+                    .map(String::trim) //
+                    .filter(line -> !line.isEmpty() && !line.startsWith("#"))
+                    .forEach(blacklist::add);
             } catch (FileNotFoundException e) {
                 LOGGER.debug("Unable to load blacklist bundles list", e.toString());
             } catch (Exception e) {
@@ -81,7 +82,7 @@ public class Blacklist {
     }
 
     public void blacklist(Features features) {
-        features.getFeature().removeIf(feature -> blacklist(feature));
+        features.getFeature().removeIf(this::blacklist);
     }
 
     public boolean blacklist(Feature feature) {

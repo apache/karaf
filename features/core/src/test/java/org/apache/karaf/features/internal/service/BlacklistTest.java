@@ -56,6 +56,14 @@ public class BlacklistTest {
         assertTrue(bundles.noneMatch(b -> b.getLocation().equals(blacklisted)));
     }
 
+    @Test
+    public void testBlacklistLoad() throws URISyntaxException {
+        Blacklist blacklist = new Blacklist(getClass().getResource("blacklist.txt").toExternalForm());
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("f02.xml").toURI(), blacklist, true);
+        Stream<Feature> features = Arrays.asList(repo.getFeatures()).stream();
+        assertTrue(features.noneMatch(f -> f.getId().equals("spring/2.5.6.SEC02")));
+    }
+
     private Stream<org.apache.karaf.features.Feature> blacklistWith(String blacklistClause) {
         URI uri;
         try {
