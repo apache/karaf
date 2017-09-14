@@ -71,6 +71,7 @@ import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.MaskingCallback;
 import org.jline.reader.ParsedLine;
+import org.jline.reader.SyntaxError;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
@@ -664,11 +665,17 @@ public class ConsoleSessionImpl implements Session {
                     this.regexs.putAll(regexs);
                 }
             }
-            ParsedLine pl = reader.getParser().parse(line, line.length());
-            String cmd = resolveCommand(pl.words().get(0));
-            ActionMaskingCallback repl = regexs.get(cmd);
-            if (repl != null) {
-                line = repl.filter(line, pl);
+            try {
+                ParsedLine pl = reader.getParser().parse(line, line.length());
+                String cmd = resolveCommand(pl.words().get(0));
+                ActionMaskingCallback repl = regexs.get(cmd);
+                if (repl != null) {
+                    line = repl.filter(line, pl);
+                }
+            } catch (SyntaxError e) {
+                // Ignore
+            } catch (Exception e) {
+                LOGGER.debug("Exception caught while masking command line", e);
             }
             return line;
         }
