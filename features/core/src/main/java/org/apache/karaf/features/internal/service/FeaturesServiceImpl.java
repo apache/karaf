@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -747,9 +748,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         // Two phase load:
         // * first load dependent repositories
         Set<String> loaded = new HashSet<>();
-        List<String> toLoad = new ArrayList<>(uris);
+        Queue<String> toLoad = new ArrayDeque<>(uris);
         while (!toLoad.isEmpty()) {
-            String uri = toLoad.remove(0);
+            String uri = toLoad.remove();
             Repository repo;
             synchronized (lock) {
                 repo = repositoryCache.get(uri);
