@@ -127,10 +127,10 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     }
 
     public static org.apache.karaf.features.Feature valueOf(String str) {
-        if (str.contains(VERSION_SEPARATOR)) {
-            String strName = str.substring(0, str.indexOf(VERSION_SEPARATOR));
-            String strVersion = str.substring(str.indexOf(VERSION_SEPARATOR)
-                    + VERSION_SEPARATOR.length(), str.length());
+        int idx = str.indexOf(VERSION_SEPARATOR);
+        if (idx >= 0) {
+            String strName = str.substring(0, idx);
+            String strVersion = str.substring(idx + VERSION_SEPARATOR.length(), str.length());
             return new Feature(strName, strVersion);
         } else {
             return new Feature(str);
