@@ -80,6 +80,11 @@ public class MavenDownloadManager implements DownloadManager {
         return (Map) Collections.synchronizedMap(downloaded);
     }
 
+    @Override
+    public void close() {
+        executorService.shutdown();
+    }
+
     protected class MavenDownloader implements Downloader {
 
         private volatile int pending = 0;

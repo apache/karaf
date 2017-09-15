@@ -978,13 +978,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                              EnumSet<Option> options,                              // installation options
                              String outputFile                                     // file to store the resolution or null
     ) throws Exception {
-
-        Dictionary<String, String> props = getMavenConfig();
-        MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
-        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(cfg.downloadThreads);
-        executor.setMaximumPoolSize(cfg.downloadThreads);
-        DownloadManager manager = DownloadManagers.createDownloadManager(resolver, executor, cfg.scheduleDelay, cfg.scheduleMaxRun);
-        try {
+        try (DownloadManager manager = createDownloadManager()) {
             Set<String> prereqs = new HashSet<>();
             while (true) {
                 try {
@@ -1001,9 +995,15 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     }
                 }
             }
-        } finally {
-            executor.shutdown();
         }
+    }
+
+    protected DownloadManager createDownloadManager() throws IOException {
+        Dictionary<String, String> props = getMavenConfig();
+        MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(cfg.downloadThreads);
+        executor.setMaximumPoolSize(cfg.downloadThreads);
+        return DownloadManagers.createDownloadManager(resolver, executor, cfg.scheduleDelay, cfg.scheduleMaxRun);
     }
 
     private Dictionary<String, String> getMavenConfig() throws IOException {
