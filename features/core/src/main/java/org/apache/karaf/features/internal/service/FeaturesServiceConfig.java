@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import org.apache.karaf.features.FeaturesService;
+
 public class FeaturesServiceConfig {
 
     public final String overrides;
@@ -56,7 +58,7 @@ public class FeaturesServiceConfig {
     public final String blacklisted;
 
     public FeaturesServiceConfig() {
-        this(null, null, null, null, 1, 0, 0, null, null);
+        this(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, null, null);
     }
 
     public FeaturesServiceConfig(String overrides, String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun, String blacklisted, String serviceRequirements) {

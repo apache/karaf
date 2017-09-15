@@ -1101,22 +1101,12 @@ public class Deployer {
     }
 
     private static void removeFragmentsAndBundlesInState(Collection<Bundle> bundles, int state) {
-        for (Iterator<Bundle> iterator = bundles.iterator(); iterator.hasNext();) {
-            Bundle bundle = iterator.next();
-            if ((bundle.getState() & state) != 0
-                    || bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
-                iterator.remove();
-            }
-        }
+        bundles.removeIf(bundle -> (bundle.getState() & state) != 0
+                || bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null);
     }
 
     private static void removeBundlesInState(Collection<Bundle> bundles, int state) {
-        for (Iterator<Bundle> iterator = bundles.iterator(); iterator.hasNext();) {
-            Bundle bundle = iterator.next();
-            if ((bundle.getState() & state) != 0) {
-                iterator.remove();
-            }
-        }
+        bundles.removeIf(bundle -> (bundle.getState() & state) != 0);
     }
 
     protected void logWiring(Map<Resource, List<Wire>> wiring, boolean onlyFeatures) {

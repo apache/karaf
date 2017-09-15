@@ -18,10 +18,13 @@ package org.apache.karaf.features.internal.download;
 
 import java.util.Map;
 
-public interface DownloadManager {
+public interface DownloadManager extends AutoCloseable {
 
     Downloader createDownloader();
 
     Map<String, StreamProvider> getProviders();
+
+    default void close() {
+    }
 
 }
