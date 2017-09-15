@@ -97,6 +97,8 @@ import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION;
+import static org.apache.karaf.features.internal.model.Feature.VERSION_SEPARATOR;
 import static org.apache.karaf.features.internal.service.StateStorage.toStringStringSetMap;
 import static org.apache.karaf.features.internal.util.MapUtils.add;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
@@ -1056,10 +1058,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     protected String normalize(String feature) {
-        if (!feature.contains("/")) {
-            feature += "/0.0.0";
+        int idx = feature.indexOf(VERSION_SEPARATOR);
+        if (idx < 0) {
+            return feature + VERSION_SEPARATOR + DEFAULT_VERSION;
         }
-        int idx = feature.indexOf("/");
         String name = feature.substring(0, idx);
         String version = feature.substring(idx + 1);
         return name + "/" + VersionCleaner.clean(version);
