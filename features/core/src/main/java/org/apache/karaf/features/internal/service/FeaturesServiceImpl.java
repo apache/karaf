@@ -578,13 +578,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         // * then load all features
         for (Repository repo : repos) {
             for (Feature f : repo.getFeatures()) {
-                if (map.get(f.getName()) == null) {
-                    Map<String, Feature> versionMap = new HashMap<>();
-                    versionMap.put(f.getVersion(), f);
-                    map.put(f.getName(), versionMap);
-                } else {
-                    map.get(f.getName()).put(f.getVersion(), f);
-                }
+                Map<String, Feature> versionMap = map.computeIfAbsent(f.getName(), key -> new HashMap<>());
+                versionMap.put(f.getVersion(), f);
             }
         }
         synchronized (lock) {
