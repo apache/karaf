@@ -892,13 +892,18 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
-    private String normalize(String feature) {
-        if (!feature.contains(VERSION_SEPARATOR)) {
-            feature += "/0.0.0";
+    private static String normalize(String feature) {
+        final int idx = feature.indexOf(VERSION_SEPARATOR);
+        final String name;
+        final String version;
+        if (idx == -1) {
+            name = feature;
+            version = "0.0.0";
+        } else {
+            name = feature.substring(0, idx);
+            version = feature.substring(idx + 1);
         }
-        int idx = feature.indexOf(VERSION_SEPARATOR);
-        String name = feature.substring(0, idx);
-        String version = feature.substring(idx + 1);
+
         return name + VERSION_SEPARATOR + VersionCleaner.clean(version);
     }
 
