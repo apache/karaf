@@ -227,7 +227,7 @@ public class Subsystem extends ResourceImpl {
     }
 
     public void require(String requirement) throws BundleException {
-        int idx = requirement.indexOf(":");
+        int idx = requirement.indexOf(':');
         String type, req;
         if (idx >= 0) {
             type = requirement.substring(0, idx);

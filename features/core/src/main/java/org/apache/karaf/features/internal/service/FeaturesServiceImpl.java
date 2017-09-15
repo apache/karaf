@@ -82,6 +82,8 @@ import org.slf4j.LoggerFactory;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION;
+import static org.apache.karaf.features.internal.model.Feature.VERSION_SEPARATOR;
 import static org.apache.karaf.features.internal.service.StateStorage.toStringStringSetMap;
 import static org.apache.karaf.features.internal.util.MapUtils.*;
 
@@ -92,7 +94,6 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     private static final String RESOLVE_FILE = "resolve";
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
-    private static final String VERSION_SEPARATOR = "/";
 
     /**
      * Used to load and save the {@link State} of this service.
@@ -893,10 +894,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     private String normalize(String feature) {
-        if (!feature.contains(VERSION_SEPARATOR)) {
-            feature += "/0.0.0";
-        }
         int idx = feature.indexOf(VERSION_SEPARATOR);
+        if (idx < 0) {
+            return feature + VERSION_SEPARATOR + DEFAULT_VERSION;
+        }
         String name = feature.substring(0, idx);
         String version = feature.substring(idx + 1);
         return name + VERSION_SEPARATOR + VersionCleaner.clean(version);
