@@ -22,25 +22,38 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.*;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.TestBase;
 import org.apache.karaf.features.FeaturesService.Option;
+import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
+import org.apache.karaf.features.internal.support.TestDownloadManager;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -162,7 +175,68 @@ public class FeaturesServiceImplTest extends TestBase {
         waitInstalled(featureService, test110);
         assertNotInstalled(featureService, test100);
     }
-    
+
+    @Test
+    public void testInstallAndStop() throws Exception {
+        Capture<Bundle> stoppedBundle = Capture.newInstance();
+
+        Bundle bundle = EasyMock.niceMock(Bundle.class);
+        BundleStartLevel bundleStartLevel = EasyMock.niceMock(BundleStartLevel.class);
+        BundleRevision bundleRevision = EasyMock.niceMock(BundleRevision.class);
+
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        FrameworkInfo dummyInfo = new FrameworkInfo();
+        expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
+        expect(installSupport.installBundle(EasyMock.eq("root"), EasyMock.eq("a100"), anyObject())).andReturn(bundle);
+        installSupport.startBundle(bundle);
+        expectLastCall();
+        expect(bundle.getBundleId()).andReturn(1L).anyTimes();
+        expect(bundle.getSymbolicName()).andReturn("a").anyTimes();
+        expect(bundle.getVersion()).andReturn(new Version("1.0.0")).anyTimes();
+        expect(bundle.getHeaders()).andReturn(new Hashtable<>()).anyTimes();
+        expect(bundle.adapt(BundleStartLevel.class)).andReturn(bundleStartLevel).anyTimes();
+        expect(bundle.adapt(BundleRevision.class)).andReturn(bundleRevision).anyTimes();
+        expect(bundleRevision.getBundle()).andReturn(bundle).anyTimes();
+        expect(bundleRevision.getCapabilities(null)).andReturn(Collections.emptyList()).anyTimes();
+        expect(bundleRevision.getRequirements(null)).andReturn(Collections.emptyList()).anyTimes();
+        EasyMock.replay(installSupport, bundle, bundleStartLevel, bundleRevision);
+        FeaturesService featureService =  new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                installSupport, null, cfg) {
+            @Override
+            protected DownloadManager createDownloadManager() throws IOException {
+                return new TestDownloadManager(FeaturesServiceImplTest.class, "data1");
+            }
+        };
+
+        URI repoA = URI.create("custom:data1/features.xml");
+        featureService.addRepository(repoA);
+        Feature test100 = featureService.getFeature("f", "1.0.0");
+        installFeature(featureService, test100);
+        assertInstalled(featureService, test100);
+
+        dummyInfo.bundles.put(1L, bundle);
+        Map<String, Map<String, FeatureState>> states = new HashMap<>();
+        states.computeIfAbsent("root", k -> new HashMap<>()).put("f/1.0.0", FeatureState.Resolved);
+        EasyMock.reset(installSupport, bundle, bundleRevision, bundleStartLevel);
+        expect(installSupport.getInfo()).andReturn(dummyInfo).anyTimes();
+        installSupport.stopBundle(EasyMock.capture(stoppedBundle), EasyMock.anyInt());
+        expectLastCall();
+        expect(bundle.getBundleId()).andReturn(1L).anyTimes();
+        expect(bundle.getSymbolicName()).andReturn("a").anyTimes();
+        expect(bundle.getVersion()).andReturn(new Version("1.0.0")).anyTimes();
+        expect(bundle.getHeaders()).andReturn(new Hashtable<>()).anyTimes();
+        expect(bundle.adapt(BundleStartLevel.class)).andReturn(bundleStartLevel).anyTimes();
+        expect(bundle.adapt(BundleRevision.class)).andReturn(bundleRevision).anyTimes();
+        expect(bundleRevision.getBundle()).andReturn(bundle).anyTimes();
+        expect(bundleRevision.getCapabilities(null)).andReturn(Collections.emptyList()).anyTimes();
+        expect(bundleRevision.getRequirements(null)).andReturn(Collections.emptyList()).anyTimes();
+        EasyMock.replay(installSupport, bundle, bundleRevision, bundleStartLevel);
+
+        featureService.updateFeaturesState(states, EnumSet.noneOf(Option.class));
+        assertSame(bundle, stoppedBundle.getValue());
+    }
+
     @Test
     public void testRemoveRepo2() throws Exception {
         final FeaturesService featureService = createTestFeatureService();
