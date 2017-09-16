@@ -34,17 +34,17 @@ import static org.junit.Assert.assertTrue;
 
 
 public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
-    
+
     @Before
     @Override
     public void setUp() throws Exception {
         password = "secret";
         driver = "org.postgresql.Driver";
         url = "jdbc:postgresql://127.0.0.1:5432/test";
-        
+
         super.setUp();
     }
-    
+
     DefaultJDBCLock createLock(Properties props) {
         return new PostgreSQLJDBCLock(props) {
             @Override
@@ -60,24 +60,24 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
             long getCurrentTimeMillis() {
                 return 1;
             }
-            
+
             @Override
             public void log(Level level, String msg, Exception e) {
                 // Suppress log
             }
         };
     }
-    
+
     @Test
     public void createConnectionShouldConcatinateOptionsCorrect() {
         props.put("karaf.lock.jdbc.url", this.url + ";dataEncryption=false");
-        
+
         lock = new PostgreSQLJDBCLock(props) {
             @Override
             boolean schemaExists() {
                 return true;
             }
-            
+
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);

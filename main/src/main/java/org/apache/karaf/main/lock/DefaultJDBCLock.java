@@ -185,7 +185,7 @@ public class DefaultJDBCLock implements Lock {
         String lockCreateStatement = statements.getLockCreateStatement();
         PreparedStatement preparedStatement = null;
         boolean lockAcquired = false;
-        
+
         try {
             preparedStatement = getConnection().prepareStatement(lockCreateStatement);
             preparedStatement.setQueryTimeout(timeout);
@@ -196,7 +196,7 @@ public class DefaultJDBCLock implements Lock {
         } finally {
             closeSafely(preparedStatement);
         }
-        
+
         return lockAcquired;
     }
 
