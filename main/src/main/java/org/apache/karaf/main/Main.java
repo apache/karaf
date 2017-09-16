@@ -380,7 +380,7 @@ public class Main {
         File dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA));
         while (!exiting) {
             if (lock.lock()) {
-                lockCallback.lockAquired();
+                lockCallback.lockAcquired();
                 for (;;) {
                     if (!dataDir.isDirectory()) {
                         LOG.info("Data directory does not exist anymore, halting");
@@ -736,7 +736,7 @@ public class Main {
         }
 
         @Override
-        public void lockAquired() {
+        public void lockAcquired() {
             LOG.info("Lock acquired. Setting startlevel to " + config.defaultStartLevel);
             shutdownThread = InstanceHelper.setupShutdown(config, framework);
             setStartLevel(config.defaultStartLevel);

@@ -53,7 +53,7 @@ public class OracleJDBCLock extends DefaultJDBCLock {
      */
     @Override
     public boolean lock() {
-        return aquireLock();
+        return acquireLock();
     }
     
     /**
@@ -65,31 +65,31 @@ public class OracleJDBCLock extends DefaultJDBCLock {
      */
     @Override
     boolean updateLock() {
-        return aquireLock();
+        return acquireLock();
     }
     
     /**
      * A SELECT FOR UPDATE does not create a database lock when the SELECT FOR UPDATE is performed
-     * on an empty selection. So a succesfull call to {@link DefaultJDBCLock#aquireLock()} is not sufficient to 
+     * on an empty selection. So a succesfull call to {@link DefaultJDBCLock#acquireLock()} is not sufficient to 
      * ensure that we are the only one who have acquired the lock.
      */
     @Override
-    boolean aquireLock() {
-    	return super.aquireLock() && lockAcquiredOnNonEmptySelection();
+    boolean acquireLock() {
+    	return super.acquireLock() && lockAcquiredOnNonEmptySelection();
     }
     
     //Verify that we have a non empty record set.
     private boolean lockAcquiredOnNonEmptySelection() {
         String verifySelectionNotEmpytStatement = statements.getLockVerifySelectionNotEmptyStatement();
         PreparedStatement preparedStatement = null;
-        boolean lockAquired = false;
+        boolean lockAcquired = false;
         
         try {
             preparedStatement = getConnection().prepareStatement(verifySelectionNotEmpytStatement);
             preparedStatement.setQueryTimeout(timeout);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-            	lockAquired = rs.getInt(1) > 0;
+               lockAcquired = rs.getInt(1) > 0;
             } else {
             	LOG.warning("Failed to acquire database lock. Missing database lock record.");
             }
@@ -98,6 +98,6 @@ public class OracleJDBCLock extends DefaultJDBCLock {
         }finally {
             closeSafely(preparedStatement);
         }        
-        return lockAquired;
+        return lockAcquired;
     }
 }

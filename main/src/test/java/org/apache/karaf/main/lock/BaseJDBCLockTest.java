@@ -140,10 +140,10 @@ public abstract class BaseJDBCLockTest {
         
         replay(connection, metaData, statement, preparedStatement, resultSet);
         
-        boolean lockAquired = lock.lock();
+        boolean lockAcquired = lock.lock();
         
         verify(connection, metaData, statement, preparedStatement, resultSet);
-        assertTrue(lockAquired);
+        assertTrue(lockAcquired);
     }
     
     @Test
@@ -164,10 +164,10 @@ public abstract class BaseJDBCLockTest {
         
         replay(connection, metaData, statement, preparedStatement, resultSet);
         
-        boolean lockAquired = lock.lock();
+        boolean lockAcquired = lock.lock();
         
         verify(connection, metaData, statement, preparedStatement, resultSet);
-        assertFalse(lockAquired);
+        assertFalse(lockAcquired);
     }
     
     @Test
@@ -188,10 +188,10 @@ public abstract class BaseJDBCLockTest {
         
         replay(connection, metaData, statement, preparedStatement, resultSet);
         
-        boolean lockAquired = lock.lock();
+        boolean lockAcquired = lock.lock();
         
         verify(connection, metaData, statement, preparedStatement, resultSet);
-        assertFalse(lockAquired);
+        assertFalse(lockAcquired);
     }
     
     @Test
@@ -328,9 +328,9 @@ public abstract class BaseJDBCLockTest {
         
         replay(connection, metaData, statement, preparedStatement, resultSet);
         
-        boolean lockAquired = lock.lock();
+        boolean lockAcquired = lock.lock();
         
         verify(connection, metaData, statement, preparedStatement, resultSet);
-        assertFalse(lockAquired);
+        assertFalse(lockAcquired);
     }
 }
