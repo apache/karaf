@@ -32,9 +32,9 @@ public class PostgreSQLJDBCLock extends DefaultJDBCLock {
     }
 
     @Override
-    boolean aquireLock() {
+    boolean acquireLock() {
         this.timeout = 0;
 
-        return super.aquireLock();
+        return super.acquireLock();
     }
 }
