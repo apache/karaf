@@ -72,28 +72,6 @@ public final class DigraphHelper {
                 digraph = readDigraph(new DataInputStream(in), bundleContext, threadLocal);
             }
         }
-        // Create default region is missing
-        Region defaultRegion = digraph.getRegion(FeaturesServiceImpl.ROOT_REGION);
-        if (defaultRegion == null) {
-            defaultRegion = digraph.createRegion(FeaturesServiceImpl.ROOT_REGION);
-        }
-        // Add all unknown bundle to default region
-        Set<Long> ids = new HashSet<>();
-        for (Bundle bundle : bundleContext.getBundles()) {
-            long id = bundle.getBundleId();
-            ids.add(id);
-            if (digraph.getRegion(id) == null) {
-                defaultRegion.addBundle(id);
-            }
-        }
-        // Clean stalled bundles
-        for (Region region : digraph) {
-            Set<Long> bundleIds = new HashSet<>(region.getBundleIds());
-            bundleIds.removeAll(ids);
-            for (long id : bundleIds) {
-                region.removeBundle(id);
-            }
-        }
         return digraph;
     }
 
@@ -190,5 +168,30 @@ public final class DigraphHelper {
             filtersPerRegion.put(region.getName(), edges);
         }
         return filtersPerRegion;
+    }
+
+    public static void verifyUnmanagedBundles(BundleContext bundleContext, RegionDigraph dg) throws BundleException {
+        // Create default region is missing
+        Region defaultRegion = dg.getRegion(FeaturesServiceImpl.ROOT_REGION);
+        if (defaultRegion == null) {
+            defaultRegion = dg.createRegion(FeaturesServiceImpl.ROOT_REGION);
+        }
+        // Add all unknown bundle to default region
+        Set<Long> ids = new HashSet<>();
+        for (Bundle bundle : bundleContext.getBundles()) {
+            long id = bundle.getBundleId();
+            ids.add(id);
+            if (dg.getRegion(id) == null) {
+                defaultRegion.addBundle(id);
+            }
+        }
+        // Clean stalled bundles
+        for (Region region : dg) {
+            Set<Long> bundleIds = new HashSet<>(region.getBundleIds());
+            bundleIds.removeAll(ids);
+            for (long id : bundleIds) {
+                region.removeBundle(id);
+            }
+        }
     }
 }
