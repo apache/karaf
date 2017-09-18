@@ -78,18 +78,19 @@ public class Main {
      */
     public static final String STARTUP_PROPERTIES_FILE_NAME = "startup.properties";
 
+    private static final Logger LOG = Logger.getLogger(Main.class.getName());
 
-    Logger LOG = Logger.getLogger(this.getClass().getName());
+    private final String[] args;
+
+    private final KarafLockCallback lockCallback = new KarafLockCallback();
 
     private ConfigProperties config;
-    private Framework framework = null;
-    private final String[] args;
+    private Framework framework;
     private int exitCode;
     private ShutdownCallback shutdownCallback;
     private KarafActivatorManager activatorManager;
-    private Lock lock;
-    private KarafLockCallback lockCallback;
-    private boolean exiting;
+    private volatile Lock lock;
+    private volatile boolean exiting;
     
     /**
      * <p>
@@ -239,7 +240,6 @@ public class Main {
         }
         String log4jConfigPath = System.getProperty("karaf.etc") + "/org.ops4j.pax.logging.cfg";
         BootstrapLogManager.setProperties(config.props, log4jConfigPath);
-        lockCallback = new KarafLockCallback();
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase, true);
         BootstrapLogManager.configureLogger(LOG);
 
@@ -347,7 +347,17 @@ public class Main {
                 },
                 new InvocationHandler() {
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        Main.this.destroy();
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                try {
+                                    exiting = true;
+                                    framework.stop();
+                                } catch (BundleException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
                         return null;
                     }
                 }
