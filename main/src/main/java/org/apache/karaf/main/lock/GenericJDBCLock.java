@@ -343,9 +343,9 @@ public class GenericJDBCLock implements Lock {
     public boolean lock() throws Exception {
         try (Connection connection = getConnection()) {
             // Try to acquire/update the lock state
-            boolean lockAquired = acquireLock(connection, statements.getLockUpdateIdStatement(uniqueId, ++state, lock_delay, uniqueId));
+            boolean lockAcquired = acquireLock(connection, statements.getLockUpdateIdStatement(uniqueId, ++state, lock_delay, uniqueId));
 
-            if (!lockAquired) {
+            if (!lockAcquired) {
 
                 String lockSelectStatement = statements.getLockSelectStatement();
 
@@ -364,7 +364,7 @@ public class GenericJDBCLock implements Lock {
                                     if ((this.currentStateTime + this.currentLockDelay + this.currentLockDelay) < System.currentTimeMillis()) {
                                         // The state was not been updated for more than twice the lock_delay value of the current master...
                                         // Try to steal the lock....
-                                        lockAquired = acquireLock(connection, statements.getLockUpdateIdStatementToStealLock(uniqueId, state, lock_delay, currentId, currentState));
+                                        lockAcquired = acquireLock(connection, statements.getLockUpdateIdStatementToStealLock(uniqueId, state, lock_delay, currentId, currentState));
                                     }
                                 } else {
                                     // Set the current time to be used to determine if we can
@@ -390,7 +390,7 @@ public class GenericJDBCLock implements Lock {
                 }
             }
 
-            return lockAquired;
+            return lockAcquired;
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error while trying to obtain the lock", e);
             return false;

@@ -172,7 +172,7 @@ public class DefaultJDBCLock implements Lock {
      * @see org.apache.karaf.main.Lock#lock()
      */
     public boolean lock() {
-        boolean result = aquireLock();
+        boolean result = acquireLock();
         
         if (result) {
             result = updateLock();
@@ -181,23 +181,23 @@ public class DefaultJDBCLock implements Lock {
         return result;
     }
     
-    boolean aquireLock() {
+    boolean acquireLock() {
         String lockCreateStatement = statements.getLockCreateStatement();
         PreparedStatement preparedStatement = null;
-        boolean lockAquired = false;
-        
+        boolean lockAcquired = false;
+
         try {
             preparedStatement = getConnection().prepareStatement(lockCreateStatement);
             preparedStatement.setQueryTimeout(timeout);
-            lockAquired = preparedStatement.execute();
+            lockAcquired = preparedStatement.execute();
         } catch (Exception e) {
             // Do we want to display this message everytime???
             log(Level.WARNING, "Failed to acquire database lock", e);
         } finally {
             closeSafely(preparedStatement);
         }
-        
-        return lockAquired;
+
+        return lockAcquired;
     }
 
     boolean updateLock() {
