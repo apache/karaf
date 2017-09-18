@@ -58,6 +58,7 @@ import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -132,7 +133,7 @@ public class Activator extends BaseActivator {
         StandardRegionDigraph dg = DigraphHelper.loadDigraph(bundleContext);
         registerRegionDiGraph(dg);
         boolean configCfgStore = getBoolean("configCfgStore", FeaturesService.DEFAULT_CONFIG_CFG_STORE);
-        FeatureConfigInstaller configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, configCfgStore) : null;
+        FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin, configCfgStore);
         installSupport = new BundleInstallSupportImpl(
                     bundleContext.getBundle(),
                     bundleContext,
@@ -247,7 +248,7 @@ public class Activator extends BaseActivator {
     }
 
     @SuppressWarnings("deprecation")
-    private void registerRegionDiGraph(StandardRegionDigraph dg) {
+    private void registerRegionDiGraph(StandardRegionDigraph dg) throws BundleException {
         register(ResolverHookFactory.class, dg.getResolverHookFactory());
         register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
         register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook());
@@ -260,6 +261,8 @@ public class Activator extends BaseActivator {
             StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
             dgmb.registerMBean();
         }
+
+        DigraphHelper.verifyUnmanagedBundles(bundleContext, dg);
     }
 
     private ServiceTracker<FeaturesListener, FeaturesListener> createFeatureListenerTracker() {
