@@ -25,11 +25,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.properties.Properties;
@@ -58,9 +56,7 @@ import org.apache.karaf.util.tracker.annotation.Services;
 import org.eclipse.equinox.internal.region.CollisionHookHelper;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
-import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -266,28 +262,7 @@ public class Activator extends BaseActivator {
             dgmb.registerMBean();
         }
 
-        // Create default region is missing
-        Region defaultRegion = dg.getRegion(FeaturesServiceImpl.ROOT_REGION);
-        if (defaultRegion == null) {
-            defaultRegion = dg.createRegion(FeaturesServiceImpl.ROOT_REGION);
-        }
-        // Add all unknown bundle to default region
-        Set<Long> ids = new HashSet<>();
-        for (Bundle bundle : bundleContext.getBundles()) {
-            long id = bundle.getBundleId();
-            ids.add(id);
-            if (dg.getRegion(id) == null) {
-                defaultRegion.addBundle(id);
-            }
-        }
-        // Clean stalled bundles
-        for (Region region : dg) {
-            Set<Long> bundleIds = new HashSet<>(region.getBundleIds());
-            bundleIds.removeAll(ids);
-            for (long id : bundleIds) {
-                region.removeBundle(id);
-            }
-        }
+        DigraphHelper.verifyUnmanagedBundles(bundleContext, dg);
     }
 
     private ServiceTracker<FeaturesListener, FeaturesListener> createFeatureListenerTracker() {

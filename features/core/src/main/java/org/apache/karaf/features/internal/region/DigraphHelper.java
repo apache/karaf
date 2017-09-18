@@ -34,12 +34,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.util.json.JsonReader;
 import org.apache.karaf.util.json.JsonWriter;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilterBuilder;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -166,5 +168,30 @@ public final class DigraphHelper {
             filtersPerRegion.put(region.getName(), edges);
         }
         return filtersPerRegion;
+    }
+
+    public static void verifyUnmanagedBundles(BundleContext bundleContext, RegionDigraph dg) throws BundleException {
+        // Create default region is missing
+        Region defaultRegion = dg.getRegion(FeaturesServiceImpl.ROOT_REGION);
+        if (defaultRegion == null) {
+            defaultRegion = dg.createRegion(FeaturesServiceImpl.ROOT_REGION);
+        }
+        // Add all unknown bundle to default region
+        Set<Long> ids = new HashSet<>();
+        for (Bundle bundle : bundleContext.getBundles()) {
+            long id = bundle.getBundleId();
+            ids.add(id);
+            if (dg.getRegion(id) == null) {
+                defaultRegion.addBundle(id);
+            }
+        }
+        // Clean stalled bundles
+        for (Region region : dg) {
+            Set<Long> bundleIds = new HashSet<>(region.getBundleIds());
+            bundleIds.removeAll(ids);
+            for (long id : bundleIds) {
+                region.removeBundle(id);
+            }
+        }
     }
 }

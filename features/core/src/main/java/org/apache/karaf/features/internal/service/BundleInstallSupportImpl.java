@@ -247,6 +247,9 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
                 region1.connectRegion(region2, rfb.build());
             }
         }
+        // Verify that no other bundles have been installed externally in the mean time
+        DigraphHelper.verifyUnmanagedBundles(systemBundleContext, temp);
+        // Do replace
         digraph.replace(temp);
     }
     
