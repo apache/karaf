@@ -25,9 +25,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.properties.Properties;
@@ -56,8 +58,11 @@ import org.apache.karaf.util.tracker.annotation.Services;
 import org.eclipse.equinox.internal.region.CollisionHookHelper;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
+import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -132,7 +137,7 @@ public class Activator extends BaseActivator {
         StandardRegionDigraph dg = DigraphHelper.loadDigraph(bundleContext);
         registerRegionDiGraph(dg);
         boolean configCfgStore = getBoolean("configCfgStore", FeaturesService.DEFAULT_CONFIG_CFG_STORE);
-        FeatureConfigInstaller configInstaller = configurationAdmin != null ? new FeatureConfigInstaller(configurationAdmin, configCfgStore) : null;
+        FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin, configCfgStore);
         installSupport = new BundleInstallSupportImpl(
                     bundleContext.getBundle(),
                     bundleContext,
@@ -247,7 +252,7 @@ public class Activator extends BaseActivator {
     }
 
     @SuppressWarnings("deprecation")
-    private void registerRegionDiGraph(StandardRegionDigraph dg) {
+    private void registerRegionDiGraph(StandardRegionDigraph dg) throws BundleException {
         register(ResolverHookFactory.class, dg.getResolverHookFactory());
         register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
         register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook());
@@ -259,6 +264,29 @@ public class Activator extends BaseActivator {
         if (getBoolean("digraphMBean", FeaturesService.DEFAULT_DIGRAPH_MBEAN)) {
             StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
             dgmb.registerMBean();
+        }
+
+        // Create default region is missing
+        Region defaultRegion = dg.getRegion(FeaturesServiceImpl.ROOT_REGION);
+        if (defaultRegion == null) {
+            defaultRegion = dg.createRegion(FeaturesServiceImpl.ROOT_REGION);
+        }
+        // Add all unknown bundle to default region
+        Set<Long> ids = new HashSet<>();
+        for (Bundle bundle : bundleContext.getBundles()) {
+            long id = bundle.getBundleId();
+            ids.add(id);
+            if (dg.getRegion(id) == null) {
+                defaultRegion.addBundle(id);
+            }
+        }
+        // Clean stalled bundles
+        for (Region region : dg) {
+            Set<Long> bundleIds = new HashSet<>(region.getBundleIds());
+            bundleIds.removeAll(ids);
+            for (long id : bundleIds) {
+                region.removeBundle(id);
+            }
         }
     }
 
