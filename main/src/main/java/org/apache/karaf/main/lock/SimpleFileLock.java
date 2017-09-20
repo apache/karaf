@@ -59,7 +59,7 @@ public class SimpleFileLock implements Lock {
         }
     }
 
-    public boolean lock() throws Exception {
+    public synchronized boolean lock() throws Exception {
         LOG.info("Trying to lock " + lockPath.getPath());
         if (lock == null) {
             lock = lockFile.getChannel().tryLock();
@@ -72,7 +72,7 @@ public class SimpleFileLock implements Lock {
         return lock != null;
     }
 
-    public void release() throws Exception {
+    public synchronized void release() throws Exception {
         if (lock != null && lock.isValid()) {
             LOG.info("Releasing lock " + lockPath.getPath());
             lock.release();
@@ -81,7 +81,7 @@ public class SimpleFileLock implements Lock {
         lock = null;
     }
  
-    public boolean isAlive() throws Exception {
+    public synchronized boolean isAlive() throws Exception {
         return lock != null && lock.isValid() && lockPath.exists();
     }
 
