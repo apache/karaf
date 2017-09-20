@@ -71,7 +71,7 @@ public class SimpleFileLock implements Lock {
         return lock != null;
     }
 
-    public void release() throws Exception {
+    public synchronized void release() throws Exception {
         if (lock != null && lock.isValid()) {
             LOG.info("Releasing lock " + lockPath.getPath());
             lock.release();
