@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -513,12 +514,15 @@ public class ConsoleSessionImpl implements Session {
 
     @Override
     public String readLine(String prompt, Character mask) throws IOException {
-        try {
-            reader.getVariables().put(LineReader.DISABLE_HISTORY, Boolean.TRUE);
-            return reader.readLine(prompt, mask);
-        } finally {
-            reader.getVariables().remove(LineReader.DISABLE_HISTORY);
-        }
+        LineReader reader = LineReaderBuilder.builder()
+                .terminal(jlineTerminal)
+                .appName("karaf")
+                .parser((line, cursor, context) -> new SimpleParsedLine(line, cursor))
+                .build();
+        reader.setOpt(LineReader.Option.DISABLE_EVENT_EXPANSION);
+        reader.setVariable(LineReader.DISABLE_HISTORY, Boolean.TRUE);
+        reader.setVariable(LineReader.DISABLE_COMPLETION, Boolean.TRUE);
+        return reader.readLine(prompt, mask);
     }
 
     private String loadCompletionMode() {
@@ -624,6 +628,47 @@ public class ConsoleSessionImpl implements Session {
         String name = ManagementFactory.getRuntimeMXBean().getName();
         String[] parts = name.split("@");
         return parts[0];
+    }
+
+    private static class SimpleParsedLine implements ParsedLine {
+
+        private final String line;
+        private final int cursor;
+
+        public SimpleParsedLine(String line, int cursor) {
+            this.line = line;
+            this.cursor = cursor;
+        }
+
+        @Override
+        public String word() {
+            return line;
+        }
+
+        @Override
+        public int wordCursor() {
+            return cursor;
+        }
+
+        @Override
+        public int wordIndex() {
+            return 0;
+        }
+
+        @Override
+        public List<String> words() {
+            return Collections.singletonList(line);
+        }
+
+        @Override
+        public String line() {
+            return line;
+        }
+
+        @Override
+        public int cursor() {
+            return cursor;
+        }
     }
 
     private class AggregateMaskingCallback implements MaskingCallback {
