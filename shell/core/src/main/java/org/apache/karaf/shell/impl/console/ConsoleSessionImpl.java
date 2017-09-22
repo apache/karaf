@@ -386,7 +386,9 @@ public class ConsoleSessionImpl implements Session {
                 if (command == null) {
                     break;
                 }
-                doExecute(command);
+                if (command.length() > 0) {
+                    doExecute(command);
+                }
             }
             close();
         } finally {
