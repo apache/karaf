@@ -58,6 +58,8 @@ public final class ResourceBuilder {
     private static final int STARTQUOTE = 4;
     private static final int ENDQUOTE = 8;
 
+    private static final Map<String, String> DEFAULT_DIRECTIVES = Collections.singletonMap(ServiceNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, ServiceNamespace.EFFECTIVE_ACTIVE);
+
     private ResourceBuilder() {
     }
 
@@ -111,18 +113,16 @@ public final class ResourceBuilder {
         // Now that we have symbolic name and version, create the resource
         String type = headerMap.get(Constants.FRAGMENT_HOST) == null ? IdentityNamespace.TYPE_BUNDLE : IdentityNamespace.TYPE_FRAGMENT;
         {
-            Map<String, String> dirs = new HashMap<>();
-            Map<String, Object> attrs = new HashMap<>();
+            Map<String, Object> attrs = new HashMap<>(4);
             attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, bundleSymbolicName);
             attrs.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, type);
             attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, bundleVersion);
-            CapabilityImpl identity = new CapabilityImpl(resource, IdentityNamespace.IDENTITY_NAMESPACE, dirs, attrs);
+            CapabilityImpl identity = new CapabilityImpl(resource, IdentityNamespace.IDENTITY_NAMESPACE, Collections.emptyMap(), attrs);
             resource.addCapability(identity);
         }
         if (uri != null) {
-            Map<String, Object> attrs = new HashMap<>();
-            attrs.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, uri);
-            resource.addCapability(new CapabilityImpl(resource, ContentNamespace.CONTENT_NAMESPACE, Collections.emptyMap(), attrs));
+            resource.addCapability(new CapabilityImpl(resource, ContentNamespace.CONTENT_NAMESPACE, Collections.emptyMap(),
+                Collections.singletonMap(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, uri)));
         }
 
         // Add a bundle and host capability to all
@@ -244,7 +244,7 @@ public final class ResourceBuilder {
                 }
             }
         }
-        
+
         // Combine all capabilities.
         resource.addCapabilities(exportCaps);
         resource.addCapabilities(provideCaps);
@@ -334,15 +334,13 @@ public final class ResourceBuilder {
         List<Capability> capList = new ArrayList<>();
         for (ParsedHeaderClause clause : clauses) {
             for (String path : clause.paths) {
-                Map<String, String> dirs = new LinkedHashMap<>();
-                dirs.put(ServiceNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, ServiceNamespace.EFFECTIVE_ACTIVE);
                 Map<String, Object> attrs = new LinkedHashMap<>();
                 attrs.put(Constants.OBJECTCLASS, path);
                 attrs.putAll(clause.attrs);
                 capList.add(new CapabilityImpl(
                         resource,
                         ServiceNamespace.SERVICE_NAMESPACE,
-                        dirs,
+                        DEFAULT_DIRECTIVES,
                         attrs));
             }
         }
@@ -899,16 +897,18 @@ public final class ResourceBuilder {
             }
 
             String nameClause;
-            if (rName != null)
+            if (rName != null) {
                 nameClause = "(" + ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE + "=" + lName + "/" + rName + ")";
-            else
+            } else {
                 nameClause = "(" + ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE + "=" + lName + ")";
+            }
 
             String filter;
-            if (versionClause != null)
+            if (versionClause != null) {
                 filter = "(&" + nameClause + versionClause + ")";
-            else
+            } else {
                 filter = nameClause;
+            }
 
             filters.add(filter);
         }
@@ -940,8 +940,9 @@ public final class ResourceBuilder {
     }
 
     private static String getBreeVersionClause(Version ver) {
-        if (ver == null)
+        if (ver == null) {
             return null;
+        }
 
         return "(" + ExecutionEnvironmentNamespace.CAPABILITY_VERSION_ATTRIBUTE + "=" + ver + ")";
     }
