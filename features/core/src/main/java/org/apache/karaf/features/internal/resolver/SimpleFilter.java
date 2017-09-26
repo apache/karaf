@@ -19,10 +19,12 @@ package org.apache.karaf.features.internal.resolver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.felix.utils.version.VersionRange;
 
@@ -38,12 +40,27 @@ public class SimpleFilter {
     public static final int PRESENT = 8;
     public static final int APPROX = 9;
 
+    /**
+     * Strings which are commonly found in filter specification. We use this map as an interner.
+     */
+    private static final Set<String> COMMON_STRINGS;
+
+    static {
+        Set<String> s = new HashSet<>(8);
+        s.add("optional");
+        s.add("osgi.ee");
+        s.add("resolution");
+        s.add("uses");
+        s.add("version");
+        COMMON_STRINGS = s;
+    }
+
     private final String name;
     private final Object value;
     private final int op;
 
     public SimpleFilter(String name, Object value, int op) {
-        this.name = name;
+        this.name = internIfCommon(name);
         this.value = value;
         this.op = op;
     }
@@ -123,6 +140,10 @@ public class SimpleFilter {
             sb.append("(*)");
             break;
         }
+    }
+
+    private static String internIfCommon(String str) {
+        return str != null && COMMON_STRINGS.contains(str) ? str.intern() : str;
     }
 
     private static void toString(StringBuilder sb, List<?> list) {
