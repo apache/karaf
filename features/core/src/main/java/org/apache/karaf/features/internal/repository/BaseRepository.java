@@ -79,7 +79,7 @@ public class BaseRepository implements Repository {
                     String filter = requirement.getDirectives().get(Constants.FILTER_DIRECTIVE);
                     sf = (filter != null)
                             ? SimpleFilter.parse(filter)
-                            : new SimpleFilter(null, null, SimpleFilter.MATCH_ALL);
+                            : SimpleFilter.MATCH_ALL_FILTER;
                 }
                 result.put(requirement, set.match(sf, true));
             } else {

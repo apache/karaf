@@ -79,7 +79,7 @@ public final class RequirementSort<T extends Resource> {
             String filter = requirement.getDirectives().get(Constants.FILTER_DIRECTIVE);
             SimpleFilter sf = (filter != null)
                     ? SimpleFilter.parse(filter)
-                    : new SimpleFilter(null, null, SimpleFilter.MATCH_ALL);
+                    : SimpleFilter.MATCH_ALL_FILTER;
             for (Capability cap : capSet.match(sf, true)) {
                 result.add((T) cap.getResource());
             }

@@ -232,7 +232,7 @@ public class SubsystemResolver {
         return wiring;
     }
 
-    private Object toJson(Map<Resource, List<Wire>> wiring) {
+    private static Object toJson(Map<Resource, List<Wire>> wiring) {
         Map<String, List<Map<String, Object>>> wires = new HashMap<>();
         for (Map.Entry<Resource, List<Wire>> reswiring : wiring.entrySet()) {
             Resource resource = reswiring.getKey();
@@ -251,25 +251,25 @@ public class SubsystemResolver {
         return wires;
     }
 
-    private String toString(Resource r) {
+    private static String toString(Resource r) {
         return toString(r.getCapabilities(IDENTITY_NAMESPACE).get(0));
     }
 
-    private String toString(Requirement r) {
+    private static String toString(Requirement r) {
         return BaseClause.toString(null, r.getNamespace(), r.getAttributes(), r.getDirectives());
     }
 
-    private String toString(Capability c) {
+    private static String toString(Capability c) {
         return BaseClause.toString(null, c.getNamespace(), c.getAttributes(), c.getDirectives());
     }
 
-    private Object toJson(Repository repository) {
+    private static Object toJson(Repository repository) {
         Requirement req = new RequirementImpl(
                 null,
                 IDENTITY_NAMESPACE,
                 Collections.emptyMap(),
                 Collections.emptyMap(),
-                new SimpleFilter(null, null, SimpleFilter.MATCH_ALL));
+                SimpleFilter.MATCH_ALL_FILTER);
         Collection<Capability> identities = repository.findProviders(Collections.singleton(req)).get(req);
         List<Object> resources = new ArrayList<>();
         for (Capability identity : identities) {
@@ -279,7 +279,7 @@ public class SubsystemResolver {
         return resources;
     }
 
-    private Object toJson(Resource resource) {
+    private static Object toJson(Resource resource) {
         Map<String, Object> obj = new HashMap<>();
         List<Object> caps = new ArrayList<>();
         List<Object> reqs = new ArrayList<>();
@@ -371,7 +371,7 @@ public class SubsystemResolver {
     }
 
     /**
-     * 
+     *
      * @return map of bundles and the region they are deployed in
      */
     public Map<Resource, String> getBundles() {
@@ -403,7 +403,7 @@ public class SubsystemResolver {
     }
 
     /**
-     * 
+     *
      * @param resourceFilter
      * @return map from resource to region name
      */
@@ -475,7 +475,7 @@ public class SubsystemResolver {
         return null;
     }
 
-    private Capability findMatchingCapability(SimpleFilter filter, Collection<Capability> caps) {
+    private static Capability findMatchingCapability(SimpleFilter filter, Collection<Capability> caps) {
         for (Capability cap : caps) {
             if (CapabilitySet.matches(cap, filter)) {
                 return cap;
@@ -484,7 +484,7 @@ public class SubsystemResolver {
         return null;
     }
 
-    private Wire findMatchingWire(SimpleFilter filter, Collection<Wire> wires) {
+    private static Wire findMatchingWire(SimpleFilter filter, Collection<Wire> wires) {
         for (Wire wire : wires) {
             Capability cap = wire.getCapability();
             if (CapabilitySet.matches(cap, filter)) {
@@ -494,7 +494,7 @@ public class SubsystemResolver {
         return null;
     }
 
-    private SimpleFilter createFilter(String... s) {
+    private static SimpleFilter createFilter(String... s) {
         Map<String, Object> attrs = new HashMap<>();
         for (int i = 0; i < s.length - 1; i += 2) {
             attrs.put(s[i], s[i + 1]);
@@ -516,13 +516,14 @@ public class SubsystemResolver {
         }
     }
 
-    private boolean isFlat(Subsystem subsystem) {
-        if (subsystem == null || subsystem.getFeature() == null)
+    private static boolean isFlat(Subsystem subsystem) {
+        if (subsystem == null || subsystem.getFeature() == null) {
             return false;
+        }
         return subsystem.getFeature() != null && subsystem.getFeature().getScoping() == null;
     }
 
-    private Subsystem getOrCreateChild(Subsystem ss, String name) {
+    private static Subsystem getOrCreateChild(Subsystem ss, String name) {
         Subsystem child = ss.getChild(name);
         return child != null ? child : ss.createSubsystem(name, true);
     }
@@ -539,7 +540,7 @@ public class SubsystemResolver {
         }
     }
 
-    private RegionFilterBuilder createRegionFilterBuilder(RegionDigraph digraph, Map<String, Set<String>> sharingPolicy) throws InvalidSyntaxException {
+    private static RegionFilterBuilder createRegionFilterBuilder(RegionDigraph digraph, Map<String, Set<String>> sharingPolicy) throws InvalidSyntaxException {
         RegionFilterBuilder result = digraph.createRegionFilterBuilder();
         for (Map.Entry<String, Set<String>> entry : sharingPolicy.entrySet()) {
             for (String filter : entry.getValue()) {

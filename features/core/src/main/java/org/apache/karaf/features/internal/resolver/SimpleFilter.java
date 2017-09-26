@@ -55,11 +55,13 @@ public class SimpleFilter {
         COMMON_STRINGS = s;
     }
 
+    public static final SimpleFilter MATCH_ALL_FILTER = new SimpleFilter(null, null, MATCH_ALL);
+
     private final String name;
     private final Object value;
     private final int op;
 
-    public SimpleFilter(String name, Object value, int op) {
+    SimpleFilter(String name, Object value, int op) {
         this.name = internIfCommon(name);
         this.value = value;
         this.op = op;
@@ -572,16 +574,13 @@ public class SimpleFilter {
             }
         }
 
-        SimpleFilter sf = null;
-
-        if (filters.size() == 1) {
-            sf = filters.get(0);
-        } else if (attrs.size() > 1) {
-            sf = new SimpleFilter(null, filters, SimpleFilter.AND);
-        } else if (filters.isEmpty()) {
-            sf = new SimpleFilter(null, null, SimpleFilter.MATCH_ALL);
+        switch (filters.size()) {
+            case 0:
+                return MATCH_ALL_FILTER;
+            case 1:
+                return filters.get(0);
+            default:
+                return new SimpleFilter(null, filters, SimpleFilter.AND);
         }
-
-        return sf;
     }
 }
