@@ -19,6 +19,7 @@ package org.apache.karaf.webconsole.gogo;
  import java.io.IOException;
  import java.io.InputStream;
  import java.io.OutputStream;
+ import java.nio.charset.StandardCharsets;
  import java.util.EnumSet;
 
  import org.apache.karaf.shell.api.console.SignalListener;
@@ -28,7 +29,7 @@ package org.apache.karaf.webconsole.gogo;
 public class WebTerminal extends ExternalTerminal implements Terminal {
 
     public WebTerminal(int width, int height, InputStream input, OutputStream output) throws IOException {
-        super("Karaf Web Terminal", "ansi", input, output, "UTF-8");
+        super("Karaf Web Terminal", "ansi", input, output, StandardCharsets.UTF_8);
         size.setColumns(width);
         size.setRows(height);
     }

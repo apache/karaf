@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
@@ -131,6 +132,11 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
     @Override
     public PrintWriter writer() {
         return terminal.writer();
+    }
+
+    @Override
+    public Charset encoding() {
+        return terminal.encoding();
     }
 
     @Override
