@@ -60,7 +60,7 @@ public class LogDumpProvider implements DumpProvider {
             Dictionary dictionary = configuration.getProperties();
             for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
                 String property = (String) e.nextElement();
-                if (property.endsWith(".file")) {
+                if (property.endsWith(".fileName")) {
                     // it's a file appender, get the file location
                     String location = (String) dictionary.get(property);
                     File file = new File(location);
