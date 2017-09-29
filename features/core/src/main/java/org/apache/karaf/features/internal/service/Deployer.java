@@ -1297,7 +1297,7 @@ public class Deployer {
                     deployment.toInstall.add(resource);
                 }
             }
-            Collections.sort(deployment.toInstall, new ResourceComparator());
+            deployment.toInstall.sort(new ResourceComparator());
 
             // Add this region if there is something to do
             if (!deployment.toDelete.isEmpty()
