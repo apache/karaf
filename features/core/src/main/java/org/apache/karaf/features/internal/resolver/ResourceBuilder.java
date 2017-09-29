@@ -355,7 +355,7 @@ public final class ResourceBuilder {
                     String multiple = clause.dirs.get("multiple");
                     String avail = clause.dirs.get("availability");
                     String filter = (String) clause.attrs.get("filter");
-                    Map<String, String> dirs = new LinkedHashMap<>();
+                    Map<String, String> dirs = new LinkedHashMap<>(2);
                     dirs.put(ServiceNamespace.REQUIREMENT_EFFECTIVE_DIRECTIVE, ServiceNamespace.EFFECTIVE_ACTIVE);
                     if ("optional".equals(avail)) {
                         dirs.put(ServiceNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, ServiceNamespace.RESOLUTION_OPTIONAL);
@@ -1197,8 +1197,8 @@ public final class ResourceBuilder {
 
     static class ParsedHeaderClause {
         public final List<String> paths = new ArrayList<>();
-        public final Map<String, String> dirs = new LinkedHashMap<>();
-        public final Map<String, Object> attrs = new LinkedHashMap<>();
-        public final Map<String, String> types = new LinkedHashMap<>();
+        public final Map<String, String> dirs = new LinkedHashMap<>(1);
+        public final Map<String, Object> attrs = new LinkedHashMap<>(1);
+        public final Map<String, String> types = new LinkedHashMap<>(1);
     }
 }
