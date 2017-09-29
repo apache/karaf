@@ -23,7 +23,6 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +30,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -439,7 +440,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
         // the feature's Maven artifact to allow for multi-feature repositories)
         // TODO Initialise the repositories from the existing feature file if any
         Map<Dependency, Feature> otherFeatures = new HashMap<>();
-        Map<Feature, String> featureRepositories = new HashMap<Feature, String>();
+        Map<Feature, String> featureRepositories = new HashMap<>();
+        FeaturesCache cache = new FeaturesCache();
         for (final LocalDependency entry : localDependencies) {
             Object artifact = entry.getArtifact();
 
@@ -447,9 +449,11 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 continue;
             }
 
-            processFeatureArtifact(features, feature, otherFeatures, featureRepositories, artifact, entry.getParent(),
-                    true);
+            processFeatureArtifact(features, feature, otherFeatures, featureRepositories, cache, artifact,
+                    entry.getParent(), true);
         }
+        // Do not retain cache beyond this point
+        cache = null;
 
         // Second pass to look for bundles
         if (addBundlesToPrimaryFeature) {
@@ -463,8 +467,6 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
                 if (!this.dependencyHelper.isArtifactAFeature(artifact)) {
                     String bundleName = this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(entry.getParent(), artifact));
-                    File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
-                    Manifest manifest = getManifest(bundleFile);
 
                     for (ConfigFile cf : feature.getConfigfile()) {
                         if (bundleName.equals(cf.getLocation().replace('\n', ' ').trim())) {
@@ -473,7 +475,9 @@ public class GenerateDescriptorMojo extends MojoSupport {
                         }
                     }
 
-                    if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
+                    File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
+                    Manifest manifest = getManifest(bundleFile);
+                    if (manifest == null || !ManifestUtils.isBundle(manifest)) {
                         bundleName = "wrap:" + bundleName;
                         needWrap = true;
                     }
@@ -541,7 +545,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
     }
 
     private void processFeatureArtifact(Features features, Feature feature, Map<Dependency, Feature> otherFeatures,
-                                        Map<Feature, String> featureRepositories,
+                                        Map<Feature, String> featureRepositories, FeaturesCache cache,
                                         Object artifact, Object parent, boolean add)
             throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
         if (this.dependencyHelper.isArtifactAFeature(artifact) && FEATURE_CLASSIFIER.equals(
@@ -551,9 +555,9 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 throw new MojoExecutionException(
                         "Cannot locate file for feature: " + artifact + " at " + featuresFile);
             }
-            Features includedFeatures = readFeaturesFile(featuresFile);
+            Features includedFeatures = cache.get(featuresFile);
             for (String repository : includedFeatures.getRepository()) {
-                processFeatureArtifact(features, feature, otherFeatures, featureRepositories,
+                processFeatureArtifact(features, feature, otherFeatures, featureRepositories, cache,
                         new DefaultArtifact(MavenUtil.mvnToAether(repository)), parent, false);
             }
             for (Feature includedFeature : includedFeatures.getFeature()) {
@@ -585,7 +589,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
     }
 
-    private Dependency findMatchingDependency(List<Dependency> dependencies, Dependency reference) {
+    private static Dependency findMatchingDependency(List<Dependency> dependencies, Dependency reference) {
         String referenceName = reference.getName();
         for (Dependency dependency : dependencies) {
             if (referenceName.equals(dependency.getName())) {
@@ -595,7 +599,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         return null;
     }
 
-    private void mergeDependencies(Dependency target, Dependency source) {
+    private static void mergeDependencies(Dependency target, Dependency source) {
         if (target.getVersion() == null || Feature.DEFAULT_VERSION.equals(target.getVersion())) {
             target.setVersion(source.getVersion());
         }
@@ -626,30 +630,28 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
 
     private Manifest getManifest(File file) throws IOException {
-        InputStream is;
+        final InputStream is;
         try {
-            is = new BufferedInputStream(new FileInputStream(file));
+            is = Files.newInputStream(file.toPath());
         } catch (Exception e) {
             getLog().warn("Error while opening artifact", e);
             return null;
         }
 
-        try {
-            is.mark(256 * 1024);
-            JarInputStream jar = new JarInputStream(is);
-            Manifest m = jar.getManifest();
-            if (m == null) {
-                getLog().warn("Manifest not present in the first entry of the zip - " + file.getName());
+        try (BufferedInputStream bis = new BufferedInputStream(is)) {
+            bis.mark(256 * 1024);
+
+            try (JarInputStream jar = new JarInputStream(bis)) {
+                Manifest m = jar.getManifest();
+                if (m == null) {
+                    getLog().warn("Manifest not present in the first entry of the zip - " + file.getName());
+                }
+                return m;
             }
-            jar.close();
-            return m;
-        } finally {
-            // just in case when we did not open bundle
-            is.close();
         }
     }
 
-    private Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
+    private static Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
         return JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
     }
 
@@ -859,7 +861,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
     }
 
-    private Features toFeatures(Collection<Bundle> addedBundles, Collection<Dependency> addedDependencys, ObjectFactory objectFactory) {
+    private static Features toFeatures(Collection<Bundle> addedBundles, Collection<Dependency> addedDependencys, ObjectFactory objectFactory) {
         Features features = objectFactory.createFeaturesRoot();
         Feature feature = objectFactory.createFeature();
         feature.getBundle().addAll(addedBundles);
@@ -869,7 +871,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
     }
 
 
-    private void writeDependencies(Features features, File file) throws JAXBException, IOException {
+    private static void writeDependencies(Features features, File file) throws JAXBException, IOException {
         file.getParentFile().mkdirs();
         if (!file.getParentFile().exists() || !file.getParentFile().isDirectory()) {
             throw new IOException("Cannot create directory at " + file.getParent());
@@ -922,4 +924,18 @@ public class GenerateDescriptorMojo extends MojoSupport {
         return "\tTree listing is saved here: " + treeListFile.getAbsolutePath() + "\n";
     }
 
+    private static final class FeaturesCache {
+        private final Map<File, Features> map = new WeakHashMap<>();
+
+        Features get(final File featuresFile) throws XMLStreamException, JAXBException, IOException {
+            final Features existing = map.get(featuresFile);
+            if (existing != null) {
+                return existing;
+            }
+
+            final Features computed = readFeaturesFile(featuresFile);
+            map.put(featuresFile, computed);
+            return computed;
+        }
+    }
 }
