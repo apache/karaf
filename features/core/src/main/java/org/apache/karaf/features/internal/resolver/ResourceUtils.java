@@ -94,8 +94,8 @@ public final class ResourceUtils {
     }
 
     public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range, boolean mandatory) {
-        Map<String, String> dirs = new HashMap<>();
-        Map<String, Object> attrs = new HashMap<>();
+        Map<String, String> dirs = new HashMap<>(1);
+        Map<String, Object> attrs = new HashMap<>(4);
         if (!mandatory) {
             dirs.put(REQUIREMENT_RESOLUTION_DIRECTIVE, RESOLUTION_OPTIONAL);
         }
@@ -121,9 +121,9 @@ public final class ResourceUtils {
         for (Capability cap : required.getCapabilities(null)) {
             if (cap.getNamespace().equals(IDENTITY_NAMESPACE)) {
                 Map<String, Object> attributes = cap.getAttributes();
-                Map<String, String> dirs = new HashMap<>();
+                Map<String, String> dirs = new HashMap<>(1);
                 dirs.put(REQUIREMENT_RESOLUTION_DIRECTIVE, mandatory ? RESOLUTION_MANDATORY : RESOLUTION_OPTIONAL);
-                Map<String, Object> attrs = new HashMap<>();
+                Map<String, Object> attrs = new HashMap<>(4);
                 attrs.put(IDENTITY_NAMESPACE, attributes.get(IDENTITY_NAMESPACE));
                 attrs.put(CAPABILITY_TYPE_ATTRIBUTE, attributes.get(CAPABILITY_TYPE_ATTRIBUTE));
                 Version version = (Version) attributes.get(CAPABILITY_VERSION_ATTRIBUTE);
@@ -137,7 +137,7 @@ public final class ResourceUtils {
 
     public static String toFeatureRequirement(String feature) {
         String[] parts = feature.split("/");
-        Map<String, Object> attrs = new HashMap<>();
+        Map<String, Object> attrs = new HashMap<>(4);
         attrs.put(IDENTITY_NAMESPACE, parts[0]);
         attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
         if (parts.length > 1) {
@@ -150,8 +150,8 @@ public final class ResourceUtils {
 
     public static String toFeatureCapability(String feature) {
         String[] parts = feature.split("/");
-        Map<String, String> dirs = new HashMap<>();
-        Map<String, Object> attrs = new HashMap<>();
+        Map<String, String> dirs = new HashMap<>(1);
+        Map<String, Object> attrs = new HashMap<>(4);
         attrs.put(IDENTITY_NAMESPACE, parts[0]);
         attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
         if (parts.length > 1) {
