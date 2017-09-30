@@ -276,6 +276,7 @@
                 <configuration>
                     <useDefaultDelimiters>false</useDefaultDelimiters>
                     <delimiters>
+                        <delimiter>${*}</delimiter>
                         <delimiter>@@</delimiter>
                     </delimiters>
                 </configuration>
@@ -293,6 +294,15 @@
     </build>
     
     <profiles>
+        <profile>
+                <id>java9</id>
+                <properties>
+                    <asm.version>6.0_BETA</asm.version>
+                </properties>
+                <activation>
+                    <jdk>9</jdk>
+            </activation>
+        </profile>
         <profile>
             <id>ci-build-profile</id>
             <activation>

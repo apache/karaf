@@ -1751,7 +1751,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>1.4.1</version>
+                    <version>3.0.0-M1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -2314,6 +2314,7 @@
         <profile>
             <id>java9</id>
             <properties>
+                <easymock.version>3.5</easymock.version>
                 <surefire.argLine>--add-opens java.base/java.security=ALL-UNNAMED
                                   --add-opens java.base/java.net=ALL-UNNAMED 
                                   --add-opens java.base/java.lang=ALL-UNNAMED

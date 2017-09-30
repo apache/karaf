@@ -119,5 +119,16 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>java9</id>
+            <properties>
+                <asm.version>6.0_BETA</asm.version> 
+            </properties>
+            <activation>
+                <jdk>9</jdk>
+            </activation>
+        </profile>
+    </profiles>
 
 </project>

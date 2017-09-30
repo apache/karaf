@@ -125,7 +125,16 @@
                     <groupId>org.eclipse.aether</groupId>
                     <artifactId>aether-util</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.plexus</groupId>
+                    <artifactId>plexus-archiver</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-archiver</artifactId>
+            <version>3.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -376,6 +385,8 @@
         <profile>
 	        <id>java9</id>
 	        <properties>
+                <plexus-utils.version>3.1.0</plexus-utils.version>
+                <asm.version>6.0_BETA</asm.version>
                 <mvn.opts>--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED --add-modules java.activation,java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
 	        </properties>
 	        <activation>

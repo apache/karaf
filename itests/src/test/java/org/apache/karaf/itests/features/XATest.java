@@ -61,6 +61,12 @@ public class XATest extends KarafTestSupport {
         result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
         result.add(replaceConfigurationFile("etc/org.ops4j.datasource-derby.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-derby.cfg")));
         result.add(replaceConfigurationFile("etc/xa-test-camel.xml", getConfigFile("/org/apache/karaf/itests/features/xa-test-camel.xml")));
+        if (System.getProperty("java.version").startsWith("9")) {
+            //need asm 6.x which support java9 to run this test
+            result.add(replaceConfigurationFile("system/org/apache/karaf/features/standard/" 
+                + version + "/standard-" + version + "-features.xml", 
+                getConfigFile("/etc/feature.xml")));
+        }
         return result.toArray(new Option[result.size()]);
     }
 
