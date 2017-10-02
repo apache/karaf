@@ -93,7 +93,7 @@ if { %(jlineReader != null) } {
 
   complete -c shell:cd -e
   complete -c shell:cd -d "Change current directory"
-  complete -c shell:cd -a '__directories'
+  complete -c shell:cd -a 'wi = ($.commandLine wordIndex); if { %(wi==1) } { __directories } { [ ] }'
 
   complete -c shell:sleep -e
   complete -c shell:sleep -d "Pause execution for the specified amount of time"
