@@ -49,6 +49,9 @@ if [ -f "${DIRNAME}/setenv" ]; then
 fi
 
 init() {
+    # KARAF-5332: Unset KARAF_DEBUG
+    unset KARAF_DEBUG
+
     # Determine if there is special OS handling we must perform
     detectOS
 
