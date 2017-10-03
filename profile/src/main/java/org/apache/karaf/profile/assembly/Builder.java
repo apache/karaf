@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -738,7 +737,7 @@ public class Builder {
         // Load startup repositories
         Map<String, Features> installedRepositories = loadRepositories(manager, installedEffective.getRepositories(), true);
         // Compute startup feature dependencies
-        Set<Feature> allInstalledFeatures = new HashSet<>();
+        Set<Feature> allInstalledFeatures = new LinkedHashSet<>();
         for (Features repo : installedRepositories.values()) {
             allInstalledFeatures.addAll(repo.getFeature());
         }
@@ -781,12 +780,12 @@ public class Builder {
         // Load startup repositories
         Map<String, Features> bootRepositories = loadRepositories(manager, bootEffective.getRepositories(), true);
         // Compute startup feature dependencies
-        Set<Feature> allBootFeatures = new HashSet<>();
+        Set<Feature> allBootFeatures = new LinkedHashSet<>();
         for (Features repo : bootRepositories.values()) {
             allBootFeatures.addAll(repo.getFeature());
         }
         // Generate a global feature
-        Map<String, Dependency> generatedDep = new HashMap<>();
+        Map<String, Dependency> generatedDep = new LinkedHashMap<>();
         Feature generated = new Feature();
         generated.setName(UUID.randomUUID().toString());
         // Add feature dependencies
@@ -815,13 +814,13 @@ public class Builder {
         Downloader downloader = manager.createDownloader();
 
         // Compute startup feature dependencies
-        Set<Feature> bootFeatures = new HashSet<>();
+        Set<Feature> bootFeatures = new LinkedHashSet<>();
         addFeatures(allBootFeatures, generated.getName(), bootFeatures, true);
         for (Feature feature : bootFeatures) {
             // the feature is a startup feature, updating startup.properties file
             LOGGER.info("Feature " + feature.getName() + " is defined as a boot feature");
             // add the feature in the system folder
-            Set<String> locations = new HashSet<>();
+            Set<String> locations = new LinkedHashSet<>();
             for (Bundle bundle : feature.getBundle()) {
                 if (!ignoreDependencyFlag || !bundle.isDependency()) {
                     locations.add(bundle.getLocation().trim());
@@ -937,7 +936,7 @@ public class Builder {
 
     private String getRepos(Features rep) {
         StringBuilder repos = new StringBuilder();
-        for (String repo : new HashSet<>(rep.getRepository())) {
+        for (String repo : new LinkedHashSet<>(rep.getRepository())) {
             if (repos.length() > 0) {
                 repos.append(",");
             }
@@ -1087,7 +1086,7 @@ public class Builder {
             name = feature;
             range = new VersionRange(Version.emptyVersion);
         }
-        Set<Feature> set = new HashSet<>();
+        Set<Feature> set = new LinkedHashSet<>();
         for (Feature f : allFeatures) {
             if (f.getName().equals(name) && range.contains(VersionTable.getVersion(f.getVersion()))) {
                 set.add(f);
@@ -1252,7 +1251,7 @@ public class Builder {
         for (String bundle : bundles) {
             MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, "bundle:" + bundle);
         }
-        Set<String> prereqs = new HashSet<>();
+        Set<String> prereqs = new LinkedHashSet<>();
         while (true) {
             try {
                 deployer.deploy(callback.getDeploymentState(), request);
@@ -1274,7 +1273,7 @@ public class Builder {
         request.bundleUpdateRange = FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE;
         request.featureResolutionRange = FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE;
         request.serviceRequirements = FeaturesService.SERVICE_REQUIREMENTS_DEFAULT;
-        request.overrides = new HashSet<>();
+        request.overrides = new LinkedHashSet<>();
         request.requirements = new HashMap<>();
         request.stateChanges = new HashMap<>();
         request.options = EnumSet.noneOf(FeaturesService.Option.class);
