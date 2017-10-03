@@ -17,7 +17,6 @@
 package org.apache.karaf.scr.command.action;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.karaf.scr.command.ScrCommandConstants;
@@ -50,7 +49,7 @@ public class ListAction extends ScrActionSupport {
         for (ComponentDescriptionDTO component : serviceComponentRuntime.getComponentDescriptionDTOs()) {
             configs.addAll(serviceComponentRuntime.getComponentConfigurationDTOs(component));
         }
-        Collections.sort(configs, idComparator);
+        configs.sort(idComparator);
         for (ComponentConfigurationDTO config : configs) {
             // Display only non hidden components, or all if showHidden is true
             if (showHidden || !ScrActionSupport.isHiddenComponent(config)) {

@@ -946,7 +946,6 @@
     <feature name="scr" description="Declarative Service support" version="${project.version}">
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.scr.compat/${felix.scr.compat.version}</bundle>
         <conditional>
             <condition>management</condition>
             <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/${project.version}</bundle>

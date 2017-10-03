@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.felix.scr.Reference;
 import org.apache.karaf.scr.management.ScrServiceMBean;
+import org.apache.karaf.scr.management.internal.ScrService;
 import org.osgi.framework.Constants;
 
 import javax.management.openmbean.ArrayType;
@@ -46,7 +46,7 @@ public class JmxReference {
     private final CompositeData data;
     //String[] COMPONENT = { REFERENCE_NAME, REFERENCE_STATE, REFERENCE_CARDINALITY, REFERENCE_AVAILABILITY, REFERENCE_POLICY, REFERENCE_BOUND_SERVICES};
 
-    public JmxReference(Reference reference) {
+    public JmxReference(ScrService.Reference reference) {
         try {
             String[] itemNames = ScrServiceMBean.REFERENCE;
             Object[] itemValues = new Object[itemNames.length];
@@ -66,10 +66,10 @@ public class JmxReference {
         return data;
     }
 
-    public static TabularData tableFrom(Reference... references) {
+    public static TabularData tableFrom(ScrService.Reference... references) {
         TabularDataSupport table = new TabularDataSupport(REFERENCE_TABLE);
         if (references != null) {
-            for (Reference reference : references) {
+            for (ScrService.Reference reference : references) {
                 table.put(new JmxReference(reference).asCompositeData());
             }
         }
@@ -114,11 +114,11 @@ public class JmxReference {
 
 
     /**
-     * Returns a literal for the {@link Reference} cardinality.
-     * @param reference     The target {@link Reference}.
+     * Returns a literal for the {@link ScrService.Reference} cardinality.
+     * @param reference     The target {@link ScrService.Reference}.
      * @return              "Multiple" or "Single".
      */
-    private static String getCardinality(Reference reference) {
+    private static String getCardinality(ScrService.Reference reference) {
         if (reference.isMultiple()) {
             return ScrServiceMBean.REFERENCE_CARDINALITY_MULTIPLE;
         } else {
@@ -127,11 +127,11 @@ public class JmxReference {
     }
 
     /**
-     * Returns a literal for the {@link Reference} availability.
-     * @param reference     The target {@link Reference}.
+     * Returns a literal for the {@link ScrService.Reference} availability.
+     * @param reference     The target {@link ScrService.Reference}.
      * @return              "Mandatory" or "Optional".
      */
-    private static String getAvailability(Reference reference) {
+    private static String getAvailability(ScrService.Reference reference) {
         if (reference.isOptional()) {
             return ScrServiceMBean.REFERENCE_AVAILABILITY_OPTIONAL;
         } else {
@@ -140,11 +140,11 @@ public class JmxReference {
     }
 
     /**
-     * Returns a literal for the {@link Reference} policy.
-     * @param reference     The target {@link Reference}.
+     * Returns a literal for the {@link ScrService.Reference} policy.
+     * @param reference     The target {@link ScrService.Reference}.
      * @return              "Static" or "Dynamic".
      */
-    private static String getPolicy(Reference reference) {
+    private static String getPolicy(ScrService.Reference reference) {
         if (reference.isStatic()) {
             return ScrServiceMBean.REFERENCE_POLICY_STATIC;
         } else {
@@ -154,10 +154,10 @@ public class JmxReference {
 
     /**
      * Returns The bound service ids.
-     * @param reference     The target {@link Reference}.
+     * @param reference     The target {@link ScrService.Reference}.
      * @return
      */
-    private static String[] getBoundServices(Reference reference) {
+    private static String[] getBoundServices(ScrService.Reference reference) {
         if (reference.getBoundServiceReferences() == null || reference.getBoundServiceReferences().length == 0) {
             return new String[0];
         } else {

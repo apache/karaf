@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.felix.scr.Component;
 import org.apache.karaf.scr.management.ScrServiceMBean;
+import org.apache.karaf.scr.management.internal.ScrService;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
@@ -28,6 +28,7 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+import java.util.Arrays;
 
 public class JmxComponent {
 
@@ -35,7 +36,7 @@ public class JmxComponent {
     /**
      * The CompositeType which represents a single component
      */
-    public final static CompositeType COMPONENT = createComponenetType();
+    public final static CompositeType COMPONENT = createComponentType();
 
     /**
      * The TabularType which represents a list of components
@@ -44,7 +45,7 @@ public class JmxComponent {
 
     private final CompositeData data;
     
-    public JmxComponent(Component component) {
+    public JmxComponent(ScrService.Component component) {
         try {
             String[] itemNames = ScrServiceMBean.COMPONENT;
             Object[] itemValues = new Object[itemNames.length];
@@ -63,15 +64,19 @@ public class JmxComponent {
         return data;
     }
 
-    public static TabularData tableFrom(Component... components) {
+    public static TabularData tableFrom(ScrService.Component... components) {
+        return tableFrom(Arrays.asList(components));
+    }
+
+    public static TabularData tableFrom(Iterable<ScrService.Component> components) {
         TabularDataSupport table = new TabularDataSupport(COMPONENT_TABLE);
-        for (Component component : components) {
+        for (ScrService.Component component : components) {
             table.put(new JmxComponent(component).asCompositeData());
         }
         return table;
     }
 
-    private static CompositeType createComponenetType() {
+    private static CompositeType createComponentType() {
         try {
             String description = "This type encapsulates Scr references";
             String[] itemNames = ScrServiceMBean.COMPONENT;
@@ -107,33 +112,33 @@ public class JmxComponent {
 
 
     /**
-     * Returns a literal for the {@link Component} state.
-     * @param component     The target {@link Component}.
+     * Returns a literal for the {@link ScrService.Component} state.
+     * @param component     The target {@link ScrService.Component}.
      * @return
      */
-    private static String getState(Component component) {
+    private static String getState(ScrService.Component component) {
         switch (component.getState()) {
-            case Component.STATE_ACTIVE:
+            case ScrService.Component.STATE_ACTIVE:
                 return "Active";
-            case Component.STATE_ACTIVATING:
+            case ScrService.Component.STATE_ACTIVATING:
                 return "Activating";
-            case Component.STATE_DEACTIVATING:
+            case ScrService.Component.STATE_DEACTIVATING:
                 return "Deactivating";
-            case Component.STATE_DISABLED:
+            case ScrService.Component.STATE_DISABLED:
                 return "Disabled";
-            case Component.STATE_DISABLING:
+            case ScrService.Component.STATE_DISABLING:
                 return "Disabling";
-            case Component.STATE_DISPOSED:
+            case ScrService.Component.STATE_DISPOSED:
                 return "Disposed";
-            case Component.STATE_DISPOSING:
+            case ScrService.Component.STATE_DISPOSING:
                 return "Disposing";
-            case Component.STATE_ENABLING:
+            case ScrService.Component.STATE_ENABLING:
                 return "Enabling";
-            case Component.STATE_FACTORY:
+            case ScrService.Component.STATE_FACTORY:
                 return "Factory";
-            case Component.STATE_REGISTERED:
+            case ScrService.Component.STATE_REGISTERED:
                 return "Registered";
-            case Component.STATE_UNSATISFIED:
+            case ScrService.Component.STATE_UNSATISFIED:
                 return "Unsatisfied";
         }
         return "Unknown";

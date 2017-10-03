@@ -16,31 +16,33 @@
  */
 package org.apache.karaf.scr.management.internal;
 
+import org.apache.karaf.scr.management.ScrServiceMBean;
+import org.apache.karaf.scr.management.codec.JmxComponent;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.StandardMBean;
+import javax.management.openmbean.TabularData;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.management.*;
-import javax.management.openmbean.TabularData;
-
-import aQute.bnd.annotation.component.Activate;
-import aQute.bnd.annotation.component.Deactivate;
-import aQute.bnd.annotation.component.Reference;
-
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.ScrService;
-import org.apache.karaf.scr.management.ScrServiceMBean;
-
-import org.apache.karaf.scr.management.codec.JmxComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-@aQute.bnd.annotation.component.Component(
+@Component(
         name = ScrServiceMBeanImpl.COMPONENT_NAME,
         enabled = true,
         immediate = true,
-        properties = {"hidden.component=true"})
+        properties = {"org/apache/karaf/scr/management/internal/ScrServiceMBeanImpl.properties"})
 public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBean {
 
     public static final String OBJECT_NAME = "org.apache.karaf:type=scr,name=" + System.getProperty("karaf.name", "root");
@@ -110,7 +112,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     @Override
     public TabularData getComponents() {
         try {
-            return JmxComponent.tableFrom(safe(scrService.getComponents()));
+            return JmxComponent.tableFrom(scrService.getComponents());
         } catch (Exception e) {
             e.printStackTrace(System.out);
             return null;
@@ -118,7 +120,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     }
 
     public String[] listComponents() {
-        Component[] components = safe(scrService.getComponents());
+        ScrService.Component[] components = scrService.getComponents();
         String[] componentNames = new String[components.length];
         for (int i = 0; i < componentNames.length; i++) {
             componentNames[i] = components[i].getName();
@@ -128,7 +130,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
 
     public boolean isComponentActive(String componentName) throws MBeanException {
         try {
-            return componentState(componentName) == Component.STATE_ACTIVE;
+            return componentState(componentName) == ScrService.Component.STATE_ACTIVE;
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
@@ -136,7 +138,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
 
     public int componentState(String componentName) {
         int state = -1;
-        final Component component = findComponent(componentName);
+        final ScrService.Component component = findComponent(componentName);
         if (component != null)
             state = component.getState();
         else
@@ -145,7 +147,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     }
 
     public void activateComponent(String componentName) {
-        final Component component = findComponent(componentName);
+        final ScrService.Component component = findComponent(componentName);
         if (component != null)
             component.enable();
         else
@@ -153,26 +155,22 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     }
 
     public void deactivateComponent(String componentName) {
-        final Component component = findComponent(componentName);
+        final ScrService.Component component = findComponent(componentName);
         if (component != null)
             component.disable();
         else
             LOGGER.warn("No component found for name: " + componentName);
     }
 
-    private Component findComponent(String componentName) {
-        Component answer = null;
+    private ScrService.Component findComponent(String componentName) {
+        ScrService.Component answer = null;
         if (scrService.getComponents(componentName) != null) {
-            Component[] components = scrService.getComponents(componentName);
-            for (Component component : safe(components)) {
+            ScrService.Component[] components = scrService.getComponents(componentName);
+            for (ScrService.Component component : components) {
                 answer = component;
             }
         }
         return answer;
-    }
-
-    private Component[] safe(Component[] components) {
-        return components == null ? new Component[0] : components;
     }
 
     @Reference
@@ -185,11 +183,11 @@ public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBea
     }
 
     @Reference
-    public void setScrService(ScrService scrService) {
-        this.scrService = scrService;
+    public void setScrService(ServiceComponentRuntime scrService) {
+        this.scrService = new ScrService(FrameworkUtil.getBundle(getClass()).getBundleContext(), scrService);
     }
 
-    public void unsetScrService(ScrService scrService) {
+    public void unsetScrService(ServiceComponentRuntime scrService) {
         this.scrService = null;
     }
 
