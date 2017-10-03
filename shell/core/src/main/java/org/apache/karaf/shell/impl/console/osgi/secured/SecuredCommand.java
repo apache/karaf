@@ -106,6 +106,11 @@ public class SecuredCommand implements Command, Function {
             CommandSession commandSession = (CommandSession) session.get(".commandSession");
             return closure.execute(commandSession, arguments);
         }
+
+        @Override
+        public String toString() {
+            return closure.toString();
+        }
     }
 
 }
