@@ -170,4 +170,6 @@ public interface FeaturesService {
 
     FeatureState getState(String featureId);
 
+    String getFeatureXml(Feature feature);
+
 }

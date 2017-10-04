@@ -16,9 +16,17 @@
  */
 package org.apache.karaf.features.command;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.apache.felix.service.command.Process;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
@@ -31,11 +39,18 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
+import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
 
 @Command(scope = "feature", name = "info", description = "Shows information about selected feature.")
 @Service
 public class InfoFeatureCommand extends FeaturesCommandSupport {
+
+    public static final String DEFAULT_XML_COLORS = "el=34;1:at=36;1:av=32;1:cm=37:cd=37";
 
     private static final String INDENT = "  ";
     private static final String FEATURE_CONTENT = "Feature";
@@ -63,6 +78,15 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "-t", aliases={"--tree"}, description="Display feature tree", required = false, multiValued = false)
     private boolean tree;
 
+    @Option(name = "-x", aliases={"--xml"}, description="Display feature xml", required = false, multiValued = false)
+    private boolean xml;
+
+    @Option(name = "--color", description="Colorize output (`always', `never' or `auto')", required = false, multiValued = false)
+    private String color;
+
+    @Reference
+    Session session;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         Feature[] features = null;
 
@@ -77,8 +101,39 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
             return;
         }
 
+        if (xml) {
+            boolean colored;
+            switch (color != null ? color : "auto") {
+                case "always":
+                case "yes":
+                case "force":
+                    colored = true;
+                    break;
+                case "never":
+                case "no":
+                case "none":
+                    colored = false;
+                    break;
+                case "auto":
+                case "tty":
+                case "if-tty":
+                    colored = Process.Utils.current().isTty(1);
+                    break;
+                default:
+                    throw new IllegalArgumentException("invalid argument ‘" + color + "’ for ‘--color’");
+            }
+            for (Feature feature : features) {
+                String xml = admin.getFeatureXml(feature);
+                if (colored) {
+                    xml = colorize(session, xml);
+                }
+                System.out.println(xml);
+            }
+            return;
+        }
+
         // default behavior
-        if (!config && !dependency && !bundle && !conditional) {
+        if (!config && !dependency && !bundle && !conditional && !tree) {
             config = true;
             dependency = true;
             bundle = true;
@@ -121,7 +176,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
             }
 
             if (tree) {
-                if (config || dependency || bundle) {
+                if (config || dependency || bundle || conditional) {
                     System.out.println("\nFeature tree");
                 }
 
@@ -241,7 +296,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
                 prefix += "   ";
                 List<Dependency> dependencies = resolved.getDependencies();
                 for (Dependency toDisplay : dependencies) {
-                    unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix + 1);
+                    unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix);
                 }
 
                 if (conditional) {
@@ -249,7 +304,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
                         List<Dependency> conditionDependencies = cond.getDependencies();
                         for (int i = 0, j = conditionDependencies.size(); i < j; i++) {
                             Dependency toDisplay = dependencies.get(i);
-                            unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix + 1);
+                            unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix);
                         }
                     }
                 }
@@ -293,6 +348,60 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
             sb.append(dep);
         }
         return sb.toString();
+    }
+
+    private static Map<String, String> getColorMap(Session session, String name, String def) {
+        Object obj = session.get(name + "_COLORS");
+        String str = obj != null ? obj.toString() : null;
+        if (str == null || !str.matches("[a-z]{2}=[0-9]*(;[0-9]+)*(:[a-z]{2}=[0-9]*(;[0-9]+)*)*")) {
+            str = def;
+        }
+        return Arrays.stream(str.split(":"))
+                .collect(Collectors.toMap(s -> s.substring(0, s.indexOf('=')),
+                        s -> s.substring(s.indexOf('=') + 1)));
+    }
+
+    private static String colorize(Session session, String xml) {
+        Terminal terminal = (Terminal) session.get(".jline.terminal");
+        Map<String, String> colorMap = getColorMap(session, "XML", DEFAULT_XML_COLORS);
+        Map<Pattern, String> patternColors = new LinkedHashMap<>();
+        patternColors.put(Pattern.compile("(</?[a-z]*)\\s?>?"),         "el");
+        patternColors.put(Pattern.compile("(/?>)"),                     "el");
+        patternColors.put(Pattern.compile("\\s([a-z-]*)\\="),           "at");
+        patternColors.put(Pattern.compile("[a-z-]*\\=(\"[^\"]*\")"),    "av");
+        patternColors.put(Pattern.compile("(<!--.*-->)"),               "cm");
+        patternColors.put(Pattern.compile("(\\<!\\[CDATA\\[).*"),       "cd");
+        patternColors.put(Pattern.compile(".*(]]>)"),                   "cd");
+        String[] styles = new String[xml.length()];
+        // Match all regexes on this snippet, store positions
+        for (Map.Entry<Pattern, String> entry : patternColors.entrySet()) {
+            Matcher matcher = entry.getKey().matcher(xml);
+            while (matcher.find()) {
+                int s = matcher.start(1);
+                int e = matcher.end();
+                String c = entry.getValue();
+                Arrays.fill(styles, s, e, c);
+            }
+        }
+        AttributedStringBuilder asb = new AttributedStringBuilder();
+        String prev = null;
+        for (int i = 0; i < xml.length(); i++) {
+            String s = styles[i];
+            if (!Objects.equals(s, prev)) {
+                applyStyle(asb, colorMap, s);
+                prev = s;
+            }
+            asb.append(xml.charAt(i));
+        }
+        return asb.toAnsi(terminal);
+    }
+
+    private static void applyStyle(AttributedStringBuilder sb, Map<String, String> colors, String type) {
+        String col = colors.get(type);
+        sb.style(AttributedStyle.DEFAULT);
+        if (col != null && !col.isEmpty()) {
+            sb.appendAnsi("\033[" + col + "m");
+        }
     }
 
 }

@@ -46,9 +46,9 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     @XmlAttribute
     protected String version;
     @XmlAttribute
-    protected boolean prerequisite;
+    protected Boolean prerequisite;
     @XmlAttribute
-    protected boolean dependency;
+    protected Boolean dependency;
 
     public Dependency() {
         // Nothing to do
@@ -115,19 +115,19 @@ public class Dependency implements org.apache.karaf.features.Dependency {
 
     @Override
     public boolean isPrerequisite() {
-        return prerequisite;
+        return prerequisite == null ? false : prerequisite;
     }
 
-    public void setPrerequisite(boolean prerequisite) {
+    public void setPrerequisite(Boolean prerequisite) {
         this.prerequisite = prerequisite;
     }
 
     @Override
     public boolean isDependency() {
-        return dependency;
+        return dependency == null ? false : dependency;
     }
 
-    public void setDependency(boolean dependency) {
+    public void setDependency(Boolean dependency) {
         this.dependency = dependency;
     }
 

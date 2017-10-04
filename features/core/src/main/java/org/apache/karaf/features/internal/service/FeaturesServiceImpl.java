@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -60,6 +62,8 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.apache.karaf.util.ThreadUtils;
@@ -79,6 +83,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.bind.JAXBException;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
@@ -1102,5 +1108,23 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     private String join(Collection<FeatureReq> reqs) {
         return reqs.stream().map(FeatureReq::toString).collect(Collectors.joining(","));
+    }
+
+    @Override
+    public String getFeatureXml(Feature feature) {
+        try {
+            StringWriter sw = new StringWriter();
+            Features r = new Features();
+            r.getFeature().add((org.apache.karaf.features.internal.model.Feature) feature);
+            JaxbUtil.marshal(r, sw);
+            String[] strs = sw.toString().split("\n");
+            StringJoiner joiner = new StringJoiner("\n");
+            for (int i = 2; i < strs.length - 1; i++) {
+                joiner.add(strs[i]);
+            }
+            return joiner.toString();
+        } catch (JAXBException e) {
+            return null;
+        }
     }
 }
