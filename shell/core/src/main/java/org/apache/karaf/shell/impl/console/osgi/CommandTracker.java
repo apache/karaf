@@ -19,13 +19,16 @@
 package org.apache.karaf.shell.impl.console.osgi;
 
 import org.apache.felix.gogo.runtime.CommandProxy;
+import org.apache.felix.gogo.runtime.Reflective;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.api.console.*;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +81,12 @@ public class CommandTracker extends ServiceTracker<Object, List<Command>> {
 
                 @Override
                 public String getDescription() {
+                    for (Method method : getMethods()) {
+                        Descriptor d = method.getAnnotation(Descriptor.class);
+                        if (d != null) {
+                            return d.value();
+                        }
+                    }
                     Object property = reference.getProperty("osgi.command.description");
                     if (property != null) {
                         return property.toString();
@@ -101,6 +110,28 @@ public class CommandTracker extends ServiceTracker<Object, List<Command>> {
                     // TODO: remove not really nice cast
                     CommandSession commandSession = (CommandSession) session.get(".commandSession");
                     return target.execute(commandSession, arguments);
+                }
+
+                private List<Method> getMethods() {
+                    Object target = context.getService(reference);
+                    List<Method> methods = new ArrayList<>();
+                    String func = name.substring(name.indexOf(':') + 1).toLowerCase();
+                    List<String> funcs = new ArrayList<>();
+                    funcs.add("is" + func);
+                    funcs.add("get" + func);
+                    funcs.add("set" + func);
+                    if (Reflective.KEYWORDS.contains(func)) {
+                        funcs.add("_" + func);
+                    } else {
+                        funcs.add(func);
+                    }
+                    for (Method method : target.getClass().getMethods()) {
+                        if (funcs.contains(method.getName().toLowerCase())) {
+                            methods.add(method);
+                        }
+                    }
+                    context.ungetService(reference);
+                    return methods;
                 }
             };
             sessionFactory.getRegistry().register(command);
