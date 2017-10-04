@@ -385,11 +385,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.scr</groupId>
-            <artifactId>org.apache.karaf.scr.command</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.scr</groupId>
             <artifactId>org.apache.karaf.scr.management</artifactId>
             <scope>provided</scope>
         </dependency>

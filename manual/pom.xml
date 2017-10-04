@@ -123,11 +123,6 @@
 						<version>${project.version}</version>
 					</dependency>
 					<dependency>
-						<groupId>org.apache.karaf.scr</groupId>
-						<artifactId>org.apache.karaf.scr.command</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
 						<groupId>org.apache.karaf.jdbc</groupId>
 						<artifactId>org.apache.karaf.jdbc.core</artifactId>
 						<version>${project.version}</version>
