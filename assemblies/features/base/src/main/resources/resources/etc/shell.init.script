@@ -57,6 +57,7 @@ if { %(jlineReader != null) } {
 
   setopt group
   setopt auto-fresh-line
+  setopt insert-tab
   keymap "^[OA" up-line-or-search
   keymap "^[[A" up-line-or-search
   keymap "^[OB" down-line-or-search
