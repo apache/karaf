@@ -19,6 +19,7 @@ package org.apache.karaf.features.internal.resolver;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
@@ -107,10 +108,7 @@ public final class FeatureResource extends ResourceImpl {
         } else if (!version.startsWith("[") && !version.startsWith("(")) {
             version = Macro.transform(featureRange, version);
         }
-        RequirementImpl requirement = addIdentityRequirement(resource, name, TYPE_FEATURE, version);
-        if (condition) {
-            requirement.getDirectives().put(REQUIREMENT_CONDITIONAL_DIRECTIVE, CONDITIONAL_TRUE);
-        }
+        addIdentityRequirement(resource, name, TYPE_FEATURE, version != null ? new VersionRange(version) : null, true, condition);
     }
 
     public Feature getFeature() {

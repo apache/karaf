@@ -18,7 +18,6 @@ package org.apache.karaf.features.internal.resolver;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -28,6 +27,7 @@ import java.util.Set;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.internal.util.StringArrayMap;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -113,7 +113,7 @@ public final class ResourceBuilder {
         // Now that we have symbolic name and version, create the resource
         String type = headerMap.get(Constants.FRAGMENT_HOST) == null ? IdentityNamespace.TYPE_BUNDLE : IdentityNamespace.TYPE_FRAGMENT;
         {
-            Map<String, Object> attrs = new HashMap<>(4);
+            Map<String, Object> attrs = new StringArrayMap<>(3);
             attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, bundleSymbolicName);
             attrs.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, type);
             attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, bundleVersion);
@@ -138,9 +138,14 @@ public final class ResourceBuilder {
             String attachment = bundleCap.dirs.get(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE);
             attachment = (attachment == null) ? Constants.FRAGMENT_ATTACHMENT_RESOLVETIME : attachment;
             if (!attachment.equalsIgnoreCase(Constants.FRAGMENT_ATTACHMENT_NEVER)) {
-                Map<String, Object> hostAttrs = new HashMap<>(bundleCap.attrs);
-                Object value = hostAttrs.remove(BundleRevision.BUNDLE_NAMESPACE);
-                hostAttrs.put(BundleRevision.HOST_NAMESPACE, value);
+                Map<String, Object> hostAttrs = new StringArrayMap<>(bundleCap.attrs.size());
+                for (Map.Entry<String, Object> e : bundleCap.attrs.entrySet()) {
+                    String k = e.getKey();
+                    if (BundleRevision.BUNDLE_NAMESPACE.equals(k)) {
+                        k = BundleRevision.HOST_NAMESPACE;
+                    }
+                    hostAttrs.put(k, e.getValue());
+                }
                 resource.addCapability(new CapabilityImpl(
                         resource, BundleRevision.HOST_NAMESPACE,
                         bundleCap.dirs,
@@ -410,7 +415,7 @@ public final class ResourceBuilder {
                 // Inject filter directive.
                 // TODO: OSGi R4.3 - Can we insert this on demand somehow?
                 Map<String, String> dirs = clause.dirs;
-                Map<String, String> newDirs = new HashMap<>(dirs.size() + 1);
+                Map<String, String> newDirs = new StringArrayMap<>(dirs.size() + 1);
                 newDirs.putAll(dirs);
                 newDirs.put(Constants.FILTER_DIRECTIVE, sf.toString());
 
@@ -759,7 +764,7 @@ public final class ResourceBuilder {
             for (String pkgName : clause.paths) {
                 // Prepend the package name to the array of attributes.
                 Map<String, Object> attrs = clause.attrs;
-                Map<String, Object> newAttrs = new HashMap<>(attrs.size() + 1);
+                Map<String, Object> newAttrs = new StringArrayMap<>(attrs.size() + 1);
                 newAttrs.putAll(attrs);
                 newAttrs.put(BundleRevision.PACKAGE_NAMESPACE, pkgName);
 
@@ -834,7 +839,7 @@ public final class ResourceBuilder {
             // Inject filter directive.
             // TODO: OSGi R4.3 - Can we insert this on demand somehow?
             Map<String, String> dirs = clauses.get(0).dirs;
-            Map<String, String> newDirs = new HashMap<>(dirs.size() + 1);
+            Map<String, String> newDirs = new StringArrayMap<>(dirs.size() + 1);
             newDirs.putAll(dirs);
             newDirs.put(Constants.FILTER_DIRECTIVE, sf.toString());
 
@@ -983,7 +988,7 @@ public final class ResourceBuilder {
                 // Inject filter directive.
                 // TODO: OSGi R4.3 - Can we insert this on demand somehow?
                 Map<String, String> dirs = clause.dirs;
-                Map<String, String> newDirs = new HashMap<>(dirs.size() + 1);
+                Map<String, String> newDirs = new StringArrayMap<>(dirs.size() + 1);
                 newDirs.putAll(dirs);
                 newDirs.put(Constants.FILTER_DIRECTIVE, sf.toString());
 
@@ -1197,8 +1202,8 @@ public final class ResourceBuilder {
 
     static class ParsedHeaderClause {
         public final List<String> paths = new ArrayList<>();
-        public final Map<String, String> dirs = new LinkedHashMap<>(1);
-        public final Map<String, Object> attrs = new LinkedHashMap<>(1);
-        public final Map<String, String> types = new LinkedHashMap<>(1);
+        public final Map<String, String> dirs = new StringArrayMap<>(0);
+        public final Map<String, Object> attrs = new StringArrayMap<>(0);
+        public final Map<String, String> types = new StringArrayMap<>(0);
     }
 }

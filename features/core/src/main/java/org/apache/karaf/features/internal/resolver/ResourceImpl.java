@@ -17,10 +17,10 @@
 package org.apache.karaf.features.internal.resolver;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.features.internal.util.StringArrayMap;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.resource.Capability;
@@ -45,8 +45,8 @@ public class ResourceImpl implements Resource {
 
     public ResourceImpl(String name, String type, Version version) {
         caps = new ArrayList<>();
-        Map<String, String> dirs = new HashMap<>();
-        Map<String, Object> attrs = new HashMap<>();
+        Map<String, String> dirs = new StringArrayMap<>(0);
+        Map<String, Object> attrs = new StringArrayMap<>(3);
         attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, name);
         attrs.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, type);
         attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);

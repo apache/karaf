@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal.resolver;
 
 import java.util.Map;
 
+import org.apache.karaf.features.internal.util.StringArrayMap;
 import org.osgi.framework.Constants;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
@@ -36,9 +37,9 @@ public class RequirementImpl extends BaseClause implements Requirement {
             Resource resource, String namespace,
             Map<String, String> dirs, Map<String, Object> attrs, SimpleFilter filter) {
         this.resource = resource;
-        this.namespace = namespace;
-        this.dirs = dirs;
-        this.attrs = attrs;
+        this.namespace = namespace.intern();
+        this.dirs = StringArrayMap.reduceMemory(dirs);
+        this.attrs = StringArrayMap.reduceMemory(attrs);
         this.filter = filter;
         // Find resolution import directives.
         optional = Constants.RESOLUTION_OPTIONAL.equals(this.dirs.get(Constants.RESOLUTION_DIRECTIVE));
