@@ -183,29 +183,31 @@ public class ClientConfig {
         command = commandBuilder.toString();
 
         Map<String, String> usersCfg = new LinkedHashMap<>();
-        loadProps(new File(System.getProperty("karaf.etc") + "/users.properties"), usersCfg);
-        if (!usersCfg.isEmpty()) {
-            Set<String> users = new LinkedHashSet<>();
-            for (String user : usersCfg.keySet()) {
-                if (!user.startsWith(GROUP_PREFIX)) {
-                    users.add(user);
-                }
-            }
-            if (user == null) {
-                if (users.iterator().hasNext()) {
-                    user = users.iterator().next();
-                }
-            }
-            if (interactiveMode && !inputPassword) {
-                password = null;
-            } else if (!inputPassword) {
-                password = usersCfg.get(user);
-                if (password != null && password.contains(ROLE_DELIMITER)) {
-                    password = password.substring(0, password.indexOf(ROLE_DELIMITER));
-                }
-            }
+		File userPropertiesFile = new File(System.getProperty("karaf.etc") + "/users.properties");
+		if (userPropertiesFile.exists()) {
+	        loadProps(userPropertiesFile, usersCfg);
+	        if (!usersCfg.isEmpty()) {
+	            Set<String> users = new LinkedHashSet<>();
+	            for (String user : usersCfg.keySet()) {
+	                if (!user.startsWith(GROUP_PREFIX)) {
+	                    users.add(user);
+	                }
+	            }
+	            if (user == null) {
+	                if (users.iterator().hasNext()) {
+	                    user = users.iterator().next();
+	                }
+	            }
+	            if (interactiveMode && !inputPassword) {
+	                password = null;
+	            } else if (!inputPassword) {
+	                password = usersCfg.get(user);
+	                if (password != null && password.contains(ROLE_DELIMITER)) {
+	                    password = password.substring(0, password.indexOf(ROLE_DELIMITER));
+	                }
+	            }
+	        }
         }
-
     }
     
     private static void showHelp() {
@@ -297,6 +299,10 @@ public class ClientConfig {
 
     public String getUser() {
         return user;
+    }
+    
+    public void setUser(String user) {
+    	this.user = user;
     }
 
     public String getPassword() {
