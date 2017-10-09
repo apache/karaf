@@ -38,6 +38,7 @@ public class LDAPOptions {
     public static final String USER_BASE_DN = "user.base.dn";
     public static final String USER_FILTER = "user.filter";
     public static final String USER_SEARCH_SUBTREE = "user.search.subtree";
+    public static final String USER_PUBKEY_ATTRIBUTE = "user.pubkey.attribute";
     public static final String ROLE_BASE_DN = "role.base.dn";
     public static final String ROLE_FILTER = "role.filter";
     public static final String ROLE_NAME_ATTRIBUTE = "role.name.attribute";
@@ -97,6 +98,10 @@ public class LDAPOptions {
 
     public boolean getUserSearchSubtree() {
         return Boolean.parseBoolean((String) options.get(USER_SEARCH_SUBTREE));
+    }
+
+    public String getUserPubkeyAttribute() {
+        return (String) options.get(USER_PUBKEY_ATTRIBUTE);
     }
 
     public String getRoleFilter() {
