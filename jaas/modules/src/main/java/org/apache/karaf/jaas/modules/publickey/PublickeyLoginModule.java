@@ -145,7 +145,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         return true;
     }
 
-    private String getString(PublicKey key) throws FailedLoginException {
+    public static String getString(PublicKey key) throws FailedLoginException {
         try {
             if (key instanceof DSAPublicKey) {
                 DSAPublicKey dsa = (DSAPublicKey) key;
@@ -175,13 +175,13 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         }
     }
 
-    private void write(DataOutputStream dos, BigInteger integer) throws IOException {
+    private static void write(DataOutputStream dos, BigInteger integer) throws IOException {
         byte[] data = integer.toByteArray();
         dos.writeInt(data.length);
         dos.write(data, 0, data.length);
     }
 
-    private void write(DataOutputStream dos, String str) throws IOException {
+    private static void write(DataOutputStream dos, String str) throws IOException {
         byte[] data = str.getBytes();
         dos.writeInt(data.length);
         dos.write(data);
