@@ -14,37 +14,34 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import javax.naming.Context;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.security.Principal;
-import java.util.HashMap;
+import java.security.PublicKey;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
+import javax.naming.NamingException;
+import javax.security.auth.login.FailedLoginException;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.publickey.PublickeyCallback;
+import org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Karaf JAAS login module which uses a LDAP backend.
  */
-public class LDAPLoginModule extends AbstractKarafLoginModule {
+public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
 
-    private static Logger logger = LoggerFactory.getLogger(LDAPLoginModule.class);
-    
-        
+    private static Logger logger = LoggerFactory.getLogger(LDAPPubkeyLoginModule.class);
+
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         LDAPCache.clear();
@@ -63,7 +60,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     protected boolean doLogin() throws LoginException {
         Callback[] callbacks = new Callback[2];
         callbacks[0] = new NameCallback("Username: ");
-        callbacks[1] = new PasswordCallback("Password: ", false);
+        callbacks[1] = new PublickeyCallback();
 
         try {
             callbackHandler.handle(callbacks);
@@ -75,39 +72,16 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
 
         user = Util.doRFC2254Encoding(((NameCallback) callbacks[0]).getName());
 
-        char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
+        PublicKey remotePubkey = ((PublickeyCallback) callbacks[1]).getPublicKey();
 
-        // If either a username or password is specified don't allow authentication = "none".
-        // This is to prevent someone from logging into Karaf as any user without providing a 
-        // valid password (because if authentication = none, the password could be any 
-        // value - it is ignored).
         LDAPOptions options = new LDAPOptions(this.options);
-        if(options.isUsernameTrim()){
-            if(user != null){
+        if (options.isUsernameTrim()) {
+            if (user != null) {
                 user = user.trim();
             }
         }
-        String authentication = options.getAuthentication();
-        if ("none".equals(authentication) && (user != null || tmpPassword != null)) {
-            logger.debug("Changing from authentication = none to simple since user or password was specified.");
-            // default to simple so that the provided user/password will get checked
-            authentication = "simple";
-            Map<String, Object> opts = new HashMap<>(this.options);
-            opts.put(LDAPOptions.AUTHENTICATION, authentication);
-            options = new LDAPOptions(opts);
-        }
-        boolean allowEmptyPasswords = options.getAllowEmptyPasswords();
-        if (!"none".equals(authentication) && !allowEmptyPasswords
-                && (tmpPassword == null || tmpPassword.length == 0)) {
-            throw new LoginException("Empty passwords not allowed");
-        }
 
-        if (tmpPassword == null) {
-            tmpPassword = new char[0];
-        }
-        String password = new String(tmpPassword);
-        principals = new HashSet<Principal>();
-
+        principals = new HashSet<>();
         LDAPCache cache = LDAPCache.getCache(options);
 
         // step 1: get the user DN
@@ -122,33 +96,27 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             logger.warn("Can't connect to the LDAP server: {}", e.getMessage(), e);
             throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
         }
-        // step 2: bind the user using the DN
-        DirContext context = null;
+
+        String userFullDn = userDnAndNamespace[0] + "," + options.getUserBaseDn();
+
+        // step 2: pubkey authentication
         try {
-            // switch the credentials to the Karaf login user so that we can verify his password is correct
-            logger.debug("Bind user (authentication).");
-            Hashtable<String, Object> env = options.getEnv();
-            env.put(Context.SECURITY_AUTHENTICATION, authentication);
-            logger.debug("Set the security principal for " + userDnAndNamespace[0] + "," + options.getUserBaseDn());
-            env.put(Context.SECURITY_PRINCIPAL, userDnAndNamespace[0] + "," + options.getUserBaseDn());
-            env.put(Context.SECURITY_CREDENTIALS, password);
-            logger.debug("Binding the user.");
-            context = new InitialDirContext(env);
-            logger.debug("User " + user + " successfully bound.");
-            context.close();
-        } catch (Exception e) {
-            logger.warn("User " + user + " authentication failed.", e);
-            throw new LoginException("Authentication failed: " + e.getMessage());
-        } finally {
-            if (context != null) {
-                try {
-                    context.close();
-                } catch (Exception e) {
-                    // ignore
-                }
+            authenticatePubkey(userFullDn, remotePubkey, cache);
+        } catch (NamingException e) {
+            logger.warn("Can't connect to the LDAP server: {}", e.getMessage(), e);
+            throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
+        } catch (FailedLoginException e) {
+            if (!this.detailedLoginExcepion) {
+                throw new LoginException("Authentication failed");
+            } else {
+                logger.warn("Public key authentication failed for user {}: {}", user, e.getMessage(), e);
+                throw new LoginException("Public key authentication failed for user " + user + ": " + e.getMessage());
             }
+
         }
+
         principals.add(new UserPrincipal(user));
+
         // step 3: retrieving user roles
         try {
             String[] roles = cache.getUserRoles(user, userDnAndNamespace[0], userDnAndNamespace[1]);
@@ -158,7 +126,23 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         } catch (Exception e) {
             throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
         }
+
         return true;
+    }
+
+    private void authenticatePubkey(String userDn, PublicKey key, LDAPCache cache) throws FailedLoginException, NamingException {
+        if (key == null)
+            throw new FailedLoginException("no public key supplied by the client");
+        String[] storedKeys = cache.getUserPubkeys(userDn);
+        if (storedKeys.length > 0) {
+            String keyString = PublickeyLoginModule.getString(key);
+            for (String storedKey : storedKeys) {
+                if (keyString.equals(storedKey)) {
+                    return;
+                }
+            }
+        }
+        throw new FailedLoginException("no matching public key found");
     }
 
     public boolean abort() throws LoginException {

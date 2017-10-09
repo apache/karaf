@@ -60,6 +60,10 @@ public class LdapLoginModuleTest extends AbstractLdapTestUnit {
     
     private static boolean portUpdated;
 
+    public static String replacePort(String line) {
+        return line.replaceAll("portno", "" + getLdapServer().getPort());
+    }
+
     @Before
     public void updatePort() throws Exception {
         if (!portUpdated) {

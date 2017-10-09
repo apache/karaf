@@ -69,6 +69,7 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
 
     private final Map<String, String[]> userDnAndNamespace;
     private final Map<String, String[]> userRoles;
+    private final Map<String, String[]> userPubkeys;
     private final LDAPOptions options;
     private DirContext context;
 
@@ -76,6 +77,7 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         this.options = options;
         userDnAndNamespace = new HashMap<>();
         userRoles = new HashMap<>();
+        userPubkeys = new HashMap<>();
     }
 
     @Override
@@ -212,6 +214,18 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         return result;
     }
 
+    public synchronized String[] getUserPubkeys(String userDn) throws NamingException {
+        String[] result = userPubkeys.get(userDn);
+        if (result == null) {
+            result = doGetUserPubkeys(userDn);
+            if (!options.getDisableCache()) {
+                userPubkeys.put(userDn, result);
+            }
+        }
+        return result;
+    }
+
+
     protected Set<String> tryMappingRole(String role) {
         Set<String> roles = new HashSet<>();
         if (options.getRoleMapping().isEmpty()) {
@@ -292,6 +306,33 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         }
     }
 
+    private String[] doGetUserPubkeys(String userDn) throws NamingException {
+        DirContext context = open();
+
+        String userPubkeyAttribute = options.getUserPubkeyAttribute();
+        if (userPubkeyAttribute != null) {
+            LOGGER.debug("Looking for public keys of user {} in attribute {}", userDn, userPubkeyAttribute);
+
+            Attributes attributes = context.getAttributes(userDn, new String[]{userPubkeyAttribute});
+            Attribute pubkeyAttribute = attributes.get(userPubkeyAttribute);
+
+            List<String> pubkeyList = new ArrayList<>();
+            if (pubkeyAttribute != null) {
+                for (int i = 0; i < pubkeyAttribute.size(); i++) {
+                    String pk = (String) pubkeyAttribute.get(i);
+                    if (pk != null) {
+                        pubkeyList.add(pk);
+                    }
+                }
+            }
+            return pubkeyList.toArray(new String[pubkeyList.size()]);
+        } else {
+            LOGGER.debug("The user public key attribute is null so no keys were retrieved");
+            return new String[] {};
+        }
+    }
+
+
     @Override
     public void objectAdded(NamingEvent evt) {
         clearCache();
@@ -320,5 +361,6 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
     protected synchronized void clearCache() {
         userDnAndNamespace.clear();
         userRoles.clear();
+        userPubkeys.clear();
     }
 }
