@@ -247,7 +247,7 @@ public class SubsystemResolveContext extends ResolveContext {
                 caps.removeIf(cap -> !providers.contains(cap.getResource()));
             }
             // Sort caps
-            if (distance != null) {
+            if (distance != null && caps.size() > 1) {
                 caps.sort(candidateComparator);
             }
         }

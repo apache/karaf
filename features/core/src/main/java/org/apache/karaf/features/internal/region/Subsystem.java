@@ -56,6 +56,7 @@ import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
 import org.apache.karaf.features.internal.service.Overrides;
+import org.apache.karaf.features.internal.util.StringArrayMap;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
@@ -445,13 +446,14 @@ public class Subsystem extends ResourceImpl {
                 final Conditional cond = entry.getValue();
                 ResourceImpl res = bundles.get(loc);
                 int sl = bi.getStartLevel() <= 0 ? feature.getStartLevel() : bi.getStartLevel();
-                if (bi.isDependency()) {
-                    addDependency(res, false, bi.isStart(), sl);
-                } else {
-                    doAddDependency(res, cond == null, bi.isStart(), sl);
-                }
                 if (cond != null) {
                     addIdentityRequirement(res, resConds.get(cond), true);
+                }
+                boolean mandatory = !bi.isDependency() && cond == null;
+                if (bi.isDependency()) {
+                    addDependency(res, mandatory, bi.isStart(), sl);
+                } else {
+                    doAddDependency(res, mandatory, bi.isStart(), sl);
                 }
             }
             for (Library library : feature.getLibraries()) {
@@ -497,7 +499,7 @@ public class Subsystem extends ResourceImpl {
         ResourceImpl res = new ResourceImpl();
         for (Capability cap : resource.getCapabilities(null)) {
             res.addCapability(new CapabilityImpl(res, cap.getNamespace(),
-                    new HashMap<>(cap.getDirectives()), new HashMap<>(cap.getAttributes())));
+                    new StringArrayMap<>(cap.getDirectives()), new StringArrayMap<>(cap.getAttributes())));
         }
         for (Requirement req : resource.getRequirements(null)) {
             SimpleFilter sf;
@@ -509,7 +511,7 @@ public class Subsystem extends ResourceImpl {
                 sf = SimpleFilter.convert(req.getAttributes());
             }
             res.addRequirement(new RequirementImpl(res, req.getNamespace(),
-                    new HashMap<>(req.getDirectives()), new HashMap<>(req.getAttributes()), sf));
+                    new StringArrayMap<>(req.getDirectives()), new StringArrayMap<>(req.getAttributes()), sf));
         }
         return res;
     }
@@ -543,15 +545,43 @@ public class Subsystem extends ResourceImpl {
 
     private void doAddDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
         String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
-        DependencyInfo info = dependencies.computeIfAbsent(id, k -> new DependencyInfo());
-        info.resource = resource;
-        info.mandatory |= mandatory;
-        info.start |= start;
-        if (info.startLevel > 0 && startLevel > 0) {
-            info.startLevel = Math.min(info.startLevel, startLevel);
+        DependencyInfo info = new DependencyInfo(resource, mandatory, start, startLevel);
+        dependencies.merge(id, info, this::merge);
+    }
+
+    private DependencyInfo merge(DependencyInfo di1, DependencyInfo di2) {
+        DependencyInfo info = new DependencyInfo();
+        if (di1.resource != di2.resource) {
+            Requirement r1 = getFirstIdentityReq(di1.resource);
+            Requirement r2 = getFirstIdentityReq(di2.resource);
+            if (r1 == null) {
+                info.resource = di1.resource;
+            } else if (r2 == null) {
+                info.resource = di2.resource;
+            } else {
+                String id = ResolverUtil.getSymbolicName(di1.resource) + "/" + ResolverUtil.getVersion(di1.resource);
+                throw new IllegalStateException("Resource " + id + " is duplicated on subsystem " + this.toString() + ". First resource requires " + (r1 != null ? r1 : "nothing") + " while the second requires " + (r2 != null ? r2 : "nothing"));
+            }
         } else {
-            info.startLevel = Math.max(info.startLevel, startLevel);
+            info.resource = di1.resource;
         }
+        info.mandatory = di1.mandatory | di2.mandatory;
+        info.start = di1.start | di2.start;
+        if (di1.startLevel > 0 && di2.startLevel > 0) {
+            info.startLevel = Math.min(di1.startLevel, di2.startLevel);
+        } else {
+            info.startLevel = Math.max(di1.startLevel, di2.startLevel);
+        }
+        return info;
+    }
+
+    private RequirementImpl getFirstIdentityReq(ResourceImpl resource) {
+        for (Requirement r : resource.getRequirements(null)) {
+            if (IDENTITY_NAMESPACE.equals(r.getNamespace())) {
+                return (RequirementImpl) r;
+            }
+        }
+        return null;
     }
 
     class DependencyInfo implements BundleInfo {
@@ -559,6 +589,16 @@ public class Subsystem extends ResourceImpl {
         boolean mandatory;
         boolean start;
         int startLevel;
+
+        public DependencyInfo() {
+        }
+
+        public DependencyInfo(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
+            this.resource = resource;
+            this.mandatory = mandatory;
+            this.start = start;
+            this.startLevel = startLevel;
+        }
 
         @Override
         public boolean isStart() {
@@ -578,6 +618,13 @@ public class Subsystem extends ResourceImpl {
         @Override
         public boolean isDependency() {
             return !mandatory;
+        }
+
+        @Override
+        public String toString() {
+            return "DependencyInfo{" +
+                    "resource=" + resource +
+                    '}';
         }
     }
 

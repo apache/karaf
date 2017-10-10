@@ -496,7 +496,7 @@ public class VerifyMojo extends MojoSupport {
                 // TODO: find unused resources ?
             } catch (Exception e) {
                 throw new MojoExecutionException("Feature resolution failed for " + features
-                        + "\nMessage: " + e.getMessage()
+                        + "\nMessage: " + (e instanceof ResolutionException ? e.getMessage() : e.toString())
                         + "\nRepositories: " + toString(new TreeSet<>(repositories.keySet()))
                         + "\nResources: " + toString(new TreeSet<>(manager.getProviders().keySet())), e);
             }

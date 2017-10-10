@@ -17,6 +17,7 @@
 package org.apache.karaf.features.internal.resolver;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -39,12 +40,12 @@ public class ResourceImpl implements Resource {
      * has the required identity capability
      */
     public ResourceImpl() {
-        caps = new ArrayList<>();
-        reqs = new ArrayList<>();
+        caps = new ArrayList<>(0);
+        reqs = new ArrayList<>(0);
     }
 
     public ResourceImpl(String name, String type, Version version) {
-        caps = new ArrayList<>();
+        caps = new ArrayList<>(1);
         Map<String, String> dirs = new StringArrayMap<>(0);
         Map<String, Object> attrs = new StringArrayMap<>(3);
         attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, name);
@@ -52,7 +53,7 @@ public class ResourceImpl implements Resource {
         attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
         CapabilityImpl identity = new CapabilityImpl(this, IdentityNamespace.IDENTITY_NAMESPACE, dirs, attrs);
         caps.add(identity);
-        reqs = new ArrayList<>();
+        reqs = new ArrayList<>(0);
     }
 
     public void addCapability(Capability capability) {
@@ -60,10 +61,11 @@ public class ResourceImpl implements Resource {
         caps.add(capability);
     }
 
-    public void addCapabilities(Iterable<? extends Capability> capabilities) {
+    public void addCapabilities(Collection<? extends Capability> capabilities) {
         for (Capability cap : capabilities) {
-            addCapability(cap);
+            assert cap.getResource() == this;
         }
+        caps.addAll(capabilities);
     }
 
     public void addRequirement(Requirement requirement) {
@@ -71,10 +73,11 @@ public class ResourceImpl implements Resource {
         reqs.add(requirement);
     }
 
-    public void addRequirements(Iterable<? extends Requirement> requirements) {
+    public void addRequirements(Collection<? extends Requirement> requirements) {
         for (Requirement req : requirements) {
-            addRequirement(req);
+            assert req.getResource() == this;
         }
+        reqs.addAll(requirements);
     }
 
     public List<Capability> getCapabilities(String namespace) {

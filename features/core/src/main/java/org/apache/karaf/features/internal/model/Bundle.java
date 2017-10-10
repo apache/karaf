@@ -178,4 +178,9 @@ public class Bundle implements BundleInfo {
         result = 31 * result + (isDependency() ? 1 : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }
