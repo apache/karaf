@@ -176,6 +176,7 @@ public final class DigraphHelper {
         if (defaultRegion == null) {
             defaultRegion = dg.createRegion(FeaturesServiceImpl.ROOT_REGION);
         }
+        dg.setDefaultRegion(defaultRegion);
         // Add all unknown bundle to default region
         Set<Long> ids = new HashSet<>();
         for (Bundle bundle : bundleContext.getBundles()) {
