@@ -126,13 +126,15 @@ public class Activator extends BaseActivator {
         }
 
         // RegionDigraph
+        Dictionary<String, Object> ranking = new Hashtable<>();
+        ranking.put(Constants.SERVICE_RANKING, 1000);
         StandardRegionDigraph dg = digraph = DigraphHelper.loadDigraph(bundleContext);
         register(ResolverHookFactory.class, dg.getResolverHookFactory());
         register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
-        register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook());
-        register(org.osgi.framework.hooks.bundle.EventHook.class, dg.getBundleEventHook());
-        register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook());
-        register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook());
+        register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook(), ranking);
+        register(org.osgi.framework.hooks.bundle.EventHook.class, dg.getBundleEventHook(), ranking);
+        register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook(), ranking);
+        register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook(), ranking);
         register(RegionDigraph.class, dg);
         register(RegionDigraphPersistence.class, this::doPersistRegionDigraph);
         DigraphHelper.verifyUnmanagedBundles(bundleContext, dg);
