@@ -81,6 +81,7 @@ public class XATest extends KarafTestSupport {
                 "pax-jdbc-derby",
                 "pax-jdbc-pool-transx",
                 "jdbc",
+                "shell-compat",
                 "camel-blueprint",
                 "camel-spring",
                 "camel-sql",

@@ -32,9 +32,7 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void checkInstalledFeaturesBoot() throws Exception {
         System.out.println("===>checkInstalledFeaturesBoot");
         assertFeatureInstalled("wrap");
-        assertFeatureInstalled("aries-blueprint");
         assertFeatureInstalled("shell");
-        assertFeatureInstalled("shell-compat");
         assertFeatureInstalled("jaas");
         assertFeatureInstalled("ssh");
         assertFeatureInstalled("management");

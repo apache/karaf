@@ -60,7 +60,7 @@ public class JmsTest extends KarafTestSupport {
         return new Option[] //
         {
          composite(super.config()), //
-         features(activeMqUrl, "jms", "activemq-broker-noweb")
+         features(activeMqUrl, "jms", "activemq-broker-noweb", "shell-compat")
         };
     }
 
