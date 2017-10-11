@@ -23,34 +23,34 @@
 
     <feature version="${project.version}" description="Karaf core feature" name="framework" hidden="true">
         <!-- persistent wiring extension -->
-        <bundle start="true" start-level="1">mvn:org.apache.karaf.features/org.apache.karaf.features.extension/${project.version}</bundle>
+        <bundle start-level="1">mvn:org.apache.karaf.features/org.apache.karaf.features.extension/${project.version}</bundle>
         <!-- mvn: and wrap: url handlers -->
-        <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
+        <bundle start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <!-- logging -->
-        <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
-        <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-log4j2/${pax.logging.version}</bundle>
+        <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
+        <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-log4j2/${pax.logging.version}</bundle>
         <!-- config admin -->
-        <bundle start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
+        <bundle start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
         <!-- file install -->
-        <bundle start="true" start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
+        <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
-        <bundle start="true" start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
+        <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
     </feature>
 
     <feature version="${project.version}" description="Karaf core feature" name="framework-logback" hidden="true">
         <!-- persistent wiring extension -->
-        <bundle start="true" start-level="1">mvn:org.apache.karaf.features/org.apache.karaf.features.extension/${project.version}</bundle>
+        <bundle start-level="1">mvn:org.apache.karaf.features/org.apache.karaf.features.extension/${project.version}</bundle>
         <!-- mvn: and wrap: url handlers -->
-        <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
+        <bundle start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <!-- logging -->
-        <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
-        <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-logback/${pax.logging.version}</bundle>
+        <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
+        <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-logback/${pax.logging.version}</bundle>
         <!-- config admin -->
-        <bundle start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
+        <bundle start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
         <!-- file install -->
-        <bundle start="true" start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
+        <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
-        <bundle start="true" start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
+        <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
     </feature>
 
 </features>
