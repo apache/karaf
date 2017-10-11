@@ -78,6 +78,7 @@ public class SimpleFileLock implements Lock {
             lock.channel().close();
         }
         lock = null;
+        lockPath.deleteOnExit();
     }
  
     public synchronized boolean isAlive() throws Exception {
