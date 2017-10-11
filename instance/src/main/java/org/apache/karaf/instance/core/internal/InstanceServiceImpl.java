@@ -488,13 +488,29 @@ public class InstanceServiceImpl implements InstanceService {
             classpath.append(childClasspath);
         }
 
+        String jdkOpts;
+        if (!System.getProperty("java.version").startsWith("1.")) {
+            jdkOpts = " --add-opens java.base/java.security=ALL-UNNAMED" +
+                      " --add-opens java.base/java.net=ALL-UNNAMED" +
+                      " --add-opens java.base/java.lang=ALL-UNNAMED" +
+                      " --add-opens java.base/java.util=ALL-UNNAMED" +
+                      " --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED" +
+                      " --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" +
+                      " --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED" +
+                      " --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED" +
+                      " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED" +
+                      " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
+                      " --add-modules java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws";
+        } else {
+            jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
+                    + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\"";
+        }
         String command = "\""
                 + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                 + "\" " + opts
                 + " " + karafOpts
+                + " " + jdkOpts
                 + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
-                + " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
-                + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""
                 + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
                 + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
