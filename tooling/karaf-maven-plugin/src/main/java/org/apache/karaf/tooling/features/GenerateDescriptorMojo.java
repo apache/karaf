@@ -329,8 +329,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     }
                     filter(inputFile, outputFile);
                     projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                    return;
                 }
-                return;
             }
 
             this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
@@ -344,7 +344,6 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 }
                 // now lets attach it
                 projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
-
             } else {
                 throw new MojoExecutionException("Could not create directory for features file: " + dir);
             }
