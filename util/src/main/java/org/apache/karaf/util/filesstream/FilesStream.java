@@ -21,6 +21,7 @@ package org.apache.karaf.util.filesstream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
@@ -97,7 +98,7 @@ public final class FilesStream {
     private static Stream<Path> files(Path cur, String glob) {
         String prefix;
         String rem;
-        int idx = glob.lastIndexOf('/');
+        int idx = glob.lastIndexOf(File.separatorChar);
         if (idx >= 0) {
             prefix = glob.substring(0, idx + 1);
             rem = glob.substring(idx + 1);
