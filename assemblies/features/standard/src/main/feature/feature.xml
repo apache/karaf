@@ -113,7 +113,7 @@
         </conditional>
     </feature>
 
-    <feature name="jaas-boot" hidden="true">
+    <feature name="jaas-boot" hidden="true" version="${project.version}">
         <library export="true" delegate="true" type="boot">
             mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.boot/${project.version}
         </library>
@@ -560,7 +560,7 @@
         <capability>http-service;provider:=felix-httplite</capability>
     </feature>
 
-    <feature name="pax-http-service" description="Pax-Web OSGi HTTP Service">
+    <feature name="pax-http-service" description="Pax-Web OSGi HTTP Service" version="${project.version}">
         <feature>pax-http</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
         <capability>http-service;provider:=pax-http</capability>
@@ -972,7 +972,7 @@
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.web.version}</bundle>
     </feature>
 
-    <feature name="wrap" description="Wrap URL handler">
+    <feature name="wrap" description="Wrap URL handler" version="${project.version}">
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
     </feature>
 
