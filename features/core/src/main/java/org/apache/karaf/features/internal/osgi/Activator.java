@@ -59,6 +59,7 @@ import org.eclipse.equinox.internal.region.management.StandardManageableRegionDi
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -249,12 +250,14 @@ public class Activator extends BaseActivator {
 
     @SuppressWarnings("deprecation")
     private void registerRegionDiGraph(StandardRegionDigraph dg) throws BundleException {
+        Dictionary<String, Object> ranking = new Hashtable<>();
+        ranking.put(Constants.SERVICE_RANKING, 1000);
         register(ResolverHookFactory.class, dg.getResolverHookFactory());
         register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
-        register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook());
-        register(org.osgi.framework.hooks.bundle.EventHook.class, dg.getBundleEventHook());
-        register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook());
-        register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook());
+        register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook(), ranking);
+        register(org.osgi.framework.hooks.bundle.EventHook.class, dg.getBundleEventHook(), ranking);
+        register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook(), ranking);
+        register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook(), ranking);
         register(RegionDigraph.class, dg);
         
         if (getBoolean("digraphMBean", FeaturesService.DEFAULT_DIGRAPH_MBEAN)) {
