@@ -51,11 +51,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.exception</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.client</artifactId>
             <scope>runtime</scope>
         </dependency>

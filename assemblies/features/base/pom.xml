@@ -44,11 +44,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.exception</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.client</artifactId>
             <scope>runtime</scope>
         </dependency>
@@ -133,11 +128,6 @@
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.client</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/apache/karaf/org.apache.karaf.client/${project.version}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf</groupId>
-                                    <artifactId>org.apache.karaf.exception</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>

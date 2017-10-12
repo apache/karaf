@@ -121,6 +121,8 @@
                             </process-resources>
                             <compile>
                             </compile>
+                            <prepare-package>
+                            </prepare-package>
                             <package>
                                 org.apache.karaf.tooling:karaf-maven-plugin:archive
                             </package>

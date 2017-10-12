@@ -715,6 +715,10 @@ public class Builder {
             }
             final String type = clause.getDirective(LIBRARY_CLAUSE_TYPE) != null
                     ? clause.getDirective(LIBRARY_CLAUSE_TYPE) : Library.TYPE_DEFAULT;
+            if (type == Library.TYPE_ENDORSED || type == Library.TYPE_EXTENSION) {
+                LOGGER.warn("Ignoring library " + library + " which is of an unsupported type " + type + ".");
+                continue;
+            }
             final String path;
             switch (type) {
             case Library.TYPE_ENDORSED:  path = "lib/endorsed"; break;

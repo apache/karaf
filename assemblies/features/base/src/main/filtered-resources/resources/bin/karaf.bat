@@ -414,8 +414,6 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         ) else (
             "%JAVA%" %JAVA_OPTS% %OPTS% ^
                 -classpath "%CLASSPATH%" ^
-                -Djava.endorsed.dirs="%JAVA_HOME%\jre\lib\endorsed;%JAVA_HOME%\lib\endorsed;%KARAF_HOME%\lib\endorsed" ^
-                -Djava.ext.dirs="%JAVA_HOME%\jre\lib\ext;%JAVA_HOME%\lib\ext;%KARAF_HOME%\lib\ext" ^
                 -Dkaraf.instances="%KARAF_HOME%\instances" ^
                 -Dkaraf.home="%KARAF_HOME%" ^
                 -Dkaraf.base="%KARAF_BASE%" ^
