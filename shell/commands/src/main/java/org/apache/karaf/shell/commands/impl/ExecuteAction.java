@@ -48,9 +48,12 @@ public class ExecuteAction implements Action {
         ProcessBuilder builder = new ProcessBuilder(args)
                 .directory(session.currentDir().toFile());
 
-        PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err, "Command" + args.toString());
+        org.apache.felix.service.command.Process cp = org.apache.felix.service.command.Process.Utils.current();
 
-        log.debug("Executing: {}", builder.command());
+        String cmd = String.join(" ", args);
+        PumpStreamHandler handler = new PumpStreamHandler(cp.in(), cp.out(), cp.err(), "Command '" + cmd + "'");
+
+        log.debug("Executing: {}", cmd);
         Process p = builder.start();
 
         handler.attach(p);

@@ -114,7 +114,7 @@ public class StreamPumper implements Runnable {
 
         final byte[] buf = new byte[bufferSize];
 
-        int length;
+        int length = 0;
         try {
             while (true) {
                 if (nonBlocking) {
@@ -143,7 +143,7 @@ public class StreamPumper implements Runnable {
                 }
                 boolean finish;
                 synchronized (this) {
-                    finish = this.finish;
+                    finish = this.finish || length < 0;
                 }
                 if (finish) {
                     break;
