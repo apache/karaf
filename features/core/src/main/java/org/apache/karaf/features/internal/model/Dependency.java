@@ -142,8 +142,8 @@ public class Dependency implements org.apache.karaf.features.Dependency {
 
         Dependency that = (Dependency) o;
 
-        if (prerequisite != that.prerequisite) return false;
-        if (dependency != that.dependency) return false;
+        if (prerequisite != null ? !prerequisite.equals(that.prerequisite) : that.prerequisite != null) return false;
+        if (dependency != null ? !dependency.equals(that.dependency) : that.dependency != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         return version != null ? version.equals(that.version) : that.version == null;
 
@@ -153,8 +153,8 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (version != null ? version.hashCode() : 0);
-        result = 31 * result + (prerequisite ? 1 : 0);
-        result = 31 * result + (dependency ? 1 : 0);
+        result = 31 * result + (prerequisite != null ? prerequisite.hashCode() : 0);
+        result = 31 * result + (dependency != null ? dependency.hashCode() : 0);
         return result;
     }
 }
