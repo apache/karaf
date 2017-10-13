@@ -18,7 +18,7 @@ These instructions should help you get Apache Karaf up and running in 5 to 15 mi
 
 === Prerequisites
 
-Karaf requires a Java SE 7 or Java SE 8 environment to run. Refer to http://www.oracle.com/technetwork/java/javase/ for details on how to download and install Java SE 1.7 or greater.
+Karaf requires a Java SE 8 or Java SE 9 environment to run. Refer to http://www.oracle.com/technetwork/java/javase/ for details on how to download and install Java SE 1.8 or greater.
 
 * Open a Web browser and access the following URL: http://karaf.apache.org/index/community/download.html
 * Download the binary distribution that matches your system (zip for windows, tar.gz for unixes)
@@ -49,14 +49,13 @@ You should see the following information on the command line console:
      / /| |/ /_/ / /  / /_/ / __/
     /_/ |_|\__,_/_/   \__,_/_/
 
-  Apache Karaf (4.0.0)
+  Apache Karaf (4.2.0)
 
 Hit '<tab>' for a list of available commands
 and '[cmd] --help' for help on a specific command.
 Hit '<ctrl-d>' or type 'system:shutdown' or 'logout' to shutdown Karaf.
 
 karaf@root()>
-
 ----
 
 === Shell console basics
@@ -64,6 +63,8 @@ karaf@root()>
 You can now run your first command.  Simply type the `<tab>` key in the console.
 
 ----
+karaf@root()>
+karaf: do you wish to see to see all 356 possibilities (219 lines)?
 karaf@root()> Display all 294 possibilities? (y or n)
 ...
 shell:logout                        shell:more                          shell:new                           shell:printf                        shell:sleep                         shell:sort                          shell:source
@@ -93,25 +94,27 @@ ARGUMENTS
                 The list of bundle (identified by IDs or name or name/version) separated by whitespaces
 
 OPTIONS
+        -name, -n
+                Show bundle name
+        -u
+                Shows the update locations
+        -r
+                Shows the bundle revisions
+        --no-ellipsis
+
+        -l
+                Show the locations
+        -s
+                Shows the symbolic name
+        --context, -c
+                Use the given bundle context
+                (defaults to 0)
+        --help
+                Display this help message
         -t
                 Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.
         --no-format
                 Disable table rendered output
-        -s
-                Shows the symbolic name
-        -l
-                Show the locations
-        --no-ellipsis
-
-        --help
-                Display this help message
-        -u
-                Shows the update locations
-        --context, -c
-                Use the given bundle context
-                (defaults to 0)
-        -r
-                Shows the bundle revisions
 ----
 
 Note that the console supports tab completion so if you start typing a command it will show all possible completions and also auto complete if there is only one completion.
@@ -120,14 +123,26 @@ Note that the console supports tab completion so if you start typing a command i
 
 While you will learn in the Karaf user's guide how to fully use and leverage Apache Karaf, let's install a sample http://camel.apache.org[Apache Camel] application for now:
 
-In the console, run the following commands:
+Copy and paste the following commands in the console:
 
 ----
-karaf@root()> feature:repo-add camel 2.15.2
-Adding feature url mvn:org.apache.camel.karaf/apache-camel/2.15.2/xml/features
-karaf@root()> feature:install camel-spring
-karaf@root()> bundle:install -s mvn:org.apache.camel/camel-example-osgi/2.15.2
-Bundle ID: 82
+feature:repo-add camel 2.20.0
+feature:install deployer camel-blueprint aries-blueprint
+cat > deploy/example.xml <<END
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <camelContext xmlns="http://camel.apache.org/schema/blueprint">
+        <route>
+            <from uri="timer://test?fixedRate=true&amp;period=2000" />
+            <setBody>
+                <simple>Message at ${date:now:yyyy-MM-dd HH:mm:ss}</simple>
+            </setBody>
+            <to uri="log:test" />
+        </route>
+    </camelContext>
+
+</blueprint>
+END
 ----
 
 The example installed is using Camel to start a timer every 2 seconds and output a message in the log.
@@ -138,11 +153,8 @@ You can display the log in the shell:
 ----
 karaf@root()> log:display
 ...
-2015-06-30 13:39:44,731 | INFO  |  timer://myTimer | ExampleRouter                    | 53 - org.apache.camel.camel-core - 2.15.2 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: SpringDSL set body:  Tue Jun 30 13:39:44 CEST 2015]
-2015-06-30 13:39:46,730 | INFO  |  timer://myTimer | MyTransform                      | 82 - camel-example-osgi - 2.15.2 | >>>> SpringDSL set body:  Tue Jun 30 13:39:46 CEST 2015
-2015-06-30 13:39:46,731 | INFO  |  timer://myTimer | ExampleRouter                    | 53 - org.apache.camel.camel-core - 2.15.2 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: SpringDSL set body:  Tue Jun 30 13:39:46 CEST 2015]
-2015-06-30 13:39:48,730 | INFO  |  timer://myTimer | MyTransform                      | 82 - camel-example-osgi - 2.15.2 | >>>> SpringDSL set body:  Tue Jun 30 13:39:48 CEST 2015
-2015-06-30 13:39:48,730 | INFO  |  timer://myTimer | ExampleRouter                    | 53 - org.apache.camel.camel-core - 2.15.2 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: SpringDSL set body:  Tue Jun 30 13:39:48 CEST 2015]
+2017-10-13 10:04:11,225 | INFO  | 7 - timer://test | test                             | 28 - org.apache.camel.camel-core - 2.20.0 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: Message at 2017-10-13 10:04:11]
+2017-10-13 10:04:13,225 | INFO  | 7 - timer://test | test                             | 28 - org.apache.camel.camel-core - 2.20.0 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: Message at 2017-10-13 10:04:13]
 ----
 
 === Stopping and uninstalling the sample application
@@ -150,8 +162,8 @@ karaf@root()> log:display
 To stop and uninstall the demo, run the following command:
 
 ----
-karaf@root()> bundle:stop camel-example-osgi
-karaf@root()> bundle:uninstall camel-example-osgi
+karaf@root()> bundle:stop example.xml
+karaf@root()> bundle:uninstall example.xml
 ----
 
 === Stopping Karaf
@@ -165,7 +177,10 @@ To stop Karaf from the console, enter `^D` in the console:
 Alternatively, you can also run the following command:
 
 ----
+karaf@root()> feature:install system
 karaf@root()> system:shutdown
+Confirm: halt instance root (yes/no): yes
+karaf@root()>
 ----
 
 halt is also an alias for system:shutdown:
