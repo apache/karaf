@@ -49,7 +49,7 @@ You should see the following information on the command line console:
      / /| |/ /_/ / /  / /_/ / __/
     /_/ |_|\__,_/_/   \__,_/_/
 
-  Apache Karaf (4.0.0)
+  Apache Karaf (4.1.0)
 
 Hit '<tab>' for a list of available commands
 and '[cmd] --help' for help on a specific command.
@@ -120,14 +120,26 @@ Note that the console supports tab completion so if you start typing a command i
 
 While you will learn in the Karaf user's guide how to fully use and leverage Apache Karaf, let's install a sample http://camel.apache.org[Apache Camel] application for now:
 
-In the console, run the following commands:
+Copy and paste the following commands in the console:
 
 ----
-karaf@root()> feature:repo-add camel 2.15.2
-Adding feature url mvn:org.apache.camel.karaf/apache-camel/2.15.2/xml/features
-karaf@root()> feature:install camel-spring
-karaf@root()> bundle:install -s mvn:org.apache.camel/camel-example-osgi/2.15.2
-Bundle ID: 82
+feature:repo-add camel 2.20.0
+feature:install deployer camel-blueprint aries-blueprint
+cat > deploy/example.xml <<END
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <camelContext xmlns="http://camel.apache.org/schema/blueprint">
+        <route>
+            <from uri="timer://test?fixedRate=true&amp;period=2000" />
+            <setBody>
+                <simple>Message at ${date:now:yyyy-MM-dd HH:mm:ss}</simple>
+            </setBody>
+            <to uri="log:test" />
+        </route>
+    </camelContext>
+
+</blueprint>
+END
 ----
 
 The example installed is using Camel to start a timer every 2 seconds and output a message in the log.
@@ -138,11 +150,8 @@ You can display the log in the shell:
 ----
 karaf@root()> log:display
 ...
-2015-06-30 13:39:44,731 | INFO  |  timer://myTimer | ExampleRouter                    | 53 - org.apache.camel.camel-core - 2.15.2 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: SpringDSL set body:  Tue Jun 30 13:39:44 CEST 2015]
-2015-06-30 13:39:46,730 | INFO  |  timer://myTimer | MyTransform                      | 82 - camel-example-osgi - 2.15.2 | >>>> SpringDSL set body:  Tue Jun 30 13:39:46 CEST 2015
-2015-06-30 13:39:46,731 | INFO  |  timer://myTimer | ExampleRouter                    | 53 - org.apache.camel.camel-core - 2.15.2 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: SpringDSL set body:  Tue Jun 30 13:39:46 CEST 2015]
-2015-06-30 13:39:48,730 | INFO  |  timer://myTimer | MyTransform                      | 82 - camel-example-osgi - 2.15.2 | >>>> SpringDSL set body:  Tue Jun 30 13:39:48 CEST 2015
-2015-06-30 13:39:48,730 | INFO  |  timer://myTimer | ExampleRouter                    | 53 - org.apache.camel.camel-core - 2.15.2 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: SpringDSL set body:  Tue Jun 30 13:39:48 CEST 2015]
+2017-10-13 10:04:11,225 | INFO  | 7 - timer://test | test                             | 28 - org.apache.camel.camel-core - 2.20.0 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: Message at 2017-10-13 10:04:11]
+2017-10-13 10:04:13,225 | INFO  | 7 - timer://test | test                             | 28 - org.apache.camel.camel-core - 2.20.0 | Exchange[ExchangePattern: InOnly, BodyType: String, Body: Message at 2017-10-13 10:04:13]
 ----
 
 === Stopping and uninstalling the sample application
@@ -150,8 +159,8 @@ karaf@root()> log:display
 To stop and uninstall the demo, run the following command:
 
 ----
-karaf@root()> bundle:stop camel-example-osgi
-karaf@root()> bundle:uninstall camel-example-osgi
+karaf@root()> bundle:stop example.xml
+karaf@root()> bundle:uninstall example.xml
 ----
 
 === Stopping Karaf
