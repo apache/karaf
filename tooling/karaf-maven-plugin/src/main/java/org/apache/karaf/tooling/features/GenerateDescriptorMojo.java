@@ -319,7 +319,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         try {
             if (enableGeneration == null) {
                 String packaging = this.project.getPackaging();
-                enableGeneration = !"feature".equals(packaging);
+                enableGeneration = "feature".equals(packaging);
             }
 
             if (!enableGeneration) {
@@ -330,8 +330,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     }
                     filter(inputFile, outputFile);
                     projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
-                    return;
                 }
+                return;
             }
 
             this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
