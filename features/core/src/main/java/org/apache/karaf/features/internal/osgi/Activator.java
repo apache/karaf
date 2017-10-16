@@ -132,6 +132,7 @@ public class Activator extends BaseActivator {
         }
 
         StandardRegionDigraph dg = DigraphHelper.loadDigraph(bundleContext);
+        DigraphHelper.verifyUnmanagedBundles(bundleContext, dg);
         registerRegionDiGraph(dg);
         boolean configCfgStore = getBoolean("configCfgStore", FeaturesService.DEFAULT_CONFIG_CFG_STORE);
         FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin, configCfgStore);
