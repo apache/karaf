@@ -129,6 +129,7 @@ public class Activator extends BaseActivator {
         Dictionary<String, Object> ranking = new Hashtable<>();
         ranking.put(Constants.SERVICE_RANKING, 1000);
         StandardRegionDigraph dg = digraph = DigraphHelper.loadDigraph(bundleContext);
+        DigraphHelper.verifyUnmanagedBundles(bundleContext, dg);
         register(ResolverHookFactory.class, dg.getResolverHookFactory());
         register(CollisionHook.class, CollisionHookHelper.getCollisionHook(dg));
         register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook(), ranking);
