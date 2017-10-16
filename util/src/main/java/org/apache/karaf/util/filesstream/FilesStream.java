@@ -89,7 +89,7 @@ public final class FilesStream {
                 files.add(buf.toString());
             }
         }
-        Path cur = Paths.get(System.getProperty("karaf.base"));
+        Path cur = Paths.get(System.getProperty("karaf.etc"));
         return Stream.concat(
                 files.stream().map(cur::resolve),
                 generators.stream().flatMap(s -> files(cur, s)));
