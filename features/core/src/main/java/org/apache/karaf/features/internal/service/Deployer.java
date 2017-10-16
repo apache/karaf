@@ -1126,9 +1126,9 @@ public class Deployer {
         List<Resource> sorted = new ArrayList<>(wires.keySet());
         sorted.sort(Comparator.comparingInt(r2 -> wires.get(r2).size()));
         for (Resource r : sorted) {
-            print("    " + ResolverUtil.getSymbolicName(r) + " / " + ResolverUtil.getVersion(r), true);
+            print("    " + ResourceUtils.getType(r) + ": " + ResolverUtil.getSymbolicName(r) + " / " + ResolverUtil.getVersion(r), true);
             for (Resource w : wires.get(r)) {
-                print("        " + ResolverUtil.getSymbolicName(w) + " / " + ResolverUtil.getVersion(w), true);
+                print("        " + ResourceUtils.getType(w) + ": " + ResolverUtil.getSymbolicName(w) + " / " + ResolverUtil.getVersion(w), true);
             }
         }
     }
