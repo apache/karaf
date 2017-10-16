@@ -18,10 +18,12 @@
  */
 package org.apache.karaf.shell.impl.console.osgi.secured;
 
+import java.nio.file.Path;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
@@ -30,12 +32,12 @@ import java.util.Map;
 import javax.security.auth.Subject;
 
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.shell.api.console.Command;
-import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleContext;
@@ -52,8 +54,11 @@ import org.slf4j.LoggerFactory;
 public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements ConfigurationListener {
 
     private static final String PROXY_COMMAND_ACL_PID_PREFIX = "org.apache.karaf.command.acl.";
-    private static final String CONFIGURATION_FILTER =
-            "(" + Constants.SERVICE_PID + "=" + PROXY_COMMAND_ACL_PID_PREFIX + "*)";
+    private static final String CONFIGURATION_FILTER = "(" + Constants.SERVICE_PID + "=" + PROXY_COMMAND_ACL_PID_PREFIX + "*)";
+
+    private static final String SHELL_SCOPE = "shell";
+    private static final String SHELL_INVOKE = ".invoke";
+    private static final String SHELL_REDIRECT = ".redirect";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuredSessionFactoryImpl.class);
 
@@ -77,6 +82,18 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     }
 
     @Override
+    protected Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
+        checkSecurity(SHELL_SCOPE, SHELL_INVOKE, Arrays.asList(target, name, args));
+        return super.invoke(session, target, name, args);
+    }
+
+    @Override
+    protected Path redirect(CommandSessionImpl session, Path path, int mode) {
+        checkSecurity(SHELL_SCOPE, SHELL_REDIRECT, Arrays.asList(path, mode));
+        return super.redirect(session, path, mode);
+    }
+
+    @Override
     protected Function wrap(Command command) {
         return new SecuredCommand(this, command);
     }
@@ -84,17 +101,18 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     @Override
     protected boolean isVisible(Object service) {
         if (service instanceof Command) {
-            return isVisible((Command) service);
+            Command cmd = (Command) service;
+            return isVisible(cmd.getScope(), cmd.getName());
         } else {
             return super.isVisible(service);
         }
     }
 
-    protected boolean isVisible(Command command) {
-        Dictionary<String, Object> config = getScopeConfig(command.getScope());
+    protected boolean isVisible(String scope, String name) {
+        Dictionary<String, Object> config = getScopeConfig(scope);
         if (config != null) {
             List<String> roles = new ArrayList<>();
-            ACLConfigurationParser.getRolesForInvocation(command.getName(), null, null, config, roles);
+            ACLConfigurationParser.getRolesForInvocation(name, null, null, config, roles);
             if (roles.isEmpty()) {
                 return true;
             } else {
@@ -109,14 +127,14 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         return true;
     }
 
-    void checkSecurity(SecuredCommand command, Session session, List<Object> arguments) {
-        Dictionary<String, Object> config = getScopeConfig(command.getScope());
+    void checkSecurity(String scope, String name, List<Object> arguments) {
+        Dictionary<String, Object> config = getScopeConfig(scope);
         if (config != null) {
-            if (!isVisible(command)) {
-                throw new CommandNotFoundException(command.getScope() + ":" + command.getName());
+            if (!isVisible(scope, name)) {
+                throw new CommandNotFoundException(scope + ":" + name);
             }
             List<String> roles = new ArrayList<>();
-            ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(command.getName(), new Object[] { arguments.toString() }, null, config, roles);
+            ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(name, new Object[] { arguments.toString() }, null, config, roles);
             if (s == ACLConfigurationParser.Specificity.NO_MATCH) {
                 return;
             }
