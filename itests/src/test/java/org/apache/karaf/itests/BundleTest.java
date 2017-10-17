@@ -20,6 +20,8 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularDataSupport;
 
+import org.apache.karaf.bundle.core.BundleService;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -30,11 +32,17 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class BundleTests extends KarafTestSupport {
+public class BundleTest extends KarafTestSupport {
+
+    private static final RolePrincipal[] ADMIN_ROLES = {
+            new RolePrincipal(BundleService.SYSTEM_BUNDLES_ROLE),
+            new RolePrincipal("admin"),
+            new RolePrincipal("manager")
+    };
 
     @Test
     public void listCommand() throws Exception {
-        String listOutput = executeCommand("bundle:list -t 0");
+        String listOutput = executeCommand("bundle:list -t 0", ADMIN_ROLES);
         System.out.println(listOutput);
         assertFalse(listOutput.isEmpty());
     }
@@ -49,19 +57,19 @@ public class BundleTests extends KarafTestSupport {
 
     @Test
     public void capabilitiesCommand() throws Exception {
-        String allCapabilitiesOutput = executeCommand("bundle:capabilities");
+        String allCapabilitiesOutput = executeCommand("bundle:capabilities", ADMIN_ROLES);
         System.out.println(allCapabilitiesOutput);
         assertFalse(allCapabilitiesOutput.isEmpty());
-        String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities org.apache.aries.jmx.whiteboard");
+        String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(jmxWhiteboardBundleCapabilitiesOutput);
-        assertTrue(jmxWhiteboardBundleCapabilitiesOutput.contains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.0.0 [UNUSED]"));
+        assertTrue(jmxWhiteboardBundleCapabilitiesOutput.contains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.1.5 [UNUSED]"));
     }
 
     @Test
     public void classesCommand() throws Exception {
-        String allClassesOutput = executeCommand("bundle:classes");
+        String allClassesOutput = executeCommand("bundle:classes", ADMIN_ROLES);
         assertFalse(allClassesOutput.isEmpty());
-        String jmxWhiteboardBundleClassesOutput = executeCommand("bundle:classes org.apache.aries.jmx.whiteboard");
+        String jmxWhiteboardBundleClassesOutput = executeCommand("bundle:classes org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(jmxWhiteboardBundleClassesOutput);
         assertTrue(jmxWhiteboardBundleClassesOutput.contains("org/apache/aries/jmx/whiteboard/Activator$MBeanTracker.class"));
     }
@@ -84,36 +92,36 @@ public class BundleTests extends KarafTestSupport {
 
     @Test
     public void headersCommand() throws Exception {
-        String headersOutput = executeCommand("bundle:headers org.apache.aries.jmx.whiteboard");
+        String headersOutput = executeCommand("bundle:headers org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(headersOutput);
         assertTrue(headersOutput.contains("Bundle-Activator = org.apache.aries.jmx.whiteboard.Activator"));
     }
 
     @Test
     public void infoCommand() throws Exception {
-        String infoOutput = executeCommand("bundle:info org.apache.karaf.management.server");
+        String infoOutput = executeCommand("bundle:info org.apache.karaf.management.server", ADMIN_ROLES);
         System.out.println(infoOutput);
         assertTrue(infoOutput.contains("This bundle starts the Karaf embedded MBean server"));
     }
 
     @Test
     public void installUninstallCommand() throws Exception {
-        executeCommand("bundle:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6");
+        executeCommand("bundle:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6", ADMIN_ROLES);
         assertBundleInstalled("org.apache.servicemix.bundles.commons-lang");
-        executeCommand("bundle:uninstall org.apache.servicemix.bundles.commons-lang");
+        executeCommand("bundle:uninstall org.apache.servicemix.bundles.commons-lang", ADMIN_ROLES);
         assertBundleNotInstalled("org.apache.servicemix.bundles.commons-lang");
     }
 
     @Test
     public void showTreeCommand() throws Exception {
-        String bundleTreeOutput = executeCommand("bundle:tree-show org.apache.karaf.management.server");
+        String bundleTreeOutput = executeCommand("bundle:tree-show org.apache.karaf.management.server", ADMIN_ROLES);
         System.out.println(bundleTreeOutput);
         assertFalse(bundleTreeOutput.isEmpty());
     }
 
     @Test
     public void statusCommand() throws Exception {
-        String statusOutput = executeCommand("bundle:status org.apache.karaf.management.server");
+        String statusOutput = executeCommand("bundle:status org.apache.karaf.management.server", ADMIN_ROLES);
         System.out.println(statusOutput);
         assertFalse(statusOutput.isEmpty());
     }

@@ -81,6 +81,7 @@ public class HeadlessSessionImpl implements Session {
             session.put("USER", ShellUtil.getCurrentUserName());
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         }
+        session.put(CommandSession.OPTION_NO_GLOB, Boolean.TRUE);
         session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
     }
 

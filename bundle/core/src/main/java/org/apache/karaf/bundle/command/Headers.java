@@ -241,8 +241,7 @@ public class Headers extends BundlesCommand {
     }
 
     protected int getTermWidth() {
-        return terminal.getWidth();
-
+        return terminal != null ? terminal.getWidth() : 0;
     }
 
     protected void formatClause(Clause clause, StringBuilder builder, int indent) {

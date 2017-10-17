@@ -271,7 +271,10 @@ public class KarafTestSupport {
                 if (!silent) {
                     System.err.println(command);
                 }
-                session.execute(command);
+                Object result = session.execute(command);
+                if (result != null) {
+                    session.getConsole().println(result.toString());
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
@@ -298,7 +301,7 @@ public class KarafTestSupport {
             e.printStackTrace(System.err);
             response = "SHELL COMMAND TIMED OUT: ";
         } catch (ExecutionException e) {
-            Throwable cause = e.getCause().getCause();
+            Throwable cause = e.getCause() != null ? (e.getCause().getCause() != null ? e.getCause().getCause() : e.getCause()) : e;
             throw new RuntimeException(cause.getMessage(), cause);
 	} catch (InterruptedException e) {
 	    throw new RuntimeException(e.getMessage(), e);
