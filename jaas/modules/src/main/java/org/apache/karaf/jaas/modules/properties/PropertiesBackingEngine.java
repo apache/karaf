@@ -245,7 +245,7 @@ public class PropertiesBackingEngine implements BackingEngine {
             }
         }
 
-        // nobody is using this group any more, remote it
+        // nobody is using this group any more, remove it
         deleteUser(GROUP_PREFIX + group);
     }
 
