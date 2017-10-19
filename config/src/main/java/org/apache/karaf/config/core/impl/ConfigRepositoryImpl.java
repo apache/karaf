@@ -78,19 +78,15 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public void delete(String pid) throws Exception {
         LOGGER.trace("Delete configuration {}", pid);
         Configuration configuration = configAdmin.getConfiguration(pid, null);
+        File cfgFile = getCfgFileFromProperties(configuration.getProperties());
         configuration.delete();
         try {
-            deleteStorage(pid);
+            if (cfgFile != null) {
+                LOGGER.trace("Delete {}", cfgFile.getName());
+                cfgFile.delete();
+            }
         } catch (Exception e) {
             LOGGER.warn("Can't delete cfg file", e);
-        }
-    }
-
-    protected void deleteStorage(String pid) throws Exception {
-        if (storage != null) {
-            File cfgFile = new File(storage, pid + ".cfg");
-            LOGGER.trace("Delete {}", cfgFile.getName());
-            cfgFile.delete();
         }
     }
 
