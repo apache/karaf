@@ -185,7 +185,7 @@ Additionally, de-facto standard log4j(2) levels can be used:
 * `OFF`
 * `DEFAULT`
 
-And because `org.ops4j.pax.loggin` PID uses `karaf.log.console` property, it's in fact better to use log4j levels instead:
+And because `org.ops4j.pax.logging` PID uses `karaf.log.console` property, it's in fact better to use log4j levels instead:
 
 [source,options="nowrap"]
 ----
