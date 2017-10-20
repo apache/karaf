@@ -321,6 +321,7 @@ public class Activator extends BaseActivator {
             featuresService = null;
         }
         if (installSupport != null) {
+            installSupport.unregister();
             installSupport.saveDigraph();
         }
     }

@@ -92,4 +92,8 @@ public abstract class StaticInstallSupport implements BundleInstallSupport {
         return new FrameworkInfo();
     }
 
+    @Override
+    public void unregister() {
+    }
+
 }

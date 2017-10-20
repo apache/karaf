@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.karaf.features.Feature;
@@ -73,7 +74,10 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
      * take place.
      */
     private final BundleContext systemBundleContext;
-    
+
+    private Map<Thread, ResolverHook> hooks = new ConcurrentHashMap<>();
+    private ServiceRegistration<ResolverHookFactory> hookRegistration;
+
     public BundleInstallSupportImpl(Bundle ourBundle,
                    BundleContext ourBundleContext,
                    BundleContext systemBundleContext,
@@ -84,6 +88,17 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         this.systemBundleContext = systemBundleContext;
         this.configInstaller = configInstaller;
         this.digraph = digraph;
+        if (systemBundleContext != null) {
+            hookRegistration = systemBundleContext.registerService(ResolverHookFactory.class,
+                    triggers -> hooks.get(Thread.currentThread()), null);
+        }
+
+    }
+
+    public void unregister() {
+        if (hookRegistration != null) {
+            hookRegistration.unregister();
+        }
     }
     
     public void print(String message, boolean verbose) {
@@ -176,10 +191,16 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
                     }
                     Bundle sourceBundle = requirement.getRevision().getBundle();
                     Resource sourceResource = bndToRes.get(sourceBundle);
+                    List<Wire> wires = wiring.get(sourceResource);
+                    if (sourceBundle == null || wires == null) {
+                        // This could be a bundle external to this resolution which
+                        // is being resolve at the same time, so do not interfere
+                        return;
+                    }
                     Set<Resource> wired = new HashSet<>();
                     // Get a list of allowed wired resources
                     wired.add(sourceResource);
-                    for (Wire wire : wiring.get(sourceResource)) {
+                    for (Wire wire : wires) {
                         wired.add(wire.getProvider());
                         if (HostNamespace.HOST_NAMESPACE.equals(wire.getRequirement().getNamespace())) {
                             for (Wire hostWire : wiring.get(wire.getProvider())) {
@@ -205,13 +226,12 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
             public void end() {
             }
         };
-        ResolverHookFactory factory = triggers -> hook;
-        ServiceRegistration<ResolverHookFactory> registration = systemBundleContext.registerService(ResolverHookFactory.class, factory, null);
+        hooks.put(Thread.currentThread(), hook);
         try {
             FrameworkWiring frameworkWiring = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
             frameworkWiring.resolveBundles(bundles);
         } finally {
-            registration.unregister();
+            hooks.remove(Thread.currentThread());
         }
     }
 

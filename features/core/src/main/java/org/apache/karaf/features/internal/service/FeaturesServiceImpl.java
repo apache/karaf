@@ -155,7 +155,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     public void stop() {
-      this.executor.shutdown();
+        this.executor.shutdown();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

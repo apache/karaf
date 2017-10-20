@@ -69,6 +69,8 @@ public interface BundleInstallSupport {
     File getDataFile(String name);
     
     FrameworkInfo getInfo();
+
+    void unregister();
     
     class FrameworkInfo {
         public Bundle ourBundle;
