@@ -41,6 +41,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -193,6 +194,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final ExecutorService executor;
     private Map<String, Map<String, Feature>> featureCache;
 
+    private Map<Thread, ResolverHook> hooks = new ConcurrentHashMap<>();
+    private ServiceRegistration<ResolverHookFactory> hookRegistration;
+
     public FeaturesServiceImpl(Bundle bundle,
                                BundleContext bundleContext,
                                BundleContext systemBundleContext,
@@ -260,12 +264,25 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.blacklisted = blacklisted;
         this.configCfgStore = configCfgStore;
         this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("features"));
+
+        if (systemBundleContext != null) {
+            hookRegistration = systemBundleContext.registerService(ResolverHookFactory.class, new ResolverHookFactory() {
+                @Override
+                public ResolverHook begin(Collection<BundleRevision> triggers) {
+                    return hooks.get(Thread.currentThread());
+                }
+            }, null);
+        }
+
         loadState();
         checkResolve();
     }
 
     public void stop() {
-      this.executor.shutdown();
+        this.executor.shutdown();
+        if (hookRegistration != null) {
+            hookRegistration.unregister();
+        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1382,10 +1399,16 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     }
                     Bundle sourceBundle = requirement.getRevision().getBundle();
                     Resource sourceResource = bndToRes.get(sourceBundle);
+                    List<Wire> wires = wiring.get(sourceResource);
+                    if (sourceBundle == null || wires == null) {
+                        // This could be a bundle external to this resolution which
+                        // is being resolve at the same time, so do not interfere
+                        return;
+                    }
                     Set<Resource> wired = new HashSet<>();
                     // Get a list of allowed wired resources
                     wired.add(sourceResource);
-                    for (Wire wire : wiring.get(sourceResource)) {
+                    for (Wire wire : wires) {
                         wired.add(wire.getProvider());
                         if (HostNamespace.HOST_NAMESPACE.equals(wire.getRequirement().getNamespace())) {
                             for (Wire hostWire : wiring.get(wire.getProvider())) {
@@ -1411,18 +1434,13 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             public void end() {
             }
         };
-        ResolverHookFactory factory = new ResolverHookFactory() {
-            @Override
-            public ResolverHook begin(Collection<BundleRevision> triggers) {
-                return hook;
-            }
-        };
-        ServiceRegistration<ResolverHookFactory> registration = systemBundleContext.registerService(ResolverHookFactory.class, factory, null);
+
+        hooks.put(thread, hook);
         try {
             FrameworkWiring frameworkWiring = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
             frameworkWiring.resolveBundles(bundles);
         } finally {
-            registration.unregister();
+            hooks.remove(thread);
         }
     }
 

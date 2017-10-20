@@ -39,14 +39,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -371,6 +370,7 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.getBundle()).andReturn(bundle);
         expect(bundle.adapt(FrameworkStartLevel.class)).andReturn(fsl);
+        expect(bundleContext.registerService(eq(ResolverHookFactory.class), anyObject(ResolverHookFactory.class), isNull())).andReturn(null);
         expect(fsl.getInitialBundleStartLevel()).andReturn(50);
         expect(fsl.getStartLevel()).andReturn(100);
         replay(bundleContext, bundle, fsl);
