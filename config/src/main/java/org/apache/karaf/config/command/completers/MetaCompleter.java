@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.config.command.completers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.karaf.config.core.impl.MetaServiceCaller;
@@ -28,23 +26,42 @@ import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.osgi.service.metatype.MetaTypeInformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MetaCompleter implements Completer, BundleListener {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MetaCompleter.class);
+
     private final StringsCompleter delegate = new StringsCompleter();
-    
+
     @Reference
     BundleContext context;
     
     @Init
     public void init() {
-        context.registerService(BundleListener.class, this, null);
-        updateMeta();
+        try {
+            updateMeta();
+            context.registerService(BundleListener.class, this, null);
+        } catch (Throwable e) {
+            Throwable ncdfe = e;
+            while (ncdfe != null && !(ncdfe instanceof NoClassDefFoundError)) {
+                ncdfe = ncdfe.getCause();
+            }
+            if (ncdfe != null && ncdfe.getMessage().equals("org/osgi/service/metatype/MetaTypeService")) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("config:meta disabled because the org.osgi.service.metatype package is not wired", e);
+                } else {
+                    LOG.warn("config:meta disabled because the org.osgi.service.metatype package is not wired (enable debug logging for full stack trace).");
+                }
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
@@ -58,24 +75,7 @@ public class MetaCompleter implements Completer, BundleListener {
     }
 
     private synchronized void updateMeta() {
-        List<String> pids = MetaServiceCaller.withMetaTypeService(context, metatypeService -> {
-            List<String> pids1 = new ArrayList<>();
-            Bundle[] bundles = context.getBundles();
-            for (Bundle bundle : bundles) {
-
-                MetaTypeInformation info = metatypeService.getMetaTypeInformation(bundle);
-                if (info == null) {
-                    continue;
-                }
-                if (info.getFactoryPids() != null) {
-                    pids1.addAll(Arrays.asList(info.getFactoryPids()));
-                }
-                if (info.getPids() != null) {
-                    pids1.addAll(Arrays.asList(info.getPids()));
-                }
-            }
-            return pids1;
-        });
+        List<String> pids = MetaServiceCaller.getPidsWithMetaInfo(context);
         if (pids != null) {
             delegate.getStrings().clear();
             delegate.getStrings().addAll(pids);

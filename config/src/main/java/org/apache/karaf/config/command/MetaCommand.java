@@ -23,15 +23,16 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.karaf.config.command.completers.MetaCompleter;
-import org.apache.karaf.config.core.impl.MetatypeCallable;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.CommandException;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -40,10 +41,15 @@ import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Command(scope = "config", name = "meta", description = "Lists meta type information.")
 @Service
 public class MetaCommand extends ConfigCommandSupport {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MetaCommand.class);
+
     @Argument(name = "pid", description = "The configuration pid", required = true, multiValued = false)
     @Completion(MetaCompleter.class)
     protected String pid;
@@ -72,15 +78,27 @@ public class MetaCommand extends ConfigCommandSupport {
 
     @Override
     public Object doExecute() throws Exception {
-        if (create) {
-            withMetaTypeService(context, new Create());
-        } else {
-            withMetaTypeService(context, new Print());
+        try {
+            if (create) {
+                withMetaTypeService(context, new Create());
+            } else {
+                withMetaTypeService(context, new Print());
+            }
+            return null;
+        } catch (Throwable e) {
+            Throwable ncdfe = e;
+            while (ncdfe != null && !(ncdfe instanceof NoClassDefFoundError)) {
+                ncdfe = ncdfe.getCause();
+            }
+            if (ncdfe != null && ncdfe.getMessage().equals("org/osgi/service/metatype/MetaTypeService")) {
+                throw new CommandException("config:meta disabled because the org.osgi.service.metatype package is not wired", e);
+            } else {
+                throw e;
+            }
         }
-        return null;
     }
         
-    abstract class AbstractMeta implements MetatypeCallable<Void> {
+    abstract class AbstractMeta implements Function<MetaTypeService, Void> {
         protected String getDefaultValueStr(String[] defaultValues) {
             if (defaultValues == null) {
                 return "";
@@ -117,7 +135,7 @@ public class MetaCommand extends ConfigCommandSupport {
     
     class Create extends AbstractMeta {
 
-        public Void callWith(MetaTypeService metaTypeService) {
+        public Void apply(MetaTypeService metaTypeService) {
             ObjectClassDefinition def = getMetatype(metaTypeService, pid);
             if (def == null) {
                 System.out.println("No meta type definition found for pid: " + pid);
@@ -151,7 +169,7 @@ public class MetaCommand extends ConfigCommandSupport {
     }
     
     class Print extends AbstractMeta {
-        public Void callWith(MetaTypeService metaTypeService) {
+        public Void apply(MetaTypeService metaTypeService) {
             ObjectClassDefinition def = getMetatype(metaTypeService, pid);
             if (def == null) {
                 System.out.println("No meta type definition found for pid: " + pid);

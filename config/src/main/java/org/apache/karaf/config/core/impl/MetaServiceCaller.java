@@ -16,30 +16,52 @@
  */
 package org.apache.karaf.config.core.impl;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * Allows to use the MetaTypeService as an optional dependency
  */
 public class MetaServiceCaller {
-    private static Logger LOG = LoggerFactory.getLogger(MetaServiceCaller.class);
 
-    public static <T> T withMetaTypeService(BundleContext context, MetatypeCallable<T> callable) {
+    public static <T> T withMetaTypeService(BundleContext context, Function<MetaTypeService, T> callable) {
+        ServiceReference<MetaTypeService> ref = context.getServiceReference(MetaTypeService.class);
         try {
-            ServiceReference<MetaTypeService> ref = context.getServiceReference(MetaTypeService.class);
-            try {
-                MetaTypeService metaService = context.getService(ref);
-                return callable.callWith(metaService);
-            } finally {
-                context.ungetService(ref);
-            }
-        } catch (NoClassDefFoundError e) {
-            LOG.warn("No Metatype Service present");
-            return null;
+            MetaTypeService metaService = context.getService(ref);
+            return callable.apply(metaService);
+        } finally {
+            context.ungetService(ref);
         }
+    }
+
+    public static List<String> getPidsWithMetaInfo(BundleContext context) {
+        return withMetaTypeService(context, metatypeService -> {
+            List<String> pids1 = new ArrayList<>();
+            Bundle[] bundles = context.getBundles();
+            for (Bundle bundle : bundles) {
+
+                MetaTypeInformation info = metatypeService.getMetaTypeInformation(bundle);
+                if (info == null) {
+                    continue;
+                }
+                if (info.getFactoryPids() != null) {
+                    pids1.addAll(Arrays.asList(info.getFactoryPids()));
+                }
+                if (info.getPids() != null) {
+                    pids1.addAll(Arrays.asList(info.getPids()));
+                }
+            }
+            return pids1;
+        });
     }
 }
