@@ -520,7 +520,13 @@
             # The pattern used to format the log statement when using log:display. This pattern is according
             # to the log4j layout. You can override this parameter at runtime using log:display with -p.
             #
-            pattern = "%d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n"
+            color.fatal = "bright red"
+            color.error = "bright red"
+            color.warn = "bright yellow"
+            color.info = "bright green"
+            color.debug = "cyan"
+            color.trace = "cyan"
+            pattern = "\u001b[90m%d{HH:mm:ss.SSS}\u001b[0m %h{%p}{FATAL=${color.fatal}, ERROR=${color.error}, WARN=${color.warn}, INFO=${color.info}, DEBUG=${color.debug}, TRACE=${color.trace}} \u001b[90m[%t]\u001b[0m %m%n"
         </config>
         <bundle start-level="30" start="true">mvn:org.apache.karaf.log/org.apache.karaf.log.core/${project.version}</bundle>
     </feature>
