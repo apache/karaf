@@ -29,9 +29,11 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -43,13 +45,13 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaseActivator implements BundleActivator, Runnable {
+public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected BundleContext bundleContext;
 
     protected ExecutorService executor = new ThreadPoolExecutor(0, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>());
+            new LinkedBlockingQueue<>(), this);
     private AtomicBoolean scheduled = new AtomicBoolean();
 
     private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
@@ -58,6 +60,17 @@ public class BaseActivator implements BundleActivator, Runnable {
     private Map<String, SingleServiceTracker> trackers = new HashMap<>();
     private ServiceRegistration managedServiceRegistration;
     private Dictionary<String, ?> configuration;
+
+    private static final AtomicInteger poolNumber = new AtomicInteger(1);
+    private final ThreadGroup group;
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private final String namePrefix;
+
+    public BaseActivator() {
+        SecurityManager s = System.getSecurityManager();
+        group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+        namePrefix = "activator-" + poolNumber.getAndIncrement() + "-thread-";
+    }
 
     public long getSchedulerStopTimeout() {
         return schedulerStopTimeout;
@@ -413,6 +426,16 @@ public class BaseActivator implements BundleActivator, Runnable {
             names.add(cl.getName());
             addSuperInterfaces(names, cl);
         }
+    }
+
+    @Override
+    public Thread newThread(Runnable r) {
+        Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+        if (t.isDaemon())
+            t.setDaemon(false);
+        if (t.getPriority() != Thread.NORM_PRIORITY)
+            t.setPriority(Thread.NORM_PRIORITY);
+        return t;
     }
 
 }

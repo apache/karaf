@@ -28,6 +28,12 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.properties.Properties;
@@ -49,6 +55,7 @@ import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
+import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -93,6 +100,7 @@ public class Activator extends BaseActivator {
     private FeaturesServiceImpl featuresService;
     private StandardManageableRegionDigraph digraphMBean;
     private BundleInstallSupport installSupport;
+    private ExecutorService executorService;
 
     public Activator() {
         // Special case here, as we don't want the activator to wait for current job to finish,
@@ -124,7 +132,11 @@ public class Activator extends BaseActivator {
         BundleContext systemBundleContext = bundleContext.getBundle(0).getBundleContext();
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
         int resolverThreads = getInt("resolverThreads", Runtime.getRuntime().availableProcessors());
-        Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class)), resolverThreads);
+        executorService = new ThreadPoolExecutor(0, resolverThreads,
+                1L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(),
+                ThreadUtils.namedThreadFactory("resolver"));
+        Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class)), executorService);
         URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
 
         if (configurationAdmin == null || mvnUrlHandler == null) {

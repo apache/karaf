@@ -1003,7 +1003,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     protected DownloadManager createDownloadManager() throws IOException {
         Dictionary<String, String> props = getMavenConfig();
         MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
-        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(cfg.downloadThreads);
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(cfg.downloadThreads, ThreadUtils.namedThreadFactory("downloader"));
         executor.setMaximumPoolSize(cfg.downloadThreads);
         return DownloadManagers.createDownloadManager(resolver, executor, cfg.scheduleDelay, cfg.scheduleMaxRun);
     }
