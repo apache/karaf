@@ -154,8 +154,6 @@ public class PropertiesLoader {
         } catch (FileNotFoundException ex) {
             if (failIfNotFound) {
                 throw ex;
-            } else {
-                System.err.println("WARN: " + configPropURL + " is not found, so not loaded");
             }
         } catch (Exception ex) {
             System.err.println("Error loading config properties from " + configPropURL);
