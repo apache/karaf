@@ -149,14 +149,25 @@ public class Main {
                     }
                 });
             }
+
+            if (config.getUser() == null || config.getUser().isEmpty()) {
+                while (true) {
+                    String user = console.readLine("Enter user: ");
+                    if (user == null || user.isEmpty()) {
+                        System.err.println("User must not be empty");
+                    } else {
+                        config.setUser(user);
+                        break;
+                    }
+                }
+            } else if (console != null) {
+                console.printf("Logging in as %s\n", config.getUser());
+            }
             setupAgent(config.getUser(), config.getKeyFile(), client, passwordProvider);
             client.getProperties().put(FactoryManager.IDLE_TIMEOUT, String.valueOf(config.getIdleTimeout()));
             // TODO: remove the line below when SSHD-732 is fixed
             client.setKeyPairProvider(new FileKeyPairProvider());
             client.start();
-            if (console != null) {
-                console.printf("Logging in as %s\n", config.getUser());
-            }
             ClientSession session = connectWithRetries(client, config);
             if (config.getPassword() != null) {
                 session.addPasswordIdentity(config.getPassword());
