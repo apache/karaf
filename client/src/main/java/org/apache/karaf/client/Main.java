@@ -145,7 +145,7 @@ public class Main {
             
             if (config.getUser()==null || config.getUser().isEmpty()) {
             	while (true) {
-            		String user = console.readLine("Enter user : ");
+            		String user = console.readLine("Enter user: ");
             		if (user==null || user.isEmpty()) {
             			System.err.println("User must not be empty!");
             		}
