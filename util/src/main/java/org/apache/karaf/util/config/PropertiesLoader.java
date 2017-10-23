@@ -99,13 +99,16 @@ public class PropertiesLoader {
      * @throws IOException if the system file can't be loaded.
      */
     public static void loadSystemProperties(File file) throws IOException {
-        Properties props = new Properties(false);
+        Properties props = null;
         try {
-            props.load(file);
-        } catch (Exception e1) {
-            // Ignore
+        	URL configPropURL = file.toURI().toURL();
+        	props = loadPropertiesFile(configPropURL, true);
         }
-
+        catch (Exception ex) {
+        	// Ignore
+        	return;
+        }
+        
         for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             if (name.startsWith(OVERRIDE_PREFIX)) {
