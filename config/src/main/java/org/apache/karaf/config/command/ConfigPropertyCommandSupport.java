@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.config.command;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.command.completers.ConfigurationCompleter;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
@@ -33,12 +31,12 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     protected String pid;
 
     protected Object doExecute() throws Exception {
-        Dictionary<String, Object> props = getEditedProps();
+        TypedProperties props = getEditedProps();
         if (props == null && pid == null) {
             System.err.println("No configuration is being edited--run the edit command first");
         } else {
             if (props == null) {
-                props = new Hashtable<>();
+                props = new TypedProperties();
             }
             propertyAction(props);
             if(requiresUpdate(pid)) {
@@ -53,8 +51,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      *
      * @param props the dictionary where to apply the action.
      */
-    @SuppressWarnings("rawtypes")
-    protected abstract void propertyAction(Dictionary props);
+    protected abstract void propertyAction(TypedProperties props);
 
     /**
      * Check if the configuration requires to be updated.
@@ -74,8 +71,13 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      * @throws Exception in case of configuration failure.
      */
     @Override
-    protected Dictionary<String, Object> getEditedProps() throws Exception {
-        Dictionary<String, Object> props = this.configRepository.getConfigProperties(pid);
-        return (props != null) ? props : super.getEditedProps();
+    protected TypedProperties getEditedProps() throws Exception {
+        if (pid != null) {
+            return this.configRepository.getConfig(pid);
+        }
+        else {
+            return super.getEditedProps();
+        }
     }
+
 }

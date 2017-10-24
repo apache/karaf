@@ -16,13 +16,14 @@
  */
 package org.apache.karaf.config.command;
 
-
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;
 import org.easymock.EasyMock;
 
@@ -37,7 +38,7 @@ public class UpdateCommandTest extends TestCase {
     private static final String PID = "myPid";
 
     public void testupdateRegularConfig() throws Exception {
-		Dictionary<String, Object> props = new Hashtable<>();
+        Hashtable<String, Object> props = new Hashtable<>();
 
         UpdateCommand command = new UpdateCommand();
         ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
@@ -54,7 +55,7 @@ public class UpdateCommandTest extends TestCase {
     }
 
     public void testupdateOnNewFactoryPid() throws Exception {
-		Dictionary<String, Object> props = new Hashtable<>();
+		Hashtable<String, Object> props = new Hashtable<>();
 
         UpdateCommand command = new UpdateCommand();
         ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
@@ -75,7 +76,12 @@ public class UpdateCommandTest extends TestCase {
 		MockCommandSession session = new MockCommandSession();
         session.put(ConfigCommandSupport.PROPERTY_CONFIG_PID, pid);
         session.put(ConfigCommandSupport.PROPERTY_FACTORY, isFactory);
-        session.put(ConfigCommandSupport.PROPERTY_CONFIG_PROPS, props);
+        TypedProperties tp = new TypedProperties();
+        for (Enumeration<String> e = props.keys(); e.hasMoreElements();) {
+            String key = e.nextElement();
+            tp.put(key, props.get(key));
+        }
+        session.put(ConfigCommandSupport.PROPERTY_CONFIG_PROPS, tp);
 		return session;
 	}
 

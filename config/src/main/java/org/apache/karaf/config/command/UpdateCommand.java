@@ -16,8 +16,7 @@
  */
 package org.apache.karaf.config.command;
 
-import java.util.Dictionary;
-
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
@@ -28,7 +27,7 @@ public class UpdateCommand extends ConfigCommandSupport {
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Object doExecute() throws Exception {
-        Dictionary props = getEditedProps();
+        TypedProperties props = getEditedProps();
         if (props == null) {
             System.err.println("No configuration is being edited--run the edit command first");
             return null;

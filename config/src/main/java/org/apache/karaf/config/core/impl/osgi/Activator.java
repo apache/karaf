@@ -23,11 +23,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-
-import java.io.File;
-import java.io.IOException;
 
 @Services(
         requires = @RequireService(ConfigurationAdmin.class),
@@ -41,23 +37,12 @@ public class Activator extends BaseActivator {
             return;
         }
 
-        File persistenceStorage = getPersistenceStorage(configurationAdmin);
-
-        ConfigRepository configRepository = new ConfigRepositoryImpl(configurationAdmin, persistenceStorage);
+        ConfigRepository configRepository = new ConfigRepositoryImpl(configurationAdmin);
         register(ConfigRepository.class, configRepository);
 
         ConfigMBeanImpl configMBean = new ConfigMBeanImpl();
         configMBean.setConfigRepo(configRepository);
         registerMBean(configMBean, "type=config");
-    }
-
-    private File getPersistenceStorage(ConfigurationAdmin configurationAdmin) throws IOException {
-        Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.config");
-        if(configuration.getProperties() == null){
-            return new File(System.getProperty("karaf.etc"));
-        }
-        String storage = (String) configuration.getProperties().get("storage");
-        return storage == null || storage.trim().isEmpty() ? null : new File(storage);
     }
 
 }

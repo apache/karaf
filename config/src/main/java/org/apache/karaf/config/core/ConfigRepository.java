@@ -17,36 +17,24 @@
 package org.apache.karaf.config.core;
 
 import java.io.IOException;
-import java.util.Dictionary;
+import java.util.Map;
 
+import org.apache.felix.utils.properties.TypedProperties;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public interface ConfigRepository {
 
-    /**
-     * Save config to storage or ConfigurationAdmin.
-     *
-     * @param pid the configuration PID.
-     * @param props the dictionary used to update the configuration.
-     * @throws IOException in case of update failure.
-     */
-    void update(String pid, Dictionary<String, Object> props) throws IOException;
+    ConfigurationAdmin getConfigAdmin();
+
+    TypedProperties getConfig(String pid) throws IOException, InvalidSyntaxException;
 
     void delete(String pid) throws Exception;
 
-    Dictionary<String, Object> getConfigProperties(String pid) throws IOException, InvalidSyntaxException;
+    void update(String pid, Map<String, Object> properties) throws IOException;
 
-    ConfigurationAdmin getConfigAdmin();
+    String createFactoryConfiguration(String factoryPid, Map<String, Object> properties) throws IOException;
 
-    /**
-     * Create a factory based configuration.
-     *
-     * @param factoryPid the configuration factory PID.
-     * @param properties the new properties to set in the configuration.
-     * @return the created configuration PID.
-     */
-    String createFactoryConfiguration(String factoryPid, Dictionary<String, Object> properties);
+    String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties) throws IOException;
 
-    String createFactoryConfiguration(String factoryPid, String alias, Dictionary<String, Object> properties);
 }

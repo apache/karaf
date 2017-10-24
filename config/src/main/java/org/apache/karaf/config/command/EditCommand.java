@@ -16,8 +16,7 @@
  */
 package org.apache.karaf.config.command;
 
-import java.util.Dictionary;
-
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.command.completers.ConfigurationCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -37,7 +36,7 @@ public class EditCommand extends ConfigCommandSupport {
     @Option(name = "--force", aliases = {}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)
     boolean force;
 
-    @Option(name = "--factory", aliases = {}, description = "Define this config as a factory config. Will be crearted on calling update", required = false, multiValued = false)
+    @Option(name = "--factory", aliases = {}, description = "Define this config as a factory config. Will be created on calling update", required = false, multiValued = false)
     boolean factory;
 
     @Option(name = "--alias", aliases = {}, description = "Specifies the alias used for this factory config.", required = false, multiValued = false)
@@ -71,7 +70,7 @@ public class EditCommand extends ConfigCommandSupport {
             System.err.println("The --alias only works in case of a factory configuration. Add the --factory option.");
         }
 
-        Dictionary props = this.configRepository.getConfigProperties(pid);
+        TypedProperties props = this.configRepository.getConfig(pid);
         this.session.put(PROPERTY_CONFIG_PID, pid);
         this.session.put(PROPERTY_FACTORY, factory);
         this.session.put(PROPERTY_CONFIG_PROPS, props);

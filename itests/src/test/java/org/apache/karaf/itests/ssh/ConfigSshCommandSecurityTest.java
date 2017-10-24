@@ -66,14 +66,14 @@ public class ConfigSshCommandSecurityTest extends SshCommandTestBase {
         String result = assertCommand(user, "config:edit " + pid + "\n" +
                 "config:property-list\n" +
                 "config:cancel", Result.OK);
-        Assert.assertTrue(result.contains("x = yz"));
-        Assert.assertTrue(result.contains("a = b"));
+        Assert.assertTrue("Result should contain 'x = yz': " + result, result.contains("x = yz"));
+        Assert.assertTrue("Result should contain 'a = b': " + result, result.contains("a = b"));
         String result2 = assertCommand(user, "config:edit " + pid + "\n" +
                 "config:property-delete a\n" +
                 "config:property-list\n" +
                 "config:update", Result.OK);
-        Assert.assertTrue(result2.contains("x = yz"));
-        Assert.assertFalse(result2.contains("a = b"));
+        Assert.assertTrue("Result should contain 'x = yz': " + result2, result2.contains("x = yz"));
+        Assert.assertFalse("Result should contain 'a = b': " + result2, result2.contains("a = b"));
 
         if (isAdmin) {
             assertCommand(user, "config:delete " + pid, Result.OK);

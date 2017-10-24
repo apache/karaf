@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.impl.ConfigRepositoryImpl;
 import org.apache.karaf.shell.api.console.Session;
 import org.osgi.service.cm.Configuration;
@@ -67,7 +68,7 @@ public class EditCommandTest extends TestCase {
         // the PID and Dictionary should have been set on the session
         assertEquals("The PID should be set on the session",
                      PID, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID));
-        assertSame("The Dictionary returned by the ConfigAdmin service should be set on the session",
+        assertEquals("The Dictionary returned by the ConfigAdmin service should be set on the session",
                    props, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS));
     }
     
@@ -87,7 +88,7 @@ public class EditCommandTest extends TestCase {
         // the PID and an empty Dictionary should have been set on the session        
         assertEquals("The PID should be set on the session",
                      PID, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID));
-        Dictionary props = (Dictionary) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS);
+        TypedProperties props = (TypedProperties) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS);
         assertNotNull("Should have a Dictionary on the session", props);
         assertTrue("Should have an empty Dictionary on the session", props.isEmpty());
     }

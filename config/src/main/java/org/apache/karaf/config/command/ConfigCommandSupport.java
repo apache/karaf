@@ -17,8 +17,8 @@
 package org.apache.karaf.config.command;
 
 import java.util.Arrays;
-import java.util.Dictionary;
 
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -51,8 +51,8 @@ public abstract class ConfigCommandSupport implements Action {
     protected abstract Object doExecute() throws Exception;
 
     @SuppressWarnings("rawtypes")
-    protected Dictionary<String, Object> getEditedProps() throws Exception {
-        return (Dictionary) this.session.get(PROPERTY_CONFIG_PROPS);
+    protected TypedProperties getEditedProps() throws Exception {
+        return (TypedProperties) this.session.get(PROPERTY_CONFIG_PROPS);
     }
 
     public void setConfigRepository(ConfigRepository configRepository) {
