@@ -64,7 +64,7 @@ public class SecuredCommand implements Command, Function {
 
     @Override
     public Object execute(Session session, List<Object> arguments) throws Exception {
-        factory.checkSecurity(this, session, arguments);
+        factory.checkSecurity(getScope(), getName(), arguments);
         return command.execute(session, arguments);
     }
 

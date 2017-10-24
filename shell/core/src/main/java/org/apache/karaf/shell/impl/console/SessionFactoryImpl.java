@@ -20,6 +20,7 @@ package org.apache.karaf.shell.impl.console;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.apache.felix.gogo.jline.Builtin;
 import org.apache.felix.gogo.jline.Posix;
 import org.apache.felix.gogo.jline.Procedural;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.gogo.runtime.Reflective;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
@@ -54,7 +56,17 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
     public SessionFactoryImpl(ThreadIO threadIO) {
         super(null);
         this.threadIO = threadIO;
-        commandProcessor = new CommandProcessorImpl(threadIO);
+        commandProcessor = new CommandProcessorImpl(threadIO) {
+            @Override
+            public Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
+                return SessionFactoryImpl.this.invoke(session, target, name, args);
+            }
+
+            @Override
+            public Path redirect(CommandSessionImpl session, Path path, int mode) {
+                return SessionFactoryImpl.this.redirect(session, path, mode);
+            }
+        };
         register(new ExitCommand());
         new HelpCommand(this);
         register(new ShellCommand("addCommand", "Add a command", commandProcessor, "addCommand"));
@@ -75,6 +87,14 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         for (String name : new String[]{"cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "nano", "head", "tail", "clear", "wc", "date", "tmux", "ttop"}) {
             register(new ShellCommand(name, null, posix, name));
         }
+    }
+
+    protected Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
+        return Reflective.invoke(session, target, name, args);
+    }
+
+    protected Path redirect(CommandSessionImpl session, Path path, int mode) {
+        return session.currentDir().resolve(path);
     }
 
     public CommandProcessorImpl getCommandProcessor() {
