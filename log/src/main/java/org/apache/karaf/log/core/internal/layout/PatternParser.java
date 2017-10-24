@@ -21,8 +21,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import org.ops4j.pax.logging.PaxLogger;
 import org.ops4j.pax.logging.spi.PaxLocationInfo;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
@@ -89,11 +92,21 @@ public class PatternParser {
   protected
   String extractOption() {
     if((i < patternLength) && (pattern.charAt(i) == '{')) {
-      int end = pattern.indexOf('}', i);
-      if (end > i) {
-	String r = pattern.substring(i + 1, end);
-	i = end+1;
-	return r;
+      int end = i;
+      int nb = 1;
+      while (++end < patternLength) {
+        switch (pattern.charAt(end)) {
+          case '{':
+            nb++;
+            break;
+          case '}':
+            if (--nb == 0) {
+              String r = pattern.substring(i + 1, end);
+              i = end + 1;
+              return r;
+            }
+            break;
+        }
       }
     }
     return null;
@@ -277,6 +290,12 @@ public class PatternParser {
       //formattingInfo.dump();
       currentLiteral.setLength(0);
       break;
+    case 'h':
+      String pat = extractOption();
+      String style = extractOption();
+      pc = new HighlightPatternConverter(formattingInfo, pat, style);
+      currentLiteral.setLength(0);
+      break;
     /*case 'l':
       pc = new LocationPatternConverter(formattingInfo,
 					FULL_LOCATION_CONVERTER);
@@ -438,6 +457,131 @@ public class PatternParser {
         //LogLog.error("Error occured while converting date.", ex);
       }
       return converted;
+    }
+  }
+
+  private static class HighlightPatternConverter extends PatternConverter {
+    static Map<String, String> SEQUENCES;
+    static {
+      SEQUENCES = new HashMap<>();
+      SEQUENCES.put("csi", "\u001b[");
+      SEQUENCES.put("suffix", "m");
+      SEQUENCES.put("separator", ";");
+      SEQUENCES.put("normal", "0");
+      SEQUENCES.put("bold", "1");
+      SEQUENCES.put("bright", "1");
+      SEQUENCES.put("dim", "2");
+      SEQUENCES.put("underline", "3");
+      SEQUENCES.put("blink", "5");
+      SEQUENCES.put("reverse", "7");
+      SEQUENCES.put("hidden", "8");
+      SEQUENCES.put("black", "30");
+      SEQUENCES.put("fg_black", "30");
+      SEQUENCES.put("red", "31");
+      SEQUENCES.put("fg_red", "31");
+      SEQUENCES.put("green", "32");
+      SEQUENCES.put("fg_green", "32");
+      SEQUENCES.put("yellow", "33");
+      SEQUENCES.put("fg_yellow", "33");
+      SEQUENCES.put("blue", "34");
+      SEQUENCES.put("fg_blue", "34");
+      SEQUENCES.put("magenta", "35");
+      SEQUENCES.put("fg_magenta", "35");
+      SEQUENCES.put("cyan", "36");
+      SEQUENCES.put("fg_cyan", "36");
+      SEQUENCES.put("white", "37");
+      SEQUENCES.put("fg_white", "37");
+      SEQUENCES.put("default", "39");
+      SEQUENCES.put("fg_default", "39");
+      SEQUENCES.put("bg_black", "40");
+      SEQUENCES.put("bg_red", "41");
+      SEQUENCES.put("bg_green", "42");
+      SEQUENCES.put("bg_yellow", "43");
+      SEQUENCES.put("bg_blue", "44");
+      SEQUENCES.put("bg_magenta", "45");
+      SEQUENCES.put("bg_cyan", "46");
+      SEQUENCES.put("bg_white", "47");
+      SEQUENCES.put("bg_default", "49");
+    }
+    private PatternConverter pattern;
+    private Map<String, String> style;
+
+    HighlightPatternConverter(FormattingInfo formattingInfo, String pattern, String style) {
+      super(formattingInfo);
+      this.pattern = new PatternParser(pattern).parse();
+      Map<String, String> unparsed = new HashMap<>();
+      unparsed.put("trace", "cyan");
+      unparsed.put("debug", "cyan");
+      unparsed.put("info", "bright green");
+      unparsed.put("warn", "bright yellow");
+      unparsed.put("error", "bright red");
+      unparsed.put("fatal", "bright red");
+      if (style != null) {
+        style = style.toLowerCase(Locale.ENGLISH);
+        if (style.indexOf(',') < 0 && style.indexOf('=') < 0) {
+          unparsed.put("trace", style.trim());
+          unparsed.put("debug", style.trim());
+          unparsed.put("info", style.trim());
+          unparsed.put("warn", style.trim());
+          unparsed.put("error", style.trim());
+          unparsed.put("fatal", style.trim());
+        } else {
+          String[] keys = style.split("\\s*,\\s*");
+          for (String key : keys) {
+            String[] val = key.split("\\s*=\\s*");
+            if (val.length > 1) {
+              unparsed.put(val[0].trim(), val[1].trim());
+            }
+          }
+        }
+      }
+      this.style = new HashMap<>();
+      for (Map.Entry<String, String> e : unparsed.entrySet()) {
+        this.style.put(e.getKey(), createSequence(e.getValue().split("\\s")));
+      }
+    }
+
+    private String createSequence(String... names) {
+      StringBuilder sb = new StringBuilder(SEQUENCES.get("csi"));
+      boolean first = true;
+      for (String name : names) {
+        name = name.trim();
+        if (!first) {
+          sb.append(SEQUENCES.get("separator"));
+        }
+        first = false;
+        sb.append(SEQUENCES.getOrDefault(name, name));
+      }
+      sb.append(SEQUENCES.get("suffix"));
+      return sb.toString();
+    }
+
+    public
+    String convert(PaxLoggingEvent event) {
+      String s;
+      switch (event.getLevel().toInt()) {
+        case PaxLogger.LEVEL_TRACE:
+          s = "trace";
+          break;
+        case PaxLogger.LEVEL_DEBUG:
+          s = "debug";
+          break;
+        case PaxLogger.LEVEL_INFO:
+          s = "info";
+          break;
+        case PaxLogger.LEVEL_WARNING:
+          s = "warn";
+          break;
+        default:
+          s = "error";
+          break;
+      }
+      String str = style.get(s);
+      if (str != null) {
+        return str + pattern.convert(event) + SEQUENCES.get("csi") + SEQUENCES.get("suffix");
+      } else {
+        return pattern.convert(event);
+      }
     }
   }
 
