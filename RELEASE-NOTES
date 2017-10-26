@@ -15,6 +15,77 @@
  * limitations under the License.
  */
 
+		    Apache Karaf 4.1.3
+		    ==================
+ Apache Karaf 4.1.0 is a maintenance release on the 4.1.x series, bringing bug fixes and updates.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-3531] - SimpleMavenResolver does not handle wrap: prefix in mvn urls
+    * [KARAF-4655] - karaf-maven-plugin add-features-to-repo goal can't add Camel feature
+    * [KARAF-5103] - Quick start fails at the step "feature:install camel-spring"
+    * [KARAF-5283] - Karaf in offline (no internet) environment - NamespaceHandler bugs
+    * [KARAF-5304] - checkRootInstance function in karaf script fails under AIX
+    * [KARAF-5311] - NPE in karaf-maven-plugin when specifying descriptor by file url
+    * [KARAF-5312] - bin/stop script output some unwanted message on mac
+    * [KARAF-5313] - Exception when deleting a .cfg file from hot deploy directory 
+    * [KARAF-5314] - The performance of profile builder used by karaf maven plugin has reduced significantly in 4.1 compared to 4.0
+    * [KARAF-5315] - Race condition during shutdown using SIGTERM
+    * [KARAF-5317] - "Exception in thread "SIGWINCH handler" java.lang.UnsupportedOperationException" occurs when resizing the console while `log:tail` is run
+    * [KARAF-5320] - Karaf Command Arguments escapes backslash characters
+    * [KARAF-5326] - variables in cfg files are expanded
+    * [KARAF-5328] - NPE is thrown when execute source command from client/ssh
+    * [KARAF-5330] - Require a specific role to access the SSH console
+    * [KARAF-5332] - bin/stop script fails when KARAF_DEBUG is set
+    * [KARAF-5333] -  UnsupportedCharsetException: cp65001 and unprintable characters from karaf 4.1.2 console
+    * [KARAF-5334] - Fix broken shell.support.table.ShellTableTest on Windows
+    * [KARAF-5337] - karaf-maven-plugin generates an "override.properties" instead of "overrides.properties"
+    * [KARAF-5338] - Unable to access the local JMX server on OSX
+    * [KARAF-5343] - Upgrade to pax-web-6.0.7
+    * [KARAF-5352] - KARAF_ETC envvar ignored
+    * [KARAF-5371] - Race condition between FeatureService and Fileinstall
+    * [KARAF-5373] - Karaf-maven-plugin fails to create feature file
+    * [KARAF-5374] - karaf-maven-plugin can't configure the start-level for the startupBundles
+    * [KARAF-5375] - feature:stop command does not stop the bundles
+    * [KARAF-5377] - Speed up repository loading
+    * [KARAF-5388] - create dump doesn't include log file anymore
+    * [KARAF-5390] - tar.gz archives contains invalid data in demos\web\src\main\webapp\WEB-INF\karaf\system\org\apache\felix
+    * [KARAF-5394] - maven-metadata-local.xml in KARs cause SAXParseException
+    * [KARAF-5397] - Remove org.apache.karaf.shell config from ssh feature
+    * [KARAF-5404] - CLI autocompletion issue
+    * [KARAF-5406] - CLI error on window resize on Linux(Wayland)
+    * [KARAF-5411] - Client doesn't prompt for user if no user.properties file
+    * [KARAF-5414] - Features mentioned in feature.xml stubs aren't taken into account in dependency calculations
+    * [KARAF-5423] - Karaf is flagged as vulnerable to CVE-2015-5262
+    * [KARAF-5435] - BundleException when installing a bundle by API when the FeatureService install a feature
+    * [KARAF-5436] - Factory configurations file in etc/ are not deleted when the configuration is deleted
+    * [KARAF-5440] - No override facility for properties in system.properties
+
+** Dependency upgrade
+    * [KARAF-5359] - Upgrade to JLine 3.5.0
+    * [KARAF-5365] - Upgrade to Aries Subsystem 2.0.10
+    * [KARAF-5366] - Upgrade to Felix ConfigAdmin 1.8.16
+    * [KARAF-5367] - Upgrade to Felix EventAdmin 1.4.10
+    * [KARAF-5368] - Upgrade to Felix Framework & Main 5.6.8
+    * [KARAF-5369] - Upgrade to Felix Metatype 1.1.4
+    * [KARAF-5370] - Upgrade to Felix Resolver 1.14.0
+    * [KARAF-5419] - Upgrade to Aries Blueprint Core 1.8.3
+    * [KARAF-5430] - Upgrade to Spring 4.0.9.RELEASE & 4.3.12.RELEASE
+
+** Documentation
+    * [KARAF-5357] - Help string for feature:stop is incorrect
+
+** Improvement
+    * [KARAF-4803] - Turn off Karaf configuration persistence manager
+    * [KARAF-4932] - Remove blueprint compat and blueprint annotations bundles
+    * [KARAF-5080] - Use the full ttop command from gogo-jline
+    * [KARAF-5294] - Cleanup Maven repository
+    * [KARAF-5319] - the jetty feature in karaf shouldn't depend on pax-jetty feature
+    * [KARAF-5363] - Add --no-start option to kar:install, kar cfg and kar MBean
+
+
 		    Apache Karaf 4.1.2
 		    ==================
  Apache Karaf 4.1.0 is a maintenance release on the 4.1.x series, bringing bug fixes and updates.
