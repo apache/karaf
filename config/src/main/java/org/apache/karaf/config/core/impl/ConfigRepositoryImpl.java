@@ -24,8 +24,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;
@@ -62,6 +64,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             if (file != null) {
                 props.load(file);
                 props.putAll(properties);
+                props.keySet().retainAll(properties.keySet());
                 props.save(file);
                 props.clear();
                 props.load(file);
@@ -69,6 +72,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             } else {
                 file = new File(System.getProperty("karaf.etc"), pid + ".cfg");
                 props.putAll(properties);
+                props.keySet().retainAll(properties.keySet());
                 props.save(file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             }
