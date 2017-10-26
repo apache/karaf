@@ -66,27 +66,26 @@ public class ConfigSshCommandSecurityTest extends SshCommandTestBase {
         String result = assertCommand(user, "config:edit " + pid + "\n" +
                 "config:property-list\n" +
                 "config:cancel", Result.OK);
-        Assert.assertTrue("Result should contain 'x = yz': " + result, result.contains("x = yz"));
-        Assert.assertTrue("Result should contain 'a = b': " + result, result.contains("a = b"));
+        assertContains("a = b", result);
         String result2 = assertCommand(user, "config:edit " + pid + "\n" +
                 "config:property-delete a\n" +
                 "config:property-list\n" +
                 "config:update", Result.OK);
-        Assert.assertTrue("Result should contain 'x = yz': " + result2, result2.contains("x = yz"));
-        Assert.assertFalse("Result should contain 'a = b': " + result2, result2.contains("a = b"));
+        assertContains("x = yz", result2);
+        assertContainsNot("a = b", result2);
 
         if (isAdmin) {
             assertCommand(user, "config:delete " + pid, Result.OK);
             String result3 = assertCommand(user, "config:edit " + pid + "\n" +
                     "config:property-list", Result.OK);
-            Assert.assertFalse(result3.contains("x = yz"));
-            Assert.assertFalse(result3.contains("a = b"));
+            assertContainsNot("x = yz", result3);
+            assertContainsNot("a = b", result3);
         } else {
             assertCommand(user, "config:delete " + pid, Result.NOT_FOUND);
             String result3 = assertCommand(user, "config:edit " + pid + "\n" +
                     "config:property-list", Result.OK);
-            Assert.assertTrue("The delete command should have had no effect", result3.contains("x = yz"));
-            Assert.assertFalse(result3.contains("a = b"));
+            assertContains("x = yz", result3);
+            assertContainsNot("a = b", result3);
         }
     }
 
@@ -123,11 +122,11 @@ public class ConfigSshCommandSecurityTest extends SshCommandTestBase {
         assertCommand(user, "config:property-append -p " + pid + " a.b.c .g.h", expectedResult);
 
         if (expectedResult == Result.OK) {
-            Assert.assertTrue(assertCommand(user, "config:property-list -p " + pid, Result.OK).contains("a.b.c = d.e.f.g.h"));
+            assertContains("a.b.c = d.e.f.g.h", assertCommand(user, "config:property-list -p " + pid, Result.OK));
         }
         assertCommand(user, "config:property-delete -p " + pid + " a.b.c", expectedResult);
         if (expectedResult == Result.OK) {
-            Assert.assertFalse(assertCommand(user, "config:property-list -p " + pid, Result.OK).contains("a.b.c"));
+            assertContainsNot("a.b.c", assertCommand(user, "config:property-list -p " + pid, Result.OK));
         }
     }
 }

@@ -62,7 +62,7 @@ public class BundleTest extends KarafTestSupport {
         assertFalse(allCapabilitiesOutput.isEmpty());
         String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(jmxWhiteboardBundleCapabilitiesOutput);
-        assertTrue(jmxWhiteboardBundleCapabilitiesOutput.contains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.1.5 [UNUSED]"));
+        assertContains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.1.5 [UNUSED]", jmxWhiteboardBundleCapabilitiesOutput);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class BundleTest extends KarafTestSupport {
         assertFalse(allClassesOutput.isEmpty());
         String jmxWhiteboardBundleClassesOutput = executeCommand("bundle:classes org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(jmxWhiteboardBundleClassesOutput);
-        assertTrue(jmxWhiteboardBundleClassesOutput.contains("org/apache/aries/jmx/whiteboard/Activator$MBeanTracker.class"));
+        assertContains("org/apache/aries/jmx/whiteboard/Activator$MBeanTracker.class", jmxWhiteboardBundleClassesOutput);
     }
 
     /**
@@ -94,14 +94,14 @@ public class BundleTest extends KarafTestSupport {
     public void headersCommand() throws Exception {
         String headersOutput = executeCommand("bundle:headers org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(headersOutput);
-        assertTrue(headersOutput.contains("Bundle-Activator = org.apache.aries.jmx.whiteboard.Activator"));
+        assertContains("Bundle-Activator = org.apache.aries.jmx.whiteboard.Activator", headersOutput);
     }
 
     @Test
     public void infoCommand() throws Exception {
         String infoOutput = executeCommand("bundle:info org.apache.karaf.management.server", ADMIN_ROLES);
         System.out.println(infoOutput);
-        assertTrue(infoOutput.contains("This bundle starts the Karaf embedded MBean server"));
+        assertContains("This bundle starts the Karaf embedded MBean server", infoOutput);
     }
 
     @Test
