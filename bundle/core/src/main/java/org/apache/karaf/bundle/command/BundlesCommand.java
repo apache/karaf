@@ -19,9 +19,11 @@ package org.apache.karaf.bundle.command;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.karaf.bundle.command.completers.BundleSymbolicNameCompleter;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.support.MultiException;
@@ -34,6 +36,7 @@ public abstract class BundlesCommand implements Action {
     String context = "0";
 
     @Argument(index = 0, name = "ids", description = "The list of bundle (identified by IDs or name or name/version) separated by whitespaces", required = false, multiValued = true)
+    @Completion(BundleSymbolicNameCompleter.class)
     List<String> ids;
     
     @Reference
