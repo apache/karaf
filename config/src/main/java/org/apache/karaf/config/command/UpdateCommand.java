@@ -29,7 +29,7 @@ public class UpdateCommand extends ConfigCommandSupport {
     protected Object doExecute() throws Exception {
         TypedProperties props = getEditedProps();
         if (props == null) {
-            System.err.println("No configuration is being edited--run the edit command first");
+            System.err.println("No configuration is being edited. Run the edit command first.");
             return null;
         }
 
