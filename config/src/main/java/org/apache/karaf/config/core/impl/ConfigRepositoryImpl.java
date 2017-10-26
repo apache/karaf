@@ -55,7 +55,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public void update(String pid, Map<String, Object> properties) throws IOException {
         try {
             LOGGER.trace("Updating configuration {}", pid);
-            Configuration cfg = configAdmin.getConfiguration(pid, null);
+            Configuration cfg = configAdmin.getConfiguration(pid, "?");
             Dictionary<String, Object> dict = cfg.getProperties();
             TypedProperties props = new TypedProperties();
             File file = getCfgFileFromProperties(dict);
@@ -67,7 +67,10 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                 props.load(file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             } else {
+                file = new File(System.getProperty("karaf.etc"), pid + ".cfg");
                 props.putAll(properties);
+                props.save(file);
+                props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             }
             cfg.update(new Hashtable<>(props));
         } catch (URISyntaxException e) {
@@ -146,7 +149,12 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @Override
     public String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties) throws IOException {
         Configuration config = configAdmin.createFactoryConfiguration(factoryPid, "?");
-        config.update(new Hashtable<>(properties));
+        TypedProperties props = new TypedProperties();
+        File file = File.createTempFile(factoryPid + "-", ".cfg", new File(System.getProperty("karaf.etc")));
+        props.putAll(properties);
+        props.save(file);
+        props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
+        config.update(new Hashtable<>(props));
         return config.getPid();
     }
 
