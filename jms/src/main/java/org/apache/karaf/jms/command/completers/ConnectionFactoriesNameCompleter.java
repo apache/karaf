@@ -40,7 +40,7 @@ public class ConnectionFactoriesNameCompleter implements Completer {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (String connectionFactory : jmsService.connectionFactories()) {
-                delegate.getStrings().add(connectionFactory + " ");
+                delegate.getStrings().add(connectionFactory);
             }
         } catch (Exception e) {
             // nothing to do

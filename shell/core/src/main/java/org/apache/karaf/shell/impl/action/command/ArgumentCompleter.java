@@ -22,6 +22,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -119,12 +120,10 @@ public class ArgumentCompleter implements Completer {
                 if (ann != null) {
                     Class<?> clazz = ann.value();
                     String[] value = ann.values();
-                    if (clazz != null) {
-                        if (value.length > 0 && clazz == StringsCompleter.class) {
-                            completer = new StringsCompleter(value, ann.caseSensitive());
-                        } else {
-                            completer = command.getCompleter(clazz);
-                        }
+                    if (value.length > 0) {
+                        completer = new StringsCompleter(Arrays.asList(value), ann.caseSensitive());
+                    } else {
+                        completer = command.getCompleter(clazz);
                     }
                 } else {
                     completer = getDefaultCompleter(field, multi);
@@ -148,12 +147,10 @@ public class ArgumentCompleter implements Completer {
                     try {
                         Class clazz = ann.value();
                         String[] value = ann.values();
-                        if (clazz != null) {
-                            if (clazz == StringsCompleter.class) {
-                                completer = new StringsCompleter(value, ann.caseSensitive());
-                            } else {
-                                completer = command.getCompleter(clazz);
-                            }
+                        if (value.length > 0) {
+                            completer = new StringsCompleter(Arrays.asList(value), ann.caseSensitive());
+                        } else {
+                            completer = command.getCompleter(clazz);
                         }
                     } catch (Throwable t) {
                         // Ignore in case the completer class is not even available
@@ -189,13 +186,13 @@ public class ArgumentCompleter implements Completer {
         } else if (type.isAssignableFrom(File.class)) {
             completer = new FileCompleter();
         } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
-            completer = new StringsCompleter(new String[] {"false", "true"}, false);
+            completer = new StringsCompleter(Arrays.asList("false", "true"));
         } else if (Enum.class.isAssignableFrom(type)) {
             Set<String> values = new HashSet<>();
             for (Object o : EnumSet.allOf((Class<Enum>) type)) {
                 values.add(o.toString());
             }
-            completer = new StringsCompleter(values, false);
+            completer = new StringsCompleter(values);
         }
         return completer;
     }

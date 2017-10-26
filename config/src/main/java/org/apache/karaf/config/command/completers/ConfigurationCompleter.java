@@ -77,7 +77,7 @@ public class ConfigurationCompleter implements Completer, ConfigurationListener 
 
         Collection<String> pids = new ArrayList<>();
         for (Configuration config : configs) {
-            pids.add(config.getPid() + " ");
+            pids.add(config.getPid());
         }
 
         delegate.getStrings().addAll(pids);
@@ -95,9 +95,9 @@ public class ConfigurationCompleter implements Completer, ConfigurationListener 
     public void configurationEvent(ConfigurationEvent configurationEvent) {
         String pid = configurationEvent.getPid();
         if (configurationEvent.getType() == ConfigurationEvent.CM_DELETED) {
-            delegate.getStrings().remove(pid + " ");
+            delegate.getStrings().remove(pid);
         } else if (configurationEvent.getType() == ConfigurationEvent.CM_UPDATED) {
-            delegate.getStrings().add(pid + " ");
+            delegate.getStrings().add(pid);
         }
     }
 }

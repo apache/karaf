@@ -39,7 +39,7 @@ public class StringsCompleter
     private final boolean caseSensitive;
 
     public StringsCompleter() {
-        this(true);
+        this(false);
     }
 
     public StringsCompleter(final boolean caseSensitive) {
@@ -95,7 +95,7 @@ public class StringsCompleter
             }
 
             // noinspection unchecked
-            candidates.add(match);
+            candidates.add(match + " ");
         }
 
         return candidates.isEmpty() ? -1 : commandLine.getBufferPosition() - commandLine.getArgumentPosition();

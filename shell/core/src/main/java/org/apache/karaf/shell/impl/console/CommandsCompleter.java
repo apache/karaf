@@ -97,7 +97,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
                 }
             }
             if (!subShell.equals(Session.SCOPE_GLOBAL)) {
-                completers.add(new StringsCompleter(new String[] { "exit" }));
+                completers.add(new StringsCompleter(Collections.singletonList("exit")));
             }
             completers.forEach(c -> c.completeCandidates(session, commandLine, candidates));
             return;

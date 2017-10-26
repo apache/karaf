@@ -18,14 +18,13 @@ package org.apache.karaf.bundle.command.completers;
 
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,19 +35,11 @@ public class BundleSymbolicNameCompleter implements Completer {
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        List<Candidate> cands = new ArrayList<>();
-        completeCandidates(session, commandLine, cands);
-        for (Candidate cand : cands) {
-            candidates.add(cand.value());
-        }
-        return candidates.isEmpty() ? -1 : 0;
-    }
-
-    @Override
-    public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
+        StringsCompleter delegate = new StringsCompleter();
         for (Bundle bundle : bundleContext.getBundles()) {
-            candidates.add(new Candidate(bundle.getSymbolicName(), true));
+            delegate.getStrings().add(bundle.getSymbolicName());
         }
+        return delegate.complete(session, commandLine, candidates);
     }
 
 }
