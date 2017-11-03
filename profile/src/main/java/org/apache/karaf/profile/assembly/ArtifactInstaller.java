@@ -56,12 +56,13 @@ public class ArtifactInstaller {
             LOGGER.warn("Ignoring non maven artifact " + location);
             return;
         }
+        final String finalLocation = location;
         downloader.download(location, provider -> {
             String uri = provider.getUrl();
-            if (blacklist.isBundleBlacklisted(uri)) {
-                throw new RuntimeException("Bundle " + uri + " is blacklisted");
+            if (blacklist.isBundleBlacklisted(finalLocation)) {
+                throw new RuntimeException("Bundle " + finalLocation + " is blacklisted");
             }
-            Path path = pathFromProviderUrl(systemDirectory, uri);
+            Path path = pathFromProviderUrl(systemDirectory, finalLocation);
             synchronized (provider) {
                 Files.createDirectories(path.getParent());
                 Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
