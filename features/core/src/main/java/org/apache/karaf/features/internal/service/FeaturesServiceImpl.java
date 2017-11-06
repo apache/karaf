@@ -146,8 +146,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.resolver = resolver;
         this.installSupport = installSupport;
         this.globalRepository = globalRepository;
-        Blacklist blacklist = new Blacklist(cfg.blacklisted);
-        this.repositories = new RepositoryCache(blacklist);
+        this.repositories = new RepositoryCacheImpl(new FeaturesProcessorImpl(cfg));
         this.cfg = cfg;
         this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("features"));
         loadState();

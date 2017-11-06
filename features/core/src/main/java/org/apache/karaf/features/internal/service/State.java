@@ -24,19 +24,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.karaf.features.internal.util.MapUtils;
 
+/**
+ * <p>Representation of the state of system from the point of view of <em>requirements</em>.
+ * It's a collection of:<ul>
+ *     <li>used repositories</li>
+ *     <li>region -&gt; requirements</li>
+ *     <li>region -&gt; installed features</li>
+ *     <li>region -&gt; installed features -&gt; state of feature installation</li>
+ *     <li>region -&gt; bundle ids</li>
+ *     <li>bundle id -&gt; checksum</li>
+ * </ul></p>
+ * <p>State is replaced (swapped) after uninstalling/updating/installing all the bundles as requested, but
+ * before resolving/refreshing them.</p>
+ */
 public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
     public final Set<String> repositories = new TreeSet<>();
     
-    // Map from region name to Set of feature requirements (name/version range)
+    /** Map from region name to Set of feature requirements (name/version range) */
     public final Map<String, Set<String>> requirements = new HashMap<>();
-    // Map from region name to Set of feature id (name/version)
+    /** Map from region name to Set of feature id (name/version) */
     public final Map<String, Set<String>> installedFeatures = new HashMap<>();
     
-    // State of features by region and feature id (name/version)
+    /** State of features by region and feature id (name/version) */
     public final Map<String, Map<String, String>> stateFeatures = new HashMap<>();
+
+    /** Map from region name to Set of installed bundle ids */
     public final Map<String, Set<Long>> managedBundles = new HashMap<>();
+    /** Map from bundle id to bundle's java.util.zip.CRC32 */
     public final Map<Long, Long> bundleChecksums = new HashMap<>();
 
     public State copy() {

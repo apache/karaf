@@ -285,6 +285,27 @@ public class Parser
     }
 
     /**
+     * Prints parsed mvn: URI (after possible change of any component)
+     * @return
+     */
+    public String toMvnURI()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(m_group).append(ARTIFACT_SEPARATOR).append(m_artifact).append(ARTIFACT_SEPARATOR).append(m_version);
+        if (!TYPE_JAR.equals(m_type)) {
+            sb.append(ARTIFACT_SEPARATOR).append(m_type);
+        }
+        if (m_classifier != null && !"".equals(m_classifier)) {
+            if (TYPE_JAR.equals(m_type)) {
+                sb.append(ARTIFACT_SEPARATOR).append(m_type);
+            }
+            sb.append(ARTIFACT_SEPARATOR).append(m_classifier);
+        }
+
+        return sb.toString();
+    }
+
+    /**
      * Return the group id of the artifact.
      *
      * @return group ID.
@@ -332,6 +353,51 @@ public class Parser
     public String getClassifier()
     {
         return m_classifier;
+    }
+
+    /**
+     * Changes parsed group - to allow printing mvn: URI with changed groupId
+     * @param m_group
+     */
+    public void setGroup(String m_group)
+    {
+        this.m_group = m_group;
+    }
+
+    /**
+     * Changes parsed artifact - to allow printing mvn: URI with changed artifactId
+     * @param m_artifact
+     */
+    public void setArtifact(String m_artifact)
+    {
+        this.m_artifact = m_artifact;
+    }
+
+    /**
+     * Changes parsed version - to allow printing mvn: URI with changed version
+     * @param m_version
+     */
+    public void setVersion(String m_version)
+    {
+        this.m_version = m_version;
+    }
+
+    /**
+     * Changes parsed type - to allow printing mvn: URI with changed type
+     * @param m_type
+     */
+    public void setType(String m_type)
+    {
+        this.m_type = m_type;
+    }
+
+    /**
+     * Changes parsed classifier - to allow printing mvn: URI with changed classifier
+     * @param m_classifier
+     */
+    public void setClassifier(String m_classifier)
+    {
+        this.m_classifier = m_classifier;
     }
 
     /**

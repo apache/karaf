@@ -19,14 +19,18 @@ package org.apache.karaf.features;
 /**
  * A bundle info holds info about a Bundle.
  */
-public interface BundleInfo {
+public interface BundleInfo extends Blacklisting {
 
     String getLocation();
+
+    String getOriginalLocation();
 
     int getStartLevel();
 
     boolean isStart();
 
     boolean isDependency();
+
+    boolean isOverriden();
 
 }

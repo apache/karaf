@@ -20,8 +20,6 @@ import org.apache.karaf.features.FeaturesService;
 
 public class FeaturesServiceConfig {
 
-    public final String overrides;
-    
     /**
      * Range to use when a version is specified on a feature dependency.
      * The default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_FEATURE_RESOLUTION_RANGE}
@@ -54,14 +52,20 @@ public class FeaturesServiceConfig {
      * Service requirements enforcement
      */
     public final String serviceRequirements;
-    
+
     public final String blacklisted;
+    public final String featureModifications;
+    public final String overrides;
 
     public FeaturesServiceConfig() {
-        this(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, null, null);
+        this(null, null, null);
     }
 
-    public FeaturesServiceConfig(String overrides, String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun, String blacklisted, String serviceRequirements) {
+    public FeaturesServiceConfig(String overrides, String blacklisted, String featureModifications) {
+        this(overrides, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklisted, featureModifications, null);
+    }
+
+    public FeaturesServiceConfig(String overrides, String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun, String blacklisted, String featureModifications, String serviceRequirements) {
         this.overrides = overrides;
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
@@ -70,6 +74,7 @@ public class FeaturesServiceConfig {
         this.scheduleDelay = scheduleDelay;
         this.scheduleMaxRun = scheduleMaxRun;
         this.blacklisted = blacklisted;
+        this.featureModifications = featureModifications;
         this.serviceRequirements = serviceRequirements;
     }
 }

@@ -160,17 +160,34 @@ public class Deployer {
         }
     }
 
+    /**
+     * <p>Representation of the state of system from the point of view of <em>bundles</em> and <em>features</em></p>
+     */
     public static class DeploymentState {
+        /** Current {@link State} of system */
         public State state;
+        /** A {@link Bundle} providing {@link FeaturesService} */
         public Bundle serviceBundle;
+        /** {@link org.osgi.framework.startlevel.FrameworkStartLevel#getInitialBundleStartLevel()} */
         public int initialBundleStartLevel;
+        /** {@link org.osgi.framework.startlevel.FrameworkStartLevel#getStartLevel()} */
         public int currentStartLevel;
+        /** bundle-id -&gt; bundle for all currently installed bundles */
         public Map<Long, Bundle> bundles;
+        /** feature-name/feature-id -&gt; feature for all available features (not only installed) */
         public Map<String, Feature> features;
+        /** region-name -&gt; ids for bundles installed in region */
         public Map<String, Set<Long>> bundlesPerRegion;
+        /** region-name -&gt; connected, filtered, region-name -&gt; filter-namespace -&gt; filters */
         public Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion;
     }
 
+    /**
+     * <p>A request to change current {@link State state} of system</p>
+     * <p>{@link #requirements} specify target set of system requirements. If new features are installed,
+     * requirements should include currently installed features and new ones. If features are being uninstalled,
+     * requirements should include currently installed features minus the ones that are removed.</p>
+     */
     public static class DeploymentRequest {
         public Set<String> overrides;
         public String featureResolutionRange;
