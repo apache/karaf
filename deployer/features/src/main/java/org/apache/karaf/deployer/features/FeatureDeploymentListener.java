@@ -26,7 +26,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -186,59 +185,60 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             Bundle bundle = bundleEvent.getBundle();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
                 try {
-                    List<URL> urls = new ArrayList<URL>();
-                    Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
+                    List<URI> toAdd = new ArrayList<>();
+                    Enumeration<URL> featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                     while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
-                        URL url = (URL) featuresUrlEnumeration.nextElement();
-                        try {
-                            featuresService.addRepository(url.toURI());
-                            URI needRemovedRepo = null;
-                            for (Repository repo : featuresService.listRepositories()) {
-                                if (repo.getURI().equals(url.toURI())) {
-                                    Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
-                                    Set<String> autoInstallFeatures = new HashSet<String>();
-                                    for(Feature feature:features) {
-                                        if(feature.getInstall() != null && feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
-                                            if (!featuresService.isInstalled(feature)) {
-                                                autoInstallFeatures.add(feature.getId());
-                                            }
-                                        }
-                                    }
-                                    if (!autoInstallFeatures.isEmpty()) {
-                                        featuresService.installFeatures(autoInstallFeatures, EnumSet.noneOf(FeaturesService.Option.class));
-                                    }
-                                } else {
-                                    //remove older out-of-data feature repo
-                                    if (repo.getURI().toString().contains(FEATURE_PATH)) {
-                                        String featureFileName = repo.getURI().toString();
-                                        featureFileName = featureFileName.substring(featureFileName.lastIndexOf('/') + 1);
-                                        String newFeatureFileName = url.toURI().toString();
-                                        newFeatureFileName = newFeatureFileName.substring(newFeatureFileName.lastIndexOf('/') + 1);
-                                        if (featureFileName.equals(newFeatureFileName)) {
-                                            needRemovedRepo = repo.getURI();
-                                        }
-                                    }
+                        URI uri = featuresUrlEnumeration.nextElement().toURI();
+                        toAdd.add(uri);
+                    }
+                    Set<Repository> toRemove = new HashSet<>();
+                    synchronized (this) {
+                        String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
+                        String countStr = (String) properties.remove(prefix + ".count");
+                        if (countStr != null) {
+                            int count = Integer.parseInt(countStr);
+                            for (int i = 0; i < count; i++) {
+                                URI uri = new URI((String) properties.remove(prefix + ".url." + i));
+                                if (!toAdd.contains(uri)) {
+                                    toRemove.add(featuresService.getRepository(uri));
                                 }
-
                             }
-                            urls.add(url);
-                            if (needRemovedRepo != null) {
-                                featuresService.removeRepository(needRemovedRepo);
-                            }
-                        } catch (Exception e) {
-                            logger.error("Unable to install features", e);
                         }
+                    }
+                    if (toRemove.isEmpty() && toAdd.isEmpty()) {
+                        return;
+                    }
+                    // Now add and remove repositories
+                    try {
+                        for (Repository repo : toRemove) {
+                            featuresService.removeRepository(repo.getURI(), true);
+                        }
+                        Set<String> featuresToInstall = new HashSet<>();
+                        for (URI uri : toAdd) {
+                            featuresService.addRepository(uri, false);
+                            Repository repo = featuresService.getRepository(uri);
+                            for (Feature f : repo.getFeatures()) {
+                                if (Feature.DEFAULT_INSTALL_MODE.equals(f.getInstall())) {
+                                    featuresToInstall.add(f.getId());
+                                }
+                            }
+                        }
+                        if (!featuresToInstall.isEmpty()) {
+                            featuresService.installFeatures(featuresToInstall, EnumSet.noneOf(FeaturesService.Option.class));
+                        }
+                    } catch (Exception e) {
+                        logger.error("Unable to install features", e);
                     }
                     synchronized (this) {
                         String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
                         String old = (String) properties.get(prefix + ".count");
-                        if (old != null && urls.isEmpty()) {
+                        if (old != null && toAdd.isEmpty()) {
                             properties.remove(prefix + ".count");
                             saveProperties();
-                        } else if (!urls.isEmpty()) {
-                            properties.put(prefix + ".count", Integer.toString(urls.size()));
-                            for (int i = 0; i < urls.size(); i++) {
-                                properties.put(prefix + ".url." + i, urls.get(i).toExternalForm());
+                        } else if (!toAdd.isEmpty()) {
+                            properties.put(prefix + ".count", Integer.toString(toAdd.size()));
+                            for (int i = 0; i < toAdd.size(); i++) {
+                                properties.put(prefix + ".url." + i, toAdd.get(i).toString());
                             }
                             saveProperties();
                         }
