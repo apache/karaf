@@ -150,7 +150,7 @@ public class EncryptionSupport {
     private org.osgi.framework.Filter getFilter() {
         String nameFilter = name != null && name.length() > 0 ? "(name=" + name + ")" : null;
         String objFilter = "(objectClass=" + EncryptionService.class.getName() + ")";
-        String filter = nameFilter == null ? objFilter : "&(" + nameFilter + objFilter + ")"; 
+        String filter = nameFilter == null ? objFilter : "(&" + nameFilter + objFilter + ")"; 
         try {
             return FrameworkUtil.createFilter(filter);
         } catch (InvalidSyntaxException e) {
