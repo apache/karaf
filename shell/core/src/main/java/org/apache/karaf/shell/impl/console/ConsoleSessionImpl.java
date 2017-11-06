@@ -86,6 +86,7 @@ public class ConsoleSessionImpl implements Session {
     private static final String SUPPRESS_WELCOME = "karaf.shell.suppress.welcome";
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String SHELL_HISTORY_MAXSIZE = "karaf.shell.history.maxSize";
+    public static final String SHELL_HISTORY_FILE_MAXSIZE = "karaf.shell.history.file.maxSize";
     public static final String PROMPT = "PROMPT";
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}(${SUBSHELL})> ";
     public static final String RPROMPT = "RPROMPT";
@@ -185,6 +186,10 @@ public class ConsoleSessionImpl implements Session {
         String maxSizeStr = System.getProperty(SHELL_HISTORY_MAXSIZE);
         if (maxSizeStr != null) {
             reader.setVariable(LineReader.HISTORY_SIZE, Integer.parseInt(maxSizeStr));
+        }
+        String maxFileSizeStr = System.getProperty(SHELL_HISTORY_FILE_MAXSIZE);
+        if (maxFileSizeStr != null) {
+            reader.setVariable(LineReader.HISTORY_FILE_SIZE, Integer.parseInt(maxFileSizeStr));
         }
         history = new HistoryWrapper(reader.getHistory());
 
