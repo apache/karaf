@@ -20,6 +20,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
@@ -53,13 +54,19 @@ public class Bundle implements BundleInfo {
     @XmlValue
     @XmlSchemaType(name = "anyURI")
     protected String value;
+    /** Original value may be queried if {@link #isOverriden()} is <code>true</code> */
+    @XmlTransient
+    protected String originalValue;
     @XmlAttribute(name = "start-level")
     protected Integer startLevel;
     @XmlAttribute
     protected Boolean start; // = true;
     @XmlAttribute
     protected Boolean dependency;
-
+    @XmlTransient
+    private boolean blacklisted = false;
+    @XmlTransient
+    private boolean overriden = false;
 
     public Bundle() {
     }
@@ -146,6 +153,33 @@ public class Bundle implements BundleInfo {
      */
     public void setDependency(Boolean value) {
         this.dependency = value;
+    }
+
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+    }
+
+    public boolean isOverriden() {
+        return overriden;
+    }
+
+    public void setOverriden(boolean overriden) {
+        this.overriden = overriden;
+
+    }
+
+    @Override
+    public String getOriginalLocation() {
+        return originalValue;
+    }
+
+    public void setOriginalLocation(String originalLocation) {
+        this.originalValue = originalLocation;
     }
 
     @Override

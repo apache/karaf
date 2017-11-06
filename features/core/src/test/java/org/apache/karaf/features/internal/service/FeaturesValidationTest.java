@@ -84,7 +84,7 @@ public class FeaturesValidationTest {
 
     private Repository unmarshalAndValidate(String path) throws Exception {
         URI uri = getClass().getResource(path).toURI();
-        return new RepositoryImpl(uri, null, true);
+        return new RepositoryImpl(uri, true);
     }
 
 }

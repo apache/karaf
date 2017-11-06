@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,7 +44,7 @@ import static org.apache.karaf.features.internal.resolver.ResolverUtil.getVersio
  */
 public final class Overrides {
 
-    protected static final String OVERRIDE_RANGE = "range";
+    public static final String OVERRIDE_RANGE = "range";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Overrides.class);
 
@@ -110,7 +111,7 @@ public final class Overrides {
     }
 
     public static Set<String> loadOverrides(String overridesUrl) {
-        Set<String> overrides = new HashSet<>();
+        Set<String> overrides = new LinkedHashSet<>();
         try {
             if (overridesUrl != null) {
                 try (

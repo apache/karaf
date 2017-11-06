@@ -1141,7 +1141,7 @@ public class Builder {
                 @Override
                 public void downloaded(final StreamProvider provider) throws Exception {
                     String url = provider.getUrl();
-                    if (repoBlacklist.isBlacklisted(url, TYPE_REPOSITORY)) {
+                    if (repoBlacklist.isRepositoryBlacklisted(url)) {
                         LOGGER.info("      feature repository " + url + " is blacklisted");
                         return;
                     }

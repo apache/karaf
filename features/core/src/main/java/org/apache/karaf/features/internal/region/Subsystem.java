@@ -451,23 +451,23 @@ public class Subsystem extends ResourceImpl {
                 }
                 boolean mandatory = !bi.isDependency() && cond == null;
                 if (bi.isDependency()) {
-                    addDependency(res, mandatory, bi.isStart(), sl);
+                    addDependency(res, mandatory, bi.isStart(), sl, bi.isBlacklisted());
                 } else {
-                    doAddDependency(res, mandatory, bi.isStart(), sl);
+                    doAddDependency(res, mandatory, bi.isStart(), sl, bi.isBlacklisted());
                 }
             }
             for (Library library : feature.getLibraries()) {
                 if (library.isExport()) {
                     final String loc = library.getLocation();
                     ResourceImpl res = bundles.get(loc);
-                    addDependency(res, false, false, 0);
+                    addDependency(res, false, false, 0, false);
                 }
             }
             for (String uri : feature.getResourceRepositories()) {
                 BaseRepository repo = repos.getRepository(feature.getRepositoryUrl(), uri);
                 for (Resource resource : repo.getResources()) {
                     ResourceImpl res = cloneResource(resource);
-                    addDependency(res, false, true, 0);
+                    addDependency(res, false, true, 0, false);
                 }
             }
         }
@@ -475,6 +475,7 @@ public class Subsystem extends ResourceImpl {
             final String loc = bundle.getName();
             boolean dependency = Boolean.parseBoolean(bundle.getAttribute("dependency"));
             boolean start = bundle.getAttribute("start") == null || Boolean.parseBoolean(bundle.getAttribute("start"));
+            boolean blacklisted = bundle.getAttribute("blacklisted") != null && Boolean.parseBoolean(bundle.getAttribute("blacklisted"));
             int startLevel = 0;
             try {
                 startLevel = Integer.parseInt(bundle.getAttribute("start-level"));
@@ -482,9 +483,9 @@ public class Subsystem extends ResourceImpl {
                 // Ignore
             }
             if (dependency) {
-                addDependency(bundles.get(loc), false, start, startLevel);
+                addDependency(bundles.get(loc), false, start, startLevel, blacklisted);
             } else {
-                doAddDependency(bundles.get(loc), true, start, startLevel);
+                doAddDependency(bundles.get(loc), true, start, startLevel, blacklisted);
                 addIdentityRequirement(this, bundles.get(loc));
             }
         }
@@ -535,17 +536,17 @@ public class Subsystem extends ResourceImpl {
         throw new IllegalArgumentException("Resource " + provider.getUrl() + " does not contain a manifest");
     }
 
-    void addDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
+    void addDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel, boolean blacklisted) {
         if (isAcceptDependencies()) {
-            doAddDependency(resource, mandatory, start, startLevel);
+            doAddDependency(resource, mandatory, start, startLevel, blacklisted);
         } else {
-            parent.addDependency(resource, mandatory, start, startLevel);
+            parent.addDependency(resource, mandatory, start, startLevel, blacklisted);
         }
     }
 
-    private void doAddDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
+    private void doAddDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel, boolean blacklisted) {
         String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
-        DependencyInfo info = new DependencyInfo(resource, mandatory, start, startLevel);
+        DependencyInfo info = new DependencyInfo(resource, mandatory, start, startLevel, blacklisted);
         dependencies.merge(id, info, this::merge);
     }
 
@@ -589,15 +590,18 @@ public class Subsystem extends ResourceImpl {
         boolean mandatory;
         boolean start;
         int startLevel;
+        boolean blacklisted;
+        boolean overriden;
 
         public DependencyInfo() {
         }
 
-        public DependencyInfo(ResourceImpl resource, boolean mandatory, boolean start, int startLevel) {
+        public DependencyInfo(ResourceImpl resource, boolean mandatory, boolean start, int startLevel, boolean blacklisted) {
             this.resource = resource;
             this.mandatory = mandatory;
             this.start = start;
             this.startLevel = startLevel;
+            this.blacklisted = blacklisted;
         }
 
         @Override
@@ -616,8 +620,28 @@ public class Subsystem extends ResourceImpl {
         }
 
         @Override
+        public String getOriginalLocation() {
+            // resource is already overriden
+            return getUri(resource);
+        }
+
+        @Override
         public boolean isDependency() {
             return !mandatory;
+        }
+
+        @Override
+        public boolean isBlacklisted() {
+            return blacklisted;
+        }
+
+        @Override
+        public boolean isOverriden() {
+            return overriden;
+        }
+
+        public void setOverriden(boolean overriden) {
+            this.overriden = overriden;
         }
 
         @Override

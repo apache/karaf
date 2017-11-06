@@ -16,63 +16,76 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import static org.junit.Assert.assertTrue;
-
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.stream.Stream;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class BlacklistTest {
 
     @Test
-    public void testBlacklistFeatureWithRange() {
+    public void testBlacklistFeatureWithRange() throws IOException {
         Stream<Feature> features = blacklistWith("spring;range=\"[2,3)\"");
-        assertTrue(features.noneMatch(f -> f.getId().equals("spring/2.5.6.SEC02")));
+        assertTrue(features.noneMatch(f -> f.getId().equals("spring/2.5.6.SEC02") && !f.isBlacklisted()));
     }
 
     @Test
-    public void testBlacklistFeatureWithVersion() {
+    public void testBlacklistFeatureWithVersion() throws IOException {
         Stream<Feature> features = blacklistWith("spring;range=2.5.6.SEC02");
-        assertTrue(features.noneMatch(f -> f.getId().equals("spring/2.5.6.SEC02")));
+        assertTrue(features.noneMatch(f -> f.getId().equals("spring/2.5.6.SEC02") && !f.isBlacklisted()));
     }
 
     @Test
-    public void testBlacklistFeatureWithoutVersion() {
+    public void testBlacklistFeatureWithoutVersion() throws IOException {
         Stream<Feature> features = blacklistWith("spring");
-        assertTrue(features.noneMatch(f -> f.getId().startsWith("spring/")));
+        assertTrue(features.noneMatch(f -> f.getId().startsWith("spring/") && !f.isBlacklisted()));
     }
 
     @Test
-    public void testBlacklistBundle() {
+    public void testBlacklistBundle() throws IOException {
         String blacklisted = "mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/1.7_1";
         Stream<Feature> features = blacklistWith(blacklisted);
         Stream<BundleInfo> bundles = features.flatMap(f -> f.getBundles().stream());
-        assertTrue(bundles.noneMatch(b -> b.getLocation().equals(blacklisted)));
+        assertTrue(bundles.noneMatch(b -> b.getLocation().equals(blacklisted) && !b.isBlacklisted()));
     }
 
     @Test
     public void testBlacklistLoad() throws URISyntaxException {
         Blacklist blacklist = new Blacklist(getClass().getResource("blacklist.txt").toExternalForm());
-        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("f02.xml").toURI(), blacklist, true);
-        Stream<Feature> features = Arrays.asList(repo.getFeatures()).stream();
-        assertTrue(features.noneMatch(f -> f.getId().equals("spring/2.5.6.SEC02")));
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("f02.xml").toURI(), true);
+        Stream<Feature> features = Arrays.stream(repo.getFeatures());
+        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig());
+        processor.getInstructions().postUnmarshall(blacklist, new HashSet<>());
+        repo.processFeatures(processor);
+        assertTrue(features.noneMatch(f -> f.getId().equals("spring/2.5.6.SEC02") && !f.isBlacklisted()));
     }
 
-    private Stream<org.apache.karaf.features.Feature> blacklistWith(String blacklistClause) {
+    private Stream<org.apache.karaf.features.Feature> blacklistWith(String blacklistClause) throws IOException {
         URI uri;
         try {
             uri = getClass().getResource("f02.xml").toURI();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        Blacklist blacklist = new Blacklist(Collections.singletonList(blacklistClause));
-        RepositoryImpl features = new RepositoryImpl(uri, blacklist, true);
-        return Arrays.asList(features.getFeatures()).stream();
+        File blacklistedProperties = File.createTempFile("blacklisted-", ".properties", new File("target"));
+        try (FileOutputStream fos = new FileOutputStream(blacklistedProperties)) {
+            fos.write(blacklistClause.getBytes("UTF-8"));
+        }
+        RepositoryImpl features = new RepositoryImpl(uri, true);
+        FeaturesServiceConfig config = new FeaturesServiceConfig(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklistedProperties.toURI().toString(), null, null);
+        features.processFeatures(new FeaturesProcessorImpl(config));
+        return Arrays.stream(features.getFeatures());
     }
+
 }

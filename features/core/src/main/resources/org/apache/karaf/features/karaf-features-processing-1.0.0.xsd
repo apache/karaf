@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<xs:schema elementFormDefault="qualified"
+        targetNamespace="http://karaf.apache.org/xmlns/features-processing/v1.0.0"
+        xmlns:tns="http://karaf.apache.org/xmlns/features-processing/v1.0.0"
+        xmlns:features="http://karaf.apache.org/xmlns/features/v1.5.0"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:import namespace="http://karaf.apache.org/xmlns/features/v1.5.0" />
+
+    <xs:element name="featuresProcessing" type="tns:featuresProcessing" />
+
+    <xs:complexType name="featuresProcessing">
+        <xs:annotation>
+            <xs:documentation><![CDATA[Configuration of FeaturesProcessor that may modify feature definitions
+after reading them from features XML file and before using them by FeaturesService.
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="blacklistedRepositories" type="tns:blacklistedRepositories" />
+            <xs:element name="blacklistedFeatures" type="tns:blacklistedFeatures" />
+            <xs:element name="blacklistedBundles" type="tns:blacklistedBundles" />
+            <xs:element name="overrideBundleDependency" type="tns:overrideBundleDependency" />
+            <xs:element name="bundleReplacements" type="tns:bundleReplacements" />
+            <xs:element name="featureReplacements" type="tns:featureReplacements" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="blacklistedRepositories">
+        <xs:annotation>
+            <xs:documentation><![CDATA[A list of feature repository URIs (e.g., mvn:group/artifact/version/xml/features)
+that should be blacklisted - they can't be added to FeaturesService and can't be searched for features to install.
+
+Repository URI should use 'mvn:' scheme, may use '*' glob (not RegExp) for all components except versions and
+version ranges as maven versions, e.g., "mvn:group/artifact/[3,5)/xml/*features*". At least groupId and artifactId
+should be specified. In most abstract case, "mvn:*/*" describes all maven URIs.
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="repository" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="blacklistedFeatures">
+        <xs:annotation>
+            <xs:documentation><![CDATA[A list of feature names (and related OSGi clause attributes) that should be
+blacklisted.
+
+Attempt to install such feature will be prohibited, but such feature is still available in `feature:list`
+output and marked as blacklisted. When custom Karaf distribution is assembled, blacklisted features' bundles are not
+taken into account (are not declared in "etc/startup.properties" and "etc/org.apache.karaf.features.cfg" and are not
+copied to "system/" directory).
+
+Feature names may use '*' glob (not RegExp) in names, "range" attribute is used in "etc/blacklisted.properties" file
+and may be used to specify version range, e.g., "*jclouds*;range=[1,3)". When using XML to configure blacklisted
+features, "range" manifest header attribute should be specified in "version" XML attribute.
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="feature" type="tns:blacklistedFeature" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="blacklistedFeature">
+        <xs:annotation>
+            <xs:documentation><![CDATA[Blacklisted feature name may use '*' character as glob. "version" attribute
+MAY specify a version (or range) of features to blacklist, e.g.,:
+ * version="[1,2)" - feature with versions 1, 1.1, 1.4.3, 1.9.99, ... will be blacklisted
+ * version="[2,*)" - features with all versions above 2.0.0 will be blacklisted
+ * version="3.0" - feature with version 3.0 only will be blacklisted
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="version" type="xs:string" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="blacklistedBundles">
+        <xs:annotation>
+            <xs:documentation><![CDATA[A list of bundle URIs that should be blacklisted.
+When feature is installed, all blacklisted bundles are skipped.
+
+When custom Karaf distribution is assembled, blacklisted bundles are not taken into account (are not declared in
+"etc/startup.properties" and are not copied to "system/" directory).
+
+Bundle URIs may use '*' globs (not RegExp), e.g., "*jclouds*;url=mvn:...". Both header-like format may be used
+(as in etc/blacklisted.properties, triggered, when ';' is used) or plain URI format for bundle locations.
+
+Bundle URIs should use 'mvn:' scheme, may use '*' glob (not RegExp) for all components except versions and
+version ranges may be specified as maven versions, e.g., "mvn:group/artifact/[3,5)/classifier". At least
+groupId and artifactId should be specified. In most abstract case, "mvn:*/*" describes all maven URIs.
+
+This element may be used instead of "etc/blacklisted.properties" file for bundle blacklisting.
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="bundle" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="overrideBundleDependency">
+        <xs:annotation>
+            <xs:documentation><![CDATA[FeaturesService configuration uses "dependency" flags for bundles and features
+declared in features XML file. This flag instructs the service to consider such "dependency" item only if current
+state of system doesn't provide required capabilities. When such flag is chosen wisely it greatly improves consistency
+of installed features and bundles. However many external features XML files (which are out of control, or simply are no
+longer maintained) do not use this flag. With "overrideBundleDependency" element it's possible to externally
+override this flag for any repository, feature or particular bundles.
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="repository" type="tns:overrideDependency" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="feature" type="tns:overrideFeatureDependency" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="bundle" type="tns:overrideDependency" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="overrideDependency">
+        <xs:annotation>
+            <xs:documentation><![CDATA[An URI of depedency (bundle or repository) should use 'mvn:' scheme.
+Maven schemes allow parsing version/version ranges.
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="uri" type="xs:anyURI" />
+        <xs:attribute name="dependency" type="xs:boolean" default="false" />
+    </xs:complexType>
+
+    <xs:complexType name="overrideFeatureDependency">
+        <xs:attribute name="name" type="xs:string" />
+        <xs:attribute name="version" type="xs:string" />
+        <xs:attribute name="dependency" type="xs:boolean" default="false" />
+    </xs:complexType>
+
+    <xs:complexType name="bundleReplacements">
+        <xs:annotation>
+            <xs:documentation><![CDATA[When feature is loaded from features XML file, "etc/overrides.properties" may
+be used to change the version of one/more of the bundles from given feature. Override is used only when symbolic
+names match. With bundleReplacements element, its possible to do the same and more. It's possible to replace a bundle
+with totally different bundle (in terms of OSGi's Symbolic-Name and Maven groupId/artifactId/version). That's useful
+especially with JavaEE API bundles, where single API may be provided by different bundles (ServiceMix, Geronimo,
+JBoss, javax.*, ...).
+
+Bundle replacement doesn't use globs - just version ranges to match replacement candidates
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="bundle" type="tns:overrideBundle" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="overrideBundle">
+        <xs:annotation>
+            <xs:documentation><![CDATA[For each bundle of any feature we can point bundle's URI to different location.
+
+URIs should use 'mvn:' scheme, to allow version/version ranges parsing. Replacement URI should use concrete version
+- no range. Original URI may use version ranges to indicate which version is eligible for replacement. E.g,:
+ * mvn:groupId/artifactId/[1,2) - bundle location will be overriden for versions 1, 1.1, 1.4.3, 1.9.99, ...
+ * mvn:groupId/artifactId/[2,*) - bundle location will be overriden for version 2.0, 3.1, 4.2, ...
+ * mvn:groupId/artifactId/3 - bundle location will be overriden for version 3 (3.0, 3.0.0) only (i.e., [3.0.0,3.0.0]
+URIs can't use globs for Maven components (groupId, artifactId, ...).
+
+mode="osgi" is used for etc/overrides.properties compatibility - symbolic name should be equal (requires
+resource's/bundle's manifest parsing) and target/replacement bundle's version shold be lower to perform replacement.
+When reading etc/overrides.properties, groupId and artifactId will match anyway, but if configured in XML, they do
+not have to match.
+
+with mode="maven", only location matching is done and target version is not compared - this is useful
+to replace bundle using different groupId/artifactId. The most common case is e.g.,
+"org.eclipse.jetty.orbit/javax.servlet/[3,4)" -> "org.apache.geronimo.specs/geronimo-servlet_3.0_spec/1.0" replacement.
+This is new mode (comparing to etc/overrides.properties).
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="originalUri" type="xs:anyURI" />
+        <xs:attribute name="replacement" type="xs:anyURI" />
+        <xs:attribute name="mode" type="tns:bundleOverrideMode" default="osgi" />
+    </xs:complexType>
+
+    <xs:simpleType name="bundleOverrideMode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="osgi" />
+            <xs:enumeration value="maven" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="featureReplacements">
+        <xs:annotation>
+            <xs:documentation><![CDATA[This element may be used to completely "rewrite" any feature (by name and
+version). Depending on mode of modification (replace, merge) it's possible to replace any feature definition, or just
+add/remove some items (usually bundles) to/from original feature.
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="replacement" type="tns:overrideFeature" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="overrideFeature">
+        <xs:annotation>
+            <xs:documentation><![CDATA[Any feature may be "overriden" simply by including its changed definition
+according to http://karaf.apache.org/xmlns/features/v1.5.0 XML schema.
+]]></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="feature" type="features:feature" />
+        </xs:sequence>
+        <xs:attribute name="mode" type="tns:featureOverrideMode" default="replace" />
+    </xs:complexType>
+
+    <xs:simpleType name="featureOverrideMode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="replace" />
+            <xs:enumeration value="merge" />
+            <xs:enumeration value="remove" />
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
