@@ -107,6 +107,12 @@ public class RepositoryImpl implements Repository {
      */
     public void processFeatures(FeaturesProcessor processor) {
         processor.process(features);
+        if (blacklisted) {
+            // all features of blacklisted repository are blacklisted too
+            for (org.apache.karaf.features.internal.model.Feature feature : features.getFeature()) {
+                feature.setBlacklisted(true);
+            }
+        }
     }
 
     static class InterruptibleInputStream extends FilterInputStream {
