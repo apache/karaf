@@ -35,6 +35,34 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class BuilderTest {
 
     @Test
+    public void testAssemblyGoalLikeBuild() throws Exception {
+        Path workDir = Paths.get("target/assembly");
+        recursiveDelete(workDir);
+
+        // Create dummy etc/config.properties file
+        Path config = workDir.resolve("etc/config.properties");
+        Files.createDirectories(config.getParent());
+        try (BufferedWriter w = Files.newBufferedWriter(config)) {
+            w.write(Constants.FRAMEWORK_SYSTEMPACKAGES + " = org.osgi.dto");
+            w.newLine();
+            w.write(Constants.FRAMEWORK_SYSTEMCAPABILITIES + " = ");
+            w.newLine();
+        }
+
+        Path mvnRepo = Paths.get("target/test-classes/repo");
+        Builder builder = Builder.newInstance();
+        // defaultValue = "${project.build.directory}/assembly"
+        builder.homeDirectory(workDir);
+//                .repositories(Builder.Stage.Startup, true, "mvn:foo/baz/1.0/xml/features")
+
+//                .localRepository(mvnRepo.toString());
+        builder.generateAssembly();
+
+        // org.apache.karaf.tooling.AssemblyMojo.includeBuildOutputDirectory? -
+        // ${project.basedir}/src/main/resources/assembly - copied over assembly (no filtering - source files)
+    }
+
+    @Test
     public void testCyclicRepos() throws Exception {
         Path workDir = Paths.get("target/distrib");
         recursiveDelete(workDir);
