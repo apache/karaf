@@ -101,6 +101,7 @@ import static org.apache.karaf.features.internal.util.MapUtils.map;
 import static org.apache.karaf.features.internal.util.MapUtils.removeFromMapSet;
 import static org.osgi.framework.Bundle.ACTIVE;
 import static org.osgi.framework.Bundle.RESOLVED;
+import static org.osgi.framework.Bundle.STARTING;
 import static org.osgi.framework.Bundle.STOPPING;
 import static org.osgi.framework.Bundle.STOP_TRANSIENT;
 import static org.osgi.framework.Bundle.UNINSTALLED;
@@ -632,7 +633,7 @@ public class Deployer {
             toStop.addAll(regionDeployment.toUpdate.keySet());
             toStop.addAll(regionDeployment.toDelete);
         }
-        removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
+        removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING | STARTING);
         if (!toStop.isEmpty()) {
             print("Stopping bundles:", verbose);
             while (!toStop.isEmpty()) {
