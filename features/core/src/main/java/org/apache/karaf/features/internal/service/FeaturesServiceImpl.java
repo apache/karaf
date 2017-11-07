@@ -392,24 +392,39 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return;
         }
 
-        Set<Repository> repos;
+        Map<String, Set<String>> reqsToRemove;
         Set<String> features;
         synchronized (lock) {
-            repos = repositories.getRepositoryClosure(repo);
-            List<Repository> required = new ArrayList<>(Arrays.asList(repositories.listMatchingRepositories(state.repositories)));
-            required.remove(repo);
-            for (Repository rep : required) {
-                repos.removeAll(repositories.getRepositoryClosure(rep));
-            }
+            getFeatureCache();
             features = new HashSet<>();
-            for (Repository tranRepo : repos) {
-                features.addAll(getRequiredFeatureIds(tranRepo));
+            for (Set<String> reqs : state.requirements.values()) {
+                features.addAll(reqs);
+            }
+            Set<Repository> repos = new HashSet<>();
+            for (String r : state.repositories) {
+                if (!uri.toString().equals(r)) {
+                    Repository rep = repositories.getRepository(r);
+                    repos.addAll(repositories.getRepositoryClosure(rep));
+                }
+            }
+            for (Repository rep : repos) {
+                for (Feature f : rep.getFeatures()) {
+                    features.remove(new FeatureReq(f).toRequirement());
+                }
+            }
+            reqsToRemove = new HashMap<>();
+            for (Map.Entry<String, Set<String>> entry : state.requirements.entrySet()) {
+                Set<String> reqs = new HashSet<>(entry.getValue());
+                reqs.retainAll(features);
+                if (!reqs.isEmpty()) {
+                    reqsToRemove.put(entry.getKey(), reqs);
+                }
             }
         }
 
         if (!features.isEmpty()) {
             if (uninstall) {
-                uninstallFeatures(features, EnumSet.noneOf(Option.class));
+                removeRequirements(reqsToRemove, EnumSet.noneOf(Option.class));
             } else {
                 throw new IllegalStateException("The following features are required from the repository: " + String.join(", ", features));
             }
