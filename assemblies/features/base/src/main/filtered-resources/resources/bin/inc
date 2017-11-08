@@ -264,8 +264,10 @@ setupDefaults() {
     if [ "${JVM_VENDOR}" = "SUN" ]; then
         # permgen was removed in Java 8
         VERSION=$("${JAVA}" -version 2>&1 | egrep '"([0-9].[0-9]\..*[0-9]).*"' | awk '{print substr($3,2,length($3)-2)}' | awk '{print substr($1, 3, 3)}' | sed -e 's;\.;;g')
-        if [ "x${VERSION}" = "x" ]; then
-            VERSION=90
+        MAJOR_VERSION=$("${JAVA}" -version 2>&1 \
+            |awk -F '"' '/version/ {print $2}')
+        if [ "${MAJOR_VERSION:0:1}" -ge "9" ]; then
+           VERSION=90
         fi
         if [ "${VERSION}" -lt "80" ]; then
             # Check some easily accessible MIN/MAX params for JVM mem usage
