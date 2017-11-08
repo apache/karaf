@@ -129,6 +129,8 @@
             exec = admin
             new = admin
             java = admin
+            .invoke = admin
+            .redirect = admin
         </config>
         <config name="org.apache.karaf.command.acl.scope_bundle">
             #
