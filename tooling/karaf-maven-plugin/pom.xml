@@ -35,6 +35,8 @@
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
         <mvn.opts />
+        <invoker.skip />
+        <compiler.fork />
         <jacoco-class-line-covered-ratio>0.00</jacoco-class-line-covered-ratio>
         <jacoco-class-instruction-covered-ratio>0.00</jacoco-class-instruction-covered-ratio>
         <jacoco-class-missed-count-maximum>1</jacoco-class-missed-count-maximum>
@@ -229,6 +231,15 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>${project.basedir}/src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>${project.basedir}/src/test/filtered-resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -250,8 +261,9 @@
                         <pomExclude>test-assembly-prop-edits/pom.xml</pomExclude>
                     </pomExcludes>
                     <postBuildHookScript>verify</postBuildHookScript>
-                    <!--<localRepositoryPath>${project.build.directory}/system</localRepositoryPath>-->
-                    <!--<settingsFile>src/it/settings.xml</settingsFile>-->
+                    <localRepositoryPath>${project.build.directory}/system</localRepositoryPath>
+                    <settingsFile>${project.build.testOutputDirectory}/settings.xml</settingsFile>
+                    <mergeUserSettings>true</mergeUserSettings>
                     <mavenOpts>${mvn.opts}</mavenOpts>
                     <skipInstallation>${invoker.skip}</skipInstallation>
                     <skipInvocation>${invoker.skip}</skipInvocation>
