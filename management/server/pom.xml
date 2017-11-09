@@ -109,7 +109,13 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.apache.karaf.management;version=${project.version};-split-package:=merge-first</Export-Package>
+                        <Export-Package>
+                            org.apache.karaf.management;version=${project.version};-split-package:=merge-first
+                        </Export-Package>
+                        <Import-Package>
+                            org.osgi.service.event*;resolution:=optional,
+                            *
+                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.management.internal,
                             org.apache.karaf.service.guard.tools,

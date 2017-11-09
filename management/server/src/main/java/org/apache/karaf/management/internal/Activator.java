@@ -60,6 +60,8 @@ public class Activator extends BaseActivator implements ManagedService {
     
     private ServiceTracker<KeystoreInstance, KeystoreInstance> keystoreInstanceServiceTracker;
 
+    private EventAdminLogger eventAdminLogger;
+
     protected void doStart() throws Exception {
         // Verify dependencies
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
@@ -67,6 +69,26 @@ public class Activator extends BaseActivator implements ManagedService {
         if (configurationAdmin == null || keystoreManager == null) {
             return;
         }
+
+        EventAdminLogger logger = null;
+        if (getBoolean("audit.eventadmin.enabled", true)) {
+            try {
+                logger = new EventAdminLoggerImpl(bundleContext);
+            } catch (Throwable ignore) {
+                // Ignore the listener if EventAdmin package isn't present
+            }
+        }
+        if (logger == null) {
+            logger = new EventAdminLogger() {
+                @Override
+                public void close() {
+                }
+                @Override
+                public void log(String methodName, String[] signature, Object result, Throwable error, Object... params) {
+                }
+            };
+        }
+        eventAdminLogger = logger;
 
         String rmiRegistryHost = getString("rmiRegistryHost", "");
         int rmiRegistryPort = getInt("rmiRegistryPort", 1099);
@@ -93,6 +115,7 @@ public class Activator extends BaseActivator implements ManagedService {
         boolean locateExistingMBeanServerIfPossible = getBoolean("locateExistingMBeanServerIfPossible", true);
 
         KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
+        guard.setLogger(eventAdminLogger);
         guard.setConfigAdmin(configurationAdmin);
 
         rmiRegistryFactory = new RmiRegistryFactory();
@@ -108,6 +131,7 @@ public class Activator extends BaseActivator implements ManagedService {
         mbeanServerFactory.init();
 
         MBeanServer mbeanServer = mbeanServerFactory.getServer();
+        mbeanServer = new EventAdminMBeanServerWrapper(mbeanServer, eventAdminLogger);
 
         JaasAuthenticator jaasAuthenticator = new JaasAuthenticator();
         jaasAuthenticator.setRealm(jmxRealm);
@@ -206,6 +230,13 @@ public class Activator extends BaseActivator implements ManagedService {
                 keystoreInstanceServiceTracker.close();
             } finally {
                 keystoreInstanceServiceTracker = null;
+            }
+        }
+        if (eventAdminLogger != null) {
+            try {
+                eventAdminLogger.close();
+            } finally {
+                eventAdminLogger = null;
             }
         }
     }

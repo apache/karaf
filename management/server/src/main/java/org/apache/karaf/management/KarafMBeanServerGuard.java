@@ -16,7 +16,11 @@
  */
 package org.apache.karaf.management;
 
+import org.apache.karaf.management.internal.Activator;
 import org.apache.karaf.management.internal.BulkRequestContext;
+import org.apache.karaf.management.internal.EventAdminLogger;
+import org.apache.karaf.management.internal.EventAdminMBeanServerWrapper;
+import org.apache.karaf.management.internal.MBeanInvocationHandler;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -25,6 +29,7 @@ import javax.management.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,7 +59,12 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
     private static final Comparator<String[]> WILDCARD_PID_COMPARATOR = new WildcardPidComparator();
 
+    private static final String INVOKE = "invoke";
+
+    private static final String[] INVOKE_SIG = new String[] {ObjectName.class.getName(), String.class.getName(), Object[].class.getName(), String[].class.getName()};
+
     private ConfigurationAdmin configAdmin;
+    private EventAdminLogger logger;
 
     public ConfigurationAdmin getConfigAdmin() {
         return configAdmin;
@@ -64,6 +74,14 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         this.configAdmin = configAdmin;
     }
 
+    public EventAdminLogger getLogger() {
+        return logger;
+    }
+
+    public void setLogger(EventAdminLogger logger) {
+        this.logger = logger;
+    }
+
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getParameterTypes().length == 0)
             return null;
@@ -71,15 +89,23 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         if (!ObjectName.class.isAssignableFrom(method.getParameterTypes()[0]))
             return null;
 
+        MBeanServer mbs = (MBeanServer) proxy;
+        if (mbs != null && Proxy.getInvocationHandler(mbs) instanceof MBeanInvocationHandler) {
+            mbs = ((MBeanInvocationHandler) Proxy.getInvocationHandler(mbs)).getDelegate();
+        }
+        if (mbs instanceof EventAdminMBeanServerWrapper) {
+            mbs = ((EventAdminMBeanServerWrapper) mbs).getDelegate();
+        }
+
         ObjectName objectName = (ObjectName) args[0];
         if ("getAttribute".equals(method.getName())) {
-            handleGetAttribute((MBeanServer) proxy, objectName, (String) args[1]);
+            handleGetAttribute(mbs, objectName, (String) args[1]);
         } else if ("getAttributes".equals(method.getName())) {
-            handleGetAttributes((MBeanServer) proxy, objectName, (String[]) args[1]);
+            handleGetAttributes(mbs, objectName, (String[]) args[1]);
         } else if ("setAttribute".equals(method.getName())) {
-            handleSetAttribute((MBeanServer) proxy, objectName, (Attribute) args[1]);
+            handleSetAttribute(mbs, objectName, (Attribute) args[1]);
         } else if ("setAttributes".equals(method.getName())) {
-            handleSetAttributes((MBeanServer) proxy, objectName, (AttributeList) args[1]);
+            handleSetAttributes(mbs, objectName, (AttributeList) args[1]);
         } else if ("invoke".equals(method.getName())) {
             handleInvoke(objectName, (String) args[1], (Object[]) args[2], (String[]) args[3]);
         }
@@ -338,7 +364,11 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         if (Boolean.valueOf(System.getProperty(JMX_ACL_DETAILED_MESSAGE, "false"))) {
             printDetailedMessage(context, objectName, operationName, params, signature);
         }
-        throw new SecurityException("Insufficient roles/credentials for operation");
+        SecurityException se = new SecurityException("Insufficient roles/credentials for operation");
+        if (logger != null) {
+            logger.log(INVOKE, INVOKE_SIG, null, se, objectName, operationName, signature, params);
+        }
+        throw se;
     }
 
     private void printDetailedMessage(BulkRequestContext context, ObjectName objectName,
