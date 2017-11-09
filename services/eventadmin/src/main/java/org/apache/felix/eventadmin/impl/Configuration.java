@@ -451,11 +451,12 @@ public class Configuration
      */
     private void adaptEvents(final EventAdmin admin)
     {
-        m_adapters = new AbstractAdapter[4];
+        m_adapters = new AbstractAdapter[3];
         m_adapters[0] = new FrameworkEventAdapter(m_bundleContext, admin);
         m_adapters[1] = new BundleEventAdapter(m_bundleContext, admin);
         m_adapters[2] = new ServiceEventAdapter(m_bundleContext, admin);
-        m_adapters[3] = new LogEventAdapter(m_bundleContext, admin);
+        // KARAF: disable log events as they are published by PaxLogging
+        //m_adapters[3] = new LogEventAdapter(m_bundleContext, admin);
     }
 
     private Object tryToCreateMetaTypeProvider(final Object managedService)

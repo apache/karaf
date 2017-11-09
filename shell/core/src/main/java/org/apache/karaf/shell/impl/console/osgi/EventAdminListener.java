@@ -48,28 +48,31 @@ public class EventAdminListener implements CommandSessionListener, Closeable
     }
 
     public void afterExecute(CommandSession session, CharSequence command, Exception exception) {
-        sendEvent(command, null, exception);
+        sendEvent(session, command, null, exception);
     }
 
     public void afterExecute(CommandSession session, CharSequence command, Object result) {
-        sendEvent(command, result, null);
+        sendEvent(session, command, result, null);
     }
 
-    private void sendEvent(CharSequence command, Object result, Exception exception) {
-        if (command.toString().trim().length() > 0) {
-            EventAdmin admin = tracker.getService();
-            if (admin != null) {
-                Map<String, Object> props = new HashMap<>();
+    private void sendEvent(CommandSession session, CharSequence command, Object result, Exception exception) {
+        EventAdmin admin = tracker.getService();
+        if (admin != null) {
+            Map<String, Object> props = new HashMap<>();
+            Object script = session.get("script");
+            if (script != null) {
+                props.put("script", script.toString());
+            } else if (command.toString().trim().length() > 0) {
                 props.put("command", command.toString());
-                if (result != null) {
-                    props.put("result", result);
-                }
-                if (exception != null) {
-                    props.put("exception", exception);
-                }
-                Event event = new Event("org/apache/karaf/shell/console/EXECUTED", props);
-                admin.postEvent(event);
             }
+            if (result != null) {
+                props.put("result", result);
+            }
+            if (exception != null) {
+                props.put("exception", exception);
+            }
+            Event event = new Event("org/apache/karaf/shell/console/EXECUTED", props);
+            admin.postEvent(event);
         }
     }
 

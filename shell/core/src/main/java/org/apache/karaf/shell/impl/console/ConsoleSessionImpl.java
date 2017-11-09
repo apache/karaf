@@ -76,6 +76,7 @@ import org.jline.reader.SyntaxError;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -555,6 +556,7 @@ public class ConsoleSessionImpl implements Session {
     }
 
     private void doExecuteScript(Path scriptFileName) {
+        Object oldScript = session.put("script", Paths.get(System.getProperty("karaf.home")).relativize(scriptFileName));
         try {
             String script = String.join("\n",
                     Files.readAllLines(scriptFileName));
@@ -562,6 +564,8 @@ public class ConsoleSessionImpl implements Session {
         } catch (Exception e) {
             LOGGER.debug("Error in initialization script {}", scriptFileName, e);
             System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
+        } finally {
+            session.put("script", oldScript);
         }
     }
 

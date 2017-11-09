@@ -66,6 +66,7 @@
         <module>jpa</module>
         <module>maven</module>
         <module>services</module>
+        <module>audit</module>
         <module>subsystem</module>
         <module>profile</module>
         <module>event</module>

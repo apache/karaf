@@ -1018,6 +1018,57 @@
         </config>
     </feature>
 
+    <feature name="audit-log" description="Security audit logging" version="${project.version}">
+        <feature>eventadmin</feature>
+        <bundle start-level="20">mvn:org.apache.karaf.audit/org.apache.karaf.audit.core/${project.version}</bundle>
+        <config name="org.apache.karaf.audit">
+            # Security audit configuration
+            # Only the above 4 loggers are supported
+            # Supported layouts include: simple, gelf, rfc3164, rfc5424
+
+            # Queue type
+            queue.class = java.util.concurrent.ArrayBlockingQueue
+            # Queue size
+            queue.size = 256
+            # Idle timeout
+            runner.idle-timeout = 60000
+            # Flush timeout
+            runner.flush-timeout = 100
+            # Event filter
+            # filter = (!(type=log))
+
+            # File logger
+            file.enabled = true
+            file.target = ${karaf.data}/log/audit.txt
+            file.encoding = UTF-8
+            file.layout.type = simple
+            # rotating policy: can be 'daily', 'size([0-9]+(kb|mb|gb)?\)'
+            file.policy = daily
+            file.files = 32
+            file.compress = false
+
+            # Tcp logger
+            # tcp.enabled = true
+            # tcp.host = localhost
+            # tcp.port = 8125
+            # tcp.encoding = UTF-8
+            # tcp.layout.type = gelf
+
+            # Udp logger
+            # udp.enabled = true
+            # udp.host = localhost
+            # udp.port = 514
+            # udp.encoding = UTF-8
+            # udp.layout.type = rfc3164
+
+            # JUL logger
+            jul.enabled = false
+            jul.logger = audit
+            jul.level = info
+            jul.layout.type = simple
+        </config>
+    </feature>
+
     <feature name="standard" description="Wrap feature describing all features part of a standard distribution" version="${project.version}">
         <feature>wrap</feature>
         <feature>aries-blueprint</feature>
