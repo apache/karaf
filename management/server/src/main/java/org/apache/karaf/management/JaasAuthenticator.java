@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.management;
 
+import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 
+import java.rmi.server.RemoteServer;
 import java.security.Principal;
 
 import javax.management.remote.JMXAuthenticator;
@@ -53,6 +55,11 @@ public class JaasAuthenticator implements JMXAuthenticator {
         }
         try {
             Subject subject = new Subject();
+            try {
+                subject.getPrincipals().add(new ClientPrincipal("jmx", RemoteServer.getClientHost()));
+            } catch (Throwable t) {
+                // Ignore
+            }
             LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
                 for (int i = 0; i < callbacks.length; i++) {
                     if (callbacks[i] instanceof NameCallback) {

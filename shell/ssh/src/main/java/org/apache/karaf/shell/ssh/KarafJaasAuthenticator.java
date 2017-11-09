@@ -30,6 +30,7 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
+import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.modules.publickey.PublickeyCallback;
 import org.apache.sshd.common.session.Session;
@@ -85,6 +86,7 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
     private boolean doLogin(final ServerSession session, CallbackHandler callbackHandler) {
         try {
             Subject subject = new Subject();
+            subject.getPrincipals().add(new ClientPrincipal("ssh", session.getClientAddress().toString()));
             LoginContext loginContext = new LoginContext(realm, subject, callbackHandler);
             loginContext.login();
             assertRolePresent(subject);

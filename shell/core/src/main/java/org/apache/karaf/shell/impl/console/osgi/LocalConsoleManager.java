@@ -24,6 +24,7 @@ import java.security.PrivilegedAction;
 
 import javax.security.auth.Subject;
 
+import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.api.console.Session;
@@ -134,6 +135,7 @@ public class LocalConsoleManager {
 
         final Subject subject = new Subject();
         subject.getPrincipals().add(new UserPrincipal(userName));
+        subject.getPrincipals().add(new ClientPrincipal("local", "localhost"));
 
         String roles = System.getProperty(KARAF_LOCAL_ROLES, KARAF_LOCAL_ROLES_DEFAULT);
         if (roles != null) {

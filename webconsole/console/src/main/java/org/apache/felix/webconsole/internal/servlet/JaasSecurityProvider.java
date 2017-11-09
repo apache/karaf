@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
+import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -77,7 +78,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
 
     @Override
     public Object authenticate(final String username, final String password) {
-        return doAuthenticate( username, password );
+        return doAuthenticate( "?", username, password );
     }
 
     @Override
@@ -100,9 +101,10 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         return def;
     }
 
-    public Subject doAuthenticate(final String username, final String password) {
+    public Subject doAuthenticate(final String address, final String username, final String password) {
         try {
             Subject subject = new Subject();
+            subject.getPrincipals().add(new ClientPrincipal("webconsole", address));
             LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
                 for (Callback callback : callbacks) {
                     if (callback instanceof NameCallback) {
@@ -195,7 +197,8 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
                         }
                         if ( subject == null )
                         {
-                            subject = doAuthenticate(username, password);
+                            String addr = request.getRemoteHost() + ":" + request.getRemotePort();
+                            subject = doAuthenticate( addr, username, password );
                         }
                         if ( subject != null )
                         {
