@@ -416,7 +416,6 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     private String getGeneralPid(List<String> allPids, String pid) {
-        String ret = "";
         String[] pidStrArray = pid.split(Pattern.quote("."));
         Set<String[]> rets = new TreeSet<>(WILDCARD_PID_COMPARATOR);
         for (String id : allPids) {
