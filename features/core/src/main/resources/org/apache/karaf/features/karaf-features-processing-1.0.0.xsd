@@ -83,7 +83,7 @@ features, "range" manifest header attribute should be specified in "version" XML
             <xs:documentation><![CDATA[Blacklisted feature name may use '*' character as glob. "version" attribute
 MAY specify a version (or range) of features to blacklist, e.g.,:
  * version="[1,2)" - feature with versions 1, 1.1, 1.4.3, 1.9.99, ... will be blacklisted
- * version="[2,*)" - features with all versions above 2.0.0 will be blacklisted
+ * version="[2,*)" - features with all versions above and including 2.0.0 will be blacklisted
  * version="3.0" - feature with version 3.0 only will be blacklisted
 ]]></xs:documentation>
         </xs:annotation>

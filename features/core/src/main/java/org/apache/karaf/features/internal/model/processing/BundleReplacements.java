@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import org.apache.karaf.features.internal.service.LocationPattern;
+import org.apache.karaf.features.LocationPattern;
 
 @XmlType(name = "bundleReplacements", propOrder = {
         "overrideBundles"
@@ -91,7 +91,7 @@ public class BundleReplacements {
         }
 
         /**
-         * Changes String for <code>originalUri</code> into {@link org.apache.karaf.features.internal.service.LocationPattern}
+         * Changes String for <code>originalUri</code> into {@link LocationPattern}
          */
         public void compile() throws MalformedURLException {
             originalUriPattern = new LocationPattern(originalUri);

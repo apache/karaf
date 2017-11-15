@@ -29,15 +29,14 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.LocationPattern;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Conditional;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.processing.BundleReplacements;
-import org.apache.karaf.features.internal.model.processing.FeatureReplacements;
 import org.apache.karaf.features.internal.model.processing.FeaturesProcessing;
 import org.apache.karaf.features.internal.model.processing.ObjectFactory;
-import org.apache.karaf.features.internal.model.processing.OverrideBundleDependency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +54,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     public static Logger LOG = LoggerFactory.getLogger(FeaturesProcessorImpl.class);
     private static final JAXBContext FEATURES_PROCESSING_CONTEXT;
 
-    private FeaturesProcessing processing;
+    private FeaturesProcessing processing = new FeaturesProcessing();
 
     static {
         try {
@@ -96,18 +95,6 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
             }
         }
 
-        if (processing == null) {
-            processing = new FeaturesProcessing();
-        }
-        if (processing.getBundleReplacements() == null) {
-            processing.setBundleReplacements(new BundleReplacements());
-        }
-        if (processing.getFeatureReplacements() == null) {
-            processing.setFeatureReplacements(new FeatureReplacements());
-        }
-        if (processing.getOverrideBundleDependency() == null) {
-            processing.setOverrideBundleDependency(new OverrideBundleDependency());
-        }
         processing.postUnmarshall(blacklist, overrides);
     }
 

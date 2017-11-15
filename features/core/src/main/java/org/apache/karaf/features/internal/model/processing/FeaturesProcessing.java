@@ -38,7 +38,7 @@ import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.internal.service.Blacklist;
-import org.apache.karaf.features.internal.service.LocationPattern;
+import org.apache.karaf.features.LocationPattern;
 import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +90,9 @@ public class FeaturesProcessing {
     private Blacklist blacklist;
 
     public FeaturesProcessing() {
+        overrideBundleDependency = new OverrideBundleDependency();
+        bundleReplacements = new BundleReplacements();
+        featureReplacements = new FeatureReplacements();
     }
 
     public List<String> getBlacklistedRepositories() {
