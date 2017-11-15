@@ -38,8 +38,6 @@ import static org.apache.karaf.profile.impl.ProfileImpl.ConfigListType;
  */
 public final class ProfileBuilderImpl implements ProfileBuilder {
 
-    private static final String PARENTS_ATTRIBUTE_KEY = Profile.ATTRIBUTE_PREFIX + Profile.PARENTS;
-
 	private String profileId;
 	private Map<String, byte[]> fileMapping = new HashMap<>();
 	private boolean isOverlay;
@@ -60,7 +58,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 	@Override
     public List<String> getParents() {
         Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
-        String pspec = (String) config.get(PARENTS_ATTRIBUTE_KEY);
+        String pspec = (String) config.get(Profile.PARENTS);
         String[] parentIds = pspec != null ? pspec.split(" ") : new String[0];
         return Arrays.asList(parentIds);
     }
@@ -102,9 +100,9 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     private void updateParentsAttribute(Collection<String> parentIds) {
         Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
-        config.remove(PARENTS_ATTRIBUTE_KEY);
+        config.remove(Profile.PARENTS);
         if (parentIds.size() > 0) {
-            config.put(PARENTS_ATTRIBUTE_KEY, parentsAttributeValue(parentIds));
+            config.put(Profile.PARENTS, parentsAttributeValue(parentIds));
         }
         addConfiguration(Profile.INTERNAL_PID, config);
     }
@@ -195,49 +193,49 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     
 	@Override
 	public ProfileBuilder setBundles(List<String> values) {
-		addAgentConfiguration(ConfigListType.BUNDLES, values);
+		addProfileConfiguration(ConfigListType.BUNDLES, values);
 		return this;
 	}
 
     @Override
     public ProfileBuilder addBundle(String value) {
-        addAgentConfiguration(ConfigListType.BUNDLES, value);
+        addProfileConfiguration(ConfigListType.BUNDLES, value);
         return this;
     }
 
     @Override
 	public ProfileBuilder setFeatures(List<String> values) {
-		addAgentConfiguration(ConfigListType.FEATURES, values);
+		addProfileConfiguration(ConfigListType.FEATURES, values);
 		return this;
 	}
 
     @Override
     public ProfileBuilder addFeature(String value) {
-        addAgentConfiguration(ConfigListType.FEATURES, value);
+        addProfileConfiguration(ConfigListType.FEATURES, value);
         return this;
     }
 
     @Override
 	public ProfileBuilder setRepositories(List<String> values) {
-		addAgentConfiguration(ConfigListType.REPOSITORIES, values);
+		addProfileConfiguration(ConfigListType.REPOSITORIES, values);
 		return this;
 	}
 
     @Override
     public ProfileBuilder addRepository(String value) {
-        addAgentConfiguration(ConfigListType.REPOSITORIES, value);
+        addProfileConfiguration(ConfigListType.REPOSITORIES, value);
         return this;
     }
 
     @Override
 	public ProfileBuilder setOverrides(List<String> values) {
-		addAgentConfiguration(ConfigListType.OVERRIDES, values);
+		addProfileConfiguration(ConfigListType.OVERRIDES, values);
 		return this;
 	}
 
     @Override
     public ProfileBuilder setOptionals(List<String> values) {
-        addAgentConfiguration(ConfigListType.OPTIONALS, values);
+        addProfileConfiguration(ConfigListType.OPTIONALS, values);
         return this;
     }
 
@@ -267,7 +265,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         return null;
     }
 
-    private void addAgentConfiguration(ConfigListType type, List<String> values) {
+    private void addProfileConfiguration(ConfigListType type, List<String> values) {
         String prefix = type + ".";
         Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
         for (String key : new ArrayList<>(config.keySet())) {
@@ -281,7 +279,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         addConfiguration(Profile.INTERNAL_PID, config);
     }
 
-    private void addAgentConfiguration(ConfigListType type, String value) {
+    private void addProfileConfiguration(ConfigListType type, String value) {
         String prefix = type + ".";
         Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
         config.put(prefix + value, value);

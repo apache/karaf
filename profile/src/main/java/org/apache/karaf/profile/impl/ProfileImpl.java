@@ -37,7 +37,7 @@ import static org.apache.karaf.profile.impl.Utils.assertTrue;
  */
 final class ProfileImpl implements Profile {
 
-    private static final Pattern ALLOWED_PROFILE_NAMES_PATTERN = Pattern.compile("^[A-Za-z0-9]+[\\.A-Za-z0-9_-]*$");
+    private static final Pattern ALLOWED_PROFILE_NAMES_PATTERN = Pattern.compile("^[A-Za-z0-9]+[.A-Za-z0-9_-]*$");
 
     private final String profileId;
     private final Map<String, String> attributes;
@@ -53,7 +53,7 @@ final class ProfileImpl implements Profile {
         assertNotNull(profileId, "profileId is null");
         assertNotNull(parents, "parents is null");
         assertNotNull(fileConfigs, "fileConfigs is null");
-        assertTrue(ALLOWED_PROFILE_NAMES_PATTERN.matcher(profileId).matches(), "Profile id '" + profileId + "' is invalid. Profile id must be: lower-case letters, numbers, and . _ or - characters");
+        assertTrue(ALLOWED_PROFILE_NAMES_PATTERN.matcher(profileId).matches(), "Profile id '" + profileId + "' is invalid. Profile id must be: upper-case or lower-case letters, numbers, and . _ or - characters");
 
         this.profileId = profileId;
         this.isOverlay = isOverlay;
@@ -72,12 +72,8 @@ final class ProfileImpl implements Profile {
             }
         }
 
-        // Attributes are agent configuration with prefix 'attribute.'
+        // Attributes are profile configuration properties with prefix "attribute." contained in "profile" PID
         attributes = getPrefixedMap(ATTRIBUTE_PREFIX);
-    }
-
-    public String getId() {
-        return profileId;
     }
 
     @Override
@@ -95,12 +91,17 @@ final class ProfileImpl implements Profile {
         return getPrefixedMap(SYSTEM_PREFIX);
     }
 
+    @Override
+    public String getId() {
+        return profileId;
+    }
+
     private Map<String, String> getPrefixedMap(String prefix) {
         Map<String, String> map = new HashMap<>();
-        Map<String, Object> agentConfig = configurations.get(Profile.INTERNAL_PID);
-        if (agentConfig != null) {
+        Map<String, Object> profileConfig = configurations.get(Profile.INTERNAL_PID);
+        if (profileConfig != null) {
             int prefixLength = prefix.length();
-            for (Entry<String, Object> entry : agentConfig.entrySet()) {
+            for (Entry<String, Object> entry : profileConfig.entrySet()) {
                 String key = entry.getKey();
                 if (key.startsWith(prefix)) {
                     map.put(key.substring(prefixLength), entry.getValue().toString());
@@ -111,8 +112,8 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
-    public List<String> getLibraries() {
-        return getContainerConfigList(ConfigListType.LIBRARIES);
+    public List<String> getParentIds() {
+        return Collections.unmodifiableList(parents);
     }
 
     @Override
@@ -131,6 +132,26 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
+    public List<String> getLibraries() {
+        return getContainerConfigList(ConfigListType.LIBRARIES);
+    }
+
+    @Override
+    public List<String> getBootLibraries() {
+        return getContainerConfigList(ConfigListType.BOOT_LIBRARIES);
+    }
+
+    @Override
+    public List<String> getEndorsedLibraries() {
+        return getContainerConfigList(ConfigListType.ENDORSED_LIBRARIES);
+    }
+
+    @Override
+    public List<String> getExtLibraries() {
+        return getContainerConfigList(ConfigListType.EXT_LIBRARIES);
+    }
+
+    @Override
     public List<String> getOverrides() {
         return getContainerConfigList(ConfigListType.OVERRIDES);
     }
@@ -141,31 +162,22 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
-    public List<String> getParentIds() {
-        return Collections.unmodifiableList(parents);
-    }
-
-    @Override
-    public boolean isAbstract() {
-        return parseBoolean(getAttributes().get(ABSTRACT));
-    }
-
-    @Override
-    public boolean isHidden() {
-        return parseBoolean(getAttributes().get(HIDDEN));
-    }
-
-    private Boolean parseBoolean(Object obj) {
-        return obj instanceof Boolean ? (Boolean) obj : Boolean.parseBoolean(obj.toString());
-    }
-
     public boolean isOverlay() {
         return isOverlay;
     }
 
     @Override
-    public Map<String, byte[]> getFileConfigurations() {
-        return Collections.unmodifiableMap(fileConfigurations);
+    public boolean isAbstract() {
+        return parseBoolean(attributes.get(ABSTRACT));
+    }
+
+    @Override
+    public boolean isHidden() {
+        return parseBoolean(attributes.get(HIDDEN));
+    }
+
+    private Boolean parseBoolean(Object obj) {
+        return obj instanceof Boolean ? (Boolean) obj : obj != null && Boolean.parseBoolean(obj.toString());
     }
 
     @Override
@@ -174,10 +186,16 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
+    public Map<String, byte[]> getFileConfigurations() {
+        return Collections.unmodifiableMap(fileConfigurations);
+    }
+
+    @Override
     public byte[] getFileConfiguration(String fileName) {
         return fileConfigurations.get(fileName);
     }
 
+    @Override
     public Map<String, Map<String, Object>> getConfigurations() {
         return Collections.unmodifiableMap(configurations);
     }
@@ -230,13 +248,16 @@ final class ProfileImpl implements Profile {
 
     @Override
     public String toString() {
-        return "Profile[id=" + profileId + ",attrs=" + getAttributes() + "]";
+        return "Profile[id=" + profileId + ", attrs=" + getAttributes() + "]";
     }
 
     enum ConfigListType {
         BUNDLES("bundle"),
         FEATURES("feature"),
         LIBRARIES("library"),
+        BOOT_LIBRARIES("boot"),
+        ENDORSED_LIBRARIES("endorsed"),
+        EXT_LIBRARIES("ext"),
         OPTIONALS("optional"),
         OVERRIDES("override"),
         REPOSITORIES("repository");
@@ -251,4 +272,5 @@ final class ProfileImpl implements Profile {
             return value;
         }
     }
+
 }

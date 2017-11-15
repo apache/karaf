@@ -23,6 +23,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,7 @@ import org.apache.maven.artifact.repository.metadata.Snapshot;
 import org.apache.maven.artifact.repository.metadata.SnapshotVersion;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
+import org.eclipse.aether.repository.RemoteRepository;
 
 /**
  * Util method for Maven manipulation (URL convert, metadata generation, etc).
@@ -41,7 +43,7 @@ public class MavenUtil {
 
     static final DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
     private static final Pattern aetherPattern = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
-    private static final Pattern mvnPattern = Pattern.compile("(?:(?:wrap:)|(?:blueprint:))?mvn:([^/ ]+)/([^/ ]+)/([^/\\$ ]*)(/([^/\\$ ]+)(/([^/\\$ ]+))?)?(/\\$.+)?");
+    private static final Pattern mvnPattern = Pattern.compile("(?:(?:wrap:)|(?:blueprint:))?mvn:([^/ ]+)/([^/ ]+)/([^/$ ]*)(/([^/$ ]+)(/([^/$ ]+))?)?(/\\$.+)?");
 
     /**
      * Convert PAX URL mvn format to aether coordinate format.
@@ -153,13 +155,35 @@ public class MavenUtil {
     }
     
     public static String getFileName(Artifact artifact) {
-        String name = artifact.getArtifactId() + "-" + artifact.getBaseVersion()
+        return artifact.getArtifactId() + "-" + artifact.getBaseVersion()
             + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
-        return name;
     }
-    
+
     public static String getDir(Artifact artifact) {
         return artifact.getGroupId().replace('.', '/') + "/" + artifact.getArtifactId() + "/" + artifact.getBaseVersion() + "/";
+    }
+
+    /**
+     * Changes maven configuration of remote repositories to a list of repositories for pax-url-aether
+     * @param remoteRepositories
+     * @return
+     */
+    public static String remoteRepositoryList(List<RemoteRepository> remoteRepositories) {
+        StringBuilder remotes = new StringBuilder();
+        for (RemoteRepository rr : remoteRepositories) {
+            if (remotes.length() > 0) {
+                remotes.append(",");
+            }
+            remotes.append(rr.getUrl());
+            remotes.append("@id=").append(rr.getId());
+            if (!rr.getPolicy(false).isEnabled()) {
+                remotes.append("@noreleases");
+            }
+            if (rr.getPolicy(true).isEnabled()) {
+                remotes.append("@snapshots");
+            }
+        }
+        return remotes.toString();
     }
 
 }

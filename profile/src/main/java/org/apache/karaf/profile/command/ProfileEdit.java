@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
+import org.apache.karaf.profile.ProfileConstants;
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -48,15 +49,6 @@ public class ProfileEdit implements Action {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProfileEdit.class);
 
-    static final String FEATURE_PREFIX = "feature.";
-    static final String REPOSITORY_PREFIX = "repository.";
-    static final String BUNDLE_PREFIX = "bundle.";
-    static final String OVERRIDE_PREFIX = "override.";
-    static final String CONFIG_PREFIX = "config.";
-    static final String SYSTEM_PREFIX = "system.";
-    static final String LIB_PREFIX = "lib.";
-    static final String ENDORSED_PREFIX = "endorsed.";
-    static final String EXT_PREFIX = "ext.";
     static final String DELIMITER = ",";
     static final String PID_KEY_SEPARATOR = "/";
 
@@ -156,15 +148,15 @@ public class ProfileEdit implements Action {
         }
         if (libs != null && libs.length > 0) {
             editInLine = true;
-            handleLibraries(builder, libs, profile, "lib", LIB_PREFIX);
+            handleLibraries(builder, libs, profile, "lib", ProfileConstants.LIB_PREFIX);
         }
         if (endorsed != null && endorsed.length > 0) {
             editInLine = true;
-            handleLibraries(builder, endorsed, profile, "endorsed lib", ENDORSED_PREFIX);
+            handleLibraries(builder, endorsed, profile, "endorsed lib", ProfileConstants.ENDORSED_PREFIX);
         }
         if (extension != null && extension.length > 0) {
             editInLine = true;
-            handleLibraries(builder, extension, profile, "extension lib", EXT_PREFIX);
+            handleLibraries(builder, extension, profile, "extension lib", ProfileConstants.EXT_PREFIX);
         }
         if (bundles != null && bundles.length > 0) {
             editInLine = true;
@@ -215,7 +207,7 @@ public class ProfileEdit implements Action {
             } else {
                 System.out.println("Adding feature:" + feature + " to profile:" + profile.getId());
             }
-            updateConfig(conf, FEATURE_PREFIX + feature.replace('/', '_'), feature, set, delete);
+            updateConfig(conf, ProfileConstants.FEATURE_PREFIX + feature.replace('/', '_'), feature, set, delete);
             builder.addConfiguration(Profile.INTERNAL_PID, conf);
         }
     }
@@ -231,7 +223,7 @@ public class ProfileEdit implements Action {
             } else if (delete) {
                 System.out.println("Deleting feature repository:" + repositoryURI + " from profile:" + profile.getId());
             }
-            updateConfig(conf, REPOSITORY_PREFIX + repositoryURI.replace('/', '_'), repositoryURI, set, delete);
+            updateConfig(conf, ProfileConstants.REPOSITORY_PREFIX + repositoryURI.replace('/', '_'), repositoryURI, set, delete);
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
     }
@@ -269,7 +261,7 @@ public class ProfileEdit implements Action {
             } else if (delete) {
                 System.out.println("Deleting bundle:" + bundle + " from profile:" + profile.getId());
             }
-            updateConfig(conf, BUNDLE_PREFIX + bundle.replace('/', '_'), bundle, set, delete);
+            updateConfig(conf, ProfileConstants.BUNDLE_PREFIX + bundle.replace('/', '_'), bundle, set, delete);
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
     }
@@ -287,7 +279,7 @@ public class ProfileEdit implements Action {
             } else if (delete) {
                 System.out.println("Deleting override:" + override + " from profile:" + profile.getId());
             }
-            updateConfig(conf, OVERRIDE_PREFIX + override.replace('/', '_'), override, set, delete);
+            updateConfig(conf, ProfileConstants.OVERRIDE_PREFIX + override.replace('/', '_'), override, set, delete);
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
     }
@@ -375,7 +367,7 @@ public class ProfileEdit implements Action {
                 } else {
                     System.out.println("Removing value:" + value + " key:" + key + " from system properties and profile:" + profile.getId());
                 }
-                updatedDelimitedList(conf, SYSTEM_PREFIX + key, value, delimiter, set, delete, append, remove);
+                updatedDelimitedList(conf, ProfileConstants.SYSTEM_PREFIX + key, value, delimiter, set, delete, append, remove);
             }
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
@@ -400,7 +392,7 @@ public class ProfileEdit implements Action {
                 } else if (set) {
                     System.out.println("Setting value:" + value + " key:" + key + " from config properties and profile:" + profile.getId());
                 }
-                updatedDelimitedList(conf, CONFIG_PREFIX + key, value, delimiter, set, delete, append, remove);
+                updatedDelimitedList(conf, ProfileConstants.CONFIG_PREFIX + key, value, delimiter, set, delete, append, remove);
             }
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
