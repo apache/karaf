@@ -38,16 +38,29 @@ import org.apache.karaf.profile.ProfileBuilder;
 
 import static org.apache.karaf.profile.impl.Utils.assertNotNull;
 
+/**
+ * Static utilities to work with {@link Profile profiles}.
+ */
 public final class Profiles {
 
     public static final String PROFILE_FOLDER_SUFFIX = ".profile";
 
+    /**
+     * <p>Loads profiles from given directory path. A profile is represented as directory with <code>.profile</code>
+     * extension. Subdirectories constitute part of {@linl Profile#getId} - directory separators are changed to
+     * <code>-</code>.</p>
+     * <p>For example, profile contained in directory <code>mq/broker/standalone.profile</code> will have
+     * id = <code>mq-broker-standalone</code>.</p>
+     * @param root
+     * @return
+     * @throws IOException
+     */
     public static Map<String, Profile> loadProfiles(final Path root) throws IOException {
         final Map<String, Profile> profiles = new HashMap<>();
         Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
                 ProfileBuilder builder;
                 @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                     Path fileName = dir.getFileName();
                     if (fileName != null && (fileName.toString().endsWith(PROFILE_FOLDER_SUFFIX)
                             || fileName.toString().endsWith(PROFILE_FOLDER_SUFFIX + "/"))) {
@@ -87,6 +100,12 @@ public final class Profiles {
         return profiles;
     }
 
+    /**
+     * Deletes profile by given {@link Profile#getId()} from <code>root</code> path.
+     * @param root
+     * @param id
+     * @throws IOException
+     */
     public static void deleteProfile(Path root, String id) throws IOException {
         Path path = root.resolve(id.replaceAll("-", root.getFileSystem().getSeparator()) + PROFILE_FOLDER_SUFFIX);
         if (Files.isDirectory(path)) {
@@ -105,6 +124,13 @@ public final class Profiles {
         }
     }
 
+    /**
+     * Writes given {@link Profile} under a path specified as <code>root</code>. Directory name to store a profile is
+     * derived from {@link Profile#getId()}
+     * @param root
+     * @param profile
+     * @throws IOException
+     */
     public static void writeProfile(Path root, Profile profile) throws IOException {
         Path path = root.resolve(profile.getId().replaceAll("-", root.getFileSystem().getSeparator()) + PROFILE_FOLDER_SUFFIX);
         Files.createDirectories(path);
@@ -113,10 +139,28 @@ public final class Profiles {
         }
     }
 
+    /**
+     * <p>Gets an <em>overlay</em> profile for given <code>profile</code>, where passed in map of additional profiles
+     * is searched for possible parent profiles of given <code>profile</code>.</p>
+     * @param profile
+     * @param profiles
+     * @return
+     */
     public static Profile getOverlay(Profile profile, Map<String, Profile> profiles) {
         return getOverlay(profile, profiles, null);
     }
 
+    /**
+     * <p>Gets an <em>overlay</em> profile for given <code>profile</code>, where passed in map of additional profiles
+     * is searched for possible parent profiles of given <code>profile</code>.</p>
+     * <p><code>environment</code> may be used to select different <em>variants</em> of profile configuration files.
+     * For example, if <code>environment</code> is specified, configuration for <code>my.pid</code> PID will be read
+     * from <code>my.pid.cfg#&lt;environment&gt;</code>.</p>
+     * @param profile
+     * @param profiles
+     * @param environment
+     * @return
+     */
     public static Profile getOverlay(Profile profile, Map<String, Profile> profiles, String environment) {
         assertNotNull(profile, "profile is null");
         assertNotNull(profile, "profiles is null");
@@ -130,22 +174,49 @@ public final class Profiles {
         }
     }
 
+    /**
+     * Gets an <code>effective</code> profile with single property placeholder resolver for <code>${profile:xxx}</code>
+     * placeholders and with <code>finalSubstitution</code> set to <code>true</code>.
+     * @param profile
+     * @return
+     */
     public static Profile getEffective(final Profile profile) {
-        return getEffective(profile,
-                true);
+        return getEffective(profile, true);
     }
 
+    /**
+     * Gets an <code>effective</code> profile with single property placeholder resolver for <code>${profile:xxx}</code>
+     * placeholders.
+     * @param profile
+     * @param finalSubstitution
+     * @return
+     */
     public static Profile getEffective(final Profile profile, boolean finalSubstitution) {
         return getEffective(profile,
                 Collections.singleton(new PlaceholderResolvers.ProfilePlaceholderResolver()),
                 finalSubstitution);
     }
 
+    /**
+     * Gets an <code>effective</code> profile with <code>finalSubstitution</code> set to <code>true</code>.
+     * @param profile
+     * @param resolvers
+     * @return
+     */
     public static Profile getEffective(final Profile profile,
                                        final Collection<PlaceholderResolver> resolvers) {
         return getEffective(profile, resolvers, true);
     }
 
+    /**
+     * <p>Gets an <em>effective</em> profile for given <code>profile</code>. Effective profile has all property
+     * placeholders resolved. When <code>finalSubstitution</code> is <code>true</code>, placeholders that can't
+     * be resolved are replaced with empty strings. When it's <code>false</code>, placeholders are left unchanged.</p>
+     * @param profile
+     * @param resolvers
+     * @param finalSubstitution
+     * @return
+     */
     public static Profile getEffective(final Profile profile,
                                        final Collection<PlaceholderResolver> resolvers,
                                        boolean finalSubstitution) {
@@ -208,6 +279,28 @@ public final class Profiles {
         return builder.getProfile();
     }
 
+    /**
+     * <p>Helper internal class to configure {@link ProfileBuilder} used to create an <em>overlay</em> profile.</p>
+     * <p>There are strict rules built on a concept of profiles being <em>containers of file configurations</em>.
+     * Each profile may contain files with the same name. Profiles may be set in multi-parent - child relationship.
+     * Such graph of profiles is searched in depth-first fashion, while child (being a root of the graph) has
+     * highest priority.</p>
+     * <p>Files from higher-priority profile override files from parent profiles. Special case are PID files (with
+     * {@link Profile#PROPERTIES_SUFFIX} extension). These files are not simply taken from child profiles. Child
+     * profiles may have own version of given PID configuration file, but these files are overwritten at property
+     * level.</p>
+     * <p>For example, if parent profile specifies:<pre>
+     * property1 = v1
+     * property2 = v2
+     * </pre> and child profile specifies:<pre>
+     * property1 = v1a
+     * property3 = v3a
+     * </pre>an <em>overlay</em> profile for child profile uses:<pre>
+     * property1 = v1a
+     * property2 = v2
+     * property3 = v3a
+     * </pre></p>
+     */
     static private class OverlayOptionsProvider {
 
         private final Map<String, Profile> profiles;

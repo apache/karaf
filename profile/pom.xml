@@ -183,6 +183,7 @@
                             org.apache.karaf.profile.impl,
                             org.apache.karaf.profile.impl.osgi,
                             org.apache.karaf.profile.versioning,
+                            org.apache.karaf.util,
                             org.apache.karaf.util.config,
                             org.apache.karaf.util.maven,
                             org.apache.felix.utils.manifest,

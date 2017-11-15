@@ -21,88 +21,135 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The immutable view of a profile
+ * <p>A <em>profile</em> is a container for configuration that can be applied to Karaf distribution.</p>
+ *
+ * <p>Profiles may inherit from other (single or multiple) profiles. An <em>overlay</em> profile is single
+ * profile with all the configurations, attributes and files from parent profiles, while configurations,
+ * attributes and files from <em>child</em> profile overwrites corresponding data from parent profiles.</p>
+ *
+ * <p>Configuration include:<ul>
+ *     <li>Attributes</li>
+ *     <li>ConfigAdmin configurations (PIDs) to put into <code>${karaf.etc}</code> directory</li>
+ *     <li>Other resources to put into <code>${karaf.etc}</code> directory</li>
+ * </ul></p>
+ *
+ * <p>Attributes are properties in special file <code>profile.cfg</code> (<code>profile</code> PID) and may specify:<ul>
+ *     <li>OSGi bundles to install (prefix: <code>bundle.</code>)</li>
+ *     <li>Karaf features to install (prefix: <code>feature.</code>)</li>
+ *     <li>Feature XML repositories to use to resolve bundles and features (prefix: <code>repository.</code>)</li>
+ *     <li>Identifiers of parent profiles (property name: <code>attribute.parents</code>)</li>
+ *     <li>Indication of abstract profile (property name: <code>abstract</code>)</li>
+ *     <li>Indication of hidden profile (property name: <code>hidden</code>)</li>
+ *     <li>Different attributes (prefix: <code>attribute.</code>)</li>
+ *     <li>Properties to be added to <code>etc/config.properties</code> (prefix: <code>config.</code>)</li>
+ *     <li>Properties to be added to <code>etc/system.properties</code> (prefix: <code>system.</code>)</li>
+ *     <li>Additional libraries to be added to <code>lib</code> (prefix: <code>library.</code>)</li>
+ *     <li>Additional libraries to be added to <code>lib/boot</code> (prefix: <code>boot.</code>)</li>
+ *     <li>Additional libraries to be added to <code>lib/endorsed</code> (prefix: <code>endorsed.</code>)</li>
+ *     <li>Additional libraries to be added to <code>lib/ext</code> (prefix: <code>ext.</code>)</li>
+ *     <li>Bundle override definitions to be added to <code>etc/overrides.properties</code> (prefix: <code>override.</code>)</li>
+ *     <li>Optional {@link org.osgi.resource.Resource resources} to be used during resolution (prefix: <code>optional.</code>)</li>
+ * </ul></p>
  */
-public interface Profile {
+public interface Profile extends ProfileConstants {
 
     /**
-     * The attribute key for the list of parents
+     * Returns an attribute map of this profile
+     * @return
      */
-    String PARENTS = "parents";
-
-    /**
-     * The attribute key for the description of the profile
-     */
-    String DESCRIPTION = "description";
-
-    /**
-     * The attribute key for the abstract flag
-     */
-    String ABSTRACT = "abstract";
-
-    /**
-     * The attribute key for the hidden flag
-     */
-    String HIDDEN = "hidden";
-
-    /**
-     * Key indicating a deletion.
-     * This value can appear as the value of a key in a configuration
-     * or as a key itself.  If used as a key, the whole configuration
-     * is flagged has been deleted from its parent when computing the
-     * overlay.
-     */
-    String DELETED = "#deleted#";
-
-    /**
-     * The pid of the configuration holding internal profile attributes
-     */
-    String INTERNAL_PID = "profile";
-
-    /**
-     * The file suffix for a configuration
-     */
-    String PROPERTIES_SUFFIX = ".cfg";
-
-    /**
-     * The attribute prefix for in the agent configuration
-     */
-    String ATTRIBUTE_PREFIX = "attribute.";
-
-    /**
-     * The config prefix for in the agent configuration
-     */
-    String CONFIG_PREFIX = "config.";
-
-    /**
-     * The config prefix for in the agent configuration
-     */
-    String SYSTEM_PREFIX = "system.";
-
     Map<String, String> getAttributes();
+
+    /**
+     * Returns a property map for additional properties to be added to <code>${karaf.etc}/config.properties</code>
+     * @return
+     */
     Map<String, String> getConfig();
+
+    /**
+     * Returns a property map for additional properties to be added to <code>${karaf.etc}/system.properties</code>
+     * @return
+     */
     Map<String, String> getSystem();
 
-    List<String> getParentIds();
-
-    List<String> getLibraries();
-    List<String> getBundles();
-    List<String> getFeatures();
-    List<String> getRepositories();
-    List<String> getOverrides();
-    List<String> getOptionals();
-
+    /**
+     * Returns a unique identifier of this profile
+     * @return
+     */
     String getId();
 
     /**
-     * Get the configuration file names that are available on this profile.
+     * Returns a list of parent profile identifiers for this profile
+     * @return
+     */
+    List<String> getParentIds();
+
+    /**
+     * Returns a list of bundles (bundle URIs) defined in this profile
+     * @return
+     */
+    List<String> getBundles();
+
+    /**
+     * Returns a list of features (<code>feature-name[/feature-version]</code>) defined in this profile
+     * @return
+     */
+    List<String> getFeatures();
+
+    /**
+     * Returns a list of features XML repositories (URIs) defined in this profile
+     * @return
+     */
+    List<String> getRepositories();
+
+    /**
+     * Returns a list of libraries (to be added to <code>${karaf.home}/lib</code>) defined in this profile
+     * @return
+     */
+    List<String> getLibraries();
+
+    /**
+     * Returns a list of boot libraries (to be added to <code>${karaf.home}/lib/boot</code>) defined in this profile
+     * @return
+     */
+    List<String> getBootLibraries();
+
+    /**
+     * Returns a list of endorsed libraries (to be added to <code>${karaf.home}/lib/endorsed</code>) defined in this profile
+     * @return
+     */
+    List<String> getEndorsedLibraries();
+
+    /**
+     * Returns a list of extension libraries (to be added to <code>${karaf.home}/lib/ext</code>) defined in this profile
+     * @return
+     */
+    List<String> getExtLibraries();
+
+    /**
+     * Returns a list of bundle override definitions (to be added to <code>${karaf.etc}/overrides.properties</code>)
+     * defined in this profile
+     * @return
+     */
+    List<String> getOverrides();
+
+    /**
+     * Returns a list of optional {@link org.osgi.resource.Resource resources} (URIs) to be used during
+     * resolution
+     * @return
+     */
+    List<String> getOptionals();
+
+    /**
+     * Get the configuration file names that are available on this profile. This list should contain at least
+     * <code>profile.cfg</code> file.
      *
      * @return The configuration file names in the profile.
      */
     Set<String> getConfigurationFileNames();
 
     /**
-     * Get all file configurations.
+     * Get all file configurations. This list should contain at least
+     * <code>profile.cfg</code> file.
      *
      * @return The file configurations in the profile.
      */
@@ -117,7 +164,8 @@ public interface Profile {
     byte[] getFileConfiguration(String fileName);
 
     /**
-     * Get all configuration properties.
+     * Get all configuration properties.This list should contain at least
+     * configuration from main profile file - <code>profile.cfg</code>.
      *
      * @return The configurations in the profile.
      */
@@ -132,7 +180,8 @@ public interface Profile {
     Map<String, Object> getConfiguration(String pid);
 
     /**
-     * Indicate if this profile is an overlay or not.
+     * Indicate if this profile is an overlay or not. An <em>overlay</em> profile includes configurations and
+     * attributes of parent profiles, while descendant profiles always have priority over parent profiles.
      *
      * @return True if the profile is an overlay, false else.
      */

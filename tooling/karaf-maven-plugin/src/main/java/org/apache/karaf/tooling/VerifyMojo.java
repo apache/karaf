@@ -80,6 +80,7 @@ import org.apache.karaf.features.internal.service.StaticInstallSupport;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.profile.assembly.CustomDownloadManager;
+import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.karaf.tooling.utils.ReactorMavenResolver;
 import org.apache.karaf.util.config.PropertiesLoader;
@@ -167,32 +168,13 @@ public class VerifyMojo extends MojoSupport {
         }
 
         if (karafVersion == null) {
-            Properties versions = new Properties();
-            try (InputStream is = getClass().getResourceAsStream("versions.properties")) {
-                versions.load(is);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-            karafVersion = versions.getProperty("karaf-version");
+            karafVersion = org.apache.karaf.util.Version.karafVersion();
         }
 
         Hashtable<String, String> config = new Hashtable<>();
-        StringBuilder remote = new StringBuilder();
-        for (Object obj : project.getRemoteProjectRepositories()) {
-            if (remote.length() > 0) {
-                remote.append(",");
-            }
-            remote.append(invoke(obj, "getUrl"));
-            remote.append("@id=").append(invoke(obj, "getId"));
-            if (!((Boolean) invoke(getPolicy(obj, false), "isEnabled"))) {
-                remote.append("@noreleases");
-            }
-            if ((Boolean) invoke(getPolicy(obj, true), "isEnabled")) {
-                remote.append("@snapshots");
-            }
-        }
-        getLog().info("Using repositories: " + remote.toString());
-        config.put("maven.repositories", remote.toString());
+        String remoteRepositories = MavenUtil.remoteRepositoryList(project.getRemoteProjectRepositories());
+        getLog().info("Using repositories: " + remoteRepositories);
+        config.put("maven.repositories", remoteRepositories);
         config.put("maven.localRepository", localRepo.getBasedir());
         config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
         // TODO: add more configuration bits ?

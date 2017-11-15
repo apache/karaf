@@ -122,9 +122,9 @@
                 <configuration>
                     <useReferenceUrls>true</useReferenceUrls>
                     <environment>static</environment>
-                    <profilesUri>
-                        jar:mvn:org.apache.karaf.demos.profiles/registry/${project.version}!/
-                    </profilesUri>
+                    <profilesUris>
+                        <uri>jar:mvn:org.apache.karaf.demos.profiles/registry/${project.version}!/</uri>
+                    </profilesUris>
                     <startupProfiles>
                         <profile>karaf</profile>
                         <profile>example-loanbroker-bank1</profile>
