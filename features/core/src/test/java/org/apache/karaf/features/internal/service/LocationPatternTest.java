@@ -20,6 +20,7 @@ package org.apache.karaf.features.internal.service;
 
 import java.net.MalformedURLException;
 
+import org.apache.karaf.features.LocationPattern;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.features.internal.service;
+package org.apache.karaf.features;
 
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
@@ -30,12 +30,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Helper class to compare Maven URIs that may use globs and version ranges.</p>
+ * <p>Helper class to compare Maven URIs (and falling back to other URIs) that may use globs and version ranges.</p>
+ *
  * <p>Each Maven URI may contain these components: groupId, artifactId, optional version, optional type and optional
- * classifier. Concrete URIs do not use globs and use precise versions (we not consider <code>LATEST</code>
- * and <code>RELEASE</code> here).</p>
+ * classifier. Concrete URIs do not use globs and use precise versions (we do not consider <code>LATEST</code>
+ * and <code>RELEASE</code> Maven versions here).</p>
+ *
  * <p>When comparing two Maven URIs, we split them to components and may use RegExps and
  * {@link org.apache.felix.utils.version.VersionRange}s</p>
+ *
  * <p>When pattern URI doesn't use <code>mvn:</code> scheme, plain {@link String#equals(Object)} is used or
  * {@link Matcher#matches()} when pattern uses <code>*</code> glob.</p>
  */
@@ -110,7 +113,7 @@ public class LocationPattern {
      * @param value
      * @return
      */
-    private Pattern toRegExp(String value) {
+    static Pattern toRegExp(String value) {
         // TODO: escape all RegExp special chars that are valid path characters, only convert '*' into '.*'
         return Pattern.compile(value
                 .replaceAll("\\.", "\\\\\\.")
@@ -133,10 +136,6 @@ public class LocationPattern {
             // this pattern is not mvn:
             return originalPattern.matcher(otherUri).matches();
         }
-        if (!otherUri.startsWith("mvn:")) {
-            // other pattern is not mvn:
-            return originalUri.equals(otherUri);
-        }
 
         LocationPattern other;
         try {
@@ -145,6 +144,12 @@ public class LocationPattern {
             LOG.debug("Can't parse \"" + otherUri + "\" as Maven URI. Ignoring.");
             return false;
         }
+
+        if (other.originalPattern != null) {
+            // other pattern is not mvn:
+            return false;
+        }
+
         if (other.versionRange != null) {
             LOG.warn("Matched URI can't use version ranges: " + otherUri);
             return false;

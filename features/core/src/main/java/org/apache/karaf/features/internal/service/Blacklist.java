@@ -25,33 +25,27 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
-import org.apache.felix.utils.version.VersionRange;
-import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.internal.model.Bundle;
-import org.apache.karaf.features.internal.model.Conditional;
-import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.FeaturePattern;
+import org.apache.karaf.features.LocationPattern;
 import org.apache.karaf.features.internal.model.Features;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Helper class to deal with blacklisted features and bundles.
+ * Helper class to deal with blacklisted features and bundles. It doesn't process JAXB model at all - it only
+ * provides information about repository/feature/bundle being blacklisted.
  */
 public class Blacklist {
 
     public static Logger LOG = LoggerFactory.getLogger(Blacklist.class);
 
     public static final String BLACKLIST_URL = "url";
-    public static final String BLACKLIST_RANGE = "range";
     public static final String BLACKLIST_TYPE = "type"; // null -> "feature"
     public static final String TYPE_FEATURE = "feature";
     public static final String TYPE_BUNDLE = "bundle";
@@ -59,7 +53,10 @@ public class Blacklist {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Blacklist.class);
     private Clause[] clauses;
-    private Map<String, LocationPattern> bundleBlacklist = new LinkedHashMap<>();
+
+    private List<LocationPattern> repositoryBlacklist = new LinkedList<>();
+    private List<FeaturePattern> featureBlacklist = new LinkedList<>();
+    private List<LocationPattern> bundleBlacklist = new LinkedList<>();
 
     public Blacklist() {
         this(Collections.emptyList());
@@ -105,11 +102,33 @@ public class Blacklist {
                     type = TYPE_FEATURE;
                 }
             }
+            String location;
             switch (type) {
+                case TYPE_REPOSITORY:
+                    location = c.getName();
+                    if (c.getAttribute(BLACKLIST_URL) != null) {
+                        location = c.getAttribute(BLACKLIST_URL);
+                    }
+                    if (location == null) {
+                        // should not happen?
+                        LOG.warn("Repository blacklist URI is empty. Ignoring.");
+                    } else {
+                        try {
+                            repositoryBlacklist.add(new LocationPattern(location));
+                        } catch (MalformedURLException e) {
+                            LOG.warn("Problem parsing repository blacklist URI \"" + location + "\": " + e.getMessage() + ". Ignoring.");
+                        }
+                    }
+                    break;
                 case TYPE_FEATURE:
+                    try {
+                        featureBlacklist.add(new FeaturePattern(c.toString()));
+                    } catch (IllegalArgumentException e) {
+                        LOG.warn("Problem parsing blacklisted feature identifier \"" + c.toString() + "\": " + e.getMessage() + ". Ignoring.");
+                    }
                     break;
                 case TYPE_BUNDLE:
-                    String location = c.getName();
+                    location = c.getName();
                     if (c.getAttribute(BLACKLIST_URL) != null) {
                         location = c.getAttribute(BLACKLIST_URL);
                     }
@@ -118,74 +137,24 @@ public class Blacklist {
                         LOG.warn("Bundle blacklist URI is empty. Ignoring.");
                     } else {
                         try {
-                            bundleBlacklist.put(location, location.startsWith("mvn:") ? new LocationPattern(location) : null);
+                            bundleBlacklist.add(new LocationPattern(location));
                         } catch (MalformedURLException e) {
-                            LOG.warn("Problem parsing blacklist URI \"" + location + "\": " + e.getMessage() + ". Ignoring.");
+                            LOG.warn("Problem parsing bundle blacklist URI \"" + location + "\": " + e.getMessage() + ". Ignoring.");
                         }
                     }
                     break;
-                case TYPE_REPOSITORY:
             }
         }
     }
 
     /**
-     * TODO: set {@link Feature#setBlacklisted(boolean)} instead of removing from collection
-     * @param features
+     * Checks whether features XML repository URI is blacklisted.
+     * @param uri
+     * @return
      */
-    public void blacklist(Features features) {
-        features.getFeature().removeIf(this::blacklist);
-    }
-
-    public boolean blacklist(Feature feature) {
-        for (Clause clause : clauses) {
-            // Check feature name
-            if (clause.getName().equals(feature.getName())) {
-                // Check feature version
-                VersionRange range = VersionRange.ANY_VERSION;
-                String vr = clause.getAttribute(BLACKLIST_RANGE);
-                if (vr != null) {
-                    range = new VersionRange(vr, true);
-                }
-                if (range.contains(VersionTable.getVersion(feature.getVersion()))) {
-                    String type = clause.getAttribute(BLACKLIST_TYPE);
-                    if (type == null || TYPE_FEATURE.equals(type)) {
-                        return true;
-                    }
-                }
-            }
-            // Check bundles
-            blacklist(feature.getBundle());
-            // Check conditional bundles
-            for (Conditional cond : feature.getConditional()) {
-                blacklist(cond.getBundle());
-            }
-        }
-        return false;
-    }
-
-    private void blacklist(List<Bundle> bundles) {
-        for (Iterator<Bundle> iterator = bundles.iterator(); iterator.hasNext();) {
-            Bundle info = iterator.next();
-            for (Clause clause : clauses) {
-                String url = clause.getName();
-                if (clause.getAttribute(BLACKLIST_URL) != null) {
-                    url = clause.getAttribute(BLACKLIST_URL);
-                }
-                if (info.getLocation().equals(url)) {
-                    String type = clause.getAttribute(BLACKLIST_TYPE);
-                    if (type == null || TYPE_BUNDLE.equals(type)) {
-                        iterator.remove();
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    public boolean isBundleBlacklisted(String uri) {
-        for (Map.Entry<String, LocationPattern> clause : bundleBlacklist.entrySet()) {
-            if (mavenMatches(clause.getKey(), clause.getValue(), uri)) {
+    public boolean isRepositoryBlacklisted(String uri) {
+        for (LocationPattern pattern : repositoryBlacklist) {
+            if (pattern.matches(uri)) {
                 return true;
             }
         }
@@ -193,56 +162,30 @@ public class Blacklist {
     }
 
     /**
-     * Checks whether given <code>uri</code> matches Maven artifact pattern (group, artifact, optional type/classifier, version
-     * range, globs).
-     * @param blacklistedUri
-     * @param compiledUri
-     * @param uri
+     * Checks whether the feature is blacklisted according to configured rules by name
+     * (possibly with wildcards) and optional version (possibly specified as version range)
+     * @param name
+     * @param version
      * @return
      */
-    private boolean mavenMatches(String blacklistedUri, LocationPattern compiledUri, String uri) {
-        if (compiledUri == null) {
-            // non maven URI - we can't be smart
-            return blacklistedUri.equals(uri);
-        } else {
-            return compiledUri.matches(uri);
-        }
-    }
-
     public boolean isFeatureBlacklisted(String name, String version) {
-        for (Clause clause : clauses) {
-            String type = clause.getAttribute(BLACKLIST_TYPE);
-            if (type != null && !TYPE_FEATURE.equals(type)) {
-                continue;
-            }
-            if (Pattern.matches(clause.getName().replaceAll("\\*", ".*"), name)) {
-                // Check feature version
-                VersionRange range = VersionRange.ANY_VERSION;
-                String vr = clause.getAttribute(BLACKLIST_RANGE);
-                if (vr != null) {
-                    range = new VersionRange(vr, true);
-                }
-                if (range.contains(VersionTable.getVersion(version))) {
-                    if (type == null || TYPE_FEATURE.equals(type)) {
-                        return true;
-                    }
-                }
+        for (FeaturePattern pattern : featureBlacklist) {
+            if (pattern.matches(name, version)) {
+                return true;
             }
         }
         return false;
     }
 
-    public boolean isRepositoryBlacklisted(String uri) {
-        for (Clause clause : clauses) {
-            String url = clause.getName();
-            if (clause.getAttribute(BLACKLIST_URL) != null) {
-                url = clause.getAttribute(BLACKLIST_URL);
-            }
-            if (uri.equals(url)) {
-                String type = clause.getAttribute(BLACKLIST_TYPE);
-                if (type == null || TYPE_REPOSITORY.equals(type)) {
-                    return true;
-                }
+    /**
+     * Checks whether the bundle URI is blacklisted according to configured rules
+     * @param uri
+     * @return
+     */
+    public boolean isBundleBlacklisted(String uri) {
+        for (LocationPattern pattern : bundleBlacklist) {
+            if (pattern.matches(uri)) {
+                return true;
             }
         }
         return false;
@@ -262,12 +205,17 @@ public class Blacklist {
             System.arraycopy(others.clauses, ours.length, this.clauses, 0, others.clauses.length);
         }
         if (others != null) {
-            this.bundleBlacklist.putAll(others.bundleBlacklist);
+            this.repositoryBlacklist.addAll(others.repositoryBlacklist);
+            this.featureBlacklist.addAll(others.featureBlacklist);
+            this.bundleBlacklist.addAll(others.bundleBlacklist);
         }
     }
 
     public Clause[] getClauses() {
         return clauses;
+    }
+
+    public void blacklist(Features featuresModel) {
     }
 
 }
