@@ -39,10 +39,10 @@ public class SleepAction implements Action {
     @Override
     public Object execute() throws Exception {
         if (second) {
-            log.info("Sleeping for {} second(s)", time);
+            log.debug("Sleeping for {} second(s)", time);
             time = time * 1000;
         } else {
-            log.info("Sleeping for {} millisecond(s)", time);
+            log.debug("Sleeping for {} millisecond(s)", time);
         }
 
         try {
@@ -52,7 +52,7 @@ public class SleepAction implements Action {
             log.debug("Sleep was interrupted... :-(");
         }
 
-        log.info("Awake now");
+        log.debug("Awake now");
         return null;
     }
 }
