@@ -22,15 +22,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 
+import static org.apache.karaf.profile.ProfileConstants.*;
 import static org.apache.karaf.profile.impl.ProfileImpl.ConfigListType;
 
 /**
@@ -39,7 +42,7 @@ import static org.apache.karaf.profile.impl.ProfileImpl.ConfigListType;
 public final class ProfileBuilderImpl implements ProfileBuilder {
 
 	private String profileId;
-	private Map<String, byte[]> fileMapping = new HashMap<>();
+	private Map<String, FileContent> fileMapping = new HashMap<>();
 	private boolean isOverlay;
 	
 	@Override
@@ -58,7 +61,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 	@Override
     public List<String> getParents() {
         Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
-        String pspec = (String) config.get(Profile.PARENTS);
+        String pspec = (String) config.get(PARENTS);
         String[] parentIds = pspec != null ? pspec.split(" ") : new String[0];
         return Arrays.asList(parentIds);
     }
@@ -100,9 +103,9 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     private void updateParentsAttribute(Collection<String> parentIds) {
         Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
-        config.remove(Profile.PARENTS);
+        config.remove(PARENTS);
         if (parentIds.size() > 0) {
-            config.put(Profile.PARENTS, parentsAttributeValue(parentIds));
+            config.put(PARENTS, parentsAttributeValue(parentIds));
         }
         addConfiguration(Profile.INTERNAL_PID, config);
     }
@@ -118,18 +121,19 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     @Override
     public byte[] getFileConfiguration(String key) {
-        return fileMapping.get(key);
+        return fileMapping.get(key) == null ? null : fileMapping.get(key).bytes;
     }
 
-	@Override
-	public ProfileBuilder setFileConfigurations(Map<String, byte[]> configurations) {
-		fileMapping = new HashMap<>(configurations);
-		return this;
-	}
+    @Override
+    public ProfileBuilder setFileConfigurations(Map<String, byte[]> configurations) {
+        fileMapping = new HashMap<>();
+        configurations.forEach((name, bytes) -> fileMapping.put(name, new FileContent(bytes, false)));
+        return this;
+    }
 
     @Override
     public ProfileBuilder addFileConfiguration(String fileName, byte[] data) {
-        fileMapping.put(fileName, data);
+        fileMapping.put(fileName, new FileContent(data, false));
         return this;
     }
 
@@ -152,7 +156,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     @Override
     public ProfileBuilder addConfiguration(String pid, Map<String, Object> config) {
-        fileMapping.put(pid + Profile.PROPERTIES_SUFFIX, Utils.toBytes(config));
+        fileMapping.put(pid + Profile.PROPERTIES_SUFFIX, new FileContent(Utils.toBytes(config), true));
         return this;
     }
 
@@ -181,8 +185,8 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     private Map<String, Object> getConfigurationInternal(String pid) {
-        byte[] bytes = fileMapping.get(pid + Profile.PROPERTIES_SUFFIX);
-        return Utils.toProperties(bytes);
+        FileContent content = fileMapping.get(pid + Profile.PROPERTIES_SUFFIX);
+        return Utils.toProperties(content == null ? null : content.bytes);
     }
     
     @Override
@@ -239,10 +243,11 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         return this;
     }
 
-	public ProfileBuilder setOverlay(boolean overlay) {
-		this.isOverlay = overlay;
-		return this;
-	}
+    public ProfileBuilder setOverlay(boolean overlay) {
+        this.isOverlay = overlay;
+        addConfiguration(Profile.INTERNAL_PID, Profile.ATTRIBUTE_PREFIX + Profile.OVERLAY, Boolean.toString(overlay));
+        return this;
+    }
 
 	@Override
     public ProfileBuilder addAttribute(String key, String value) {
@@ -286,10 +291,148 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         addConfiguration(Profile.INTERNAL_PID, config);
     }
 
-
+    /**
+     * Returns an immutable implementation of {@link Profile}
+     * @return
+     */
     @Override
-	public Profile getProfile() {
-		return new ProfileImpl(profileId, getParents(), fileMapping, isOverlay);
-	}
+    public Profile getProfile() {
+        // reformatting all generated files.
+        Map<String, byte[]> files = new LinkedHashMap<>();
+        fileMapping.forEach((k, v) -> files.put(k, reformat(k, v)));
+        return new ProfileImpl(profileId, getParents(), files, isOverlay);
+    }
+
+    /**
+     * If some properties file has been marked as {@link FileContent#generated}, then we can add some comment hints.
+     * @param name
+     * @param fileContent
+     * @return
+     */
+    private byte[] reformat(String name, FileContent fileContent) {
+        if (!fileContent.generated && !(isOverlay && name.equals(INTERNAL_PID + PROPERTIES_SUFFIX))) {
+            return fileContent.bytes;
+        }
+
+        TypedProperties properties = Utils.toProperties(fileContent.bytes);
+        TypedProperties result = Utils.toProperties((byte[])null);
+
+        String parents = null;
+        Map<String, Object> attributes = new LinkedHashMap<>();
+        Map<String, Object> repositories = new LinkedHashMap<>();
+        Map<String, Object> features = new LinkedHashMap<>();
+        Map<String, Object> bundles = new LinkedHashMap<>();
+        Map<String, Object> libraries = new LinkedHashMap<>();
+        Map<String, Object> bootLibraries = new LinkedHashMap<>();
+        Map<String, Object> endorsedLibraries = new LinkedHashMap<>();
+        Map<String, Object> extLibraries = new LinkedHashMap<>();
+        Map<String, Object> config = new LinkedHashMap<>();
+        Map<String, Object> system = new LinkedHashMap<>();
+        Map<String, Object> overrides = new LinkedHashMap<>();
+        Map<String, Object> optionals = new LinkedHashMap<>();
+        for (String key : properties.keySet()) {
+            Object v = properties.get(key);
+            if (key.equals(PARENTS)) {
+                parents = (String) v;
+            } else if (key.startsWith(ATTRIBUTE_PREFIX)) {
+                attributes.put(key, v);
+            } else if (key.startsWith(REPOSITORY_PREFIX)) {
+                repositories.put(key, v);
+            } else if (key.startsWith(FEATURE_PREFIX)) {
+                features.put(key, v);
+            } else if (key.startsWith(BUNDLE_PREFIX)) {
+                bundles.put(key, v);
+            } else if (key.startsWith(LIB_PREFIX)) {
+                libraries.put(key, v);
+            } else if (key.startsWith(BOOT_PREFIX)) {
+                bootLibraries.put(key, v);
+            } else if (key.startsWith(ENDORSED_PREFIX)) {
+                endorsedLibraries.put(key, v);
+            } else if (key.startsWith(EXT_PREFIX)) {
+                extLibraries.put(key, v);
+            } else if (key.startsWith(CONFIG_PREFIX)) {
+                config.put(key, v);
+            } else if (key.startsWith(SYSTEM_PREFIX)) {
+                system.put(key, v);
+            } else if (key.startsWith(OVERRIDE_PREFIX)) {
+                overrides.put(key, v);
+            } else if (key.startsWith(OPTIONAL_PREFIX)) {
+                optionals.put(key, v);
+            }
+        }
+
+        result.setHeader(Arrays.asList("#", "# Profile generated by Karaf Assembly Builder", "#"));
+        if (parents != null) {
+            result.put(PARENTS, comment("Parent profiles"), parents);
+        }
+        addGroupOfProperties("Attributes", result, attributes);
+        addGroupOfProperties("Feature XML repositories", result, repositories);
+        addGroupOfProperties("Features", result, features);
+        addGroupOfProperties("Bundles", result, bundles);
+        addGroupOfProperties("Libraries", result, libraries);
+        addGroupOfProperties("Boot libraries", result, bootLibraries);
+        addGroupOfProperties("Endorsed libraries", result, endorsedLibraries);
+        addGroupOfProperties("Extension libraries", result, extLibraries);
+        addGroupOfProperties("Configuration properties for etc/config.properties", result, config);
+        addGroupOfProperties("Configuration properties for etc/system.properties", result, system);
+        addGroupOfProperties("Bundle overrides (deprecated)", result, overrides);
+        addGroupOfProperties("Optional resources for resolution", result, optionals);
+
+        return Utils.toBytes(result);
+    }
+
+    /**
+     * Puts properties under single comment.
+     * @param comment
+     * @param properties
+     * @param values
+     */
+    private void addGroupOfProperties(String comment, TypedProperties properties, Map<String, Object> values) {
+        boolean first = true;
+        for (Entry<String, Object> entry : values.entrySet()) {
+            if (first) {
+                first = false;
+                properties.put(entry.getKey(), comment(comment), entry.getValue());
+            } else {
+                properties.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    /**
+     * Helper method to generate comments above property groups in {@link TypedProperties}
+     * @param comment
+     * @return
+     */
+    private List<String> comment(String comment) {
+        return Arrays.asList("", "# " + comment);
+    }
+
+    /**
+     * We can distinguish between bytes read from external file and bytes from serialized
+     * {@link org.apache.felix.utils.properties.TypedProperties}
+     */
+    static class FileContent {
+        byte[] bytes;
+        boolean generated;
+
+        public FileContent(byte[] bytes, boolean generated) {
+            this.bytes = bytes;
+            this.generated = generated;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FileContent that = (FileContent) o;
+            return Arrays.equals(bytes, that.bytes);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(bytes);
+        }
+    }
 
 }

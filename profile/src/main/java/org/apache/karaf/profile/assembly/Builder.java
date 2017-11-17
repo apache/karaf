@@ -788,7 +788,6 @@ public class Builder {
         // Unzip KARs
         //
         LOGGER.info("Unzipping kars");
-//        Map<String, RepositoryInfo> repositories = new LinkedHashMap<>(this.repositories);
         Downloader downloader = manager.createDownloader();
         for (String kar : kars.keySet()) {
             downloader.download(kar, null);
@@ -811,7 +810,6 @@ public class Builder {
         // Propagate feature installation from repositories
         //
         LOGGER.info("Loading repositories");
-//        Map<String, Stage> features = new LinkedHashMap<>(this.features);
         Map<String, Features> karRepositories = loadRepositories(manager, repositories.keySet(), false);
         for (String repo : repositories.keySet()) {
             RepositoryInfo info = repositories.get(repo);

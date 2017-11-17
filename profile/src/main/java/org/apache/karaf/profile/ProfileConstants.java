@@ -46,6 +46,11 @@ public interface ProfileConstants {
     String HIDDEN = "hidden";
 
     /**
+     * The attribute key for the <em>overlay</em> flag meaning the parents are already included/merged in the profile.
+     */
+    String OVERLAY = "overlay";
+
+    /**
      * <p>Key indicating a deletion.</p>
      * <p>This value can appear as the value of a key in a configuration
      * or as a key itself.  If used as a key, the whole configuration
