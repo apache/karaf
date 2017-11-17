@@ -82,15 +82,23 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
             });
             loginContext.login();
 
+            boolean hasCorrectRole = role == null || role.isEmpty();
             int roleCount = 0;
             for (Principal principal : subject.getPrincipals()) {
                 if (principal instanceof RolePrincipal) {
+                    if (!hasCorrectRole) {
+                        hasCorrectRole = role.equals(principal.getName());
+                    }
                     roleCount++;
                 }
             }
 
             if (roleCount == 0) {
                 throw new FailedLoginException("User doesn't have role defined");
+            }
+            
+            if (!hasCorrectRole) {
+                throw new FailedLoginException("User doesn't have the required role " + role);
             }
 
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
