@@ -30,7 +30,9 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 
 @Ignore
@@ -122,7 +124,7 @@ public class TestPerf {
         map.put("params", new Object[] { new ObjectName("org.apache.karaf.Mbean:type=foo"), "myMethod", new Object[] { String.class.getName() }, new String[] { "the-param "}});
         Event event = new MapEvent(map);
 
-        EventLayout layout = new Rfc3164Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER);
+        EventLayout layout = new Rfc3164Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER, TimeZone.getTimeZone("CET"), Locale.ENGLISH);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Writer writer = new BufferedWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8));
 

@@ -40,7 +40,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -80,7 +82,7 @@ public class EventLoggerTest {
 
         Thread.sleep(100);
 
-        EventLayout layout = new Rfc3164Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER);
+        EventLayout layout = new Rfc3164Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER, TimeZone.getTimeZone("CET"), Locale.ENGLISH);
         EventLogger logger = new UdpEventLogger("localhost", port, "UTF-8", layout);
         logger.write(event);
 
@@ -123,7 +125,7 @@ public class EventLoggerTest {
 
         Thread.sleep(100);
 
-        EventLayout layout = new Rfc5424Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER);
+        EventLayout layout = new Rfc5424Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER, TimeZone.getTimeZone("CET"));
         EventLogger logger = new TcpEventLogger("localhost", port, "UTF-8", layout);
         logger.write(event);
         logger.flush();

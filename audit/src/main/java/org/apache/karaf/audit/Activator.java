@@ -51,6 +51,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -186,11 +187,14 @@ public class Activator extends BaseActivator implements ManagedService {
             case "rfc3164":
                 return new Rfc3164Layout(getInt(prefix + ".facility", 16),
                         getInt(prefix + ".priority", 5),
-                        getInt(prefix + ".enterprise", Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER));
+                        getInt(prefix + ".enterprise", Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER),
+                        TimeZone.getDefault(),
+                        Locale.ENGLISH);
             case "rfc5424":
                 return new Rfc5424Layout(getInt(prefix + ".facility", 16),
                                          getInt(prefix + ".priority", 5),
-                                         getInt(prefix + ".enterprise", Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER));
+                                         getInt(prefix + ".enterprise", Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER),
+                                         TimeZone.getDefault());
             case "gelf":
                 return new GelfLayout();
             default:

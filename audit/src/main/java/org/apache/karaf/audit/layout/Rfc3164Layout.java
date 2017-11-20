@@ -21,6 +21,8 @@ import org.apache.karaf.audit.util.Buffer;
 import org.apache.karaf.audit.util.FastDateFormat;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class Rfc3164Layout extends AbstractLayout {
 
@@ -29,18 +31,18 @@ public class Rfc3164Layout extends AbstractLayout {
     protected final int facility;
     protected final int priority;
     protected final int enterpriseNumber;
+    protected final FastDateFormat fastDateFormat;
 
     protected String hdr1;
     protected String hdr2;
     protected String hdr3;
 
-    protected FastDateFormat fastDateFormat = new FastDateFormat();
-
-    public Rfc3164Layout(int facility, int priority, int enterpriseNumber) {
+    public Rfc3164Layout(int facility, int priority, int enterpriseNumber, TimeZone timeZone, Locale locale) {
         super(new Buffer(Buffer.Format.Syslog));
         this.facility = facility;
         this.priority = priority;
         this.enterpriseNumber = enterpriseNumber;
+        this.fastDateFormat = new FastDateFormat(timeZone, locale);
 
         hdr1 = "<" + ((facility << 3) + priority) + ">";
         hdr2 = " " + hostName + " " + appName + " " + procId + " ";
