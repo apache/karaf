@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleCapability;
@@ -85,7 +86,8 @@ class StoredWiringResolver implements ResolverHook {
     private long getBundleId(BundleRequirement requirement) {
         long sourceId = requirement.getRevision().getBundle().getBundleId();
         if (isFragment(requirement.getRevision())
-            && !requirement.getNamespace().equals(HostNamespace.HOST_NAMESPACE)) {
+            && !requirement.getNamespace().equals(HostNamespace.HOST_NAMESPACE)
+            && !requirement.getNamespace().equals(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE)) {
             sourceId = wiring.get(sourceId).getFragmentHost();
         }
         return sourceId;
