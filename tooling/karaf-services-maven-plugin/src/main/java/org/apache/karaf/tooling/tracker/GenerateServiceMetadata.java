@@ -78,6 +78,9 @@ public class GenerateServiceMetadata extends AbstractMojo {
     @Parameter(defaultValue = "project")
     protected String classLoader;
     
+    @Parameter(defaultValue=".*")
+    protected String artifactInclude;
+
     @Component
     private BuildContext buildContext;
 
@@ -96,7 +99,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 URL classUrl = clazz.getClassLoader().getResource(clazz.getName().replace('.', '/') + ".class");
                 URL outputDirectoryUrl = new File(project.getBuild().getOutputDirectory()).toURI().toURL();
                 if (classUrl == null || !classUrl.getPath().startsWith(outputDirectoryUrl.getPath())) {
-                    System.out.println("Ignoring " + classUrl);
+                    getLog().info("Ignoring " + classUrl);
                     continue;
                 }
 
@@ -128,6 +131,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
             project.getProperties().setProperty(requirementsProperty, String.join(",", requirements));
             project.getProperties().setProperty(capabilitiesProperty, String.join(",", capabilities));
             if (activators.size() == 1) {
+                getLog().info("Activator " + activators.get(0).getName());
                 project.getProperties().setProperty(activatorProperty, activators.get(0).getName());
             }
             project.getProperties().setProperty("BNDExtension-Private-Package", "org.apache.karaf.util.tracker");
@@ -136,6 +140,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
             List<Class<?>> services = finder.findAnnotatedClasses(Service.class);
             Set<String> packages = new TreeSet<>();
             for (Class<?> clazz : services) {
+                getLog().info("Service " + clazz.getPackage().getName());
                 packages.add(clazz.getPackage().getName());
             }
             if (!packages.isEmpty()) {
@@ -189,11 +194,16 @@ public class GenerateServiceMetadata extends AbstractMojo {
         if ("project".equals(classloaderType)) {
             List<URL> urls = new ArrayList<>();
 
-            urls.add( new File(project.getBuild().getOutputDirectory()).toURI().toURL() );
-            for ( Artifact artifact : project.getArtifacts() ) {
-                File file = artifact.getFile();
-                if ( file != null ) {
-                    urls.add( file.toURI().toURL() );
+            urls.add(new File(project.getBuild().getOutputDirectory()).toURI().toURL());
+            for (Artifact artifact : project.getArtifacts()) {
+                if (artifactInclude != null && artifactInclude.length() > 0 && artifact.getArtifactId().matches(artifactInclude)) {
+                    File file = artifact.getFile();
+                    if (file != null) {
+                        getLog().debug("Use artifact " + artifact.getArtifactId() + ": " + file);
+                        urls.add(file.toURI().toURL());
+                    }
+                } else {
+                    getLog().debug("Ignore artifact " + artifact.getArtifactId());
                 }
             }
             ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
