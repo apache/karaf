@@ -82,7 +82,7 @@ public class EventLoggerTest {
 
         Thread.sleep(100);
 
-        EventLayout layout = new Rfc3164Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER, TimeZone.getTimeZone("CET"), Locale.ENGLISH);
+        EventLayout layout = new Rfc3164Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER, TimeZone.getTimeZone("GMT+01:00"), Locale.ENGLISH);
         EventLogger logger = new UdpEventLogger("localhost", port, "UTF-8", layout);
         logger.write(event);
 
@@ -125,7 +125,7 @@ public class EventLoggerTest {
 
         Thread.sleep(100);
 
-        EventLayout layout = new Rfc5424Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER, TimeZone.getTimeZone("CET"));
+        EventLayout layout = new Rfc5424Layout(16, 5, Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER, TimeZone.getTimeZone("GMT+01:00"));
         EventLogger logger = new TcpEventLogger("localhost", port, "UTF-8", layout);
         logger.write(event);
         logger.flush();
