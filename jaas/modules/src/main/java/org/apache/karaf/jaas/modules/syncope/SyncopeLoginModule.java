@@ -85,7 +85,9 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
         Credentials creds = new UsernamePasswordCredentials(user, password);
         client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
         HttpGet get = new HttpGet(address + "/users/self");
-        if (version.equals("2.x") || version.equals("2")) {
+
+        boolean version2 = version != null && (version.equals("2.x") || version.equals("2"));
+        if (version2) {
             get.setHeader("Content-Type", "application/json");
         } else {
             get.setHeader("Content-Type", "application/xml");
@@ -102,10 +104,11 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
             LOGGER.debug("Populating principals with user");
             principals.add(new UserPrincipal(user));
             LOGGER.debug("Retrieving user {} roles", user);
-            if (version.equals("2.x") || version.equals("2")) {
-                roles = extractingRolesSyncope2(EntityUtils.toString(response.getEntity()));
+            String responseSt = EntityUtils.toString(response.getEntity());
+            if (version2) {
+                roles = extractingRolesSyncope2(responseSt);
             } else {
-                roles = extractingRolesSyncope1(EntityUtils.toString(response.getEntity()));
+                roles = extractingRolesSyncope1(responseSt);
             }
         } catch (Exception e) {
             LOGGER.error("User {} authentication failed", user, e);
@@ -136,7 +139,7 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
                 response = response.substring(index + "<memberships>".length());
                 index = response.indexOf("</memberships>");
                 response = response.substring(0, index);
-    
+
                 // looking for the roleName elements
                 index = response.indexOf("<roleName>");
                 while (index != -1) {
