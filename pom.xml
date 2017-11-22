@@ -271,7 +271,7 @@
         <pax.logging.version>1.10.1</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
         <pax.url.version>2.5.3</pax.url.version>
-        <pax.web.version>6.0.7</pax.web.version>
+        <pax.web.version>6.1.0-SNAPSHOT</pax.web.version>
         <pax.tinybundle.version>2.1.1</pax.tinybundle.version>
         <pax.jdbc.version>1.2.0</pax.jdbc.version>
         <pax.jms.version>0.1.0</pax.jms.version>
@@ -294,7 +294,7 @@
         <derby-version>10.12.1.1</derby-version>
         <directory-version>2.0.0-M24</directory-version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
-        <xbean.version>3.18</xbean.version>
+        <xbean.version>4.6</xbean.version>
         <xerces.version>2.11.0_1</xerces.version>
         <xalan.bundle.version>2.7.2_3</xalan.bundle.version>
         <xalan-serializer.bundle.version>2.7.2_1</xalan-serializer.bundle.version>

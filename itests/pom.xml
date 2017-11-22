@@ -35,7 +35,7 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
-        <jetty.version>9.3.12.v20160915</jetty.version>
+        <jetty.version>9.3.21.v20170918</jetty.version>
     </properties>
 
     <dependencies>
@@ -294,15 +294,6 @@
     </build>
     
     <profiles>
-        <profile>
-                <id>java9</id>
-                <properties>
-                    <asm.version>6.0_BETA</asm.version>
-                </properties>
-                <activation>
-                    <jdk>9</jdk>
-            </activation>
-        </profile>
         <profile>
             <id>ci-build-profile</id>
             <activation>
