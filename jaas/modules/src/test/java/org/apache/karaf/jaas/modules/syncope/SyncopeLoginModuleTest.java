@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.jaas.modules.syncope;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -25,7 +25,9 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -37,15 +39,25 @@ public class SyncopeLoginModuleTest {
         String syncopeResponse = read("syncope1Response.xml");
         SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
         List<String> roles = syncopeLoginModule.extractingRolesSyncope1(syncopeResponse);
-        assertThat(roles, containsInAnyOrder("admin", "another"));
+        assertThat(roles, contains("admin", "another"));
     }
 
     @Test
     public void testRolesExtractionSyncope2() throws Exception {
         String syncopeResponse = read("syncope2Response.json");
         SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
+        Map<String, String> options = Collections.singletonMap(SyncopeLoginModule.USE_ROLES_FOR_SYNCOPE2, "true");
+        syncopeLoginModule.initialize(null, null, Collections.emptyMap(), options);
         List<String> roles = syncopeLoginModule.extractingRolesSyncope2(syncopeResponse);
-        assertThat(roles, containsInAnyOrder("admin", "another"));
+        assertThat(roles, contains("admin", "another"));
+    }
+
+    @Test
+    public void testGroupsExtractionSyncope2() throws Exception {
+        String syncopeResponse = read("syncope2Response.json");
+        SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
+        List<String> roles = syncopeLoginModule.extractingRolesSyncope2(syncopeResponse);
+        assertThat(roles, contains("manager"));
     }
 
     private String read(String resourceName) throws URISyntaxException, IOException {
