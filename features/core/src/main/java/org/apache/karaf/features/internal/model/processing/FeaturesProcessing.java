@@ -142,22 +142,49 @@ public class FeaturesProcessing {
     }
 
     /**
-     * Perform <em>compilation</em> of rules declared in feature processing XML file.
+     * <p>Perform <em>compilation</em> of rules declared in feature processing XML file.</p>
+     * <p>Additional blacklist and overrides definitions will be added to this model</p>
+     *
      * @param blacklist additional {@link Blacklist} definition with lower priority
      * @param overrides additional overrides definition with lower priority
      */
     public void postUnmarshall(Blacklist blacklist, Set<String> overrides) {
-        // compile blacklisted repository URIs
-        for (String repositoryURI : this.getBlacklistedRepositories()) {
+        // configure Blacklist tool
+        List<String> blacklisted = new LinkedList<>();
+
+        // compile blacklisted repository URIs (from XML and additional blacklist)
+        blacklist.getRepositoryBlacklist().stream()
+                .map(LocationPattern::getOriginalUri)
+                .forEach(uri -> getBlacklistedRepositories().add(uri));
+        for (String repositoryURI : getBlacklistedRepositories()) {
             try {
                 blacklistedRepositoryLocationPatterns.add(new LocationPattern(repositoryURI));
+                blacklisted.add(repositoryURI + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_REPOSITORY);
             } catch (MalformedURLException e) {
                 LOG.warn("Can't parse blacklisted repository location pattern: " + repositoryURI + ". Ignoring.");
             }
         }
 
-        // verify bundle override definitions
-        for (Iterator<BundleReplacements.OverrideBundle> iterator = this.bundleReplacements.getOverrideBundles().iterator(); iterator.hasNext(); ) {
+        // add external blacklisted features to this model
+        blacklist.getFeatureBlacklist()
+                .forEach(fb -> getBlacklistedFeatures().add(new BlacklistedFeature(fb.getName(), fb.getVersion())));
+        blacklisted.addAll(getBlacklistedFeatures().stream()
+                .map(bf -> bf.getName() + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_FEATURE + (bf.getVersion() == null ? "" : ";" + FeaturePattern.RANGE + "=\"" + bf.getVersion() + "\""))
+                .collect(Collectors.toList()));
+
+        // add external blacklisted bundle URIs to this model
+        blacklist.getBundleBlacklist().stream()
+                .map(LocationPattern::getOriginalUri)
+                .forEach(uri -> getBlacklistedBundles().add(uri));
+        blacklisted.addAll(getBlacklistedBundles().stream()
+                .map(bl -> bl + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_BUNDLE)
+                .collect(Collectors.toList()));
+
+        this.blacklist = new Blacklist(blacklisted);
+
+        // verify bundle override definitions (from XML and additional overrides)
+        bundleReplacements.getOverrideBundles().addAll(parseOverridesClauses(overrides));
+        for (Iterator<BundleReplacements.OverrideBundle> iterator = bundleReplacements.getOverrideBundles().iterator(); iterator.hasNext(); ) {
             BundleReplacements.OverrideBundle overrideBundle = iterator.next();
             if (overrideBundle.getOriginalUri() == null) {
                 // we have to derive it from replacement - as with etc/overrides.properties entry
@@ -180,27 +207,6 @@ public class FeaturesProcessing {
                 iterator.remove();
             }
         }
-
-        // etc/blacklisted.properties
-        // blacklisted bundle from XML to instruction for Blacklist class
-        List<String> blacklisted = new LinkedList<>();
-        for (String bl : this.getBlacklistedBundles()) {
-            blacklisted.add(bl + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_BUNDLE);
-        }
-        // blacklisted features - XML type to String instruction for Blacklist class
-        blacklisted.addAll(this.getBlacklistedFeatures().stream()
-                .map(bf -> bf.getName() + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_FEATURE + (bf.getVersion() == null ? "" : ";" + FeaturePattern.RANGE + "=\"" + bf.getVersion() + "\""))
-                .collect(Collectors.toList()));
-        // blacklisted repositories
-        for (String bl : this.getBlacklistedRepositories()) {
-            blacklisted.add(bl + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_REPOSITORY);
-        }
-
-        this.blacklist = new Blacklist(blacklisted);
-        this.blacklist.merge(blacklist);
-
-        // etc/overrides.properties (mvn: URIs)
-        bundleReplacements.getOverrideBundles().addAll(parseOverridesClauses(overrides));
     }
 
     /**

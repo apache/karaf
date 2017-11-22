@@ -80,6 +80,18 @@ public class FeaturePattern {
         }
     }
 
+    public String getOriginalFeatureId() {
+        return originalId;
+    }
+
+    public String getName() {
+        return nameString;
+    }
+
+    public String getVersion() {
+        return versionString;
+    }
+
     /**
      * Returns <code>true</code> if this feature pattern matches given feature/version
      * @param featureName

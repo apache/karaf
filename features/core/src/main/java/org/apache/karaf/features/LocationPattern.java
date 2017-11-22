@@ -108,6 +108,10 @@ public class LocationPattern {
         }
     }
 
+    public String getOriginalUri() {
+        return originalUri;
+    }
+
     /**
      * Converts a String with one special character (<code>*</code>) into working {@link Pattern}
      * @param value
