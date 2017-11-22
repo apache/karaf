@@ -25,9 +25,12 @@ import javax.xml.bind.Marshaller;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.processing.BundleReplacements;
+import org.apache.karaf.features.internal.model.processing.FeatureReplacements;
 import org.apache.karaf.features.internal.model.processing.FeaturesProcessing;
 import org.apache.karaf.features.internal.model.processing.ObjectFactory;
+import org.apache.karaf.features.internal.model.processing.OverrideBundleDependency;
 import org.apache.karaf.util.maven.Parser;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -120,7 +123,7 @@ public class FeaturesProcessorTest {
         assertThat(clauses.length, equalTo(4));
         assertTrue(blacklist.isFeatureBlacklisted("spring", "2.5.6.SEC02"));
         assertFalse(blacklist.isFeatureBlacklisted("spring", "2.5.7.SEC02"));
-        assertTrue(blacklist.isFeatureBlacklisted("jclouds", "42"));
+        assertFalse(blacklist.isFeatureBlacklisted("jclouds", "1"));
 
         assertTrue(blacklist.isBundleBlacklisted("mvn:org.spring/spring-infinity/42"));
         assertFalse(blacklist.isBundleBlacklisted("mvn:org.spring/spring-infinity/41"));
@@ -137,9 +140,9 @@ public class FeaturesProcessorTest {
         RepositoryImpl repo = (RepositoryImpl) new RepositoryCacheImpl(processor).create(uri, true);
         assertThat(repo.getRepositories().length, equalTo(3));
         assertFalse(repo.isBlacklisted());
-        assertFalse(processor.isRepositoryBlacklisted(repo.getRepositories()[0]));
-        assertTrue(processor.isRepositoryBlacklisted(repo.getRepositories()[1]));
-        assertFalse(processor.isRepositoryBlacklisted(repo.getRepositories()[2]));
+        assertFalse(processor.isRepositoryBlacklisted(repo.getRepositories()[0].toString()));
+        assertTrue(processor.isRepositoryBlacklisted(repo.getRepositories()[1].toString()));
+        assertFalse(processor.isRepositoryBlacklisted(repo.getRepositories()[2].toString()));
     }
 
     @Test
@@ -195,6 +198,37 @@ public class FeaturesProcessorTest {
         assertThat(f1.getConditional().get(0).getBundles().get(0).getLocation(), equalTo("mvn:org.glassfish/something-strangest/4.3.1"));
         assertThat(f1.getConditional().get(0).getBundles().get(0).getOriginalLocation(), equalTo("mvn:org.glassfish/something-strangest/4.3.0"));
         assertFalse(f1.getConditional().get(0).getBundles().get(1).isOverriden());
+    }
+
+    @Test
+    public void serializeWithComments() {
+        FeaturesProcessingSerializer serializer = new FeaturesProcessingSerializer();
+        FeaturesProcessing featuresProcessing = new FeaturesProcessing();
+        featuresProcessing.getBlacklistedRepositories().add("repository 1");
+        OverrideBundleDependency.OverrideDependency d1 = new OverrideBundleDependency.OverrideDependency();
+        d1.setDependency(true);
+        d1.setUri("uri 1");
+        featuresProcessing.getOverrideBundleDependency().getRepositories().add(d1);
+        OverrideBundleDependency.OverrideFeatureDependency d2 = new OverrideBundleDependency.OverrideFeatureDependency();
+        d2.setDependency(false);
+        d2.setName("n");
+        d2.setVersion("1.2.3");
+        featuresProcessing.getOverrideBundleDependency().getFeatures().add(d2);
+        BundleReplacements.OverrideBundle override = new BundleReplacements.OverrideBundle();
+        override.setOriginalUri("original");
+        override.setReplacement("replacement");
+        override.setMode(BundleReplacements.BundleOverrideMode.OSGI);
+        featuresProcessing.getBundleReplacements().getOverrideBundles().add(override);
+        FeatureReplacements.OverrideFeature of = new FeatureReplacements.OverrideFeature();
+        of.setMode(FeatureReplacements.FeatureOverrideMode.REPLACE);
+        org.apache.karaf.features.internal.model.Feature f = new org.apache.karaf.features.internal.model.Feature();
+        f.setName("f1");
+        Bundle b = new Bundle();
+        b.setLocation("location");
+        f.getBundle().add(b);
+        of.setFeature(f);
+        featuresProcessing.getFeatureReplacements().getReplacements().add(of);
+        serializer.write(featuresProcessing, System.out);
     }
 
 }

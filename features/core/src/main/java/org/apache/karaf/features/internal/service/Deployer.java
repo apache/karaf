@@ -200,6 +200,18 @@ public class Deployer {
         public Map<String, Map<String, FeatureState>> stateChanges;
         public EnumSet<FeaturesService.Option> options;
         public String outputFile;
+
+        public static DeploymentRequest defaultDeploymentRequest() {
+            DeploymentRequest request = new DeploymentRequest();
+            request.bundleUpdateRange = FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE;
+            request.featureResolutionRange = FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE;
+            request.serviceRequirements = FeaturesService.SERVICE_REQUIREMENTS_DEFAULT;
+            request.overrides = new HashSet<>();
+            request.requirements = new HashMap<>();
+            request.stateChanges = new HashMap<>();
+            request.options = EnumSet.noneOf(FeaturesService.Option.class);
+            return request;
+        }
     }
 
     static class Deployment {

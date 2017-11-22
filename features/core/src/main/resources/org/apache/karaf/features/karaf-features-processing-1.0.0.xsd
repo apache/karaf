@@ -60,17 +60,12 @@ should be specified. In most abstract case, "mvn:*/*" describes all maven URIs.
 
     <xs:complexType name="blacklistedFeatures">
         <xs:annotation>
-            <xs:documentation><![CDATA[A list of feature names (and related OSGi clause attributes) that should be
-blacklisted.
+            <xs:documentation><![CDATA[A list of feature identifiers that should be blacklisted.
 
 Attempt to install such feature will be prohibited, but such feature is still available in `feature:list`
 output and marked as blacklisted. When custom Karaf distribution is assembled, blacklisted features' bundles are not
 taken into account (are not declared in "etc/startup.properties" and "etc/org.apache.karaf.features.cfg" and are not
 copied to "system/" directory).
-
-Feature names may use '*' glob (not RegExp) in names, "range" attribute is used in "etc/blacklisted.properties" file
-and may be used to specify version range, e.g., "*jclouds*;range=[1,3)". When using XML to configure blacklisted
-features, "range" manifest header attribute should be specified in "version" XML attribute.
 ]]></xs:documentation>
         </xs:annotation>
         <xs:sequence>
@@ -102,11 +97,8 @@ When feature is installed, all blacklisted bundles are skipped.
 When custom Karaf distribution is assembled, blacklisted bundles are not taken into account (are not declared in
 "etc/startup.properties" and are not copied to "system/" directory).
 
-Bundle URIs may use '*' globs (not RegExp), e.g., "*jclouds*;url=mvn:...". Both header-like format may be used
-(as in etc/blacklisted.properties, triggered, when ';' is used) or plain URI format for bundle locations.
-
 Bundle URIs should use 'mvn:' scheme, may use '*' glob (not RegExp) for all components except versions and
-version ranges may be specified as maven versions, e.g., "mvn:group/artifact/[3,5)/classifier". At least
+version ranges may be specified as maven versions, e.g., "mvn:group/artifact/[3,5)/type/classifier". At least
 groupId and artifactId should be specified. In most abstract case, "mvn:*/*" describes all maven URIs.
 
 This element may be used instead of "etc/blacklisted.properties" file for bundle blacklisting.
@@ -137,7 +129,8 @@ override this flag for any repository, feature or particular bundles.
     <xs:complexType name="overrideDependency">
         <xs:annotation>
             <xs:documentation><![CDATA[An URI of depedency (bundle or repository) should use 'mvn:' scheme.
-Maven schemes allow parsing version/version ranges.
+Maven schemes allow parsing version/version ranges. "dependency" flag will overwrite dependency attribute of related
+features (in repository) and bundles.
 ]]></xs:documentation>
         </xs:annotation>
         <xs:attribute name="uri" type="xs:anyURI" />
@@ -145,6 +138,11 @@ Maven schemes allow parsing version/version ranges.
     </xs:complexType>
 
     <xs:complexType name="overrideFeatureDependency">
+        <xs:annotation>
+            <xs:documentation><![CDATA[After matching feature by name (may use "*" glob) and version (or range), we
+can overwrite "dependency" attribute on given feature
+]]></xs:documentation>
+        </xs:annotation>
         <xs:attribute name="name" type="xs:string" />
         <xs:attribute name="version" type="xs:string" />
         <xs:attribute name="dependency" type="xs:boolean" default="false" />
@@ -158,8 +156,6 @@ names match. With bundleReplacements element, its possible to do the same and mo
 with totally different bundle (in terms of OSGi's Symbolic-Name and Maven groupId/artifactId/version). That's useful
 especially with JavaEE API bundles, where single API may be provided by different bundles (ServiceMix, Geronimo,
 JBoss, javax.*, ...).
-
-Bundle replacement doesn't use globs - just version ranges to match replacement candidates
 ]]></xs:documentation>
         </xs:annotation>
         <xs:sequence>

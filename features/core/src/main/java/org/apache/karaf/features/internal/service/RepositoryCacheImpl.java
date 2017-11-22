@@ -47,7 +47,7 @@ public class RepositoryCacheImpl implements RepositoryCache {
         RepositoryImpl repository = new RepositoryImpl(uri, validate);
         if (featuresProcessor != null) {
             // maybe it could be done better - first we have to set if entire repo is blacklisted
-            repository.setBlacklisted(featuresProcessor.isRepositoryBlacklisted(uri));
+            repository.setBlacklisted(featuresProcessor.isRepositoryBlacklisted(uri.toString()));
             // processing features will take the above flag into account to blacklist (if needed) the features
             repository.processFeatures(featuresProcessor);
         }

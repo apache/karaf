@@ -149,6 +149,12 @@ public class AssemblyMojo extends MojoSupport {
     private String environment;
 
     /**
+     * Default start level for bundles in features that don't specify it.
+     */
+    @Parameter
+    protected int defaultStartLevel = 30;
+
+    /**
      * List of compile-scope features XML files to be used in startup stage (etc/startup.properties)
      */
     @Parameter
@@ -455,6 +461,7 @@ public class AssemblyMojo extends MojoSupport {
         builder.pidsToExtract(pidsToExtract);
         builder.writeProfiles(writeProfiles);
         builder.environment(environment);
+        builder.defaultStartLevel(defaultStartLevel);
 
         // Set up remote repositories from Maven build, to be used by pax-url-aether resolver
         String remoteRepositories = MavenUtil.remoteRepositoryList(project.getRemoteProjectRepositories());

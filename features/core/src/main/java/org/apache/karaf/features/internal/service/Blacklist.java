@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Helper class to deal with blacklisted features and bundles. It doesn't process JAXB model at all - it only
  * provides information about repository/feature/bundle being blacklisted.
+ * The task of actual blacklisting (altering JAXB model) is performed in {@link FeaturesProcessor}
  */
 public class Blacklist {
 
@@ -216,6 +217,30 @@ public class Blacklist {
     }
 
     public void blacklist(Features featuresModel) {
+    }
+
+    /**
+     * Directly add {@link LocationPattern} as blacklisted features XML repository URI
+     * @param locationPattern
+     */
+    public void blacklistRepository(LocationPattern locationPattern) {
+        repositoryBlacklist.add(locationPattern);
+    }
+
+    /**
+     * Directly add {@link FeaturePattern} as blacklisted feature ID
+     * @param featurePattern
+     */
+    public void blacklistFeature(FeaturePattern featurePattern) {
+        featureBlacklist.add(featurePattern);
+    }
+
+    /**
+     * Directly add {@link LocationPattern} as blacklisted bundle URI
+     * @param locationPattern
+     */
+    public void blacklistBundle(LocationPattern locationPattern) {
+        bundleBlacklist.add(locationPattern);
     }
 
 }

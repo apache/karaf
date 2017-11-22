@@ -51,7 +51,6 @@ import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.util.maven.Parser;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.slf4j.Logger;
@@ -74,12 +73,11 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
 
     private final Map<String, Bundle> bundles = new HashMap<>();
 
-
-    public AssemblyDeployCallback(DownloadManager manager, Builder builder, BundleRevision systemBundle, Collection<Features> repositories) throws Exception {
+    public AssemblyDeployCallback(DownloadManager manager, Builder builder, BundleRevision systemBundle, Collection<Features> repositories) {
         this.manager = manager;
         this.builder = builder;
-        this.featureBlacklist = new Blacklist(builder.getBlacklistedFeatures());
-        this.bundleBlacklist = new Blacklist(builder.getBlacklistedBundles());
+//        this.featureBlacklist = new Blacklist(builder.getBlacklistedFeatures());
+//        this.bundleBlacklist = new Blacklist(builder.getBlacklistedBundles());
         this.homeDirectory = builder.homeDirectory;
         this.etcDirectory = homeDirectory.resolve("etc");
         this.systemDirectory = homeDirectory.resolve("system");
@@ -122,11 +120,11 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
     }
 
     @Override
-    public void persistResolveRequest(Deployer.DeploymentRequest request) throws IOException {
+    public void persistResolveRequest(Deployer.DeploymentRequest request) {
     }
 
     @Override
-    public void installConfigs(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+    public void installConfigs(org.apache.karaf.features.Feature feature) throws IOException {
         assertNotBlacklisted(feature);
         // Install
         Downloader downloader = manager.createDownloader();
@@ -195,11 +193,11 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
     }
     
     private void assertNotBlacklisted(org.apache.karaf.features.Feature feature) {
-        if (featureBlacklist.isFeatureBlacklisted(feature.getName(), feature.getVersion())) {
-            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
-                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
-            }
-        }
+//        if (featureBlacklist.isFeatureBlacklisted(feature.getName(), feature.getVersion())) {
+//            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
+//                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
+//            }
+//        }
     }
 
     @Override
@@ -213,11 +211,11 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
     @Override
     public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
         // Check blacklist
-        if (bundleBlacklist.isBundleBlacklisted(uri)) {
-            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
-                throw new RuntimeException("Bundle " + uri + " is blacklisted");
-            }
-        }
+//        if (bundleBlacklist.isBundleBlacklisted(uri)) {
+//            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
+//                throw new RuntimeException("Bundle " + uri + " is blacklisted");
+//            }
+//        }
         // Install
         LOGGER.info("      adding maven artifact: " + uri);
         try {

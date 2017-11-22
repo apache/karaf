@@ -20,13 +20,10 @@ package org.apache.karaf.features.internal.service;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URI;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.LocationPattern;
@@ -36,7 +33,6 @@ import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.processing.BundleReplacements;
 import org.apache.karaf.features.internal.model.processing.FeaturesProcessing;
-import org.apache.karaf.features.internal.model.processing.ObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,41 +48,22 @@ import org.slf4j.LoggerFactory;
 public class FeaturesProcessorImpl implements FeaturesProcessor {
 
     public static Logger LOG = LoggerFactory.getLogger(FeaturesProcessorImpl.class);
-    private static final JAXBContext FEATURES_PROCESSING_CONTEXT;
 
+    private static FeaturesProcessingSerializer serializer = new FeaturesProcessingSerializer();
     private FeaturesProcessing processing = new FeaturesProcessing();
 
-    static {
-        try {
-            FEATURES_PROCESSING_CONTEXT = JAXBContext.newInstance(ObjectFactory.class);
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
-     * <p>Creates instance of features processor using {@link FeaturesServiceConfig configuration object} where
-     * three files may be specified: overrides.properties, blacklisted.properties and org.apache.karaf.features.xml.</p>
-     * @param configuration
+     * <p>Creates instance of features processor using 1 external URI, additional {@link Blacklist} instance
+     * and additional set of override clauses.</p>
+     * @param featureModificationsURI
+     * @param blacklistDefinitions
+     * @param overrides
      */
-    public FeaturesProcessorImpl(FeaturesServiceConfig configuration) {
-        // org.apache.karaf.features.xml - highest priority
-        String featureModificationsURI = configuration.featureModifications;
-        // blacklisted.properties - if available, adds to main configuration of feature processing
-        String blacklistedURI = configuration.blacklisted;
-        // overrides.properties - if available, adds to main configuration of feature processing
-        String overridesURI = configuration.overrides;
-
-        // these two are not changed - they still may be used, but if etc/org.apache.karaf.features.xml is available
-        // both of the below are merged into single processing configuration
-        Blacklist blacklist = new Blacklist(blacklistedURI);
-        Set<String> overrides = Overrides.loadOverrides(overridesURI);
-
+    public FeaturesProcessorImpl(String featureModificationsURI, Blacklist blacklistDefinitions, Set<String> overrides) {
         if (featureModificationsURI != null) {
             try {
                 try (InputStream stream = new URL(featureModificationsURI).openStream()) {
-                    Unmarshaller unmarshaller = FEATURES_PROCESSING_CONTEXT.createUnmarshaller();
-                    processing = (FeaturesProcessing) unmarshaller.unmarshal(stream);
+                    processing = serializer.read(stream);
                 }
             } catch (FileNotFoundException e) {
                 LOG.warn("Can't find feature processing file (" + featureModificationsURI + ")");
@@ -95,11 +72,47 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
             }
         }
 
-        processing.postUnmarshall(blacklist, overrides);
+        processing.postUnmarshall(blacklistDefinitions, overrides);
+    }
+
+    /**
+     * <p>Creates instance of features processor using 3 external (optional) URIs.</p>
+     * @param featureModificationsURI
+     * @param blacklistedURI
+     * @param overridesURI
+     */
+    public FeaturesProcessorImpl(String featureModificationsURI, String blacklistedURI, String overridesURI) {
+        this(featureModificationsURI, new Blacklist(blacklistedURI), Overrides.loadOverrides(overridesURI));
+    }
+
+    /**
+     * <p>Creates instance of features processor using {@link FeaturesServiceConfig configuration object} where
+     * three files may be specified: overrides.properties, blacklisted.properties and org.apache.karaf.features.xml.</p>
+     * @param configuration
+     */
+    public FeaturesProcessorImpl(FeaturesServiceConfig configuration) {
+        this(configuration.featureModifications, configuration.blacklisted, configuration.overrides);
+    }
+
+    /**
+     * Writes model to output stream.
+     * @param output
+     */
+    public void writeInstructions(OutputStream output) {
+        serializer.write(processing, output);
     }
 
     public FeaturesProcessing getInstructions() {
         return processing;
+    }
+
+    /**
+     * For the purpose of assembly builder, we can configure additional overrides that are read from profiles
+     * @param overrides
+     */
+    public void addOverrides(Set<String> overrides) {
+        processing.getBundleReplacements().getOverrideBundles()
+                .addAll(FeaturesProcessing.parseOverridesClauses(overrides));
     }
 
     @Override
@@ -153,9 +166,9 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     }
 
     @Override
-    public boolean isRepositoryBlacklisted(URI uri) {
+    public boolean isRepositoryBlacklisted(String uri) {
         for (LocationPattern lp : processing.getBlacklistedRepositoryLocationPatterns()) {
-            if (lp.matches(uri.toString())) {
+            if (lp.matches(uri)) {
                 return true;
             }
         }
@@ -179,6 +192,25 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
      */
     private boolean isBundleBlacklisted(String location) {
         return getInstructions().getBlacklist().isBundleBlacklisted(location);
+    }
+
+    /**
+     * Checks whether the configuration in this processor contains any instructions (for bundles, repositories,
+     * overrides, ...)
+     * @return
+     */
+    public boolean hasInstructions() {
+        int count = 0;
+        count += getInstructions().getBlacklistedRepositories().size();
+        count += getInstructions().getBlacklistedFeatures().size();
+        count += getInstructions().getBlacklistedBundles().size();
+        count += getInstructions().getOverrideBundleDependency().getRepositories().size();
+        count += getInstructions().getOverrideBundleDependency().getFeatures().size();
+        count += getInstructions().getOverrideBundleDependency().getBundles().size();
+        count += getInstructions().getBundleReplacements().getOverrideBundles().size();
+        count += getInstructions().getFeatureReplacements().getReplacements().size();
+
+        return count > 0;
     }
 
 }
