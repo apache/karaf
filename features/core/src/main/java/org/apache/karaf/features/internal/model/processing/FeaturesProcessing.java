@@ -20,6 +20,7 @@ package org.apache.karaf.features.internal.model.processing;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.karaf.features.FeaturePattern;
 import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.features.LocationPattern;
 import org.osgi.framework.Version;
@@ -183,17 +185,32 @@ public class FeaturesProcessing {
         // blacklisted bundle from XML to instruction for Blacklist class
         List<String> blacklisted = new LinkedList<>();
         for (String bl : this.getBlacklistedBundles()) {
-            blacklisted.add(bl + ";type=bundle");
+            blacklisted.add(bl + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_BUNDLE);
         }
         // blacklisted features - XML type to String instruction for Blacklist class
         blacklisted.addAll(this.getBlacklistedFeatures().stream()
-                .map(bf -> bf.getName() + ";type=feature" + (bf.getVersion() == null ? "" : ";range=\"" + bf.getVersion() + "\""))
+                .map(bf -> bf.getName() + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_FEATURE + (bf.getVersion() == null ? "" : ";" + FeaturePattern.RANGE + "=\"" + bf.getVersion() + "\""))
                 .collect(Collectors.toList()));
+        // blacklisted repositories
+        for (String bl : this.getBlacklistedRepositories()) {
+            blacklisted.add(bl + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_REPOSITORY);
+        }
 
         this.blacklist = new Blacklist(blacklisted);
         this.blacklist.merge(blacklist);
 
         // etc/overrides.properties (mvn: URIs)
+        bundleReplacements.getOverrideBundles().addAll(parseOverridesClauses(overrides));
+    }
+
+    /**
+     * Changes overrides list (old format) into a list of {@link BundleReplacements.OverrideBundle} definitions.
+     * @param overrides
+     * @return
+     */
+    public static Collection<? extends BundleReplacements.OverrideBundle> parseOverridesClauses(Set<String> overrides) {
+        List<BundleReplacements.OverrideBundle> result = new LinkedList<>();
+
         for (Clause clause : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
             // name of the clause will become a bundle replacement
             String mvnURI = clause.getName();
@@ -210,12 +227,14 @@ public class FeaturesProcessing {
                 override.setOriginalUri(originalUri);
                 try {
                     override.compile();
-                    bundleReplacements.getOverrideBundles().add(override);
+                    result.add(override);
                 } catch (MalformedURLException e) {
                     LOG.warn("Can't parse override URL location pattern: " + originalUri + ". Ignoring.");
                 }
             }
         }
+
+        return result;
     }
 
     /**
@@ -225,7 +244,7 @@ public class FeaturesProcessing {
      * @param range
      * @return
      */
-    private String calculateOverridenURI(String replacement, String range) {
+    private static String calculateOverridenURI(String replacement, String range) {
         try {
             org.apache.karaf.util.maven.Parser parser = new org.apache.karaf.util.maven.Parser(replacement);
             if (parser.getVersion() != null

@@ -18,8 +18,6 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.net.URI;
-
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 
@@ -33,7 +31,7 @@ public interface FeaturesProcessor {
      * @param uri
      * @return
      */
-    boolean isRepositoryBlacklisted(URI uri);
+    boolean isRepositoryBlacklisted(String uri);
 
     /**
      * Processes original {@link Features JAXB model of features}

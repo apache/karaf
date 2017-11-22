@@ -420,7 +420,7 @@ public class VerifyMojo extends MojoSupport {
 
 
             // Install framework
-            Deployer.DeploymentRequest request = createDeploymentRequest();
+            Deployer.DeploymentRequest request = Deployer.DeploymentRequest.defaultDeploymentRequest();
 
             for (String fmwk : framework) {
                 MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, fmwk);
@@ -489,18 +489,6 @@ public class VerifyMojo extends MojoSupport {
         } catch (Exception e) {
             throw new MojoExecutionException("Error verifying feature " + features + "\nMessage: " + e.getMessage(), e);
         }
-    }
-
-    private static Deployer.DeploymentRequest createDeploymentRequest() {
-        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
-        request.bundleUpdateRange = FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE;
-        request.featureResolutionRange = FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE;
-        request.serviceRequirements = FeaturesService.SERVICE_REQUIREMENTS_DEFAULT;
-        request.overrides = new HashSet<>();
-        request.requirements = new HashMap<>();
-        request.stateChanges = new HashMap<>();
-        request.options = EnumSet.noneOf(FeaturesService.Option.class);
-        return request;
     }
 
     private static String toString(Collection<String> collection) {

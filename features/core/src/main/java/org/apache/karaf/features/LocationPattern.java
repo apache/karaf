@@ -113,7 +113,7 @@ public class LocationPattern {
      * @param value
      * @return
      */
-    static Pattern toRegExp(String value) {
+    public static Pattern toRegExp(String value) {
         // TODO: escape all RegExp special chars that are valid path characters, only convert '*' into '.*'
         return Pattern.compile(value
                 .replaceAll("\\.", "\\\\\\.")

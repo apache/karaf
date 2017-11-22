@@ -16,21 +16,20 @@
  */
 package org.apache.karaf.profile.assembly;
 
-import static org.apache.karaf.features.internal.download.impl.DownloadManagerHelper.stripUrl;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.karaf.features.internal.download.impl.DownloadManagerHelper.stripUrl;
 
 /**
  * Downloads a maven artifact and installs it into the given system directory.
@@ -43,10 +42,10 @@ public class ArtifactInstaller {
     private Downloader downloader;
     private Blacklist blacklist;
 
-    public ArtifactInstaller(Path systemDirectory, Downloader downloader, List<String> blacklisted) {
+    public ArtifactInstaller(Path systemDirectory, Downloader downloader, Blacklist blacklist) {
         this.systemDirectory = systemDirectory;
         this.downloader = downloader;
-        this.blacklist = new Blacklist(blacklisted);
+        this.blacklist = blacklist;
     }
     
     public void installArtifact(String location) throws Exception {

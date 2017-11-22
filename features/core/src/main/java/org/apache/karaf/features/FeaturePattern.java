@@ -41,6 +41,7 @@ public class FeaturePattern {
     public static final String RANGE = "range";
 
     private String originalId;
+    private String nameString;
     private Pattern namePattern;
     private String versionString;
     private Version version;
@@ -51,16 +52,16 @@ public class FeaturePattern {
             throw new IllegalArgumentException("Feature ID to match should not be null");
         }
         originalId = featureId;
-        String name = originalId;
-        if (name.indexOf("/") > 0) {
-            name = originalId.substring(0, originalId.indexOf("/"));
+        nameString = originalId;
+        if (originalId.indexOf("/") > 0) {
+            nameString = originalId.substring(0, originalId.indexOf("/"));
             versionString = originalId.substring(originalId.indexOf("/") + 1);
-        } else if (name.contains(";")) {
+        } else if (originalId.contains(";")) {
             Clause[] c = org.apache.felix.utils.manifest.Parser.parseClauses(new String[] { originalId });
-            name = c[0].getName();
+            nameString = c[0].getName();
             versionString = c[0].getAttribute(RANGE);
         }
-        namePattern = LocationPattern.toRegExp(name);
+        namePattern = LocationPattern.toRegExp(nameString);
 
         if (versionString != null && versionString.length() >= 1) {
             try {
@@ -80,7 +81,7 @@ public class FeaturePattern {
     }
 
     /**
-     * Returns <code>if this feature pattern</code> matches given feature/version
+     * Returns <code>true</code> if this feature pattern matches given feature/version
      * @param featureName
      * @param featureVersion
      * @return

@@ -19,18 +19,23 @@ package org.apache.karaf.profile.assembly;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -49,6 +54,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -76,6 +82,9 @@ import org.apache.karaf.features.internal.repository.BaseRepository;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.features.internal.service.Deployer;
+import org.apache.karaf.features.internal.service.FeaturesProcessor;
+import org.apache.karaf.features.internal.service.FeaturesProcessorImpl;
+import org.apache.karaf.features.internal.service.Overrides;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.kar.internal.Kar;
@@ -217,6 +226,41 @@ public class Builder {
         }
     }
 
+    /**
+     * Class similar to {@link FeaturePattern} but simplified for profile name matching
+     */
+    private static class ProfileNamePattern {
+        private String name;
+        private Pattern namePattern;
+
+
+        public ProfileNamePattern(String profileName) {
+            if (profileName == null) {
+                throw new IllegalArgumentException("Profile name to match should not be null");
+            }
+            name = profileName;
+            if (name.contains("*")) {
+                namePattern = LocationPattern.toRegExp(name);
+            }
+        }
+
+        /**
+         * Returns <code>if this feature pattern</code> matches given feature/version
+         * @param profileName
+         * @return
+         */
+        public boolean matches(String profileName) {
+            if (profileName == null) {
+                return false;
+            }
+            if (namePattern != null) {
+                return namePattern.matcher(profileName).matches();
+            } else {
+                return name.equals(profileName);
+            }
+        }
+    }
+
     //
     // Input parameters
     //
@@ -229,10 +273,10 @@ public class Builder {
     Map<String, RepositoryInfo> repositories = new LinkedHashMap<>();
     Map<String, Stage> features = new LinkedHashMap<>();
     Map<String, Stage> bundles = new LinkedHashMap<>();
-    List<String> blacklistedProfiles = new ArrayList<>();
-    List<String> blacklistedFeatures = new ArrayList<>();
-    List<String> blacklistedBundles = new ArrayList<>();
-    List<String> blacklistedRepositories = new ArrayList<>();
+    List<String> blacklistedProfileNames = new ArrayList<>();
+    List<String> blacklistedFeatureIdentifiers = new ArrayList<>();
+    List<String> blacklistedBundleURIs = new ArrayList<>();
+    List<String> blacklistedRepositoryURIs = new ArrayList<>();
     BlacklistPolicy blacklistPolicy = BlacklistPolicy.Discard;
     List<String> libraries = new ArrayList<>();
     JavaVersion javase = JavaVersion.Java18;
@@ -259,6 +303,7 @@ public class Builder {
     private KarafPropertyEdits propertyEdits;
     private FeaturesProcessing featuresProcessing = new FeaturesProcessing();
     private Map<String, String> translatedUrls;
+    private Blacklist blacklist;
 
     private Function<MavenResolver, MavenResolver> resolverWrapper = Function.identity();
 
@@ -622,7 +667,7 @@ public class Builder {
      * @return
      */
     public Builder blacklistProfiles(Collection<String> profiles) {
-        this.blacklistedProfiles.addAll(profiles);
+        this.blacklistedProfileNames.addAll(profiles);
         return this;
     }
 
@@ -632,7 +677,7 @@ public class Builder {
      * @return
      */
     public Builder blacklistFeatures(Collection<String> features) {
-        this.blacklistedFeatures.addAll(features);
+        this.blacklistedFeatureIdentifiers.addAll(features);
         return this;
     }
 
@@ -642,7 +687,7 @@ public class Builder {
      * @return
      */
     public Builder blacklistBundles(Collection<String> bundles) {
-        this.blacklistedBundles.addAll(bundles);
+        this.blacklistedBundleURIs.addAll(bundles);
         return this;
     }
 
@@ -652,7 +697,7 @@ public class Builder {
      * @return
      */
     public Builder blacklistRepositories(Collection<String> repositories) {
-        this.blacklistedRepositories.addAll(repositories);
+        this.blacklistedRepositoryURIs.addAll(repositories);
         return this;
     }
 
@@ -724,20 +769,20 @@ public class Builder {
         return this;
     }
 
-    public List<String> getBlacklistedProfiles() {
-        return blacklistedProfiles;
+    public List<String> getBlacklistedProfileNames() {
+        return blacklistedProfileNames;
     }
 
-    public List<String> getBlacklistedFeatures() {
-        return blacklistedFeatures;
+    public List<String> getBlacklistedFeatureIdentifiers() {
+        return blacklistedFeatureIdentifiers;
     }
 
-    public List<String> getBlacklistedBundles() {
-        return blacklistedBundles;
+    public List<String> getBlacklistedBundleURIs() {
+        return blacklistedBundleURIs;
     }
 
-    public List<String> getBlacklistedRepositories() {
-        return blacklistedRepositories;
+    public List<String> getBlacklistedRepositoryURIs() {
+        return blacklistedRepositoryURIs;
     }
 
     public BlacklistPolicy getBlacklistPolicy() {
@@ -807,16 +852,39 @@ public class Builder {
         }
 
         //
+        // Handle blacklist - we'll use SINGLE instance iof Blacklist for all further downloads
+        //
+        blacklist = processBlacklist();
+
+        // we can't yet have full feature processor, because some overrides may be defined in profiles and
+        // profiles are generated after reading features from repositories
+        // so for now, we can only configure blacklisting features processor
+
+        Path existingProcessorDefinition = etcDirectory.resolve("org.apache.karaf.features.xml");
+        String existingProcessorDefinitionURI = null;
+        if (existingProcessorDefinition.toFile().isFile()) {
+            existingProcessorDefinitionURI = existingProcessorDefinition.toFile().toURI().toString();
+        }
+        // now we can configure blacklisting features processor which may have already defined (in XML)
+        // configuration for bundle replacements or feature overrides.
+        // we'll add overrides from profiles later.
+        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(existingProcessorDefinitionURI, blacklist, new HashSet<>());
+
+        //
         // Propagate feature installation from repositories
         //
         LOGGER.info("Loading repositories");
-        Map<String, Features> karRepositories = loadRepositories(manager, repositories.keySet(), false);
+        Map<String, Features> karRepositories = loadRepositories(manager, repositories.keySet(), false, processor);
         for (String repo : repositories.keySet()) {
             RepositoryInfo info = repositories.get(repo);
             if (info.addAll) {
-                LOGGER.info("   adding all features from repository: " + repo + " (stage: " + info.stage + ")");
+                LOGGER.info("   adding all non-blacklisted features from repository: " + repo + " (stage: " + info.stage + ")");
                 for (Feature feature : karRepositories.get(repo).getFeature()) {
-                    features.put(feature.getId(), info.stage);
+                    if (feature.isBlacklisted()) {
+                        LOGGER.info("      feature {}/{} is blacklisted - skipping.", feature.getId(), feature.getVersion());
+                    } else {
+                        features.put(feature.getId(), info.stage);
+                    }
                 }
             }
         }
@@ -867,6 +935,14 @@ public class Builder {
         // profile with property placeholders resolved or left unchanged (if there's no property value available,
         // so property placeholders are preserved - like ${karaf.base})
         Profile overallEffective = Profiles.getEffective(overallOverlay, false);
+
+        //
+        // Handle overrides - existing (unzipped from KAR) and defined in profile
+        //
+        Set<String> overrides = processOverrides(overallEffective.getOverrides());
+
+        // we can now add overrides from profiles.
+        processor.addOverrides(overrides);
 
         if (writeProfiles) {
             Path profiles = etcDirectory.resolve("profiles");
@@ -938,57 +1014,101 @@ public class Builder {
             editor.run();
         }
 
-        //
-        // Handle overrides
-        //
-        if (!overallEffective.getOverrides().isEmpty()) {
-            Path overrides = etcDirectory.resolve("overrides.properties");
-            List<String> lines = new ArrayList<>();
-            lines.add("#");
-            lines.add("# Generated by the karaf assembly builder");
-            lines.add("#");
-            lines.addAll(overallEffective.getOverrides());
-            LOGGER.info("Generating {}", homeDirectory.relativize(overrides));
-            Files.write(overrides, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        }
+//        if (!blacklistedFeatures.isEmpty() || !blacklistedBundles.isEmpty()) {
+//            List<String> lines = new ArrayList<>();
+//            lines.add("#");
+//            lines.add("# Generated by the karaf assembly builder");
+//            lines.add("#");
+//            if (!blacklistedFeatures.isEmpty()) {
+//                lines.add("");
+//                lines.add("# Features");
+//                lines.addAll(blacklistedFeatures);
+//            }
+//            if (!blacklistedBundles.isEmpty()) {
+//                lines.add("");
+//                lines.add("# Bundles");
+//                lines.addAll(blacklistedBundles);
+//            }
+//            LOGGER.info("Generating {}", homeDirectory.relativize(blacklist));
+//            Files.write(blacklist, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+//        }
 
-        //
-        // Handle blacklist
-        //
-        if (!blacklistedFeatures.isEmpty() || !blacklistedBundles.isEmpty()) {
-            Path blacklist = etcDirectory.resolve("blacklisted.properties");
-            List<String> lines = new ArrayList<>();
-            lines.add("#");
-            lines.add("# Generated by the karaf assembly builder");
-            lines.add("#");
-            if (!blacklistedFeatures.isEmpty()) {
-                lines.add("");
-                lines.add("# Features");
-                lines.addAll(blacklistedFeatures);
+        // TODO: download overrides, implement fuller override clauses (original->replacement)
+        if (processor.hasInstructions()) {
+            Path featuresProcessingXml = etcDirectory.resolve("org.apache.karaf.features.xml");
+            try (FileOutputStream fos = new FileOutputStream(featuresProcessingXml.toFile())) {
+                processor.writeInstructions(fos);
             }
-            if (!blacklistedBundles.isEmpty()) {
-                lines.add("");
-                lines.add("# Bundles");
-                lines.addAll(blacklistedBundles);
-            }
-            LOGGER.info("Generating {}", homeDirectory.relativize(blacklist));
-            Files.write(blacklist, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         }
 
         //
         // Startup stage
         //
-        Profile startupEffective = startupStage(startupProfile);
+        Profile startupEffective = startupStage(startupProfile, processor);
 
         //
         // Boot stage
         //
-        Set<Feature> allBootFeatures = bootStage(bootProfile, startupEffective);
+        Set<Feature> allBootFeatures = bootStage(bootProfile, startupEffective, processor);
 
         //
         // Installed stage
         //
-        installStage(installedProfile, allBootFeatures);
+        installStage(installedProfile, allBootFeatures, processor);
+    }
+
+    /**
+     * Checks existing (etc/overrides.properties) and configured (in profiles) overrides definitions
+     * @param profileOverrides
+     * @return
+     */
+    private Set<String> processOverrides(List<String> profileOverrides) {
+        Set<String> result = new LinkedHashSet<>();
+        Path existingOverridesLocation = etcDirectory.resolve("overrides.properties");
+        if (existingOverridesLocation.toFile().isFile()) {
+            LOGGER.warn("Found {} which is deprecated, please use new feature processor configuration.", homeDirectory.relativize(existingOverridesLocation));
+            result.addAll(Overrides.loadOverrides(existingOverridesLocation.toFile().toURI().toString()));
+        }
+        result.addAll(profileOverrides);
+
+        return result;
+    }
+
+    /**
+     * Checks existing and configured blacklisting definitions
+     * @return
+     * @throws IOException
+     */
+    private Blacklist processBlacklist() throws IOException {
+        Blacklist existingBlacklist = null;
+        Blacklist blacklist = new Blacklist();
+        Path existingBLacklistedLocation = etcDirectory.resolve("blacklisted.properties");
+        if (existingBLacklistedLocation.toFile().isFile()) {
+            LOGGER.warn("Found {} which is deprecated, please use new feature processor configuration.", homeDirectory.relativize(existingBLacklistedLocation));
+            existingBlacklist = new Blacklist(Files.readAllLines(existingBLacklistedLocation));
+        }
+        for (String br : blacklistedRepositoryURIs) {
+            try {
+                blacklist.blacklistRepository(new LocationPattern(br));
+            } catch (MalformedURLException e) {
+                LOGGER.warn("Blacklisted features XML repository URI is invalid {}, ignoring", br);
+            }
+        }
+        for (String bf : blacklistedFeatureIdentifiers) {
+            blacklist.blacklistFeature(new FeaturePattern(bf));
+        }
+        for (String bb : blacklistedBundleURIs) {
+            try {
+                blacklist.blacklistBundle(new LocationPattern(bb));
+            } catch (MalformedURLException e) {
+                LOGGER.warn("Blacklisted bundle URI is invalid {}, ignoring", bb);
+            }
+        }
+        if (existingBlacklist != null) {
+            blacklist.merge(existingBlacklist);
+        }
+
+        return blacklist;
     }
 
     private MavenResolver createMavenResolver() {
@@ -1012,6 +1132,8 @@ public class Builder {
      */
     private Map<String, Profile> loadExternalProfiles(List<String> profilesUris) throws IOException, MultiException, InterruptedException {
         Map<String, Profile> profiles = new LinkedHashMap<>();
+        Map<String, Profile> filteredProfiles = new LinkedHashMap<>();
+
         for (String profilesUri : profilesUris) {
             String uri = profilesUri;
             if (uri.startsWith("jar:") && uri.contains("!/")) {
@@ -1035,19 +1157,33 @@ public class Builder {
             }
             profiles.putAll(Profiles.loadProfiles(profilePath));
             // Handle blacklisted profiles
-            if (!blacklistedProfiles.isEmpty()) {
-                if (blacklistPolicy == BlacklistPolicy.Discard) {
-                    // Override blacklisted profiles with empty ones
-                    for (String profile : blacklistedProfiles) {
-                        profiles.put(profile, ProfileBuilder.Factory.create(profile).getProfile());
+            List<ProfileNamePattern> blacklistedProfilePatterns = blacklistedProfileNames.stream()
+                    .map(ProfileNamePattern::new).collect(Collectors.toList());
+
+            for (String profileName : profiles.keySet()) {
+                boolean blacklisted = false;
+                for (ProfileNamePattern pattern : blacklistedProfilePatterns) {
+                    if (pattern.matches(profileName)) {
+                        LOGGER.info("   blacklisting profile {} from {}", profileName, profilePath);
+                        // TODO review blacklist policy options
+                        if (blacklistPolicy == BlacklistPolicy.Discard) {
+                            // Override blacklisted profiles with empty one
+                            filteredProfiles.put(profileName, ProfileBuilder.Factory.create(profileName).getProfile());
+                        } else {
+                            // Remove profile completely
+                        }
+                        // no need to check other patterns
+                        blacklisted = true;
+                        break;
                     }
-                } else {
-                    // Remove profiles completely
-                    profiles.keySet().removeAll(blacklistedProfiles);
+                }
+                if (!blacklisted) {
+                    filteredProfiles.put(profileName, profiles.get(profileName));
                 }
             }
         }
-        return profiles;
+
+        return filteredProfiles;
     }
 
     private void reformatClauses(Properties config, String key) {
@@ -1137,18 +1273,18 @@ public class Builder {
                         if (packages != null) {
                             Clause[] clauses1 = org.apache.felix.utils.manifest.Parser.parseHeader(packages);
                             if (export) {
-                                String val = config.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+                                StringBuilder val = new StringBuilder(config.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA));
                                 for (Clause clause1 : clauses1) {
-                                    val += "," + clause1.toString();
+                                    val.append(",").append(clause1.toString());
                                 }
-                                config.setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, val);
+                                config.setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, val.toString());
                             }
                             if (delegate) {
-                                String val = config.getProperty(Constants.FRAMEWORK_BOOTDELEGATION);
+                                StringBuilder val = new StringBuilder(config.getProperty(Constants.FRAMEWORK_BOOTDELEGATION));
                                 for (Clause clause1 : clauses1) {
-                                    val += "," + clause1.getName();
+                                    val.append(",").append(clause1.getName());
                                 }
-                                config.setProperty(Constants.FRAMEWORK_BOOTDELEGATION, val);
+                                config.setProperty(Constants.FRAMEWORK_BOOTDELEGATION, val.toString());
                             }
                         }
                     }
@@ -1156,7 +1292,7 @@ public class Builder {
         }
     }
 
-    private void installStage(Profile installedProfile, Set<Feature> allBootFeatures) throws Exception {
+    private void installStage(Profile installedProfile, Set<Feature> allBootFeatures, FeaturesProcessor processor) throws Exception {
         LOGGER.info("Install stage");
         //
         // Handle installed profiles
@@ -1168,7 +1304,7 @@ public class Builder {
 
         // Load startup repositories
         LOGGER.info("   Loading repositories");
-        Map<String, Features> installedRepositories = loadRepositories(manager, installedEffective.getRepositories(), true);
+        Map<String, Features> installedRepositories = loadRepositories(manager, installedEffective.getRepositories(), true, processor);
         // Compute startup feature dependencies
         Set<Feature> allInstalledFeatures = new HashSet<>();
         for (Features repo : installedRepositories.values()) {
@@ -1179,7 +1315,7 @@ public class Builder {
         allInstalledFeatures.addAll(allBootFeatures);
         FeatureSelector selector = new FeatureSelector(allInstalledFeatures);
         Set<Feature> installedFeatures = selector.getMatching(installedEffective.getFeatures());
-        ArtifactInstaller installer = new ArtifactInstaller(systemDirectory, downloader, blacklistedBundles);
+        ArtifactInstaller installer = new ArtifactInstaller(systemDirectory, downloader, blacklist);
         for (Feature feature : installedFeatures) {
             LOGGER.info("   Feature {} is defined as an installed feature", feature.getId());
             for (Bundle bundle : feature.getBundle()) {
@@ -1205,7 +1341,7 @@ public class Builder {
         downloader.await();
     }
 
-    private Set<Feature> bootStage(Profile bootProfile, Profile startupEffective) throws Exception {
+    private Set<Feature> bootStage(Profile bootProfile, Profile startupEffective, FeaturesProcessor processor) throws Exception {
         LOGGER.info("Boot stage");
         //
         // Handle boot profiles
@@ -1214,7 +1350,7 @@ public class Builder {
         Profile bootEffective = Profiles.getEffective(bootOverlay, false);
         // Load startup repositories
         LOGGER.info("   Loading repositories");
-        Map<String, Features> bootRepositories = loadRepositories(manager, bootEffective.getRepositories(), true);
+        Map<String, Features> bootRepositories = loadRepositories(manager, bootEffective.getRepositories(), true, processor);
         // Compute startup feature dependencies
         Set<Feature> allBootFeatures = new HashSet<>();
         for (Features repo : bootRepositories.values()) {
@@ -1276,7 +1412,7 @@ public class Builder {
             prereqs.put("spring:", Arrays.asList("deployer", "spring"));
             prereqs.put("wrap:", Collections.singletonList("wrap"));
             prereqs.put("war:", Collections.singletonList("war"));
-            ArtifactInstaller installer = new ArtifactInstaller(systemDirectory, downloader, blacklistedBundles);
+            ArtifactInstaller installer = new ArtifactInstaller(systemDirectory, downloader, blacklist);
             for (String location : locations) {
                 installer.installArtifact(location);
                 for (Map.Entry<String, List<String>> entry : prereqs.entrySet()) {
@@ -1365,8 +1501,6 @@ public class Builder {
         return allBootFeatures;
     }
 
-
-
     private String getRepos(Features rep) {
         StringBuilder repos = new StringBuilder();
         for (String repo : new HashSet<>(rep.getRepository())) {
@@ -1424,7 +1558,7 @@ public class Builder {
         return dep;
     }
 
-    private Profile startupStage(Profile startupProfile) throws Exception {
+    private Profile startupStage(Profile startupProfile, FeaturesProcessor processor) throws Exception {
         LOGGER.info("Startup stage");
         //
         // Compute startup
@@ -1433,7 +1567,7 @@ public class Builder {
         Profile startupEffective = Profiles.getEffective(startupOverlay, false);
         // Load startup repositories
         LOGGER.info("   Loading repositories");
-        Map<String, Features> startupRepositories = loadRepositories(manager, startupEffective.getRepositories(), false);
+        Map<String, Features> startupRepositories = loadRepositories(manager, startupEffective.getRepositories(), false, processor);
 
         //
         // Resolve
@@ -1511,21 +1645,15 @@ public class Builder {
         return staged;
     }
 
-    private Map<String, Features> loadRepositories(DownloadManager manager, Collection<String> repositories, final boolean install) throws Exception {
+    private Map<String, Features> loadRepositories(DownloadManager manager, Collection<String> repositories, final boolean install, FeaturesProcessor processor) throws Exception {
         final Map<String, Features> loaded = new HashMap<>();
         final Downloader downloader = manager.createDownloader();
-        final List<String> blacklist = new ArrayList<>();
-        blacklist.addAll(blacklistedBundles);
-        blacklist.addAll(blacklistedFeatures);
-        final List<String> blacklistRepos = new ArrayList<>(blacklistedRepositories);
-        final Blacklist blacklistOther = new Blacklist(blacklist);
-        final Blacklist repoBlacklist = new Blacklist(blacklistRepos);
         for (String repository : repositories) {
             downloader.download(repository, new DownloadCallback() {
                 @Override
                 public void downloaded(final StreamProvider provider) throws Exception {
                     String url = provider.getUrl();
-                    if (repoBlacklist.isRepositoryBlacklisted(url)) {
+                    if (processor.isRepositoryBlacklisted(url)) {
                         LOGGER.info("   feature repository " + url + " is blacklisted");
                         return;
                     }
@@ -1541,9 +1669,11 @@ public class Builder {
                             }
                             try (InputStream is = provider.open()) {
                                 Features featuresModel = JaxbUtil.unmarshal(url, is, false);
-                                if (blacklistPolicy == BlacklistPolicy.Discard) {
-                                    blacklistOther.blacklist(featuresModel);
-                                }
+                                // always process according to processor configuration
+                                processor.process(featuresModel);
+                                // TODO consult blacklist policy
+//                                if (blacklistPolicy == BlacklistPolicy.Discard) {
+//                                }
                                 loaded.put(provider.getUrl(), featuresModel);
                                 for (String innerRepository : featuresModel.getRepository()) {
                                     downloader.download(innerRepository, this);
@@ -1598,7 +1728,7 @@ public class Builder {
         Deployer deployer = new Deployer(manager, resolver, callback);
 
         // Install framework
-        Deployer.DeploymentRequest request = createDeploymentRequest();
+        Deployer.DeploymentRequest request = Deployer.DeploymentRequest.defaultDeploymentRequest();
         // Add overrides
         request.overrides.addAll(overrides);
         // Add optional resources
@@ -1636,18 +1766,6 @@ public class Builder {
         }
 
         return callback.getStartupBundles();
-    }
-
-    private Deployer.DeploymentRequest createDeploymentRequest() {
-        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
-        request.bundleUpdateRange = FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE;
-        request.featureResolutionRange = FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE;
-        request.serviceRequirements = FeaturesService.SERVICE_REQUIREMENTS_DEFAULT;
-        request.overrides = new HashSet<>();
-        request.requirements = new HashMap<>();
-        request.stateChanges = new HashMap<>();
-        request.options = EnumSet.noneOf(FeaturesService.Option.class);
-        return request;
     }
 
     @SuppressWarnings("rawtypes")

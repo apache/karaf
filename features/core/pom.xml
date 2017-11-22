@@ -156,6 +156,7 @@
                             org.apache.karaf.util.collections,
                             org.apache.karaf.util.json,
                             org.apache.karaf.util.maven,
+                            org.apache.karaf.util.xml,
                             org.eclipse.equinox.internal.region.*;-split-package:=merge-first,
                             org.apache.felix.resolver.*,
                         </Private-Package>
