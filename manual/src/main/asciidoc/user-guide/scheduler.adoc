@@ -68,7 +68,7 @@ This example uses Declarative Services to register a Service of Type "org.apache
 
 Alternatively, jobs can be registered as type "Runnable" in a more API neutral way. In this case you won't get the "JobContext" information though.
 ----
-@Component (immediate = true, property = {
+@Component(immediate = true, property = {
         Scheduler.PROPERTY_SCHEDULER_EXPRESSION + "=0 0/10 * * * ?",
 } )
 public class SchedulerPing implements Job {
@@ -89,9 +89,38 @@ Name                   │ Schedule
 Registered Service.185 │ cron(0 0/10 * * * ?)
 ----
 
+The Karaf scheduler can also schedule `Runnable` service.
 
+For instance, if you have the following bean:
+
+```
+@Component(immediate = true, property = {
+    "scheduler.period:Long=60",
+    "scheduler.concurrent:Boolean=false",
+    "scheduler.name=PingJob"
+  }
+)
+public class PingThread implements Runnable {
+
+  @Override
+  public void run() {
+    // ..
+  }
+
+}
+```
+
+This will register a job for the thread (runnable):
+
+----
+karaf@root()> scheduler:list
+Name                       │ Schedule
+───────────────────────────┼──────────────────────────────────────────
+PingJob.126                │ at(2017-11-22T15:37:17.103+01:00, -1, 10)
+----
 
 ==== Schedule a new Job using the Gogo Shell
+
 ----
 karaf@root()> scheduler:schedule --help
 DESCRIPTION
@@ -123,11 +152,6 @@ OPTIONS
         --name
                 Name of this job
 
-----
-
-For example:
-----
-tbd
 ----
 
 ==== Schedule a new Job using the Scheduler Service
