@@ -415,7 +415,11 @@ public class Activator extends BaseActivator implements ManagedService {
 
         private String _subtype() {
             String topic = event.getTopic();
-            return topic.substring(topic.lastIndexOf('/') + 1).toLowerCase(Locale.ENGLISH);
+            String subtype = topic.substring(topic.lastIndexOf('/') + 1).toLowerCase(Locale.ENGLISH);
+            if (subtype.startsWith("log_")) {
+                subtype = subtype.substring("log_".length());
+            }
+            return subtype;
         }
 
         @Override
