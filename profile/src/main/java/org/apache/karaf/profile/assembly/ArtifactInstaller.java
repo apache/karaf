@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.util.maven.Parser;
@@ -48,6 +49,33 @@ public class ArtifactInstaller {
         this.blacklist = blacklist;
     }
     
+    public void installArtifact(BundleInfo bundle) throws Exception {
+        if (bundle.isBlacklisted()) {
+            LOGGER.info("      skipping blacklisted maven artifact: " + bundle.getLocation());
+            return;
+        }
+        if (bundle.isOverriden()) {
+            LOGGER.info("      adding overriden maven artifact: " + bundle.getLocation() + " (original location: " + bundle.getOriginalLocation() + ")");
+        } else {
+            LOGGER.info("      adding maven artifact: " + bundle.getLocation());
+        }
+        String location = bundle.getLocation().trim();
+        location = removeTrailingSlash(stripUrl(location));
+        if (!location.startsWith("mvn:")) {
+            LOGGER.warn("Ignoring non maven artifact " + location);
+            return;
+        }
+        final String finalLocation = location;
+        downloader.download(location, provider -> {
+            String uri = provider.getUrl();
+            Path path = pathFromProviderUrl(systemDirectory, finalLocation);
+            synchronized (provider) {
+                Files.createDirectories(path.getParent());
+                Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+            }
+        });
+    }
+
     public void installArtifact(String location) throws Exception {
         LOGGER.info("      adding maven artifact: " + location);
         location = removeTrailingSlash(stripUrl(location));

@@ -243,4 +243,16 @@ public class Blacklist {
         bundleBlacklist.add(locationPattern);
     }
 
+    public List<LocationPattern> getRepositoryBlacklist() {
+        return repositoryBlacklist;
+    }
+
+    public List<FeaturePattern> getFeatureBlacklist() {
+        return featureBlacklist;
+    }
+
+    public List<LocationPattern> getBundleBlacklist() {
+        return bundleBlacklist;
+    }
+
 }

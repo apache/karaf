@@ -88,6 +88,13 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter(defaultValue = "${project.build.directory}/assembly")
     protected File workDirectory;
 
+    /**
+     * Optional location for custom features processing XML configuration
+     * (<code>etc/org.apache.karaf.features.cfg</code>)
+     */
+    @Parameter
+    protected File featuresProcessing;
+
     /*
      * There are three builder stages related to maven dependency scopes:
      *  - Stage.Startup : scope=compile
@@ -462,6 +469,9 @@ public class AssemblyMojo extends MojoSupport {
         builder.writeProfiles(writeProfiles);
         builder.environment(environment);
         builder.defaultStartLevel(defaultStartLevel);
+        if (featuresProcessing != null) {
+            builder.setFeaturesProcessing(featuresProcessing.toPath());
+        }
 
         // Set up remote repositories from Maven build, to be used by pax-url-aether resolver
         String remoteRepositories = MavenUtil.remoteRepositoryList(project.getRemoteProjectRepositories());
