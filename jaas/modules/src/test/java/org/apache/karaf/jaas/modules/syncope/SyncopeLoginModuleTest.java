@@ -20,6 +20,8 @@ import org.junit.Test;
 import org.junit.Assert;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 
 public class SyncopeLoginModuleTest {
 
@@ -137,6 +139,8 @@ public class SyncopeLoginModuleTest {
                 + "\n" + "         ]\n" + "\n" + "      }\n" + "\n" + "   ],\n" + "\n"
                 + "   \"dynGroups\":[\n" + "\n" + " \n" + "\n" + "   ]\n" + "\n" + "}";
         SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
+        Map<String, String> options = Collections.singletonMap(SyncopeLoginModule.USE_ROLES_FOR_SYNCOPE2, "true");
+        syncopeLoginModule.initialize(null, null, Collections.emptyMap(), options);
         List<String> roles = syncopeLoginModule.extractingRolesSyncope2(syncopeResponse);
         Assert.assertEquals(2, roles.size());
         Assert.assertEquals("admin", roles.get(0));
