@@ -82,7 +82,9 @@ public class FastDateFormat {
                 }
                 date = sb.toString();
             } else {
-                date = new SimpleDateFormat(pattern, locale).format(new Date(now));
+                SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
+                sdf.setCalendar(Calendar.getInstance(timeZone, locale));
+                date = sdf.format(new Date(now));
             }
             cache.put(pattern, date);
         }
