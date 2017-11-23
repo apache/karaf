@@ -145,7 +145,7 @@ public class Builder {
     List<String> blacklistedRepositories = new ArrayList<>();
     BlacklistPolicy blacklistPolicy = BlacklistPolicy.Discard;
     List<String> libraries = new ArrayList<>();
-    String javase = "1.7";
+    String javase = "1.8";
     KarafVersion karafVersion = KarafVersion.v4x;
     String environment = null;
     boolean useReferenceUrls;
@@ -715,8 +715,8 @@ public class Builder {
             }
             final String type = clause.getDirective(LIBRARY_CLAUSE_TYPE) != null
                     ? clause.getDirective(LIBRARY_CLAUSE_TYPE) : Library.TYPE_DEFAULT;
-            if (type == Library.TYPE_ENDORSED || type == Library.TYPE_EXTENSION) {
-                LOGGER.warn("Ignoring library " + library + " which is of an unsupported type " + type + ".");
+            if (!javase.startsWith("1.") && (Library.TYPE_ENDORSED.equals(type) || Library.TYPE_EXTENSION.equals(type))) {
+                LOGGER.warn("Ignoring library " + library + " of type " + type + " which is only supported for Java 1.8.");
                 continue;
             }
             final String path;

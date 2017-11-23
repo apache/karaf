@@ -155,8 +155,12 @@ run() {
     if [ "x$CHECK_ROOT_INSTANCE_RUNNING" = "x" ]; then
         CHECK_ROOT_INSTANCE_RUNNING=true
     fi
+    JAVA_ENDORSED_DIRS="${JAVA_HOME}/jre/lib/endorsed:${JAVA_HOME}/lib/endorsed:${KARAF_HOME}/lib/endorsed"
+    JAVA_EXT_DIRS="${JAVA_HOME}/jre/lib/ext:${JAVA_HOME}/lib/ext:${KARAF_HOME}/lib/ext"
     if ${cygwin}; then
         JAVA_HOME=$(cygpath --path --windows "${JAVA_HOME}")
+        JAVA_ENDORSED_DIRS=$(cygpath --path --windows "${JAVA_ENDORSED_DIRS}")
+        JAVA_EXT_DIRS=$(cygpath --path --windows "${JAVA_EXT_DIRS}")
     fi
     convertPaths
     cd "${KARAF_BASE}" || exit 2
@@ -290,6 +294,8 @@ run() {
                     ${MAIN} "$@"
             else
                 ${KARAF_EXEC} "${JAVA}" ${JAVA_OPTS} \
+                    -Djava.endorsed.dirs="${JAVA_ENDORSED_DIRS}" \
+                    -Djava.ext.dirs="${JAVA_EXT_DIRS}" \
                     -Dkaraf.instances="${KARAF_HOME}/instances" \
                     -Dkaraf.home="${KARAF_HOME}" \
                     -Dkaraf.base="${KARAF_BASE}" \
