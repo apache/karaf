@@ -135,7 +135,8 @@ public class EventLoggerTest {
         assertEquals(1, packets.size());
         String str = packets.get(0);
         System.out.println(str);
-        assertTrue(str.startsWith("<133>1 2017-11-17T08:00:00.000+01:00 "));
+        // fix the test for Jenkins as it uses different timezone
+        assertTrue(str.startsWith("<133>1 2017-11-17T08:00:00.000+01:00 ") || str.startsWith("<133>1 2017-11-17T08:00:00.000Z "));
         assertTrue(str.indexOf(" jmx [jmx@18060 type=\"jmx\" subtype=\"invoke\" method=\"invoke\" signature=\"[javax.management.ObjectName, java.lang.String, [Ljava.lang.Object;, [Ljava.lang.String;\\]\" params=\"[org.apache.karaf.Mbean:type=foo, myMethod, [java.lang.String\\], [the-param \\]\\]\"]") > 0);
     }
 
