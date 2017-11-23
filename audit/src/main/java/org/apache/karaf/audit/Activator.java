@@ -39,11 +39,14 @@ import org.osgi.service.event.EventHandler;
 
 import javax.security.auth.Subject;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -198,8 +201,47 @@ public class Activator extends BaseActivator implements ManagedService {
             case "gelf":
                 return new GelfLayout();
             default:
-                logger.warn("Unknown layout: " + type + ". Using a simple layout.");
-                return new SimpleLayout();
+                try {
+                    return createCustomLayout(type);
+                } catch (Exception e) {
+                    logger.error("Error creating layout: " + type + ". Using a simple layout.", e);
+                    return new SimpleLayout();
+                }
+        }
+    }
+
+    private EventLayout createCustomLayout(String type) throws ClassNotFoundException, InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException {
+        Class<?> clazz = Class.forName(type);
+        Constructor<?> cnsMap = null;
+        Constructor<?> cnsDef = null;
+        Object layout = null;
+        try {
+            cnsMap = clazz.getConstructor(Map.class);
+        } catch (NoSuchMethodException e) {
+            // ignore
+        }
+        try {
+            cnsDef = clazz.getConstructor();
+        } catch (NoSuchMethodException e) {
+            // ignore
+        }
+        if (cnsMap != null) {
+            Map<String, Object> params = new HashMap<>();
+            for (Enumeration<String> e = getConfiguration().keys(); e.hasMoreElements(); ) {
+                String key = e.nextElement();
+                Object val = getConfiguration().get(key);
+                params.put(key, val);
+            }
+            layout = cnsMap.newInstance(params);
+        } else if (cnsDef != null) {
+            layout = cnsDef.newInstance();
+        } else {
+            throw new IllegalArgumentException("Unable to find a supported constructor");
+        }
+        if (layout instanceof EventLayout) {
+            return (EventLayout) layout;
+        } else {
+            throw new IllegalArgumentException("The built layout does not implement " + EventLayout.class.getName());
         }
     }
 
