@@ -111,7 +111,7 @@ public class Activator extends BaseActivator implements ManagedService {
         populate(config, EVENTADMIN_ENABLED, "true");
         populate(config, "audit.file.enabled", "false");
         populate(config, "audit.file.file", System.getProperty("karaf.data") + "/security/audit.log");
-        populate(config, "audit.log.enabled", "true");
+        populate(config, "audit.log.enabled", "false");
         populate(config, "audit.log.logger", "org.apache.karaf.jaas.modules.audit.LogAuditLoginModule");
         populate(config, "audit.log.level", "info");
         populate(config, "audit.eventadmin.enabled", "true");
