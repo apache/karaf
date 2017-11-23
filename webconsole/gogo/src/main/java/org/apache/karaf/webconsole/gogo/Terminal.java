@@ -1708,16 +1708,16 @@ public class Terminal {
                 }
             } else if (c == '~') {
                 vt100_keyfilter_escape = true;
-            } else if (c == 127) {
+            } else if (c == '\u007f') {
                 if (vt100_mode_backspace) {
-                    o += Integer.toString(8);
+                    o += '\u0008';
                 } else {
-                    o += Integer.toString(127);
+                    o += '\u007f';
                 }
             } else {
-                o += Integer.toString(c);
-                if (vt100_mode_lfnewline && c == 13) {
-                    o += Integer.toString(10);
+                o += c;
+                if (vt100_mode_lfnewline && c == '\r') {
+                    o += '\n';
                 }
             }
         }
