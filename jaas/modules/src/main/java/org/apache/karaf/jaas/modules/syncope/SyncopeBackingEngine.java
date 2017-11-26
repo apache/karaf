@@ -15,6 +15,7 @@
  */
 package org.apache.karaf.jaas.modules.syncope;
 
+import org.apache.felix.utils.json.JSONParser;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -42,11 +43,13 @@ public class SyncopeBackingEngine implements BackingEngine {
     private final Logger logger = LoggerFactory.getLogger(SyncopeBackingEngine.class);
 
     private String address;
+    private boolean version2;
 
     private DefaultHttpClient client;
 
-    public SyncopeBackingEngine(String address, String adminUser, String adminPassword) {
+    public SyncopeBackingEngine(String address, String version, String adminUser, String adminPassword) {
         this.address = address;
+        version2 = version != null && (version.equals("2.x") || version.equals("2"));
 
         client = new DefaultHttpClient();
         Credentials creds = new UsernamePasswordCredentials(adminUser, adminPassword);
@@ -57,6 +60,14 @@ public class SyncopeBackingEngine implements BackingEngine {
         if (username.startsWith(GROUP_PREFIX)) {
             throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
         }
+        if (version2) {
+            addUserSyncope2(username, password);
+        } else {
+            addUserSyncope1(username, password);
+        }
+    }
+
+    private void addUserSyncope1(String username, String password) {
         HttpPost request = new HttpPost(address + "/users");
         request.setHeader("Content-Type", "application/xml");
         String userTO = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
@@ -79,12 +90,40 @@ public class SyncopeBackingEngine implements BackingEngine {
         }
     }
 
+    private void addUserSyncope2(String username, String password) {
+        HttpPost request = new HttpPost(address + "/users");
+        request.setHeader("Content-Type", "application/json");
+        String userTO = "{" +
+                  "\"@class\": \"org.apache.syncope.common.lib.to.UserTO\"," +
+                  "\"type\": \"USER\"," +
+                  "\"realm\": \"/\"," +
+                  "\"username\": \"" + username + "\"," +
+                  "\"password\": \"" + password + "\"," +
+                  "\"plainAttrs\": [" +
+                    "{ \"schema\": \"surname\", \"values\": [\"" + username + "\"] }," +
+                    "{ \"schema\": \"fullname\", \"values\": [\"" + username + "\"] }," +
+                    "{ \"schema\": \"userId\", \"value\": [\"" + username + "@karaf.apache.org\"] }" +
+                "}";
+        try {
+            StringEntity entity = new StringEntity(userTO);
+            request.setEntity(entity);
+            HttpResponse response = client.execute(request);
+        } catch (Exception e) {
+            logger.error("Can't add user {}", username, e);
+            throw new RuntimeException("Can't add user " + username, e);
+        }
+    }
+
     public void deleteUser(String username) {
         if (username.startsWith(GROUP_PREFIX)) {
             throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
         }
         HttpDelete request = new HttpDelete(address + "/users/" + username);
-        request.setHeader("Content-Type", "application/xml");
+        if (version2) {
+            request.setHeader("Content-Type", "application/json");
+        } else {
+            request.setHeader("Content-Type", "application/xml");
+        }
         try {
             client.execute(request);
         } catch (Exception e) {
@@ -94,6 +133,14 @@ public class SyncopeBackingEngine implements BackingEngine {
     }
 
     public List<UserPrincipal> listUsers() {
+        if (version2) {
+            return listUsersSyncope2();
+        } else {
+            return listUsersSyncope1();
+        }
+    }
+
+    private List<UserPrincipal> listUsersSyncope1() {
         List<UserPrincipal> users = new ArrayList<>();
         HttpGet request = new HttpGet(address + "/users");
         request.setHeader("Content-Type", "application/xml");
@@ -121,7 +168,33 @@ public class SyncopeBackingEngine implements BackingEngine {
         return users;
     }
 
+    private List<UserPrincipal> listUsersSyncope2() {
+        List<UserPrincipal> users = new ArrayList<>();
+        HttpGet request = new HttpGet(address + "/users");
+        request.setHeader("Content-Type", "application/json");
+        try {
+            HttpResponse httpResponse = client.execute(request);
+            String response = EntityUtils.toString(httpResponse.getEntity());
+            JSONParser parser = new JSONParser(response);
+            List<Map<String, Object>> results = (List<Map<String, Object>>) parser.getParsed().get("result");
+            for (Map<String, Object> result : results) {
+                users.add(new UserPrincipal((String) result.get("username")));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error listing users", e);
+        }
+        return users;
+    }
+
     public List<RolePrincipal> listRoles(Principal principal) {
+        if (version2) {
+            return listRolesSyncope2(principal);
+        } else {
+            return listRolesSyncope1(principal);
+        }
+    }
+
+    private List<RolePrincipal> listRolesSyncope1(Principal principal) {
         List<RolePrincipal> roles = new ArrayList<>();
         HttpGet request = new HttpGet(address + "/users?username=" + principal.getName());
         request.setHeader("Content-Type", "application/xml");
@@ -147,6 +220,26 @@ public class SyncopeBackingEngine implements BackingEngine {
             throw new RuntimeException("Error listing roles", e);
         }
         return roles;
+    }
+
+    private List<RolePrincipal> listRolesSyncope2(Principal principal) {
+        List<RolePrincipal> result = new ArrayList<>();
+        HttpGet request = new HttpGet(address + "/users/" + principal.getName());
+        request.setHeader("Content-Type", "application/json");
+        try {
+            HttpResponse httpResponse = client.execute(request);
+            String response = EntityUtils.toString(httpResponse.getEntity());
+            if (response != null && !response.isEmpty()) {
+                JSONParser parser = new JSONParser(response);
+                List<String> roles = (List<String>) parser.getParsed().get("roles");
+                for (String role : roles) {
+                    result.add(new RolePrincipal(role));
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error listing roles", e);
+        }
+        return result;
     }
 
     public void addRole(String username, String role) {
