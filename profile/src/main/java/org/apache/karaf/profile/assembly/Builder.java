@@ -185,12 +185,14 @@ public class Builder {
      * supported versions are defined.</p>
      */
     public enum JavaVersion {
-        Java16("1.6"), Java17("1.7"), Java18("1.8"), Java9("9");
+        Java16("1.6", 1), Java17("1.7", 2), Java18("1.8", 3), Java9("9", 4);
 
         private String version;
+        private int ordinal;
 
-        JavaVersion(String version) {
+        JavaVersion(String version, int ordinal) {
             this.version = version;
+            this.ordinal = ordinal;
         }
 
         public static JavaVersion from(String version) {
@@ -202,6 +204,10 @@ public class Builder {
                 throw new IllegalArgumentException("Java version \"" + version + "\" is not supported");
             }
             return v.get();
+        }
+
+        public boolean supportsEndorsedAndExtLibraries() {
+            return this.ordinal < Java9.ordinal;
         }
     }
 
@@ -1256,7 +1262,7 @@ public class Builder {
             }
             final String type = clause.getDirective(LIBRARY_CLAUSE_TYPE) != null
                     ? clause.getDirective(LIBRARY_CLAUSE_TYPE) : Library.TYPE_DEFAULT;
-            if (!javase.startsWith("1.") && (Library.TYPE_ENDORSED.equals(type) || Library.TYPE_EXTENSION.equals(type))) {
+            if (!javase.supportsEndorsedAndExtLibraries() && (Library.TYPE_ENDORSED.equals(type) || Library.TYPE_EXTENSION.equals(type))) {
                 LOGGER.warn("Ignoring library " + library + " of type " + type + " which is only supported for Java 1.8.");
                 continue;
             }
