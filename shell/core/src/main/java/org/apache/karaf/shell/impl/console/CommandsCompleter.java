@@ -36,6 +36,8 @@ import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.impl.console.osgi.secured.SecuredCommand;
+import org.apache.karaf.shell.impl.console.osgi.secured.SecuredSessionFactoryImpl;
 import org.apache.karaf.shell.support.completers.ArgumentCommandLine;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.jline.reader.LineReader;
@@ -270,7 +272,34 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         for (String var : vars) {
             Object content = session.get(var);
             if (content != null && "org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName())) {
-                aliases.add(var);
+
+                //check both acl for alias and original cmd to determine if it should be visible
+                int index = var.indexOf(":");
+                if (index > 0 && (factory instanceof SecuredSessionFactoryImpl)) {
+                    String scope = var.substring(0, index);
+                    String command = var.substring(index + 1);
+                    String originalCmd = content.toString();
+                    index = originalCmd.indexOf(" ");
+                    Object securityCmd = null;
+                    if (index > 0) {
+                        securityCmd = ((org.apache.felix.gogo.runtime.Closure)content).
+                            get(originalCmd.substring(0, index));
+                    }
+                    if (securityCmd instanceof SecuredCommand) {
+                        if (((SecuredSessionFactoryImpl)factory).isVisible(scope, command)
+                            && ((SecuredSessionFactoryImpl)factory).isVisible(((SecuredCommand)securityCmd).getScope(),
+                                                                              ((SecuredCommand)securityCmd).getName())) {
+                            aliases.add(var);
+                        }
+                    } else {
+                        if (((SecuredSessionFactoryImpl)factory).isVisible(scope, command)) {
+                            aliases.add(var);
+                        }
+                    }
+                    
+                } else {
+                    aliases.add(var);
+                }
             }
         }
         return aliases;

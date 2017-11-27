@@ -108,7 +108,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         }
     }
 
-    protected boolean isVisible(String scope, String name) {
+    public boolean isVisible(String scope, String name) {
         Dictionary<String, Object> config = getScopeConfig(scope);
         if (config != null) {
             List<String> roles = new ArrayList<>();
