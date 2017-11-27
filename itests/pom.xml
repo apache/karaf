@@ -268,6 +268,9 @@
                         <spring43.version>${spring43.version}</spring43.version>
                         <activemq.version>${activemq.version}</activemq.version>
                     </systemPropertyVariables>
+                    <excludes>
+                        <exclude>MavenTest</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -316,6 +319,9 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
+                            <excludes>
+                                <exclude>MavenTest</exclude>
+                            </excludes>
                             <systemPropertyVariables>
                                 <org.ops4j.pax.url.mvn.localRepository>${maven.repo.local}</org.ops4j.pax.url.mvn.localRepository>
 		                        <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
