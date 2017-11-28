@@ -31,9 +31,10 @@ public class SyncopeBackingEngineFactory implements BackingEngineFactory {
         String address = (String) options.get(SyncopeLoginModule.ADDRESS);
         String adminUser = (String) options.get(SyncopeLoginModule.ADMIN_USER);
         String adminPassword = (String) options.get(SyncopeLoginModule.ADMIN_PASSWORD);
+        String version = (String) options.get(SyncopeLoginModule.VERSION);
 
         try {
-            instance = new SyncopeBackingEngine(address, adminUser, adminPassword);
+            instance = new SyncopeBackingEngine(address, version, adminUser, adminPassword);
         } catch (Exception e) {
             LOGGER.error("Error creating the Syncope backing engine", e);
         }
