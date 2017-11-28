@@ -36,6 +36,10 @@ public class Activator extends BaseActivator {
         scheduler = new QuartzScheduler(threadPool);
         whiteboardHandler = new WhiteboardHandler(bundleContext, scheduler);
         register(Scheduler.class, scheduler);
+
+        SchedulerMBeanImpl mBean = new SchedulerMBeanImpl();
+        mBean.setScheduler(scheduler);
+        registerMBean(mBean, "type=scheduler");
     }
 
     @Override
