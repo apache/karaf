@@ -23,8 +23,6 @@ public interface SchedulerMBean {
 
     TabularData getJobs() throws MBeanException;
 
-    void trigger(String name, boolean background) throws MBeanException;
-
     void unschedule(String name) throws MBeanException;
 
 }

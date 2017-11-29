@@ -19,7 +19,6 @@ package org.apache.karaf.scheduler.core;
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.scheduler.SchedulerMBean;
-import org.apache.karaf.scheduler.command.support.TriggerJob;
 
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -53,19 +52,6 @@ public class SchedulerMBeanImpl extends StandardMBean implements SchedulerMBean 
                 table.put(data);
             }
             return table;
-        } catch (Exception e) {
-            throw new MBeanException(null, e.toString());
-        }
-    }
-
-    @Override
-    public void trigger(String name, boolean background) throws MBeanException {
-        try {
-            if (background) {
-                scheduler.schedule(new TriggerJob(scheduler, name), scheduler.NOW());
-            } else {
-                scheduler.trigger(name);
-            }
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
