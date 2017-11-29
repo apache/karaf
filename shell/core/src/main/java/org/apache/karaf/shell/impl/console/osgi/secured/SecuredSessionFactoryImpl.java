@@ -69,7 +69,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private Map<String, Dictionary<String, Object>> scopes = new HashMap<>();
     private SingleServiceTracker<ConfigurationAdmin> configAdminTracker;
     private ServiceRegistration<ConfigurationListener> registration;
-    private Map<Object, Boolean> serviceVisibleMap = new HashMap<>();
+    private ThreadLocal<Map<Object, Boolean>> serviceVisibleMap = new ThreadLocal<>();
 
     public SecuredSessionFactoryImpl(BundleContext bundleContext, ThreadIO threadIO) throws InvalidSyntaxException {
         super(threadIO);
@@ -104,17 +104,20 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
 
     @Override
     protected boolean isVisible(Object service) {
-        if (this.serviceVisibleMap.get(service) != null) {
-            return this.serviceVisibleMap.get(service);
+        if (this.serviceVisibleMap.get() == null) {
+            this.serviceVisibleMap.set(new HashMap<>());
+        }
+        if (this.serviceVisibleMap.get().get(service) != null) {
+            return this.serviceVisibleMap.get().get(service);
         }
         if (service instanceof Command) {
             Command cmd = (Command) service;
             boolean ret = isVisible(cmd.getScope(), cmd.getName());
-            this.serviceVisibleMap.put(service, ret);
+            this.serviceVisibleMap.get().put(service, ret);
             return ret;
         } else {
             boolean ret = super.isVisible(service);
-            this.serviceVisibleMap.put(service, ret);
+            this.serviceVisibleMap.get().put(service, ret);
             return ret;
         }
     }
@@ -282,7 +285,9 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
 
         try {
             synchronized(this.serviceVisibleMap) {
-                this.serviceVisibleMap.clear();
+                if (this.serviceVisibleMap.get() != null) {
+                    this.serviceVisibleMap.get().clear();
+                }
             }
             switch (event.getType()) {
                 case ConfigurationEvent.CM_DELETED:
