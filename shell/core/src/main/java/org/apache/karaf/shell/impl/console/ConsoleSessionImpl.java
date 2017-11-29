@@ -195,7 +195,7 @@ public class ConsoleSessionImpl implements Session {
         history = new HistoryWrapper(reader.getHistory());
 
         // Registry
-        registry = new RegistryImpl(factory.getRegistry());
+        registry = new RegistryImpl(factory.getRegistry(), this);
         registry.register(factory);
         registry.register(this);
         registry.register(registry);

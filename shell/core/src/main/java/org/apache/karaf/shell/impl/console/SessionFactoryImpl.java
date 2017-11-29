@@ -157,6 +157,9 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
                 throw new IllegalStateException("SessionFactory has been closed");
             }
             final Session session = new ConsoleSessionImpl(this, commandProcessor, threadIO, in, out, err, term, encoding, closeCallback);
+            if (this.session == null) {
+                this.session = session;
+            }
             return session;
         }
     }

@@ -286,7 +286,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
                             get(originalCmd.substring(0, index));
                     }
                     if (securityCmd instanceof SecuredCommand) {
-                        if (((SecuredSessionFactoryImpl)factory).isVisible(scope, command)
+                        if (((SecuredSessionFactoryImpl)factory).isAliasVisible(scope, command)
                             && ((SecuredSessionFactoryImpl)factory).isVisible(((SecuredCommand)securityCmd).getScope(),
                                                                               ((SecuredCommand)securityCmd).getName())) {
                             aliases.add(var);

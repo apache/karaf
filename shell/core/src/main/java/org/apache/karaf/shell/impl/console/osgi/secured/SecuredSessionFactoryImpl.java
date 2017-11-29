@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.Subject;
 
@@ -38,6 +40,7 @@ import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.shell.api.console.Command;
+import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleContext;
@@ -66,6 +69,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private Map<String, Dictionary<String, Object>> scopes = new HashMap<>();
     private SingleServiceTracker<ConfigurationAdmin> configAdminTracker;
     private ServiceRegistration<ConfigurationListener> registration;
+    private Map<Object, Boolean> serviceVisibleMap = new HashMap<>();
 
     public SecuredSessionFactoryImpl(BundleContext bundleContext, ThreadIO threadIO) throws InvalidSyntaxException {
         super(threadIO);
@@ -100,15 +104,46 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
 
     @Override
     protected boolean isVisible(Object service) {
+        if (this.serviceVisibleMap.get(service) != null) {
+            return this.serviceVisibleMap.get(service);
+        }
         if (service instanceof Command) {
             Command cmd = (Command) service;
-            return isVisible(cmd.getScope(), cmd.getName());
+            boolean ret = isVisible(cmd.getScope(), cmd.getName());
+            this.serviceVisibleMap.put(service, ret);
+            return ret;
         } else {
-            return super.isVisible(service);
+            boolean ret = super.isVisible(service);
+            this.serviceVisibleMap.put(service, ret);
+            return ret;
         }
     }
 
     public boolean isVisible(String scope, String name) {
+        boolean visible = true;
+        Dictionary<String, Object> config = getScopeConfig(scope);
+        if (config != null) {
+            visible = false;
+            List<String> roles = new ArrayList<>();
+            ACLConfigurationParser.getRolesForInvocation(name, null, null, config, roles);
+            if (roles.isEmpty()) {
+                visible = true;
+            } else {
+                for (String role : roles) {
+                    if (currentUserHasRole(role)) {
+                        visible = true;
+                    }
+                }
+            }
+        } 
+        AliasCommand aliasCommand = findAlias(scope, name);
+        if (aliasCommand != null) {
+            visible = visible && isAliasVisible(aliasCommand.getScope(), aliasCommand.getName());
+        }
+        return visible;
+    }
+
+    public boolean isAliasVisible(String scope, String name) {
         Dictionary<String, Object> config = getScopeConfig(scope);
         if (config != null) {
             List<String> roles = new ArrayList<>();
@@ -123,29 +158,91 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                 }
                 return false;
             }
-        }
+        } 
         return true;
     }
+       
+    private AliasCommand findAlias(String scope, String name) {
+        if (session != null) {
+            Set<String> vars = ((Set<String>) session.get(null));
+            Set<String> aliases = new HashSet<>();
+            String aliasScope = null;
+            String aliasName = null;
+            for (String var : vars) {
+                Object content = session.get(var);
+                if (content != null && "org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName())) {
 
+                    int index = var.indexOf(":");
+                    if (index > 0) {
+                        aliasScope = var.substring(0, index);
+                        aliasName = var.substring(index + 1);
+                        String originalCmd = content.toString();
+                        index = originalCmd.indexOf(" ");
+                        Object securityCmd = null;
+                        if (index > 0) {
+                            securityCmd = ((org.apache.felix.gogo.runtime.Closure)content)
+                                .get(originalCmd.substring(0, index));
+                        }
+                        if (securityCmd instanceof SecuredCommand) {
+                            if (((SecuredCommand)securityCmd).getScope().equals(scope)
+                               && ((SecuredCommand)securityCmd).getName().equals(name)) {
+                                return new AliasCommand(aliasScope, aliasName);
+                            }
+                        }
+                    }
+                }
+                
+            }
+        }
+        return null;
+    }
+    
+    
     void checkSecurity(String scope, String name, List<Object> arguments) {
+       
         Dictionary<String, Object> config = getScopeConfig(scope);
         if (config != null) {
+            boolean passCheck = false;
             if (!isVisible(scope, name)) {
                 throw new CommandNotFoundException(scope + ":" + name);
             }
             List<String> roles = new ArrayList<>();
             ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(name, new Object[] { arguments.toString() }, null, config, roles);
             if (s == ACLConfigurationParser.Specificity.NO_MATCH) {
-                return;
+                passCheck = true;
             }
             for (String role : roles) {
                 if (currentUserHasRole(role)) {
-                    return;
+                    passCheck = true;
                 }
             }
-            throw new SecurityException("Insufficient credentials.");
+            if (!passCheck) {
+                throw new SecurityException("Insufficient credentials.");
+            }
         }
+        AliasCommand aliasCommand = findAlias(scope, name); 
+        if (aliasCommand != null) {
+            //this is the alias
+            if (config != null) {
+                if (!isAliasVisible(aliasCommand.getScope(), aliasCommand.getName())) {
+                    throw new CommandNotFoundException(aliasCommand.getScope() + ":" + aliasCommand.getName());
+                }
+                List<String> roles = new ArrayList<>();
+                ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(aliasCommand.getName(), new Object[] { arguments.toString() }, null, config, roles);
+                if (s == ACLConfigurationParser.Specificity.NO_MATCH) {
+                    return;
+                }
+                for (String role : roles) {
+                    if (currentUserHasRole(role)) {
+                        return;
+                    }
+                }
+                throw new SecurityException("Insufficient credentials.");
+            }
+        }
+               
     }
+
 
     static boolean currentUserHasRole(String requestedRole) {
         String clazz;
@@ -184,6 +281,9 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
             return;
 
         try {
+            synchronized(this.serviceVisibleMap) {
+                this.serviceVisibleMap.clear();
+            }
             switch (event.getType()) {
                 case ConfigurationEvent.CM_DELETED:
                     removeScopeConfig(event.getPid().substring(PROXY_COMMAND_ACL_PID_PREFIX.length()));

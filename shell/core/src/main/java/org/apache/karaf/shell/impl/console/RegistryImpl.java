@@ -27,17 +27,24 @@ import java.util.concurrent.Callable;
 
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Registry;
+import org.apache.karaf.shell.api.console.Session;
 
 public class RegistryImpl implements Registry {
 
     protected final Registry parent;
     protected final Map<Object, Object> services = new LinkedHashMap<>();
+    protected Session session;
     private final Map<String, List<Command>> commands = new HashMap<>();
 
     public RegistryImpl(Registry parent) {
         this.parent = parent;
     }
 
+    public RegistryImpl(Registry parent, Session session) {
+        this.parent = parent;
+        this.session = session;
+    }
+    
     @Override
     public List<Command> getCommands() {
         return getServices(Command.class);
