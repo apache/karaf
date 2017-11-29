@@ -35,7 +35,6 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
-        <jetty.version>9.3.21.v20170918</jetty.version>
     </properties>
 
     <dependencies>

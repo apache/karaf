@@ -625,7 +625,7 @@
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-server-impl/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-client-impl/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
+        <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${websocket.version}</bundle>
     </feature>
 
     <feature name="jetty" version="8.1.14.v20131031">
