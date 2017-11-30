@@ -143,8 +143,7 @@
         <aspectj.bundle.version>1.7.4_1</aspectj.bundle.version>
         <ant.bundle.version>1.9.7_1</ant.bundle.version>
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
-        <asm.version>5.2</asm.version>
-        <asm.springsource.version>1.5.3</asm.springsource.version>
+        <asm.version>6.0</asm.version>
         <awaitility.version>3.0.0</awaitility.version>
         <cglib.bundle.version>3.2.4_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
@@ -236,6 +235,7 @@
         <aries.jndi.url.version>1.1.0</aries.jndi.url.version>
         <aries.proxy.version>1.1.1</aries.proxy.version>
         <aries.proxy.api.version>1.1.0</aries.proxy.api.version>
+        <aries.spifly.version>1.0.10</aries.spifly.version>
         <aries.subsystem.api.version>2.0.10</aries.subsystem.api.version>
         <aries.subsystem.core.version>2.0.10</aries.subsystem.core.version>
         <aries.transaction.manager.version>1.3.3</aries.transaction.manager.version>
@@ -257,6 +257,7 @@
         <hibernate.validator.version>5.3.4.Final</hibernate.validator.version>
         <jansi.version>1.16</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
+        <jetty.version>9.3.21.v20170918</jetty.version>
         <jline.version>3.5.1</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
@@ -273,7 +274,7 @@
         <pax.logging.version>1.10.1</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
         <pax.url.version>2.5.3</pax.url.version>
-        <pax.web.version>6.0.7</pax.web.version>
+        <pax.web.version>6.1.0-SNAPSHOT</pax.web.version>
         <pax.tinybundle.version>2.1.1</pax.tinybundle.version>
         <pax.jdbc.version>1.2.0</pax.jdbc.version>
         <pax.jms.version>0.1.0</pax.jms.version>
@@ -296,12 +297,13 @@
         <derby-version>10.12.1.1</derby-version>
         <directory-version>2.0.0-M24</directory-version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
-        <xbean.version>3.18</xbean.version>
+        <xbean.version>4.6</xbean.version>
         <xerces.version>2.11.0_1</xerces.version>
         <xalan.bundle.version>2.7.2_3</xalan.bundle.version>
         <xalan-serializer.bundle.version>2.7.2_1</xalan-serializer.bundle.version>
         <javax.mail.version>1.4.7</javax.mail.version>
 
+        <websocket.version>1.1</websocket.version>
         <winsw.version>1.18</winsw.version>
 
 
@@ -978,7 +980,27 @@
 
             <dependency>
                 <groupId>org.ow2.asm</groupId>
-                <artifactId>asm-all</artifactId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-util</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-tree</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-analysis</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-commons</artifactId>
                 <version>${asm.version}</version>
             </dependency>
 

@@ -76,7 +76,27 @@
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-all</artifactId>
+            <artifactId>asm</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-util</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-tree</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-analysis</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-commons</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -119,16 +139,5 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>java9</id>
-            <properties>
-                <asm.version>6.0_BETA</asm.version> 
-            </properties>
-            <activation>
-                <jdk>9</jdk>
-            </activation>
-        </profile>
-    </profiles>
 
 </project>

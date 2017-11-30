@@ -32,7 +32,11 @@
 
     <feature name="aries-proxy" description="Aries Proxy" version="${project.version}">
         <!-- false to avoid restarts of proxy which cascades badly -->
-        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-util/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-tree/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-analysis/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-commons/${asm.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
     </feature>
 
@@ -596,7 +600,11 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-util/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-tree/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-analysis/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-commons/${asm.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${dependency.jetty.version}</bundle>
@@ -625,7 +633,7 @@
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-server-impl/${dependency.jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-client-impl/${dependency.jetty.version}</bundle>
-        <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${dependency.websocket.version}</bundle>
+        <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${websocket.version}</bundle>
     </feature>
 
     <feature name="jetty" version="8.1.14.v20131031">
