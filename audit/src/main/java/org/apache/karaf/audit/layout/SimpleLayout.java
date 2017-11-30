@@ -30,7 +30,7 @@ public class SimpleLayout extends AbstractLayout {
 
     public SimpleLayout() {
         super(new Buffer(Buffer.Format.Json));
-        hdr = " " + hostName + " " + appName + " " + procId + " ";
+        hdr = " " + hostName + " " + appName + " " + procId;
     }
 
     @Override
