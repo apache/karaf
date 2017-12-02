@@ -89,6 +89,7 @@ public class RepositoryImpl implements Repository {
 
     public void setBlacklisted(boolean blacklisted) {
         this.blacklisted = blacklisted;
+        features.setBlacklisted(blacklisted);
     }
 
     private void load(boolean validate) {

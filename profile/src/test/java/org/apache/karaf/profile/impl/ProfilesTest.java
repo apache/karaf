@@ -89,7 +89,7 @@ public class ProfilesTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testProfilePlaceholderResolverWitCycle() {
+    public void testProfilePlaceholderResolverWithCycle() {
         Profile profile = ProfileBuilder.Factory.create("test")
                 .addConfiguration("pid1", "foo", "b${profile:pid2/bar}")
                 .addConfiguration("pid2", "bar", "a${rep}")
@@ -212,12 +212,13 @@ public class ProfilesTest {
         parents.put("p1", p1);
         parents.put("p2", p2);
 
-        assertThat(Profiles.getOverlay(c, parents).getAttributes().get("a"), equalTo("5"));
-        assertThat(Profiles.getOverlay(c, parents).getAttributes().get("b"), equalTo("4"));
-        assertThat(Profiles.getOverlay(c, parents).getAttributes().get("c"), equalTo("2"));
-        assertThat(Profiles.getOverlay(c, parents).getConfiguration("p").get("p"), equalTo("5"));
-        assertThat(Profiles.getOverlay(c, parents).getConfiguration("p").get("px"), equalTo("1"));
-        assertThat(Profiles.getOverlay(c, parents).getFileConfiguration("f"), equalTo(new byte[] { 0x05 }));
+        Profile overlay = Profiles.getOverlay(c, parents);
+        assertThat(overlay.getAttributes().get("a"), equalTo("5"));
+        assertThat(overlay.getAttributes().get("b"), equalTo("4"));
+        assertThat(overlay.getAttributes().get("c"), equalTo("2"));
+        assertThat(overlay.getConfiguration("p").get("p"), equalTo("5"));
+        assertThat(overlay.getConfiguration("p").get("px"), equalTo("1"));
+        assertThat(overlay.getFileConfiguration("f"), equalTo(new byte[] { 0x05 }));
     }
 
     @Test

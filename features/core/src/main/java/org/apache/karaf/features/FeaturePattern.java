@@ -118,4 +118,9 @@ public class FeaturePattern {
         return match;
     }
 
+    @Override
+    public String toString() {
+        return originalId;
+    }
+
 }

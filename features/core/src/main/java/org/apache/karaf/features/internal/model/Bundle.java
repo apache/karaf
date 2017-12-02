@@ -66,7 +66,7 @@ public class Bundle implements BundleInfo {
     @XmlTransient
     private boolean blacklisted = false;
     @XmlTransient
-    private boolean overriden = false;
+    private BundleInfo.BundleOverrideMode overriden = BundleInfo.BundleOverrideMode.NONE;
 
     public Bundle() {
     }
@@ -164,13 +164,13 @@ public class Bundle implements BundleInfo {
         this.blacklisted = blacklisted;
     }
 
-    public boolean isOverriden() {
+    @Override
+    public BundleInfo.BundleOverrideMode isOverriden() {
         return overriden;
     }
 
-    public void setOverriden(boolean overriden) {
+    public void setOverriden(BundleInfo.BundleOverrideMode overriden) {
         this.overriden = overriden;
-
     }
 
     @Override

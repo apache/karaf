@@ -232,13 +232,13 @@ public class Activator extends BaseActivator {
             getString("overrides", new File(karafEtc, "overrides.properties").toURI().toString()),
             getString("featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE),
             getString("bundleUpdateRange", FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE),
-            getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS),
+            getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS.getValue()),
             getInt("downloadThreads", FeaturesService.DEFAULT_DOWNLOAD_THREADS),
             getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY),
             getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN),
             getString("blacklisted", new File(karafEtc, "blacklisted.properties").toURI().toString()),
             getString("featureProcessing", new File(karafEtc, FEATURES_SERVICE_PROCESSING_FILE).toURI().toString()),
-            getString("serviceRequirements", FeaturesService.SERVICE_REQUIREMENTS_DEFAULT));
+            getString("serviceRequirements", FeaturesService.ServiceRequirementsBehavior.Default.getValue()));
     }
 
     private StateStorage createStateStorage() {

@@ -50,6 +50,8 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     public static Logger LOG = LoggerFactory.getLogger(FeaturesProcessorImpl.class);
 
     private static FeaturesProcessingSerializer serializer = new FeaturesProcessingSerializer();
+
+    // empty, but fully functional features processing configuration
     private FeaturesProcessing processing = new FeaturesProcessing();
 
     /**
@@ -66,7 +68,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
                     processing = serializer.read(stream);
                 }
             } catch (FileNotFoundException e) {
-                LOG.warn("Can't find feature processing file (" + featureModificationsURI + ")");
+                LOG.debug("Can't find feature processing file (" + featureModificationsURI + "), skipping");
             } catch (Exception e) {
                 LOG.warn("Can't initialize feature processor: " + e.getMessage());
             }
@@ -119,11 +121,12 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     public void process(Features features) {
         // blacklisting features
         for (Feature feature : features.getFeature()) {
-            feature.setBlacklisted(isFeatureBlacklisted(feature));
+            boolean allBlacklisted = features.isBlacklisted();
+            feature.setBlacklisted(allBlacklisted || isFeatureBlacklisted(feature));
             // blacklisting bundles
-            processBundles(feature.getBundle());
+            processBundles(feature.getBundle(), allBlacklisted);
             for (Conditional c : feature.getConditional()) {
-                processBundles(c.getBundle());
+                processBundles(c.getBundle(), allBlacklisted);
             }
         }
 
@@ -132,9 +135,9 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
         // TODO: overriding features
     }
 
-    private void processBundles(List<Bundle> bundles) {
+    private void processBundles(List<Bundle> bundles, boolean allBlacklisted) {
         for (Bundle bundle : bundles) {
-            boolean bundleBlacklisted = isBundleBlacklisted(bundle.getLocation());
+            boolean bundleBlacklisted = allBlacklisted || isBundleBlacklisted(bundle.getLocation());
             if (bundleBlacklisted) {
                 // blacklisting has higher priority
                 bundle.setBlacklisted(true);
@@ -151,18 +154,23 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
      * @param bundle
      */
     private void staticOverrideBundle(Bundle bundle) {
+        bundle.setOverriden(BundleInfo.BundleOverrideMode.NONE);
+
         for (BundleReplacements.OverrideBundle override : this.getInstructions().getBundleReplacements().getOverrideBundles()) {
             String originalLocation = bundle.getLocation();
             if (override.getOriginalUriPattern().matches(originalLocation)) {
                 LOG.debug("Overriding bundle location \"" + originalLocation + "\" with \"" + override.getReplacement() + "\"");
                 bundle.setOriginalLocation(originalLocation);
-                bundle.setOverriden(true);
+                if (override.getMode() == BundleReplacements.BundleOverrideMode.MAVEN) {
+                    bundle.setOverriden(BundleInfo.BundleOverrideMode.MAVEN);
+                } else {
+                    bundle.setOverriden(BundleInfo.BundleOverrideMode.OSGI);
+                }
                 bundle.setLocation(override.getReplacement());
-                // last rule wins - no break!!!
+                // TOCHECK: last rule wins - no break!!!
                 //break;
             }
         }
-
     }
 
     @Override
@@ -190,7 +198,8 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
      * @param location
      * @return
      */
-    private boolean isBundleBlacklisted(String location) {
+    @Override
+    public boolean isBundleBlacklisted(String location) {
         return getInstructions().getBlacklist().isBundleBlacklisted(location);
     }
 

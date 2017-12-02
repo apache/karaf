@@ -204,4 +204,9 @@ public class LocationPattern {
         return match;
     }
 
+    @Override
+    public String toString() {
+        return originalUri;
+    }
+
 }

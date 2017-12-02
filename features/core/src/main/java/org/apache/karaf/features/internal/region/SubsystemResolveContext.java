@@ -38,7 +38,6 @@ import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.namespace.service.ServiceNamespace;
@@ -72,9 +71,9 @@ public class SubsystemResolveContext extends ResolveContext {
     private final Repository repository;
     private final Repository globalRepository;
     private final Downloader downloader;
-    private final String serviceRequirements;
+    private final FeaturesService.ServiceRequirementsBehavior serviceRequirements;
 
-    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader, String serviceRequirements) throws BundleException {
+    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader, FeaturesService.ServiceRequirementsBehavior serviceRequirements) {
         this.root = root;
         this.globalRepository = globalRepository != null ? new SubsystemRepository(globalRepository) : null;
         this.downloader = downloader;
@@ -159,6 +158,11 @@ public class SubsystemResolveContext extends ResolveContext {
         return PackageNamespace.RESOLUTION_DYNAMIC.equals(resolution);
     }
 
+    /**
+     * {@link #resToSub} will quickly map all {@link Subsystem#getInstallable() installable resources} to their
+     * {@link Subsystem}
+     * @param subsystem
+     */
     void prepare(Subsystem subsystem) {
         resToSub.put(subsystem, subsystem);
         for (Resource res : subsystem.getInstallable()) {
@@ -275,7 +279,7 @@ public class SubsystemResolveContext extends ResolveContext {
     @Override
     public boolean isEffective(Requirement requirement) {
         boolean isServiceReq = ServiceNamespace.SERVICE_NAMESPACE.equals(requirement.getNamespace());
-        return !(isServiceReq && FeaturesService.SERVICE_REQUIREMENTS_DISABLE.equals(serviceRequirements));
+        return !(isServiceReq && FeaturesService.ServiceRequirementsBehavior.Disable == serviceRequirements);
     }
 
     @Override

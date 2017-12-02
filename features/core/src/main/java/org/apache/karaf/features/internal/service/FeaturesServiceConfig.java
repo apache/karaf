@@ -53,18 +53,50 @@ public class FeaturesServiceConfig {
      */
     public final String serviceRequirements;
 
+    /**
+     * Location of <code>etc/blacklisted.properties</code>
+     */
+    @Deprecated
     public final String blacklisted;
+
+    /**
+     * Location of <code>etc/org.apache.karaf.features.xml</code>
+     */
     public final String featureModifications;
+
+    /**
+     * Location of <code>etc/overrides.properties</code>
+     */
+    @Deprecated
     public final String overrides;
 
     public FeaturesServiceConfig() {
         this(null, null, null);
     }
 
+    public FeaturesServiceConfig(String featureModifications) {
+        this(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, null, featureModifications, null);
+    }
+
+    @Deprecated
     public FeaturesServiceConfig(String overrides, String blacklisted, String featureModifications) {
         this(overrides, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklisted, featureModifications, null);
     }
 
+    public FeaturesServiceConfig(String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun, String featureModifications, String serviceRequirements) {
+        this.overrides = null;
+        this.featureResolutionRange = featureResolutionRange;
+        this.bundleUpdateRange = bundleUpdateRange;
+        this.updateSnapshots = updateSnapshots;
+        this.downloadThreads = downloadThreads;
+        this.scheduleDelay = scheduleDelay;
+        this.scheduleMaxRun = scheduleMaxRun;
+        this.blacklisted = null;
+        this.featureModifications = featureModifications;
+        this.serviceRequirements = serviceRequirements;
+    }
+
+    @Deprecated
     public FeaturesServiceConfig(String overrides, String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun, String blacklisted, String featureModifications, String serviceRequirements) {
         this.overrides = overrides;
         this.featureResolutionRange = featureResolutionRange;
@@ -77,4 +109,5 @@ public class FeaturesServiceConfig {
         this.featureModifications = featureModifications;
         this.serviceRequirements = serviceRequirements;
     }
+
 }

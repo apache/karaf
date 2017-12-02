@@ -16,34 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.features.internal.service;
+package org.apache.karaf.features.internal.region;
 
-import org.apache.karaf.features.Repository;
-import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.BundleInfo;
 
 /**
- * Service that can process (enhance, modify, trim, ...) a set of features read from {@link Repository}.
+ * Additional callback methods that may be invoked from {@link SubsystemResolver}
  */
-public interface FeaturesProcessor {
+public interface SubsystemResolverCallback {
 
     /**
-     * Checks whether given repository URI is <em>blacklisted</em>
-     * @param uri
-     * @return
+     * Notification about {@link BundleInfo bundle} being blacklisted
+     * @param bundleInfo
      */
-    boolean isRepositoryBlacklisted(String uri);
-
-    /**
-     * Checks whether given bundle URI is <em>blacklisted</em>
-     * @param uri
-     * @return
-     */
-    boolean isBundleBlacklisted(String uri);
-
-    /**
-     * Processes original {@link Features JAXB model of features}
-     * @param features
-     */
-    void process(Features features);
+    void bundleBlacklisted(BundleInfo bundleInfo);
 
 }

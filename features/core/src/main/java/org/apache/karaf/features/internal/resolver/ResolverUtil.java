@@ -46,6 +46,11 @@ public class ResolverUtil
         return null;
     }
 
+    /**
+     * Returns name of owning {@link org.apache.karaf.features.internal.region.Subsystem} for given resource
+     * @param resource
+     * @return
+     */
     public static String getOwnerName(Resource resource)
     {
         List<Requirement> reqs = resource.getRequirements(null);
