@@ -310,7 +310,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
      * @return
      */
     private byte[] reformat(String name, FileContent fileContent) {
-        if (!fileContent.generated && !(isOverlay && name.equals(INTERNAL_PID + PROPERTIES_SUFFIX))) {
+        if (!fileContent.generated || !(isOverlay && name.equals(INTERNAL_PID + PROPERTIES_SUFFIX))) {
             return fileContent.bytes;
         }
 

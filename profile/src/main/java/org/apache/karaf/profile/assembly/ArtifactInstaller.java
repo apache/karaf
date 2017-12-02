@@ -48,13 +48,19 @@ public class ArtifactInstaller {
         this.downloader = downloader;
         this.blacklist = blacklist;
     }
-    
+
+    /**
+     * Installs a {@link BundleInfo} into <code>system/</code> directory taking into account <em>blacklisted</em>
+     * and <em>overriden</em> flags.
+     * @param bundle
+     * @throws Exception
+     */
     public void installArtifact(BundleInfo bundle) throws Exception {
         if (bundle.isBlacklisted()) {
             LOGGER.info("      skipping blacklisted maven artifact: " + bundle.getLocation());
             return;
         }
-        if (bundle.isOverriden()) {
+        if (bundle.isOverriden() != BundleInfo.BundleOverrideMode.NONE) {
             LOGGER.info("      adding overriden maven artifact: " + bundle.getLocation() + " (original location: " + bundle.getOriginalLocation() + ")");
         } else {
             LOGGER.info("      adding maven artifact: " + bundle.getLocation());
@@ -76,6 +82,12 @@ public class ArtifactInstaller {
         });
     }
 
+    /**
+     * Installs generic artifact to <code>system/</code> directory. For bundles, dedicated {@link #installArtifact(BundleInfo)}
+     * should be used.
+     * @param location
+     * @throws Exception
+     */
     public void installArtifact(String location) throws Exception {
         LOGGER.info("      adding maven artifact: " + location);
         location = removeTrailingSlash(stripUrl(location));

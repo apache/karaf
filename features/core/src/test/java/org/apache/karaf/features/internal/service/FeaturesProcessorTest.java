@@ -24,6 +24,7 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.processing.BundleReplacements;
@@ -186,18 +187,18 @@ public class FeaturesProcessorTest {
         RepositoryImpl repo = (RepositoryImpl) new RepositoryCacheImpl(processor).create(uri, true);
 
         Feature f1 = repo.getFeatures()[0];
-        assertFalse(f1.getBundles().get(0).isOverriden());
-        assertTrue(f1.getBundles().get(1).isOverriden());
+        assertTrue(f1.getBundles().get(0).isOverriden() == BundleInfo.BundleOverrideMode.NONE);
+        assertTrue(f1.getBundles().get(1).isOverriden() == BundleInfo.BundleOverrideMode.OSGI);
         assertThat(f1.getBundles().get(1).getLocation(), equalTo("mvn:commons-io/commons-io/1.3.5"));
         assertThat(f1.getBundles().get(1).getOriginalLocation(), equalTo("mvn:commons-io/commons-io/1.3"));
-        assertTrue(f1.getBundles().get(2).isOverriden());
+        assertTrue(f1.getBundles().get(2).isOverriden() == BundleInfo.BundleOverrideMode.MAVEN);
         assertThat(f1.getBundles().get(2).getLocation(), equalTo("mvn:commons-codec/commons-codec/1.4.2"));
         assertThat(f1.getBundles().get(2).getOriginalLocation(), equalTo("mvn:commons-codec/commons-codec/0.4"));
-        assertFalse(f1.getBundles().get(3).isOverriden());
-        assertTrue(f1.getConditional().get(0).getBundles().get(0).isOverriden());
+        assertTrue(f1.getBundles().get(3).isOverriden() == BundleInfo.BundleOverrideMode.NONE);
+        assertTrue(f1.getConditional().get(0).getBundles().get(0).isOverriden() == BundleInfo.BundleOverrideMode.OSGI);
         assertThat(f1.getConditional().get(0).getBundles().get(0).getLocation(), equalTo("mvn:org.glassfish/something-strangest/4.3.1"));
         assertThat(f1.getConditional().get(0).getBundles().get(0).getOriginalLocation(), equalTo("mvn:org.glassfish/something-strangest/4.3.0"));
-        assertFalse(f1.getConditional().get(0).getBundles().get(1).isOverriden());
+        assertTrue(f1.getConditional().get(0).getBundles().get(1).isOverriden() == BundleInfo.BundleOverrideMode.NONE);
     }
 
     @Test

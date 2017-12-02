@@ -26,8 +26,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.resolver.ResolverImpl;
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
+import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.junit.Test;
@@ -141,11 +143,10 @@ public class FeaturesDependenciesTest {
         }
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data8"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                 requirements,
                 Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
         verify(resolver, expected);
@@ -201,6 +202,12 @@ public class FeaturesDependenciesTest {
         return cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE) + ": "
                 + cap.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE) + "/"
                 + cap.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+    }
+
+    private Map<String, List<Feature>> partitionByName(Feature[] features) {
+        Deployer.DeploymentState ds = new Deployer.DeploymentState();
+        ds.partitionFeatures(Arrays.asList(features));
+        return ds.featuresByName();
     }
 
 }

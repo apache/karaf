@@ -209,7 +209,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
                 if(startLevel > 0) {
                     sb.append(" start-level=").append(startLevel);
                 }
-                if (featureBundle.isOverriden()) {
+                if (featureBundle.isOverriden() != BundleInfo.BundleOverrideMode.NONE) {
                     sb.append(" (overriden from " + featureBundle.getOriginalLocation() + ")");
                 }
                 System.out.println(sb.toString());

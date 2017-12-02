@@ -29,6 +29,8 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import org.apache.karaf.features.Blacklisting;
+
 /**
  * <p>Root element of Feature definition. It contains optional attribute which allow
  * name of repository. This name will be used in shell to display source repository
@@ -53,7 +55,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "features", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "features", propOrder = {"repository", "resourceRepository", "feature"})
-public class Features {
+public class Features implements Blacklisting {
 
     @XmlSchemaType(name = "anyURI")
     @XmlElement(name = "repository", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
@@ -67,6 +69,8 @@ public class Features {
     protected String name;
     @XmlTransient
     private String namespace;
+    @XmlTransient
+    private boolean blacklisted;
 
     /**
      * <p>Get the value of the repository property.</p>
@@ -196,4 +200,14 @@ public class Features {
     public String getNamespace() {
         return namespace;
     }
+
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+    }
+
 }

@@ -70,7 +70,10 @@ public final class Overrides {
      * @param resources the list of resources to resolve
      * @param overrides list of bundle overrides
      * @param <T> the resource type.
+     *
+     * @deprecated Use {@link #override(Map, Map)}
      */
+    @Deprecated
     public static <T extends Resource> void override(Map<String, T> resources, Collection<String> overrides) {
         // Do override replacement
         for (Clause override : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
@@ -85,6 +88,35 @@ public final class Overrides {
                 if (shouldOverride(res, over, overrideRange)) {
                     resources.put(uri, over);
                 }
+            }
+        }
+    }
+
+    /**
+     * <p>Input map of resources is checked - if there are matching resources in <code>overridenFrom</code> and
+     * there's <strong>no</strong> symbolic name matching, resource for original URI is restored.
+     * Effectively this method reverts {@link org.apache.karaf.features.internal.model.processing.BundleReplacements.BundleOverrideMode#MAVEN maven}
+     * override mode if there's no symbolic name matching.</p>
+     *
+     * <p>About versions - with previous <code>${karaf.etc}/overrides.properties</code> both symbolic name
+     * should match <strong>and</strong> versions should be compatible - either using implicit rules or by means
+     * of <code>range</code> clause. With new mechanism, we know we should use OSGi or Maven override, but we
+     * loose information about OSGi version range matching - we assume then that version rules were applied at
+     * features JAXB model processing time.</p>
+     *
+     * @param resources
+     * @param overridenFrom
+     * @param <T>
+     */
+    public static <T extends Resource> void override(Map<String, T> resources, Map<String, T> overridenFrom) {
+        for (Map.Entry<String, T> original : overridenFrom.entrySet()) {
+            T replacement = resources.get(original.getKey());
+            if (replacement == null) {
+                continue;
+            }
+            if (!shouldOverride(original.getValue(), replacement, "[0,*)")) {
+                // bring back original version
+                resources.put(original.getKey(), original.getValue());
             }
         }
     }

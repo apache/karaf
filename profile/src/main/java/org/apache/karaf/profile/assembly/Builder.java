@@ -103,6 +103,7 @@ import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Resource;
+import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1278,6 +1279,9 @@ public class Builder {
                         Path input = provider.getFile().toPath();
                         String name = filename != null ? filename : input.getFileName().toString();
                         Path libOutput = homeDirectory.resolve(path).resolve(name);
+                        if (!libOutput.toFile().getParentFile().isDirectory()) {
+                            libOutput.toFile().getParentFile().mkdirs();
+                        }
                         LOGGER.info("{}   adding library: {}", indent, homeDirectory.relativize(libOutput));
                         Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
                         if (provider.getUrl().startsWith("mvn:")) {
@@ -1342,7 +1346,7 @@ public class Builder {
         Downloader downloader = manager.createDownloader();
 
         // Load startup repositories
-        LOGGER.info("   Loading repositories");
+        LOGGER.info("   Loading installed repositories");
         Map<String, Features> installedRepositories = loadRepositories(manager, installedEffective.getRepositories(), true, processor);
         // Compute startup feature dependencies
         Set<Feature> allInstalledFeatures = new HashSet<>();
@@ -1388,7 +1392,7 @@ public class Builder {
         Profile bootOverlay = Profiles.getOverlay(bootProfile, allProfiles, environment);
         Profile bootEffective = Profiles.getEffective(bootOverlay, false);
         // Load startup repositories
-        LOGGER.info("   Loading repositories");
+        LOGGER.info("   Loading boot repositories");
         Map<String, Features> bootRepositories = loadRepositories(manager, bootEffective.getRepositories(), true, processor);
         // Compute startup feature dependencies
         Set<Feature> allBootFeatures = new HashSet<>();
@@ -1605,21 +1609,24 @@ public class Builder {
         Profile startupOverlay = Profiles.getOverlay(startupProfile, allProfiles, environment);
         Profile startupEffective = Profiles.getEffective(startupOverlay, false);
         // Load startup repositories
-        LOGGER.info("   Loading repositories");
+        LOGGER.info("   Loading startup repositories");
         Map<String, Features> startupRepositories = loadRepositories(manager, startupEffective.getRepositories(), false, processor);
 
         //
         // Resolve
         //
-        LOGGER.info("   Resolving features");
+        LOGGER.info("   Resolving startup features and bundles");
+        LOGGER.info("      Features: " + startupEffective.getFeatures().stream().collect(Collectors.joining(", ")));
+        LOGGER.info("      Bundles: " + startupEffective.getBundles().stream().collect(Collectors.joining(", ")));
+
         Map<String, Integer> bundles =
                 resolve(manager,
                         resolver,
                         startupRepositories.values(),
                         startupEffective.getFeatures(),
                         startupEffective.getBundles(),
-                        startupEffective.getOverrides(),
-                        startupEffective.getOptionals());
+                        startupEffective.getOptionals(),
+                        processor);
 
         //
         // Generate startup.properties
@@ -1709,10 +1716,9 @@ public class Builder {
                             try (InputStream is = provider.open()) {
                                 Features featuresModel = JaxbUtil.unmarshal(url, is, false);
                                 // always process according to processor configuration
+                                featuresModel.setBlacklisted(processor.isRepositoryBlacklisted(url));
                                 processor.process(featuresModel);
-                                // TODO consult blacklist policy
-//                                if (blacklistPolicy == BlacklistPolicy.Discard) {
-//                                }
+
                                 loaded.put(provider.getUrl(), featuresModel);
                                 for (String innerRepository : featuresModel.getRepository()) {
                                     downloader.download(innerRepository, this);
@@ -1754,59 +1760,85 @@ public class Builder {
                 .getProfile();
     }
 
+    /**
+     * <p>Resolves set of features and bundles using OSGi resolver to calculate startup stage bundles.</p>
+     * <p>Startup stage means that <em>current</em> state of the OSGi framework is just single system bundle installed
+     * and bundles+features are being resolved against this single <em>bundle 0</em>.</p>
+     *
+     * @param manager {@link DownloadManager} to help downloading bundles and resources
+     * @param resolver OSGi resolver which will resolve features and bundles in framework with only system bundle installed
+     * @param repositories all available (not only to-be-installed) features
+     * @param features feature identifiers to resolve
+     * @param bundles bundle locations to resolve
+     * @param optionals optional URI locations that'll be available through {@link org.osgi.service.repository.Repository},
+     * used in resolution process
+     * @param processor {@link FeaturesProcessor} to process repositories/features/bundles
+     * @return map from bundle URI to bundle start-level
+     * @throws Exception
+     */
     private Map<String, Integer> resolve(
                     DownloadManager manager,
                     Resolver resolver,
                     Collection<Features> repositories,
                     Collection<String> features,
                     Collection<String> bundles,
-                    Collection<String> overrides,
-                    Collection<String> optionals) throws Exception {
+                    Collection<String> optionals,
+                    FeaturesProcessor processor) throws Exception {
+
+        // System bundle will be single bundle installed with bundleId == 0
         BundleRevision systemBundle = getSystemBundle();
-        AssemblyDeployCallback callback = new AssemblyDeployCallback(manager, this, systemBundle, repositories);
+        // Static distribution building callback and deployer that's used to deploy/collect startup-stage artifacts
+        AssemblyDeployCallback callback = new AssemblyDeployCallback(manager, this, systemBundle, repositories, processor);
         Deployer deployer = new Deployer(manager, resolver, callback);
 
         // Install framework
         Deployer.DeploymentRequest request = Deployer.DeploymentRequest.defaultDeploymentRequest();
-        // Add overrides
-        request.overrides.addAll(overrides);
-        // Add optional resources
-        final List<Resource> resources = new ArrayList<>();
-        Downloader downloader = manager.createDownloader();
-        for (String optional : optionals) {
-            downloader.download(optional, provider -> {
-                    Resource resource = ResourceBuilder.build(provider.getUrl(), getHeaders(provider));
-                    synchronized (resources) {
-                        resources.add(resource);
-                    }
-            });
-        }
-        downloader.await();
-        request.globalRepository = new BaseRepository(resources);
-        // Install features
+
+        // Add optional resources available through OSGi resource repository
+        request.globalRepository = repositoryOfOptionalResources(manager, optionals);
+
+        // Specify feature requirements (already prefixed with "feature:")
         for (String feature : features) {
             MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, feature);
         }
+        // Specify bundle requirements
         for (String bundle : bundles) {
             MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, "bundle:" + bundle);
         }
-        Set<String> prereqs = new HashSet<>();
-        while (true) {
-            try {
-                deployer.deploy(callback.getDeploymentState(), request);
-                break;
-            } catch (Deployer.PartialDeploymentException e) {
-                if (!prereqs.containsAll(e.getMissing())) {
-                    prereqs.addAll(e.getMissing());
-                } else {
-                    throw new Exception("Deployment aborted due to loop in missing prerequisites: " + e.getMissing());
-                }
-            }
-        }
+
+        deployer.deployFully(callback.getDeploymentState(), request);
 
         return callback.getStartupBundles();
     }
 
+    /**
+     * Optional resource URIs will be made available through OSGi {@link Repository}
+     * @param manager
+     * @param optionals
+     * @return
+     * @throws Exception
+     */
+    private Repository repositoryOfOptionalResources(DownloadManager manager, Collection<String> optionals)
+            throws Exception {
+        final List<Resource> resources = new ArrayList<>();
+        Downloader downloader = manager.createDownloader();
+        for (String optional : optionals) {
+            downloader.download(optional, provider -> {
+                Resource resource = ResourceBuilder.build(provider.getUrl(), getHeaders(provider));
+                synchronized (resources) {
+                    resources.add(resource);
+                }
+            });
+        }
+        downloader.await();
+        return new BaseRepository(resources);
+    }
+
+    /**
+     * Prepares {@link BundleRevision} that represents System Bundle (a.k.a. <em>bundle 0</em>)
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("rawtypes")
     private BundleRevision getSystemBundle() throws Exception {
         Path configPropPath = etcDirectory.resolve("config.properties");

@@ -17,9 +17,12 @@
 package org.apache.karaf.features;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.osgi.namespace.service.ServiceNamespace;
 
 /**
  * The service managing features repositories.
@@ -28,19 +31,12 @@ public interface FeaturesService {
 
     String ROOT_REGION = "root";
 
-    String UPDATE_SNAPSHOTS_NONE = "none";
-    String UPDATE_SNAPSHOTS_CRC = "crc";
-    String DEFAULT_UPDATE_SNAPSHOTS = UPDATE_SNAPSHOTS_CRC;
-    String UPDATE_SNAPSHOTS_ALWAYS = "always";
+    SnapshotUpdateBehavior DEFAULT_UPDATE_SNAPSHOTS = SnapshotUpdateBehavior.Crc;
 
     String DEFAULT_FEATURE_RESOLUTION_RANGE = "${range;[====,====]}";
     String DEFAULT_BUNDLE_UPDATE_RANGE = "${range;[==,=+)}";
 
     String UPDATEABLE_URIS = "mvn:.*SNAPSHOT|(?!mvn:).*";
-
-    String SERVICE_REQUIREMENTS_DISABLE = "disable";
-    String SERVICE_REQUIREMENTS_DEFAULT = "default";
-    String SERVICE_REQUIREMENTS_ENFORCE = "enforce";
 
     int DEFAULT_DOWNLOAD_THREADS = 8;
     long DEFAULT_SCHEDULE_DELAY = 250;
@@ -62,6 +58,58 @@ public interface FeaturesService {
         Upgrade,
         DisplayFeaturesWiring,
         DisplayAllWiring
+    }
+
+    /**
+     * Configuration options for handling requirements from {@link ServiceNamespace#SERVICE_NAMESPACE} namespace
+     */
+    enum ServiceRequirementsBehavior {
+        /** Remove and do not consider any {@link ServiceNamespace#SERVICE_NAMESPACE} requirements */
+        Disable("disable"),
+        /** Consider {@link ServiceNamespace#SERVICE_NAMESPACE} requirements only for <code>http://karaf.apache.org/xmlns/features/v1.2.1</code> XSD and below */
+        Default("default"),
+        /** Always consider {@link ServiceNamespace#SERVICE_NAMESPACE} requirements */
+        Enforce("enforce");
+
+        private String value;
+
+        ServiceRequirementsBehavior(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static ServiceRequirementsBehavior fromString(String serviceRequirements) {
+            return Arrays.stream(values()).filter(sub -> sub.value.equalsIgnoreCase(serviceRequirements)).findFirst().orElse(Default);
+        }
+    }
+
+    /**
+     * Configuration options for checking whether update'able bundle should really be updated
+     */
+    enum SnapshotUpdateBehavior {
+        /** Never update */
+        None("none"),
+        /** Update if CRC differs */
+        Crc("crc"),
+        /** Always update */
+        Always("always");
+
+        private String value;
+
+        SnapshotUpdateBehavior(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static SnapshotUpdateBehavior fromString(String updateSnapshots) {
+            return Arrays.stream(values()).filter(sub -> sub.value.equals(updateSnapshots)).findFirst().orElse(Crc);
+        }
     }
 
     /**

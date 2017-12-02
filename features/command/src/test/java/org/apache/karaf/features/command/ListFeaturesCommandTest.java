@@ -41,6 +41,7 @@ public class ListFeaturesCommandTest {
         EasyMock.expect(service.listRepositories()).andReturn(new Repository[] { repo });
         EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] { feature });
         EasyMock.expect(feature.isHidden()).andReturn(true);
+        EasyMock.expect(feature.isBlacklisted()).andReturn(false);
 
         EasyMock.replay(service, repo, feature);
 
@@ -69,6 +70,7 @@ public class ListFeaturesCommandTest {
         EasyMock.expect(service.listRepositories()).andReturn(new Repository[] { repo });
         EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] { feature });
         EasyMock.expect(feature.isHidden()).andReturn(true).anyTimes();
+        EasyMock.expect(feature.isBlacklisted()).andReturn(false).anyTimes();
         EasyMock.expect(feature.getName()).andReturn("feature");
         EasyMock.expect(feature.getId()).andReturn("feature/1.0.0");
         EasyMock.expect(service.getState(EasyMock.eq("feature/1.0.0"))).andReturn(FeatureState.Started);

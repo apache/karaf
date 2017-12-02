@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.felix.utils.version.VersionCleaner;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.DeploymentListener;
 import org.apache.karaf.features.Feature;
@@ -125,6 +126,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     // Synchronized on lock
     private final Object lock = new Object();
+    /**
+     * {@link State} persisted to data directory of features.core bundle.
+     */
     private final State state = new State();
 
     private final ExecutorService executor;
@@ -223,7 +227,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 // Make sure we don't store bundle checksums if
                 // it has been disabled through configadmin
                 // so that we don't keep out-of-date checksums.
-                if (!UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(cfg.updateSnapshots)) {
+                if (!SnapshotUpdateBehavior.Crc.getValue().equalsIgnoreCase(cfg.updateSnapshots)) {
                     state.bundleChecksums.clear();
                 }
                 storage.save(state);
@@ -965,7 +969,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         dstate.currentStartLevel = info.currentStartLevel;
         dstate.bundles = info.bundles;
         // Features
-        dstate.features = featuresById;
+        dstate.partitionFeatures(featuresById.values());
         RegionDigraph regionDigraph = installSupport.getDiGraphCopy();
         dstate.bundlesPerRegion = DigraphHelper.getBundlesPerRegion(regionDigraph);
         dstate.filtersPerRegion = DigraphHelper.getPolicies(regionDigraph);
@@ -973,13 +977,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     private Deployer.DeploymentRequest getDeploymentRequest(Map<String, Set<String>> requirements, Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options, String outputFile) {
-        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        Deployer.DeploymentRequest request = Deployer.DeploymentRequest.defaultDeploymentRequest();
         request.bundleUpdateRange = cfg.bundleUpdateRange;
         request.featureResolutionRange = cfg.featureResolutionRange;
-        request.serviceRequirements = cfg.serviceRequirements;
-        request.updateSnaphots = cfg.updateSnapshots;
+        request.serviceRequirements = ServiceRequirementsBehavior.fromString(cfg.serviceRequirements);
+        request.updateSnaphots = SnapshotUpdateBehavior.fromString(cfg.updateSnapshots);
         request.globalRepository = globalRepository;
-        request.overrides = Overrides.loadOverrides(cfg.overrides);
         request.requirements = requirements;
         request.stateChanges = stateChanges;
         request.options = options;
@@ -1118,6 +1121,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     @Override
     public void installLibraries(Feature feature) throws IOException {
         installSupport.installLibraries(feature);
+    }
+
+    @Override
+    public void bundleBlacklisted(BundleInfo bundleInfo) {
+
     }
 
     private String join(Collection<FeatureReq> reqs) {
