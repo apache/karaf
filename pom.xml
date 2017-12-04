@@ -261,7 +261,7 @@
         <jline.version>3.5.1</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
-        <maven.version>3.5.0</maven.version>
+        <maven.version>3.5.2</maven.version>
         <maven.wagon.version>2.10</maven.wagon.version>
         <maven-plugin-annotations.version>3.5</maven-plugin-annotations.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
