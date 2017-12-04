@@ -184,7 +184,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-osgi</artifactId>
-            <version>5.2.6.Final</version>
+            <version>${hibernate.version}</version>
         </dependency>
     </dependencies>
 
