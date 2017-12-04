@@ -29,7 +29,7 @@ public class SimpleLayout extends AbstractLayout {
     protected FastDateFormat fastDateFormat = new FastDateFormat();
 
     public SimpleLayout() {
-        super(new Buffer(Buffer.Format.Json));
+        super(new Buffer(Buffer.Format.Json, 4096));
         hdr = " " + hostName + " " + appName + " " + procId;
     }
 
