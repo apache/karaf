@@ -47,7 +47,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static java.lang.String.*;
-import static org.apache.commons.lang.reflect.MethodUtils.invokeMethod;
+import static org.apache.commons.lang3.reflect.MethodUtils.invokeMethod;
 import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
 /**
