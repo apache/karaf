@@ -120,6 +120,8 @@ public interface FeaturesService {
      */
     void validateRepository(URI uri) throws Exception;
 
+    boolean isRepositoryUriBlacklisted(URI uri);
+
     void addRepository(URI uri) throws Exception;
 
     void addRepository(URI uri, boolean install) throws Exception;

@@ -27,7 +27,7 @@ public class AvailableFeatureCompleter extends FeatureCompleterSupport {
 
     @Override
     protected boolean acceptsFeature(Feature feature) {
-        return !featuresService.isInstalled(feature) && !feature.isHidden();
+        return !featuresService.isInstalled(feature) && !feature.isHidden() && !feature.isBlacklisted();
     }
 
 }
