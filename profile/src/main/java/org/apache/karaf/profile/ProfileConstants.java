@@ -26,6 +26,11 @@ public interface ProfileConstants {
     String ATTRIBUTE_PREFIX = "attribute.";
 
     /**
+     * Prefix for blacklisting attributes
+     */
+    String BLACKLISTED_PREFIX = "blacklisted.";
+
+    /**
      * The attribute key for whitespace-separated list of parent profile IDs
      */
     String PARENTS = ATTRIBUTE_PREFIX + "parents";
@@ -92,6 +97,21 @@ public interface ProfileConstants {
      * The prefix for attributes that specify bundle URIs to install
      */
     String BUNDLE_PREFIX = "bundle.";
+
+    /**
+     * The prefix for attributes that specify URIs of blacklisted features XML files
+     */
+    String BLACKLISTED_REPOSITORY_PREFIX = BLACKLISTED_PREFIX + "repository.";
+
+    /**
+     * The prefix for attributes that specify blacklisted feature names (<code>name[/version]</code>)
+     */
+    String BLACKLISTED_FEATURE_PREFIX = BLACKLISTED_PREFIX + "feature.";
+
+    /**
+     * The prefix for attributes that specify blacklisted bundle URIs
+     */
+    String BLACKLISTED_BUNDLE_PREFIX = BLACKLISTED_PREFIX + "bundle.";
 
     /**
      * The prefix for attributes that specify additional libraries to add to <code>${karaf.home}/lib</code>.

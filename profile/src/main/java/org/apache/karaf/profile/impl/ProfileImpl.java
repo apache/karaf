@@ -24,8 +24,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
+import org.apache.karaf.features.FeaturePattern;
+import org.apache.karaf.features.LocationPattern;
 import org.apache.karaf.profile.Profile;
 
 import static org.apache.karaf.profile.impl.Utils.assertNotNull;
@@ -132,6 +135,27 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
+    public List<LocationPattern> getBlacklistedBundles() {
+        return getContainerConfigList(ConfigListType.BLACKLISTED_BUNDLES).stream()
+                .map(LocationPattern::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FeaturePattern> getBlacklistedFeatures() {
+        return getContainerConfigList(ConfigListType.BLACKLISTED_FEATURES).stream()
+                .map(FeaturePattern::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LocationPattern> getBlacklistedRepositories() {
+        return getContainerConfigList(ConfigListType.BLACKLISTED_REPOSITORIES).stream()
+                .map(LocationPattern::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<String> getLibraries() {
         return getContainerConfigList(ConfigListType.LIBRARIES);
     }
@@ -210,7 +234,7 @@ final class ProfileImpl implements Profile {
     private List<String> getContainerConfigList(ConfigListType type) {
         Map<String, Object> containerProps = getConfiguration(Profile.INTERNAL_PID);
         List<String> rc = new ArrayList<>();
-        String prefix = type + ".";
+        String prefix = type.value + ".";
         for (Map.Entry<String, Object> e : containerProps.entrySet()) {
             if ((e.getKey()).startsWith(prefix)) {
                 rc.add(e.getValue().toString());
@@ -253,14 +277,17 @@ final class ProfileImpl implements Profile {
 
     enum ConfigListType {
         BUNDLES("bundle"),
+        BLACKLISTED_BUNDLES("blacklisted.bundle"),
         FEATURES("feature"),
+        BLACKLISTED_FEATURES("blacklisted.feature"),
         LIBRARIES("library"),
         BOOT_LIBRARIES("boot"),
         ENDORSED_LIBRARIES("endorsed"),
         EXT_LIBRARIES("ext"),
         OPTIONALS("optional"),
         OVERRIDES("override"),
-        REPOSITORIES("repository");
+        REPOSITORIES("repository"),
+        BLACKLISTED_REPOSITORIES("blacklisted.repository");
 
         private String value;
 

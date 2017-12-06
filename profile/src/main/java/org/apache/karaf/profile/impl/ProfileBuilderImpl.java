@@ -41,24 +41,24 @@ import static org.apache.karaf.profile.impl.ProfileImpl.ConfigListType;
  */
 public final class ProfileBuilderImpl implements ProfileBuilder {
 
-	private String profileId;
-	private Map<String, FileContent> fileMapping = new HashMap<>();
-	private boolean isOverlay;
-	
-	@Override
-	public ProfileBuilder from(Profile profile) {
-		profileId = profile.getId();
-		setFileConfigurations(profile.getFileConfigurations());
+    private String profileId;
+    private Map<String, FileContent> fileMapping = new HashMap<>();
+    private boolean isOverlay;
+
+    @Override
+    public ProfileBuilder from(Profile profile) {
+        profileId = profile.getId();
+        setFileConfigurations(profile.getFileConfigurations());
         return this;
-	}
+    }
 
-	@Override
-	public ProfileBuilder identity(String profileId) {
-		this.profileId = profileId;
-		return this;
-	}
+    @Override
+    public ProfileBuilder identity(String profileId) {
+        this.profileId = profileId;
+        return this;
+    }
 
-	@Override
+    @Override
     public List<String> getParents() {
         Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
         String pspec = (String) config.get(PARENTS);
@@ -67,14 +67,14 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     @Override
-	public ProfileBuilder addParent(String parentId) {
+    public ProfileBuilder addParent(String parentId) {
         return addParentsInternal(Collections.singletonList(parentId), false);
-	}
+    }
 
-	@Override
-	public ProfileBuilder addParents(List<String> parentIds) {
-		return addParentsInternal(parentIds, false);
-	}
+    @Override
+    public ProfileBuilder addParents(List<String> parentIds) {
+        return addParentsInternal(parentIds, false);
+    }
 
     @Override
     public ProfileBuilder setParents(List<String> parentIds) {
@@ -94,12 +94,12 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
     
     @Override
-	public ProfileBuilder removeParent(String profileId) {
+    public ProfileBuilder removeParent(String profileId) {
         Set<String> currentIds = new LinkedHashSet<>(getParents());
         currentIds.remove(profileId);
         updateParentsAttribute(currentIds);
-		return this;
-	}
+        return this;
+    }
 
     private void updateParentsAttribute(Collection<String> parentIds) {
         Map<String, Object> config = getConfigurationInternal(Profile.INTERNAL_PID);
@@ -111,7 +111,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     private String parentsAttributeValue(Collection<String> parentIds) {
-	    return parentIds.isEmpty() ? "" : String.join(" ", parentIds);
+        return parentIds.isEmpty() ? "" : String.join(" ", parentIds);
     }
     
     @Override
@@ -143,16 +143,16 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         return this;
     }
 
-	@Override
-	public ProfileBuilder setConfigurations(Map<String, Map<String, Object>> configs) {
-	    for (String pid : getConfigurationKeys()) {
-	        deleteConfiguration(pid);
-	    }
-		for (Entry<String, Map<String, Object>> entry : configs.entrySet()) {
-		    addConfiguration(entry.getKey(), new HashMap<>(entry.getValue()));
-		}
-		return this;
-	}
+    @Override
+    public ProfileBuilder setConfigurations(Map<String, Map<String, Object>> configs) {
+        for (String pid : getConfigurationKeys()) {
+            deleteConfiguration(pid);
+        }
+        for (Entry<String, Map<String, Object>> entry : configs.entrySet()) {
+            addConfiguration(entry.getKey(), new HashMap<>(entry.getValue()));
+        }
+        return this;
+    }
 
     @Override
     public ProfileBuilder addConfiguration(String pid, Map<String, Object> config) {
@@ -195,11 +195,11 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         return this;
     }
     
-	@Override
-	public ProfileBuilder setBundles(List<String> values) {
-		addProfileConfiguration(ConfigListType.BUNDLES, values);
-		return this;
-	}
+    @Override
+    public ProfileBuilder setBundles(List<String> values) {
+        addProfileConfiguration(ConfigListType.BUNDLES, values);
+        return this;
+    }
 
     @Override
     public ProfileBuilder addBundle(String value) {
@@ -208,10 +208,10 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     @Override
-	public ProfileBuilder setFeatures(List<String> values) {
-		addProfileConfiguration(ConfigListType.FEATURES, values);
-		return this;
-	}
+    public ProfileBuilder setFeatures(List<String> values) {
+        addProfileConfiguration(ConfigListType.FEATURES, values);
+        return this;
+    }
 
     @Override
     public ProfileBuilder addFeature(String value) {
@@ -220,10 +220,10 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     @Override
-	public ProfileBuilder setRepositories(List<String> values) {
-		addProfileConfiguration(ConfigListType.REPOSITORIES, values);
-		return this;
-	}
+    public ProfileBuilder setRepositories(List<String> values) {
+        addProfileConfiguration(ConfigListType.REPOSITORIES, values);
+        return this;
+    }
 
     @Override
     public ProfileBuilder addRepository(String value) {
@@ -232,10 +232,46 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     @Override
-	public ProfileBuilder setOverrides(List<String> values) {
-		addProfileConfiguration(ConfigListType.OVERRIDES, values);
-		return this;
-	}
+    public ProfileBuilder setBlacklistedBundles(List<String> values) {
+        addProfileConfiguration(ConfigListType.BLACKLISTED_BUNDLES, values);
+        return null;
+    }
+
+    @Override
+    public ProfileBuilder addBlacklistedBundle(String value) {
+        addProfileConfiguration(ConfigListType.BLACKLISTED_BUNDLES, value);
+        return null;
+    }
+
+    @Override
+    public ProfileBuilder setBlacklistedFeatures(List<String> values) {
+        addProfileConfiguration(ConfigListType.BLACKLISTED_FEATURES, values);
+        return null;
+    }
+
+    @Override
+    public ProfileBuilder addBlacklistedFeature(String value) {
+        addProfileConfiguration(ConfigListType.BLACKLISTED_FEATURES, value);
+        return null;
+    }
+
+    @Override
+    public ProfileBuilder setBlacklistedRepositories(List<String> values) {
+        addProfileConfiguration(ConfigListType.BLACKLISTED_REPOSITORIES, values);
+        return null;
+    }
+
+    @Override
+    public ProfileBuilder addBlacklistedRepository(String value) {
+        addProfileConfiguration(ConfigListType.BLACKLISTED_REPOSITORIES, value);
+        return null;
+    }
+
+    @Override
+    public ProfileBuilder setOverrides(List<String> values) {
+        addProfileConfiguration(ConfigListType.OVERRIDES, values);
+        return this;
+    }
 
     @Override
     public ProfileBuilder setOptionals(List<String> values) {
@@ -249,7 +285,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         return this;
     }
 
-	@Override
+    @Override
     public ProfileBuilder addAttribute(String key, String value) {
         addConfiguration(Profile.INTERNAL_PID, Profile.ATTRIBUTE_PREFIX + key, value);
         return this;
@@ -322,6 +358,9 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         Map<String, Object> repositories = new LinkedHashMap<>();
         Map<String, Object> features = new LinkedHashMap<>();
         Map<String, Object> bundles = new LinkedHashMap<>();
+        Map<String, Object> blacklistedRepositories = new LinkedHashMap<>();
+        Map<String, Object> blacklistedFeatures = new LinkedHashMap<>();
+        Map<String, Object> blacklistedBundles = new LinkedHashMap<>();
         Map<String, Object> libraries = new LinkedHashMap<>();
         Map<String, Object> bootLibraries = new LinkedHashMap<>();
         Map<String, Object> endorsedLibraries = new LinkedHashMap<>();
@@ -342,6 +381,12 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
                 features.put(key, v);
             } else if (key.startsWith(BUNDLE_PREFIX)) {
                 bundles.put(key, v);
+            } else if (key.startsWith(BLACKLISTED_REPOSITORY_PREFIX)) {
+                blacklistedRepositories.put(key, v);
+            } else if (key.startsWith(BLACKLISTED_FEATURE_PREFIX)) {
+                blacklistedFeatures.put(key, v);
+            } else if (key.startsWith(BLACKLISTED_BUNDLE_PREFIX)) {
+                blacklistedBundles.put(key, v);
             } else if (key.startsWith(LIB_PREFIX)) {
                 libraries.put(key, v);
             } else if (key.startsWith(BOOT_PREFIX)) {
@@ -377,6 +422,9 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         addGroupOfProperties("Configuration properties for etc/system.properties", result, system);
         addGroupOfProperties("Bundle overrides (deprecated)", result, overrides);
         addGroupOfProperties("Optional resources for resolution", result, optionals);
+        addGroupOfProperties("Blacklisted repositories", result, blacklistedRepositories);
+        addGroupOfProperties("Blacklisted features", result, blacklistedFeatures);
+        addGroupOfProperties("Blacklisted bundles", result, blacklistedBundles);
 
         return Utils.toBytes(result);
     }

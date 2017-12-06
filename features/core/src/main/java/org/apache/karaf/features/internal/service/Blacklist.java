@@ -116,7 +116,7 @@ public class Blacklist {
                     } else {
                         try {
                             repositoryBlacklist.add(new LocationPattern(location));
-                        } catch (MalformedURLException e) {
+                        } catch (IllegalArgumentException e) {
                             LOG.warn("Problem parsing repository blacklist URI \"" + location + "\": " + e.getMessage() + ". Ignoring.");
                         }
                     }
@@ -139,7 +139,7 @@ public class Blacklist {
                     } else {
                         try {
                             bundleBlacklist.add(new LocationPattern(location));
-                        } catch (MalformedURLException e) {
+                        } catch (IllegalArgumentException e) {
                             LOG.warn("Problem parsing bundle blacklist URI \"" + location + "\": " + e.getMessage() + ". Ignoring.");
                         }
                     }

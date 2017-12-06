@@ -875,13 +875,31 @@ public class Builder {
         }
 
         //
-        // Handle blacklist - we'll use SINGLE instance iof Blacklist for all further downloads
+        // Load profiles
         //
-        blacklist = processBlacklist();
+        LOGGER.info("Loading profiles from:");
+        profilesUris.forEach(p -> LOGGER.info("   " + p));
+        allProfiles = loadExternalProfiles(profilesUris);
+        if (allProfiles.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            LOGGER.info("   Found profiles: " + allProfiles.keySet().stream().collect(Collectors.joining(", ")));
+        }
 
-        // we can't yet have full feature processor, because some overrides may be defined in profiles and
-        // profiles are generated after reading features from repositories
-        // so for now, we can only configure blacklisting features processor
+        // Generate initial profile to collect overrides and blacklisting instructions
+        Profile initialProfile = ProfileBuilder.Factory.create("initial")
+                .setParents(new ArrayList<>(profiles.keySet()))
+                .getProfile();
+        Profile initialOverlay = Profiles.getOverlay(initialProfile, allProfiles, environment);
+        Profile initialEffective = Profiles.getEffective(initialOverlay, false);
+
+        //
+        // Handle blacklist - we'll use SINGLE instance of Blacklist for all further downloads
+        //
+        blacklist = processBlacklist(initialEffective);
+
+        //
+        // Configure blacklisting and overriding features processor
+        //
 
         boolean needFeaturesProcessorFileCopy = false;
         String existingProcessorDefinitionURI = null;
@@ -905,8 +923,11 @@ public class Builder {
 
         // now we can configure blacklisting features processor which may have already defined (in XML)
         // configuration for bundle replacements or feature overrides.
-        // we'll add overrides from profiles later.
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(existingProcessorDefinitionURI, null, blacklist, new HashSet<>());
+
+        // add overrides from initialProfile
+        Set<String> overrides = processOverrides(initialEffective.getOverrides());
+        processor.addOverrides(overrides);
 
         //
         // Propagate feature installation from repositories
@@ -925,17 +946,6 @@ public class Builder {
                     }
                 }
             }
-        }
-
-        //
-        // Load profiles
-        //
-        LOGGER.info("Loading profiles from:");
-        profilesUris.forEach(p -> LOGGER.info("   " + p));
-        allProfiles = loadExternalProfiles(profilesUris);
-        if (allProfiles.size() > 0) {
-            StringBuilder sb = new StringBuilder();
-            LOGGER.info("   Found profiles: " + allProfiles.keySet().stream().collect(Collectors.joining(", ")));
         }
 
         //
@@ -963,7 +973,11 @@ public class Builder {
                 .setParents(Arrays.asList(startupProfile.getId(), bootProfile.getId(), installedProfile.getId()));
         config.forEach((k ,v) -> builder.addConfiguration(Profile.INTERNAL_PID, Profile.CONFIG_PREFIX + k, v));
         system.forEach((k ,v) -> builder.addConfiguration(Profile.INTERNAL_PID, Profile.SYSTEM_PREFIX + k, v));
-        // profile with all the parents configured
+        // profile with all the parents configured and stage-agnostic blacklisting configuration added
+        blacklistedRepositoryURIs.forEach(builder::addBlacklistedRepository);
+        blacklistedFeatureIdentifiers.forEach(builder::addBlacklistedFeature);
+        blacklistedBundleURIs.forEach(builder::addBlacklistedBundle);
+        // final profilep
         Profile overallProfile = builder.getProfile();
 
         // profile with parents included and "flattened" using inheritance rules (child files overwrite parent
@@ -973,14 +987,6 @@ public class Builder {
         // profile with property placeholders resolved or left unchanged (if there's no property value available,
         // so property placeholders are preserved - like ${karaf.base})
         Profile overallEffective = Profiles.getEffective(overallOverlay, false);
-
-        //
-        // Handle overrides - existing (unzipped from KAR) and defined in profile
-        //
-        Set<String> overrides = processOverrides(overallEffective.getOverrides());
-
-        // we can now add overrides from profiles.
-        processor.addOverrides(overrides);
 
         if (writeProfiles) {
             Path profiles = etcDirectory.resolve("profiles");
@@ -1116,10 +1122,11 @@ public class Builder {
 
     /**
      * Checks existing and configured blacklisting definitions
+     * @param initialProfile
      * @return
      * @throws IOException
      */
-    private Blacklist processBlacklist() throws IOException {
+    private Blacklist processBlacklist(Profile initialProfile) throws IOException {
         Blacklist existingBlacklist = null;
         Blacklist blacklist = new Blacklist();
         Path existingBLacklistedLocation = etcDirectory.resolve("blacklisted.properties");
@@ -1128,21 +1135,36 @@ public class Builder {
             existingBlacklist = new Blacklist(Files.readAllLines(existingBLacklistedLocation));
         }
         for (String br : blacklistedRepositoryURIs) {
+            // from Maven/Builder configuration
             try {
                 blacklist.blacklistRepository(new LocationPattern(br));
-            } catch (MalformedURLException e) {
+            } catch (IllegalArgumentException e) {
                 LOGGER.warn("Blacklisted features XML repository URI is invalid: {}, ignoring", br);
             }
         }
+        for (LocationPattern br : initialProfile.getBlacklistedRepositories()) {
+            // from profile configuration
+            blacklist.blacklistRepository(br);
+        }
         for (String bf : blacklistedFeatureIdentifiers) {
+            // from Maven/Builder configuration
             blacklist.blacklistFeature(new FeaturePattern(bf));
         }
+        for (FeaturePattern bf : initialProfile.getBlacklistedFeatures()) {
+            // from profile configuration
+            blacklist.blacklistFeature(bf);
+        }
         for (String bb : blacklistedBundleURIs) {
+            // from Maven/Builder configuration
             try {
                 blacklist.blacklistBundle(new LocationPattern(bb));
-            } catch (MalformedURLException e) {
+            } catch (IllegalArgumentException e) {
                 LOGGER.warn("Blacklisted bundle URI is invalid: {}, ignoring", bb);
             }
+        }
+        for (LocationPattern bb : initialProfile.getBlacklistedBundles()) {
+            // from profile configuration
+            blacklist.blacklistBundle(bb);
         }
         if (existingBlacklist != null) {
             blacklist.merge(existingBlacklist);

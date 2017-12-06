@@ -60,7 +60,7 @@ public class LocationPattern {
     private String classifier;
     private Pattern classifierPattern;
 
-    public LocationPattern(String uri) throws MalformedURLException {
+    public LocationPattern(String uri) throws IllegalArgumentException {
         if (uri == null) {
             throw new IllegalArgumentException("URI to match should not be null");
         }
@@ -69,7 +69,12 @@ public class LocationPattern {
             originalPattern = toRegExp(originalUri);
         } else {
             uri = uri.substring(4);
-            Parser parser = new Parser(uri);
+            Parser parser = null;
+            try {
+                parser = new Parser(uri);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException(e.getMessage(), e);
+            }
             if (Parser.VERSION_LATEST.equals(parser.getVersion())) {
                 parser.setVersion(null);
             }
@@ -92,8 +97,7 @@ public class LocationPattern {
                         version = new Version(VersionCleaner.clean(versionString));
                     }
                 } catch (IllegalArgumentException e) {
-                    MalformedURLException mue = new MalformedURLException("Can't parse version \"" + versionString + "\" as OSGi version object.");
-                    mue.initCause(e);
+                    IllegalArgumentException mue = new IllegalArgumentException("Can't parse version \"" + versionString + "\" as OSGi version object.", e);
                     throw mue;
                 }
             }
@@ -144,7 +148,7 @@ public class LocationPattern {
         LocationPattern other;
         try {
             other = new LocationPattern(otherUri);
-        } catch (MalformedURLException e) {
+        } catch (IllegalArgumentException e) {
             LOG.debug("Can't parse \"" + otherUri + "\" as Maven URI. Ignoring.");
             return false;
         }
