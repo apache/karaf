@@ -28,13 +28,16 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.FeaturePattern;
 import org.apache.karaf.features.LocationPattern;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Conditional;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.processing.BundleReplacements;
+import org.apache.karaf.features.internal.model.processing.FeatureReplacements;
 import org.apache.karaf.features.internal.model.processing.FeaturesProcessing;
+import org.apache.karaf.features.internal.model.processing.OverrideBundleDependency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,23 +137,54 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
 
     @Override
     public void process(Features features) {
-        // blacklisting features
-        for (Feature feature : features.getFeature()) {
-            boolean allBlacklisted = features.isBlacklisted();
-            feature.setBlacklisted(allBlacklisted || isFeatureBlacklisted(feature));
-            // blacklisting bundles
-            processBundles(feature.getBundle(), allBlacklisted);
-            for (Conditional c : feature.getConditional()) {
-                processBundles(c.getBundle(), allBlacklisted);
+        List<Feature> featureList = features.getFeature();
+        for (int i = 0; i < featureList.size(); i++) {
+            Feature f = featureList.get(i);
+            // overriding features first, so we can further override their bundles
+            for (FeatureReplacements.OverrideFeature override : getInstructions().getFeatureReplacements().getReplacements()) {
+                if (f.getId().equals(override.getFeature().getId())) {
+                    switch (override.getMode()) {
+                        case REPLACE:
+                            featureList.set(i, override.getFeature());
+                            break;
+                        case MERGE:
+                            f.getBundle().addAll(override.getFeature().getBundle());
+                            break;
+                        case REMOVE:
+                            // TODO
+                            break;
+                    }
+                }
             }
         }
 
-        // TODO: changing "dependency" flag of features
-        // TODO: changing "dependency" flag of bundles
-        // TODO: overriding features
+        for (Feature feature : features.getFeature()) {
+            // blacklisting features
+            boolean allBlacklisted = features.isBlacklisted();
+            feature.setBlacklisted(allBlacklisted || isFeatureBlacklisted(feature));
+
+            // override dependency flag (null - don't touch, false - change to false, true - change to true)
+            Boolean dependency = null;
+            for (OverrideBundleDependency.OverrideFeatureDependency overrideFeatureDependency : getInstructions().getOverrideBundleDependency().getFeatures()) {
+                FeaturePattern pattern = new FeaturePattern(overrideFeatureDependency.getName() + "/" + overrideFeatureDependency.getVersion());
+                if (pattern.matches(feature.getName(), feature.getVersion())) {
+                    dependency = overrideFeatureDependency.isDependency();
+                }
+            }
+
+            // blacklisting bundles and processing bundles
+            processBundles(feature.getBundle(), allBlacklisted, dependency);
+            for (Conditional c : feature.getConditional()) {
+                processBundles(c.getBundle(), allBlacklisted, dependency);
+            }
+
+            // TODO: think about overriding at repository level
+//            for (OverrideBundleDependency.OverrideDependency overrideDependency : getInstructions().getOverrideBundleDependency().getRepositories()) {
+//            }
+        }
     }
 
-    private void processBundles(List<Bundle> bundles, boolean allBlacklisted) {
+    private void processBundles(List<Bundle> bundles, boolean allBlacklisted, Boolean forceDependency) {
         for (Bundle bundle : bundles) {
             boolean bundleBlacklisted = allBlacklisted || isBundleBlacklisted(bundle.getLocation());
             if (bundleBlacklisted) {
@@ -159,6 +193,19 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
             } else {
                 // if not blacklisted, it may be overriden
                 staticOverrideBundle(bundle);
+                // and may have dependency flag altered
+                if (forceDependency != null) {
+                    // set at feature level
+                    bundle.setDependency(forceDependency);
+                } else {
+                    // may have dependency overriden at bundle level
+                    for (OverrideBundleDependency.OverrideDependency overrideBundleDependency : getInstructions().getOverrideBundleDependency().getBundles()) {
+                        LocationPattern pattern = new LocationPattern(overrideBundleDependency.getUri());
+                        if (pattern.matches(bundle.getLocation())) {
+                            bundle.setDependency(overrideBundleDependency.isDependency());
+                        }
+                    }
+                }
             }
         }
     }
