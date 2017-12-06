@@ -1426,14 +1426,17 @@ public class Builder {
         Feature generated = new Feature();
         generated.setName(UUID.randomUUID().toString());
         // Add feature dependencies
-        for (String dependency : bootEffective.getFeatures()) {
-            Dependency dep = generatedDep.get(dependency);
-            if (dep == null) {
-                dep = createDependency(dependency);
-                generated.getFeature().add(dep);
-                generatedDep.put(dep.getName(), dep);
+        for (String nameOrPattern : bootEffective.getFeatures()) {
+            // KARAF-5273: feature may be a pattern
+            for (String dependency : FeatureSelector.getMatchingFeatures(nameOrPattern, bootRepositories.values())) {
+                Dependency dep = generatedDep.get(dependency);
+                if (dep == null) {
+                    dep = createDependency(dependency);
+                    generated.getFeature().add(dep);
+                    generatedDep.put(dep.getName(), dep);
+                }
+                dep.setDependency(false);
             }
-            dep.setDependency(false);
         }
         // Add bundles
         for (String location : bootEffective.getBundles()) {
@@ -1819,9 +1822,12 @@ public class Builder {
         // Add optional resources available through OSGi resource repository
         request.globalRepository = repositoryOfOptionalResources(manager, optionals);
 
-        // Specify feature requirements (already prefixed with "feature:")
+        // Specify feature requirements
         for (String feature : features) {
-            MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, feature);
+            // KARAF-5273: feature may be a pattern
+            for (String featureName : FeatureSelector.getMatchingFeatures(feature, repositories)) {
+                MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, featureName);
+            }
         }
         // Specify bundle requirements
         for (String bundle : bundles) {
