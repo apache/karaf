@@ -89,6 +89,18 @@ public interface ProfileBuilder {
 
     ProfileBuilder addRepository(String value);
 
+    ProfileBuilder setBlacklistedBundles(List<String> values);
+
+    ProfileBuilder addBlacklistedBundle(String value);
+
+    ProfileBuilder setBlacklistedFeatures(List<String> values);
+
+    ProfileBuilder addBlacklistedFeature(String value);
+
+    ProfileBuilder setBlacklistedRepositories(List<String> values);
+
+    ProfileBuilder addBlacklistedRepository(String value);
+
     ProfileBuilder setOverrides(List<String> values);
     
     ProfileBuilder setOptionals(List<String> values);

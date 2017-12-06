@@ -160,7 +160,7 @@ public class FeaturesProcessing {
             try {
                 blacklistedRepositoryLocationPatterns.add(new LocationPattern(repositoryURI));
                 blacklisted.add(repositoryURI + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_REPOSITORY);
-            } catch (MalformedURLException e) {
+            } catch (IllegalArgumentException e) {
                 LOG.warn("Can't parse blacklisted repository location pattern: " + repositoryURI + ". Ignoring.");
             }
         }

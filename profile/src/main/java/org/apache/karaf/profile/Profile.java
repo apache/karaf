@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.karaf.features.FeaturePattern;
+import org.apache.karaf.features.LocationPattern;
+
 /**
  * <p>A <em>profile</em> is a container for configuration that can be applied to Karaf distribution.</p>
  *
@@ -100,6 +103,24 @@ public interface Profile extends ProfileConstants {
      * @return
      */
     List<String> getRepositories();
+
+    /**
+     * Returns a list of blacklisted bundles (URIs) (as {@link LocationPattern location patterns}
+     * @return
+     */
+    List<LocationPattern> getBlacklistedBundles();
+
+    /**
+     * Returns a list of blacklisted {@link FeaturePattern feature patterns}
+     * @return
+     */
+    List<FeaturePattern> getBlacklistedFeatures();
+
+    /**
+     * Returns a list of blacklisted features XML repositories (URIs) (as {@link LocationPattern location patterns}
+     * @return
+     */
+    List<LocationPattern> getBlacklistedRepositories();
 
     /**
      * Returns a list of libraries (to be added to <code>${karaf.home}/lib</code>) defined in this profile

@@ -58,7 +58,7 @@ public class LocationPatternTest {
         }) {
             try {
                 new LocationPattern(p);
-            } catch (MalformedURLException ignored) {
+            } catch (IllegalArgumentException ignored) {
                 exception |= true;
             }
         }
@@ -94,7 +94,7 @@ public class LocationPatternTest {
             try {
                 new LocationPattern(p);
                 exception &= false;
-            } catch (MalformedURLException ignored) {
+            } catch (IllegalArgumentException ignored) {
             }
         }
         assertTrue("We should fail for all broken mvn: URIs", exception);

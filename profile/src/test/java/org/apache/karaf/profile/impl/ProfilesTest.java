@@ -47,12 +47,15 @@ public class ProfilesTest {
         builder.addParents(Collections.emptyList());
         builder.addAttribute("attr1", "val1");
         builder.addBundle("mvn:commons-everything/commons-everything/42");
+        builder.addBlacklistedBundle("mvn:commons-banned/commons-banned/[42,52)");
         builder.addConfiguration("my.pid", "a1", "v1${profile:my.pid2/a2}");
         builder.addConfiguration("my.pid", "a2", "v1${profile:my.pid2/a3}");
         builder.addFeature("feature1");
+        builder.addBlacklistedFeature("f34tu4e");
         builder.addFileConfiguration("my.pid2.txt", "hello!".getBytes("UTF-8"));
         builder.addFileConfiguration("my.pid2.cfg", "a2=v2".getBytes("UTF-8"));
         builder.addRepository("mvn:my/repository/1/xml/features");
+        builder.addBlacklistedRepository("mvn:my/repository/[0,1)/xml/features");
         builder.setOptionals(Arrays.asList("mvn:g/a/1", "mvn:g/a/2"));
         builder.setOverrides(Arrays.asList("mvn:g/a/4", "mvn:g/a/3"));
         Profile profile = builder.getProfile();
