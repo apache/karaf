@@ -18,7 +18,9 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import java.io.FileWriter;
 import java.net.URI;
+import java.util.Properties;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
@@ -89,7 +91,7 @@ public class FeaturesProcessorTest {
     public void readingLegacyOverrides() {
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
                 "file:src/test/resources/org/apache/karaf/features/internal/service/overrides2.properties",
-                null, null));
+                null, null, null));
 
         FeaturesProcessing instructions = processor.getInstructions();
         BundleReplacements bundleReplacements = instructions.getBundleReplacements();
@@ -116,7 +118,7 @@ public class FeaturesProcessorTest {
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
                 null,
                 "file:src/test/resources/org/apache/karaf/features/internal/service/blacklisted2.properties",
-                null));
+                null, null));
 
         FeaturesProcessing instructions = processor.getInstructions();
         Blacklist blacklist = instructions.getBlacklist();
@@ -136,7 +138,7 @@ public class FeaturesProcessorTest {
     public void blacklistingRepositories() {
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
                 null, null,
-                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi01.xml"));
+                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi01.xml", null));
         URI uri = URI.create("file:src/test/resources/org/apache/karaf/features/internal/service/fp01.xml");
         RepositoryImpl repo = (RepositoryImpl) new RepositoryCacheImpl(processor).create(uri, true);
         assertThat(repo.getRepositories().length, equalTo(3));
@@ -150,7 +152,7 @@ public class FeaturesProcessorTest {
     public void blacklistingFeatures() {
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
                 null, null,
-                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi01.xml"));
+                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi01.xml", null));
         URI uri = URI.create("file:src/test/resources/org/apache/karaf/features/internal/service/fp02.xml");
         RepositoryImpl repo = (RepositoryImpl) new RepositoryCacheImpl(processor).create(uri, true);
 
@@ -166,7 +168,7 @@ public class FeaturesProcessorTest {
     public void blacklistingBundles() {
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
                 null, null,
-                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi01.xml"));
+                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi01.xml", null));
         URI uri = URI.create("file:src/test/resources/org/apache/karaf/features/internal/service/fp03.xml");
         RepositoryImpl repo = (RepositoryImpl) new RepositoryCacheImpl(processor).create(uri, true);
 
@@ -182,7 +184,7 @@ public class FeaturesProcessorTest {
     public void overridingBundles() {
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
                 null, null,
-                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi02.xml"));
+                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi02.xml", null));
         URI uri = URI.create("file:src/test/resources/org/apache/karaf/features/internal/service/fp03.xml");
         RepositoryImpl repo = (RepositoryImpl) new RepositoryCacheImpl(processor).create(uri, true);
 
@@ -199,6 +201,24 @@ public class FeaturesProcessorTest {
         assertThat(f1.getConditional().get(0).getBundles().get(0).getLocation(), equalTo("mvn:org.glassfish/something-strangest/4.3.1"));
         assertThat(f1.getConditional().get(0).getBundles().get(0).getOriginalLocation(), equalTo("mvn:org.glassfish/something-strangest/4.3.0"));
         assertTrue(f1.getConditional().get(0).getBundles().get(1).isOverriden() == BundleInfo.BundleOverrideMode.NONE);
+    }
+
+    @Test
+    public void resolvePlaceholders() throws Exception {
+        Properties props = new Properties();
+        props.put("version.jclouds", "1.9");
+        props.put("version.commons-io", "2.5");
+        props.store(new FileWriter("target/versions.properties"), null);
+
+        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
+                null, null,
+                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi03.xml",
+                "file:target/versions.properties"));
+
+        assertThat(processor.getInstructions().getBlacklistedRepositories().get(0),
+                equalTo("mvn:org.jclouds/jclouds-features/1.9/xml/features"));
+        assertThat(processor.getInstructions().getBundleReplacements().getOverrideBundles().get(0).getReplacement(),
+                equalTo("mvn:commons-io/commons-io/2.5"));
     }
 
     @Test

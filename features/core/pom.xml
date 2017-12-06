@@ -88,6 +88,19 @@
         </dependency>
 
         <dependency>
+            <groupId>org.ops4j.base</groupId>
+            <artifactId>ops4j-base-util-property</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.base</groupId>
+            <artifactId>ops4j-base-util-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.swissbox</groupId>
+            <artifactId>pax-swissbox-property</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <scope>test</scope>
@@ -159,6 +172,9 @@
                             org.apache.karaf.util.xml,
                             org.eclipse.equinox.internal.region.*;-split-package:=merge-first,
                             org.apache.felix.resolver.*,
+                            org.ops4j.pax.swissbox.*,
+                            org.ops4j.util.*,
+                            org.ops4j.lang.*
                         </Private-Package>
                         <Embed-Dependency>
                             org.apache.karaf.util;inline="org/apache/karaf/util/XmlUtils*.class"

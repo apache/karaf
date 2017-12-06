@@ -280,7 +280,7 @@ public class FeaturesProcessing {
                     return null;
                 }
                 Version vfloor = new Version(v.getMajor(), v.getMinor(), 0, null);
-                parser.setVersion(new VersionRange(false, vfloor, v, true).toString());
+                parser.setVersion(new VersionRange(false, vfloor, v, v.compareTo(vfloor) > 0).toString());
             }
             return parser.toMvnURI();
         } catch (MalformedURLException e) {

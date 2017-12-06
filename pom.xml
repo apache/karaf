@@ -273,6 +273,7 @@
         <pax.exam.version>4.11.0</pax.exam.version>
         <pax.logging.version>1.10.1</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
+        <pax.swissbox.version>1.8.2</pax.swissbox.version>
         <pax.url.version>2.5.3</pax.url.version>
         <pax.web.version>6.1.0-SNAPSHOT</pax.web.version>
         <pax.tinybundle.version>2.1.1</pax.tinybundle.version>
@@ -1246,6 +1247,16 @@
                 <version>${pax.base.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ops4j.base</groupId>
+                <artifactId>ops4j-base-util-property</artifactId>
+                <version>${pax.base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.base</groupId>
+                <artifactId>ops4j-base-util-collections</artifactId>
+                <version>${pax.base.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-aether</artifactId>
                 <version>${pax.url.version}</version>
@@ -1303,6 +1314,11 @@
                         <artifactId>pax-url-aether-support</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.swissbox</groupId>
+                <artifactId>pax-swissbox-property</artifactId>
+                <version>${pax.swissbox.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>

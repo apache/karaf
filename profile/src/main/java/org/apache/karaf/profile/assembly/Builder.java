@@ -906,7 +906,7 @@ public class Builder {
         // now we can configure blacklisting features processor which may have already defined (in XML)
         // configuration for bundle replacements or feature overrides.
         // we'll add overrides from profiles later.
-        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(existingProcessorDefinitionURI, blacklist, new HashSet<>());
+        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(existingProcessorDefinitionURI, null, blacklist, new HashSet<>());
 
         //
         // Propagate feature installation from repositories

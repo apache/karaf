@@ -24,13 +24,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.UnmarshallerHandler;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -42,8 +44,21 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.karaf.features.internal.model.processing.FeaturesProcessing;
 import org.apache.karaf.features.internal.model.processing.ObjectFactory;
 import org.apache.karaf.util.xml.IndentingXMLEventWriter;
+import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
+import org.ops4j.util.property.DictionaryPropertyResolver;
+import org.ops4j.util.property.PropertyResolver;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.AttributesImpl;
 
 /**
  * A class to help serialize {@link org.apache.karaf.features.internal.model.processing.FeaturesProcessing} model
@@ -53,12 +68,15 @@ public class FeaturesProcessingSerializer {
 
     public static Logger LOG = LoggerFactory.getLogger(FeaturesProcessingSerializer.class);
 
+    private final BundleContext bundleContext;
     private JAXBContext FEATURES_PROCESSING_CONTEXT;
 
     public FeaturesProcessingSerializer() {
+        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+        this.bundleContext = bundle == null ? null : bundle.getBundleContext();
         try {
             FEATURES_PROCESSING_CONTEXT = JAXBContext.newInstance(ObjectFactory.class);
-        } catch (JAXBException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -68,9 +86,43 @@ public class FeaturesProcessingSerializer {
      * @param stream
      * @return
      */
-    public FeaturesProcessing read(InputStream stream) throws JAXBException {
+    public FeaturesProcessing read(InputStream stream) throws Exception {
+        return this.read(stream, null);
+    }
+
+    /**
+     * Reads {@link FeaturesProcessing features processing model} from input stream
+     * @param stream
+     * @param versions additional properties to resolve placeholders in features processing XML
+     * @return
+     */
+    public FeaturesProcessing read(InputStream stream, Properties versions) throws Exception {
         Unmarshaller unmarshaller = FEATURES_PROCESSING_CONTEXT.createUnmarshaller();
-        return (FeaturesProcessing) unmarshaller.unmarshal(stream);
+        UnmarshallerHandler handler = unmarshaller.getUnmarshallerHandler();
+
+        // BundleContextPropertyResolver gives access to e.g., ${karaf.base}
+        final PropertyResolver resolver = bundleContext == null ? new DictionaryPropertyResolver(versions)
+                : new DictionaryPropertyResolver(versions, new BundleContextPropertyResolver(bundleContext));
+
+        // indirect unmarshaling with property resolution inside XML attribute values and CDATA
+        SAXParserFactory spf = SAXParserFactory.newInstance();
+        spf.setNamespaceAware(true);
+        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
+        xmlReader.setContentHandler(new ResolvingContentHandler(new Properties() {
+            @Override
+            public String getProperty(String key) {
+                return resolver.get(key);
+            }
+
+            @Override
+            public String getProperty(String key, String defaultValue) {
+                String value = resolver.get(key);
+                return value == null ? defaultValue : value;
+            }
+        }, handler));
+        xmlReader.parse(new InputSource(stream));
+
+        return (FeaturesProcessing) handler.getResult();
     }
 
     /**
@@ -154,6 +206,117 @@ public class FeaturesProcessingSerializer {
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
         }
+    }
+
+    private static class ResolvingContentHandler implements ContentHandler {
+
+        public static Logger LOG = LoggerFactory.getLogger(ResolvingContentHandler.class);
+
+        private Properties properties;
+        private ContentHandler target;
+
+        private boolean inElement = false;
+        private StringWriter sw = new StringWriter();
+
+        public ResolvingContentHandler(Properties properties, ContentHandler target) {
+            this.properties = properties;
+            this.target = target;
+        }
+
+        @Override
+        public void setDocumentLocator(Locator locator) {
+            target.setDocumentLocator(locator);
+        }
+
+        @Override
+        public void startDocument() throws SAXException {
+            target.startDocument();
+        }
+
+        @Override
+        public void endDocument() throws SAXException {
+            target.endDocument();
+        }
+
+        @Override
+        public void startPrefixMapping(String prefix, String uri) throws SAXException {
+            target.startPrefixMapping(prefix, uri);
+        }
+
+        @Override
+        public void endPrefixMapping(String prefix) throws SAXException {
+            target.endPrefixMapping(prefix);
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+            AttributesImpl resolvedAttributes = new AttributesImpl(atts);
+            for (int i = 0; i < atts.getLength(); i++) {
+                resolvedAttributes.setAttribute(i, atts.getURI(i), atts.getLocalName(i), atts.getQName(i),
+                        atts.getType(i), resolve(atts.getValue(i)));
+            }
+            if (inElement) {
+                flushBuffer(false);
+            }
+            inElement = true;
+            target.startElement(uri, localName, qName, resolvedAttributes);
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            if (inElement) {
+                flushBuffer(true);
+                inElement = false;
+            }
+            target.endElement(uri, localName, qName);
+        }
+
+        @Override
+        public void characters(char[] ch, int start, int length) throws SAXException {
+            if (inElement) {
+                sw.append(new String(ch, start, length));
+            } else {
+                target.characters(ch, start, length);
+            }
+        }
+
+        @Override
+        public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
+            // only elements without PCDATA in DTD have whitespace passed to this method. so ignore
+            target.ignorableWhitespace(ch, start, length);
+        }
+
+        @Override
+        public void processingInstruction(String target, String data) throws SAXException {
+            this.target.processingInstruction(target, data);
+        }
+
+        @Override
+        public void skippedEntity(String name) throws SAXException {
+            target.skippedEntity(name);
+        }
+
+        /**
+         * Pass collected characters to target {@link ContentHandler}
+         * @param resolve whether to expect placeholders in collected text
+         */
+        private void flushBuffer(boolean resolve) throws SAXException {
+            String value = sw.toString();
+            String resolved = resolve ? resolve(value) : value;
+
+            target.characters(resolved.toCharArray(), 0, resolved.length());
+            sw = new StringWriter();
+        }
+
+        private String resolve(String value) {
+            String resolved = org.ops4j.util.collections.PropertyResolver.resolve(properties, value);
+            if (resolved.contains("${")) {
+                // there are still unresolved properties - just log warning
+                LOG.warn("Value {} has unresolved properties, please check configuration.", value);
+            }
+            return resolved;
+        }
+
     }
 
 }
