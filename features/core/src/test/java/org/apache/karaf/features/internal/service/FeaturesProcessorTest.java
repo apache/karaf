@@ -204,6 +204,39 @@ public class FeaturesProcessorTest {
     }
 
     @Test
+    public void replaceFeatures() {
+        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
+                null, null,
+                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi04.xml", null));
+        URI uri = URI.create("file:src/test/resources/org/apache/karaf/features/internal/service/fp04.xml");
+        RepositoryImpl repo = (RepositoryImpl) new RepositoryCacheImpl(processor).create(uri, true);
+
+        Feature f11_0 = repo.getFeatures()[0];
+        Feature f11_1 = repo.getFeatures()[1];
+        assertThat(f11_0.getBundles().size(), equalTo(1));
+        assertThat(f11_0.getBundles().get(0).getLocation(), equalTo("mvn:commons-io/commons-io/1.4"));
+        assertThat(f11_1.getBundles().size(), equalTo(2));
+        assertThat(f11_1.getBundles().get(0).getLocation(), equalTo("mvn:commons-io/commons-io/1.3"));
+        assertThat(f11_1.getBundles().get(1).getLocation(), equalTo("mvn:commons-codec/commons-codec/0.5"));
+    }
+
+    @Test
+    public void overrideDependencyFlag() {
+        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig(
+                null, null,
+                "file:src/test/resources/org/apache/karaf/features/internal/service/fpi05.xml", null));
+        URI uri = URI.create("file:src/test/resources/org/apache/karaf/features/internal/service/fp04.xml");
+        RepositoryImpl repo = (RepositoryImpl) new RepositoryCacheImpl(processor).create(uri, true);
+
+        Feature f11_0 = repo.getFeatures()[0];
+        Feature f11_1 = repo.getFeatures()[1];
+        assertTrue(f11_0.getBundles().get(0).isDependency());
+        assertTrue(f11_0.getBundles().get(1).isDependency());
+        assertFalse(f11_1.getBundles().get(0).isDependency());
+        assertFalse(f11_1.getBundles().get(1).isDependency());
+    }
+
+    @Test
     public void resolvePlaceholders() throws Exception {
         Properties props = new Properties();
         props.put("version.jclouds", "1.9");

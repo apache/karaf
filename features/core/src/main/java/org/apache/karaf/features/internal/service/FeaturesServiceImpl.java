@@ -112,6 +112,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final BundleInstallSupport installSupport;
     private final FeaturesServiceConfig cfg;
     private final RepositoryCache repositories;
+    private final FeaturesProcessor featuresProcessor;
 
     private final ThreadLocal<String> outputFile = new ThreadLocal<>();
 
@@ -150,7 +151,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.resolver = resolver;
         this.installSupport = installSupport;
         this.globalRepository = globalRepository;
-        this.repositories = new RepositoryCacheImpl(new FeaturesProcessorImpl(cfg));
+        this.featuresProcessor = new FeaturesProcessorImpl(cfg);
+        this.repositories = new RepositoryCacheImpl(featuresProcessor);
         this.cfg = cfg;
         this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("features"));
         loadState();
@@ -352,6 +354,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     @Override
     public void validateRepository(URI uri) throws Exception {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isRepositoryUriBlacklisted(URI uri) {
+        return featuresProcessor.isRepositoryBlacklisted(uri.toString());
     }
 
     @Override
@@ -776,9 +783,19 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Set<FeatureReq> existingFeatures = map(requirements, FeatureReq::parseRequirement);
 
         Set<FeatureReq> toAdd = computeFeaturesToAdd(options, toInstall);
-        toAdd.forEach(f -> requirements.add(f.toRequirement()));
-        print("Adding features: " + join(toAdd), options.contains(Option.Verbose));
-        
+        toAdd.forEach(f -> {
+            if (f.isBlacklisted()) {
+                print("Skipping blacklisted feature: " + f, options.contains(Option.Verbose));
+            } else {
+                requirements.add(f.toRequirement());
+            }
+        });
+        List<FeatureReq> notBlacklisted = toAdd.stream()
+                .filter(fr -> !fr.isBlacklisted()).collect(Collectors.toList());
+        if (notBlacklisted.size() > 0) {
+            print("Adding features: " + join(notBlacklisted), options.contains(Option.Verbose));
+        }
+
         if (options.contains(Option.Upgrade)) {
             Set<FeatureReq> toRemove = computeFeaturesToRemoveOnUpdate(toAdd, existingFeatures);
             toRemove.forEach(f -> requirements.remove(f.toRequirement()));
