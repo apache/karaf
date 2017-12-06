@@ -92,6 +92,7 @@ public class Activator extends BaseActivator {
 
     public static final String FEATURES_SERVICE_CONFIG_FILE = "org.apache.karaf.features.cfg";
     public static final String FEATURES_SERVICE_PROCESSING_FILE = "org.apache.karaf.features.xml";
+    public static final String FEATURES_SERVICE_PROCESSING_VERSIONS_FILE = "versions.properties";
 
     private static final String STATE_FILE = "state.json";
 
@@ -238,6 +239,7 @@ public class Activator extends BaseActivator {
             getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN),
             getString("blacklisted", new File(karafEtc, "blacklisted.properties").toURI().toString()),
             getString("featureProcessing", new File(karafEtc, FEATURES_SERVICE_PROCESSING_FILE).toURI().toString()),
+            getString("featureProcessingVersions", new File(karafEtc, FEATURES_SERVICE_PROCESSING_VERSIONS_FILE).toURI().toString()),
             getString("serviceRequirements", FeaturesService.ServiceRequirementsBehavior.Default.getValue()));
     }
 

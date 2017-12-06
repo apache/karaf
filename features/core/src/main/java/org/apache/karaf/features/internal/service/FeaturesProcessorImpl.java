@@ -18,11 +18,13 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.karaf.features.BundleInfo;
@@ -49,7 +51,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
 
     public static Logger LOG = LoggerFactory.getLogger(FeaturesProcessorImpl.class);
 
-    private static FeaturesProcessingSerializer serializer = new FeaturesProcessingSerializer();
+    private FeaturesProcessingSerializer serializer = new FeaturesProcessingSerializer();
 
     // empty, but fully functional features processing configuration
     private FeaturesProcessing processing = new FeaturesProcessing();
@@ -58,14 +60,25 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
      * <p>Creates instance of features processor using 1 external URI, additional {@link Blacklist} instance
      * and additional set of override clauses.</p>
      * @param featureModificationsURI
+     * @param featureProcessingVersions
      * @param blacklistDefinitions
      * @param overrides
      */
-    public FeaturesProcessorImpl(String featureModificationsURI, Blacklist blacklistDefinitions, Set<String> overrides) {
+    public FeaturesProcessorImpl(String featureModificationsURI, String featureProcessingVersions,
+                                 Blacklist blacklistDefinitions, Set<String> overrides) {
         if (featureModificationsURI != null) {
             try {
                 try (InputStream stream = new URL(featureModificationsURI).openStream()) {
-                    processing = serializer.read(stream);
+                    Properties versions = new Properties();
+                    if (featureProcessingVersions != null) {
+                        File versionsProperties = new File(new URL(featureProcessingVersions).getPath());
+                        if (versionsProperties.isFile()) {
+                            try (InputStream propsStream = new URL(featureProcessingVersions).openStream()) {
+                                versions.load(propsStream);
+                            }
+                        }
+                    }
+                    processing = serializer.read(stream, versions);
                 }
             } catch (FileNotFoundException e) {
                 LOG.debug("Can't find feature processing file (" + featureModificationsURI + "), skipping");
@@ -80,11 +93,13 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     /**
      * <p>Creates instance of features processor using 3 external (optional) URIs.</p>
      * @param featureModificationsURI
+     * @param featureProcessingVersions
      * @param blacklistedURI
      * @param overridesURI
      */
-    public FeaturesProcessorImpl(String featureModificationsURI, String blacklistedURI, String overridesURI) {
-        this(featureModificationsURI, new Blacklist(blacklistedURI), Overrides.loadOverrides(overridesURI));
+    public FeaturesProcessorImpl(String featureModificationsURI, String featureProcessingVersions,
+                                 String blacklistedURI, String overridesURI) {
+        this(featureModificationsURI, featureProcessingVersions, new Blacklist(blacklistedURI), Overrides.loadOverrides(overridesURI));
     }
 
     /**
@@ -93,7 +108,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
      * @param configuration
      */
     public FeaturesProcessorImpl(FeaturesServiceConfig configuration) {
-        this(configuration.featureModifications, configuration.blacklisted, configuration.overrides);
+        this(configuration.featureModifications, configuration.featureProcessingVersions, configuration.blacklisted, configuration.overrides);
     }
 
     /**
