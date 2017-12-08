@@ -222,4 +222,6 @@ public interface FeaturesService {
 
     String getFeatureXml(Feature feature);
 
+    void refreshFeatures() throws Exception;
+
 }
