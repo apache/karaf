@@ -1169,7 +1169,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     @Override
-    public void refreshFeatures() throws Exception {
+    public void refreshFeatures(EnumSet<Option> options) throws Exception {
         Set<URI> uris = new LinkedHashSet<>();
         for (Repository r : this.repositories.listRepositories()) {
             uris.add(r.getURI());
@@ -1179,7 +1179,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.repositories = new RepositoryCacheImpl(featuresProcessor);
 
         State state = copyState();
-        doProvisionInThread(state.requirements, emptyMap(), state, getFeaturesById(), EnumSet.noneOf(Option.class));
+        doProvisionInThread(state.requirements, emptyMap(), state, getFeaturesById(), options);
     }
 
 }

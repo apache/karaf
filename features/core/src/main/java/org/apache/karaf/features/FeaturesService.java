@@ -222,6 +222,6 @@ public interface FeaturesService {
 
     String getFeatureXml(Feature feature);
 
-    void refreshFeatures() throws Exception;
+    void refreshFeatures(EnumSet<Option> options) throws Exception;
 
 }
