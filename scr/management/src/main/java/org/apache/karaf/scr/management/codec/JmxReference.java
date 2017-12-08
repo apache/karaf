@@ -16,11 +16,9 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.karaf.scr.management.ScrServiceMBean;
-import org.apache.karaf.scr.management.internal.ScrService;
-import org.osgi.framework.Constants;
+import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
+import org.osgi.service.component.runtime.dto.ReferenceDTO;
 
-import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -44,18 +42,23 @@ public class JmxReference {
     public final static TabularType REFERENCE_TABLE = createReferenceTableType();
 
     private final CompositeData data;
-    //String[] COMPONENT = { REFERENCE_NAME, REFERENCE_STATE, REFERENCE_CARDINALITY, REFERENCE_AVAILABILITY, REFERENCE_POLICY, REFERENCE_BOUND_SERVICES};
 
-    public JmxReference(ScrService.Reference reference) {
+    public JmxReference(ReferenceDTO reference) {
         try {
-            String[] itemNames = ScrServiceMBean.REFERENCE;
+            String[] itemNames = ServiceComponentRuntimeMBean.REFERENCE;
             Object[] itemValues = new Object[itemNames.length];
-            itemValues[0] = reference.getName();
-            itemValues[1] = reference.isSatisfied();
-            itemValues[2] = getCardinality(reference);
-            itemValues[3] = getAvailability(reference);
-            itemValues[4] = getPolicy(reference);
-            itemValues[5] = getBoundServices(reference);
+            itemValues[0] = reference.name;
+            itemValues[1] = reference.interfaceName;
+            itemValues[2] = reference.cardinality;
+            itemValues[3] = reference.policy;
+            itemValues[4] = reference.policyOption;
+            itemValues[5] = reference.target;
+            itemValues[6] = reference.bind;
+            itemValues[7] = reference.unbind;
+            itemValues[8] = reference.updated;
+            itemValues[9] = reference.field;
+            itemValues[10] = reference.fieldOption;
+            itemValues[11] = reference.scope;
             data = new CompositeDataSupport(REFERENCE, itemNames, itemValues);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Cannot form feature open data", e);
@@ -66,10 +69,10 @@ public class JmxReference {
         return data;
     }
 
-    public static TabularData tableFrom(ScrService.Reference... references) {
+    public static TabularData tableFrom(ReferenceDTO[] references) {
         TabularDataSupport table = new TabularDataSupport(REFERENCE_TABLE);
         if (references != null) {
-            for (ScrService.Reference reference : references) {
+            for (ReferenceDTO reference : references) {
                 table.put(new JmxReference(reference).asCompositeData());
             }
         }
@@ -79,22 +82,34 @@ public class JmxReference {
     private static CompositeType createReferenceType() {
         try {
             String description = "This type encapsulates Scr references";
-            String[] itemNames = ScrServiceMBean.REFERENCE;
+            String[] itemNames = ServiceComponentRuntimeMBean.REFERENCE;
             OpenType[] itemTypes = new OpenType[itemNames.length];
             String[] itemDescriptions = new String[itemNames.length];
             itemTypes[0] = SimpleType.STRING;
-            itemTypes[1] = SimpleType.BOOLEAN;
+            itemTypes[1] = SimpleType.STRING;
             itemTypes[2] = SimpleType.STRING;
             itemTypes[3] = SimpleType.STRING;
             itemTypes[4] = SimpleType.STRING;
-            itemTypes[5] = new ArrayType(1, SimpleType.STRING);
+            itemTypes[5] = SimpleType.STRING;
+            itemTypes[6] = SimpleType.STRING;
+            itemTypes[7] = SimpleType.STRING;
+            itemTypes[8] = SimpleType.STRING;
+            itemTypes[9] = SimpleType.STRING;
+            itemTypes[10] = SimpleType.STRING;
+            itemTypes[11] = SimpleType.STRING;
 
             itemDescriptions[0] = "The name of the reference";
-            itemDescriptions[1] = "The state of the reference";
+            itemDescriptions[1] = "The interface name of the reference";
             itemDescriptions[2] = "The cardinality of the reference";
-            itemDescriptions[3] = "The availability of the reference";
-            itemDescriptions[4] = "The policy of the reference";
-            itemDescriptions[5] = "The bound services";
+            itemDescriptions[3] = "The policy of the reference";
+            itemDescriptions[4] = "The policy option of the reference";
+            itemDescriptions[5] = "The target";
+            itemDescriptions[6] = "The bind";
+            itemDescriptions[7] = "The unbind";
+            itemDescriptions[8] = "The updated";
+            itemDescriptions[9] = "The field";
+            itemDescriptions[10] = "The field option";
+            itemDescriptions[11] = "The scope";
 
             return new CompositeType("Reference", description, itemNames,
                     itemDescriptions, itemTypes);
@@ -106,66 +121,11 @@ public class JmxReference {
     private static TabularType createReferenceTableType() {
         try {
             return new TabularType("References", "The table of all references",
-                    REFERENCE,  new String[] {ScrServiceMBean.REFERENCE_NAME});
+                    REFERENCE,  new String[] {ServiceComponentRuntimeMBean.REFERENCE_NAME});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build references table type", e);
         }
     }
 
 
-    /**
-     * Returns a literal for the {@link ScrService.Reference} cardinality.
-     * @param reference     The target {@link ScrService.Reference}.
-     * @return              "Multiple" or "Single".
-     */
-    private static String getCardinality(ScrService.Reference reference) {
-        if (reference.isMultiple()) {
-            return ScrServiceMBean.REFERENCE_CARDINALITY_MULTIPLE;
-        } else {
-            return ScrServiceMBean.REFERENCE_CARDINALITY_SINGLE;
-        }
-    }
-
-    /**
-     * Returns a literal for the {@link ScrService.Reference} availability.
-     * @param reference     The target {@link ScrService.Reference}.
-     * @return              "Mandatory" or "Optional".
-     */
-    private static String getAvailability(ScrService.Reference reference) {
-        if (reference.isOptional()) {
-            return ScrServiceMBean.REFERENCE_AVAILABILITY_OPTIONAL;
-        } else {
-            return ScrServiceMBean.REFERENCE_AVAILABILITY_MANDATORY;
-        }
-    }
-
-    /**
-     * Returns a literal for the {@link ScrService.Reference} policy.
-     * @param reference     The target {@link ScrService.Reference}.
-     * @return              "Static" or "Dynamic".
-     */
-    private static String getPolicy(ScrService.Reference reference) {
-        if (reference.isStatic()) {
-            return ScrServiceMBean.REFERENCE_POLICY_STATIC;
-        } else {
-            return ScrServiceMBean.REFERENCE_POLICY_DYNAMIC;
-        }
-    }
-
-    /**
-     * Returns The bound service ids.
-     * @param reference     The target {@link ScrService.Reference}.
-     * @return
-     */
-    private static String[] getBoundServices(ScrService.Reference reference) {
-        if (reference.getBoundServiceReferences() == null || reference.getBoundServiceReferences().length == 0) {
-            return new String[0];
-        } else {
-            String[] ids = new String[reference.getBoundServiceReferences().length];
-            for (int i=0; i < reference.getBoundServiceReferences().length; i++) {
-                ids[i] = String.valueOf(reference.getBoundServiceReferences()[i].getProperty(Constants.SERVICE_ID));
-            }
-            return ids;
-        }
-    }
 }
