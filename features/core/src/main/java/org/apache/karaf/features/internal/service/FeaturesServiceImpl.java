@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -111,8 +112,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final Resolver resolver;
     private final BundleInstallSupport installSupport;
     private final FeaturesServiceConfig cfg;
-    private final RepositoryCache repositories;
-    private final FeaturesProcessor featuresProcessor;
+    private RepositoryCache repositories;
+    private FeaturesProcessor featuresProcessor;
 
     private final ThreadLocal<String> outputFile = new ThreadLocal<>();
 
@@ -1166,4 +1167,19 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return null;
         }
     }
+
+    @Override
+    public void refreshFeatures(EnumSet<Option> options) throws Exception {
+        Set<URI> uris = new LinkedHashSet<>();
+        for (Repository r : this.repositories.listRepositories()) {
+            uris.add(r.getURI());
+        }
+        this.refreshRepositories(uris);
+        this.featuresProcessor = new FeaturesProcessorImpl(cfg);
+        this.repositories = new RepositoryCacheImpl(featuresProcessor);
+
+        State state = copyState();
+        doProvisionInThread(state.requirements, emptyMap(), state, getFeaturesById(), options);
+    }
+
 }
