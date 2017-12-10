@@ -2043,7 +2043,7 @@
                     <plugin>
                         <groupId>org.apache.rat</groupId>
                         <artifactId>apache-rat-plugin</artifactId>
-                        <version>0.11</version>
+                        <version>0.12</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>
@@ -2058,6 +2058,8 @@
                             <excludes>
                                 <exclude>**/*.pub</exclude>
                                 <exclude>**/target/**/*</exclude>
+                                <!-- JLine -->
+                                <exclude>**/src/main/java/jline/**/*</exclude>
                                 <!-- GIT files -->
                                 <exclude>**/.git/**/*</exclude>
                                 <!-- IDEA files -->
@@ -2083,8 +2085,10 @@
                                 <exclude>**/*.mf</exclude>
                                 <!-- test json files -->
                                 <exclude>**/*.json</exclude>
+                                <exclude>**/src/test/resources/wirings/1</exclude>
                                 <!-- SSH keys -->
 				                <exclude>**/*.key</exclude>
+                                <exclude>**/*.id_rsa</exclude>
                                 <!-- For Jenkins, ignore the .repository -->
                                 <exclude>.repository/**</exclude>
                                 <!-- jar files -->
