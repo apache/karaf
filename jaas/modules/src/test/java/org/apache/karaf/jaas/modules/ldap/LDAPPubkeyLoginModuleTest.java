@@ -7,8 +7,14 @@ package org.apache.karaf.jaas.modules.ldap;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 import org.apache.directory.server.annotations.CreateLdapServer;
@@ -17,16 +23,15 @@ import org.apache.directory.server.core.annotations.ApplyLdifFiles;
 import org.apache.directory.server.core.annotations.CreateDS;
 import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
-import static org.apache.directory.server.core.integ.AbstractLdapTestUnit.getLdapServer;
 import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.NamePubkeyCallbackHandler;
-import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
-import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
 import org.apache.log4j.Level;
 import org.hamcrest.Matchers;
+
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
@@ -156,6 +161,23 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         }
         File file = new File(basedir + "/target/test-classes/" + LDAP_PROPERTIES_FILE);
         return new Properties(file);
+    }
+
+    private static void ldapProps(String propsPath, Function<String, String> mapFunction) throws IOException {
+        String basedir = System.getProperty("basedir");
+        if (basedir == null) {
+            basedir = new File(".").getCanonicalPath();
+        }
+        Path inPath = new File(basedir + "/src/test/resources/" + propsPath).toPath();
+        List<String> lines = Files.lines(inPath, Charset.forName("UTF-8"))
+                .map(mapFunction)
+                .collect(toList());
+        Path outPath = new File(basedir + "/target/test-classes/" + propsPath).toPath();
+        Files.write(outPath, lines, Charset.forName("UTF-8"));
+    }
+
+    public static List<String> names(Collection<? extends Principal> principals) {
+        return principals.stream().map(r->r.getName()).collect(toList());
     }
 
 }
