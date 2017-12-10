@@ -2166,12 +2166,17 @@
                                 <exclude>**/foo</exclude>
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>
+                                <!-- jline -->
+                                <exclude>**/shell/console/src/main/java/jline/**/*.java</exclude>
                                 <!-- test manifests -->
                                 <exclude>**/*.mf</exclude>
                                 <!-- test json files -->
                                 <exclude>**/*.json</exclude>
+                                <!-- test wiring resource files -->
+                                <exclude>**/src/test/resources/wirings/1</exclude>
                                 <!-- SSH keys -->
 				                <exclude>**/*.key</exclude>
+                                <exclude>**/*.id_rsa</exclude>
                                 <!-- For Jenkins, ignore the .repository -->
                                 <exclude>.repository/**</exclude>
                                 <!-- jar files -->
