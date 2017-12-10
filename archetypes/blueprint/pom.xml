@@ -35,7 +35,7 @@
     <description>An archetype for creating a simple blueprint bundle.</description>
 
     <properties>
-        <archetype.version>2.2</archetype.version>
+        <archetype.version>3.0.1</archetype.version>
     </properties>
 
     <build>
