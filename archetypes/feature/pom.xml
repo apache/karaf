@@ -35,7 +35,7 @@
     <description>This archetype sets up an empty karaf features project.</description>
 
     <properties>
-        <archetype.version>2.2</archetype.version>
+        <archetype.version>3.0.1</archetype.version>
     </properties>
 
     <build>
