@@ -2167,7 +2167,7 @@
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>
                                 <!-- jline -->
-                                <exclude>**/shell/console/src/main/java/jline/**/*.java</exclude>
+                                <exclude>**/src/main/java/jline/**/*.java</exclude>
                                 <!-- test manifests -->
                                 <exclude>**/*.mf</exclude>
                                 <!-- test json files -->
