@@ -134,10 +134,10 @@ public class OverridesTest {
         Clause karafAdminCommand = null;
         Clause karafAdminCore = null;
         for (Clause clause : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
-            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/2.3.0.redhat-61033X")) {
+            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/2.3.0.61033X")) {
                 karafAdminCommand = clause;
             }
-            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/2.3.0.redhat-61033X")) {
+            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/2.3.0.61033X")) {
                 karafAdminCore = clause;
             }
         }

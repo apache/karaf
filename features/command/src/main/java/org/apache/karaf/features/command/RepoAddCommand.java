@@ -46,6 +46,10 @@ public class RepoAddCommand extends FeaturesCommandSupport {
         if (uri == null) {
             uri = new URI(nameOrUrl);
         }
+        if (featuresService.isRepositoryUriBlacklisted(uri)) {
+            System.out.println("Feature URL " + uri + " is blacklisted");
+            return;
+        }
         System.out.println("Adding feature url " + uri);
         featuresService.addRepository(uri, install);
     }

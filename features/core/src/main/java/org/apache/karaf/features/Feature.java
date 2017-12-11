@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * A feature is a list of bundles associated identified by its name.
  */
-public interface Feature {
+public interface Feature extends Blacklisting {
 
     String DEFAULT_INSTALL_MODE = "auto";
 

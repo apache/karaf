@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<featuresProcessing xmlns="http://karaf.apache.org/xmlns/features-processing/v1.0.0"
+        xmlns:f="http://karaf.apache.org/xmlns/features/v1.5.0">
+
+    <!--
+        org.apache.karaf.features.internal.service.RepositoryCache will refuse to add/track a repository URI if it's blacklisted,
+        either if added explicitly or as referenced features repository URI
+    -->
+    <blacklistedRepositories>
+        <repository>mvn:org.hibernate/hibernate-validator-osgi-karaf-features/[5,*)/xml/features</repository>
+        <!-- ... -->
+    </blacklistedRepositories>
+
+    <!--
+        org.apache.karaf.features.internal.service.RepositoryCache will transform added/tracked repository by removing blacklisted features
+    -->
+    <blacklistedFeatures>
+        <feature>*jetty*</feature>
+        <feature version="[2,3)">*jclouds*</feature>
+        <!-- ... -->
+    </blacklistedFeatures>
+
+    <!--
+        org.apache.karaf.features.internal.service.RepositoryCache will transform added/tracked repository and remove all blacklisted
+        bundles from all the features in the repository
+    -->
+    <blacklistedBundles>
+        <bundle>mvn:commons-logging/*</bundle>
+        <!-- ... -->
+    </blacklistedBundles>
+
+    <!--
+        We can configure RepositoryCache to change 'dependency="false|true"' flag on given bundles, features,
+        repositories or globally
+    -->
+    <overrideBundleDependency>
+        <!-- Override "dependency" flag for all bundles of all features for given repository URI(s) -->
+        <repository uri="mvn:org.ops4j.pax.cdi/pax-cdi-features/*/xml/features" dependency="true" />
+        <repository uri="mvn:*/xml/features" dependency="true" />
+        <!-- Override "dependency" flag for all bundles of given feature(s) -->
+        <feature name="jclouds*" version="[1,3)" dependency="true" />
+        <!-- Override "dependency" flag for given bundle(s) -->
+        <bundle uri="mvn:javax.annotation/javax.annotation-api/*" dependency="true" />
+    </overrideBundleDependency>
+
+    <!--
+        Knowing there are multiple bundles containing the same classes (usually APIs), we can "translate"
+        bundle location to completely different bundles
+    -->
+    <bundleReplacements>
+        <bundle originalUri="mvn:commons-beanutils/commons-beanutils/[1.9,2)"
+                replacement="mvn:commons-beanutils/commons-beanutils/1.9.3" />
+        <!--
+            An example of direct etc/overrides.properties equivalent - originalUri will be derived from replacement
+             - candidate must have version lower than replacement
+             - candidate must be in eligible range for update: [3.2.0, 3.2.2)
+        -->
+        <bundle replacement="mvn:commons-collections/commons-collections/3.2.2" />
+        <bundle originalUri="mvn:org.eclipse.jetty.orbit/javax.servlet/[3,4)"
+                replacement="mvn:org.apache.geronimo.specs/geronimo-servlet_3.0_spec/1.0" mode="maven" />
+        <!-- ... -->
+    </bundleReplacements>
+
+    <!--
+        We can completely rewrite any feature deifnition, which may be useful for features beyond our control or
+        which are no longer maintained. This is expert setting and has to be configured with care.
+        We can add, remove and change all the items inside feature definition
+    -->
+    <featureReplacements>
+        <replacement mode="replace">
+            <feature name="pax-jsf-resources-support" description="Provide sharing of resources according to Servlet 3.0 for OSGi bundles and JSF" version="6.0.7">
+                <f:feature version="[6.0,6.1)">pax-jsf-support</f:feature>
+                <f:bundle dependency="true">mvn:org.ops4j.pax.web/pax-web-resources-extender/6.0.7</f:bundle>
+                <f:bundle>mvn:org.ops4j.pax.web/pax-web-resources-jsf/6.0.7</f:bundle>
+            </feature>
+        </replacement>
+        <!-- ... -->
+    </featureReplacements>
+
+</featuresProcessing>

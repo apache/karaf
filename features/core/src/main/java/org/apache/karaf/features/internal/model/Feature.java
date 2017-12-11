@@ -113,6 +113,8 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected List<String> resourceRepositories;
     @XmlTransient
     protected String repositoryUrl;
+    @XmlTransient
+    private boolean blacklisted;
 
     public Feature() {
     }
@@ -470,4 +472,14 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     public void setRepositoryUrl(String repositoryUrl) {
         this.repositoryUrl = repositoryUrl;
     }
+
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+    }
+
 }

@@ -16,22 +16,43 @@
  */
 package org.apache.karaf.features;
 
-import java.io.IOException;
 import java.net.URI;
 
 /**
- * A repository of features.
+ * <p>A repository of features. A runtime representation of JAXB model read from feature XML files.</p>
+ *
+ * <p>Original model may be subject to further processing (e.g., blacklisting)</p>
  */
-public interface Repository {
+public interface Repository extends Blacklisting {
 
-    String getName() throws IOException;
+    /**
+     * Logical name of the {@link Repository}
+     * @return
+     */
+    String getName();
 
+    /**
+     * Original URI of the {@link Repository}, where feature declarations were loaded from
+     * @return
+     */
     URI getURI();
 
-    URI[] getRepositories() throws Exception;
+    /**
+     * An array of referenced repository URIs (<code>/features/repository</code>)
+     * @return
+     */
+    URI[] getRepositories();
 
-    URI[] getResourceRepositories() throws Exception;
+    /**
+     * An array of referenced resource repository URIs (<code>/features/resource-repository</code>)
+     * @return
+     */
+    URI[] getResourceRepositories();
 
-    Feature[] getFeatures() throws Exception;
+    /**
+     * An array of {@link Feature features} in this {@link Repository} after possible processing.
+     * @return
+     */
+    Feature[] getFeatures();
 
 }

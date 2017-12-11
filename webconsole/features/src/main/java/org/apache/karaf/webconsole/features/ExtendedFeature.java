@@ -169,4 +169,10 @@ public class ExtendedFeature implements Feature {
     public String getRepositoryUrl() {
         return feature.getRepositoryUrl();
     }
+
+    @Override
+    public boolean isBlacklisted() {
+        return feature.isBlacklisted();
+    }
+
 }

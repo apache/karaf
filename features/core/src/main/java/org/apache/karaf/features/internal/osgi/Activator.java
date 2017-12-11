@@ -28,9 +28,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -93,6 +91,8 @@ import org.slf4j.LoggerFactory;
 public class Activator extends BaseActivator {
 
     public static final String FEATURES_SERVICE_CONFIG_FILE = "org.apache.karaf.features.cfg";
+    public static final String FEATURES_SERVICE_PROCESSING_FILE = "org.apache.karaf.features.xml";
+    public static final String FEATURES_SERVICE_PROCESSING_VERSIONS_FILE = "versions.properties";
 
     private static final String STATE_FILE = "state.json";
 
@@ -228,16 +228,19 @@ public class Activator extends BaseActivator {
     }
 
     private FeaturesServiceConfig getConfig() {
+        String karafEtc = System.getProperty("karaf.etc");
         return new FeaturesServiceConfig(
-            getString("overrides", new File(System.getProperty("karaf.etc"), "overrides.properties").toURI().toString()),
+            getString("overrides", new File(karafEtc, "overrides.properties").toURI().toString()),
             getString("featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE),
             getString("bundleUpdateRange", FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE),
-            getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS),
+            getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS.getValue()),
             getInt("downloadThreads", FeaturesService.DEFAULT_DOWNLOAD_THREADS),
             getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY),
             getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN),
-            getString("blacklisted", new File(System.getProperty("karaf.etc"), "blacklisted.properties").toURI().toString()),
-            getString("serviceRequirements", FeaturesService.SERVICE_REQUIREMENTS_DEFAULT));
+            getString("blacklisted", new File(karafEtc, "blacklisted.properties").toURI().toString()),
+            getString("featureProcessing", new File(karafEtc, FEATURES_SERVICE_PROCESSING_FILE).toURI().toString()),
+            getString("featureProcessingVersions", new File(karafEtc, FEATURES_SERVICE_PROCESSING_VERSIONS_FILE).toURI().toString()),
+            getString("serviceRequirements", FeaturesService.ServiceRequirementsBehavior.Default.getValue()));
     }
 
     private StateStorage createStateStorage() {

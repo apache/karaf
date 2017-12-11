@@ -42,6 +42,18 @@ public final class MapUtils {
         return inverted;
     }
 
+    /**
+     * Changes mapping from <code>S</code> -&gt; <code>Set&lt;T&gt;</code> to mapping
+     * <code>S</code> -&gt; <code>Set&lt;U&gt;</code> using {@link Function} that can change <code>T</code> to
+     * <code>U</code>.
+     *
+     * @param mapset
+     * @param function
+     * @param <S> A key that maps to set of values in input and result map
+     * @param <T> A type of input set of values
+     * @param <U> A type of result set of values
+     * @return
+     */
     public static <S, T, U> Map<S, Set<U>> apply(Map<S, Set<T>> mapset, Function<T, U> function) {
         Map<S, Set<U>> result = new HashMap<>(mapset.size());
         for (Map.Entry<S, Set<T>> entry : mapset.entrySet()) {
@@ -94,6 +106,15 @@ public final class MapUtils {
         return set;
     }
 
+    /**
+     * Produces a map where each set value in <code>from</code> map has every element that's in <code>to</code>
+     * map's set value removed. If <code>from</code> map is left with empty set value, entire set is removed.
+     * @param from
+     * @param to
+     * @param <S>
+     * @param <T>
+     * @return
+     */
     public static <S, T> Map<S, Set<T>> diff(Map<S, Set<T>> from, Map<S, Set<T>> to) {
         Map<S, Set<T>> diff = copyMapSet(from);
         remove(diff, to);
@@ -118,6 +139,14 @@ public final class MapUtils {
         }
     }
 
+    /**
+     * Removes all values from <code>toRemove</code> map from <code>from</code> map. After removal, set values
+     * in <code>from</code> map may be smaller or removed entirely (if there are no more values in given set).
+     * @param from
+     * @param toRemove
+     * @param <S>
+     * @param <T>
+     */
     public static <S, T> void remove(Map<S, Set<T>> from, Map<S, Set<T>> toRemove) {
         for (Map.Entry<S, Set<T>> entry : toRemove.entrySet()) {
             Set<T> s = from.get(entry.getKey());

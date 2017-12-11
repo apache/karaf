@@ -37,6 +37,8 @@ import org.apache.karaf.features.Feature;
         })
 public class Conditional extends Content implements org.apache.karaf.features.Conditional {
 
+    // TODO: use type that really reflects <xs:element name="condition" type="tns:dependency" /> ?
+    // i.e., org.apache.karaf.features.internal.model.Dependency
     @XmlElement(name = "condition", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> condition;
 

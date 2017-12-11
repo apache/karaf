@@ -52,6 +52,7 @@ public class FeatureReq {
 
     private String name;
     private VersionRange versionRange;
+    private boolean blacklisted = false;
 
     public static FeatureReq parseRequirement(String featureReq) {
         if (!featureReq.startsWith(FEATURE_OSGI_REQUIREMENT_PREFIX)) {
@@ -76,13 +77,14 @@ public class FeatureReq {
         this.versionRange = range(versionRange);
     }
     
-    public FeatureReq(String name, VersionRange versionRange) {
+    public FeatureReq(String name, VersionRange versionRange, boolean blacklisted) {
         this.name = name;
         this.versionRange = versionRange;
+        this.blacklisted = blacklisted;
     }
     
     public FeatureReq(Feature feature) {
-        this(feature.getName(), exactVersion(feature.getVersion()));
+        this(feature.getName(), exactVersion(feature.getVersion()), feature.isBlacklisted());
     }
     
     public String getName() {
@@ -119,7 +121,11 @@ public class FeatureReq {
             for (String available : versions.keySet()) {
                 Version availableVersion = VersionTable.getVersion(available);
                 if (availableVersion.compareTo(latest) >= 0 && versionRange.contains(availableVersion)) {
-                    feature = versions.get(available);
+                    Feature possiblyBlacklisted = versions.get(available);
+                    // return only if there are no more non-blaclisted features
+                    if (feature == null || !possiblyBlacklisted.isBlacklisted()) {
+                        feature = possiblyBlacklisted;
+                    }
                     latest = availableVersion;
                 }
             }
@@ -134,6 +140,10 @@ public class FeatureReq {
 
     public String toRequirement() {
         return FEATURE_OSGI_REQUIREMENT_PREFIX + toString();
+    }
+
+    public boolean isBlacklisted() {
+        return blacklisted;
     }
 
     @Override

@@ -33,6 +33,11 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 
+/**
+ * <p>Interface to interact with OSGi framework.</p>
+ * <p>Bundles are installed into {@link org.eclipse.equinox.region.Region regions} and {@link Feature features}
+ * are used only to get their configs and libraries.</p>
+ */
 public interface BundleInstallSupport {
 
     void print(String message, boolean verbose);
@@ -71,14 +76,18 @@ public interface BundleInstallSupport {
     FrameworkInfo getInfo();
 
     void unregister();
-    
+
+    /**
+     * <p>Low-level state of system, provides information about start levels (initial and current), system bundle,
+     * bundle of features service and entire map of bundle IDs to {@link Bundle} instances.</p>
+     * <p>There's no relation to {@link org.eclipse.equinox.region.Region regions}.</p>
+     */
     class FrameworkInfo {
         public Bundle ourBundle;
         public Bundle systemBundle;
         public int initialBundleStartLevel;
         public int currentStartLevel;
         public Map<Long, Bundle> bundles = new HashMap<>();
-
     }
 
 }

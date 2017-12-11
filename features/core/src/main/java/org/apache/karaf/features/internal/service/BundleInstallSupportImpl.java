@@ -59,6 +59,10 @@ import org.osgi.resource.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Interaction with OSGi framework, where bundles are installed into it via {@link RegionDigraph}. After a bundle
+ * is installed, it may be controlled in standard way via {@link Bundle} interface.
+ */
 public class BundleInstallSupportImpl implements BundleInstallSupport {
     private static final Logger LOGGER = LoggerFactory.getLogger(BundleInstallSupportImpl.class);
     
@@ -311,7 +315,7 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         for (Bundle bundle : systemBundleContext.getBundles()) {
             info.bundles.put(bundle.getBundleId(), bundle);
         }
-        info.systemBundle = info.bundles.get(0);
+        info.systemBundle = info.bundles.get(0L);
         return info;
     }
 }

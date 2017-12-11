@@ -19,6 +19,7 @@ package org.apache.karaf.features.internal.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -32,6 +33,7 @@ import java.util.jar.Manifest;
 
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
@@ -113,9 +115,7 @@ public class DeployerTest {
         dstate.state = new State();
         dstate.bundles = new HashMap<>();
         dstate.bundlesPerRegion = new HashMap<>();
-        dstate.features = new HashMap<>();
-        dstate.features.put(f100.getId(), f100);
-        dstate.features.put(f101.getId(), f101);
+        dstate.partitionFeatures(Arrays.asList(f100, f101));
         dstate.filtersPerRegion = new HashMap<>();
         dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
@@ -124,9 +124,8 @@ public class DeployerTest {
         request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
         request.globalRepository = null;
         request.options = EnumSet.noneOf(Option.class);
-        request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
-        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
         request.requirements = new HashMap<>();
         addToMapSet(request.requirements, ROOT_REGION, f100.getName() + "/" + new VersionRange(f100.getVersion(), true));
 
@@ -215,9 +214,7 @@ public class DeployerTest {
         dstate.bundles.put(1L, bundleA);
         dstate.bundlesPerRegion = new HashMap<>();
         addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, 1L);
-        dstate.features = new HashMap<>();
-        dstate.features.put(f100.getId(), f100);
-        dstate.features.put(f101.getId(), f101);
+        dstate.partitionFeatures(Arrays.asList(f100, f101));
         dstate.filtersPerRegion = new HashMap<>();
         dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
@@ -226,9 +223,8 @@ public class DeployerTest {
         request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
         request.globalRepository = null;
         request.options = EnumSet.noneOf(Option.class);
-        request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
-        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
         request.requirements = new HashMap<>();
         addToMapSet(request.requirements, ROOT_REGION, f101.getName() + "/" + new VersionRange(f101.getVersion(), true));
 
@@ -286,7 +282,7 @@ public class DeployerTest {
         dstate.bundles.put(serviceBundle.getBundleId(), serviceBundle);
         dstate.bundlesPerRegion = new HashMap<>();
         addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, serviceBundle.getBundleId());
-        dstate.features = Collections.singletonMap(f1.getId(), f1);
+        dstate.partitionFeatures(Collections.singletonList(f1));
         dstate.filtersPerRegion = new HashMap<>();
         dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
@@ -295,9 +291,8 @@ public class DeployerTest {
         request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
         request.globalRepository = null;
         request.options = EnumSet.noneOf(Option.class);
-        request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
-        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
         request.requirements = new HashMap<>();
         addToMapSet(request.requirements, ROOT_REGION, f1.getName());
 
@@ -358,9 +353,7 @@ public class DeployerTest {
         dstate.state = new State();
         dstate.bundles = new HashMap<>();
         dstate.bundlesPerRegion = new HashMap<>();
-        dstate.features = new HashMap<>();
-        dstate.features.put(f1.getId(), f1);
-        dstate.features.put(f2.getId(), f2);
+        dstate.partitionFeatures(Arrays.asList(f1, f2));
         dstate.filtersPerRegion = new HashMap<>();
         dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
@@ -369,9 +362,8 @@ public class DeployerTest {
         request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
         request.globalRepository = null;
         request.options = EnumSet.noneOf(Option.class);
-        request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
-        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
         request.requirements = new HashMap<>();
         addToMapSet(request.requirements, ROOT_REGION, f2.getName());
 
@@ -425,9 +417,7 @@ public class DeployerTest {
         dstate.bundles.put(serviceBundle1.getBundleId(), serviceBundle1);
         dstate.bundlesPerRegion = new HashMap<>();
         addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, serviceBundle1.getBundleId());
-        dstate.features = new HashMap<>();
-        dstate.features.put(f1.getId(), f1);
-        dstate.features.put(f2.getId(), f2);
+        dstate.partitionFeatures(Arrays.asList(f1, f2));
         dstate.filtersPerRegion = new HashMap<>();
         dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
@@ -436,9 +426,8 @@ public class DeployerTest {
         request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
         request.globalRepository = null;
         request.options = EnumSet.noneOf(Option.class);
-        request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
-        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
         request.requirements = new HashMap<>();
         addToMapSet(request.requirements, ROOT_REGION, f2.getName());
 
@@ -485,10 +474,7 @@ public class DeployerTest {
         dstate.state = new State();
         dstate.bundles = new HashMap<>();
         dstate.bundlesPerRegion = new HashMap<>();
-        dstate.features = new HashMap<>();
-        for (Feature f : repo.getFeatures()) {
-            dstate.features.put(f.getId(), f);
-        }
+        dstate.partitionFeatures(Arrays.asList(repo.getFeatures()));
         dstate.filtersPerRegion = new HashMap<>();
         dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
 
@@ -497,9 +483,8 @@ public class DeployerTest {
         request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
         request.globalRepository = null;
         request.options = EnumSet.noneOf(Option.class);
-        request.overrides = Collections.emptySet();
         request.stateChanges = Collections.emptyMap();
-        request.updateSnaphots = UPDATE_SNAPSHOTS_NONE;
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
 
         MyDeployCallback callback = new MyDeployCallback(dstate, bundles);
         Deployer deployer = new Deployer(manager, resolver, callback);
@@ -645,6 +630,11 @@ public class DeployerTest {
 
         @Override
         public void installLibraries(Feature feature) throws IOException {
+
+        }
+
+        @Override
+        public void bundleBlacklisted(BundleInfo bundleInfo) {
 
         }
     }

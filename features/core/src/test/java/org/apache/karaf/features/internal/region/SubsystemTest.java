@@ -26,9 +26,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.resolver.ResolverImpl;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
+import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.junit.Test;
@@ -62,11 +65,35 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data1"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                          features,
                          Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                         FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null, null, null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void test1a() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<>();
+        addToMapSet(features, "root", "f1");
+        addToMapSet(features, "root/apps1", "f2");
+        addToMapSet(features, "root/apps1/regionx", "bundle:d");
+
+        Map<String, Set<String>> expected = new HashMap<>();
+        addToMapSet(expected, "root", "a/1.0.0");
+        addToMapSet(expected, "root", "c/1.0.0");
+        addToMapSet(expected, "root/apps1", "b/1.0.0");
+        addToMapSet(expected, "root/apps1/regionx", "d/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data1"));
+        resolver.prepare(partitionByName(repo.getFeatures()),
+                         features,
+                         Collections.emptyMap());
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
         verify(resolver, expected);
@@ -93,19 +120,23 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps2#f1", "a/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data2"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                          features,
                          Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                         FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
         verify(resolver, expected);
     }
 
     @Test
-    public void testOverrides() throws Exception {
+    public void testOverridesCompatibilityModeSymbolicNameMatches() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data3/features.xml").toURI());
+
+        // this is normally done by features processor
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setOverriden(BundleInfo.BundleOverrideMode.OSGI);
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setOriginalLocation("a");
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setLocation("b");
 
         Map<String, Set<String>> features = new HashMap<>();
         addToMapSet(features, "root/apps1", "f1");
@@ -114,11 +145,62 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "a/1.0.1");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data3"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                          features,
                          Collections.emptyMap());
-        resolver.resolve(Collections.singleton("b"),
-                         FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null, null, null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void testOverridesCompatibilityModeSymbolicDoesNotMatch() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data3/features.xml").toURI());
+
+        // this is normally done by features processor
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setOverriden(BundleInfo.BundleOverrideMode.OSGI);
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setOriginalLocation("a");
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setLocation("c");
+
+        Map<String, Set<String>> features = new HashMap<>();
+        addToMapSet(features, "root/apps1", "f1");
+
+        // we expect override not to be used - symbolic name between a and c doesn't match
+        Map<String, Set<String>> expected = new HashMap<>();
+        addToMapSet(expected, "root/apps1", "a/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data3"));
+        resolver.prepare(partitionByName(repo.getFeatures()),
+                         features,
+                         Collections.emptyMap());
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null, null, null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void testOverridesMavenMode() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data3/features.xml").toURI());
+
+        // this is normally done by features processor
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setOverriden(BundleInfo.BundleOverrideMode.MAVEN);
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setOriginalLocation("a");
+        ((Bundle)repo.getFeatures()[0].getBundles().get(0)).setLocation("c");
+
+        Map<String, Set<String>> features = new HashMap<>();
+        addToMapSet(features, "root/apps1", "f1");
+
+        // we expect override to be used - symbolic name between a and c doesn't match, but we don't care
+        Map<String, Set<String>> expected = new HashMap<>();
+        addToMapSet(expected, "root/apps1", "not-a/1.0.1");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data3"));
+        resolver.prepare(partitionByName(repo.getFeatures()),
+                         features,
+                         Collections.emptyMap());
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
         verify(resolver, expected);
@@ -134,11 +216,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "a/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data4"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                          features,
                          Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                         FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
         verify(resolver, expected);
@@ -156,11 +237,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data4"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                          features,
                          Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                         FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                          null, null, null);
 
         verify(resolver, expected);
@@ -178,11 +258,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "c/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data1"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                 features,
                 Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
         verify(resolver, expected);
@@ -199,11 +278,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data5"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                 features,
                 Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
         verify(resolver, expected);
@@ -221,11 +299,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root", "c/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data5"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                 features,
                 Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
         verify(resolver, expected);
@@ -243,11 +320,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root", "c/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data6"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                 features,
                 Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
         verify(resolver, expected);
@@ -267,11 +343,10 @@ public class SubsystemTest {
         addToMapSet(expected, "root/apps1", "b/1.0.0");
 
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data7"));
-        resolver.prepare(Arrays.asList(repo.getFeatures()),
+        resolver.prepare(partitionByName(repo.getFeatures()),
                 features,
                 Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
         verify(resolver, expected);
@@ -294,12 +369,37 @@ public class SubsystemTest {
         addToMapSet(expected, "root", "pax-web-tomcat/6.0.4");
         addToMapSet(expected, "root", "pax-web-api/6.0.4");
 
+        Deployer.DeploymentState ds = new Deployer.DeploymentState();
+        ds.partitionFeatures(allFeatures);
         SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data9"));
-        resolver.prepare(allFeatures,
+        resolver.prepare(ds.featuresByName(),
                 features,
                 Collections.emptyMap());
-        resolver.resolve(Collections.emptySet(),
-                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null, null, null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void testBlacklistedBundles() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data10/features.xml").toURI());
+
+        // this is normally done by features processor
+        ((Bundle)repo.getFeatures()[0].getBundles().get(1)).setBlacklisted(true);
+
+        Map<String, Set<String>> features = new HashMap<>();
+        addToMapSet(features, "root", "f1");
+
+        Map<String, Set<String>> expected = new HashMap<>();
+        // we expect only bundle "a", as "b" is blacklisted
+        addToMapSet(expected, "root", "a/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data10"));
+        resolver.prepare(partitionByName(repo.getFeatures()),
+                features,
+                Collections.emptyMap());
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
                 null, null, null);
 
         verify(resolver, expected);
@@ -355,6 +455,12 @@ public class SubsystemTest {
         return cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE) + ": "
                 + cap.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE) + "/"
                 + cap.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+    }
+
+    private Map<String, List<Feature>> partitionByName(Feature[] features) {
+        Deployer.DeploymentState ds = new Deployer.DeploymentState();
+        ds.partitionFeatures(Arrays.asList(features));
+        return ds.featuresByName();
     }
 
 }
