@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.karaf.scr.management.ScrServiceMBean;
+import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
@@ -27,8 +27,7 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import java.util.Dictionary;
-import java.util.Enumeration;
+import java.util.Map;
 
 public class JmxProperty {
 
@@ -47,7 +46,7 @@ public class JmxProperty {
 
     public JmxProperty(String key, String value) {
         try {
-            String[] itemNames = ScrServiceMBean.PROPERTY;
+            String[] itemNames = ServiceComponentRuntimeMBean.PROPERTY;
             Object[] itemValues = new Object[itemNames.length];
             itemValues[0] = key;
             itemValues[1] = value;
@@ -61,13 +60,12 @@ public class JmxProperty {
         return data;
     }
 
-    public static TabularData tableFrom(Dictionary properties) {
+    public static TabularData tableFrom(Map<String, Object> properties) {
         TabularDataSupport table = new TabularDataSupport(PROPERTY_TABLE);
-        Enumeration p = properties.keys();
-        while (p.hasMoreElements()) {
-            Object key = p.nextElement();
-            Object value = properties.get(key);
-            table.put(new JmxProperty(String.valueOf(key), String.valueOf(value)).asCompositeData());
+        for (Map.Entry<String, Object> e : properties.entrySet()) {
+            String key = e.getKey();
+            Object value = e.getValue();
+            table.put(new JmxProperty(key, String.valueOf(value)).asCompositeData());
         }
         return table;
     }
@@ -75,7 +73,7 @@ public class JmxProperty {
     private static CompositeType createPropertyType() {
         try {
             String description = "This type encapsulates Scr properties";
-            String[] itemNames = ScrServiceMBean.PROPERTY;
+            String[] itemNames = ServiceComponentRuntimeMBean.PROPERTY;
             OpenType[] itemTypes = new OpenType[itemNames.length];
             String[] itemDescriptions = new String[itemNames.length];
             itemTypes[0] = SimpleType.STRING;
@@ -94,7 +92,7 @@ public class JmxProperty {
     private static TabularType createPropertyTableType() {
         try {
             return new TabularType("References", "The table of all properties",
-                    PROPERTY, new String[] {ScrServiceMBean.PROPERTY_KEY});
+                    PROPERTY, new String[] {ServiceComponentRuntimeMBean.PROPERTY_KEY});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build properties table type", e);
         }
