@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.profile.assembly;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -33,6 +31,9 @@ import org.apache.karaf.features.internal.model.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Installs PID configuration to <code>${karaf.etc}</code> and <code>system/</code> directory.
+ */
 public class ConfigInstaller {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigInstaller.class);
     private Path etcDirectory;
@@ -41,11 +42,10 @@ public class ConfigInstaller {
     public ConfigInstaller(Path etcDirectory, List<String> pidsToExtract) {
         this.etcDirectory = etcDirectory;
         this.pidsToExtract = pidsToExtract;
-        // TODO Auto-generated constructor stub
     }
 
     public void installConfigs(Feature feature, Downloader downloader, ArtifactInstaller installer)
-        throws Exception, MalformedURLException, IOException {
+        throws Exception {
         List<Content> contents = new ArrayList<>();
         contents.add(feature);
         contents.addAll(feature.getConditional());

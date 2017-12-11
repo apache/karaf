@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -51,6 +52,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.felix.utils.version.VersionCleaner;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.DeploymentListener;
 import org.apache.karaf.features.Feature;
@@ -110,7 +112,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     private final Resolver resolver;
     private final BundleInstallSupport installSupport;
     private final FeaturesServiceConfig cfg;
-    private final RepositoryCache repositories;
+    private RepositoryCache repositories;
+    private FeaturesProcessor featuresProcessor;
 
     private final ThreadLocal<String> outputFile = new ThreadLocal<>();
 
@@ -125,6 +128,9 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
 
     // Synchronized on lock
     private final Object lock = new Object();
+    /**
+     * {@link State} persisted to data directory of features.core bundle.
+     */
     private final State state = new State();
 
     private final ExecutorService executor;
@@ -146,8 +152,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         this.resolver = resolver;
         this.installSupport = installSupport;
         this.globalRepository = globalRepository;
-        Blacklist blacklist = new Blacklist(cfg.blacklisted);
-        this.repositories = new RepositoryCache(blacklist);
+        this.featuresProcessor = new FeaturesProcessorImpl(cfg);
+        this.repositories = new RepositoryCacheImpl(featuresProcessor);
         this.cfg = cfg;
         this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("features"));
         loadState();
@@ -224,7 +230,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                 // Make sure we don't store bundle checksums if
                 // it has been disabled through configadmin
                 // so that we don't keep out-of-date checksums.
-                if (!UPDATE_SNAPSHOTS_CRC.equalsIgnoreCase(cfg.updateSnapshots)) {
+                if (!SnapshotUpdateBehavior.Crc.getValue().equalsIgnoreCase(cfg.updateSnapshots)) {
                     state.bundleChecksums.clear();
                 }
                 storage.save(state);
@@ -349,6 +355,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     @Override
     public void validateRepository(URI uri) throws Exception {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isRepositoryUriBlacklisted(URI uri) {
+        return featuresProcessor.isRepositoryBlacklisted(uri.toString());
     }
 
     @Override
@@ -773,9 +784,19 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Set<FeatureReq> existingFeatures = map(requirements, FeatureReq::parseRequirement);
 
         Set<FeatureReq> toAdd = computeFeaturesToAdd(options, toInstall);
-        toAdd.forEach(f -> requirements.add(f.toRequirement()));
-        print("Adding features: " + join(toAdd), options.contains(Option.Verbose));
-        
+        toAdd.forEach(f -> {
+            if (f.isBlacklisted()) {
+                print("Skipping blacklisted feature: " + f, options.contains(Option.Verbose));
+            } else {
+                requirements.add(f.toRequirement());
+            }
+        });
+        List<FeatureReq> notBlacklisted = toAdd.stream()
+                .filter(fr -> !fr.isBlacklisted()).collect(Collectors.toList());
+        if (notBlacklisted.size() > 0) {
+            print("Adding features: " + join(notBlacklisted), options.contains(Option.Verbose));
+        }
+
         if (options.contains(Option.Upgrade)) {
             Set<FeatureReq> toRemove = computeFeaturesToRemoveOnUpdate(toAdd, existingFeatures);
             toRemove.forEach(f -> requirements.remove(f.toRequirement()));
@@ -966,7 +987,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         dstate.currentStartLevel = info.currentStartLevel;
         dstate.bundles = info.bundles;
         // Features
-        dstate.features = featuresById;
+        dstate.partitionFeatures(featuresById.values());
         RegionDigraph regionDigraph = installSupport.getDiGraphCopy();
         dstate.bundlesPerRegion = DigraphHelper.getBundlesPerRegion(regionDigraph);
         dstate.filtersPerRegion = DigraphHelper.getPolicies(regionDigraph);
@@ -974,13 +995,12 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     private Deployer.DeploymentRequest getDeploymentRequest(Map<String, Set<String>> requirements, Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options, String outputFile) {
-        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        Deployer.DeploymentRequest request = Deployer.DeploymentRequest.defaultDeploymentRequest();
         request.bundleUpdateRange = cfg.bundleUpdateRange;
         request.featureResolutionRange = cfg.featureResolutionRange;
-        request.serviceRequirements = cfg.serviceRequirements;
-        request.updateSnaphots = cfg.updateSnapshots;
+        request.serviceRequirements = ServiceRequirementsBehavior.fromString(cfg.serviceRequirements);
+        request.updateSnaphots = SnapshotUpdateBehavior.fromString(cfg.updateSnapshots);
         request.globalRepository = globalRepository;
-        request.overrides = Overrides.loadOverrides(cfg.overrides);
         request.requirements = requirements;
         request.stateChanges = stateChanges;
         request.options = options;
@@ -1121,6 +1141,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         installSupport.installLibraries(feature);
     }
 
+    @Override
+    public void bundleBlacklisted(BundleInfo bundleInfo) {
+
+    }
+
     private String join(Collection<FeatureReq> reqs) {
         return reqs.stream().map(FeatureReq::toString).collect(Collectors.joining(","));
     }
@@ -1142,4 +1167,19 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return null;
         }
     }
+
+    @Override
+    public void refreshFeatures(EnumSet<Option> options) throws Exception {
+        Set<URI> uris = new LinkedHashSet<>();
+        for (Repository r : this.repositories.listRepositories()) {
+            uris.add(r.getURI());
+        }
+        this.refreshRepositories(uris);
+        this.featuresProcessor = new FeaturesProcessorImpl(cfg);
+        this.repositories = new RepositoryCacheImpl(featuresProcessor);
+
+        State state = copyState();
+        doProvisionInThread(state.requirements, emptyMap(), state, getFeaturesById(), options);
+    }
+
 }

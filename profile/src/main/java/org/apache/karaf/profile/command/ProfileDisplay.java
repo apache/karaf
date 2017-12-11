@@ -54,7 +54,7 @@ public class ProfileDisplay implements Action {
     private ProfileService profileService;
 
     @Override
-    public Object execute() throws Exception {
+    public Object execute() {
         displayProfile(profileService.getRequiredProfile(profileId));
         return null;
     }
@@ -87,11 +87,11 @@ public class ProfileDisplay implements Action {
 
         Map<String, Map<String, Object>> configuration = new HashMap<>(profile.getConfigurations());
         Map<String, byte[]> resources = profile.getFileConfigurations();
-        Map<String,Object> agentConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
-        List<String> agentProperties = new ArrayList<>();
+        Map<String,Object> profileConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
+        List<String> profileProperties = new ArrayList<>();
         List<String> systemProperties = new ArrayList<>();
         List<String> configProperties = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : agentConfiguration.entrySet()) {
+        for (Map.Entry<String, Object> entry : profileConfiguration.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value instanceof String && ((String) value).contains(",")) {
@@ -107,7 +107,7 @@ public class ProfileDisplay implements Action {
             else if (!key.startsWith("feature.") && !key.startsWith("repository") &&
                         !key.startsWith("bundle.") && !key.startsWith("fab.") &&
                         !key.startsWith("override.") && !key.startsWith("attribute.")) {
-                agentProperties.add("  " + key + " = " + value);
+                profileProperties.add("  " + key + " = " + value);
             }
         }
 
@@ -131,8 +131,8 @@ public class ProfileDisplay implements Action {
                 printConfigList("Overrides : ", output, profile.getOverrides());
             }
 
-            if (agentProperties.size() > 0) {
-                printConfigList("Agent Properties : ", output, agentProperties);
+            if (profileProperties.size() > 0) {
+                printConfigList("Profile Properties : ", output, profileProperties);
             }
 
             if (systemProperties.size() > 0) {

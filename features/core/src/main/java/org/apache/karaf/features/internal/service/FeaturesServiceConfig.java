@@ -20,8 +20,6 @@ import org.apache.karaf.features.FeaturesService;
 
 public class FeaturesServiceConfig {
 
-    public final String overrides;
-    
     /**
      * Range to use when a version is specified on a feature dependency.
      * The default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_FEATURE_RESOLUTION_RANGE}
@@ -54,14 +52,64 @@ public class FeaturesServiceConfig {
      * Service requirements enforcement
      */
     public final String serviceRequirements;
-    
+
+    /**
+     * Location of <code>etc/blacklisted.properties</code>
+     */
+    @Deprecated
     public final String blacklisted;
 
+    /**
+     * Location of <code>etc/org.apache.karaf.features.xml</code>
+     */
+    public final String featureModifications;
+
+    /**
+     * Location of <code>etc/versions.properties</code> to read properties to resolve placeholders in
+     * {@link #featureModifications}
+     */
+    public final String featureProcessingVersions;
+
+    /**
+     * Location of <code>etc/overrides.properties</code>
+     */
+    @Deprecated
+    public final String overrides;
+
     public FeaturesServiceConfig() {
-        this(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, null, null);
+        this(null, null, null, null);
     }
 
-    public FeaturesServiceConfig(String overrides, String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun, String blacklisted, String serviceRequirements) {
+    public FeaturesServiceConfig(String featureModifications, String featureProcessingVersions) {
+        this(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, null, featureModifications, featureProcessingVersions, null);
+    }
+
+    @Deprecated
+    public FeaturesServiceConfig(String overrides, String blacklisted, String featureModifications, String featureProcessingVersions) {
+        this(overrides, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklisted, featureModifications, featureProcessingVersions, null);
+    }
+
+    public FeaturesServiceConfig(String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun,
+                                 String featureModifications, String featureProcessingVersions, String serviceRequirements) {
+        this.overrides = null;
+        this.featureResolutionRange = featureResolutionRange;
+        this.bundleUpdateRange = bundleUpdateRange;
+        this.updateSnapshots = updateSnapshots;
+        this.downloadThreads = downloadThreads;
+        this.scheduleDelay = scheduleDelay;
+        this.scheduleMaxRun = scheduleMaxRun;
+        this.blacklisted = null;
+        this.featureModifications = featureModifications;
+        this.featureProcessingVersions = featureProcessingVersions;
+        this.serviceRequirements = serviceRequirements;
+    }
+
+    @Deprecated
+    public FeaturesServiceConfig(String overrides, String featureResolutionRange, String bundleUpdateRange,
+                                 String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun,
+                                 String blacklisted,
+                                 String featureModifications, String featureProcessingVersions,
+                                 String serviceRequirements) {
         this.overrides = overrides;
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
@@ -70,6 +118,9 @@ public class FeaturesServiceConfig {
         this.scheduleDelay = scheduleDelay;
         this.scheduleMaxRun = scheduleMaxRun;
         this.blacklisted = blacklisted;
+        this.featureModifications = featureModifications;
+        this.featureProcessingVersions = featureProcessingVersions;
         this.serviceRequirements = serviceRequirements;
     }
+
 }

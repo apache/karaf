@@ -16,21 +16,21 @@
  */
 package org.apache.karaf.profile.assembly;
 
-import static org.apache.karaf.features.internal.download.impl.DownloadManagerHelper.stripUrl;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.karaf.features.internal.download.impl.DownloadManagerHelper.stripUrl;
 
 /**
  * Downloads a maven artifact and installs it into the given system directory.
@@ -43,12 +43,51 @@ public class ArtifactInstaller {
     private Downloader downloader;
     private Blacklist blacklist;
 
-    public ArtifactInstaller(Path systemDirectory, Downloader downloader, List<String> blacklisted) {
+    public ArtifactInstaller(Path systemDirectory, Downloader downloader, Blacklist blacklist) {
         this.systemDirectory = systemDirectory;
         this.downloader = downloader;
-        this.blacklist = new Blacklist(blacklisted);
+        this.blacklist = blacklist;
     }
-    
+
+    /**
+     * Installs a {@link BundleInfo} into <code>system/</code> directory taking into account <em>blacklisted</em>
+     * and <em>overriden</em> flags.
+     * @param bundle
+     * @throws Exception
+     */
+    public void installArtifact(BundleInfo bundle) throws Exception {
+        if (bundle.isBlacklisted()) {
+            LOGGER.info("      skipping blacklisted maven artifact: " + bundle.getLocation());
+            return;
+        }
+        if (bundle.isOverriden() != BundleInfo.BundleOverrideMode.NONE) {
+            LOGGER.info("      adding overriden maven artifact: " + bundle.getLocation() + " (original location: " + bundle.getOriginalLocation() + ")");
+        } else {
+            LOGGER.info("      adding maven artifact: " + bundle.getLocation());
+        }
+        String location = bundle.getLocation().trim();
+        location = removeTrailingSlash(stripUrl(location));
+        if (!location.startsWith("mvn:")) {
+            LOGGER.warn("Ignoring non maven artifact " + location);
+            return;
+        }
+        final String finalLocation = location;
+        downloader.download(location, provider -> {
+            String uri = provider.getUrl();
+            Path path = pathFromProviderUrl(systemDirectory, finalLocation);
+            synchronized (provider) {
+                Files.createDirectories(path.getParent());
+                Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
+            }
+        });
+    }
+
+    /**
+     * Installs generic artifact to <code>system/</code> directory. For bundles, dedicated {@link #installArtifact(BundleInfo)}
+     * should be used.
+     * @param location
+     * @throws Exception
+     */
     public void installArtifact(String location) throws Exception {
         LOGGER.info("      adding maven artifact: " + location);
         location = removeTrailingSlash(stripUrl(location));

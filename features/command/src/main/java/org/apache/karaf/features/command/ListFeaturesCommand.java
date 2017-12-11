@@ -27,6 +27,7 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 
 @Command(scope = "feature", name = "list", description = "Lists all existing features available from the defined repositories.")
@@ -41,6 +42,9 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
     @Option(name = "-s", aliases = {"--show-hidden"}, description = "Display hidden features", required = false, multiValued = false)
     boolean showHidden;
+
+    @Option(name = "-b", aliases = {"--show-blacklisted"}, description = "Display blacklisted features", required = false, multiValued = false)
+    boolean showBlacklisted;
 
     @Option(name = "-o", aliases = {"--ordered"}, description = "Display a list using alphabetical order ", required = false, multiValued = false)
     boolean ordered;
@@ -58,6 +62,9 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         table.column("State");
         table.column("Repository");
         table.column("Description").maxSize(50);
+        if (showBlacklisted) {
+            table.column("Blacklisted");
+        }
         table.emptyTableText(onlyInstalled ? "No features installed" : "No features available");
 
         List<Repository> repos = Arrays.asList(featuresService.listRepositories());
@@ -75,17 +82,25 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
                     // Filter out not installed features if we only want to see the installed ones
                     continue;
                 }
+                if (!showBlacklisted && f.isBlacklisted()) {
+                    // Filter out blacklisted
+                    continue;
+                }
                 if (!showHidden && f.isHidden()) {
                     // Filter out hidden feature if not asked to display those
                     continue;
                 }
-                table.addRow().addContent(
+                Row row = table.addRow();
+                row.addContent(
                         f.getName(),
                         f.getVersion(),
                         featuresService.isRequired(f) ? "x" : "",
                         featuresService.getState(f.getId()),
                         r.getName(),
                         f.getDescription());
+                if (showBlacklisted) {
+                    row.addContent(f.isBlacklisted() ? "yes" : "no");
+                }
                 if (isInstalledViaDeployDir(r.getName())) {
                     needsLegend = true;
                 }
