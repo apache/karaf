@@ -556,7 +556,7 @@ public class Deployer {
         //
         // Execute deployment
         //
-        // #1: stop bundles that needs to be updated or uninstalled in order
+        // #1: stop bundles that needs to be updated or uninstalled or refreshed in order
         // #2: uninstall needed bundles
         // #3: update regions
         // #4: update bundles
@@ -629,6 +629,11 @@ public class Deployer {
         for (Deployer.RegionDeployment regionDeployment : deployment.regions.values()) {
             toStop.addAll(regionDeployment.toUpdate.keySet());
             toStop.addAll(regionDeployment.toDelete);
+        }
+        if (!noRefresh) {
+            Set<Bundle> toRefreshToStopEarly = new HashSet<>(toRefresh.keySet());
+            toRefreshToStopEarly.remove(dstate.serviceBundle);
+            toStop.addAll(toRefreshToStopEarly);
         }
         removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
         if (!toStop.isEmpty()) {
