@@ -58,6 +58,8 @@ rem Karaf base folder
 rem SET KARAF_BASE
 rem Karaf etc folder
 rem SET KARAF_ETC
+rem First citizen Karaf options
+rem SET KARAF_SYSTEM_OPTS
 rem Additional available Karaf options
 rem SET KARAF_OPTS
 rem Enable debug mode
