@@ -728,6 +728,7 @@ public class Deployer {
             Set<Bundle> toRefreshToStopEarly = new HashSet<>(toRefresh.keySet());
             toRefreshToStopEarly.remove(dstate.serviceBundle);
             toStop.addAll(toRefreshToStopEarly);
+            toStart.addAll(toRefreshToStopEarly);
         }
         removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING | STARTING);
         if (!toStop.isEmpty()) {
