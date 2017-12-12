@@ -22,6 +22,7 @@ import static org.apache.karaf.itests.KarafTestSupport.MIN_RMI_REG_PORT;
 import static org.apache.karaf.itests.KarafTestSupport.MIN_RMI_SERVER_PORT;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
@@ -84,6 +85,8 @@ public abstract class KarafMinimalMonitoredTestSupport {
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
                 configureSecurity().disableKarafMBeanServerBuilder(),
                 logLevel(LogLevelOption.LogLevel.INFO),
+                mavenBundle().groupId("biz.aQute.bnd").artifactId("biz.aQute.bndlib").version("3.5.0"),
+                mavenBundle().groupId("org.ops4j.pax.tinybundles").artifactId("tinybundles").versionAsInProject(),
                 editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
                 editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
                 editConfigurationFilePut("etc/startup.properties", "file:../../" + new File(url.toURI()).getName(), "1"),
