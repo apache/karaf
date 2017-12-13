@@ -40,7 +40,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 
 	public void install(File file) throws Exception {
         // check if the KAR is not already installed
-        if (karService.list().contains(file.getName())) {
+        if (karService.list().contains(getKarName(file))) {
             LOGGER.info("KAR {} is already installed. Please uninstall it first.", file.getName());
             return;
         }
@@ -61,12 +61,12 @@ public class KarArtifactInstaller implements ArtifactInstaller {
         karService.uninstall(getKarName(file));
         karService.install(file.toURI());
 	}
-	
-	private String getKarName(File karFile) {
-	    String karName = karFile.getName();
+
+    String getKarName(File karFile) {
+        String karName = karFile.getName();
         karName = karName.substring(0, karName.lastIndexOf("."));
         return karName;
-	}
+    }
 
     public boolean canHandle(File file) {
 		// If the file ends with .kar, then we can handle it!
