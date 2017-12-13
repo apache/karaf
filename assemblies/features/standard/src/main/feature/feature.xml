@@ -271,6 +271,11 @@
             sshRole = ssh
 
             #
+            # Defines if the SFTP system is enabled or not in the SSH server
+            #
+            sftpEnabled=true
+
+            #
             # The location of the hostKey file defines where the private/public key of the server
             # is located. If no file is at the defined location it will be ignored.
             #

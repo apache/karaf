@@ -156,6 +156,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String[] kexAlgorithms = getStringArray("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
         String welcomeBanner   = getString("welcomeBanner", null);
         String moduliUrl       = getString("moduli-url", null);
+        boolean sftpEnabled     = getBoolean("sftpEnabled", true);
         
         Path serverKeyPath = Paths.get(hostKey);
         KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverKeyPath.toFile(), algorithm, keySize);
@@ -170,12 +171,14 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setCipherFactories(SshUtils.buildCiphers(ciphers));
         server.setKeyExchangeFactories(SshUtils.buildKexAlgorithms(kexAlgorithms));
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
-        server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(cmd -> new ShellCommand(sessionFactory, cmd)).build());
-        server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
+        if (sftpEnabled) {
+            server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(cmd -> new ShellCommand(sessionFactory, cmd)).build());
+            server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
+            server.setFileSystemFactory(new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))));
+        }
         server.setKeyPairProvider(keyPairProvider);
         server.setPasswordAuthenticator(authenticator);
         server.setPublickeyAuthenticator(authenticator);
-        server.setFileSystemFactory(new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))));
         server.setUserAuthFactories(authFactoriesFactory.getFactories());
         server.setAgentFactory(KarafAgentFactory.getInstance());
         server.setTcpipForwardingFilter(AcceptAllForwardingFilter.INSTANCE);
