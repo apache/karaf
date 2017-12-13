@@ -109,6 +109,12 @@ public class ACLConfigurationParser {
         }
             
     }
+    
+    public static void getCompulsoryRoles(List<String> roles) {
+        if (compulsoryRoles != null) {
+            roles.addAll(ACLConfigurationParser.parseRoles(compulsoryRoles));
+        }
+    }
 
     private static Specificity getRolesBasedOnSignature(String methodName, Object[] params, String[] signature,
                                                         Dictionary<String, Object> properties, List<String> roles) {

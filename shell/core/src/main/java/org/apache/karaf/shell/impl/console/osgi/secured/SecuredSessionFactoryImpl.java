@@ -204,14 +204,28 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     void checkSecurity(String scope, String name, List<Object> arguments) {
        
         Dictionary<String, Object> config = getScopeConfig(scope);
+        boolean passCheck = false;
         if (config != null) {
-            boolean passCheck = false;
             if (!isVisible(scope, name)) {
                 throw new CommandNotFoundException(scope + ":" + name);
             }
             List<String> roles = new ArrayList<>();
             ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(name, new Object[] { arguments.toString() }, null, config, roles);
             if (s == ACLConfigurationParser.Specificity.NO_MATCH) {
+                passCheck = true;
+            }
+            for (String role : roles) {
+                if (currentUserHasRole(role)) {
+                    passCheck = true;
+                }
+            }
+            if (!passCheck) {
+                throw new SecurityException("Insufficient credentials.");
+            }
+        } else {
+            List<String> roles = new ArrayList<>();
+            ACLConfigurationParser.getCompulsoryRoles(roles);
+            if (roles.size() == 0) {
                 passCheck = true;
             }
             for (String role : roles) {
