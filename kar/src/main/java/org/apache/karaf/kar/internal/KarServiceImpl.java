@@ -45,12 +45,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.ConfigFileInfo;
-import org.apache.karaf.features.Dependency;
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.*;
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.maven.Parser;
@@ -404,13 +399,26 @@ public class KarServiceImpl implements KarService {
 
     private void copyFeatureToJar(JarOutputStream jos, Feature feature, Map<URI, Integer> locationMap)
         throws URISyntaxException {
+        // add bundles
         for (BundleInfo bundleInfo : feature.getBundles()) {
             URI location = new URI(bundleInfo.getLocation());
             copyResourceToJar(jos, location, locationMap);
         }
+        // add config files
         for (ConfigFileInfo configFileInfo : feature.getConfigurationFiles()) {
             URI location = new URI(configFileInfo.getLocation());
             copyResourceToJar(jos, location, locationMap);
+        }
+        // add bundles and config files in conditionals
+        for (Conditional conditional : feature.getConditional()) {
+            for (BundleInfo bundleInfo : conditional.getBundles()) {
+                URI location = new URI(bundleInfo.getLocation());
+                copyResourceToJar(jos, location, locationMap);
+            }
+            for (ConfigFileInfo configFileInfo : conditional.getConfigurationFiles()) {
+                URI location = new URI(configFileInfo.getLocation());
+                copyResourceToJar(jos, location, locationMap);
+            }
         }
     }
 
