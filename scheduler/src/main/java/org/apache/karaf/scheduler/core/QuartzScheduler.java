@@ -26,12 +26,7 @@ import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.scheduler.SchedulerError;
-import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
+import org.quartz.*;
 import org.quartz.impl.DirectSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.simpl.RAMJobStore;
@@ -259,12 +254,41 @@ public class QuartzScheduler implements Scheduler {
         }
     }
 
+    @Override
+    public void reschedule(String name, ScheduleOptions options) throws SchedulerError {
+        final org.quartz.Scheduler s = this.scheduler;
+        if (name == null) {
+            throw new IllegalArgumentException("Job name is mandatory");
+        }
+        JobKey key = JobKey.jobKey(name);
+        if (key == null) {
+            throw new IllegalStateException("No job found with name " + name);
+        }
+        try {
+            JobDetail detail = s.getJobDetail(key);
+
+            Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
+
+            s.deleteJob(key);
+
+            final InternalScheduleOptions opts = (InternalScheduleOptions)options;
+            Trigger trigger = opts.trigger.withIdentity(name).build();
+            JobDataMap jobDataMap = this.initDataMap(name, job, opts);
+            detail = createJobDetail(name, jobDataMap, opts.canRunConcurrently);
+
+            logger.debug("Update job scheduling {} with name {} and trigger {}", job, name, trigger);
+            s.scheduleJob(detail, trigger);
+        } catch (SchedulerException e) {
+            throw new SchedulerError(e);
+        }
+    }
+
     /**
      * @see org.apache.karaf.scheduler.Scheduler#unschedule(java.lang.String)
      */
     public boolean unschedule(final String jobName) {
         final org.quartz.Scheduler s = this.scheduler;
-        if ( jobName != null && s != null ) {
+        if (jobName != null && s != null) {
             try {
                 final JobKey key = JobKey.jobKey(jobName);
                 final JobDetail jobdetail = s.getJobDetail(key);
