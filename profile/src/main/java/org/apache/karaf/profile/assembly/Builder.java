@@ -16,10 +16,12 @@
  */
 package org.apache.karaf.profile.assembly;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -98,6 +100,7 @@ import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.Version;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.maven.Parser;
+import org.ops4j.net.URLUtils;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Constants;
@@ -302,6 +305,7 @@ public class Builder {
     Map<String, String> system = new LinkedHashMap<>();
     List<String> pidsToExtract = new LinkedList<>();
     boolean writeProfiles;
+    String generateConsistencyReport;
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
@@ -561,6 +565,14 @@ public class Builder {
      */
     public void writeProfiles(boolean writeProfiles) {
         this.writeProfiles = writeProfiles;
+    }
+
+    /**
+     * Configure builder to generate consistency report
+     * @param generateConsistencyReport
+     */
+    public void generateConsistencyReport(String generateConsistencyReport) {
+        this.generateConsistencyReport = generateConsistencyReport;
     }
 
     /**
@@ -948,6 +960,18 @@ public class Builder {
             }
         }
 
+        if (generateConsistencyReport != null) {
+            File directory = new File(generateConsistencyReport);
+            if (directory.isDirectory()) {
+                LOGGER.info("Writing bundle report");
+                generateConsistencyReport(karRepositories, new File(directory, "bundle-report-full.xml"), true);
+                generateConsistencyReport(karRepositories, new File(directory, "bundle-report.xml"), false);
+                Files.copy(getClass().getResourceAsStream("/bundle-report.xslt"),
+                        directory.toPath().resolve("bundle-report.xslt"),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+
         //
         // Generate profiles. If user has configured additional profiles, they'll be used as parents
         // of the generated ones.
@@ -1087,6 +1111,122 @@ public class Builder {
         // Installed stage
         //
         installStage(installedProfile, allBootFeatures, processor);
+    }
+
+    /**
+     * Produces human readable XML with <em>feature consistency report</em>.
+     * @param repositories
+     * @param result
+     */
+    public void generateConsistencyReport(Map<String, Features> repositories, File result, boolean full) {
+        Map<String, String> featureId2repository = new HashMap<>();
+        // list of feature IDs containing given bundle URIs
+        Map<String, Set<String>> bundle2featureId = new TreeMap<>(new URIAwareComparator());
+        // map of groupId/artifactId to full URI list to detect "duplicates"
+        Map<String, List<String>> ga2uri = new TreeMap<>();
+        Set<String> haveDuplicates = new HashSet<>();
+
+        // collect closure of bundles and features
+        repositories.forEach((name, features) -> {
+            if (full || !features.isBlacklisted()) {
+                features.getFeature().forEach(feature -> {
+                    if (full || !feature.isBlacklisted()) {
+                        featureId2repository.put(feature.getId(), name);
+                        feature.getBundle().forEach(bundle -> {
+                            // normal bundles of feature
+                            bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                        });
+                        feature.getConditional().forEach(cond -> {
+                            cond.asFeature().getBundles().forEach(bundle -> {
+                                // conditional bundles of feature
+                                bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                            });
+                        });
+                    }
+                });
+            }
+        });
+        // collect bundle URIs - for now, only wrap:mvn: and mvn: are interesting
+        bundle2featureId.keySet().forEach(uri -> {
+            String originalUri = uri;
+            if (uri.startsWith("wrap:mvn:")) {
+                uri = uri.substring(5);
+                if (uri.indexOf(";") > 0) {
+                    uri = uri.substring(0, uri.indexOf(";"));
+                }
+                if (uri.indexOf("$") > 0) {
+                    uri = uri.substring(0, uri.indexOf("$"));
+                }
+            }
+            if (uri.startsWith("mvn:")) {
+                try {
+                    LocationPattern pattern = new LocationPattern(uri);
+                    String ga = String.format("%s/%s", pattern.getGroupId(), pattern.getArtifactId());
+                    ga2uri.computeIfAbsent(ga, k -> new LinkedList<>()).add(originalUri);
+                } catch (IllegalArgumentException ignored) {
+                    /*
+                        <!-- hibernate-validator-osgi-karaf-features-5.3.4.Final-features.xml -->
+                        <feature name="hibernate-validator-paranamer" version="5.3.4.Final">
+                            <feature>hibernate-validator</feature>
+                            <bundle>wrap:mvn:com.thoughtworks.paranamer:paranamer:2.8</bundle>
+                        </feature>
+                     */
+                }
+            }
+        });
+        ga2uri.values().forEach(l -> {
+            if (l.size() > 1) {
+                haveDuplicates.addAll(l);
+            }
+        });
+
+        if (result == null) {
+            return;
+        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(result))) {
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            writer.write("<?xml-stylesheet type=\"text/xsl\" href=\"bundle-report.xslt\"?>\n");
+            writer.write("<consistency-report xmlns=\"urn:apache:karaf:consistency:1.0\">\n");
+            writer.write("    <duplicates>\n");
+            ga2uri.forEach((key, uris) -> {
+                if (uris.size() > 1) {
+                    try {
+                        writer.write(String.format("        <duplicate ga=\"%s\">\n", key));
+                        for (String uri : uris) {
+                            writer.write(String.format("            <bundle uri=\"%s\">\n", sanitize(uri)));
+                            for (String fid : bundle2featureId.get(uri)) {
+                                writer.write(String.format("                <feature repository=\"%s\">%s</feature>\n", featureId2repository.get(fid), fid));
+                            }
+                            writer.write("            </bundle>\n");
+                        }
+                        writer.write("        </duplicate>\n");
+                    } catch (IOException e) {
+                    }
+                }
+            });
+            writer.write("    </duplicates>\n");
+            writer.write("    <bundles>\n");
+            for (String uri : bundle2featureId.keySet()) {
+                writer.write(String.format("        <bundle uri=\"%s\" duplicate=\"%b\">\n", sanitize(uri), haveDuplicates.contains(uri)));
+                for (String fid : bundle2featureId.get(uri)) {
+                    writer.write(String.format("            <feature>%s</feature>\n", fid));
+                }
+                writer.write("        </bundle>\n");
+            }
+            writer.write("    </bundles>\n");
+            writer.write("</consistency-report>\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Sanitize before putting to XML
+     * @param uri
+     * @return
+     */
+    public String sanitize(String uri) {
+        return uri.replaceAll("&", "&amp;").replaceAll(">", "&lt;").replaceAll("<", "&gt;").replaceAll("\"", "&quot;");
     }
 
     /**

@@ -82,6 +82,10 @@ public class RepositoryImpl implements Repository {
                 .toArray(new Feature[features.getFeature().size()]);
     }
 
+    public Features getFeaturesInternal() {
+        return features;
+    }
+
     @Override
     public boolean isBlacklisted() {
         return blacklisted;

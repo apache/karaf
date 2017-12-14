@@ -116,6 +116,18 @@ public class LocationPattern {
         return originalUri;
     }
 
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    public String getVersionString() {
+        return versionString;
+    }
+
     /**
      * Converts a String with one special character (<code>*</code>) into working {@link Pattern}
      * @param value

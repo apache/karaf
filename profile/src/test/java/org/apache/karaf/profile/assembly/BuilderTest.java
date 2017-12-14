@@ -17,14 +17,20 @@
 package org.apache.karaf.profile.assembly;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.service.RepositoryCacheImpl;
+import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Constants;
@@ -101,6 +107,21 @@ public class BuilderTest {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    //@Test
+    //@Ignore("no need to run this test")
+    public void consistencyReport() {
+        Map<String, Features> features = new LinkedHashMap<>();
+        Builder builder = new Builder();
+        File[] uris = new File("src/test/resources/repositories").listFiles((dir, name) -> name.endsWith(".xml"));
+        if (uris != null) {
+            for (File f : uris) {
+                features.put(f.getName(), new RepositoryImpl(f.toURI(), false).getFeaturesInternal());
+            }
+        }
+        builder.generateConsistencyReport(features, new File("target/consistency.xml"), false);
+        builder.generateConsistencyReport(features, new File("target/consistency-full.xml"), true);
     }
 
     private static void recursiveDelete(Path path) throws IOException {

@@ -268,6 +268,14 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter(defaultValue = "false")
     private boolean writeProfiles;
 
+    /**
+     * When assembly custom distribution, we can also generate an XML/XSLT report with the summary of bundles.
+     * This parameter specifies target directory, to which <code>bundle-report.xml</code> and <code>bundle-report-full.xml</code>
+     * (along with XSLT stylesheet) will be written.
+     */
+    @Parameter
+    private String generateConsistencyReport;
+
     /*
      * KARs are not configured using Maven plugin configuration, but rather detected from dependencies.
      * All KARs are just unzipped into the assembly being constructed, but additionally KAR's embedded
@@ -467,6 +475,7 @@ public class AssemblyMojo extends MojoSupport {
         builder.translatedUrls(configureTranslatedUrls());
         builder.pidsToExtract(pidsToExtract);
         builder.writeProfiles(writeProfiles);
+        builder.generateConsistencyReport(generateConsistencyReport);
         builder.environment(environment);
         builder.defaultStartLevel(defaultStartLevel);
         if (featuresProcessing != null) {
