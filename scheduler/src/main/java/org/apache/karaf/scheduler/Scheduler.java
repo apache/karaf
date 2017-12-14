@@ -82,6 +82,15 @@ public interface Scheduler {
     void schedule(Object job, ScheduleOptions options) throws IllegalArgumentException, SchedulerError;
 
     /**
+     * Update the scheduling of an existing job.
+     * @param jobName
+     * @param options
+     * @throws IllegalArgumentException
+     * @throws SchedulerError
+     */
+    void reschedule(String jobName, ScheduleOptions options) throws IllegalArgumentException, SchedulerError;
+
+    /**
      * Remove a scheduled job by name.
      *
      * @param jobName The name of the job.

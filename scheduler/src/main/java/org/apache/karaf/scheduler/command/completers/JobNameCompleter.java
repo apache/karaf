@@ -14,31 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.scheduler.command;
+package org.apache.karaf.scheduler.command.completers;
 
+import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
-import org.apache.karaf.scheduler.command.completers.JobNameCompleter;
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Argument;
-import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-@Command(scope = "scheduler", name = "unschedule", description = "Unschedule a job")
+import java.util.List;
+import java.util.Map;
+
 @Service
-public class Unschedule implements Action {
-
-    @Argument(name = "name")
-    @Completion(JobNameCompleter.class)
-    String name;
+public class JobNameCompleter implements Completer {
 
     @Reference
     Scheduler scheduler;
 
     @Override
-    public Object execute() throws Exception {
-        scheduler.unschedule(name);
-        return null;
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+        StringsCompleter delegate = new StringsCompleter();
+        try {
+            Map<Object, ScheduleOptions> jobs = scheduler.getJobs();
+            for (Map.Entry<Object, ScheduleOptions> job : jobs.entrySet()) {
+                String name = job.getValue().name();
+                delegate.getStrings().add(name);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return delegate.complete(session, commandLine, candidates);
     }
+
 }
