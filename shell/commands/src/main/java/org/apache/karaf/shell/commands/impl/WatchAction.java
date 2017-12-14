@@ -18,9 +18,7 @@
  */
 package org.apache.karaf.shell.commands.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -104,7 +102,8 @@ public class WatchAction implements Action {
             try {
                 byteArrayOutputStream = new ByteArrayOutputStream();
                 printStream = new PrintStream(byteArrayOutputStream);
-                session = sessionFactory.create(null, printStream, printStream, WatchAction.this.session);
+                InputStream is = new ByteArrayInputStream(new byte[0]);
+                session = sessionFactory.create(is, printStream, printStream, WatchAction.this.session);
                 String output = "";
                 try {
                     session.execute(command);
@@ -123,13 +122,14 @@ public class WatchAction implements Action {
                 byteArrayOutputStream.close();
                 session.close();
             } catch (Exception e) {
-                //Ingore
+                // ignore
             }
         }
 
         public void abort() {
             doDisplay = false;
         }
+
         public void close() throws IOException {
             if (this.session != null) {
                 this.session.close();
