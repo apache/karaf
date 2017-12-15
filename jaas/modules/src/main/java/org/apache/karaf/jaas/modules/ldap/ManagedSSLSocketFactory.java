@@ -73,12 +73,6 @@ public class ManagedSSLSocketFactory extends SSLSocketFactory implements Compara
         return delegate.createSocket(address, port, localAddress, localPort);
     }
 
-    /**
-     * For com.sun.jndi.ldap.ClientId#invokeComparator(com.sun.jndi.ldap.ClientId, com.sun.jndi.ldap.ClientId)
-     * @param f1
-     * @param f2
-     * @return
-     */
     public int compare(Object f1, Object f2) {
         if (f1 == null && f2 == null) {
             return 0;

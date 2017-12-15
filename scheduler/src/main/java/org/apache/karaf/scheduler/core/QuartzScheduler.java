@@ -196,9 +196,9 @@ public class QuartzScheduler implements Scheduler {
     }
 
     /**
-     * Schedule a job
+     * Schedule a job.
      * @see org.apache.karaf.scheduler.Scheduler#schedule(java.lang.Object, org.apache.karaf.scheduler.ScheduleOptions)
-     * @throws SchedulerException if the job can't be scheduled
+     * @throws SchedulerError if the job can't be scheduled
      * @throws IllegalArgumentException If the preconditions are not met
      */
     public void schedule(final Object job, final ScheduleOptions options) throws IllegalArgumentException, SchedulerError {

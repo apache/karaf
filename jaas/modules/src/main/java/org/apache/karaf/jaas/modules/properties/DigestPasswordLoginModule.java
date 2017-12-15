@@ -102,7 +102,6 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
      * method is cached for efficiency.  
      * @param inputBytes the bytes to digest
      * @return the digest of the input bytes
-     * @throws WSSecurityException
      */
     public synchronized byte[] generateDigest(byte[] inputBytes) {
         try {

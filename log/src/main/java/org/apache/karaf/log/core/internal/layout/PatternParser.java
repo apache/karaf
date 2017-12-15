@@ -30,8 +30,7 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
  * Copied from log4j
  */
 /**
-   Most of the work of the {@link org.apache.log4j.PatternLayout} class
-   is delegated to the PatternParser class.
+   Most of the work of the PatternLayout class is delegated to the PatternParser class.
 
    @since 0.8.2
 */
