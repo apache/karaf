@@ -68,9 +68,9 @@ import org.sonatype.plexus.components.sec.dispatcher.SecUtil;
 import org.sonatype.plexus.components.sec.dispatcher.model.SettingsSecurity;
 
 /**
- * <p>Base class for <code>maven:</code> commands.</p>
+ * Base class for <code>maven:</code> commands.
  * <p>Important: even if it duplicates some code from pax-url-aether, this should be treated as verification code of
- * how pax-url-aether should interact with <code>org.ops4j.pax.url.mvn</code> PID configuration.</p>
+ * how pax-url-aether should interact with <code>org.ops4j.pax.url.mvn</code> PID configuration.
  */
 public abstract class MavenConfigurationSupport implements Action {
 
@@ -687,10 +687,8 @@ public abstract class MavenConfigurationSupport implements Action {
 
     /**
      * Stores changed {@link org.apache.maven.settings.Settings} in new settings.xml file and updates
-     * <code>org.ops4j.pax.url.mvn.settings</code> property. Does <string>not</string> update
+     * <code>org.ops4j.pax.url.mvn.settings</code> property. Does not update
      * {@link org.osgi.service.cm.ConfigurationAdmin} config.
-     * @param prefix
-     * @param config
      */
     protected void updateSettings(String prefix, Dictionary<String, Object> config) throws IOException {
         File dataDir = context.getDataFile(".");

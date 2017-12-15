@@ -26,15 +26,15 @@ import org.apache.felix.utils.version.VersionRange;
 import org.osgi.framework.Version;
 
 /**
- * <p>Helper class to compare feature identifiers that may use globs and version ranges.</p>
+ * Helper class to compare feature identifiers that may use globs and version ranges.
  *
- * <p>Following feature identifiers are supported:<ul>
+ * Following feature identifiers are supported:<ul>
  *     <li>name (simple name)</li>
  *     <li>name/version (Karaf feature ID syntax)</li>
  *     <li>name/version-range (Karaf feature ID syntax using version-range)</li>
  *     <li>name;range=version (OSGi manifest header with <code>range</code> <em>attribute</em>)</li>
  *     <li>name;range=version-range (OSGi manifest header with <code>range</code> <em>attribute</em>)</li>
- * </ul></p>
+ * </ul>
  */
 public class FeaturePattern {
 

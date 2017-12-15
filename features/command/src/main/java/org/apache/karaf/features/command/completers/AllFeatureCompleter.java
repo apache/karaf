@@ -20,7 +20,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
- * {@link org.apache.karaf.shell.console.Completer} for available features.
+ * {@link FeatureCompleterSupport} for all available features.
  */
 @Service
 public class AllFeatureCompleter extends FeatureCompleterSupport {

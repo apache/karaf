@@ -24,17 +24,17 @@ import org.apache.karaf.features.FeaturePattern;
 import org.apache.karaf.features.LocationPattern;
 
 /**
- * <p>A <em>profile</em> is a container for configuration that can be applied to Karaf distribution.</p>
+ * A <em>profile</em> is a container for configuration that can be applied to Karaf distribution.
  *
  * <p>Profiles may inherit from other (single or multiple) profiles. An <em>overlay</em> profile is single
  * profile with all the configurations, attributes and files from parent profiles, while configurations,
- * attributes and files from <em>child</em> profile overwrites corresponding data from parent profiles.</p>
+ * attributes and files from <em>child</em> profile overwrites corresponding data from parent profiles.
  *
  * <p>Configuration include:<ul>
  *     <li>Attributes</li>
  *     <li>ConfigAdmin configurations (PIDs) to put into <code>${karaf.etc}</code> directory</li>
  *     <li>Other resources to put into <code>${karaf.etc}</code> directory</li>
- * </ul></p>
+ * </ul>
  *
  * <p>Attributes are properties in special file <code>profile.cfg</code> (<code>profile</code> PID) and may specify:<ul>
  *     <li>OSGi bundles to install (prefix: <code>bundle.</code>)</li>
@@ -52,111 +52,94 @@ import org.apache.karaf.features.LocationPattern;
  *     <li>Additional libraries to be added to <code>lib/ext</code> (prefix: <code>ext.</code>)</li>
  *     <li>Bundle override definitions to be added to <code>etc/overrides.properties</code> (prefix: <code>override.</code>)</li>
  *     <li>Optional {@link org.osgi.resource.Resource resources} to be used during resolution (prefix: <code>optional.</code>)</li>
- * </ul></p>
+ * </ul>
  */
 public interface Profile extends ProfileConstants {
 
     /**
-     * Returns an attribute map of this profile
-     * @return
+     * Returns an attribute map of this profile.
      */
     Map<String, String> getAttributes();
 
     /**
-     * Returns a property map for additional properties to be added to <code>${karaf.etc}/config.properties</code>
-     * @return
+     * Returns a property map for additional properties to be added to <code>${karaf.etc}/config.properties</code>.
      */
     Map<String, String> getConfig();
 
     /**
-     * Returns a property map for additional properties to be added to <code>${karaf.etc}/system.properties</code>
-     * @return
+     * Returns a property map for additional properties to be added to <code>${karaf.etc}/system.properties</code>.
      */
     Map<String, String> getSystem();
 
     /**
-     * Returns a unique identifier of this profile
-     * @return
+     * Returns a unique identifier of this profile.
      */
     String getId();
 
     /**
-     * Returns a list of parent profile identifiers for this profile
-     * @return
+     * Returns a list of parent profile identifiers for this profile.
      */
     List<String> getParentIds();
 
     /**
-     * Returns a list of bundles (bundle URIs) defined in this profile
-     * @return
+     * Returns a list of bundles (bundle URIs) defined in this profile.
      */
     List<String> getBundles();
 
     /**
-     * Returns a list of features (<code>feature-name[/feature-version]</code>) defined in this profile
-     * @return
+     * Returns a list of features (<code>feature-name[/feature-version]</code>) defined in this profile.
      */
     List<String> getFeatures();
 
     /**
-     * Returns a list of features XML repositories (URIs) defined in this profile
-     * @return
+     * Returns a list of features XML repositories (URIs) defined in this profile.
      */
     List<String> getRepositories();
 
     /**
-     * Returns a list of blacklisted bundles (URIs) (as {@link LocationPattern location patterns}
-     * @return
+     * Returns a list of blacklisted bundles (URIs) (as {@link LocationPattern location patterns}.
      */
     List<LocationPattern> getBlacklistedBundles();
 
     /**
-     * Returns a list of blacklisted {@link FeaturePattern feature patterns}
-     * @return
+     * Returns a list of blacklisted {@link FeaturePattern feature patterns}.
      */
     List<FeaturePattern> getBlacklistedFeatures();
 
     /**
-     * Returns a list of blacklisted features XML repositories (URIs) (as {@link LocationPattern location patterns}
-     * @return
+     * Returns a list of blacklisted features XML repositories (URIs) (as {@link LocationPattern location patterns}.
      */
     List<LocationPattern> getBlacklistedRepositories();
 
     /**
-     * Returns a list of libraries (to be added to <code>${karaf.home}/lib</code>) defined in this profile
-     * @return
+     * Returns a list of libraries (to be added to <code>${karaf.home}/lib</code>) defined in this profile.
      */
     List<String> getLibraries();
 
     /**
-     * Returns a list of boot libraries (to be added to <code>${karaf.home}/lib/boot</code>) defined in this profile
-     * @return
+     * Returns a list of boot libraries (to be added to <code>${karaf.home}/lib/boot</code>) defined in this profile.
      */
     List<String> getBootLibraries();
 
     /**
-     * Returns a list of endorsed libraries (to be added to <code>${karaf.home}/lib/endorsed</code>) defined in this profile
-     * @return
+     * Returns a list of endorsed libraries (to be added to <code>${karaf.home}/lib/endorsed</code>) defined in this profile.
      */
     List<String> getEndorsedLibraries();
 
     /**
-     * Returns a list of extension libraries (to be added to <code>${karaf.home}/lib/ext</code>) defined in this profile
-     * @return
+     * Returns a list of extension libraries (to be added to <code>${karaf.home}/lib/ext</code>) defined in this profile.
      */
     List<String> getExtLibraries();
 
     /**
      * Returns a list of bundle override definitions (to be added to <code>${karaf.etc}/overrides.properties</code>)
-     * defined in this profile
-     * @return
+     * defined in this profile.
      */
     List<String> getOverrides();
 
     /**
      * Returns a list of optional {@link org.osgi.resource.Resource resources} (URIs) to be used during
-     * resolution
-     * @return
+     * resolution.
      */
     List<String> getOptionals();
 

@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
- * instead used from the non-OSGi {@link org.apache.karaf.shell.console.impl.Main}
+ * instead used from the non-OSGi {@code org.apache.karaf.shell.console.impl.Main}.
  */
 @Deprecated
 public class CommandsCompleter implements Completer {

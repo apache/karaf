@@ -391,7 +391,8 @@ public class SubsystemResolver implements SubsystemResolverResolution, Subsystem
 
     /**
      * A mapping from subsystem, to parent subsystem representing a region or {@link Feature#getScoping() scoped feature}.
-     * @return
+     *
+     * @return The map of subsystems.
      */
     public Map<String, String> getFlatSubsystemsMap() {
         if (flatSubsystemsMap == null) {

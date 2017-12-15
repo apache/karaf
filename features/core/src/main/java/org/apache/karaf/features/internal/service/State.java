@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.karaf.features.internal.util.MapUtils;
 
 /**
- * <p>Representation of the state of features service from the point of view of <em>logical requirements</em>
+ * Representation of the state of features service from the point of view of <em>logical requirements</em>
  * which are translated into bundles and features installed in {@link org.eclipse.equinox.region.Region regions}.
  * It's a collection of:<ul>
  *     <li>used repositories</li>
@@ -34,9 +34,9 @@ import org.apache.karaf.features.internal.util.MapUtils;
  *     <li>region -&gt; installed features -&gt; state of feature installation</li>
  *     <li>region -&gt; bundle ids (for bundles installed via features service, a.k.a. <em>managed bundles</em>)</li>
  *     <li>bundle id -&gt; checksum</li>
- * </ul></p>
- * <p>State is replaced (swapped) after uninstalling/updating/installing all the bundles as requested, but
- * before resolving/refreshing them. Before State is set, work is done on the instance of Deployer.DeploymentState.</p>
+ * </ul>
+ * State is replaced (swapped) after uninstalling/updating/installing all the bundles as requested, but
+ * before resolving/refreshing them. Before State is set, work is done on the instance of Deployer.DeploymentState.
  */
 public class State {
 

@@ -71,8 +71,6 @@ public final class ResourceUtils {
 
     /**
      * If the resource has <code>type=karaf.feature</code> capability, returns its ID (name[/version]).
-     * @param resource
-     * @return
      */
     public static String getFeatureId(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
@@ -150,10 +148,11 @@ public final class ResourceUtils {
     }
 
     /**
-     * <p>Changes feature identifier (<code>name[/version]</code>) into a requirement specification.</p>
-     * <p>The OSGi manifest header for a feature will be: <code>osgi.identity;osgi.identity=feature-name;type=karaf.feature[;version=feature-version];filter:=filter-from-attrs</code></p>
-     * @param feature
-     * @return
+     * Changes feature identifier (<code>name[/version]</code>) into a requirement specification.
+     * The OSGi manifest header for a feature will be: <code>osgi.identity;osgi.identity=feature-name;type=karaf.feature[;version=feature-version];filter:=filter-from-attrs</code>.
+     *
+     * @param feature The feature name.
+     * @return The feature requirement.
      */
     public static String toFeatureRequirement(String feature) {
         String[] parts = feature.split("/");

@@ -42,13 +42,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Configurable {@link FeaturesProcessor}, controlled by several files from <code>etc/</code> directory:<ul>
+ * Configurable {@link FeaturesProcessor}, controlled by several files from <code>etc/</code> directory:<ul>
  *     <li><code>etc/overrides.properties</code>: may alter bundle versions in features</li>
  *     <li><code>etc/blacklisted.properties</code>: may filter out some features/bundles</li>
  *     <li><code>etc/org.apache.karaf.features.xml</code> (<strong>new!</strong>): incorporates two above files
  *     and may define additional processing (changing G/A/V, adding bundles to features, changing <code>dependency</code>
  *     attributes, ...)</li>
- * </ul></p>
+ * </ul>
  */
 public class FeaturesProcessorImpl implements FeaturesProcessor {
 
@@ -60,12 +60,8 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     private FeaturesProcessing processing = new FeaturesProcessing();
 
     /**
-     * <p>Creates instance of features processor using 1 external URI, additional {@link Blacklist} instance
-     * and additional set of override clauses.</p>
-     * @param featureModificationsURI
-     * @param featureProcessingVersions
-     * @param blacklistDefinitions
-     * @param overrides
+     * Creates instance of features processor using 1 external URI, additional {@link Blacklist} instance
+     * and additional set of override clauses.
      */
     public FeaturesProcessorImpl(String featureModificationsURI, String featureProcessingVersions,
                                  Blacklist blacklistDefinitions, Set<String> overrides) {
@@ -94,11 +90,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     }
 
     /**
-     * <p>Creates instance of features processor using 3 external (optional) URIs.</p>
-     * @param featureModificationsURI
-     * @param featureProcessingVersions
-     * @param blacklistedURI
-     * @param overridesURI
+     * Creates instance of features processor using 3 external (optional) URIs.
      */
     public FeaturesProcessorImpl(String featureModificationsURI, String featureProcessingVersions,
                                  String blacklistedURI, String overridesURI) {
@@ -106,9 +98,8 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     }
 
     /**
-     * <p>Creates instance of features processor using {@link FeaturesServiceConfig configuration object} where
-     * three files may be specified: overrides.properties, blacklisted.properties and org.apache.karaf.features.xml.</p>
-     * @param configuration
+     * Creates instance of features processor using {@link FeaturesServiceConfig configuration object} where
+     * three files may be specified: overrides.properties, blacklisted.properties and org.apache.karaf.features.xml.
      */
     public FeaturesProcessorImpl(FeaturesServiceConfig configuration) {
         this(configuration.featureModifications, configuration.featureProcessingVersions, configuration.blacklisted, configuration.overrides);
@@ -116,7 +107,6 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
 
     /**
      * Writes model to output stream.
-     * @param output
      */
     public void writeInstructions(OutputStream output) {
         serializer.write(processing, output);
@@ -127,8 +117,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     }
 
     /**
-     * For the purpose of assembly builder, we can configure additional overrides that are read from profiles
-     * @param overrides
+     * For the purpose of assembly builder, we can configure additional overrides that are read from profiles.
      */
     public void addOverrides(Set<String> overrides) {
         processing.getBundleReplacements().getOverrideBundles()
@@ -212,8 +201,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
 
     /**
      * Processes {@link Bundle bundle definition} and (according to override instructions) maybe sets different target
-     * location and {@link BundleInfo#isOverriden()} flag
-     * @param bundle
+     * location and {@link BundleInfo#isOverriden()} flag.
      */
     private void staticOverrideBundle(Bundle bundle) {
         bundle.setOverriden(BundleInfo.BundleOverrideMode.NONE);
@@ -247,18 +235,14 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     }
 
     /**
-     * Matching name and version of given feature, checks whether this feature is blacklisted
-     * @param feature
-     * @return
+     * Matching name and version of given feature, checks whether this feature is blacklisted.
      */
     private boolean isFeatureBlacklisted(Feature feature) {
         return getInstructions().getBlacklist().isFeatureBlacklisted(feature.getName(), feature.getVersion());
     }
 
     /**
-     * Matching location of the bundle, checks whether this bundle is blacklisted
-     * @param location
-     * @return
+     * Matching location of the bundle, checks whether this bundle is blacklisted.
      */
     @Override
     public boolean isBundleBlacklisted(String location) {
@@ -267,8 +251,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
 
     /**
      * Checks whether the configuration in this processor contains any instructions (for bundles, repositories,
-     * overrides, ...)
-     * @return
+     * overrides, ...).
      */
     public boolean hasInstructions() {
         int count = 0;

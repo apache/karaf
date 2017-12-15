@@ -46,14 +46,11 @@ public final class Profiles {
     public static final String PROFILE_FOLDER_SUFFIX = ".profile";
 
     /**
-     * <p>Loads profiles from given directory path. A profile is represented as directory with <code>.profile</code>
-     * extension. Subdirectories constitute part of {@linl Profile#getId} - directory separators are changed to
-     * <code>-</code>.</p>
-     * <p>For example, profile contained in directory <code>mq/broker/standalone.profile</code> will have
-     * id = <code>mq-broker-standalone</code>.</p>
-     * @param root
-     * @return
-     * @throws IOException
+     * Loads profiles from given directory path. A profile is represented as directory with <code>.profile</code>
+     * extension. Subdirectories constitute part of {@link Profile#getId} - directory separators are changed to
+     * <code>-</code>.
+     * For example, profile contained in directory <code>mq/broker/standalone.profile</code> will have
+     * id = <code>mq-broker-standalone</code>.
      */
     public static Map<String, Profile> loadProfiles(final Path root) throws IOException {
         final Map<String, Profile> profiles = new HashMap<>();

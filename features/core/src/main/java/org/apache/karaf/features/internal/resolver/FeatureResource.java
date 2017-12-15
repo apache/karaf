@@ -34,12 +34,12 @@ import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEA
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
 
 /**
- * <p>An OSGi {@link Resource} representing Karaf feature. It has requirements on all its non-dependency
- * (<code>dependency="false"</code>) bundles.</p>
- * <p>It'll also use arbitrary capabilities ({@code <feature>/<capability>}) and requirements
- * ({@code <feature>/<requirement>}).</p>
- * <p>Dependant features ({@code <feature>/<feature>}) without <code>dependency="true"</code> will also be added
- * as <code>osgi.identity</code> requirements with <code>type=karaf.feature</code>.</p>
+ * An OSGi {@link Resource} representing Karaf feature. It has requirements on all its non-dependency
+ * (<code>dependency="false"</code>) bundles.
+ * It'll also use arbitrary capabilities ({@code <feature>/<capability>}) and requirements
+ * ({@code <feature>/<requirement>}).
+ * Dependant features ({@code <feature>/<feature>}) without <code>dependency="true"</code> will also be added
+ * as <code>osgi.identity</code> requirements with <code>type=karaf.feature</code>.
  */
 public final class FeatureResource extends ResourceImpl {
 
@@ -53,13 +53,7 @@ public final class FeatureResource extends ResourceImpl {
     }
 
     /**
-     * Constructs a {@link Resource} for conditional of a feature
-     * @param feature
-     * @param conditional
-     * @param featureRange
-     * @param locToRes
-     * @return
-     * @throws BundleException
+     * Constructs a {@link Resource} for conditional of a feature.
      */
     public static FeatureResource build(Feature feature, Conditional conditional, String featureRange, Map<String, ? extends Resource> locToRes) throws BundleException {
         Feature fcond = conditional.asFeature();
@@ -95,11 +89,6 @@ public final class FeatureResource extends ResourceImpl {
 
     /**
      * Constructs {@link Resource} for given non-conditional feature.
-     * @param feature
-     * @param featureRange
-     * @param locToRes
-     * @return
-     * @throws BundleException
      */
     public static FeatureResource build(Feature feature, String featureRange, Map<String, ? extends Resource> locToRes) throws BundleException {
         FeatureResource resource = new FeatureResource(feature);
