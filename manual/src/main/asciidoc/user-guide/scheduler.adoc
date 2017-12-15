@@ -26,12 +26,13 @@ To enable the Apache Karaf Scheduler, you just have to install the `scheduler` f
 karaf@root()> feature:install scheduler
 ----
 
-The `scheduler` feature automatically installs the `scheduler` Gogo command group, too:
+The `scheduler` feature automatically installs the `scheduler` command group, too:
 
 ----
 scheduler:list
 scheduler:schedule
 scheduler:unschedule
+scheduler:reschedule
 ----
 
 ==== Configuration
@@ -179,3 +180,10 @@ public class Demo {
 }
 
 ----
+
+==== Update scheduling of an existing job
+
+You can change the scheduling of an existing job using `scheduler:reschedule` command.
+
+This command works as the schedule command (using the same `at`, `period`, `cron`, ... options) but taking the job name
+as argument (as given by the `scheduler:list` command).
