@@ -93,16 +93,26 @@ public class JdbcServiceImpl implements JdbcService {
     @Override
     public List<String> datasources() throws Exception {
         List<String> datasources = new ArrayList<>();
-        Collection<ServiceReference<DataSource>> references = bundleContext.getServiceReferences(DataSource.class, null);
-        if (references == null) {
-            return datasources;
-        }
-        for (ServiceReference reference : references) {
-            String dsName = (String)reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME);
-            if (dsName != null) {
-                datasources.add(dsName);
+
+        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null,
+                "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
+                        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
+        if (references != null) {
+            for (ServiceReference reference : references) {
+                if (reference.getProperty("osgi.jndi.service.name") != null) {
+                    datasources.add(reference.getProperty("osgi.jndi.service.name").toString());
+                } else if (reference.getProperty("datasource") != null) {
+                    datasources.add(reference.getProperty("datasource").toString());
+                } else if (reference.getProperty("name") != null) {
+                    datasources.add(reference.getProperty("name").toString());
+                } else if (reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME) != null) {
+                    datasources.add(reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME).toString());
+                } else {
+                    datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
+                }
             }
         }
+
         return datasources;
     }
 
