@@ -19,11 +19,10 @@ The Apache Karaf DataSources (JDBC) is an optional enterprise feature.
 You have to install the following features first:
 
 ----
-karaf@root()> feature:repo-add pax-jdbc
-karaf@root()> feature:install pax-jdbc
-karaf@root()> feature:install pax-jdbc-config
 karaf@root()> feature:install jdbc
 ----
+
+NB: `jdbc` feature automatically installs the `pax-jdbc-*` core features.
 
 Pax JDBC provides ready to use adapters for different databases:
 
