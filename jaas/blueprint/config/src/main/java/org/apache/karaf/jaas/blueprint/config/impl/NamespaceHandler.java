@@ -48,10 +48,13 @@ import org.w3c.dom.NodeList;
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
 
     public URL getSchemaLocation(String namespace) {
-        if ("http://karaf.apache.org/xmlns/jaas/v1.0.0".equals(namespace)) {
-            return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.0.0.xsd");
-        } else {
-            return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.1.0.xsd");
+        switch (namespace) {
+            case "http://karaf.apache.org/xmlns/jaas/v1.0.0":
+                return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.0.0.xsd");
+            case "http://karaf.apache.org/xmlns/jaas/v1.1.0":
+                return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.1.0.xsd");
+            default:
+                return null;
         }
     }
 
