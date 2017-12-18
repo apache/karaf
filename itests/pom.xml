@@ -265,6 +265,7 @@
                         <spring41.version>${spring41.version}</spring41.version>
                         <spring42.version>${spring42.version}</spring42.version>
                         <spring43.version>${spring43.version}</spring43.version>
+                        <spring50.version>${spring50.version}</spring50.version>
                         <activemq.version>${activemq.version}</activemq.version>
                     </systemPropertyVariables>
                     <excludes>

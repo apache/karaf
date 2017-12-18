@@ -420,6 +420,83 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-websocket/${spring42.version}</bundle>
     </feature>
 
+    <!-- Spring 4.3.x support -->
+
+    <feature name="spring" description="Spring 4.3.x support" version="${spring43.version}">
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-core/${spring43.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/${spring43.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-beans/${spring43.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring43.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring43.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-aspects" description="Spring 4.3.x AOP support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aspects/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-instrument" description="Spring 4.3.x Instrument support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-instrument/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-jdbc" description="Spring 4.3.x JDBC support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring-tx</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-jms" description="Spring 4.3.x JMS support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring-tx</feature>
+        <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-test" description="Spring 4.3.x Test support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring</feature>
+        <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
+        <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/4.4.6</bundle>
+        <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/4.5.2</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-orm" description="Spring 4.3.x ORM support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring-jdbc</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-oxm" description="Spring 4.3.x OXM support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-tx" description="Spring 4.3.x Transaction (TX) support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-web" description="Spring 4.3.x Web support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring</feature>
+        <feature>http</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-web/${spring43.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-web-portlet" description="Spring 4.3.x Web Portlet support" version="${spring43.version}">
+        <feature prerequisite="true">wrap</feature>
+        <feature version="[${spring43.version},4.4)">spring-web</feature>
+        <bundle dependency="true" start-level="30">wrap:mvn:javax.portlet/portlet-api/${portlet-api.version}$Export-Package=javax.portlet.*;version=2.0</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc-portlet/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-websocket" description="Spring 4.3.x WebSocket support" version="${spring43.version}">
+        <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
+        <feature version="[${spring43.version},4.4)">spring-web</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-websocket/${spring43.version}</bundle>
+    </feature>
+
     <!-- Spring Security support -->
 
     <feature name="spring-security" description="Spring Security 3.1.x support" version="${spring.security31.version}">
