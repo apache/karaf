@@ -107,6 +107,7 @@
             pax-jms=mvn:org.ops4j.pax.jms/pax-jms-features/RELEASE/xml/features
             pax-jpa=mvn:org.ops4j.pax.jpa/pax-jpa-features/RELEASE/xml/features
             pax-transx=mvn:org.ops4j.pax.transx/pax-transx-features/RELEASE/xml/features
+            pax-keycloak=mvn:org.ops4j.pax.keycloak/pax-keycloak-features/RELEASE/xml/features
             pax-web=mvn:org.ops4j.pax.web/pax-web-features/RELEASE/xml/features
             pax-wicket=mvn:org.ops4j.pax.wicket/pax-wicket-features/RELEASE/xml/features
             ecf=http://download.eclipse.org/rt/ecf/RELEASE/site.p2/karaf-features.xml
