@@ -38,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
@@ -55,12 +56,16 @@ public class JmsTest extends KarafTestSupport {
 
     @Configuration
     public Option[] config() {
+        String version = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
         MavenArtifactUrlReference activeMqUrl = maven().groupId("org.apache.activemq")
             .artifactId("activemq-karaf").versionAsInProject().type("xml").classifier("features");
+        MavenArtifactUrlReference springLegacyUrl = maven().groupId("org.apache.karaf.features")
+            .artifactId("spring-legacy").version(version).type("xml").classifier("features");
         return new Option[] //
         {
          composite(super.config()), //
-         features(activeMqUrl, "jms", "activemq-broker-noweb", "shell-compat")
+         features(activeMqUrl, "jms", "activemq-broker-noweb", "shell-compat"),
+         features(springLegacyUrl, "spring")
         };
     }
 
