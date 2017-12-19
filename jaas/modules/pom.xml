@@ -171,6 +171,9 @@
                             org.apache.http*,
                             org.apache.commons.codec*
                         </Private-Package>
+                        <Provide-Capability>
+                            osgi.service;effective:=active;name=basic;objectClass="org.apache.karaf.jaas.modules.EncryptionService"
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>

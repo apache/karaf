@@ -37,8 +37,7 @@ import org.osgi.service.cm.ManagedService;
 @Managed("org.apache.karaf.jaas")
 @Services(provides = {
         @ProvideService(JaasRealm.class),
-        @ProvideService(BackingEngineFactory.class),
-        @ProvideService(EncryptionService.class)
+        @ProvideService(BackingEngineFactory.class)
 })
 public class Activator extends BaseActivator implements ManagedService {
 
