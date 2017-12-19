@@ -155,6 +155,9 @@
                         <Bundle-Activator>
                             org.apache.karaf.jaas.jasypt.impl.Activator
                         </Bundle-Activator>
+                        <Provide-Capability>
+                            osgi.service;effective:=active;name=jasypt;objectClass="org.apache.karaf.jaas.modules.EncryptionService"
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>
