@@ -50,6 +50,18 @@ public class RepositoryImpl implements Repository {
         load(validate);
     }
 
+    /**
+     * Constructs a repository without any downloading
+     * @param uri
+     * @param features
+     * @param blacklisted
+     */
+    public RepositoryImpl(URI uri, Features features, boolean blacklisted) {
+        this.uri = uri;
+        this.features = features;
+        this.blacklisted = blacklisted;
+    }
+
     @Override
     public URI getURI() {
         return uri;

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.internal.model.Features;
 
 /**
  * Implementation of {@link RepositoryCache} that makes use of {@link FeaturesProcessor} to alter feature
@@ -44,6 +45,9 @@ public class RepositoryCacheImpl implements RepositoryCache {
 
     @Override
     public Repository create(URI uri, boolean validate) {
+        if (featuresProcessor != null && featuresProcessor.isRepositoryBlacklisted(uri.toString())) {
+            return new RepositoryImpl(uri, new Features(), true);
+        }
         RepositoryImpl repository = new RepositoryImpl(uri, validate);
         if (featuresProcessor != null) {
             // maybe it could be done better - first we have to set if entire repo is blacklisted
