@@ -401,22 +401,22 @@ public class KarServiceImpl implements KarService {
         throws URISyntaxException {
         // add bundles
         for (BundleInfo bundleInfo : feature.getBundles()) {
-            URI location = new URI(bundleInfo.getLocation());
+            URI location = new URI(bundleInfo.getLocation().trim());
             copyResourceToJar(jos, location, locationMap);
         }
         // add config files
         for (ConfigFileInfo configFileInfo : feature.getConfigurationFiles()) {
-            URI location = new URI(configFileInfo.getLocation());
+            URI location = new URI(configFileInfo.getLocation().trim());
             copyResourceToJar(jos, location, locationMap);
         }
         // add bundles and config files in conditionals
         for (Conditional conditional : feature.getConditional()) {
             for (BundleInfo bundleInfo : conditional.getBundles()) {
-                URI location = new URI(bundleInfo.getLocation());
+                URI location = new URI(bundleInfo.getLocation().trim());
                 copyResourceToJar(jos, location, locationMap);
             }
             for (ConfigFileInfo configFileInfo : conditional.getConfigurationFiles()) {
-                URI location = new URI(configFileInfo.getLocation());
+                URI location = new URI(configFileInfo.getLocation().trim());
                 copyResourceToJar(jos, location, locationMap);
             }
         }
