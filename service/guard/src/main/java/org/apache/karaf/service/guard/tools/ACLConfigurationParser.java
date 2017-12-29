@@ -110,6 +110,30 @@ public class ACLConfigurationParser {
             
     }
     
+    public static Specificity getRolesForInvocationForAlias(String methodName, Object[] params, String[] signature,
+                                                    Dictionary<String, Object> config, List<String> addToRoles) {
+        Dictionary<String, Object> properties = trimKeys(config);
+        String pid = (String)properties.get("service.pid");
+        Specificity s = getRolesBasedOnSignature(methodName, params, signature, properties, addToRoles);
+        if (s != Specificity.NO_MATCH) {
+            return s;
+        }
+
+        s = getRolesBasedOnSignature(methodName, params, null, properties, addToRoles);
+        if (s != Specificity.NO_MATCH) {
+            return s;
+        }
+
+        List<String> roles = getMethodNameWildcardRoles(properties, methodName);
+        if (roles != null) {
+            addToRoles.addAll(roles);
+            return Specificity.WILDCARD_MATCH;
+        } else {
+            return Specificity.NO_MATCH;
+        }
+            
+    }
+    
     public static void getCompulsoryRoles(List<String> roles) {
         if (compulsoryRoles != null) {
             roles.addAll(ACLConfigurationParser.parseRoles(compulsoryRoles));

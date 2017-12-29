@@ -150,7 +150,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         Dictionary<String, Object> config = getScopeConfig(scope);
         if (config != null) {
             List<String> roles = new ArrayList<>();
-            ACLConfigurationParser.getRolesForInvocation(name, null, null, config, roles);
+            ACLConfigurationParser.getRolesForInvocationForAlias(name, null, null, config, roles);
             if (roles.isEmpty()) {
                 return true;
             } else {
@@ -245,7 +245,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                     throw new CommandNotFoundException(aliasCommand.getScope() + ":" + aliasCommand.getName());
                 }
                 List<String> roles = new ArrayList<>();
-                ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(aliasCommand.getName(), new Object[] { arguments.toString() }, null, config, roles);
+                ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocationForAlias(aliasCommand.getName(), new Object[] { arguments.toString() }, null, config, roles);
                 if (s == ACLConfigurationParser.Specificity.NO_MATCH) {
                     return;
                 }
