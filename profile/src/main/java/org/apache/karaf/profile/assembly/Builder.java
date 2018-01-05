@@ -1522,6 +1522,10 @@ public class Builder {
         Set<Feature> installedFeatures = selector.getMatching(installedEffective.getFeatures());
         ArtifactInstaller installer = new ArtifactInstaller(systemDirectory, downloader, blacklist);
         for (Feature feature : installedFeatures) {
+            if (feature.isBlacklisted()) {
+                LOGGER.info("   Feature " + feature.getId() + " is blacklisted, ignoring");
+                continue;
+            }
             LOGGER.info("   Feature {} is defined as an installed feature", feature.getId());
             for (Bundle bundle : feature.getBundle()) {
                 if (!ignoreDependencyFlag || !bundle.isDependency()) {
@@ -1597,7 +1601,10 @@ public class Builder {
         FeatureSelector selector = new FeatureSelector(allBootFeatures);
         Set<Feature> bootFeatures = selector.getMatching(singletonList(generated.getName()));
         for (Feature feature : bootFeatures) {
-            // the feature is a startup feature, updating startup.properties file
+            if (feature.isBlacklisted()) {
+                LOGGER.info("   Feature " + feature.getId() + " is blacklisted, ignoring");
+                continue;
+            }
             LOGGER.info("   Feature " + feature.getId() + " is defined as a boot feature");
             // add the feature in the system folder
             Set<BundleInfo> bundleInfos = new HashSet<>();
