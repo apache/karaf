@@ -69,6 +69,8 @@
                             !org.quartz.*,
                             !weblogic.*,
                             !javax.transaction,
+                            javax.servlet*;resolution:=optional,
+                            org.jboss.*;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>
@@ -81,6 +83,7 @@
                             org.quartz.spi.*,
                             org.quartz.simpl.*,
                             org.quartz.utils.*,
+                            org.quartz.ee.*
                         </Private-Package>
                     </instructions>
                 </configuration>
@@ -92,6 +95,11 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
