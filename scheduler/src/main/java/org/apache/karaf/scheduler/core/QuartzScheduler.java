@@ -16,11 +16,7 @@
  */
 package org.apache.karaf.scheduler.core;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.ScheduleOptions;
@@ -28,8 +24,11 @@ import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.scheduler.SchedulerError;
 import org.quartz.*;
 import org.quartz.impl.DirectSchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.simpl.RAMJobStore;
+import org.quartz.spi.JobStore;
 import org.quartz.spi.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +43,6 @@ public class QuartzScheduler implements Scheduler {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final String PREFIX = "Apache Karaf Quartz Scheduler ";
-
-    private static final String QUARTZ_SCHEDULER_NAME = "ApacheKaraf";
 
     /** Map key for the job object */
     static final String DATA_MAP_OBJECT = "QuartzJobScheduler.Object";
@@ -62,30 +59,19 @@ public class QuartzScheduler implements Scheduler {
     /** The quartz scheduler. */
     private volatile org.quartz.Scheduler scheduler;
 
-    public QuartzScheduler(ThreadPool threadPool) throws SchedulerException {
+    public QuartzScheduler(Properties configuration) {
         // SLING-2261 Prevent Quartz from checking for updates
         System.setProperty("org.terracotta.quartz.skipUpdateCheck", Boolean.TRUE.toString());
-
-        final DirectSchedulerFactory factory = DirectSchedulerFactory.getInstance();
-        // unique run id
-        final String runID = new Date().toString().replace(' ', '_');
-        factory.createScheduler(QUARTZ_SCHEDULER_NAME, runID, threadPool, new RAMJobStore());
-        // quartz does not provide a way to get the scheduler by name AND runID, so we have to iterate!
-        final Iterator<org.quartz.Scheduler> allSchedulersIter = factory.getAllSchedulers().iterator();
-        while ( scheduler == null && allSchedulersIter.hasNext() ) {
-            final org.quartz.Scheduler current = allSchedulersIter.next();
-            if ( QUARTZ_SCHEDULER_NAME.equals(current.getSchedulerName())
-                    && runID.equals(current.getSchedulerInstanceId()) ) {
-                scheduler = current;
-            }
-        }
-        if ( scheduler == null ) {
-            throw new SchedulerException("Unable to find new scheduler with name " + QUARTZ_SCHEDULER_NAME + " and run ID " + runID);
-        }
-
-        scheduler.start();
-        if ( this.logger.isDebugEnabled() ) {
-            this.logger.debug(PREFIX + "started.");
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(QuartzScheduler.class.getClassLoader());
+            StdSchedulerFactory factory = new StdSchedulerFactory(configuration);
+            scheduler = factory.getScheduler();
+            scheduler.start();
+        } catch (Throwable t) {
+            throw new RuntimeException("Unable to create quartz scheduler", t);
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
         }
     }
 
