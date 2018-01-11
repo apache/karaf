@@ -1062,7 +1062,7 @@ public class Deployer {
             newRequest.options = request.options;
             newRequest.requirements = copy(dstate.state.requirements);
             for (String prereq : prereqs) {
-                addToMapSet(newRequest.requirements, ROOT_REGION, prereq);
+                addToMapSet(newRequest.requirements, ROOT_REGION, new FeatureReq(prereq).toRequirement());
             }
             newRequest.stateChanges = Collections.emptyMap();
             newRequest.updateSnaphots = request.updateSnaphots;
