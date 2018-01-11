@@ -252,7 +252,7 @@ public class Deployer {
             newRequest.overrides = request.overrides;
             newRequest.requirements = copy(dstate.state.requirements);
             for (String prereq : prereqs) {
-                addToMapSet(newRequest.requirements, ROOT_REGION, prereq);
+                addToMapSet(newRequest.requirements, ROOT_REGION, FeaturesServiceImpl.FEATURE_OSGI_REQUIREMENT_PREFIX + prereq);
             }
             newRequest.stateChanges = Collections.emptyMap();
             newRequest.updateSnaphots = request.updateSnaphots;
