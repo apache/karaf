@@ -114,8 +114,8 @@ import static org.apache.karaf.features.internal.util.MapUtils.remove;
  */
 public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCallback {
 
+    static final String FEATURE_OSGI_REQUIREMENT_PREFIX = "feature:";
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
-    private static final String FEATURE_OSGI_REQUIREMENT_PREFIX = "feature:";
 
     /**
      * Our bundle and corresponding bundle context.
