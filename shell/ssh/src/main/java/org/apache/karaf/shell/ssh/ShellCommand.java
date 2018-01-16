@@ -131,6 +131,11 @@ public class ShellCommand implements Command, Runnable, SessionAware {
                 }
                 if (result != null)
                 {
+                	if(result instanceof Integer) {
+                		// if it is an integer it's interpreted as a return code
+                		exitStatus = (Integer) result;
+                	}
+
                     // TODO: print the result of the command ?
 //                    session.getConsole().println(session.format(result, Converter.INSPECT));
                 }
