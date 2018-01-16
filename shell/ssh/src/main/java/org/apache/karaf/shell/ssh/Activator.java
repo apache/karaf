@@ -175,6 +175,8 @@ public class Activator extends BaseActivator implements ManagedService {
             server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(cmd -> new ShellCommand(sessionFactory, cmd)).build());
             server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
             server.setFileSystemFactory(new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))));
+        } else {
+            server.setCommandFactory(cmd -> new ShellCommand(sessionFactory, cmd));
         }
         server.setKeyPairProvider(keyPairProvider);
         server.setPasswordAuthenticator(authenticator);
