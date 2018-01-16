@@ -452,7 +452,7 @@ public class ConsoleSessionImpl implements Session {
     private void doExecute(CharSequence command) {
         try {
             Object result = session.execute(command);
-            if (result != null) {
+            if (result instanceof String) {
                 session.getConsole().println(session.format(result, Converter.INSPECT));
             }
         } catch (InterruptedException e) {
