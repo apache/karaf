@@ -91,7 +91,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
                     .allMatch(t -> t.getService() != null)) {
             try {
                 doStart();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.warn("Error starting activator", e);
                 doStop();
             }
