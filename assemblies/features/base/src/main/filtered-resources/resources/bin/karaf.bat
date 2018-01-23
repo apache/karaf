@@ -387,7 +387,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%CHECK_ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%IS_RUNNABLE%" == "true" (
-        for /f tokens^=2-5^ delims^=.-_^" %%j in ('%JAVA% -fullversion 2^>^&1') do set "JAVA_VERSION=%%k%"
+        for /f tokens^=2-5^ delims^=.-_^" %%j in ('"%JAVA%" -fullversion 2^>^&1') do set "JAVA_VERSION=%%k%"
         if "%JAVA_VERSION%" GTR 8 (
             "%JAVA%" %JAVA_OPTS% %OPTS% ^
                 --add-opens java.base/java.security=ALL-UNNAMED ^
