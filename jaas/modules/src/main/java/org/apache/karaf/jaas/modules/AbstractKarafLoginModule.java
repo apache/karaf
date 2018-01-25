@@ -83,7 +83,13 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
 
     public boolean checkPassword(String plain, String encrypted) {
         String newEncrypted = encryptionSupport.encrypt(plain);
-        return encrypted.equals(newEncrypted);
+        String prefix = encryptionSupport.getEncryptionPrefix();
+        String suffix = encryptionSupport.getEncryptionSuffix();
+        boolean isMatch = encryptionSupport.getEncryption() != null 
+            ? encryptionSupport.getEncryption().checkPassword(plain, 
+                encrypted.substring(prefix.length(), encrypted.length() - suffix.length())) : false;
+        return encrypted.equals(newEncrypted) 
+            || isMatch;
     }
 
 }
