@@ -183,7 +183,7 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setPublickeyAuthenticator(authenticator);
         server.setUserAuthFactories(authFactoriesFactory.getFactories());
         server.setAgentFactory(KarafAgentFactory.getInstance());
-        server.setTcpipForwardingFilter(AcceptAllForwardingFilter.INSTANCE);
+        server.setForwardingFilter(AcceptAllForwardingFilter.INSTANCE);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
         server.getProperties().put(SshServer.NIO_WORKERS, Integer.toString(nioWorkers));
         if (moduliUrl != null) {
