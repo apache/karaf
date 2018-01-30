@@ -226,6 +226,49 @@ public class SubsystemTest {
     }
 
     @Test
+    public void test2Conditionals() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data4a/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<>();
+        addToMapSet(features, "root/apps1", "f1");
+        addToMapSet(features, "root/apps1", "f2");
+        addToMapSet(features, "root/apps1", "f3");
+        Map<String, Set<String>> expected = new HashMap<>();
+        addToMapSet(expected, "root/apps1", "a/1.0.0");
+        addToMapSet(expected, "root/apps1", "b/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data4a"));
+        resolver.prepare(partitionByName(repo.getFeatures()),
+                         features,
+                         Collections.emptyMap());
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null, null, null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
+    public void test2Conditionals2() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data4a/features.xml").toURI());
+
+        Map<String, Set<String>> features = new HashMap<>();
+        addToMapSet(features, "root/apps1", "f2");
+        addToMapSet(features, "root/apps1", "f3");
+        Map<String, Set<String>> expected = new HashMap<>();
+        // nothing should be installed
+        //        addToMapSet(expected, "root/apps1", "a/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data4a"));
+        resolver.prepare(partitionByName(repo.getFeatures()),
+                         features,
+                         Collections.emptyMap());
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                         null, null, null);
+
+        verify(resolver, expected);
+    }
+
+    @Test
     public void testConditionalSatisfiedWithOptional() throws Exception {
         RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data4/features.xml").toURI());
 
