@@ -129,14 +129,6 @@ public abstract class MojoSupport extends AbstractMojo {
     // called by Plexus when injecting the mojo's session
     public void setMavenSession(MavenSession mavenSession) {
         this.mavenSession = mavenSession;
-
-        if (mavenSession != null) {
-            // check for custom settings.xml and pass it onto pax-url-aether
-            File settingsFile = mavenSession.getRequest().getUserSettingsFile();
-            if (settingsFile != null && settingsFile.isFile()) {
-                System.setProperty("org.ops4j.pax.url.mvn.settings", settingsFile.getPath());
-            }
-        }
     }
 
     protected Map createManagedVersionMap(String projectId,

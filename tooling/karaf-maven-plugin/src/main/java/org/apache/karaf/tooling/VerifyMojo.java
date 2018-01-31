@@ -188,7 +188,11 @@ public class VerifyMojo extends MojoSupport {
         getLog().info("Using repositories: " + remote.toString());
         config.put("maven.repositories", remote.toString());
         config.put("maven.localRepository", localRepo.getBasedir());
-        config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
+
+        if (mavenSession.getRequest().getUserSettingsFile().exists()) {
+            config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
+        }
+
         // TODO: add more configuration bits ?
         resolver = MavenResolvers.createMavenResolver(config, "maven");
         doExecute();
