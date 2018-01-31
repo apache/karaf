@@ -175,7 +175,11 @@ public class VerifyMojo extends MojoSupport {
         getLog().info("Using repositories: " + remoteRepositories);
         config.put("maven.repositories", remoteRepositories);
         config.put("maven.localRepository", localRepo.getBasedir());
-        config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
+
+        if (mavenSession.getRequest().getUserSettingsFile().exists()) {
+            config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
+        }
+
         // TODO: add more configuration bits ?
         resolver = new ReactorMavenResolver(reactor, MavenResolvers.createMavenResolver(config, "maven"));
         doExecute();
