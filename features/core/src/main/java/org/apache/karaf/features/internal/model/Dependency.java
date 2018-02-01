@@ -19,9 +19,9 @@ package org.apache.karaf.features.internal.model;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-
 
 /**
  * <p>Dependency of feature.</p>
@@ -49,6 +49,9 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     protected Boolean prerequisite;
     @XmlAttribute
     protected Boolean dependency;
+
+    @XmlTransient
+    private boolean blacklisted;
 
     public Dependency() {
         // Nothing to do
@@ -131,6 +134,15 @@ public class Dependency implements org.apache.karaf.features.Dependency {
         this.dependency = dependency;
     }
 
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+    }
+
     public String toString() {
         return getName() + Feature.VERSION_SEPARATOR + getVersion();
     }
@@ -146,7 +158,6 @@ public class Dependency implements org.apache.karaf.features.Dependency {
         if (dependency != null ? !dependency.equals(that.dependency) : that.dependency != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         return version != null ? version.equals(that.version) : that.version == null;
-
     }
 
     @Override

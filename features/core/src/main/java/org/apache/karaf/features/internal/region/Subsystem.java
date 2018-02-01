@@ -340,6 +340,9 @@ public class Subsystem extends ResourceImpl {
             // each dependant feature becomes a non-mandatory (why?) requirement of first parent that
             // accepts dependencies
             for (Dependency dep : feature.getDependencies()) {
+                if (dep.isBlacklisted()) {
+                    continue;
+                }
                 Subsystem ss = this;
                 while (!ss.isAcceptDependencies()) {
                     ss = ss.getParent();
@@ -348,6 +351,9 @@ public class Subsystem extends ResourceImpl {
             }
             // each conditional feature becomes a child subsystem of this feature's subsystem
             for (Conditional cond : feature.getConditional()) {
+                if (cond.isBlacklisted()) {
+                    continue;
+                }
                 Feature fcond = cond.asFeature();
                 String ssName = this.name + "#" + (fcond.hasVersion() ? fcond.getName() + "-" + fcond.getVersion() : fcond.getName());
                 Subsystem fs = getChild(ssName);
@@ -451,9 +457,11 @@ public class Subsystem extends ResourceImpl {
         final Downloader downloader = manager.createDownloader();
         if (feature != null) {
             for (Conditional cond : feature.getConditional()) {
-                for (final BundleInfo bi : cond.getBundles()) {
-                    // bundles from conditional features will be added as non-mandatory requirements
-                    infos.put(bi, cond);
+                if (!cond.isBlacklisted()) {
+                    for (final BundleInfo bi : cond.getBundles()) {
+                        // bundles from conditional features will be added as non-mandatory requirements
+                        infos.put(bi, cond);
+                    }
                 }
             }
             for (BundleInfo bi : feature.getBundles()) {
@@ -537,6 +545,9 @@ public class Subsystem extends ResourceImpl {
             // Add conditionals
             Map<Conditional, Resource> resConds = new HashMap<>();
             for (Conditional cond : feature.getConditional()) {
+                if (cond.isBlacklisted()) {
+                    continue;
+                }
                 FeatureResource resCond = FeatureResource.build(feature, cond, featureResolutionRange, bundles);
                 // feature's subsystem will optionally require conditional feature resource
                 addIdentityRequirement(this, resCond, false);

@@ -18,7 +18,7 @@ package org.apache.karaf.features;
 
 import java.util.List;
 
-public interface Conditional {
+public interface Conditional extends Blacklisting {
 
     List<String> getCondition();
 

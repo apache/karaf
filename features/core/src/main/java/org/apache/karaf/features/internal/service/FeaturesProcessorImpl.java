@@ -32,6 +32,7 @@ import org.apache.karaf.features.FeaturePattern;
 import org.apache.karaf.features.LocationPattern;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Conditional;
+import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.processing.BundleReplacements;
@@ -151,6 +152,19 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
             // blacklisting features
             boolean allBlacklisted = features.isBlacklisted();
             feature.setBlacklisted(allBlacklisted || isFeatureBlacklisted(feature));
+
+            // blacklisting feature's dependencies and conditionals
+            for (Conditional conditional : feature.getConditional()) {
+                boolean isConditionBlacklisted = false;
+                for (String cond : conditional.getCondition()) {
+                    isConditionBlacklisted |= isFeatureBlacklisted(new Feature(cond));
+                }
+                conditional.setBlacklisted(feature.isBlacklisted() || isConditionBlacklisted);
+            }
+
+            for (Dependency dep : feature.getFeature()) {
+                dep.setBlacklisted(feature.isBlacklisted() || isFeatureBlacklisted(new Feature(dep.getName(), dep.getVersion())));
+            }
 
             // override dependency flag (null - don't touch, false - change to false, true - change to true)
             Boolean dependency = null;

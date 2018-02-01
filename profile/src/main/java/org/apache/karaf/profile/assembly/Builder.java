@@ -1537,6 +1537,9 @@ public class Builder {
                 installer.installArtifact(configFile.getLocation().trim());
             }
             for (Conditional cond : feature.getConditional()) {
+                if (cond.isBlacklisted()) {
+                    LOGGER.info("   Conditionial " + cond.getConditionId() + " is blacklisted, ignoring");
+                }
                 for (Bundle bundle : cond.getBundle()) {
                     if (!ignoreDependencyFlag || !bundle.isDependency()) {
                         installer.installArtifact(bundle);
@@ -1614,6 +1617,9 @@ public class Builder {
                 }
             }
             for (Conditional cond : feature.getConditional()) {
+                if (cond.isBlacklisted()) {
+                    LOGGER.info("   Conditionial " + cond.getConditionId() + " is blacklisted, ignoring");
+                }
                 for (Bundle bundle : cond.getBundle()) {
                     if (!ignoreDependencyFlag || !bundle.isDependency()) {
                         bundleInfos.add(bundle);
