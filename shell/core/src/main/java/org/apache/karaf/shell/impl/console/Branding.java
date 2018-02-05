@@ -32,11 +32,17 @@ public final class Branding {
 
     public static Properties loadBrandingProperties(boolean ssh) {
         Properties props = new Properties();
-        String name = ssh ? "branding-ssh.properties" : "branding.properties";
-        loadPropsFromResource(props, "org/apache/karaf/shell/console/" + name);
-        loadPropsFromResource(props, "org/apache/karaf/branding/" + name);
-        loadPropsFromFile(props, System.getProperty("karaf.etc") + "/" + name);
+        loadPropsFromResource(props, "org/apache/karaf/shell/console/", ssh);
+        loadPropsFromResource(props, "org/apache/karaf/branding/", ssh);
+        loadPropsFromFile(props, System.getProperty("karaf.etc") + "/", ssh);
         return props;
+    }
+
+    private static void loadPropsFromFile(Properties props, String fileName, boolean ssh) {
+        loadPropsFromFile(props, fileName + "branding.properties");
+        if (ssh) {
+            loadPropsFromFile(props, fileName + "branding-ssh.properties");
+        }
     }
 
     private static void loadPropsFromFile(Properties props, String fileName) {
@@ -44,6 +50,13 @@ public final class Branding {
             loadProps(props, is);
         } catch (IOException e) {
             LOGGER.trace("Could not load branding.", e);
+        }
+    }
+
+    private static void loadPropsFromResource(Properties props, String resource, boolean ssh) {
+        loadPropsFromResource(props, resource + "branding.properties");
+        if (ssh) {
+            loadPropsFromResource(props, resource + "branding-ssh.properties");
         }
     }
 
