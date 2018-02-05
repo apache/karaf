@@ -32,7 +32,7 @@ public class Activator extends BaseActivator {
 
     @Override
     protected void doStart() throws Exception {
-        threadPool = new SimpleThreadPool(4, Thread.NORM_PRIORITY);
+        threadPool = new SimpleThreadPool(30, Thread.NORM_PRIORITY);
         scheduler = new QuartzScheduler(threadPool);
         whiteboardHandler = new WhiteboardHandler(bundleContext, scheduler);
         register(Scheduler.class, scheduler);
