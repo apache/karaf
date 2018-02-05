@@ -304,4 +304,33 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
         }
     }
 
+    @Override
+    public boolean canPauseResume() {
+        return terminal.canPauseResume();
+    }
+
+    @Override
+    public void pause() {
+        terminal.pause();
+    }
+
+    @Override
+    public void resume() {
+        terminal.resume();
+    }
+
+    @Override
+    public boolean paused() {
+        return terminal.paused();
+    }
+
+    @Override
+    public boolean hasFocusSupport() {
+        return terminal.hasFocusSupport();
+    }
+
+    @Override
+    public boolean trackFocus(boolean tracking) {
+        return terminal.trackFocus(tracking);
+    }
 }

@@ -255,10 +255,10 @@
         <hibernate43.version>4.3.6.Final</hibernate43.version>
         <hibernate.version>5.2.8.Final</hibernate.version>
         <hibernate.validator.version>5.3.4.Final</hibernate.validator.version>
-        <jansi.version>1.16</jansi.version>
+        <jansi.version>1.17</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
         <jetty.version>9.3.21.v20170918</jetty.version>
-        <jline.version>3.5.2</jline.version>
+        <jline.version>3.6.0</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
         <maven.version>3.5.2</maven.version>
