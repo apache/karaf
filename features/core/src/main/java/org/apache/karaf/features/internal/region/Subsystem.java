@@ -382,7 +382,7 @@ public class Subsystem extends ResourceImpl {
                 if (TYPE_FEATURE.equals(type) && allFeatures.containsKey(name)) {
                     for (Feature feature : allFeatures.get(name)) {
                         if (range == null || range.contains(VersionTable.getVersion(feature.getVersion()))) {
-                            if (feature != this.feature) {
+                            if (feature != this.feature && !feature.isBlacklisted()) {
                                 String ssName = this.name + "#" + (feature.hasVersion() ? feature.getName() + "-" + feature.getVersion() : feature.getName());
                                 Subsystem fs = getChild(ssName);
                                 if (fs == null) {
