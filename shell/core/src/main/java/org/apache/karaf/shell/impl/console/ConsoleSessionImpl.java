@@ -60,12 +60,7 @@ import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.support.completers.UriCompleter;
 import org.apache.karaf.util.filesstream.FilesStream;
 import org.jline.builtins.Completers;
-import org.jline.reader.Completer;
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.ParsedLine;
-import org.jline.reader.UserInterruptException;
+import org.jline.reader.*;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.slf4j.Logger;
@@ -345,7 +340,7 @@ public class ConsoleSessionImpl implements Session {
                 CharSequence command = null;
                 reading.set(true);
                 try {
-                    reader.readLine(getPrompt(), getRPrompt(), null, null);
+                    reader.readLine(getPrompt(), getRPrompt(), (MaskingCallback) null, null);
                     ParsedLine pl = reader.getParsedLine();
                     if (pl instanceof ParsedLineImpl) {
                         command = ((ParsedLineImpl) pl).program();
