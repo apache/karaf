@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.impl.console.parsing;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.apache.felix.gogo.runtime.EOFError;
 import org.apache.felix.gogo.runtime.Parser.Program;
 import org.apache.felix.gogo.runtime.Parser.Statement;
 import org.apache.felix.gogo.runtime.SyntaxError;
+import org.apache.felix.gogo.runtime.Token;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Parser;
@@ -44,7 +46,7 @@ public class KarafParser implements org.jline.reader.Parser {
     @Override
     public ParsedLine parse(String line, int cursor, ParseContext parseContext) throws SyntaxError {
         try {
-            return doParse(line, cursor);
+            return doParse(line, cursor, parseContext);
         } catch (EOFError e) {
             throw new org.jline.reader.EOFError(e.line(), e.column(), e.getMessage(), e.missing());
         } catch (SyntaxError e) {
@@ -52,10 +54,24 @@ public class KarafParser implements org.jline.reader.Parser {
         }
     }
 
-    private ParsedLine doParse(CharSequence line, int cursor) throws SyntaxError {
-        org.apache.felix.gogo.runtime.Parser parser = new org.apache.felix.gogo.runtime.Parser(line);
-        Program program = parser.program();
-        List<Statement> statements = parser.statements();
+    private ParsedLine doParse(String line, int cursor, ParseContext parseContext) throws SyntaxError {
+        Program program = null;
+        List<Statement> statements = null;
+        String repaired = line;
+        while (program == null) {
+            try {
+                org.apache.felix.gogo.runtime.Parser parser = new org.apache.felix.gogo.runtime.Parser(repaired);
+                program = parser.program();
+                statements = parser.statements();
+            } catch (EOFError e) {
+                // Make sure we don't loop forever
+                if (parseContext == ParseContext.COMPLETE && repaired.length() < line.length() + 1024) {
+                    repaired = repaired + " " + e.repair();
+                } else {
+                    throw e;
+                }
+            }
+        }
         // Find corresponding statement
         Statement statement = null;
         for (int i = statements.size() - 1; i >= 0; i--) {
@@ -105,6 +121,13 @@ public class KarafParser implements org.jline.reader.Parser {
                         return cmdLine.getBufferPosition();
                     }
                 };
+            }
+            if (repaired != line) {
+                Token stmt = statement.subSequence(0, line.length() - statement.start());
+                List<Token> tokens = new ArrayList<>(statement.tokens());
+                Token last = tokens.get(tokens.size() - 1);
+                tokens.set(tokens.size() - 1, last.subSequence(0, line.length() - last.start()));
+                return new ParsedLineImpl(program, stmt, cursor, tokens);
             }
             return new ParsedLineImpl(program, statement, cursor, statement.tokens());
         } else {
