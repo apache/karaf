@@ -435,7 +435,9 @@ public class ConsoleSessionImpl implements Session {
             if (pl instanceof ParsedLineImpl) {
                 command = ((ParsedLineImpl) pl).program();
             } else {
-                command = pl.line();
+                if (pl != null) {
+                    command = pl.line();
+                }
             }
         } catch (EndOfFileException e) {
             command = null;
