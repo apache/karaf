@@ -49,6 +49,7 @@ public class JDBCBackingEngine implements BackingEngine {
     private String deleteAllUserRolesStatement = "DELETE FROM ROLES WHERE USERNAME=?";
     private String deleteUserStatement = "DELETE FROM USERS WHERE USERNAME=?";
     private String selectUsersQuery = "SELECT USERNAME FROM USERS";
+    private String selectUserQuery = "SELECT USERNAME FROM USERS WHERE USERNAME=?";
     private String selectRolesQuery = "SELECT ROLE FROM ROLES WHERE USERNAME=?";
 
     public JDBCBackingEngine(DataSource dataSource) {
@@ -126,6 +127,21 @@ public class JDBCBackingEngine implements BackingEngine {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error listing users", e);
+        }
+    }
+
+    @Override
+    public UserPrincipal lookupUser(String username) {
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                List<String> names = rawSelect(connection, selectUserQuery, username);
+                if (names.size() == 0) {
+                    return null;
+                }
+                return new UserPrincipal(username);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting user", e);
         }
     }
 

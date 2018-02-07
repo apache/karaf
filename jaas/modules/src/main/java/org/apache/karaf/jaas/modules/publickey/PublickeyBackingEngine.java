@@ -110,6 +110,16 @@ public class PublickeyBackingEngine implements BackingEngine {
     }
 
     @Override
+    public UserPrincipal lookupUser(String username) {
+        for (UserPrincipal userPrincipal : listUsers()) {
+            if (userPrincipal.getName().equals(username)) {
+                return userPrincipal;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<RolePrincipal> listRoles(Principal principal) {
         String userName = principal.getName();
         if (principal instanceof  GroupPrincipal) {
