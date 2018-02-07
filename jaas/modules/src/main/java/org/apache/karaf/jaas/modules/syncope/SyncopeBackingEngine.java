@@ -186,6 +186,45 @@ public class SyncopeBackingEngine implements BackingEngine {
         return users;
     }
 
+    @Override
+    public UserPrincipal lookupUser(String username) {
+        if (version2) {
+            return lookupUserSyncope2(username);
+        } else {
+            return lookupUserSyncope1(username);
+        }
+    }
+
+    private UserPrincipal lookupUserSyncope1(String username) {
+        HttpGet request = new HttpGet(address + "/users?username=" + username);
+        request.setHeader("Content-Type", "application/xml");
+        try {
+            HttpResponse response = client.execute(request);
+            String responseTO = EntityUtils.toString(response.getEntity());
+            if (responseTO != null && !responseTO.isEmpty()) {
+                return new UserPrincipal(username);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting user", e);
+        }
+        return null;
+    }
+
+    private UserPrincipal lookupUserSyncope2(String username) {
+        HttpGet request = new HttpGet(address + "/users/" + username);
+        request.setHeader("Content-Type", "application/json");
+        try {
+            HttpResponse httpResponse = client.execute(request);
+            String response = EntityUtils.toString(httpResponse.getEntity());
+            if (response != null && !response.isEmpty()) {
+                return new UserPrincipal(username);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting user", e);
+        }
+        return null;
+    }
+
     public List<RolePrincipal> listRoles(Principal principal) {
         if (version2) {
             return listRolesSyncope2(principal);

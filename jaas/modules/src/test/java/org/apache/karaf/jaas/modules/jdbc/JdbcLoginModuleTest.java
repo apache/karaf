@@ -38,6 +38,7 @@ import org.osgi.framework.ServiceReference;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class JdbcLoginModuleTest {
@@ -147,6 +148,9 @@ public class JdbcLoginModuleTest {
         assertTrue(engine.listRoles(user).isEmpty());
         assertTrue(engine.listRoles(group1).isEmpty());
         assertTrue(engine.listGroups(user).isEmpty());
+
+        assertNotNull(engine.lookupUser("abc"));
+        assertEquals("abc", engine.lookupUser("abc").getName());
 
         engine.addRole("abc", "role1");
         assertTrue(engine.listUsers().contains(user));
