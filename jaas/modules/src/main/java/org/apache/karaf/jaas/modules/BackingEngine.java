@@ -49,6 +49,14 @@ public interface BackingEngine {
     List<UserPrincipal> listUsers();
 
     /**
+     * Retrieve the {@link UserPrincipal} corresponding to an username, or {@code null} if user doesn't exist.
+     *
+     * @param username The username.
+     * @return The {@link UserPrincipal} or {@code null}.
+     */
+    UserPrincipal lookupUser(String username);
+
+    /**
      * List groups that a user is member of.
      *
      * @param user the {@link UserPrincipal}.

@@ -19,6 +19,7 @@ package org.apache.karaf.jaas.modules.properties;
 import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -67,6 +68,9 @@ public class PropertiesBackingEngineTest {
         Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
 
         checkLoading();
+
+        assertNotNull(engine.lookupUser("a"));
+        assertEquals("a", engine.lookupUser("a").getName());
 
         // removing some stuff
         UserPrincipal upb = getUser(engine, "b");

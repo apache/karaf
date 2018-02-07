@@ -63,6 +63,37 @@ public class LDAPBackingEngine implements BackingEngine {
     }
 
     @Override
+    public UserPrincipal lookupUser(String username) {
+        DirContext context = null;
+        try {
+            context = cache.open();
+
+            SearchControls controls = new SearchControls();
+            if (options.getUserSearchSubtree()) {
+                controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            } else {
+                controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+            }
+
+            String filter = options.getUserFilter();
+            filter = filter.replaceAll(Pattern.quote("%u"), username);
+            filter = filter.replace("\\", "\\\\");
+
+            LOGGER.debug("Looking for user {} in LDAP with", username);
+            LOGGER.debug("   base DN: {}", options.getUserBaseDn());
+            LOGGER.debug("   filter: {}", filter);
+
+            NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
+            if (namingEnumeration.hasMore()) {
+                return new UserPrincipal(username);
+            }
+        } catch (NamingException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
     public List<UserPrincipal> listUsers() {
         DirContext context = null;
 
