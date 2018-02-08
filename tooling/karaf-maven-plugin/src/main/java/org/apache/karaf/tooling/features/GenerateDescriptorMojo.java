@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -60,6 +59,7 @@ import org.apache.karaf.tooling.utils.LocalDependency;
 import org.apache.karaf.tooling.utils.ManifestUtils;
 import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.karaf.tooling.utils.SimpleLRUCache;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -91,7 +91,7 @@ import org.xml.sax.SAXException;
 /**
  * Generates the features XML file starting with an optional source feature.xml and adding
  * project dependencies as bundles and feature/car dependencies.
- * 
+ *
  * NB this requires a recent maven-install-plugin such as 2.3.1
  */
 @Mojo(name = "features-generate-descriptor", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
@@ -235,14 +235,14 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
     @Parameter(defaultValue = "${project.artifactId}")
     private String primaryFeatureName;
-    
+
     /**
      * Flag indicating whether bundles should use the version range declared in the POM. If <code>false</code>,
      * the actual version of the resolved artifacts will be used.
      */
     @Parameter(defaultValue = "false")
     private boolean useVersionRange;
-    
+
     /**
      * Flag indicating whether the plugin should determine whether transitive dependencies are declared with
      * a version range. If this flag is set to <code>true</code> and a transitive dependency has been found
@@ -263,6 +263,19 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
     @Parameter(defaultValue = "false")
     private boolean simplifyBundleDependencies;
+
+    /**
+     * Maximum size of the artifact LRU cache. This cache is used to prevent repeated artifact-to-file resolution.
+     */
+    @Parameter(defaultValue = "1024")
+    private int artifactCacheSize;
+
+    /**
+     * Maximum size of the Features LRU cache. This cache is used to prevent repeated deserialization of features
+     * XML files.
+     */
+    @Parameter(defaultValue = "256")
+    private int featuresCacheSize;
 
     /**
      * Name of features which are prerequisites (they still need to be defined separately).
@@ -286,7 +299,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
     @Component
     private PlexusContainer container;
-    
+
     @Component
     private RepositorySystem repoSystem;
 
@@ -295,7 +308,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
     @Component
     protected MavenFileFilter mavenFileFilter;
-    
+
 	@Component
 	private ProjectBuilder mavenProjectBuilder;
 
@@ -310,11 +323,12 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
     // maven log
     private Log log;
-    
+
     // If useVersionRange is true, this map will be used to cache
     // resolved MavenProjects
     private final Map<Artifact, MavenProject> resolvedProjects = new HashMap<>();
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             if (enableGeneration == null) {
@@ -334,7 +348,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 }
             }
 
-            this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+            this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project,
+                this.mavenSession, this.artifactCacheSize, getLog());
             this.dependencyHelper.getDependencies(project, includeTransitiveDependency);
             this.localDependencies = dependencyHelper.getLocalDependencies();
             this.treeListing = dependencyHelper.getTreeListing();
@@ -363,11 +378,11 @@ public class GenerateDescriptorMojo extends MojoSupport {
 			resolvedProject = resolvedProjects.get(artifact);
 			if (resolvedProject == null) {
 				final ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
-				
-				// Fixes KARAF-4626; if the system properties are not transferred to the request, 
+
+				// Fixes KARAF-4626; if the system properties are not transferred to the request,
 				// test-feature-use-version-range-transfer-properties will fail
 				request.setSystemProperties(System.getProperties());
-				
+
 				request.setResolveDependencies(true);
 				request.setRemoteRepositories(project.getPluginArtifactRepositories());
 				request.setLocalRepository(localRepo);
@@ -402,7 +417,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
 		}
 		return versionOrRange;
 	}
-    
+
     /*
      * Write all project dependencies as feature
      */
@@ -460,7 +475,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         // TODO Initialise the repositories from the existing feature file if any
         Map<Dependency, Feature> otherFeatures = new HashMap<>();
         Map<Feature, String> featureRepositories = new HashMap<>();
-        FeaturesCache cache = new FeaturesCache();
+        FeaturesCache cache = new FeaturesCache(featuresCacheSize);
         for (final LocalDependency entry : localDependencies) {
             Object artifact = entry.getArtifact();
 
@@ -536,7 +551,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
             wrapDependency.setPrerequisite(true);
             feature.getFeature().add(wrapDependency);
         }
-        
+
         if ((!feature.getBundle().isEmpty() || !feature.getFeature().isEmpty()) && !features.getFeature().contains(feature)) {
             features.getFeature().add(feature);
         }
@@ -672,14 +687,16 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
     }
 
-    private static Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
+    static Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
         return JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
     }
 
+    @Override
     public void setLog(Log log) {
         this.log = log;
     }
 
+    @Override
     public Log getLog() {
         if (log == null) {
             setLog(new SystemStreamLog());
@@ -946,16 +963,20 @@ public class GenerateDescriptorMojo extends MojoSupport {
     }
 
     private static final class FeaturesCache {
-        private final Map<File, Features> map = new WeakHashMap<>();
+        private final SimpleLRUCache<File, Features> cache;
+
+        FeaturesCache(int featuresCacheSize) {
+            cache = new SimpleLRUCache<>(featuresCacheSize);
+        }
 
         Features get(final File featuresFile) throws XMLStreamException, JAXBException, IOException {
-            final Features existing = map.get(featuresFile);
+            final Features existing = cache.get(featuresFile);
             if (existing != null) {
                 return existing;
             }
 
             final Features computed = readFeaturesFile(featuresFile);
-            map.put(featuresFile, computed);
+            cache.put(featuresFile, computed);
             return computed;
         }
     }

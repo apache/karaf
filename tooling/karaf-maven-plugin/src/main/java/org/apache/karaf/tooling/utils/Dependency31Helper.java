@@ -74,25 +74,32 @@ public class Dependency31Helper implements DependencyHelper {
      */
     private final List<RemoteRepository> projectRepositories;
 
+    private final SimpleLRUCache<Artifact, ArtifactResult> artifactCache;
+
     // dependencies we are interested in
     protected Set<LocalDependency> localDependencies;
     // log of what happened during search
     protected String treeListing;
 
     @SuppressWarnings("unchecked")
-    public Dependency31Helper(List<?> repositories, Object session, RepositorySystem repositorySystem) {
+    public Dependency31Helper(List<?> repositories, Object session, RepositorySystem repositorySystem, int cacheSize) {
         this.projectRepositories = (List<RemoteRepository>) repositories;
         this.repositorySystemSession = (RepositorySystemSession) session;
         this.repositorySystem = repositorySystem;
+        this.artifactCache = new SimpleLRUCache<>(cacheSize);
     }
-    
-	public void setRepositorySession(final ProjectBuildingRequest request) throws MojoExecutionException {
-		try {
-			invokeMethod(request, "setRepositorySession", repositorySystemSession);
-		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-			throw new MojoExecutionException("Cannot set repository session on project building request", e);
-		}
-	}
+
+    public Dependency31Helper(List<?> repositories, Object session, RepositorySystem repositorySystem) {
+        this(repositories, session, repositorySystem, 32);
+    }
+
+    public void setRepositorySession(final ProjectBuildingRequest request) throws MojoExecutionException {
+        try {
+            invokeMethod(request, "setRepositorySession", repositorySystemSession);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new MojoExecutionException("Cannot set repository session on project building request", e);
+        }
+    }
 
     @Override
     public Set<LocalDependency> getLocalDependencies() {
@@ -283,7 +290,7 @@ public class Dependency31Helper implements DependencyHelper {
     public boolean isArtifactAFeature(Object artifact) {
         return Dependency31Helper.isFeature((Artifact) artifact);
     }
-    
+
 	@Override
 	public String getBaseVersion(Object artifact) {
 		return ((Artifact) artifact).getBaseVersion();
@@ -304,17 +311,30 @@ public class Dependency31Helper implements DependencyHelper {
         return ((Artifact) artifact).getClassifier();
     }
 
-    @Override
-    public File resolve(Object artifact, Log log) {
+    private ArtifactResult resolveArtifact(Artifact artifact) throws ArtifactResolutionException {
+        ArtifactResult result = artifactCache.get(artifact);
+        if (result != null) {
+            return result;
+        }
+
         ArtifactRequest request = new ArtifactRequest();
-        request.setArtifact((Artifact) artifact);
+        request.setArtifact(artifact);
         request.setRepositories(projectRepositories);
 
+        result = repositorySystem.resolveArtifact(repositorySystemSession, request);
+        if (result != null) {
+            artifactCache.put(artifact, result);
+        }
+        return result;
+    }
+
+    @Override
+    public File resolve(Object artifact, Log log) {
         log.debug("Resolving artifact " + artifact + " from " + projectRepositories);
 
         ArtifactResult result;
         try {
-            result = repositorySystem.resolveArtifact(repositorySystemSession, request);
+            result = resolveArtifact((Artifact) artifact);
         } catch (ArtifactResolutionException e) {
             log.warn("Cound not resolve " + artifact, e);
             return null;
@@ -336,15 +356,12 @@ public class Dependency31Helper implements DependencyHelper {
             }
         }
         id = MavenUtil.mvnToAether(id);
-        ArtifactRequest request = new ArtifactRequest();
-        request.setArtifact(new DefaultArtifact(id));
-        request.setRepositories(projectRepositories);
 
         log.debug("Resolving artifact " + id + " from " + projectRepositories);
 
         ArtifactResult result;
         try {
-            result = repositorySystem.resolveArtifact(repositorySystemSession, request);
+            result = resolveArtifact(new DefaultArtifact(id));
         } catch (ArtifactResolutionException e) {
             log.warn("Could not resolve " + id, e);
             throw new MojoFailureException(format("Couldn't resolve artifact %s", id), e);

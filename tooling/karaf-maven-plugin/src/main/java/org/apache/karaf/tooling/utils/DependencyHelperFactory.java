@@ -49,7 +49,7 @@ public class DependencyHelperFactory {
      * @return The {@link DependencyHelper} depending of the Maven version used.
      * @throws MojoExecutionException If the plugin execution fails.
      */
-    public static DependencyHelper createDependencyHelper(PlexusContainer container, MavenProject mavenProject, MavenSession mavenSession, Log log) throws MojoExecutionException {
+    public static DependencyHelper createDependencyHelper(PlexusContainer container, MavenProject mavenProject, MavenSession mavenSession, int cacheSize, Log log) throws MojoExecutionException {
         try {
             if (container.hasComponent("org.sonatype.aether.RepositorySystem")) {
                 org.sonatype.aether.RepositorySystem system = container.lookup(org.sonatype.aether.RepositorySystem.class);
@@ -65,7 +65,7 @@ public class DependencyHelperFactory {
                     throw new MojoExecutionException(e.getMessage(), e);
                 }
                 List<?> repositories = mavenProject.getRemoteProjectRepositories();
-                return new Dependency31Helper(repositories, session, system);
+                return new Dependency31Helper(repositories, session, system, cacheSize);
             }
         } catch (ComponentLookupException e) {
             throw new MojoExecutionException(e.getMessage(), e);
