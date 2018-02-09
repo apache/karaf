@@ -588,7 +588,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
             Features includedFeatures = cache.get(featuresFile);
             for (String repository : includedFeatures.getRepository()) {
                 processFeatureArtifact(features, feature, otherFeatures, featureRepositories, cache,
-                        new DefaultArtifact(MavenUtil.mvnToAether(repository)), parent, false);
+                        MavenUtil.mvnToArtifact(repository), parent, false);
             }
             for (Feature includedFeature : includedFeatures.getFeature()) {
                 Dependency dependency = new Dependency(includedFeature.getName(), includedFeature.getVersion());

@@ -366,7 +366,7 @@ public class Dependency31Helper implements DependencyHelper {
 
         ArtifactResult result;
         try {
-            result = resolveArtifact(new DefaultArtifact(id));
+            result = resolveArtifact(MavenUtil.aetherToArtifact(id));
         } catch (ArtifactResolutionException e) {
             log.warn("Could not resolve " + id, e);
             throw new MojoFailureException(format("Couldn't resolve artifact %s", id), e);
@@ -421,8 +421,7 @@ public class Dependency31Helper implements DependencyHelper {
 
     @Override
     public org.apache.maven.artifact.Artifact mvnToArtifact(String name) throws MojoExecutionException {
-        name = MavenUtil.mvnToAether(name);
-        DefaultArtifact artifact = new DefaultArtifact(name);
+        DefaultArtifact artifact = MavenUtil.mvnToArtifact(name);
         org.apache.maven.artifact.Artifact mavenArtifact = toArtifact(artifact);
         return mavenArtifact;
     }
@@ -441,7 +440,7 @@ public class Dependency31Helper implements DependencyHelper {
 
     @Override
     public String pathFromAether(String name) throws MojoExecutionException {
-        DefaultArtifact artifact = new DefaultArtifact(name);
+        DefaultArtifact artifact = MavenUtil.aetherToArtifact(name);
         org.apache.maven.artifact.Artifact mavenArtifact = toArtifact(artifact);
         return MavenUtil.layout.pathOf(mavenArtifact);
     }
