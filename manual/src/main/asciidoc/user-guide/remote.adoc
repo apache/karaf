@@ -94,9 +94,9 @@ sftpEnabled=true
 
 #
 # Self defined key size in 1024, 2048, 3072, or 4096
-# If not set, this defaults to 4096.
+# If not set, this defaults to 2048.
 #
-# keySize = 4096
+# keySize = 2048
 
 #
 # Specify host key algorithm, defaults to RSA
