@@ -330,7 +330,9 @@ public class Dependency31Helper implements DependencyHelper {
 
     @Override
     public File resolve(Object artifact, Log log) {
-        log.debug("Resolving artifact " + artifact + " from " + projectRepositories);
+        if (log.isDebugEnabled()) {
+            log.debug("Resolving artifact " + artifact + " from " + projectRepositories);
+        }
 
         ArtifactResult result;
         try {
@@ -340,7 +342,10 @@ public class Dependency31Helper implements DependencyHelper {
             return null;
         }
 
-        log.debug("Resolved artifact " + artifact + " to " + result.getArtifact().getFile() + " from " + result.getRepository());
+        if (log.isDebugEnabled()) {
+            log.debug("Resolved artifact " + artifact + " to " + result.getArtifact().getFile() + " from "
+                    + result.getRepository());
+        }
 
         return result.getArtifact().getFile();
     }
@@ -357,17 +362,22 @@ public class Dependency31Helper implements DependencyHelper {
         }
         id = MavenUtil.mvnToAether(id);
 
-        log.debug("Resolving artifact " + id + " from " + projectRepositories);
+        if (log.isDebugEnabled()) {
+            log.debug("Resolving artifact " + id + " from " + projectRepositories);
+        }
 
         ArtifactResult result;
         try {
-            result = resolveArtifact(new DefaultArtifact(id));
+            result = resolveArtifact(MavenUtil.aetherToArtifact(id));
         } catch (ArtifactResolutionException e) {
             log.warn("Could not resolve " + id, e);
             throw new MojoFailureException(format("Couldn't resolve artifact %s", id), e);
         }
 
-        log.debug("Resolved artifact " + id + " to " + result.getArtifact().getFile() + " from " + result.getRepository());
+        if (log.isDebugEnabled()) {
+            log.debug("Resolved artifact " + id + " to " + result.getArtifact().getFile() + " from "
+                    + result.getRepository());
+        }
 
         return result.getArtifact().getFile();
     }
@@ -413,8 +423,7 @@ public class Dependency31Helper implements DependencyHelper {
 
     @Override
     public org.apache.maven.artifact.Artifact mvnToArtifact(String name) throws MojoExecutionException {
-        name = MavenUtil.mvnToAether(name);
-        DefaultArtifact artifact = new DefaultArtifact(name);
+        DefaultArtifact artifact = MavenUtil.mvnToArtifact(name);
         org.apache.maven.artifact.Artifact mavenArtifact = toArtifact(artifact);
         return mavenArtifact;
     }
@@ -433,7 +442,7 @@ public class Dependency31Helper implements DependencyHelper {
 
     @Override
     public String pathFromAether(String name) throws MojoExecutionException {
-        DefaultArtifact artifact = new DefaultArtifact(name);
+        DefaultArtifact artifact = MavenUtil.aetherToArtifact(name);
         org.apache.maven.artifact.Artifact mavenArtifact = toArtifact(artifact);
         return MavenUtil.layout.pathOf(mavenArtifact);
     }

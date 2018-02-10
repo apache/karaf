@@ -33,6 +33,7 @@ import org.apache.maven.artifact.repository.metadata.Snapshot;
 import org.apache.maven.artifact.repository.metadata.SnapshotVersion;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
+import org.eclipse.aether.artifact.DefaultArtifact;
 
 /**
  * Util method for Maven manipulation (URL convert, metadata generation, etc).
@@ -75,6 +76,58 @@ public class MavenUtil {
         }
         b.append(m.group(3));
         return b.toString();
+    }
+
+    /**
+     * Convert PAX URL mvn format to an aether Artifact.
+     * N.B. we do not handle repository-url in mvn urls.
+     * N.B. version is required in mvn urls.
+     *
+     * @param name PAX URL mvn format: mvn-uri := [ 'wrap:' ] 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
+     * @return aether Artifact
+     */
+    public static DefaultArtifact mvnToArtifact(String name) {
+        Matcher m = mvnPattern.matcher(name);
+        if (!m.matches()) {
+            return new DefaultArtifact(name);
+        }
+
+        String groupId = m.group(1);
+        String artifactId = m.group(2);
+        String version = m.group(3);
+        String extension = m.group(5);
+        if (!present(extension)) {
+            extension = "jar";
+        }
+        String classifier = m.group(7);
+
+        return new DefaultArtifact(groupId, artifactId, present(classifier) ? classifier : "", extension, version);
+    }
+
+    /**
+     * Convert Aether coordinate format to an aether Artifact.
+     * N.B. we do not handle repository-url in mvn urls.
+     * N.B. version is required in mvn urls.
+     *
+     * @param name aether coordinate format: &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
+     * @return aether Artifact
+     */
+    public static DefaultArtifact aetherToArtifact(String name) {
+        Matcher m = aetherPattern.matcher(name);
+        if (!m.matches()) {
+            return new DefaultArtifact(name);
+        }
+
+        String groupId = m.group(1);
+        String artifactId = m.group(2);
+        String version = m.group(7);
+        String extension = m.group(4);
+        if (!present(extension)) {
+            extension = "jar";
+        }
+        String classifier = m.group(6);
+
+        return new DefaultArtifact(groupId, artifactId, present(classifier) ? classifier : "", extension, version);
     }
 
     private static boolean present(String part) {
