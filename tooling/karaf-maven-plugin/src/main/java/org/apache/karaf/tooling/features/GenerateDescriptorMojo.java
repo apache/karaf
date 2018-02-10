@@ -471,7 +471,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         // TODO Initialise the repositories from the existing feature file if any
         Map<Dependency, Feature> otherFeatures = new HashMap<>();
         Map<Feature, String> featureRepositories = new HashMap<>();
-        FeaturesCache cache = new FeaturesCache(featuresCacheSize);
+        FeaturesCache cache = new FeaturesCache(featuresCacheSize, artifactCacheSize);
         for (final LocalDependency entry : localDependencies) {
             Object artifact = entry.getArtifact();
 
@@ -585,10 +585,10 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 throw new MojoExecutionException(
                         "Cannot locate file for feature: " + artifact + " at " + featuresFile);
             }
-            Features includedFeatures = cache.get(featuresFile);
+            Features includedFeatures = cache.getFeature(featuresFile);
             for (String repository : includedFeatures.getRepository()) {
                 processFeatureArtifact(features, feature, otherFeatures, featureRepositories, cache,
-                        new DefaultArtifact(MavenUtil.mvnToAether(repository)), parent, false);
+                        cache.getArtifact(repository), parent, false);
             }
             for (Feature includedFeature : includedFeatures.getFeature()) {
                 Dependency dependency = new Dependency(includedFeature.getName(), includedFeature.getVersion());
@@ -944,20 +944,27 @@ public class GenerateDescriptorMojo extends MojoSupport {
     }
 
     private static final class FeaturesCache {
-        private final SimpleLRUCache<File, Features> cache;
+        // Maven-to-Aether Artifact cache, as parsing strings is expensive
+        private final SimpleLRUCache<String, DefaultArtifact> artifactCache;
+        private final SimpleLRUCache<File, Features> featuresCache;
 
-        FeaturesCache(int featuresCacheSize) {
-            cache = new SimpleLRUCache<>(featuresCacheSize);
+        FeaturesCache(int featuresCacheSize, int artifactCacheSize) {
+            featuresCache = new SimpleLRUCache<>(featuresCacheSize);
+            artifactCache = new SimpleLRUCache<>(artifactCacheSize);
         }
 
-        Features get(final File featuresFile) throws XMLStreamException, JAXBException, IOException {
-            final Features existing = cache.get(featuresFile);
+        DefaultArtifact getArtifact(String mavenName) {
+            return artifactCache.computeIfAbsent(mavenName, MavenUtil::mvnToArtifact);
+        }
+
+        Features getFeature(final File featuresFile) throws XMLStreamException, JAXBException, IOException {
+            final Features existing = featuresCache.get(featuresFile);
             if (existing != null) {
                 return existing;
             }
 
             final Features computed = readFeaturesFile(featuresFile);
-            cache.put(featuresFile, computed);
+            featuresCache.put(featuresFile, computed);
             return computed;
         }
     }
