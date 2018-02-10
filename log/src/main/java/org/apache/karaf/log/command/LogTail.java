@@ -74,7 +74,12 @@ public class LogTail extends DisplayLog {
      * Track LogService dynamically so we can react when the log core bundle stops even while we block for the tail
      */
     private final class LogServiceTracker extends ServiceTracker<LogService, LogService> {
+
+        private final static String SSHD_LOGGER = "org.apache.sshd";
+
         private final PaxAppender appender;
+
+        private String sshdLoggerLevel;
     
         private LogServiceTracker(BundleContext context, Class<LogService> clazz,
                                   ServiceTrackerCustomizer<LogService, LogService> customizer,
@@ -86,12 +91,17 @@ public class LogTail extends DisplayLog {
         @Override
         public LogService addingService(ServiceReference<LogService> reference) {
             LogService service = super.addingService(reference);
+            sshdLoggerLevel = service.getLevel(SSHD_LOGGER).get(SSHD_LOGGER);
+            service.setLevel(SSHD_LOGGER, "ERROR");
             service.addAppender(appender);
             return service;
         }
     
         @Override
         public void removedService(ServiceReference<LogService> reference, LogService service) {
+            if (sshdLoggerLevel != null) {
+                service.setLevel(SSHD_LOGGER, sshdLoggerLevel);
+            }
             service.removeAppender(appender);
             stopTail();
         }
