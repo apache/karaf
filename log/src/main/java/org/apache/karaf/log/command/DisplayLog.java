@@ -42,6 +42,8 @@ public class DisplayLog implements Action {
     public final static int INFO_INT  = 6;
     public final static int DEBUG_INT = 7;
 
+    private final static String SSHD_LOGGER = "org.apache.sshd";
+
     @Option(name = "-n", aliases = {}, description="Number of entries to display", required = false, multiValued = false)
     int entries;
 
@@ -68,8 +70,11 @@ public class DisplayLog implements Action {
     public Object execute() throws Exception {
         final PrintStream out = System.out;
         int minLevel = getMinLevel(level);
+        String sshdLoggerLevel = logService.getLevel(SSHD_LOGGER).get(SSHD_LOGGER);
+        logService.setLevel(SSHD_LOGGER, "ERROR");
         display(out, minLevel);
         out.println();
+        logService.setLevel(SSHD_LOGGER, sshdLoggerLevel);
         return null;
     }
 
