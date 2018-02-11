@@ -42,6 +42,7 @@ import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.client.ClientBuilder;
+import org.apache.sshd.client.ClientFactoryManager;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.auth.keyboard.UserInteraction;
 import org.apache.sshd.client.channel.ChannelExec;
@@ -51,6 +52,7 @@ import org.apache.sshd.client.channel.PtyCapableChannelSession;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.FactoryManager;
+import org.apache.sshd.common.PropertyResolverUtils;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.channel.PtyMode;
 import org.apache.sshd.common.config.keys.FilePasswordProvider;
@@ -95,8 +97,7 @@ public class Main {
             config.setCommand(sb.toString());
         }
 
-        try (SshClient client = ClientBuilder.builder().build())
-        {
+        try (SshClient client = ClientBuilder.builder().build()) {
             FilePasswordProvider passwordProvider = null;
             final Console console = System.console();
             if (console != null) {
@@ -160,7 +161,13 @@ public class Main {
             }
             
             setupAgent(config.getUser(), config.getKeyFile(), client, passwordProvider);
-            client.getProperties().put(FactoryManager.IDLE_TIMEOUT, String.valueOf(config.getIdleTimeout()));
+
+            // define hearbeat (for the keep alive) and timeouts
+            // TODO this should be dealt by Apache SSH client directly using .ssh/config
+            client.getProperties().put(ClientFactoryManager.HEARTBEAT_INTERVAL, "60000");
+            client.getProperties().put(ClientFactoryManager.IDLE_TIMEOUT, String.valueOf(config.getIdleTimeout()));
+            client.getProperties().put(ClientFactoryManager.NIO2_READ_TIMEOUT, String.valueOf(config.getIdleTimeout()));
+
             // TODO: remove the line below when SSHD-732 is fixed
             client.setKeyPairProvider(new FileKeyPairProvider());
             client.start();
