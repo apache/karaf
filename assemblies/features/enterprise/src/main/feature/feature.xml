@@ -193,7 +193,7 @@
 
     <feature name="eclipselink" description="Eclipselink JPA persistence engine support" version="${eclipselink.version}">
         <details>Eclipselink persistence engine.</details>
-        <bundle dependency="true">mvn:org.eclipse.persistence/javax.persistence/2.1.0</bundle>
+        <bundle dependency="true">mvn:org.eclipse.persistence/javax.persistence/2.2.0</bundle>
         <feature version="[2,3)">transaction</feature>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipselink.version}</bundle>
