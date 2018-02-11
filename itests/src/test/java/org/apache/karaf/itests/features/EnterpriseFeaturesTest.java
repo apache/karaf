@@ -90,7 +90,7 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
 
     @Test
     public void installOpenJpa240Feature() throws Exception {
-        installAssertAndUninstallFeature("openjpa", "2.4.1");
+        installAssertAndUninstallFeature("openjpa", "2.4.2");
     }
 
     @Test
