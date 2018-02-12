@@ -15,9 +15,45 @@
  * limitations under the License.
  */
 
+		    Apache Karaf 4.1.5
+		    ==================
+ Apache Karaf 4.1.5 is a maintenance release on the 4.1.x series, bringing bug fixes, updates and some improvements.
+
+ ChangeLog:
+ ----------
+** Bug
+    * [KARAF-4662] - Unable to create Karaf Cave 4.0.0 Kar file
+    * [KARAF-5210] - Seemingly random NPEs from Aether resolver
+    * [KARAF-5333] -  UnsupportedCharsetException: cp65001 and unprintable characters from karaf 4.1.2 console
+    * [KARAF-5473] - Karaf SSH session timing out
+    * [KARAF-5542] - Installing a feature triggers restarting previous ones
+    * [KARAF-5546] - incorrect acl rules for system:start-level
+    * [KARAF-5559] - log:tail kills ssh & karaf when root logger is in DEBUG
+    * [KARAF-5566] - Features installed through prerequisites lead to errors when uninstalling features
+    * [KARAF-5569] - Cannot pass commands to client script when sftpEnabled=false
+    * [KARAF-5572] - The parent pom of the karaf manual module in 4.1.x still points to 4.1.3-SNAPSHOT
+    * [KARAF-5573] - Karaf on Windows does not pass the version check when JAVA_HOME contains whitespace
+    * [KARAF-5585] - Verify mojo configure pax-url-mvn with non existent settings.xml
+
+** Improvement
+    * [KARAF-4496] - UserPrincipal lookup in the JAAS' BackingEngine
+    * [KARAF-5511] - Proper Provide-Capability for org.apache.karaf.jaas.modules.EncryptionService
+    * [KARAF-5558] - Be able to configure the Quartz Scheduler
+    * [KARAF-5568] - Karaf Commands cannot have return codes
+    * [KARAF-5588] - Increase max number of threads in the scheduler by default
+    * [KARAF-5604] - karaf:features-generate-descriptor takes long when faced with complex feature dependencies
+
+** Dependency upgrade
+    * [KARAF-5550] - Upgrade to pax-url 2.5.4
+    * [KARAF-5595] - Upgrade toJLine 3.6.0 and Jansi 1.17
+    * [KARAF-5597] - Upgrade to Spring 4.3.14.RELEASE
+    * [KARAF-5605] - Upgrade to OpenJPA 2.4.2
+    * [KARAF-5606] - Upgrade to EclipseLink 2.7.1
+    * [KARAF-5607] - Upgrade to Hibernate 5.2.9.Final
+
 		    Apache Karaf 4.1.4
 		    ==================
- Apache Karaf 4.1.0 is a maintenance release on the 4.1.x series, bringing bug fixes, updates and some improvements.
+ Apache Karaf 4.1.4 is a maintenance release on the 4.1.x series, bringing bug fixes, updates and some improvements.
 
  ChangeLog:
  ----------
