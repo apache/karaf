@@ -26,6 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -60,6 +62,7 @@ import static org.apache.karaf.features.internal.service.Overrides.OVERRIDE_RANG
         "bundleReplacements",
         "featureReplacements"
 })
+@XmlAccessorType(XmlAccessType.FIELD)
 public class FeaturesProcessing {
 
     public static Logger LOG = LoggerFactory.getLogger(FeaturesProcessing.class);
@@ -290,6 +293,7 @@ public class FeaturesProcessing {
     }
 
     @XmlType(name = "blacklistedFeature")
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class BlacklistedFeature {
         @XmlValue
         private String name;

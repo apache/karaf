@@ -20,6 +20,8 @@ package org.apache.karaf.features.internal.model.processing;
 
 import java.util.LinkedList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
@@ -32,6 +34,7 @@ import org.apache.karaf.features.internal.model.Feature;
 @XmlType(name = "featureReplacements", propOrder = {
         "replacements"
 })
+@XmlAccessorType(XmlAccessType.FIELD)
 public class FeatureReplacements {
 
     @XmlElement(name = "replacement")
@@ -55,6 +58,7 @@ public class FeatureReplacements {
     @XmlType(name = "overrideFeature", propOrder = {
             "feature"
     })
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class OverrideFeature {
         @XmlAttribute
         private FeatureOverrideMode mode = FeatureOverrideMode.REPLACE;

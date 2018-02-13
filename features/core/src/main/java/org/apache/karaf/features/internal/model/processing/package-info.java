@@ -17,16 +17,12 @@
 @XmlSchema(namespace = "http://karaf.apache.org/xmlns/features-processing/v1.0.0",
         elementFormDefault = XmlNsForm.QUALIFIED, attributeFormDefault = XmlNsForm.UNQUALIFIED,
         xmlns = {
-                @XmlNs(prefix = "", namespaceURI = FEATURES_PROCESSING_NS
-                ),
+                @XmlNs(prefix = "", namespaceURI = FEATURES_PROCESSING_NS),
                 @XmlNs(prefix = "f", namespaceURI = FeaturesNamespaces.URI_CURRENT)
         }
 )
-@XmlAccessorType(XmlAccessType.FIELD)
 package org.apache.karaf.features.internal.model.processing;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSchema;

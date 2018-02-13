@@ -20,6 +20,8 @@ package org.apache.karaf.features.internal.model.processing;
 
 import java.util.LinkedList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
@@ -29,6 +31,7 @@ import javax.xml.bind.annotation.XmlType;
         "features",
         "bundles"
 })
+@XmlAccessorType(XmlAccessType.FIELD)
 public class OverrideBundleDependency {
 
     @XmlElement(name = "repository")
@@ -51,6 +54,7 @@ public class OverrideBundleDependency {
     }
 
     @XmlType(name = "overrideDependency")
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class OverrideDependency {
         @XmlAttribute
         private String uri;
@@ -75,6 +79,7 @@ public class OverrideBundleDependency {
     }
 
     @XmlType(name = "overrideFeatureDependency")
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class OverrideFeatureDependency {
         @XmlAttribute
         private String name;

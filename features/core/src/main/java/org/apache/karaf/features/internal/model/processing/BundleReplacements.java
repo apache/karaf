@@ -21,6 +21,8 @@ package org.apache.karaf.features.internal.model.processing;
 import java.net.MalformedURLException;
 import java.util.LinkedList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
@@ -33,6 +35,7 @@ import org.apache.karaf.features.LocationPattern;
 @XmlType(name = "bundleReplacements", propOrder = {
         "overrideBundles"
 })
+@XmlAccessorType(XmlAccessType.FIELD)
 public class BundleReplacements {
 
     @XmlElement(name = "bundle")
@@ -52,6 +55,7 @@ public class BundleReplacements {
     }
 
     @XmlType(name = "overrideBundle")
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class OverrideBundle {
         @XmlAttribute
         private String originalUri;
