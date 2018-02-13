@@ -17,6 +17,8 @@
 package org.apache.karaf.shell.support.table;
 
 import org.apache.felix.gogo.runtime.threadio.ThreadPrintStream;
+import org.apache.felix.service.command.Job;
+import org.jline.terminal.Terminal;
 
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -106,7 +108,11 @@ public class ShellTable {
     }
 
     public void print(PrintStream out, boolean format)  {
-        boolean unicode = supportsUnicode(out);
+        print(out, null, format);
+    }
+
+    public void print(PrintStream out, Charset charset, boolean format)  {
+        boolean unicode = supportsUnicode(out, charset);
         String separator = unicode ? this.separator : DEFAULT_SEPARATOR_ASCII;
 
         // "normal" table rendering, with borders
@@ -150,22 +156,29 @@ public class ShellTable {
         }
     }
 
-    private boolean supportsUnicode(PrintStream out) {
+    private boolean supportsUnicode(PrintStream out, Charset charset) {
         if (forceAscii) {
             return false;
         }
-        String encoding = getEncoding(out);
-        if (encoding == null) {
+        if (charset == null) {
+            charset = getEncoding(out);
+        }
+        if (charset == null) {
             return false;
         }
-        CharsetEncoder encoder = Charset.forName(encoding).newEncoder();
+        CharsetEncoder encoder = charset.newEncoder();
         return encoder.canEncode(separator) 
             && encoder.canEncode(SEP_HORIZONTAL)
             && encoder.canEncode(SEP_CROSS);
     }
 
-    private String getEncoding(PrintStream ps) {
+    private Charset getEncoding(PrintStream ps) {
         if (ps.getClass() == ThreadPrintStream.class) {
+            try {
+                return ((Terminal) Job.Utils.current().session().get(".jline.terminal")).encoding();
+            } catch (Throwable t) {
+                // ignore
+            }
             try {
                 ps = (PrintStream) ps.getClass().getMethod("getCurrent").invoke(ps);
             } catch (Throwable t) {
@@ -176,7 +189,7 @@ public class ShellTable {
             Field f = ps.getClass().getDeclaredField("charOut");
             f.setAccessible(true);
             OutputStreamWriter osw = (OutputStreamWriter) f.get(ps);
-            return osw.getEncoding();
+            return Charset.forName(osw.getEncoding());
         } catch (Throwable t) {
             // ignore
         }
