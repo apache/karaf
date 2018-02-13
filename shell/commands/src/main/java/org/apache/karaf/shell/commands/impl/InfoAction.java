@@ -153,18 +153,18 @@ public class InfoAction implements Action {
                     System.out.println(spaces4 + spaces4 + "Peak Usage");
                     printValue(spaces4 + spaces4 + spaces4 + "init", maxNameLen, printLong(init));
                     printValue(spaces4 + spaces4 + spaces4 + "used", maxNameLen, printLong(used));
-                    printValue(spaces4 + spaces4 + spaces4 + "committed:", maxNameLen, printLong(committed));
-                    printValue(spaces4 + spaces4 + spaces4 + "max:", maxNameLen, printLong(max));
+                    printValue(spaces4 + spaces4 + spaces4 + "committed", maxNameLen, printLong(committed));
+                    printValue(spaces4 + spaces4 + spaces4 + "max", maxNameLen, printLong(max));
 
                     init = usage.getInit();
                     used = usage.getUsed();
                     committed = usage.getCommitted();
                     max = usage.getMax();
                     System.out.println(spaces4 + spaces4 + "Current Usage");
-                    printValue(spaces4 + spaces4 + spaces4 + "init:", maxNameLen, printLong(init));
-                    printValue(spaces4 + spaces4 + spaces4 + "used:", maxNameLen, printLong(used));
-                    printValue(spaces4 + spaces4 + spaces4 + "committed:", maxNameLen, printLong(committed));
-                    printValue(spaces4 + spaces4 + spaces4 + "max:", maxNameLen, printLong(max));
+                    printValue(spaces4 + spaces4 + spaces4 + "init", maxNameLen, printLong(init));
+                    printValue(spaces4 + spaces4 + spaces4 + "used", maxNameLen, printLong(used));
+                    printValue(spaces4 + spaces4 + spaces4 + "committed", maxNameLen, printLong(committed));
+                    printValue(spaces4 + spaces4 + spaces4 + "max", maxNameLen, printLong(max));
                 }
             }
         }
