@@ -494,6 +494,7 @@ public class InstanceServiceImpl implements InstanceService {
                       " --add-opens java.base/java.net=ALL-UNNAMED" +
                       " --add-opens java.base/java.lang=ALL-UNNAMED" +
                       " --add-opens java.base/java.util=ALL-UNNAMED" +
+                      " --add-opens java.naming/javax.naming.spi=ALL-UNNAMED" +
                       " --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED" +
                       " --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED" +
                       " --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" +
