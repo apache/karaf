@@ -2347,6 +2347,7 @@
                                   --add-opens java.base/java.net=ALL-UNNAMED 
                                   --add-opens java.base/java.lang=ALL-UNNAMED
                                   --add-opens java.base/java.util=ALL-UNNAMED
+                                  --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED
                                   --add-modules java.activation,java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws</surefire.argLine>
             </properties>
             <activation>
