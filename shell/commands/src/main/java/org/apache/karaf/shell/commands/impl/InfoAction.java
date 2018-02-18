@@ -20,6 +20,9 @@ import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryType;
+import java.lang.management.MemoryUsage;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
@@ -40,6 +43,7 @@ import java.util.concurrent.Callable;
 import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.osgi.framework.Bundle;
@@ -51,17 +55,26 @@ import org.osgi.framework.FrameworkUtil;
 public class InfoAction implements Action {
 
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
+    private NumberFormat fmtDec = new DecimalFormat("###,###.##", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
+
+    private OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+
+    @Option(name="--memory-pools", aliases= {"-mp"}, description="Includes detailed information about memory pools")
+    protected boolean showMemoryPools;
 
 //    @Reference
     List<InfoProvider> infoProviders;
+
+    public InfoAction() {
+        fmtDec.setMinimumFractionDigits(2);
+    }
 
     @Override
     public Object execute() throws Exception {
         int maxNameLen;
 
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-        OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
         ThreadMXBean threads = ManagementFactory.getThreadMXBean();
         MemoryMXBean mem = ManagementFactory.getMemoryMXBean();
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
@@ -87,7 +100,16 @@ public class InfoAction implements Action {
         printValue("Pid", maxNameLen, getPid());
         printValue("Uptime", maxNameLen, printDuration(runtime.getUptime()));
         try {
-            printValue("Process CPU time", maxNameLen, printDuration(getSunOsValueAsLong(os, "getProcessCpuTime") / 1000000));
+            Class< ? > sunOS = Class.forName("com.sun.management.OperatingSystemMXBean");
+            printValue("Process CPU time", maxNameLen, printDuration(getValueAsLong(sunOS, "getProcessCpuTime") / 1000000));
+            printValue("Process CPU load", maxNameLen, fmtDec.format(getValueAsDouble(sunOS, "getProcessCpuLoad")));
+            printValue("System CPU load", maxNameLen, fmtDec.format(getValueAsDouble(sunOS, "getSystemCpuLoad")));
+        } catch (Throwable t) {
+        }
+        try {
+            Class<?> unixOS = Class.forName("com.sun.management.UnixOperatingSystemMXBean");
+            printValue("Open file descriptors", maxNameLen, printLong(getValueAsLong(unixOS, "getOpenFileDescriptorCount")));
+            printValue("Max file descriptors", maxNameLen, printLong(getValueAsLong(unixOS, "getMaxFileDescriptorCount")));
         } catch (Throwable t) {
         }
         printValue("Total compile time", maxNameLen, printDuration(ManagementFactory.getCompilationMXBean().getTotalCompilationTime()));
@@ -106,6 +128,45 @@ public class InfoAction implements Action {
         for (GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
             String val = "Name = '" + gc.getName() + "', Collections = " + gc.getCollectionCount() + ", Time = " + printDuration(gc.getCollectionTime());
             printValue("Garbage collector", maxNameLen, val);
+        }
+
+        if (showMemoryPools) {
+            List<MemoryPoolMXBean> memoryPools = ManagementFactory.getMemoryPoolMXBeans();
+            System.out.println("Memory Pools");
+            printValue("Total Memory Pools", maxNameLen, printLong(memoryPools.size()));
+            String spaces4 = "   ";
+            for (MemoryPoolMXBean pool : memoryPools)
+            {
+                String name = pool.getName();
+                MemoryType type = pool.getType();
+                printValue(spaces4 + "Pool (" + type + ")", maxNameLen, name);
+
+                // PeakUsage/CurrentUsage
+                MemoryUsage peakUsage = pool.getPeakUsage();
+                MemoryUsage usage = pool.getUsage();
+
+                if (usage != null && peakUsage != null) {
+                    long init = peakUsage.getInit();
+                    long used = peakUsage.getUsed();
+                    long committed = peakUsage.getCommitted();
+                    long max = peakUsage.getMax();
+                    System.out.println(spaces4 + spaces4 + "Peak Usage");
+                    printValue(spaces4 + spaces4 + spaces4 + "init", maxNameLen, printLong(init));
+                    printValue(spaces4 + spaces4 + spaces4 + "used", maxNameLen, printLong(used));
+                    printValue(spaces4 + spaces4 + spaces4 + "committed", maxNameLen, printLong(committed));
+                    printValue(spaces4 + spaces4 + spaces4 + "max", maxNameLen, printLong(max));
+
+                    init = usage.getInit();
+                    used = usage.getUsed();
+                    committed = usage.getCommitted();
+                    max = usage.getMax();
+                    System.out.println(spaces4 + spaces4 + "Current Usage");
+                    printValue(spaces4 + spaces4 + spaces4 + "init", maxNameLen, printLong(init));
+                    printValue(spaces4 + spaces4 + spaces4 + "used", maxNameLen, printLong(used));
+                    printValue(spaces4 + spaces4 + spaces4 + "committed", maxNameLen, printLong(committed));
+                    printValue(spaces4 + spaces4 + spaces4 + "max", maxNameLen, printLong(max));
+                }
+            }
         }
 
         System.out.println("Classes");
@@ -156,14 +217,33 @@ public class InfoAction implements Action {
     }
 
     private String getPid() {
-    	String name = ManagementFactory.getRuntimeMXBean().getName();
-    	String[] parts = name.split("@");
-		return parts[0];
-	}
+        // In Java 9 the new process API can be used:
+        // long pid = ProcessHandle.current().getPid();
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        String[] parts = name.split("@");
+        return parts[0];
+    }
 
-	private long getSunOsValueAsLong(OperatingSystemMXBean os, String name) throws Exception {
+    private long getSunOsValueAsLong(OperatingSystemMXBean os, String name) throws Exception {
         Method mth = os.getClass().getMethod(name);
         return (Long) mth.invoke(os);
+    }
+
+    private long getValueAsLong(Class<?> osImpl, String name) throws Exception {
+        if (osImpl.isInstance(os))
+        {
+            Method mth = osImpl.getMethod(name);
+            return (Long) mth.invoke(os);
+        }
+        return -1;
+    }
+
+    private double getValueAsDouble(Class<?> osImpl, String name) throws Exception {
+        if (osImpl.isInstance(os)) {
+            Method mth = osImpl.getMethod(name);
+            return (Double) mth.invoke(os);
+        }
+        return -1;
     }
 
     private String printLong(long i) {
