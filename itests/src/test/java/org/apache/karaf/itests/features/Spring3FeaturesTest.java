@@ -191,7 +191,7 @@ public class Spring3FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringSecurityFeature() throws Exception {
-        installAssertAndUninstallFeatures("spring-security");
+        installAssertAndUninstallFeature("spring-security", System.getProperty("spring.security31.version"));
     }
 
 }
