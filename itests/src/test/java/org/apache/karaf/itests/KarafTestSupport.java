@@ -218,6 +218,8 @@ public class KarafTestSupport {
             editConfigurationFilePut("etc/system.properties", "spring42.version", System.getProperty("spring42.version")),
             editConfigurationFilePut("etc/system.properties", "spring43.version", System.getProperty("spring43.version")),
             editConfigurationFilePut("etc/system.properties", "spring50.version", System.getProperty("spring50.version")),
+            editConfigurationFilePut("etc/system.properties", "spring.security31.version", System.getProperty("spring.security31.version")),
+            editConfigurationFilePut("etc/system.properties", "spring.security42.version", System.getProperty("spring.security42.version")),
             editConfigurationFilePut("etc/system.properties", "activemq.version", System.getProperty("activemq.version")),
             editConfigurationFilePut("etc/branding.properties", "welcome", ""), // No welcome banner
             editConfigurationFilePut("etc/branding-ssh.properties", "welcome", "")

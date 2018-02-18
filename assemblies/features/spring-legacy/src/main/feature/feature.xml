@@ -510,4 +510,15 @@
         <bundle start-level="30">mvn:org.springframework.security/spring-security-taglibs/${spring.security31.version}</bundle>
     </feature>
 
+    <feature name="spring-security" description="Spring Security 4.2.x support" version="${spring.security42.version}">
+        <feature>war</feature>
+        <feature version="[4,5)">spring-web</feature>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-core/${spring.security42.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-config/${spring.security42.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-web/${spring.security42.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-acl/${spring.security42.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-taglibs/${spring.security42.version}</bundle>
+    </feature>
+
 </features>
