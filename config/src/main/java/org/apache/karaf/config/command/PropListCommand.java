@@ -31,7 +31,7 @@ public class PropListCommand extends ConfigPropertyCommandSupport {
     public void propertyAction(Dictionary props) {
         for (Enumeration e = props.keys(); e.hasMoreElements(); ) {
             Object key = e.nextElement();
-            System.out.println("   " + key + " = " + props.get(key));
+            System.out.println("   " + key + " = " + displayValue(props.get(key)));
         }
     }
 
