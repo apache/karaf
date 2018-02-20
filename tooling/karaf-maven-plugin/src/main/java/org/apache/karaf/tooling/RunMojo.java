@@ -99,6 +99,10 @@ public class RunMojo extends MojoSupport {
     @Parameter(defaultValue = "false")
     private String startSsh = "false";
 
+
+    @Parameter(defaultValue="${project.build.directory}/${project.build.finalName}.jar")
+    private String bundleArchivePath;
+
     private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -141,6 +145,7 @@ public class RunMojo extends MojoSupport {
 
             Object featureService = findFeatureService(bundleContext);
             addFeatureRepositories(featureService);
+            fixProjectArtifact();
             deploy(bundleContext, featureService);
             addFeatures(featureService);
             if (keepRunning)
@@ -150,6 +155,14 @@ public class RunMojo extends MojoSupport {
             throw new MojoExecutionException("Can't start container", e);
         } finally {
             System.gc();
+        }
+    }
+
+    void fixProjectArtifact() {
+        Artifact artifact = project.getArtifact();
+
+        if(artifact.getFile() == null || !artifact.getFile().exists()) {
+            artifact.setFile(new File(bundleArchivePath));
         }
     }
 
