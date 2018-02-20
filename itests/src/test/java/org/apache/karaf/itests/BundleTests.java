@@ -54,7 +54,7 @@ public class BundleTests extends KarafTestSupport {
         assertFalse(allCapabilitiesOutput.isEmpty());
         String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities org.apache.aries.jmx.whiteboard");
         System.out.println(jmxWhiteboardBundleCapabilitiesOutput);
-        assertTrue(jmxWhiteboardBundleCapabilitiesOutput.contains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.0.0 [UNUSED]"));
+        assertContains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.2.0 [UNUSED]", jmxWhiteboardBundleCapabilitiesOutput);
     }
 
     @Test
