@@ -108,6 +108,8 @@ if "%LOCAL_CLASSPATH%" == "" goto :KARAF_CLASSPATH_EMPTY
     set CLASSPATH=%KARAF_BASE%\conf
 :KARAF_CLASSPATH_END
 
+set CLASSPATH_INITIAL=%CLASSPATH%
+
 rem Setup Karaf Home
 if exist "%KARAF_HOME%\conf\karaf-rc.cmd" call %KARAF_HOME%\conf\karaf-rc.cmd
 if exist "%HOME%\karaf-rc.cmd" call %HOME%\karaf-rc.cmd
@@ -381,6 +383,12 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         echo Updating libs...
         RD /S /Q "%KARAF_HOME%\lib"
         MOVE /Y "%KARAF_HOME%\lib.next" "%KARAF_HOME%\lib"
+
+        echo "Updating classpath..."
+        set CLASSPATH=%CLASSPATH_INITIAL%
+        pushd "%KARAF_HOME%\lib\boot"
+        for %%G in (*.jar) do call:APPEND_TO_CLASSPATH %%G
+        popd
     )
 
     SET IS_RUNNABLE=false

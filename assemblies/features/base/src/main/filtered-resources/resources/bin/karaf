@@ -48,6 +48,7 @@ realpath() {
 REALNAME=$(realpath "$0")
 DIRNAME=$(dirname "${REALNAME}")
 PROGNAME=$(basename "${REALNAME}")
+LOCAL_CLASSPATH=$CLASSPATH
 
 #
 # Load common functions
@@ -254,6 +255,10 @@ run() {
             echo "Updating libs..."
             rm -rf "${KARAF_HOME:?}/lib"
             mv -f "${KARAF_HOME:?}/lib.next" "${KARAF_HOME}/lib"
+
+            echo "Updating classpath..."
+            CLASSPATH=$LOCAL_CLASSPATH
+            setupClassPath
         fi
 
         # Ensure the log directory exists
