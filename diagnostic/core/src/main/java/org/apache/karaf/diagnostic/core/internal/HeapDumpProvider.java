@@ -52,10 +52,7 @@ public class HeapDumpProvider implements DumpProvider {
             File heapDumpFile = new File("heapdump.txt");
             in = new FileInputStream(heapDumpFile);
             out = destination.add("heapdump.txt");
-            byte[] buffer = new byte[2048];
-            while ((in.read(buffer) != -1)) {
-                out.write(buffer);
-            }
+            LogDumpProvider.copy(in, out);
             // remove the original dump
             if (heapDumpFile.exists()) {
                 heapDumpFile.delete();
