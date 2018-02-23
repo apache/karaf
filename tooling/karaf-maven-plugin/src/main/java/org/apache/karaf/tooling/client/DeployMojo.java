@@ -199,7 +199,7 @@ public class DeployMojo extends MojoSupport {
                 print.println("bundle:install -s " + location);
             }
 
-            final ClientChannel channel = session.createChannel("exec", print.toString().concat(NEW_LINE));
+            final ClientChannel channel = session.createChannel("exec", writer.toString().concat(NEW_LINE));
             channel.setIn(new ByteArrayInputStream(new byte[0]));
             final ByteArrayOutputStream sout = new ByteArrayOutputStream();
             final ByteArrayOutputStream serr = new ByteArrayOutputStream();
