@@ -269,13 +269,13 @@
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
 
-        <pax.cdi.version>1.0.0.RC2</pax.cdi.version>
+        <pax.cdi.version>1.0.0</pax.cdi.version>
         <pax.exam.version>4.11.0</pax.exam.version>
         <pax.logging.version>1.10.1</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
         <pax.swissbox.version>1.8.3</pax.swissbox.version>
         <pax.url.version>2.5.4</pax.url.version>
-        <pax.web.version>6.1.1</pax.web.version>
+        <pax.web.version>6.1.2</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.2.0</pax.jdbc.version>
         <pax.jms.version>0.1.0</pax.jms.version>
