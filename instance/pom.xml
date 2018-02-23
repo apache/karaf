@@ -188,6 +188,8 @@
                         <Private-Package>
                             org.apache.karaf.jpm,
                             org.apache.karaf.jpm.impl,
+                            org.apache.karaf.jpm.impl.unix,
+                            org.apache.karaf.jpm.impl.windows,
                             org.apache.karaf.instance.main,
                             org.apache.karaf.instance.command,
                             org.apache.karaf.instance.command.completers,
