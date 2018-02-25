@@ -87,7 +87,7 @@ public class LogDumpProvider implements DumpProvider {
      * @param outputStream Destination stream.
      * @throws IOException When IO operation fails.
      */
-    private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+    static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
         byte[] buffer = new byte[4096];
         int n = 0;
         while (-1 != (n = inputStream.read(buffer))) {
