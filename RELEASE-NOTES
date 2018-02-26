@@ -15,6 +15,26 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 3.0.9
+                    ==================
+
+  This is an update patch for Apache Karaf 3.0.x, containing bug fixes and minor dependency updates.
+
+  Changelog
+  ---------
+** Bug
+    * [KARAF-4688] - jre.properties should export all JavaFX packages for JRE 1.8+
+    * [KARAF-4993] - Unsecured access to gogo console over web
+    * [KARAF-5632] - dev:create-dump creates invalid dump file
+
+** Improvement
+    * [KARAF-4651] - Update tooling to use wagon-http to 2.10
+
+** Dependency upgrade
+    * [KARAF-4623] - Upgrade to Spring 4.1.9.RELEASE
+    * [KARAF-4890] - Upgrade to Spring 4.2.8.RELEASE
+    * [KARAF-5061] - Upgrade to ServiceMix Specs 2.8.0
+
                     Apache Karaf 3.0.8
                     ==================
 
