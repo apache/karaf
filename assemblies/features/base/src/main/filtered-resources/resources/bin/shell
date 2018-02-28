@@ -17,17 +17,32 @@
 #
 
 realpath() {
-  OURPWD=${PWD}
-  cd "$(dirname "${1}")" || exit 2
-  LINK=$(ls -l "$(basename "${1}")" | awk -F"-> " '{print $2}')
-  while [ "${LINK}" ]; do
-	  echo "link: ${LINK}" >&2
-    cd "$(dirname "${LINK}")" || exit 2
+  READLINK_EXISTS=$(command -v readlink &> /dev/null)
+  if [ -z $READLINK_EXISTS ]; then
+    OURPWD=${PWD}
+    cd "$(dirname "${1}")" || exit 2
     LINK=$(ls -l "$(basename "${1}")" | awk -F"-> " '{print $2}')
-  done
-  REALPATH="${PWD}/$(basename "${1}")"
-  cd "${OURPWD}" || exit 2
-  echo "${REALPATH}"
+    while [ "${LINK}" ]; do
+        echo "link: ${LINK}" >&2
+        cd "$(dirname "${LINK}")" || exit 2
+        LINK=$(ls -l "$(basename "${1}")" | awk -F"-> " '{print $2}')
+    done
+    REALPATH="${PWD}/$(basename "${1}")"
+    cd "${OURPWD}" || exit 2
+    echo "${REALPATH}"
+  else
+    OURPWD=${PWD}
+    cd "$(dirname "${1}")" || exit 2
+    LINK=$(readlink "$(basename "${1}")")
+    while [ "${LINK}" ]; do
+	    echo "link: ${LINK}" >&2
+        cd "$(dirname "${LINK}")" || exit 2
+        LINK=$(readlink "$(basename "${1}")")
+    done
+    REALPATH="${PWD}/$(basename "${1}")"
+    cd "${OURPWD}" || exit 2
+    echo "${REALPATH}"
+  fi
 }
 
 REALNAME=$(realpath "$0")
