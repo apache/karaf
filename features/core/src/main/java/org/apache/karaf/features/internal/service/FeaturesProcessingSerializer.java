@@ -175,10 +175,6 @@ public class FeaturesProcessingSerializer {
                             String comment = props.getProperty(tag);
                             xmlEventWriter.add(evFactory.createCharacters("\n    "));
                             xmlEventWriter.add(evFactory.createComment(" " + comment + " "));
-                            if (emptyElements.get(tag) != null && emptyElements.get(tag)) {
-                                skipClose = true;
-                                writer.write("    <" + tag + " />\n");
-                            }
                         }
                     } else if (type == XMLEvent.END_ELEMENT) {
                         skipClose = false;
@@ -186,9 +182,6 @@ public class FeaturesProcessingSerializer {
                         if (depth == 1) {
                             String tag = ev.asEndElement().getName().getLocalPart();
                             String comment = props.getProperty(tag);
-                            if (emptyElements.get(tag) != null && emptyElements.get(tag)) {
-                                skipClose = true;
-                            }
                         }
                     }
                     if (type == XMLEvent.END_ELEMENT && depth == 0) {
@@ -202,6 +195,7 @@ public class FeaturesProcessingSerializer {
                     }
                 }
             }
+            xmlEventWriter.add(evFactory.createEndDocument());
             writer.flush();
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
