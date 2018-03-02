@@ -71,6 +71,7 @@
         <module>profile</module>
         <module>event</module>
         <module>tooling</module>
+        <module>manual</module>
         <module>assemblies</module>
         <module>demos</module>
         <module>archetypes</module>
@@ -1820,7 +1821,7 @@
                         <useReleaseProfile>false</useReleaseProfile>
                         <preparationGoals>clean install</preparationGoals>
                         <goals>deploy</goals>
-                        <arguments>-Prelease,deploy,src,manual</arguments>
+                        <arguments>-Prelease,deploy,src</arguments>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                     </configuration>
                 </plugin>
@@ -2131,12 +2132,6 @@
               <invoker.skip>true</invoker.skip>
               <archetype.test.skip>true</archetype.test.skip>
             </properties>
-        </profile>
-        <profile>
-            <id>manual</id>
-            <modules>
-                <module>manual</module>
-            </modules>
         </profile>
         <profile>
             <id>rat</id>

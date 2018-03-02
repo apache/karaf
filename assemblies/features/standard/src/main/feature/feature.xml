@@ -1596,6 +1596,11 @@
         </config>
     </feature>
 
+    <feature name="documentation" description="Documentation of Karaf project in HTML" version="${project.version}">
+        <feature>war</feature>
+        <bundle>mvn:org.apache.karaf/manual/${project.version}</bundle>
+    </feature>
+
     <feature name="standard" description="Wrap feature describing all features part of a standard distribution" version="${project.version}">
         <feature>wrap</feature>
         <feature>aries-blueprint</feature>
