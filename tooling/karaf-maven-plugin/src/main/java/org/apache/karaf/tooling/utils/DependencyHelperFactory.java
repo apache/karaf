@@ -38,13 +38,13 @@ import java.util.List;
 public class DependencyHelperFactory {
 
     /**
-     * <p>Create a new {@link DependencyHelper} based on what has been found in {@link
-     * org.codehaus.plexus.PlexusContainer}</p>
+     * Create a new {@link DependencyHelper} based on what has been found in
+     * {@link org.codehaus.plexus.PlexusContainer}.
      *
      * @param container    The Maven Plexus container to use.
      * @param mavenProject The Maven project to use.
      * @param mavenSession The Maven session.
-     * @param cacheSize    Size of the artifact->file LRU cache
+     * @param cacheSize    Size of the artifact/file LRU cache
      * @param log          The log to use for the messages.
      *
      * @return The {@link DependencyHelper} depending of the Maven version used.

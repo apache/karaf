@@ -451,7 +451,6 @@ public class AssemblyMojo extends MojoSupport {
 
     /**
      * Main processing method. Most of the work involves configuring and invoking {@link Builder a profile builder}.
-     * @throws Exception
      */
     protected void doExecute() throws Exception {
         if (!startupProfiles.isEmpty() || !bootProfiles.isEmpty() || !installedProfiles.isEmpty()) {
