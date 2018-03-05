@@ -245,7 +245,6 @@
 				<configuration>
 					<instructions>
 						<Web-ContextPath>/documentation</Web-ContextPath>
-						<Private-Package>*</Private-Package>
 						<Include-Resource>target/generated-docs</Include-Resource>
 					</instructions>
 				</configuration>
