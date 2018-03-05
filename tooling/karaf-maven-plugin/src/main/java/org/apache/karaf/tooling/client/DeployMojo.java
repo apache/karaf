@@ -109,10 +109,16 @@ public class DeployMojo extends MojoSupport {
             Artifact projectArtifact = project.getArtifact();
             artifacts.add("mvn:" + projectArtifact.getGroupId() + "/" + projectArtifact.getArtifactId() + "/" + projectArtifact.getVersion());
         }
-        artifacts.addAll(artifactLocations);
+        if(artifactLocations != null) {
+            artifacts.addAll(artifactLocations);
+        } else if(!useProjectArtifact) {
+            throw new MojoExecutionException(
+                    "You can't deploy nothing. Either set serProjectArtifact to true or specify some artifactLocations."
+            );
+        }
         if (useSsh)
-            deployWithSsh(artifactLocations);
-        else deployWithJmx(artifactLocations);
+            deployWithSsh(artifacts);
+        else deployWithJmx(artifacts);
     }
 
     protected void deployWithJmx(List<String> locations) throws MojoExecutionException {
