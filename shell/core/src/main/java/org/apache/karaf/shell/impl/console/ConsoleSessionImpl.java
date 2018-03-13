@@ -177,6 +177,7 @@ public class ConsoleSessionImpl implements Session {
                     .completer((rdr, line, candidates) -> {
                         builtinCompleter.complete(rdr, line, candidates);
                         commandsCompleter.complete(rdr, line, candidates);
+			            merge(candidates);
                     })
                     .build();
 
@@ -229,6 +230,15 @@ public class ConsoleSessionImpl implements Session {
         session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
 
 
+    }
+
+    private void merge(List<Candidate> candidates) {
+        Map<String, Candidate> map = new HashMap<>();
+        for (Candidate c : candidates) {
+            map.merge(c.value(), c, (c1, c2) -> c1.descr() != null ? c1 : c2);
+        }
+        candidates.clear();
+        candidates.addAll(map.values());
     }
 
     /**
