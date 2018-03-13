@@ -66,14 +66,7 @@ import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.support.completers.UriCompleter;
 import org.apache.karaf.util.filesstream.FilesStream;
 import org.jline.builtins.Completers;
-import org.jline.reader.Completer;
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.MaskingCallback;
-import org.jline.reader.ParsedLine;
-import org.jline.reader.SyntaxError;
-import org.jline.reader.UserInterruptException;
+import org.jline.reader.*;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.osgi.service.event.EventAdmin;
@@ -166,6 +159,7 @@ public class ConsoleSessionImpl implements Session {
         Completer completer =  (rdr, line, candidates) -> {
             builtinCompleter.complete(rdr, line, candidates);
             commandsCompleter.complete(rdr, line, candidates);
+            merge(candidates);
         };
 
         // Masking
@@ -235,6 +229,15 @@ public class ConsoleSessionImpl implements Session {
         session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
 
 
+    }
+
+    private void merge(List<Candidate> candidates) {
+        Map<String, Candidate> map = new HashMap<>();
+        for (Candidate c : candidates) {
+            map.merge(c.value(), c, (c1, c2) -> c1.descr() != null ? c1 : c2);
+        }
+        candidates.clear();
+        candidates.addAll(map.values());
     }
 
     private Completer createBuiltinCompleter() {
