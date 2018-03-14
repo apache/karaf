@@ -85,6 +85,7 @@ public interface BundleInstallSupport {
     class FrameworkInfo {
         public Bundle ourBundle;
         public Bundle systemBundle;
+        public Bundle cmBundle;
         public int initialBundleStartLevel;
         public int currentStartLevel;
         public Map<Long, Bundle> bundles = new HashMap<>();

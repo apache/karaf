@@ -37,7 +37,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
     private final BundleContext ctx;
     private final String className;
     private final AtomicReference<T> service = new AtomicReference<>();
-    private final AtomicReference<ServiceReference> ref = new AtomicReference<>();
+    private final AtomicReference<ServiceReference<T>> ref = new AtomicReference<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
     private final BiConsumer<T, T> serviceListener;
     private final String filterString;
@@ -88,7 +88,8 @@ public final class SingleServiceTracker<T> implements ServiceListener {
     public void serviceChanged(ServiceEvent event) {
         if (open.get()) {
             if (event.getType() == ServiceEvent.UNREGISTERING) {
-                ServiceReference deadRef = event.getServiceReference();
+                @SuppressWarnings("unchecked")
+                ServiceReference<T> deadRef = (ServiceReference) event.getServiceReference();
                 if (deadRef.equals(ref.get())) {
                     findMatchingReference(deadRef);
                 }
@@ -98,22 +99,23 @@ public final class SingleServiceTracker<T> implements ServiceListener {
         }
     }
 
-    private void findMatchingReference(ServiceReference original) {
+    private void findMatchingReference(ServiceReference<T> original) {
         try {
             boolean clear = true;
-            ServiceReference[] refs = ctx.getServiceReferences(className, filterString);
+            ServiceReference<?>[] refs = ctx.getServiceReferences(className, filterString);
             if (refs != null && refs.length > 0) {
                 if (refs.length > 1) {
                     Arrays.sort(refs);
                 }
                 @SuppressWarnings("unchecked")
-                T service = (T) ctx.getService(refs[0]);
+                ServiceReference<T> r = (ServiceReference) refs[0];
+                T service = ctx.getService(r);
                 if (service != null) {
                     clear = false;
 
                     // We do the unget out of the lock so we don't exit this class while holding a lock.
-                    if (!update(original, refs[0], service)) {
-                        ctx.ungetService(refs[0]);
+                    if (!update(original, r, service)) {
+                        ctx.ungetService(r);
                     }
                 }
             } else if (original == null) {
@@ -128,7 +130,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
         }
     }
 
-    private boolean update(ServiceReference deadRef, ServiceReference newRef, T service) {
+    private boolean update(ServiceReference<T> deadRef, ServiceReference<T> newRef, T service) {
         boolean result = false;
         T prev = null;
 
