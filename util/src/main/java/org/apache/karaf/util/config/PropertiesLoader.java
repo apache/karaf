@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
+
+import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
 import java.util.StringTokenizer;
 
@@ -108,16 +110,17 @@ public class PropertiesLoader {
         	// Ignore
         	return;
         }
-        
+
+        InterpolationHelper.SubstitutionCallback callback = new InterpolationHelper.BundleContextSubstitutionCallback(null);
         for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             if (name.startsWith(OVERRIDE_PREFIX)) {
                 String overrideName = name.substring(OVERRIDE_PREFIX.length());
                 String value = props.getProperty(name);
-                System.setProperty(overrideName, substVars(value, name, null, props));
+                System.setProperty(overrideName, substVars(value, name, null, props, callback));
             } else {
                 String value = System.getProperty(name, props.getProperty(name));
-                System.setProperty(name, substVars(value, name, null, props));
+                System.setProperty(name, substVars(value, name, null, props, callback));
             }
         }
     }
