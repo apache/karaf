@@ -79,6 +79,7 @@ import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.Resolver;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,6 +177,8 @@ public class Deployer {
 
         /** A {@link Bundle} providing {@link FeaturesService} */
         public Bundle serviceBundle;
+        /** A {@link Bundle} providing {@link org.osgi.service.cm.ConfigurationAdmin} service */
+        public Bundle configadminBundle;
         /** {@link org.osgi.framework.startlevel.FrameworkStartLevel#getInitialBundleStartLevel()} */
         public int initialBundleStartLevel;
         /** {@link org.osgi.framework.startlevel.FrameworkStartLevel#getStartLevel()} */
@@ -662,6 +665,7 @@ public class Deployer {
         // #10: send events
         //
         Bundle serviceBundle = dstate.serviceBundle;
+        Bundle configadminBundle = dstate.configadminBundle;
         //
         // Handle updates on the FeaturesService bundle
         //
@@ -727,6 +731,7 @@ public class Deployer {
         if (!noRefresh) {
             Set<Bundle> toRefreshToStopEarly = new HashSet<>(toRefresh.keySet());
             toRefreshToStopEarly.remove(dstate.serviceBundle);
+            toRefreshToStopEarly.remove(dstate.configadminBundle);
             toStop.addAll(toRefreshToStopEarly);
             toStart.addAll(toRefreshToStopEarly);
         }

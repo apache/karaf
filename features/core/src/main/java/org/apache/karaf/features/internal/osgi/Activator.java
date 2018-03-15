@@ -152,6 +152,7 @@ public class Activator extends BaseActivator {
                     bundleContext.getBundle(),
                     bundleContext,
                     systemBundleContext,
+                    getTrackedServiceRef(ConfigurationAdmin.class).getBundle(),
                     configInstaller,
                     dg);
         register(RegionDigraphPersistence.class, () -> installSupport.saveDigraph());
@@ -326,6 +327,7 @@ public class Activator extends BaseActivator {
         if (installSupport != null) {
             installSupport.unregister();
             installSupport.saveDigraph();
+            installSupport = null;
         }
     }
 

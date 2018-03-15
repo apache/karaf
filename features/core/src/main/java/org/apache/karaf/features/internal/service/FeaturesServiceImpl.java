@@ -983,6 +983,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         dstate.state = state;
         FrameworkInfo info = installSupport.getInfo();
         dstate.serviceBundle = info.ourBundle;
+        dstate.configadminBundle = info.cmBundle;
         dstate.initialBundleStartLevel = info.initialBundleStartLevel;
         dstate.currentStartLevel = info.currentStartLevel;
         dstate.bundles = info.bundles;
@@ -1030,6 +1031,10 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                     } else {
                         throw new Exception("Deployment aborted due to loop in missing prerequisites: " + e.getMissing());
                     }
+                } catch (Throwable t) {
+                    // Print stack trace to stdout, there may be no log anymore
+                    t.printStackTrace();
+                    throw t;
                 }
             }
         }

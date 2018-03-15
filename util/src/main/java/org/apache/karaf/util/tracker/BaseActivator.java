@@ -37,11 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -336,6 +332,14 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
             throw new IllegalStateException("Service not tracked for class " + clazz);
         }
         return clazz.cast(tracker.getService());
+    }
+
+    protected <T> ServiceReference<T> getTrackedServiceRef(Class<T> clazz) {
+        SingleServiceTracker tracker = trackers.get(clazz.getName());
+        if (tracker == null) {
+            throw new IllegalStateException("Service not tracked for class " + clazz);
+        }
+        return tracker.getServiceReference();
     }
 
     /**

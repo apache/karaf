@@ -68,6 +68,7 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     
     private final RegionDigraph digraph;
     private final Bundle ourBundle;
+    private final Bundle cmBundle;
     private final BundleContext ourBundleContext;
     private final FeatureConfigInstaller configInstaller;
     
@@ -85,11 +86,13 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     public BundleInstallSupportImpl(Bundle ourBundle,
                    BundleContext ourBundleContext,
                    BundleContext systemBundleContext,
+                   Bundle cmBundle,
                    FeatureConfigInstaller configInstaller,
                    RegionDigraph digraph) {
         this.ourBundle = ourBundle;
         this.ourBundleContext = ourBundleContext;
         this.systemBundleContext = systemBundleContext;
+        this.cmBundle = cmBundle;
         this.configInstaller = configInstaller;
         this.digraph = digraph;
         if (systemBundleContext != null) {
@@ -102,6 +105,7 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     public void unregister() {
         if (hookRegistration != null) {
             hookRegistration.unregister();
+            hookRegistration = null;
         }
     }
     
@@ -315,6 +319,7 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         for (Bundle bundle : systemBundleContext.getBundles()) {
             info.bundles.put(bundle.getBundleId(), bundle);
         }
+        info.cmBundle = cmBundle;
         info.systemBundle = info.bundles.get(0L);
         return info;
     }
