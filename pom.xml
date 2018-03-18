@@ -201,6 +201,7 @@
         <felix.utils.version>1.10.4</felix.utils.version>
         <felix.webconsole.version>4.3.4</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
+        <felix.memoryusage.webconsole.plugin.version>1.0.8</felix.memoryusage.webconsole.plugin.version>
         <felix.metatype.version>1.1.6</felix.metatype.version>
         <felix.eventadmin.version>1.4.10</felix.eventadmin.version>
         <felix.eventadmin.webconsole.plugin.version>1.1.8</felix.eventadmin.webconsole.plugin.version>
@@ -915,6 +916,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.webconsole.plugins.ds</artifactId>
                 <version>${felix.scr.webconsole.plugin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
+                <version>${felix.memoryusage.webconsole.plugin.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
