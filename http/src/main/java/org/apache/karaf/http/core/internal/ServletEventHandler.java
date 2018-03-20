@@ -17,9 +17,9 @@
 package org.apache.karaf.http.core.internal;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.ops4j.pax.web.service.spi.ServletEvent;
@@ -37,7 +37,7 @@ public class ServletEventHandler implements ServletListener {
 	/**
 	 * @return the servletEvents
 	 */
-	public synchronized Collection<ServletEvent> getServletEvents() {
+	public synchronized List<ServletEvent> getServletEvents() {
 		return new ArrayList<>(servletEvents.values());
 	}
 
