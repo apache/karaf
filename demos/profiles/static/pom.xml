@@ -133,6 +133,9 @@
                         <profile>example-loanbroker-broker</profile>
                         <profile>activemq-broker</profile>
                     </startupProfiles>
+                    <blacklistedFeatures>
+                        <feature>spring/[4.0,4.2)</feature>
+                    </blacklistedFeatures>
                 </configuration>
             </plugin>
 
