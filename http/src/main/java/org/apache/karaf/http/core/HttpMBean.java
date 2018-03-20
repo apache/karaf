@@ -32,4 +32,19 @@ public interface HttpMBean {
      */
     TabularData getServlets() throws MBeanException;
 
+    /**
+     * List configured HTTP proxies.
+     */
+    TabularData getProxies() throws MBeanException;
+
+    /**
+     * Add a new HTTP proxy using URL, proxyTo and prefix.
+     */
+    void addProxy(String url, String proxyTo, String prefix) throws MBeanException;
+
+    /**
+     * Remove an existing HTTP proxy identified by URL.
+     */
+    void removeProxy(String url) throws MBeanException;
+
 }

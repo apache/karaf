@@ -44,6 +44,11 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
@@ -63,6 +68,11 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-proxy</artifactId>
+            <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
@@ -98,7 +108,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.http.core,
+                            org.apache.karaf.http.core
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.http.command,
@@ -106,6 +116,7 @@
                             org.apache.karaf.http.core.internal.osgi,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
+                            org.eclipse.jetty.proxy
                         </Private-Package>
                     </instructions>
                 </configuration>

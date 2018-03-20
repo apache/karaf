@@ -14,24 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.http.core.internal;
+package org.apache.karaf.http.core;
 
-import java.lang.management.ManagementFactory;
+public class ProxyInfo {
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.openmbean.TabularData;
+    private String url;
+    private String prefix;
+    private String proxyTo;
 
-import org.junit.Test;
-
-public class HttpMBeanImplTest {
-
-    @Test
-    public void testRegisterMBean() throws Exception {
-        HttpMBeanImpl httpMBean = new HttpMBeanImpl(new ServletServiceImpl(new ServletEventHandler()), new ProxyServiceImpl(null));
-        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
-        mbeanServer.registerMBean(httpMBean, new ObjectName("org.apache.karaf:type=http,name=root"));
-        
-        TabularData data = httpMBean.getServlets();
+    public String getUrl() {
+        return url;
     }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public String getProxyTo() {
+        return proxyTo;
+    }
+
+    public void setProxyTo(String proxyTo) {
+        this.proxyTo = proxyTo;
+    }
+
 }

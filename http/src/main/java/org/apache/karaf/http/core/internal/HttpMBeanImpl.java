@@ -17,6 +17,7 @@
 package org.apache.karaf.http.core.internal;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.management.MBeanException;
@@ -31,21 +32,23 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
-import org.apache.karaf.http.core.HttpMBean;
-import org.apache.karaf.http.core.ServletInfo;
-import org.apache.karaf.http.core.ServletService;
+import org.apache.karaf.http.core.*;
 
 /**
  * Implementation of the HTTP MBean.
  */
 public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
-    private ServletService servletService;
 
-    public HttpMBeanImpl(ServletService servletService) throws NotCompliantMBeanException {
+    private ServletService servletService;
+    private ProxyService proxyService;
+
+    public HttpMBeanImpl(ServletService servletService, ProxyService proxyService) throws NotCompliantMBeanException {
         super(HttpMBean.class);
         this.servletService = servletService;
+        this.proxyService = proxyService;
     }
 
+    @Override
     public TabularData getServlets() throws MBeanException {
         try {
             CompositeType servletType = new CompositeType("Servlet", "HTTP Servlet",
@@ -56,14 +59,52 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
             TabularData table = new TabularDataSupport(tableType);
             List<ServletInfo> servletInfos = servletService.getServlets();
             for (ServletInfo info : servletInfos) {
-            
                 CompositeData data = new CompositeDataSupport(servletType,
                         new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
                         new Object[]{info.getBundleId(), info.getClassName(), info.getName(), info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls())});
                 table.put(data);
-            
             }
             return table;
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public TabularData getProxies() throws MBeanException {
+        try {
+            CompositeType proxyType = new CompositeType("Proxy", "HTTP Proxy",
+                    new String[]{"URL", "ProxyTo", "Prefix"},
+                    new String[]{"Proxy URL", "Target location", "Proxy prefix"},
+                    new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
+            TabularType tableType = new TabularType("Proxies", "Table of all HTTP proxies", proxyType, new String[]{"URL"});
+            TabularData table = new TabularDataSupport(tableType);
+            Collection<ProxyInfo> proxyInfos = proxyService.getProxies();
+            for (ProxyInfo info : proxyInfos) {
+                CompositeData data = new CompositeDataSupport(proxyType,
+                        new String[]{"URL", "ProxyTo", "Prefix"},
+                        new Object[]{info.getUrl(), info.getProxyTo(), info.getPrefix()});
+                table.put(data);
+            }
+            return table;
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void addProxy(String url, String proxyTo, String prefix) throws MBeanException {
+        try {
+            proxyService.addProxy(url, proxyTo, prefix);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void removeProxy(String url) throws MBeanException {
+        try {
+            proxyService.removeProxy(url);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
