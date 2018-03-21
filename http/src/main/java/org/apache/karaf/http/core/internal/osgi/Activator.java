@@ -75,7 +75,10 @@ public class Activator extends BaseActivator {
 
     @Override
     protected void doStop() {
-        bundleContext.removeBundleListener(listener);
+        if (listener != null) {
+            bundleContext.removeBundleListener(listener);
+            listener = null;
+        }
         super.doStop();
     }
 }
