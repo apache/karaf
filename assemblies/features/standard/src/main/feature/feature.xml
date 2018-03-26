@@ -120,7 +120,7 @@
             openjpa=mvn:org.apache.openjpa/openjpa-features/RELEASE/xml/features
             artemis=mvn:org.apache.activemq/artemis-features/RELEASE/xml/features
             brave=mvn:io.zipkin.brave.karaf/brave-features/RELEASE/xml/features
-						sling=mvn:org.apache.sling/org.apache.sling.karaf-features/RELEASE/xml/features
+			sling=mvn:org.apache.sling/org.apache.sling.karaf-features/RELEASE/xml/features
         </config>
         <conditional>
             <condition>shell</condition>
@@ -353,10 +353,17 @@
             # moduli-url = external moduli-url users wanna use
 
         </config>
-        <bundle dependency="true" start-level="30">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.jline/jline/${jline.version}</bundle>
+        <feature>jline</feature>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/${project.version}</bundle>
+    </feature>
+
+    <feature name="jline" version="${jline.version}" hidden="true">
+        <bundle dependency="true" start-level="30">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
+        <bundle start-level="30">mvn:org.jline/jline-terminal/${jline.version}</bundle>
+        <bundle start-level="30">mvn:org.jline/jline-terminal-jansi/${jline.version}</bundle>
+        <bundle start-level="30">mvn:org.jline/jline-reader/${jline.version}</bundle>
+        <bundle start-level="30">mvn:org.jline/jline-builtins/${jline.version}</bundle>
     </feature>
 
     <feature name="shell-compat" description="Karaf Shell Compatibility" version="${project.version}">
