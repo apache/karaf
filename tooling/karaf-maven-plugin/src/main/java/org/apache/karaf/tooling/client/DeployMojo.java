@@ -113,8 +113,8 @@ public class DeployMojo extends MojoSupport {
             artifacts.addAll(artifactLocations);
         }
         if (useSsh)
-            deployWithSsh(artifactLocations);
-        else deployWithJmx(artifactLocations);
+            deployWithSsh(artifacts);
+        else deployWithJmx(artifacts);
     }
 
     protected void deployWithJmx(List<String> locations) throws MojoExecutionException {
@@ -226,6 +226,7 @@ public class DeployMojo extends MojoSupport {
             throw e;
         }
         catch (Throwable t) {
+            t.printStackTrace();
             throw new MojoExecutionException(t, t.getMessage(), t.toString());
         }
         finally {
