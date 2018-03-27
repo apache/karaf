@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+
+        Licensed to the Apache Software Foundation (ASF) under one or more
+        contributor license agreements.  See the NOTICE file distributed with
+        this work for additional information regarding copyright ownership.
+        The ASF licenses this file to You under the Apache License, Version 2.0
+        (the "License"); you may not use this file except in compliance with
+        the License.  You may obtain a copy of the License at
+
+           http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    -->
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache.karaf.specs</groupId>
+        <artifactId>specs</artifactId>
+        <version>4.2.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>org.apache.karaf.specs.java.xml</artifactId>
+    <packaging>jar</packaging>
+    <name>Apache Karaf :: Specs :: Java Xml</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-stax-api_1.2_spec</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.specs</groupId>
+            <artifactId>org.apache.karaf.specs.locator</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <inherited>true</inherited>
+                <configuration>
+                    <!--<compilerArgument>-Xbootclasspath/p:${settings.localRepository}/xml-apis/xml-apis/1.4.01/xml-apis-1.4.01.jar</compilerArgument>-->
+                </configuration>
+            </plugin>
+            <!--
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Description>${project.description}</Bundle-Description>
+                        <Export-Package>
+                            !org.w3c.dom.css,
+                            !org.w3c.dom.html,
+                            !org.w3c.dom.stylesheets,
+                            !org.w3c.dom.xpath,
+                            javax.xml.stream*;version=1.2;-split-package:=merge-first;-noimport:=true,
+                            javax.xml*;version=1.4;-split-package:=merge-first;-noimport:=true,
+                            org.w3c.dom*;version=1.0;-split-package:=merge-first;-noimport:=true,
+                            org.xml.sax*;version=2.0.2;-split-package:=merge-first;-noimport:=true,
+                        </Export-Package>
+                        <Import-Package>
+                            *
+                        </Import-Package>
+                    </instructions>
+                    <unpackBundle>true</unpackBundle>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.apache.servicemix.specs:org.apache.servicemix.specs.locator</include>
+                                    <include>xml-apis:xml-apis</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>${project.groupId}:${project.artifactId}</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/servicemix/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>xml-apis:xml-apis</artifact>
+                                    <excludes>
+                                        <exclude>javax/**</exclude>
+                                        <exclude>org/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <createSourcesJar>${createSourcesJar}</createSourcesJar>
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+-->
+        </plugins>
+    </build>
+</project>

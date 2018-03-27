@@ -98,7 +98,7 @@ public class BootFeaturesInstaller {
             }
             featuresService.bootDone();
             publishBootFinished();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // Special handling in case the bundle has been refreshed.
             // In such a case, simply exits without logging any exception
             // as the restart should cause the feature service to finish

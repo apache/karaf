@@ -398,6 +398,10 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         for /f tokens^=2-5^ delims^=.-_^" %%j in ('"%JAVA%" -fullversion 2^>^&1') do set "JAVA_VERSION=%%k%"
         if "%JAVA_VERSION%" GTR 8 (
             "%JAVA%" %JAVA_OPTS% %OPTS% ^
+                --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,java.xml.ws,ALL-UNNAMED ^
+                --patch-module java.base=lib/endorsed/org.apache.karaf.specs.locator-@@project.version@@.jar ^
+                --patch-module java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-@@project.version@@.jar ^
+                --patch-module java.xml.ws=lib/endorsed/org.apache.karaf.specs.java.xml.ws-@@project.version@@.jar ^
                 --add-opens java.base/java.security=ALL-UNNAMED ^
                 --add-opens java.base/java.net=ALL-UNNAMED ^
                 --add-opens java.base/java.lang=ALL-UNNAMED ^
