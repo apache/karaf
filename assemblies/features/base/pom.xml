@@ -38,6 +38,26 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.karaf.specs</groupId>
+            <artifactId>org.apache.karaf.specs.locator</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.specs</groupId>
+            <artifactId>org.apache.karaf.specs.java.xml</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.specs</groupId>
+            <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.specs</groupId>
+            <artifactId>org.apache.karaf.specs.activator</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
             <scope>runtime</scope>
@@ -114,6 +134,26 @@
                         </goals>
                         <configuration>
                             <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf.specs</groupId>
+                                    <artifactId>org.apache.karaf.specs.locator</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf.specs</groupId>
+                                    <artifactId>org.apache.karaf.specs.java.xml</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf.specs</groupId>
+                                    <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf.specs</groupId>
+                                    <artifactId>org.apache.karaf.specs.activator</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.main</artifactId>

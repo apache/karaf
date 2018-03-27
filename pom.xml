@@ -72,6 +72,7 @@
         <module>event</module>
         <module>tooling</module>
         <module>manual</module>
+        <module>specs</module>
         <module>assemblies</module>
         <module>demos</module>
         <module>archetypes</module>
@@ -399,6 +400,26 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>org.apache.karaf.client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.specs</groupId>
+                <artifactId>org.apache.karaf.specs.locator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.specs</groupId>
+                <artifactId>org.apache.karaf.specs.activator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.specs</groupId>
+                <artifactId>org.apache.karaf.specs.java.xml</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.specs</groupId>
+                <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
