@@ -1068,9 +1068,13 @@ public class Builder {
         LOGGER.info("Writing configurations");
         for (Map.Entry<String, byte[]> config : overallEffective.getFileConfigurations().entrySet()) {
             Path configFile = etcDirectory.resolve(config.getKey());
-            LOGGER.info("   adding config file: {}", homeDirectory.relativize(configFile));
-            Files.createDirectories(configFile.getParent());
-            Files.write(configFile, config.getValue());
+            if (Files.exists(configFile)) {
+                LOGGER.info("   not changing existing config file: {}", homeDirectory.relativize(configFile));
+            } else {
+                LOGGER.info("   adding config file: {}", homeDirectory.relativize(configFile));
+                Files.createDirectories(configFile.getParent());
+                Files.write(configFile, config.getValue());
+            }
         }
 
         // 'improve' configuration files.

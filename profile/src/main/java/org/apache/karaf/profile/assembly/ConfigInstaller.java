@@ -19,6 +19,7 @@ package org.apache.karaf.profile.assembly;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -60,18 +61,35 @@ public class ConfigInstaller {
                 installer.installArtifact(configFile.getLocation().trim());
             }
             // Extract configs
+            Path homeDirectory = etcDirectory.getParent();
             for (Config config : content.getConfig()) {
                 if (pidMatching(config.getName())) {
                     Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
-                    LOGGER.info("      adding config file: {}", configFile);
+                    if (!config.isAppend() && Files.exists(configFile)) {
+                        LOGGER.info("      not changing existing config file: {}", homeDirectory.relativize(configFile));
+                        continue;
+                    }
                     if (config.isExternal()) {
                         downloader.download(config.getValue().trim(), provider -> {
                             synchronized (provider) {
-                                Files.copy(provider.getFile().toPath(), configFile, StandardCopyOption.REPLACE_EXISTING);
+                                if (config.isAppend()) {
+                                    byte[] data = Files.readAllBytes(provider.getFile().toPath());
+                                    LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
+                                    Files.write(configFile, data, StandardOpenOption.APPEND);
+                                } else {
+                                    LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                                    Files.copy(provider.getFile().toPath(), configFile, StandardCopyOption.REPLACE_EXISTING);
+                                }
                             }
                         });
                     } else {
-                        Files.write(configFile, config.getValue().getBytes());
+                        if (config.isAppend()) {
+                            LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
+                            Files.write(configFile, config.getValue().getBytes(), StandardOpenOption.APPEND);
+                        } else {
+                            LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                            Files.write(configFile, config.getValue().getBytes());
+                        }
                     }
                 }
             }

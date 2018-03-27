@@ -154,45 +154,56 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
         // Install
         Downloader downloader = manager.createDownloader();
         for (Config config : ((Feature) feature).getConfig()) {
+            Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
+            if (Files.exists(configFile) && !config.isAppend()) {
+                LOGGER.info("      not changing existing config file: {}", homeDirectory.relativize(configFile));
+                continue;
+            }
             if (config.isExternal()) {
                 downloader.download(config.getValue().trim(), provider -> {
                     Path input = provider.getFile().toPath();
                     byte[] data = Files.readAllBytes(input);
-                    Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
-                    LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
-                    if (!Files.exists(configFile)) {
-                        Files.write(configFile, data);
-                    } else if (config.isAppend()) {
+                    if (config.isAppend()) {
+                        LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
                         Files.write(configFile, data, StandardOpenOption.APPEND);
+                    } else {
+                        LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                        Files.write(configFile, data);
                     }
                 });
             } else {
                 byte[] data = config.getValue().getBytes();
-                Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
-                LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
-                if (!Files.exists(configFile)) {
-                    Files.write(configFile, data);
-                } else if (config.isAppend()) {
+                if (config.isAppend()) {
+                    LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
                     Files.write(configFile, data, StandardOpenOption.APPEND);
+                } else {
+                    LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                    Files.write(configFile, data);
                 }
             }
         }
         for (final ConfigFile configFile : ((Feature) feature).getConfigfile()) {
-            downloader.download(configFile.getLocation(), provider -> {
-                Path input = provider.getFile().toPath();
-                String path = configFile.getFinalname();
-                if (path.startsWith("/")) {
-                    path = path.substring(1);
-                }
-                path = substFinalName(path);
-                Path output = homeDirectory.resolve(path);
-                LOGGER.info("      adding config file: {}", path);
-                Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
-            });
+            String path = configFile.getFinalname();
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            path = substFinalName(path);
+            final Path output = homeDirectory.resolve(path);
+            final String finalPath = path;
+            if (configFile.isOverride() || !Files.exists(output)) {
+                downloader.download(configFile.getLocation(), provider -> {
+                    Path input = provider.getFile().toPath();
+                    if (configFile.isOverride()) {
+                        LOGGER.info("      overwriting config file: {}", finalPath);
+                    } else {
+                        LOGGER.info("      adding config file: {}", finalPath);
+                    }
+                    Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
+                });
+            }
         }
     }
 
-    
     @Override
     public void installLibraries(org.apache.karaf.features.Feature feature) throws IOException {
         assertNotBlacklisted(feature);
