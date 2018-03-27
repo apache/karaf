@@ -230,7 +230,7 @@
         <jansi.version>1.11</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
         <jline.version>2.13</jline.version>
-        <jledit.version>0.2.1</jledit.version>
+        <jledit.version>0.2.2</jledit.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
         <maven.version>2.0.9</maven.version>
