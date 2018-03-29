@@ -26,6 +26,7 @@ function renderView() {
     renderStatusLine();
     renderTable( "HTTP Contexts", "context_table", ["ID", "Servlet", "Name", "State", "Alias", "urls"] );
     renderTable( "Web Contexts", "webctxt_table", ["ID", "BundleState", "Web Context", "State"] );
+    renderTable(" HTTP Proxies", "proxy_table", ["URL", "ProxyTo"]);
     renderStatusLine();
 }    
     
