@@ -300,29 +300,28 @@ The `http:proxies` command list the configured HTTP proxies:
 
 ----
 karaf@root()> http:proxies
-
+karaf@root()> http:proxies
+URL         │ ProxyTo
+────────────┼─────────────────────────────────────
+/webconsole │ http://localhost:8181/system/console
 ----
 
 ===== `http:proxy-add`
 
-The `http:proxy-add` registers a new HTTP proxy:
+The `http:proxy-add` registers a new HTTP proxy. For instance, you can proxy the Karaf WebConsole on another URL of your choice using:
 
 ----
-karaf@root()> http:proxy-add /my-proxy http://host:port/xxxx
+karaf@root()> http:proxy-add /webconsole http://localhost:8181/system/console
 ----
 
-Optionally, you can provide a prefix on the HTTP proxy:
-
-----
-karaf@root()> http:proxy-add -p /foo /my-proxy http://host:port/xxx
-----
+Karaf HTTP Proxy can proxy any URL, like a backend running on Docker or a remote URL.
 
 ===== `http:proxy-remove`
 
 The `http:proxy-remove` removes an existing HTTP proxy:
 
 ----
-karaf@root()> http:proxy-remove /my-proxy
+karaf@root()> http:proxy-remove /webconsole
 ----
 
 ===== JMX HttpMBean
