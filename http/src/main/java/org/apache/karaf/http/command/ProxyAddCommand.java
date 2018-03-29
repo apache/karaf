@@ -37,15 +37,9 @@ public class ProxyAddCommand implements Action {
     @Argument(index = 1, name = "proxyTo", description = "HTTP location to proxy on the prefix", required = true, multiValued = false)
     String proxyTo;
 
-    @Option(name = "-p", aliases = "--prefix", description = "HTTP proxy prefix", required = false, multiValued = false)
-    String prefix;
-
     @Override
     public Object execute() throws Exception {
-        if (prefix == null) {
-            prefix = "/";
-        }
-        proxyService.addProxy(url, prefix, proxyTo);
+        proxyService.addProxy(url, proxyTo);
         return null;
     }
 

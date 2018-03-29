@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.http.core.internal;
 
-import org.apache.karaf.http.core.ProxyInfo;
 import org.apache.karaf.http.core.ProxyService;
-import org.eclipse.jetty.proxy.ProxyServlet;
 import org.osgi.service.http.HttpService;
 
 import java.util.*;
@@ -26,7 +24,7 @@ import java.util.*;
 public class ProxyServiceImpl implements ProxyService {
 
     private HttpService httpService;
-    private Map<String, ProxyInfo> proxies;
+    private Map<String, String> proxies;
 
     public ProxyServiceImpl(HttpService httpService) {
         this.httpService = httpService;
@@ -34,21 +32,16 @@ public class ProxyServiceImpl implements ProxyService {
     }
 
     @Override
-    public Collection<ProxyInfo> getProxies() {
-        return proxies.values();
+    public Map<String, String> getProxies() {
+        return proxies;
     }
 
     @Override
-    public void addProxy(String url, String prefix, String proxyTo) throws Exception {
-        Dictionary<String, String> proxyConfig = new Hashtable<>();
-        proxyConfig.put("prefix", prefix);
-        proxyConfig.put("proxyTo", proxyTo);
-        httpService.registerServlet(url, new ProxyServlet.Transparent(), proxyConfig, null);
-        ProxyInfo proxyInfo = new ProxyInfo();
-        proxyInfo.setPrefix(prefix);
-        proxyInfo.setUrl(url);
-        proxyInfo.setProxyTo(proxyTo);
-        proxies.put(url, proxyInfo);
+    public void addProxy(String url, String proxyTo) throws Exception {
+        ProxyServlet proxyServlet = new ProxyServlet();
+        proxyServlet.setProxyTo(proxyTo);
+        httpService.registerServlet(url, proxyServlet, new Hashtable(), null);
+        proxies.put(url, proxyTo);
     }
 
     @Override

@@ -19,6 +19,7 @@ package org.apache.karaf.http.core.internal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -71,31 +72,14 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
     }
 
     @Override
-    public TabularData getProxies() throws MBeanException {
-        try {
-            CompositeType proxyType = new CompositeType("Proxy", "HTTP Proxy",
-                    new String[]{"URL", "ProxyTo", "Prefix"},
-                    new String[]{"Proxy URL", "Target location", "Proxy prefix"},
-                    new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("Proxies", "Table of all HTTP proxies", proxyType, new String[]{"URL"});
-            TabularData table = new TabularDataSupport(tableType);
-            Collection<ProxyInfo> proxyInfos = proxyService.getProxies();
-            for (ProxyInfo info : proxyInfos) {
-                CompositeData data = new CompositeDataSupport(proxyType,
-                        new String[]{"URL", "ProxyTo", "Prefix"},
-                        new Object[]{info.getUrl(), info.getProxyTo(), info.getPrefix()});
-                table.put(data);
-            }
-            return table;
-        } catch (Exception e) {
-            throw new MBeanException(null, e.toString());
-        }
+    public Map<String, String> getProxies() throws MBeanException {
+        return proxyService.getProxies();
     }
 
     @Override
-    public void addProxy(String url, String proxyTo, String prefix) throws MBeanException {
+    public void addProxy(String url, String proxyTo) throws MBeanException {
         try {
-            proxyService.addProxy(url, proxyTo, prefix);
+            proxyService.addProxy(url, proxyTo);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }

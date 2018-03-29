@@ -18,6 +18,7 @@ package org.apache.karaf.http.core;
 
 import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
+import java.util.Map;
 
 /**
  * HTTP MBean.
@@ -35,12 +36,12 @@ public interface HttpMBean {
     /**
      * List configured HTTP proxies.
      */
-    TabularData getProxies() throws MBeanException;
+    Map<String, String> getProxies() throws MBeanException;
 
     /**
      * Add a new HTTP proxy using URL, proxyTo and prefix.
      */
-    void addProxy(String url, String proxyTo, String prefix) throws MBeanException;
+    void addProxy(String url, String proxyTo) throws MBeanException;
 
     /**
      * Remove an existing HTTP proxy identified by URL.

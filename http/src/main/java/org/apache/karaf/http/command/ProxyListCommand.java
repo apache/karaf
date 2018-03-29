@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.http.command;
 
-import org.apache.karaf.http.core.ProxyInfo;
 import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -36,9 +35,8 @@ public class ProxyListCommand implements Action {
         ShellTable table = new ShellTable();
         table.column("URL");
         table.column("ProxyTo");
-        table.column("Prefix");
-        for (ProxyInfo proxyInfo : proxyService.getProxies()) {
-             table.addRow().addContent(proxyInfo.getUrl(), proxyInfo.getProxyTo(), proxyInfo.getPrefix());
+        for (String url : proxyService.getProxies().keySet()) {
+             table.addRow().addContent(url, proxyService.getProxies().get(url));
         }
         table.print(System.out);
         return null;

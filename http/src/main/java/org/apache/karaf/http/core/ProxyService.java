@@ -16,13 +16,13 @@
  */
 package org.apache.karaf.http.core;
 
-import java.util.Collection;
+import java.util.Map;
 
 public interface ProxyService {
 
-    Collection<ProxyInfo> getProxies();
+    Map<String, String> getProxies();
 
-    void addProxy(String url, String prefix, String proxyTo) throws Exception;
+    void addProxy(String url, String proxyTo) throws Exception;
 
     void removeProxy(String url) throws Exception;
 

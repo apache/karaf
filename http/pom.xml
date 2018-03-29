@@ -70,14 +70,14 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-proxy</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.3</version>
         </dependency>
     </dependencies>
 
@@ -116,7 +116,8 @@
                             org.apache.karaf.http.core.internal.osgi,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
-                            org.eclipse.jetty.proxy
+                            org.apache.http*,
+                            org.apache.commons.codec*
                         </Private-Package>
                     </instructions>
                 </configuration>
