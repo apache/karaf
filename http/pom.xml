@@ -112,6 +112,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.http.command,
+                            org.apache.karaf.http.command.completers,
                             org.apache.karaf.http.core.internal,
                             org.apache.karaf.http.core.internal.osgi,
                             org.apache.felix.utils.version,

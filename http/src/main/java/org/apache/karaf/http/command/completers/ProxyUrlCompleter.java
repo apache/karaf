@@ -14,32 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.http.command;
+package org.apache.karaf.http.command.completers;
 
-import org.apache.karaf.http.command.completers.ProxyUrlCompleter;
 import org.apache.karaf.http.core.ProxyService;
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Argument;
-import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-@Command(scope = "http", name = "proxy-remove", description = "Remove an existing HTTP proxy")
+import java.util.List;
+import java.util.Set;
+
 @Service
-public class ProxyRemoveCommand implements Action {
+public class ProxyUrlCompleter implements Completer {
 
     @Reference
     private ProxyService proxyService;
 
-    @Argument(name = "prefix", description = "The HTTP proxy prefix", required = true, multiValued = false)
-    @Completion(ProxyUrlCompleter.class)
-    String prefix;
-
     @Override
-    public Object execute() throws Exception {
-        proxyService.removeProxy(prefix);
-        return null;
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+        StringsCompleter delegate = new StringsCompleter();
+        try {
+            Set<String> urls = proxyService.getProxies().keySet();
+            for (String url : urls) {
+                delegate.getStrings().add(url);
+            }
+        } catch (Exception e) {
+            // nothing to do
+        }
+        return delegate.complete(session, commandLine, candidates);
     }
 
 }
