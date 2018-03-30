@@ -20,12 +20,14 @@ import javax.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.ops4j.pax.web.service.spi.WebListener;
 
-@Services
+@Services(requires = @RequireService(ProxyService.class))
 public class Activator extends BaseActivator {
 
     private HttpPlugin httpPlugin;
@@ -34,6 +36,11 @@ public class Activator extends BaseActivator {
 
     @Override
     protected void doStart() throws Exception {
+        ProxyService proxyService = getTrackedService(ProxyService.class);
+        if (proxyService == null) {
+            return;
+        }
+
         eaHandler = new ServletEventHandler();
         eaHandler.setBundleContext(bundleContext);
         eaHandler.init();
@@ -48,6 +55,7 @@ public class Activator extends BaseActivator {
         httpPlugin.setBundleContext(bundleContext);
         httpPlugin.setServletEventHandler(eaHandler);
         httpPlugin.setWebEventHandler(webEaHandler);
+        httpPlugin.setProxyService(proxyService);
         httpPlugin.start();
 
         Dictionary<String, String> props = new Hashtable<>();

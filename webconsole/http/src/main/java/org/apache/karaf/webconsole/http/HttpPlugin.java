@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.utils.json.JSONWriter;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.karaf.http.core.ProxyService;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
@@ -56,6 +57,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     private ServletEventHandler servletEventHandler;
     private WebEventHandler webEventHandler;
     private BundleContext bundleContext;
+    private ProxyService proxyService;
 
     @Override
     protected boolean isHtmlRequest(HttpServletRequest request) {
@@ -145,6 +147,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
 
         final List<ServletDetails> servlets = this.getServletDetails();
         final List<WebDetail> web = this.getWebDetails();
+        final Map<String, String> proxies = proxyService.getProxies();
         final String statusLine = this.getStatusLine(servlets, web);
         final JSONWriter jw = new JSONWriter(pw);
 
@@ -189,6 +192,18 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             jw.value(webDetail.getContextPath());
             jw.key("state");
             jw.value(webDetail.getWebState());
+            jw.endObject();
+        }
+        jw.endArray();
+
+        jw.key("proxy");
+        jw.array();
+        for (String proxy : proxies.keySet()) {
+            jw.object();
+            jw.key("url");
+            jw.value(proxy);
+            jw.key("proxyTo");
+            jw.value(proxies.get(proxy));
             jw.endObject();
         }
         jw.endArray();
@@ -310,6 +325,10 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    public void setProxyService(ProxyService proxyService) {
+        this.proxyService = proxyService;
     }
 
 }

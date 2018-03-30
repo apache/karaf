@@ -229,6 +229,13 @@ karaf@root()> bundle:install -s "webbundle:http://tomcat.apache.org/tomcat-7.0-d
 
 You can note the `webbundle` prefix, and the `Bundle-SymbolicName` and `Web-ContextPath` headers on the URL.
 
+====== HTTP proxy
+
+Apache Karaf provides a HTTP proxy service. It allows you to proxy any HTTP URLs within Karaf. It allows you to expose
+remote web applications in Karaf.
+
+You can use the Karaf `ProxyService` programmatically, or via the corresponding shell commands and MBeans.
+
 ===== Commands
 
 ====== `http:list`
@@ -287,6 +294,36 @@ For instance, to start the Apache Karaf manual web application:
 karaf@root()> web:start 111
 ----
 
+====== `http:proxies`
+
+The `http:proxies` command list the configured HTTP proxies:
+
+----
+karaf@root()> http:proxies
+karaf@root()> http:proxies
+URL         │ ProxyTo
+────────────┼─────────────────────────────────────
+/webconsole │ http://localhost:8181/system/console
+----
+
+===== `http:proxy-add`
+
+The `http:proxy-add` registers a new HTTP proxy. For instance, you can proxy the Karaf WebConsole on another URL of your choice using:
+
+----
+karaf@root()> http:proxy-add /webconsole http://localhost:8181/system/console
+----
+
+Karaf HTTP Proxy can proxy any URL, like a backend running on Docker or a remote URL.
+
+===== `http:proxy-remove`
+
+The `http:proxy-remove` removes an existing HTTP proxy:
+
+----
+karaf@root()> http:proxy-remove /webconsole
+----
+
 ===== JMX HttpMBean
 
 On the JMX layer, you have a MBean dedicated to the manipulation of the Servlets: the HttpMBean.
@@ -302,6 +339,17 @@ The `Servlets` attribute provides a tabular data providing the list of deployed 
 * `Servlet` is the class name of the Servlet.
 * `State` is the current Servlet state (`Deployed` or `Undeployed`).
 * `URL` is the URL of the Servlet (the Servlet context path).
+
+The `Proxies` attribute provides a tabular data providing the list of HTTP proxies including:
+
+* `URL` is the proxy URL.
+* `proxyTo` is the proxy target.
+* `prefix` is optional proxy prefix.
+
+====== Operations
+
+* `addProxy(url, proxyTo, prefix)` registers a new HTTP proxy.
+* `removeProxy(url)` removes an existing HTTP proxy.
 
 ===== JMX WebMBean
 

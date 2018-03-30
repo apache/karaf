@@ -44,6 +44,11 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-spi</artifactId>
@@ -68,6 +73,11 @@
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.3</version>
         </dependency>
     </dependencies>
 
@@ -98,14 +108,17 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.http.core,
+                            org.apache.karaf.http.core
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.http.command,
+                            org.apache.karaf.http.command.completers,
                             org.apache.karaf.http.core.internal,
                             org.apache.karaf.http.core.internal.osgi,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
+                            org.apache.http*,
+                            org.apache.commons.codec*
                         </Private-Package>
                     </instructions>
                 </configuration>
