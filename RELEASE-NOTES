@@ -15,6 +15,94 @@
  * limitations under the License.
  */
 
+		    Apache Karaf 4.2.0
+		    ==================
+ Apache Karaf 4.2.0 is the first GA release on the 4.2.x series. We encourage all users to upgrade to this
+ new stable series, bringing a lot of fixes, improvements and new features.
+
+ ChangeLog:
+ ----------
+
+** Bug
+    * [KARAF-5342] - No reference to branding-ssh.properties in console branding section
+    * [KARAF-5384] - Optional dependencies in MINA SSHD Core cause system bundle refreshes
+    * [KARAF-5473] - Karaf SSH session timing out
+    * [KARAF-5554] - the karaf.secured.command.compulsory.roles shouldn't apply for alias commands
+    * [KARAF-5559] - log:tail kills ssh & karaf when root logger is in DEBUG
+    * [KARAF-5563] - Enf-of-line display problem with the ShellTable on windows
+    * [KARAF-5566] - Features installed through prerequisites lead to errors when uninstalling features
+    * [KARAF-5569] - Cannot pass commands to client script when sftpEnabled=false
+    * [KARAF-5573] - Karaf on Windows does not pass the version check when JAVA_HOME contains whitespace
+    * [KARAF-5581] - bin/client -u karaf -p karaf can login if we enable jasypt for jaas 
+    * [KARAF-5585] - Verify mojo configure pax-url-mvn with non existent settings.xml
+    * [KARAF-5591] - Blacklisted features should be considered as dependencies and/or conditionals
+    * [KARAF-5592] - Karaf shell unexpected exit when Ctrl + C during log:display or select text then press Enter
+    * [KARAF-5610] - Build problems with JDK9
+    * [KARAF-5611] - karaf.bat still uses endorsed dirs with Java 9 install
+    * [KARAF-5634] - karaf/karaf.bat scripts do not handle lib.next->lib update correctly
+    * [KARAF-5639] - NPE during instance:start
+    * [KARAF-5641] - Karaf boot scripts need to deal with JDK10 version patterns
+    * [KARAF-5642] - karaf:deploy goal broken
+    * [KARAF-5645] - Karaf crashes when using the character ']' in the console
+    * [KARAF-5646] - Support env:XXX subtitution missing for system.properties
+    * [KARAF-5647] - start, stop, shell, status and client fail on Solaris Sparc 11
+    * [KARAF-5657] - client.bat doesn't work on Windows
+    * [KARAF-5667] - Installing the audit-log feature never ends
+    * [KARAF-5670] - pax-web throws an exception when running with a security manager
+    * [KARAF-5671] - Demo profiles still use "old style" pax-logging configuration
+    * [KARAF-5672] - Servlets urls are displayed without the http context path
+    * [KARAF-5673] - karaf-maven-plugin can be very long to apply profile
+    * [KARAF-5678] - Existing configfiles (in kar) may be overwritten when building assembly
+
+** New Feature
+    * [KARAF-1677] - Unpacked KAR deployment
+    * [KARAF-5614] - Add HttpRedirect/Proxy service with http:redirect/proxy command & MBean
+    * [KARAF-5629] - Add new karaf commands shell:elif and shell:else
+    * [KARAF-5635] - Integrate WebConsole Memory Usage plugin
+    * [KARAF-5665] - Sometimes the command description does not show when listing commands with "TAB"
+    * [KARAF-5680] - Provide support for xml parsers deployed as bundle on Java 9
+
+** Improvement
+    * [KARAF-2688] - Karaf info - Add memory details about perm gen pool
+    * [KARAF-4496] - UserPrincipal lookup in the JAAS' BackingEngine
+    * [KARAF-5448] - Fix Java 9 warnings
+    * [KARAF-5558] - Be able to configure the Quartz Scheduler
+    * [KARAF-5568] - Karaf Commands cannot have return codes
+    * [KARAF-5578] - Add repo URL for sling
+    * [KARAF-5588] - Increase max number of threads in the scheduler by default
+    * [KARAF-5604] - karaf:features-generate-descriptor takes long when faced with complex feature dependencies
+    * [KARAF-5627] - Upgrade to PAX-JMS 0.3.0
+    * [KARAF-5677] - deploy goal throws NPE with artifactLocations is not provided
+    * [KARAF-5679] - Upgrade to Hibernate Validator 6.0.9.Final
+
+** Task
+    * [KARAF-5586] - Upgrade to Hibernate-validator 5.4.2
+
+** Dependency upgrade
+    * [KARAF-5574] - Upgrade to Pax Web 7.0.0/Jetty 9.4.6
+    * [KARAF-5584] - Upgrade to SSHD 1.7.0
+    * [KARAF-5595] - Upgrade toJLine 3.6.0 and Jansi 1.17
+    * [KARAF-5596] - Upgrade to Spring 5.0.3.RELEASE
+    * [KARAF-5597] - Upgrade to Spring 4.3.14.RELEASE
+    * [KARAF-5599] - Upgrade Narayana to version 5.7.2.Final
+    * [KARAF-5602] - Upgrade to Spring Security 4.2.4.RELEASE
+    * [KARAF-5605] - Upgrade to OpenJPA 2.4.2
+    * [KARAF-5606] - Upgrade to EclipseLink 2.7.1
+    * [KARAF-5607] - Upgrade to Hibernate 5.2.9.Final
+    * [KARAF-5612] - Upgrade to blueprint-core 1.9.0, blueprint-cm-1.2.0, blueprint-spring-0.6.0 and blueprint-spring-extender-0.4.0
+    * [KARAF-5616] - Upgrade to SCR 2.0.14
+    * [KARAF-5617] - Upgrade to JNA 4.5.1
+    * [KARAF-5618] - Upgrade to Aries JMX Blueprint 1.2.0
+    * [KARAF-5619] - Upgrade to Aries JMX Core 1.1.8 & JMX Whiteboard 1.2.0
+    * [KARAF-5622] - Upgrade to commons-compress 1.16.1
+    * [KARAF-5623] - Upgrade to maven-bundle-plugin 3.5.0
+    * [KARAF-5624] - Upgrade to jline 3.6.1
+    * [KARAF-5625] - Upgrade to Pax Swissbox 1.8.3
+    * [KARAF-5631] - Upgrade to PAX-CDI 1.0.0
+    * [KARAF-5658] - Upgrade to Spring 5.0.4.RELEASE
+    * [KARAF-5668] - Upgrade to JLine 3.6.2
+    * [KARAF-5675] - Upgrade to XBean 4.7
+
 		    Apache Karaf 4.2.0.M2
 		    =====================
  Apache Karaf 4.2.0.M2 is a the second technical preview of the 4.2.x series. It's not yet a GA release. It
