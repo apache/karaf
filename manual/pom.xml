@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.apache.karaf</groupId>
 		<artifactId>karaf</artifactId>
-		<version>4.2.0-SNAPSHOT</version>
+		<version>4.2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -278,8 +278,8 @@
 											<arg value="--log" />
 											<arg value="${project.build.directory}/prince.log" />
 										</exec>
-										<attachartifact file="target/documentation.html" type="html"/>
-										<attachartifact file="target/documentation.pdf" type="pdf"/>
+										<attachartifact file="target/documentation.html" type="html" />
+										<attachartifact file="target/documentation.pdf" type="pdf" />
 									</tasks>
 								</configuration>
 							</execution>
