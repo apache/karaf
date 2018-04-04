@@ -53,6 +53,7 @@
     * [KARAF-5672] - Servlets urls are displayed without the http context path
     * [KARAF-5673] - karaf-maven-plugin can be very long to apply profile
     * [KARAF-5678] - Existing configfiles (in kar) may be overwritten when building assembly
+    * [KARAF-5688] - XML parsing fails when xerces is installed on JDK 8
 
 ** New Feature
     * [KARAF-1677] - Unpacked KAR deployment
