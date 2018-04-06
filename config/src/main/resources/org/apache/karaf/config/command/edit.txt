@@ -9,7 +9,7 @@ Create a factory config by factory pid:
 In this case the config is created with a pid like myfactorypid.<generated id>. The file name is myfactorypid-<generated alias>.cfg.
 
 Create a factory config by factory pid and alias:
-  > config:edit --factory myfactorypid --alias myalias
+  > config:edit --factory --alias myalias myfactorypid
 In this case the config is created with a pid like myfactorypid.<generated id>. The file name is myfactorypid-myalias.cfg.
 
 Edit a config specified by an ldap query

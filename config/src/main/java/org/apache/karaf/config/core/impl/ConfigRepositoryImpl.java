@@ -154,7 +154,12 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties) throws IOException {
         Configuration config = configAdmin.createFactoryConfiguration(factoryPid, "?");
         TypedProperties props = new TypedProperties();
-        File file = File.createTempFile(factoryPid + "-", ".cfg", new File(System.getProperty("karaf.etc")));
+        File file = null;
+        if (alias != null && !"".equals(alias.trim())) {
+            file = new File(new File(System.getProperty("karaf.etc")), factoryPid + "-" + alias + ".cfg");
+        } else {
+            file = File.createTempFile(factoryPid + "-", ".cfg", new File(System.getProperty("karaf.etc")));
+        }
         props.putAll(properties);
         props.save(file);
         props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
