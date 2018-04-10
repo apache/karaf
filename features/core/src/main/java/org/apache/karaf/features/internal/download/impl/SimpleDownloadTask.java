@@ -72,7 +72,8 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
             }
 
             File tmpFile = File.createTempFile("download-", null, dir);
-
+            
+            urlObj = new URL(DownloadManagerHelper.stripUrl(urlObj.toString()));
             try (InputStream is = urlObj.openStream();
                  OutputStream os = new FileOutputStream(tmpFile)) {
                 StreamUtils.copy(is, os);
