@@ -144,13 +144,7 @@ public class SimpleFilter {
     }
 
     private static String reuseCommonString(String str) {
-        if (str != null) {
-            String commonString = COMMON_STRINGS.get(str);
-            if (commonString != null) {
-                return commonString;
-            }
-        }
-        return str;
+        return str != null ? COMMON_STRINGS.getOrDefault(str, str) : null;
     }
 
     private static void toString(StringBuilder sb, List<?> list) {
