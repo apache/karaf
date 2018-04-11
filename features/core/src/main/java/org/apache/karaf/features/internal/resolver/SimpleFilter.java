@@ -19,12 +19,11 @@ package org.apache.karaf.features.internal.resolver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.utils.version.VersionRange;
 
@@ -43,15 +42,15 @@ public class SimpleFilter {
     /**
      * Strings which are commonly found in filter specification. We use this map as an interner.
      */
-    private static final Set<String> COMMON_STRINGS;
+    private static final ConcurrentHashMap<String, String> COMMON_STRINGS;
 
     static {
-        Set<String> s = new HashSet<>(8);
-        s.add("optional");
-        s.add("osgi.ee");
-        s.add("resolution");
-        s.add("uses");
-        s.add("version");
+        ConcurrentHashMap<String, String> s = new ConcurrentHashMap<>(8);
+        s.put("optional", "optional");
+        s.put("osgi.ee", "osgi.ee");
+        s.put("resolution", "resolution");
+        s.put("uses", "uses");
+        s.put("version", "version");
         COMMON_STRINGS = s;
     }
 
@@ -62,7 +61,7 @@ public class SimpleFilter {
     private final int op;
 
     SimpleFilter(String name, Object value, int op) {
-        this.name = internIfCommon(name);
+        this.name = reuseCommonString(name);
         this.value = value;
         this.op = op;
     }
@@ -144,8 +143,14 @@ public class SimpleFilter {
         }
     }
 
-    private static String internIfCommon(String str) {
-        return str != null && COMMON_STRINGS.contains(str) ? str.intern() : str;
+    private static String reuseCommonString(String str) {
+        if (str != null) {
+            String commonString = COMMON_STRINGS.get(str);
+            if (commonString != null) {
+                return commonString;
+            }
+        }
+        return str;
     }
 
     private static void toString(StringBuilder sb, List<?> list) {
