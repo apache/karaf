@@ -214,6 +214,11 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
     set JAVA=%JAVA_HOME%\bin\java
 :Check_JAVA_END
 
+rem Retrieve java version
+for /f tokens^=2-5^ delims^=.-_+^" %%j in ('"%JAVA%" -fullversion 2^>^&1') do (
+    if %%j==1 (set JAVA_VERSION=%%k) else (set JAVA_VERSION=%%j)
+)
+
 :CheckRootInstance
     set ROOT_INSTANCE_RUNNING=false
     if exist "%KARAF_HOME%\instances\instance.properties" (
@@ -395,10 +400,9 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%CHECK_ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%IS_RUNNABLE%" == "true" (
-        for /f tokens^=2-5^ delims^=.-_^" %%j in ('"%JAVA%" -fullversion 2^>^&1') do set "JAVA_VERSION=%%j%"
         rem If major version is greater than 1 (meaning Java 9 or 10), we don't use endorsed lib but module
         rem If major version is 1 (meaning Java 1.6, 1.7, 1.8), we use endorsed lib
-        if "%JAVA_VERSION%" GTR 1 (
+        if %JAVA_VERSION% GTR 8 (
             "%JAVA%" %JAVA_OPTS% %OPTS% ^
                 --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,java.xml.ws,ALL-UNNAMED ^
                 --patch-module java.base=lib/endorsed/org.apache.karaf.specs.locator-@@project.version@@.jar ^
