@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.shell</groupId>
         <artifactId>shell</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -44,8 +44,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>jline</groupId>
+            <groupId>org.jline</groupId>
             <artifactId>jline</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -145,7 +149,7 @@
                             org.apache.karaf.shell.core
                         </Fragment-Host>
                         <Import-Package>
-                            !org.apache.felix.gogo.runtime.*,
+                            !org.apache.felix.gogo.*,
                             !org.apache.karaf.shell.inject.impl,
                             org.osgi.service.event;resolution:=optional,
                             org.apache.karaf.branding;resolution:=optional,
@@ -171,9 +175,11 @@
                             org.apache.karaf.shell.inject;version=${project.version};-noimport:=true,
                         	org.apache.karaf.shell.util;version=${project.version};-noimport:=true,
                             org.apache.karaf.shell.util;version=2.3.0;-noimport:=true,
-                            org.apache.felix.gogo*;version=${felix.gogo.version};-noimport:=true,
-                            org.apache.felix.service.command;version=${felix.gogo.version};-noimport:=true,
-                            org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status;-noimport:=true
+                            org.apache.felix.gogo.api;version=0.17.0;status=provisional;-noimport:=true,
+                            org.apache.felix.gogo.commands.*;version=0.17.0;-noimport:=true,
+                            org.apache.felix.service.command;version=0.17.0;status=provisional;-noimport:=true,
+                            org.apache.felix.service.threadio;version=0.17.0;status=provisional;-noimport:=true;
+                            jline.console.completer;version=2.14;-noimport:=true
                         </Export-Package>
                         <Private-Package>
                         	org.apache.karaf.shell.commands.ansi,
@@ -181,11 +187,18 @@
                         	org.apache.karaf.shell.console.impl*,
                             org.apache.karaf.shell.security.impl*,
                             org.apache.karaf.shell.inject.impl*,
-                            org.apache.karaf.util.jaas
+                            org.apache.karaf.util.jaas,
+                            jline.internal
                         </Private-Package>
                         <Main-Class>
                             org.apache.karaf.shell.console.impl.Main
                         </Main-Class>
+                        <!--
+                           - Work around for KARAF-5180 / FELIX-5649
+                          -->
+                        <_removeheaders>
+                            Require-Capability
+                        </_removeheaders>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>

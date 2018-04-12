@@ -19,12 +19,12 @@ package org.apache.karaf.system.commands;
 import java.io.File;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -133,14 +133,12 @@ public class SystemProperty implements Action {
 
     private void printOrderedProperties(Properties props, PrintStream out) {
         Set<Object> keys = props.keySet();
-        Vector<String> order = new Vector<String>(keys.size());
-        for (Iterator<Object> i = keys.iterator(); i.hasNext(); ) {
-            Object str = (Object) i.next();
+        List<String> order = new ArrayList<>(keys.size());
+        for (Object str : keys) {
             order.add((String) str);
         }
         Collections.sort(order);
-        for (Iterator<String> i = order.iterator(); i.hasNext(); ) {
-            String key = (String) i.next();
+        for (String key : order) {
             out.println(key + "=" + props.getProperty(key));
         }
     }

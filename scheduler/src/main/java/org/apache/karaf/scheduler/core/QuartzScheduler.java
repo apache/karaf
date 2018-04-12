@@ -16,24 +16,19 @@
  */
 package org.apache.karaf.scheduler.core;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
-import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
+import org.apache.karaf.scheduler.SchedulerError;
+import org.quartz.*;
 import org.quartz.impl.DirectSchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.simpl.RAMJobStore;
+import org.quartz.spi.JobStore;
 import org.quartz.spi.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +43,6 @@ public class QuartzScheduler implements Scheduler {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final String PREFIX = "Apache Karaf Quartz Scheduler ";
-
-    private static final String QUARTZ_SCHEDULER_NAME = "ApacheKaraf";
 
     /** Map key for the job object */
     static final String DATA_MAP_OBJECT = "QuartzJobScheduler.Object";
@@ -66,30 +59,19 @@ public class QuartzScheduler implements Scheduler {
     /** The quartz scheduler. */
     private volatile org.quartz.Scheduler scheduler;
 
-    public QuartzScheduler(ThreadPool threadPool) throws SchedulerException {
+    public QuartzScheduler(Properties configuration) {
         // SLING-2261 Prevent Quartz from checking for updates
         System.setProperty("org.terracotta.quartz.skipUpdateCheck", Boolean.TRUE.toString());
-
-        final DirectSchedulerFactory factory = DirectSchedulerFactory.getInstance();
-        // unique run id
-        final String runID = new Date().toString().replace(' ', '_');
-        factory.createScheduler(QUARTZ_SCHEDULER_NAME, runID, threadPool, new RAMJobStore());
-        // quartz does not provide a way to get the scheduler by name AND runID, so we have to iterate!
-        final Iterator<org.quartz.Scheduler> allSchedulersIter = factory.getAllSchedulers().iterator();
-        while ( scheduler == null && allSchedulersIter.hasNext() ) {
-            final org.quartz.Scheduler current = allSchedulersIter.next();
-            if ( QUARTZ_SCHEDULER_NAME.equals(current.getSchedulerName())
-                    && runID.equals(current.getSchedulerInstanceId()) ) {
-                scheduler = current;
-            }
-        }
-        if ( scheduler == null ) {
-            throw new SchedulerException("Unable to find new scheduler with name " + QUARTZ_SCHEDULER_NAME + " and run ID " + runID);
-        }
-
-        scheduler.start();
-        if ( this.logger.isDebugEnabled() ) {
-            this.logger.debug(PREFIX + "started.");
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(QuartzScheduler.class.getClassLoader());
+            StdSchedulerFactory factory = new StdSchedulerFactory(configuration);
+            scheduler = factory.getScheduler();
+            scheduler.start();
+        } catch (Throwable t) {
+            throw new RuntimeException("Unable to create quartz scheduler", t);
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
         }
     }
 
@@ -202,10 +184,10 @@ public class QuartzScheduler implements Scheduler {
     /**
      * Schedule a job
      * @see org.apache.karaf.scheduler.Scheduler#schedule(java.lang.Object, org.apache.karaf.scheduler.ScheduleOptions)
-     * @throws SchedulerException if the job can't be scheduled
+     * @throws SchedulerError if the job can't be scheduled
      * @throws IllegalArgumentException If the preconditions are not met
      */
-    public void schedule(final Object job, final ScheduleOptions options) throws IllegalArgumentException, SchedulerException {
+    public void schedule(final Object job, final ScheduleOptions options) throws IllegalArgumentException, SchedulerError {
         this.checkJob(job);
 
         if ( !(options instanceof InternalScheduleOptions)) {
@@ -251,7 +233,40 @@ public class QuartzScheduler implements Scheduler {
         final JobDetail detail = this.createJobDetail(name, jobDataMap, opts.canRunConcurrently);
 
         this.logger.debug("Scheduling job {} with name {} and trigger {}", job, name, trigger);
-        s.scheduleJob(detail, trigger);
+        try {
+            s.scheduleJob(detail, trigger);
+        } catch (SchedulerException ex) {
+            throw new SchedulerError(ex);
+        }
+    }
+
+    @Override
+    public void reschedule(String name, ScheduleOptions options) throws SchedulerError {
+        final org.quartz.Scheduler s = this.scheduler;
+        if (name == null) {
+            throw new IllegalArgumentException("Job name is mandatory");
+        }
+        JobKey key = JobKey.jobKey(name);
+        if (key == null) {
+            throw new IllegalStateException("No job found with name " + name);
+        }
+        try {
+            JobDetail detail = s.getJobDetail(key);
+
+            Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
+
+            s.deleteJob(key);
+
+            final InternalScheduleOptions opts = (InternalScheduleOptions)options;
+            Trigger trigger = opts.trigger.withIdentity(name).build();
+            JobDataMap jobDataMap = this.initDataMap(name, job, opts);
+            detail = createJobDetail(name, jobDataMap, opts.canRunConcurrently);
+
+            logger.debug("Update job scheduling {} with name {} and trigger {}", job, name, trigger);
+            s.scheduleJob(detail, trigger);
+        } catch (SchedulerException e) {
+            throw new SchedulerError(e);
+        }
     }
 
     /**
@@ -259,7 +274,7 @@ public class QuartzScheduler implements Scheduler {
      */
     public boolean unschedule(final String jobName) {
         final org.quartz.Scheduler s = this.scheduler;
-        if ( jobName != null && s != null ) {
+        if (jobName != null && s != null) {
             try {
                 final JobKey key = JobKey.jobKey(jobName);
                 final JobDetail jobdetail = s.getJobDetail(key);
@@ -276,20 +291,42 @@ public class QuartzScheduler implements Scheduler {
     }
 
     @Override
-    public Map<Object, ScheduleOptions> getJobs() throws SchedulerException {
-        Map<Object, ScheduleOptions> jobs = new HashMap<>();
-        org.quartz.Scheduler s = this.scheduler;
-        if (s != null) {
-            for (String group : s.getJobGroupNames()) {
-                for (JobKey key : s.getJobKeys(GroupMatcher.jobGroupEquals(group))) {
-                    JobDetail detail = s.getJobDetail(key);
-                    ScheduleOptions options = (ScheduleOptions) detail.getJobDataMap().get(DATA_MAP_OPTIONS);
-                    Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
-                    jobs.put(job, options);
+    public Map<Object, ScheduleOptions> getJobs() throws SchedulerError {
+        try {
+            Map<Object, ScheduleOptions> jobs = new HashMap<>();
+            org.quartz.Scheduler s = this.scheduler;
+            if (s != null) {
+                for (String group : s.getJobGroupNames()) {
+                    for (JobKey key : s.getJobKeys(GroupMatcher.jobGroupEquals(group))) {
+                        JobDetail detail = s.getJobDetail(key);
+                        ScheduleOptions options = (ScheduleOptions) detail.getJobDataMap().get(DATA_MAP_OPTIONS);
+                        Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
+                        jobs.put(job, options);
+                    }
                 }
             }
+            return jobs;
+        } catch (SchedulerException ex) {
+            throw new SchedulerError(ex);
         }
-        return jobs;
+    }
+
+    @Override
+    public boolean trigger(String jobName) throws SchedulerError {
+        final org.quartz.Scheduler s = this.scheduler;
+        if (jobName != null && s != null) {
+            try {
+                final JobKey key = JobKey.jobKey(jobName);
+                final JobDetail jobdetail = s.getJobDetail(key);
+                if (jobdetail != null) {
+                    this.scheduler.triggerJob(key, jobdetail.getJobDataMap());
+                    return true;
+                }
+            } catch (SchedulerException ex) {
+                throw new SchedulerError(ex);
+            }
+        }
+        return false;
     }
 
 }

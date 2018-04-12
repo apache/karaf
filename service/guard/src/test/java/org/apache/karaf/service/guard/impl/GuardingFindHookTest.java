@@ -26,7 +26,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -43,7 +42,7 @@ public class GuardingFindHookTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testFindHook() throws Exception {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put("service.guard", "(|(moo=foo)(foo=*))");
 
         BundleContext hookBC = mockConfigAdminBundleContext(config);
@@ -54,12 +53,12 @@ public class GuardingFindHookTest {
 
         BundleContext clientBC = mockBundleContext(31L);
 
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        Dictionary<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_ID, 16L);
         props.put("moo", "foo");
         ServiceReference<?> sref = mockServiceReference(props);
 
-        Collection<ServiceReference<?>> refs = new ArrayList<ServiceReference<?>>();
+        Collection<ServiceReference<?>> refs = new ArrayList<>();
         refs.add(sref);
 
         assertEquals("Precondition", 0, gpc.proxyMap.size());
@@ -69,12 +68,12 @@ public class GuardingFindHookTest {
                 Collections.singletonList(sref), refs);
 
         long service2ID = 17L;
-        Dictionary<String, Object> props2 = new Hashtable<String, Object>();
+        Dictionary<String, Object> props2 = new Hashtable<>();
         props2.put(Constants.SERVICE_ID, service2ID);
         props2.put("foo", new Object());
         ServiceReference<?> sref2 = mockServiceReference(props2);
 
-        Collection<ServiceReference<?>> refs2 = new ArrayList<ServiceReference<?>>();
+        Collection<ServiceReference<?>> refs2 = new ArrayList<>();
         refs2.add(sref2);
 
         gfh.find(clientBC, null, null, true, refs2);
@@ -83,7 +82,7 @@ public class GuardingFindHookTest {
         assertEquals("A proxy creation job should have been created", 1, gpc.createProxyQueue.size());
         assertEquals(sref2.getProperty(Constants.SERVICE_ID), gpc.proxyMap.keySet().iterator().next());
 
-        Collection<ServiceReference<?>> refs3 = new ArrayList<ServiceReference<?>>();
+        Collection<ServiceReference<?>> refs3 = new ArrayList<>();
         refs3.add(sref2);
 
         // Ensure that the hook bundle has nothing hidden
@@ -106,7 +105,7 @@ public class GuardingFindHookTest {
         assertEquals("No additional jobs should have been scheduled", 0, gpc.createProxyQueue.size());
         assertEquals("No change expected", sref2.getProperty(Constants.SERVICE_ID), gpc.proxyMap.keySet().iterator().next());
 
-        Collection<ServiceReference<?>> refs4 = new ArrayList<ServiceReference<?>>();
+        Collection<ServiceReference<?>> refs4 = new ArrayList<>();
         refs4.add(sref2);
 
         // another client should not get another proxy
@@ -121,7 +120,7 @@ public class GuardingFindHookTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testFindHookProxyServices() throws Exception {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put("service.guard", "(service.id=*)");
 
         BundleContext hookBC = mockConfigAdminBundleContext(config);
@@ -132,12 +131,12 @@ public class GuardingFindHookTest {
 
         BundleContext clientBC = mockBundleContext(31L);
 
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        Dictionary<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_ID, 16L);
         props.put(GuardProxyCatalog.PROXY_SERVICE_KEY, Boolean.TRUE);
         ServiceReference<?> sref = mockServiceReference(props);
 
-        Collection<ServiceReference<?>> refs = new ArrayList<ServiceReference<?>>();
+        Collection<ServiceReference<?>> refs = new ArrayList<>();
         refs.add(sref);
         gfh.find(clientBC, null, null, false, refs);
         assertEquals("No proxy should have been created for the proxy find", 0, gpc.proxyMap.size());
@@ -160,13 +159,8 @@ public class GuardingFindHookTest {
 
         BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
         EasyMock.expect(bc.getBundle()).andReturn(bundle).anyTimes();
-        EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(new IAnswer<Filter>() {
-            @Override
-            public Filter answer() throws Throwable {
-                Filter filter = FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0]);
-                return filter;
-            }
-        }).anyTimes();
+        EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(
+                () -> FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0])).anyTimes();
         EasyMock.replay(bc);
 
         EasyMock.expect(bundle.getBundleContext()).andReturn(bc).anyTimes();
@@ -201,12 +195,8 @@ public class GuardingFindHookTest {
 
         BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
         EasyMock.expect(bc.getBundle()).andReturn(b).anyTimes();
-        EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(new IAnswer<Filter>() {
-            @Override
-            public Filter answer() throws Throwable {
-                return FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0]);
-            }
-        }).anyTimes();
+        EasyMock.expect(bc.createFilter(EasyMock.isA(String.class))).andAnswer(
+                () -> FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0])).anyTimes();
         String cmFilter = "(&(objectClass=" + ConfigurationAdmin.class.getName() + ")"
                 + "(!(" + GuardProxyCatalog.PROXY_SERVICE_KEY + "=*)))";
         bc.addServiceListener(EasyMock.isA(ServiceListener.class), EasyMock.eq(cmFilter));
@@ -223,18 +213,10 @@ public class GuardingFindHookTest {
         ServiceReference<Object> sr = EasyMock.createMock(ServiceReference.class);
 
         // Make sure the properties are 'live' in that if they change the reference changes too
-        EasyMock.expect(sr.getPropertyKeys()).andAnswer(new IAnswer<String[]>() {
-            @Override
-            public String[] answer() throws Throwable {
-                return Collections.list(props.keys()).toArray(new String [] {});
-            }
-        }).anyTimes();
-        EasyMock.expect(sr.getProperty(EasyMock.isA(String.class))).andAnswer(new IAnswer<Object>() {
-            @Override
-            public Object answer() throws Throwable {
-                return props.get(EasyMock.getCurrentArguments()[0]);
-            }
-        }).anyTimes();
+        EasyMock.expect(sr.getPropertyKeys()).andAnswer(
+                () -> Collections.list(props.keys()).toArray(new String[] {})).anyTimes();
+        EasyMock.expect(sr.getProperty(EasyMock.isA(String.class))).andAnswer(
+                () -> props.get(EasyMock.getCurrentArguments()[0])).anyTimes();
         EasyMock.replay(sr);
         return sr;
     }

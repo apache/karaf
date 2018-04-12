@@ -64,7 +64,7 @@ public class ShowBundleTree extends BundleCommand {
         long start = System.currentTimeMillis();
         // let's do the real work here
         printHeader(bundle);
-        tree = new Tree<Bundle>(bundle);
+        tree = new Tree<>(bundle);
         createTree(bundle);
         printTree(tree);
         printDuplicatePackages(tree);
@@ -103,19 +103,16 @@ public class ShowBundleTree extends BundleCommand {
      */
     private void printTree(Tree<Bundle> tree) {
         System.out.printf("%n");
-        tree.write(System.out, new Tree.Converter<Bundle>() {
-
-            public String toString(Node<Bundle> node) {
-                if (versions) {
-                    return String.format("%s / [%s] [%s]",
-                            node.getValue().getSymbolicName(),
-                            node.getValue().getVersion().toString(),
-                            node.getValue().getBundleId());
-                } else {
-                    return String.format("%s [%s]",
-                            node.getValue().getSymbolicName(),
-                            node.getValue().getBundleId());
-                }
+        tree.write(System.out, node -> {
+            if (versions) {
+                return String.format("%s / [%s] [%s]",
+                        node.getValue().getSymbolicName(),
+                        node.getValue().getVersion().toString(),
+                        node.getValue().getBundleId());
+            } else {
+                return String.format("%s [%s]",
+                        node.getValue().getSymbolicName(),
+                        node.getValue().getBundleId());
             }
         });
     }
@@ -126,7 +123,7 @@ public class ShowBundleTree extends BundleCommand {
      */
     private void printDuplicatePackages(Tree<Bundle> tree) {
         Set<Bundle> bundles = tree.flatten();
-        Map<String, Set<Bundle>> exports = new HashMap<String, Set<Bundle>>();
+        Map<String, Set<Bundle>> exports = new HashMap<>();
 
         for (Bundle bundle : bundles) {
             for (BundleRevision revision : bundle.adapt(BundleRevisions.class).getRevisions()) {
@@ -136,24 +133,22 @@ public class ShowBundleTree extends BundleCommand {
                     if (wires != null) {
                         for (BundleWire wire : wires) {
                             String name = wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE).toString();
-                            if (exports.get(name) == null) {
-                                exports.put(name, new HashSet<Bundle>());
-                            }
-                            exports.get(name).add(bundle);
+                            exports.computeIfAbsent(name, k -> new HashSet<>()).add(bundle);
                         }
                     }
                 }
             }
         }
-
-        for (String pkg : exports.keySet()) {
-            if (exports.get(pkg).size() > 1) {
-                System.out.printf("%n");
-                System.out.printf("WARNING: multiple bundles are exporting package %s%n", pkg);
-                for (Bundle bundle : exports.get(pkg)) {
+        
+        for(Map.Entry<String, Set<Bundle>> entry : exports.entrySet()) {
+        	Set<Bundle> bundlesExportingPkg = entry.getValue();
+        	if(bundlesExportingPkg.size() > 1) {
+        		System.out.printf("%n");
+                System.out.printf("WARNING: multiple bundles are exporting package %s%n", entry.getKey());
+                for (Bundle bundle : bundlesExportingPkg) {
                     System.out.printf("- %s%n", bundle);
                 }
-            }
+        	}
         }
     }
 
@@ -233,7 +228,7 @@ public class ShowBundleTree extends BundleCommand {
     */
     private void createNode(Node<Bundle> node) {
         Bundle bundle = node.getValue();
-        Collection<Bundle> exporters = new HashSet<Bundle>();
+        Collection<Bundle> exporters = new HashSet<>();
         exporters.addAll(bundleService.getWiredBundles(bundle).values());
 
         for (Bundle exporter : exporters) {

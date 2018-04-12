@@ -82,7 +82,7 @@ public class NLS {
                     try {
                         number = Integer.parseInt(message.substring(i, index));
                     } catch (NumberFormatException e) {
-                        throw (IllegalArgumentException) new IllegalArgumentException().initCause(e);
+                        throw new IllegalArgumentException(e);
                     }
                     if (bindings == null || number >= bindings.length || number < 0) {
                         buffer.append("<missing argument>"); //$NON-NLS-1$

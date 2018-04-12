@@ -28,7 +28,7 @@ import org.apache.felix.utils.properties.Properties;
  * to become master.
  */
 public class OracleJDBCLock extends DefaultJDBCLock {
-    
+
     private static final String MOMENT_COLUMN_DATA_TYPE = "NUMBER(20)";
 
     public OracleJDBCLock(Properties props) {
@@ -43,61 +43,61 @@ public class OracleJDBCLock extends DefaultJDBCLock {
         statements.setMomentColumnDataType(MOMENT_COLUMN_DATA_TYPE);
         return statements;
     }
-    
+
     /**
      * When we perform an update on a long lived locked table, Oracle will save
      * a copy of the transaction in it's UNDO table space. Eventually this can
      * cause the UNDO table to become full, disrupting all locks in the DB instance.
      * A select query just touches the table, ensuring we can still read the DB but
-     * doesn't add to the UNDO. 
+     * doesn't add to the UNDO.
      */
     @Override
     public boolean lock() {
-        return aquireLock();
+        return acquireLock();
     }
-    
+
     /**
      * When we perform an update on a long lived locked table, Oracle will save
      * a copy of the transaction in it's UNDO table space. Eventually this can
      * cause the UNDO table to become full, disrupting all locks in the DB instance.
      * A select query just touches the table, ensuring we can still read the DB but
-     * doesn't add to the UNDO. 
+     * doesn't add to the UNDO.
      */
     @Override
     boolean updateLock() {
-        return aquireLock();
+        return acquireLock();
     }
-    
+
     /**
      * A SELECT FOR UPDATE does not create a database lock when the SELECT FOR UPDATE is performed
-     * on an empty selection. So a succesfull call to {@link DefaultJDBCLock#aquireLock()} is not sufficient to 
+     * on an empty selection. So a succesfull call to {@link DefaultJDBCLock#acquireLock()} is not sufficient to
      * ensure that we are the only one who have acquired the lock.
      */
     @Override
-    boolean aquireLock() {
-    	return super.aquireLock() && lockAcquiredOnNonEmptySelection();
+    boolean acquireLock() {
+        return super.acquireLock() && lockAcquiredOnNonEmptySelection();
     }
-    
+
     //Verify that we have a non empty record set.
     private boolean lockAcquiredOnNonEmptySelection() {
         String verifySelectionNotEmpytStatement = statements.getLockVerifySelectionNotEmptyStatement();
         PreparedStatement preparedStatement = null;
-        boolean lockAquired = false;
-        
+        boolean lockAcquired = false;
+
         try {
             preparedStatement = getConnection().prepareStatement(verifySelectionNotEmpytStatement);
             preparedStatement.setQueryTimeout(timeout);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-            	lockAquired = rs.getInt(1) > 0;
+                lockAcquired = rs.getInt(1) > 0;
             } else {
-            	LOG.warning("Failed to acquire database lock. Missing database lock record.");
+                LOG.warning("Failed to acquire database lock. Missing database lock record.");
             }
         } catch (Exception e) {
             LOG.warning("Failed to acquire database lock: " + e);
-        }finally {
+        } finally {
             closeSafely(preparedStatement);
-        }        
-        return lockAquired;
+        }
+        return lockAcquired;
     }
 }

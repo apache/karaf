@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 @Deprecated
 public @interface Option
 {
-    public static final String DEFAULT_STRING= "DEFAULT";
+    String DEFAULT_STRING= "DEFAULT";
 
     String name();
 

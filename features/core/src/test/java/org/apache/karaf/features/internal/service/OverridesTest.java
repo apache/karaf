@@ -17,8 +17,6 @@
 package org.apache.karaf.features.internal.service;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,10 +134,10 @@ public class OverridesTest {
         Clause karafAdminCommand = null;
         Clause karafAdminCore = null;
         for (Clause clause : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
-            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/2.3.0.redhat-61033X")) {
+            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/2.3.0.61033X")) {
                 karafAdminCommand = clause;
             }
-            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/2.3.0.redhat-61033X")) {
+            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/2.3.0.61033X")) {
                 karafAdminCore = clause;
             }
         }
@@ -153,7 +151,7 @@ public class OverridesTest {
     }
 
     static Map<String, Resource> asResourceMap(Resource... resources) {
-        Map<String, Resource> map = new HashMap<String, Resource>();
+        Map<String, Resource> map = new HashMap<>();
         for (Resource resource : resources) {
             map.put(getUri(resource), resource);
         }
@@ -162,7 +160,7 @@ public class OverridesTest {
 
     static class Builder {
         String uri;
-        Map<String,String> headers = new HashMap<String,String>();
+        Map<String,String> headers = new HashMap<>();
         Builder(String uri) {
             this.uri = uri;
             this.headers.put("Bundle-ManifestVersion", "2");

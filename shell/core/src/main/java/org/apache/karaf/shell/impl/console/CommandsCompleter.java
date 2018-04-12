@@ -30,36 +30,55 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
-import org.apache.karaf.shell.support.completers.AggregateCompleter;
+import org.apache.karaf.shell.impl.console.osgi.secured.SecuredCommand;
+import org.apache.karaf.shell.impl.console.osgi.secured.SecuredSessionFactoryImpl;
 import org.apache.karaf.shell.support.completers.ArgumentCommandLine;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
 
 /**
  * Overall command line completer.
  */
-public class CommandsCompleter extends org.apache.karaf.shell.support.completers.CommandsCompleter {
+public class CommandsCompleter extends org.apache.karaf.shell.support.completers.CommandsCompleter implements org.jline.reader.Completer {
 
     private final SessionFactory factory;
-    private final Map<String, Completer> globalCompleters = new HashMap<String, Completer>();
-    private final Map<String, Completer> localCompleters = new HashMap<String, Completer>();
+    private final Session session;
+    private final Map<String, Completer> globalCompleters = new HashMap<>();
+    private final Map<String, Completer> localCompleters = new HashMap<>();
     private final Completer aliasesCompleter = new SimpleCommandCompleter() {
         @Override
         protected Collection<String> getNames(Session session) {
             return getAliases(session);
         }
     };
-    private final List<Command> commands = new ArrayList<Command>();
+    private final List<Command> commands = new ArrayList<>();
 
-    public CommandsCompleter(SessionFactory factory) {
+    public CommandsCompleter(SessionFactory factory, Session session) {
         this.factory = factory;
+        this.session = session;
     }
 
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+    @Override
+    public void complete(LineReader reader, ParsedLine line, List<org.jline.reader.Candidate> candidates) {
+        CommandLine commandLine = new CommandLineImpl(line);
+        List<Candidate> cands = new ArrayList<>();
+        completeCandidates(session, commandLine, cands);
+        for (Candidate cand : cands) {
+            candidates.add(new org.jline.reader.Candidate(
+                    cand.value(), cand.displ(), cand.group(),
+                    cand.descr(), cand.suffix(), cand.key(),
+                    cand.complete()));
+        }
+    }
+
+    public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
         Map<String, Completer>[] allCompleters = checkData();
 
         List<String> scopes = getCurrentScopes(session);
@@ -73,55 +92,59 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
             if (subShell.isEmpty()) {
                 subShell = Session.SCOPE_GLOBAL;
             }
-            List<Completer> completers = new ArrayList<Completer>();
+            List<Completer> completers = new ArrayList<>();
             for (String name : allCompleters[1].keySet()) {
                 if (name.startsWith(subShell + ":")) {
                     completers.add(allCompleters[1].get(name));
                 }
             }
             if (!subShell.equals(Session.SCOPE_GLOBAL)) {
-                completers.add(new StringsCompleter(new String[] { "exit" }));
+                completers.add(new StringsCompleter(Collections.singletonList("exit")));
             }
-            int res = new AggregateCompleter(completers).complete(session, commandLine, candidates);
-            Collections.sort(candidates);
-            return res;
+            completers.forEach(c -> c.completeCandidates(session, commandLine, candidates));
+            return;
         }
 
         // FIRST mode
         if (Session.COMPLETION_MODE_FIRST.equalsIgnoreCase(completion)) {
             if (!subShell.isEmpty()) {
-                List<Completer> completers = new ArrayList<Completer>();
+                List<Completer> completers = new ArrayList<>();
                 for (String name : allCompleters[1].keySet()) {
                     if (name.startsWith(subShell + ":")) {
                         completers.add(allCompleters[1].get(name));
                     }
                 }
-                int res = new AggregateCompleter(completers).complete(session, commandLine, candidates);
+                completers.forEach(c -> c.completeCandidates(session, commandLine, candidates));
                 if (!candidates.isEmpty()) {
-                    Collections.sort(candidates);
-                    return res;
+                    return;
                 }
             }
-            List<Completer> compl = new ArrayList<Completer>();
+            List<Completer> compl = new ArrayList<>();
             compl.add(aliasesCompleter);
             compl.addAll(allCompleters[0].values());
-            int res = new AggregateCompleter(compl).complete(session, commandLine, candidates);
-            Collections.sort(candidates);
-            return res;
+            compl.forEach(c -> c.completeCandidates(session, commandLine, candidates));
+            return;
         }
 
-        List<Completer> compl = new ArrayList<Completer>();
+        List<Completer> compl = new ArrayList<>();
         compl.add(aliasesCompleter);
         compl.addAll(allCompleters[0].values());
-        int res = new AggregateCompleter(compl).complete(session, commandLine, candidates);
-        Collections.sort(candidates);
-        return res;
+        compl.forEach(c -> c.completeCandidates(session, commandLine, candidates));
+    }
+
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+        List<Candidate> cands = new ArrayList<>();
+        completeCandidates(session, commandLine, cands);
+        for (Candidate cand : cands) {
+            candidates.add(cand.value());
+        }
+        return 0;
     }
 
     protected void sort(Map<String, Completer>[] completers, List<String> scopes) {
         ScopeComparator comparator = new ScopeComparator(scopes);
         for (int i = 0; i < completers.length; i++) {
-            Map<String, Completer> map = new TreeMap<String, Completer>(comparator);
+            Map<String, Completer> map = new TreeMap<>(comparator);
             map.putAll(completers[i]);
             completers[i] = map;
         }
@@ -186,11 +209,6 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         return completion;
     }
 
-    protected String stripScope(String name) {
-        int index = name.indexOf(":");
-        return index > 0 ? name.substring(index + 1) : name;
-    }
-
     @SuppressWarnings("unchecked")
     protected Map<String, Completer>[] checkData() {
         // Copy the set to avoid concurrent modification exceptions
@@ -203,8 +221,8 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         }
         if (update) {
             // get command aliases
-            Map<String, Completer> global = new HashMap<String, Completer>();
-            Map<String, Completer> local = new HashMap<String, Completer>();
+            Map<String, Completer> global = new HashMap<>();
+            Map<String, Completer> local = new HashMap<>();
 
             // add argument completers for each command
             for (Command command : commands) {
@@ -213,13 +231,13 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
                 Completer cl = command.getCompleter(true);
                 if (cg == null) {
                     if (Session.SCOPE_GLOBAL.equals(command.getScope())) {
-                        cg = new FixedSimpleCommandCompleter(Arrays.asList(command.getName()));
+                        cg = new FixedSimpleCommandCompleter(Collections.singletonList(command.getName()));
                     } else {
                         cg = new FixedSimpleCommandCompleter(Arrays.asList(key, command.getName()));
                     }
                 }
                 if (cl == null) {
-                    cl = new FixedSimpleCommandCompleter(Arrays.asList(command.getName()));
+                    cl = new FixedSimpleCommandCompleter(Collections.singletonList(command.getName()));
                 }
                 global.put(key, cg);
                 local.put(key, cl);
@@ -236,8 +254,8 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         }
         synchronized (this) {
             return new Map[] {
-                    new HashMap<String, Completer>(this.globalCompleters),
-                    new HashMap<String, Completer>(this.localCompleters)
+                    new HashMap<>(this.globalCompleters),
+                    new HashMap<>(this.localCompleters)
             };
         }
     }
@@ -250,11 +268,38 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
     @SuppressWarnings("unchecked")
     private Set<String> getAliases(Session session) {
         Set<String> vars = ((Set<String>) session.get(null));
-        Set<String> aliases = new HashSet<String>();
+        Set<String> aliases = new HashSet<>();
         for (String var : vars) {
             Object content = session.get(var);
             if (content != null && "org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName())) {
-                aliases.add(var);
+
+                //check both acl for alias and original cmd to determine if it should be visible
+                int index = var.indexOf(":");
+                if (index > 0 && (factory instanceof SecuredSessionFactoryImpl)) {
+                    String scope = var.substring(0, index);
+                    String command = var.substring(index + 1);
+                    String originalCmd = content.toString();
+                    index = originalCmd.indexOf(" ");
+                    Object securityCmd = null;
+                    if (index > 0) {
+                        securityCmd = ((org.apache.felix.gogo.runtime.Closure)content).
+                            get(originalCmd.substring(0, index));
+                    }
+                    if (securityCmd instanceof SecuredCommand) {
+                        if (((SecuredSessionFactoryImpl)factory).isAliasVisible(scope, command)
+                            && ((SecuredSessionFactoryImpl)factory).isVisible(((SecuredCommand)securityCmd).getScope(),
+                                                                              ((SecuredCommand)securityCmd).getName())) {
+                            aliases.add(var);
+                        }
+                    } else {
+                        if (((SecuredSessionFactoryImpl)factory).isVisible(scope, command)) {
+                            aliases.add(var);
+                        }
+                    }
+                    
+                } else {
+                    aliases.add(var);
+                }
             }
         }
         return aliases;
@@ -282,7 +327,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         protected abstract Collection<String> getNames(Session session);
 
         private boolean verifyCompleter(Session session, Completer completer, String argument) {
-            List<String> candidates = new ArrayList<String>();
+            List<String> candidates = new ArrayList<>();
             return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
         }
 
@@ -299,6 +344,44 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         @Override
         protected Collection<String> getNames(Session session) {
             return names;
+        }
+    }
+
+    private static class CommandLineImpl implements CommandLine {
+        private final ParsedLine line;
+
+        public CommandLineImpl(ParsedLine line) {
+            this.line = line;
+        }
+
+        @Override
+        public int getCursorArgumentIndex() {
+            return line.wordIndex();
+        }
+
+        @Override
+        public String getCursorArgument() {
+            return line.word();
+        }
+
+        @Override
+        public int getArgumentPosition() {
+            return line.wordCursor();
+        }
+
+        @Override
+        public String[] getArguments() {
+            return line.words().toArray(new String[line.words().size()]);
+        }
+
+        @Override
+        public int getBufferPosition() {
+            return line.cursor();
+        }
+
+        @Override
+        public String getBuffer() {
+            return line.line();
         }
     }
 

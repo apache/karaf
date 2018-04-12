@@ -31,6 +31,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Function;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.api.console.SessionFactory;
 
 @Command(scope = "scheduler", name = "schedule", description = "Schedule a script execution")
 @Service
@@ -63,6 +64,9 @@ public class Schedule implements Action {
     @Reference
     Session session;
 
+    @Reference
+    SessionFactory sessionFactory;
+
     @Override
     public Object execute() throws Exception {
         if (cron != null && (at != null || times != -1 || period != 0)) {
@@ -90,7 +94,7 @@ public class Schedule implements Action {
         if (concurrent) {
             options.canRunConcurrently(concurrent);
         }
-        scheduler.schedule(new ScriptJob(session, script), options);
+        scheduler.schedule(new ScriptJob(sessionFactory, session, script), options);
         return null;
     }
 }

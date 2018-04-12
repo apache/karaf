@@ -34,6 +34,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.startlevel.BundleStartLevel;
 
+@SuppressWarnings("rawtypes")
 public class Converters implements Converter
 {
     private final BundleContext context;
@@ -67,6 +68,7 @@ public class Converters implements Converter
         f.format("%06d %3s %-40s %s", ref.getProperty("service.id"),
             ref.getBundle().getBundleId(),
             getShortNames((String[]) ref.getProperty("objectclass")), spid);
+        f.close();
         return sb;
     }
 

@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.webconsole</groupId>
         <artifactId>webconsole</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -59,6 +59,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>${servlet.spec.groupId}</groupId>
             <artifactId>${servlet.spec.artifactId}</artifactId>
             <scope>provided</scope>
@@ -69,6 +74,11 @@
 			<scope>provided</scope>
 		</dependency>
         <dependency>
+            <groupId>org.apache.karaf.http</groupId>
+            <artifactId>org.apache.karaf.http.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
@@ -76,12 +86,6 @@
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -113,8 +117,12 @@
                     <instructions>
                         <Import-Package>
 			                org.apache.felix.webconsole*;version="[3,5)",
+                            javax.servlet*;version=2.4,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.felix.utils.json
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

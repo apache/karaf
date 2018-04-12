@@ -16,61 +16,43 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.net.URL;
-
-import org.apache.karaf.features.Library;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.URI;
+
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.Library;
+import org.apache.karaf.features.Repository;
+import org.junit.Test;
+
 public class FeaturesValidationTest {
 
     @Test
     public void testNs10() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f02.xml").toURI());
-    }
-
-    @Test
-    public void testNs10Unmarshall() throws Exception {
-        URL url = getClass().getResource("f02.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Repository features = unmarshalAndValidate("f02.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs10NoName() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f03.xml").toURI());
-    }
-
-    @Test
-    public void testNs10NoNameUnmarshall() throws Exception {
-        URL url = getClass().getResource("f03.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Repository features = unmarshalAndValidate("f03.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs11() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f04.xml").toURI());
-    }
-
-    @Test
-    public void testNs11Unmarshall() throws Exception {
-        URL url = getClass().getResource("f04.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Repository features = unmarshalAndValidate("f04.xml");;
         assertNotNull(features);
     }
 
     @Test
     public void testNs11NoName() throws Exception {
         try {
-            FeatureValidationUtil.validate(getClass().getResource("f05.xml").toURI());
+            unmarshalAndValidate("f05.xml");
             fail("Validation should have failed");
         } catch (Exception e) {
             // ok
@@ -78,35 +60,31 @@ public class FeaturesValidationTest {
     }
 
     @Test
-    public void testNs12() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f06.xml").toURI());
-    }
-
-    @Test
     public void testNs12Unmarshall() throws Exception {
-        URL url = getClass().getResource("f06.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
+        Repository features = unmarshalAndValidate("f06.xml");
         assertNotNull(features);
     }
 
     @Test
     public void testNs13() throws Exception {
-        FeatureValidationUtil.validate(getClass().getResource("f07.xml").toURI());
+        Repository features = unmarshalAndValidate("f07.xml");
+        assertNotNull(features);
+        Feature f0 = features.getFeatures()[0];
+        Feature f1 = features.getFeatures()[1];
+        assertEquals("2.5.6.SEC02", f0.getVersion());
+        assertTrue(f1.isHidden());
+        assertNotNull(f1.getLibraries());
+        assertEquals(1, f0.getLibraries().size());
+        Library lib = f0.getLibraries().get(0);
+        assertEquals("my-library", lib.getLocation());
+        assertEquals(Library.TYPE_ENDORSED, lib.getType());
+        assertFalse(lib.isExport());
+        assertTrue(lib.isDelegate());
     }
 
-    @Test
-    public void testNs13Unmarshall() throws Exception {
-        URL url = getClass().getResource("f07.xml");
-        Features features = JaxbUtil.unmarshal(url.toExternalForm(), true);
-        assertNotNull(features);
-        assertEquals("2.5.6.SEC02", features.getFeature().get(0).getVersion());
-        assertTrue(features.getFeature().get(1).isHidden());
-        assertNotNull(features.getFeature().get(1).getLibraries());
-        assertEquals(1, features.getFeature().get(0).getLibraries().size());
-        assertEquals("my-library", features.getFeature().get(0).getLibraries().get(0).getLocation());
-        assertEquals(Library.TYPE_ENDORSED, features.getFeature().get(0).getLibraries().get(0).getType());
-        assertFalse(features.getFeature().get(0).getLibraries().get(0).isExport());
-        assertTrue(features.getFeature().get(0).getLibraries().get(0).isDelegate());
+    private Repository unmarshalAndValidate(String path) throws Exception {
+        URI uri = getClass().getResource(path).toURI();
+        return new RepositoryImpl(uri, true);
     }
 
 }

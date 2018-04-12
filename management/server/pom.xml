@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.management</groupId>
         <artifactId>management</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -75,6 +75,12 @@
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -103,7 +109,13 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.apache.karaf.management;version=${project.version};-split-package:=merge-first</Export-Package>
+                        <Export-Package>
+                            org.apache.karaf.management;version=${project.version};-split-package:=merge-first
+                        </Export-Package>
+                        <Import-Package>
+                            org.osgi.service.event*;resolution:=optional,
+                            *
+                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.management.internal,
                             org.apache.karaf.service.guard.tools,

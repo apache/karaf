@@ -16,17 +16,20 @@
  */
 package org.apache.karaf.features.internal.resolver;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.internal.util.StringArrayMap;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 
+import static org.apache.karaf.features.internal.resolver.FeatureResource.CONDITIONAL_TRUE;
+import static org.apache.karaf.features.internal.resolver.FeatureResource.REQUIREMENT_CONDITIONAL_DIRECTIVE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
 import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
@@ -66,6 +69,9 @@ public final class ResourceUtils {
         return null;
     }
 
+    /**
+     * If the resource has <code>type=karaf.feature</code> capability, returns its ID (name[/version]).
+     */
     public static String getFeatureId(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
         for (Capability cap : caps) {
@@ -94,10 +100,16 @@ public final class ResourceUtils {
     }
 
     public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range, boolean mandatory) {
-        Map<String, String> dirs = new HashMap<>();
-        Map<String, Object> attrs = new HashMap<>();
+        return addIdentityRequirement(resource, name, type, range, mandatory, false);
+    }
+    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range, boolean mandatory, boolean conditional) {
+        Map<String, String> dirs = new StringArrayMap<>((mandatory ? 0 : 1) + (conditional ? 1 : 0));
+        Map<String, Object> attrs = new StringArrayMap<>((name != null ? 1 : 0) + (type != null ? 1 : 0) + (range != null ? 1 : 0));
         if (!mandatory) {
             dirs.put(REQUIREMENT_RESOLUTION_DIRECTIVE, RESOLUTION_OPTIONAL);
+        }
+        if (conditional) {
+            dirs.put(REQUIREMENT_CONDITIONAL_DIRECTIVE, CONDITIONAL_TRUE);
         }
         if (name != null) {
             attrs.put(IDENTITY_NAMESPACE, name);
@@ -121,12 +133,12 @@ public final class ResourceUtils {
         for (Capability cap : required.getCapabilities(null)) {
             if (cap.getNamespace().equals(IDENTITY_NAMESPACE)) {
                 Map<String, Object> attributes = cap.getAttributes();
-                Map<String, String> dirs = new HashMap<>();
+                Map<String, String> dirs = new StringArrayMap<>(1);
                 dirs.put(REQUIREMENT_RESOLUTION_DIRECTIVE, mandatory ? RESOLUTION_MANDATORY : RESOLUTION_OPTIONAL);
-                Map<String, Object> attrs = new HashMap<>();
+                Version version = (Version) attributes.get(CAPABILITY_VERSION_ATTRIBUTE);
+                Map<String, Object> attrs = new StringArrayMap<>(version != null ? 3 : 2);
                 attrs.put(IDENTITY_NAMESPACE, attributes.get(IDENTITY_NAMESPACE));
                 attrs.put(CAPABILITY_TYPE_ATTRIBUTE, attributes.get(CAPABILITY_TYPE_ATTRIBUTE));
-                Version version = (Version) attributes.get(CAPABILITY_VERSION_ATTRIBUTE);
                 if (version != null) {
                     attrs.put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(version, true));
                 }
@@ -135,23 +147,30 @@ public final class ResourceUtils {
         }
     }
 
+    /**
+     * Changes feature identifier (<code>name[/version]</code>) into a requirement specification.
+     * The OSGi manifest header for a feature will be: <code>osgi.identity;osgi.identity=feature-name;type=karaf.feature[;version=feature-version];filter:=filter-from-attrs</code>.
+     *
+     * @param feature The feature name.
+     * @return The feature requirement.
+     */
     public static String toFeatureRequirement(String feature) {
         String[] parts = feature.split("/");
-        Map<String, Object> attrs = new HashMap<>();
+        Map<String, Object> attrs = new StringArrayMap<>(parts.length > 1 ? 3 : 2);
         attrs.put(IDENTITY_NAMESPACE, parts[0]);
         attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
         if (parts.length > 1) {
             attrs.put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(parts[1]));
         }
-        Map<String, String> dirs = new HashMap<>();
-        dirs.put(Constants.FILTER_DIRECTIVE, SimpleFilter.convert(attrs).toString());
+        Map<String, String> dirs = Collections.singletonMap(
+            Constants.FILTER_DIRECTIVE, SimpleFilter.convert(attrs).toString());
         return new RequirementImpl(null, IDENTITY_NAMESPACE, dirs, attrs).toString();
     }
 
     public static String toFeatureCapability(String feature) {
         String[] parts = feature.split("/");
-        Map<String, String> dirs = new HashMap<>();
-        Map<String, Object> attrs = new HashMap<>();
+        Map<String, String> dirs = Collections.emptyMap();
+        Map<String, Object> attrs = new StringArrayMap<>(parts.length > 1 ? 3 : 2);
         attrs.put(IDENTITY_NAMESPACE, parts[0]);
         attrs.put(CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
         if (parts.length > 1) {

@@ -24,7 +24,7 @@ import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 
 public interface BackingEngine {
 
-    static final String GROUP_PREFIX = "_g_:";
+    String GROUP_PREFIX = "_g_:";
     
     /**
      * Create a new user.
@@ -47,6 +47,14 @@ public interface BackingEngine {
      * @return the list of {@link UserPrincipal}.
      */
     List<UserPrincipal> listUsers();
+
+    /**
+     * Retrieve the {@link UserPrincipal} corresponding to an username, or {@code null} if user doesn't exist.
+     *
+     * @param username The username.
+     * @return The {@link UserPrincipal} or {@code null}.
+     */
+    UserPrincipal lookupUser(String username);
 
     /**
      * List groups that a user is member of.

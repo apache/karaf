@@ -18,92 +18,59 @@
  */
 package org.apache.karaf.shell.impl.console;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.karaf.shell.api.console.Terminal;
+import java.io.*;
+import java.util.Properties;
 
 
 public final class Branding {
-   
     static final Logger LOGGER = LoggerFactory.getLogger(Branding.class);
-     
+
     private Branding() { }
 
-    public static Properties loadBrandingProperties() {
+    public static Properties loadBrandingProperties(boolean ssh) {
         Properties props = new Properties();
-        loadProps(props, "org/apache/karaf/shell/console/branding.properties");
-        loadProps(props, "org/apache/karaf/branding/branding.properties");
+        loadPropsFromResource(props, "org/apache/karaf/shell/console/", ssh);
+        loadPropsFromResource(props, "org/apache/karaf/branding/", ssh);
+        loadPropsFromFile(props, System.getProperty("karaf.etc") + "/", ssh);
         return props;
     }
 
-    public static Properties loadBrandingProperties(Terminal terminal) {
-        Properties props = new Properties();
-        if (terminal != null && terminal.getClass().getName().endsWith("SshTerminal")) {
-            //it's a ssh client, so load branding seperately
-            loadProps(props, "org/apache/karaf/shell/console/branding-ssh.properties");
-        } else {
-            loadProps(props, "org/apache/karaf/shell/console/branding.properties");
-        }
-
-        loadProps(props, "org/apache/karaf/branding/branding.properties");
-        // load branding from etc/branding.properties
-        File etcBranding = new File(System.getProperty("karaf.etc"), "branding.properties");
-        if (etcBranding.exists()) {
-            FileInputStream etcBrandingIs = null;
-            try {
-                etcBrandingIs = new FileInputStream(etcBranding);
-            } catch (FileNotFoundException e) {
-                LOGGER.trace("Could not load branding.", e);
-            }
-            loadProps(props, etcBrandingIs);
-        }
-
-        return props;
-    }
-    
-    protected static void loadProps(Properties props, String resource) {
-        InputStream is = null;
-        try {
-            is = Branding.class.getClassLoader().getResourceAsStream(resource);
-            if (is != null) {
-                props.load(is);
-            }
-        } catch (IOException e) {
-            // ignore
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
+    private static void loadPropsFromFile(Properties props, String fileName, boolean ssh) {
+        loadPropsFromFile(props, fileName + "branding.properties");
+        if (ssh) {
+            loadPropsFromFile(props, fileName + "branding-ssh.properties");
         }
     }
 
-    protected static void loadProps(Properties props, InputStream is) {
-        try {
-            if (is != null) {
-                props.load(is);
-            }
+    private static void loadPropsFromFile(Properties props, String fileName) {
+        try (FileInputStream is = new FileInputStream(fileName)) {
+            loadProps(props, is);
         } catch (IOException e) {
-            // ignore
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
+            LOGGER.trace("Could not load branding.", e);
+        }
+    }
+
+    private static void loadPropsFromResource(Properties props, String resource, boolean ssh) {
+        loadPropsFromResource(props, resource + "branding.properties");
+        if (ssh) {
+            loadPropsFromResource(props, resource + "branding-ssh.properties");
+        }
+    }
+
+    private static void loadPropsFromResource(Properties props, String resource) {
+        try (InputStream is = Branding.class.getClassLoader().getResourceAsStream(resource)) {
+            loadProps(props, is);
+        } catch (IOException e) {
+            LOGGER.trace("Could not load branding.", e);
+        }
+    }
+
+    private static void loadProps(Properties props, InputStream is) throws IOException {
+        if (is != null) {
+            props.load(is);
         }
     }
 

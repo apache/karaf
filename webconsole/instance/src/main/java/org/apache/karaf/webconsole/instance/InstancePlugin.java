@@ -29,13 +29,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.felix.utils.json.JSONWriter;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
-import org.json.JSONException;
-import org.json.JSONWriter;
 import org.osgi.framework.BundleContext;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +150,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
     }
 
     private List<String> parseStringList(String value) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         if (value != null) {
             for (String el : value.split(",")) {
                 String trimmed = el.trim();
@@ -224,14 +223,14 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
             }
             jw.endArray();
             jw.endObject();
-        } catch (JSONException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(InstancePlugin.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(InstancePlugin.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void instanceInfo(JSONWriter jw, Instance instance) throws JSONException, Exception {
+    private void instanceInfo(JSONWriter jw, Instance instance) throws Exception {
         jw.object();
         jw.key("pid");
         jw.value(instance.getPid());
@@ -263,7 +262,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
         jw.endObject();
     }
 
-    private void action(JSONWriter jw, String op, String title, String image) throws JSONException {
+    private void action(JSONWriter jw, String op, String title, String image) throws IOException {
         jw.object();
         jw.key("op").value(op);
         jw.key("title").value(title);

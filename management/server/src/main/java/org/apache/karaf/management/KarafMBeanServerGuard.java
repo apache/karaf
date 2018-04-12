@@ -16,7 +16,11 @@
  */
 package org.apache.karaf.management;
 
+import org.apache.karaf.management.internal.Activator;
 import org.apache.karaf.management.internal.BulkRequestContext;
+import org.apache.karaf.management.internal.EventAdminLogger;
+import org.apache.karaf.management.internal.EventAdminMBeanServerWrapper;
+import org.apache.karaf.management.internal.MBeanInvocationHandler;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -25,6 +29,8 @@ import javax.management.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,12 +52,19 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     private static final String JMX_ACL_PID_PREFIX = "jmx.acl";
     
     private static final String JMX_ACL_WHITELIST = "jmx.acl.whitelist";
+    
+    private static final String JMX_ACL_DETAILED_MESSAGE = "jmx.acl.detailed.message";
 
     private static final String JMX_OBJECTNAME_PROPERTY_WILDCARD = "_";
 
     private static final Comparator<String[]> WILDCARD_PID_COMPARATOR = new WildcardPidComparator();
 
+    private static final String INVOKE = "invoke";
+
+    private static final String[] INVOKE_SIG = new String[] {ObjectName.class.getName(), String.class.getName(), Object[].class.getName(), String[].class.getName()};
+
     private ConfigurationAdmin configAdmin;
+    private EventAdminLogger logger;
 
     public ConfigurationAdmin getConfigAdmin() {
         return configAdmin;
@@ -61,6 +74,14 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         this.configAdmin = configAdmin;
     }
 
+    public EventAdminLogger getLogger() {
+        return logger;
+    }
+
+    public void setLogger(EventAdminLogger logger) {
+        this.logger = logger;
+    }
+
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getParameterTypes().length == 0)
             return null;
@@ -68,15 +89,23 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         if (!ObjectName.class.isAssignableFrom(method.getParameterTypes()[0]))
             return null;
 
+        MBeanServer mbs = (MBeanServer) proxy;
+        if (mbs != null && Proxy.getInvocationHandler(mbs) instanceof MBeanInvocationHandler) {
+            mbs = ((MBeanInvocationHandler) Proxy.getInvocationHandler(mbs)).getDelegate();
+        }
+        if (mbs instanceof EventAdminMBeanServerWrapper) {
+            mbs = ((EventAdminMBeanServerWrapper) mbs).getDelegate();
+        }
+
         ObjectName objectName = (ObjectName) args[0];
         if ("getAttribute".equals(method.getName())) {
-            handleGetAttribute((MBeanServer) proxy, objectName, (String) args[1]);
+            handleGetAttribute(mbs, objectName, (String) args[1]);
         } else if ("getAttributes".equals(method.getName())) {
-            handleGetAttributes((MBeanServer) proxy, objectName, (String[]) args[1]);
+            handleGetAttributes(mbs, objectName, (String[]) args[1]);
         } else if ("setAttribute".equals(method.getName())) {
-            handleSetAttribute((MBeanServer) proxy, objectName, (Attribute) args[1]);
+            handleSetAttribute(mbs, objectName, (Attribute) args[1]);
         } else if ("setAttributes".equals(method.getName())) {
-            handleSetAttributes((MBeanServer) proxy, objectName, (AttributeList) args[1]);
+            handleSetAttributes(mbs, objectName, (AttributeList) args[1]);
         } else if ("invoke".equals(method.getName())) {
             handleInvoke(objectName, (String) args[1], (Object[]) args[2], (String[]) args[3]);
         }
@@ -111,7 +140,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         MBeanInfo info = mbeanServer.getMBeanInfo(objectName);
 
         for (MBeanOperationInfo operation : info.getOperations()) {
-            List<String> sig = new ArrayList<String>();
+            List<String> sig = new ArrayList<>();
             for (MBeanParameterInfo param : operation.getSignature()) {
                 sig.add(param.getType());
             }
@@ -168,7 +197,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                 continue;
             }
 
-            List<String> sig = new ArrayList<String>();
+            List<String> sig = new ArrayList<>();
             for (MBeanParameterInfo param : op.getSignature()) {
                 sig.add(param.getType());
             }
@@ -285,7 +314,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
     
     private boolean canBypassRBAC(BulkRequestContext context, ObjectName objectName, String operationName) {
-        List<String> allBypassObjectName = new ArrayList<String>();
+        List<String> allBypassObjectName = new ArrayList<>();
 
         List<Dictionary<String, Object>> configs = context.getWhitelistProperties();
         for (Dictionary<String, Object> config : configs) {
@@ -332,7 +361,61 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             if (JaasHelper.currentUserHasRole(role))
                 return;
         }
-        throw new SecurityException("Insufficient roles/credentials for operation");
+        if (Boolean.valueOf(System.getProperty(JMX_ACL_DETAILED_MESSAGE, "false"))) {
+            printDetailedMessage(context, objectName, operationName, params, signature);
+        }
+        SecurityException se = new SecurityException("Insufficient roles/credentials for operation");
+        if (logger != null) {
+            logger.log(INVOKE, INVOKE_SIG, null, se, objectName, operationName, signature, params);
+        }
+        throw se;
+    }
+
+    private void printDetailedMessage(BulkRequestContext context, ObjectName objectName,
+                                      String operationName, Object[] params, String[] signature) throws IOException {
+        String expectedRoles = "";
+        for (String role : getRequiredRoles(context, objectName, operationName, params, signature)) {
+            if (expectedRoles.length() != 0) {
+                expectedRoles = expectedRoles + ", " + role;
+            } else {
+                expectedRoles = role;
+            }
+        }
+        String currentRoles = "";
+        for (Principal p : context.getPrincipals()) {
+            if (!p.getClass().getName().endsWith("RolePrincipal")) {
+                continue;
+            }
+            if (currentRoles.length() != 0) {
+                currentRoles = currentRoles + ", " + p.getName();
+            } else {
+                currentRoles = p.getName();
+            }
+        }
+        String matchedPid = null;
+        for (String pid : iterateDownPids(getNameSegments(objectName))) {
+            String generalPid = getGeneralPid(context.getAllPids(), pid);
+            if (generalPid.length() > 0) {
+                Dictionary<String, Object> config = context.getConfiguration(generalPid);
+                List<String> roles = new ArrayList<>();
+                ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(operationName, params, signature, config, roles);
+                if (s != ACLConfigurationParser.Specificity.NO_MATCH) {
+                    matchedPid = generalPid;
+                    break;
+                }
+            }
+        }
+        if (matchedPid == null) {
+            //can't find the matched PID, use the most specific one
+            matchedPid = iterateDownPids(getNameSegments(objectName)).get(0);
+        }
+        LOG.debug("The current roles are \'" + currentRoles 
+                  + "\', however the expected roles are \'"
+                  + expectedRoles 
+                  + "\'. To make the call pass RBAC check, please add current role into entry \'"
+                  + operationName + "\' of file "
+                  + matchedPid + ".cfg"
+                  );
     }
 
     List<String> getRequiredRoles(ObjectName objectName, String methodName, String[] signature) throws IOException {
@@ -352,7 +435,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             String generalPid = getGeneralPid(context.getAllPids(), pid);
             if (generalPid.length() > 0) {
                 Dictionary<String, Object> config = context.getConfiguration(generalPid);
-                List<String> roles = new ArrayList<String>();
+                List<String> roles = new ArrayList<>();
                 ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(methodName, params, signature, config, roles);
                 if (s != ACLConfigurationParser.Specificity.NO_MATCH) {
                     return roles;
@@ -363,9 +446,8 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     private String getGeneralPid(List<String> allPids, String pid) {
-        String ret = "";
         String[] pidStrArray = pid.split(Pattern.quote("."));
-        Set<String[]> rets = new TreeSet<String[]>(WILDCARD_PID_COMPARATOR);
+        Set<String[]> rets = new TreeSet<>(WILDCARD_PID_COMPARATOR);
         for (String id : allPids) {
             String[] idStrArray = id.split(Pattern.quote("."));
             if (idStrArray.length == pidStrArray.length) {
@@ -401,7 +483,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     private List<String> getNameSegments(ObjectName objectName) {
-        List<String> segments = new ArrayList<String>();
+        List<String> segments = new ArrayList<>();
         segments.add(objectName.getDomain());
         // TODO can an ObjectName property contain a comma as key or value ?
         // TODO support quoting as described in http://docs.oracle.com/javaee/1.4/api/javax/management/ObjectName.html
@@ -435,7 +517,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
      * @return the PIDs corresponding with the ObjectName in the above order.
      */
     private List<String> iterateDownPids(List<String> segments) {
-        List<String> res = new ArrayList<String>();
+        List<String> res = new ArrayList<>();
         for (int i = segments.size(); i > 0; i--) {
             StringBuilder sb = new StringBuilder();
             sb.append(JMX_ACL_PID_PREFIX);

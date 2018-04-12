@@ -15,12 +15,10 @@
  */
 package org.apache.karaf.jaas.command;
 
-import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -52,38 +50,34 @@ public class SuCommand implements Action {
     @Override
     public Object execute() throws Exception {
         Subject subject = new Subject();
-        LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback callback : callbacks) {
-                    if (callback instanceof NameCallback) {
-                        ((NameCallback) callback).setName(user);
-                    } else if (callback instanceof PasswordCallback) {
-                        String password = SuCommand.this.session.readLine("Password: ", '*');
-                        ((PasswordCallback) callback).setPassword(password.toCharArray());
-                    } else {
-                        throw new UnsupportedCallbackException(callback);
-                    }
+        LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
+            for (Callback callback : callbacks) {
+                if (callback instanceof NameCallback) {
+                    ((NameCallback) callback).setName(user);
+                } else if (callback instanceof PasswordCallback) {
+                    String password = SuCommand.this.session.readLine("Password: ", '*');
+                    ((PasswordCallback) callback).setPassword(password.toCharArray());
+                } else {
+                    throw new UnsupportedCallbackException(callback);
                 }
             }
         });
         loginContext.login();
 
-        JaasHelper.doAs(subject, new PrivilegedExceptionAction<Object>() {
-            public Object run() throws InterruptedException {
-                final Session newSession = session.getFactory().create(
-                        System.in, System.out, System.err, SuCommand.this.session.getTerminal(), null, null);
-                Object oldIgnoreInterrupts = session.get(Session.IGNORE_INTERRUPTS);
-                try {
-                    session.put(Session.IGNORE_INTERRUPTS, Boolean.TRUE);
-                    String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
-                    Thread thread = new Thread(newSession, name);
-                    thread.start();
-                    thread.join();
-                } finally {
-                    session.put(Session.IGNORE_INTERRUPTS, oldIgnoreInterrupts);
-                }
-                return null;
+        JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
+            final Session newSession = session.getFactory().create(
+                    System.in, System.out, System.err, SuCommand.this.session.getTerminal(), null, null);
+            Object oldIgnoreInterrupts = session.get(Session.IGNORE_INTERRUPTS);
+            try {
+                session.put(Session.IGNORE_INTERRUPTS, Boolean.TRUE);
+                String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
+                Thread thread = new Thread(newSession, name);
+                thread.start();
+                thread.join();
+            } finally {
+                session.put(Session.IGNORE_INTERRUPTS, oldIgnoreInterrupts);
             }
+            return null;
         });
 
         loginContext.logout();

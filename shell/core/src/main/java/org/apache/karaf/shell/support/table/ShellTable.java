@@ -16,19 +16,40 @@
  */
 package org.apache.karaf.shell.support.table;
 
+import org.apache.felix.gogo.runtime.threadio.ThreadPrintStream;
+import org.apache.felix.service.command.Job;
+import org.jline.terminal.Terminal;
+
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ShellTable {
 
-    private List<Col> cols = new ArrayList<Col>();
-    private List<Row> rows = new ArrayList<Row>();
-    boolean showHeaders = true;
-    private String separator = " | ";
+    private static final char SEP_HORIZONTAL = '─';
+    private static final char SEP_VERTICAL = '│';
+    private static final char SEP_CROSS = '┼';
+
+    private static final char SEP_HORIZONTAL_ASCII = '-';
+    private static final char SEP_VERTICAL_ASCII = '|';
+    private static final char SEP_CROSS_ASCII = '+';
+
+    private static final String DEFAULT_SEPARATOR = " " + SEP_VERTICAL + " ";
+    private static final String DEFAULT_SEPARATOR_ASCII = " " + SEP_VERTICAL_ASCII + " ";
+    private static final String DEFAULT_SEPARATOR_NO_FORMAT = "\t";
+
+    private List<Col> cols = new ArrayList<>();
+    private List<Row> rows = new ArrayList<>();
+    private boolean showHeaders = true;
+    private String separator = DEFAULT_SEPARATOR;
     private int size;
     private String emptyTableText;
+    private boolean forceAscii;
 
     public ShellTable() {
 
@@ -65,6 +86,11 @@ public class ShellTable {
         rows.add(row);
         return row;
     }
+    
+    public ShellTable forceAscii() {
+        forceAscii = true;
+        return this;
+    }
 
     /**
      * Set text to display if there are no rows in the table.
@@ -82,6 +108,12 @@ public class ShellTable {
     }
 
     public void print(PrintStream out, boolean format)  {
+        print(out, null, format);
+    }
+
+    public void print(PrintStream out, Charset charset, boolean format)  {
+        boolean unicode = supportsUnicode(out, charset);
+        String separator = unicode ? this.separator : DEFAULT_SEPARATOR_ASCII;
 
         // "normal" table rendering, with borders
         Row headerRow = new Row(cols);
@@ -97,16 +129,22 @@ public class ShellTable {
         if (format && showHeaders) {
             String headerLine = headerRow.getContent(cols, separator);
             out.println(headerLine);
+            int iCol = 0;
             for (Col col : cols) {
-                out.print(underline(col.getSize()));
+                if (iCol++ == 0) {
+                    out.print(underline(col.getSize(), false, unicode));
+                } else {
+                    out.print(underline(col.getSize() + 3, true, unicode));
+                }
+                iCol++;
             }
-            out.println(underline((cols.size() - 1) * 3));
+            out.println();
         }
 
         for (Row row : rows) {
             if (!format) {
-                if (separator == null || separator.equals(" | "))
-                    out.println(row.getContent(cols, "\t"));
+                if (separator == null || separator.equals(DEFAULT_SEPARATOR))
+                    out.println(row.getContent(cols, DEFAULT_SEPARATOR_NO_FORMAT));
                 else out.println(row.getContent(cols, separator));
             } else {
                 out.println(row.getContent(cols, separator));
@@ -116,6 +154,46 @@ public class ShellTable {
         if (format && rows.size() == 0 && emptyTableText != null) {
             out.println(emptyTableText);
         }
+    }
+
+    private boolean supportsUnicode(PrintStream out, Charset charset) {
+        if (forceAscii) {
+            return false;
+        }
+        if (charset == null) {
+            charset = getEncoding(out);
+        }
+        if (charset == null) {
+            return false;
+        }
+        CharsetEncoder encoder = charset.newEncoder();
+        return encoder.canEncode(separator) 
+            && encoder.canEncode(SEP_HORIZONTAL)
+            && encoder.canEncode(SEP_CROSS);
+    }
+
+    private Charset getEncoding(PrintStream ps) {
+        if (ps.getClass() == ThreadPrintStream.class) {
+            try {
+                return ((Terminal) Job.Utils.current().session().get(".jline.terminal")).encoding();
+            } catch (Throwable t) {
+                // ignore
+            }
+            try {
+                ps = (PrintStream) ps.getClass().getMethod("getCurrent").invoke(ps);
+            } catch (Throwable t) {
+                // ignore
+            }
+        }
+        try {
+            Field f = ps.getClass().getDeclaredField("charOut");
+            f.setAccessible(true);
+            OutputStreamWriter osw = (OutputStreamWriter) f.get(ps);
+            return Charset.forName(osw.getEncoding());
+        } catch (Throwable t) {
+            // ignore
+        }
+        return null;
     }
 
     private void adjustSize() {
@@ -136,9 +214,12 @@ public class ShellTable {
 
     }
 
-    private String underline(int length) {
+    private String underline(int length, boolean crossAtBeg, boolean supported) {
         char[] exmarks = new char[length];
-        Arrays.fill(exmarks, '-');
+        Arrays.fill(exmarks,  supported ? SEP_HORIZONTAL : SEP_HORIZONTAL_ASCII);
+        if (crossAtBeg) {
+            exmarks[1] = supported ? SEP_CROSS : SEP_CROSS_ASCII;
+        }
         return new String(exmarks);
     }
 

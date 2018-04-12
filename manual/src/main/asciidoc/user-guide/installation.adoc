@@ -102,6 +102,37 @@ tar xvf apache-karaf-4.0.0.tar
 Remember the restrictions concerning illegal characters in Java paths, e.g. \!, % etc.
 ====
 
+====== Installation on Debian GNU/linux
+
+There is an unofficial debian package of karaf:
+
+. Add the key of the unofficial debian archive containing karaf
++
+----
+wget -O - https://apt.bang.priv.no/apt_pub.gpg | apt-key add -
+----
+. Open /etc/apt/sources.list in a text editor and add the following lines:
++
+----
+# Unofficial APT archive for apache karaf
+deb http://apt.bang.priv.no/public stable main
+----
+. Update the APT package index and install the package
++
+----
+apt-get update
+apt-get install openjdk-8-jdk karaf
+----
+
+The installed karaf will run as user karaf, group karaf, listening to the usual default karaf ports, be started with systemd, with KARAF_ETC in /etc/karaf and KARAF_DATA in /var/lib/karaf/data.
+
+
+
+[NOTE]
+====
+When/if the link:++https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=881297++[Debian Request For Package (RFP) of karaf] results in an official karaf package becoming available, the unofficial debian package will be discontinued.
+====
+
 ==== Post-Installation steps
 
 Thought it is not always required, it is strongly advised to set up the `JAVA_HOME` environment property to point to the JDK you want Apache Karaf to use before starting it.

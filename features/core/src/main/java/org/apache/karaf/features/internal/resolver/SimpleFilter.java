@@ -17,11 +17,13 @@
 package org.apache.karaf.features.internal.resolver;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.utils.version.VersionRange;
 
@@ -37,12 +39,29 @@ public class SimpleFilter {
     public static final int PRESENT = 8;
     public static final int APPROX = 9;
 
+    /**
+     * Strings which are commonly found in filter specification. We use this map as an interner.
+     */
+    private static final ConcurrentHashMap<String, String> COMMON_STRINGS;
+
+    static {
+        ConcurrentHashMap<String, String> s = new ConcurrentHashMap<>(8);
+        s.put("optional", "optional");
+        s.put("osgi.ee", "osgi.ee");
+        s.put("resolution", "resolution");
+        s.put("uses", "uses");
+        s.put("version", "version");
+        COMMON_STRINGS = s;
+    }
+
+    public static final SimpleFilter MATCH_ALL_FILTER = new SimpleFilter(null, null, MATCH_ALL);
+
     private final String name;
     private final Object value;
     private final int op;
 
-    public SimpleFilter(String name, Object value, int op) {
-        this.name = name;
+    SimpleFilter(String name, Object value, int op) {
+        this.name = reuseCommonString(name);
         this.value = value;
         this.op = op;
     }
@@ -59,29 +78,29 @@ public class SimpleFilter {
         return op;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         toString(sb);
         return sb.toString();
     }
 
-    private void toString(StringBuilder sb)
-    {
+    private void toString(StringBuilder sb) {
         switch (op)
         {
         case AND:
             sb.append("(&");
-            toString(sb, (List) value);
+            toString(sb, (List<?>) value);
             sb.append(")");
             break;
         case OR:
             sb.append("(|");
-            toString(sb, (List) value);
+            toString(sb, (List<?>) value);
             sb.append(")");
             break;
         case NOT:
             sb.append("(!");
-            toString(sb, (List) value);
+            toString(sb, (List<?>) value);
             sb.append(")");
             break;
         case EQ:
@@ -107,7 +126,7 @@ public class SimpleFilter {
             break;
         case SUBSTRING:
             sb.append("(").append(name).append("=");
-            unparseSubstring(sb, (List) value);
+            unparseSubstring(sb, (List<?>) value);
             sb.append(")");
             break;
         case PRESENT:
@@ -124,7 +143,11 @@ public class SimpleFilter {
         }
     }
 
-    private static void toString(StringBuilder sb, List list) {
+    private static String reuseCommonString(String str) {
+        return str != null ? COMMON_STRINGS.getOrDefault(str, str) : null;
+    }
+
+    private static void toString(StringBuilder sb, List<?> list) {
         for (Object o : list) {
             SimpleFilter sf = (SimpleFilter) o;
             sf.toString(sb);
@@ -193,7 +216,7 @@ public class SimpleFilter {
                     int peek = skipWhitespace(filter, idx + 1);
                     if (filter.charAt(peek) == '(') {
                         idx = peek - 1;
-                        stack.addFirst(new SimpleFilter(null, new ArrayList(), SimpleFilter.AND));
+                        stack.addFirst(new SimpleFilter(null, new ArrayList<>(2), SimpleFilter.AND));
                     } else {
                         stack.addFirst(idx);
                     }
@@ -201,7 +224,7 @@ public class SimpleFilter {
                     int peek = skipWhitespace(filter, idx + 1);
                     if (filter.charAt(peek) == '(') {
                         idx = peek - 1;
-                        stack.addFirst(new SimpleFilter(null, new ArrayList(), SimpleFilter.OR));
+                        stack.addFirst(new SimpleFilter(null, new ArrayList<>(2), SimpleFilter.OR));
                     } else {
                         stack.addFirst(idx);
                     }
@@ -209,7 +232,7 @@ public class SimpleFilter {
                     int peek = skipWhitespace(filter, idx + 1);
                     if (filter.charAt(peek) == '(') {
                         idx = peek - 1;
-                        stack.addFirst(new SimpleFilter(null, new ArrayList(), SimpleFilter.NOT));
+                        stack.addFirst(new SimpleFilter(null, new ArrayList<>(1), SimpleFilter.NOT));
                     } else {
                         stack.addFirst(idx);
                     }
@@ -246,13 +269,11 @@ public class SimpleFilter {
     }
 
     private static SimpleFilter subfilter(String filter, int startIdx, int endIdx) {
-        final String opChars = "=<>~";
-
         // Determine the ending index of the attribute name.
         int attrEndIdx = startIdx;
         for (int i = 0; i < (endIdx - startIdx); i++) {
             char c = filter.charAt(startIdx + i);
-            if (opChars.indexOf(c) >= 0) {
+            if ("=<>~".indexOf(c) >= 0) {
                 break;
             } else if (!Character.isWhitespace(c)) {
                 attrEndIdx = startIdx + i + 1;
@@ -325,7 +346,6 @@ public class SimpleFilter {
     }
 
     public static List<String> parseSubstring(String value) {
-        List<String> pieces = new ArrayList<>();
         int length = value.length();
 
         boolean isSimple = true;
@@ -337,8 +357,7 @@ public class SimpleFilter {
             }
         }
         if (isSimple) {
-            pieces.add(value);
-            return pieces;
+            return Collections.singletonList(value);
         }
 
         StringBuilder ss = new StringBuilder();
@@ -350,6 +369,7 @@ public class SimpleFilter {
         int idx = 0;
 
         // We assume (sub)strings can contain leading and trailing blanks
+        List<String> pieces = new ArrayList<>(2);
         boolean escaped = false;
         for (;;) {
             if (idx >= length) {
@@ -404,7 +424,7 @@ public class SimpleFilter {
         return pieces;
     }
 
-    public static void unparseSubstring(StringBuilder sb, List<String> pieces) {
+    public static void unparseSubstring(StringBuilder sb, List<?> pieces) {
         for (int i = 0; i < pieces.size(); i++) {
             if (i > 0) {
                 sb.append("*");
@@ -489,7 +509,6 @@ public class SimpleFilter {
      * @param attrs Map of attributes to convert to a filter.
      * @return A filter corresponding to the attributes.
      */
-    @SuppressWarnings("unchecked")
     public static SimpleFilter convert(Map<String, Object> attrs) {
         // Rather than building a filter string to be parsed into a SimpleFilter,
         // we will just create the parsed SimpleFilter directly.
@@ -507,14 +526,12 @@ public class SimpleFilter {
                                     SimpleFilter.GTE)
                     );
                 } else {
+                    SimpleFilter val = new SimpleFilter(
+                        entry.getKey(),
+                        vr.getFloor().toString(),
+                        SimpleFilter.LTE);
                     SimpleFilter not =
-                            new SimpleFilter(null, new ArrayList(), SimpleFilter.NOT);
-                    ((List<Object>) not.getValue()).add(
-                            new SimpleFilter(
-                                    entry.getKey(),
-                                    vr.getFloor().toString(),
-                                    SimpleFilter.LTE)
-                    );
+                            new SimpleFilter(null, Collections.singletonList(val), SimpleFilter.NOT);
                     filters.add(not);
                 }
 
@@ -527,14 +544,12 @@ public class SimpleFilter {
                                         SimpleFilter.LTE)
                         );
                     } else if (!vr.getCeiling().equals(VersionRange.INFINITE_VERSION)) {
+                        SimpleFilter val = new SimpleFilter(
+                            entry.getKey(),
+                            vr.getCeiling().toString(),
+                            SimpleFilter.GTE);
                         SimpleFilter not =
-                                new SimpleFilter(null, new ArrayList(), SimpleFilter.NOT);
-                        ((List<Object>) not.getValue()).add(
-                                new SimpleFilter(
-                                        entry.getKey(),
-                                        vr.getCeiling().toString(),
-                                        SimpleFilter.GTE)
-                        );
+                                new SimpleFilter(null, Collections.singletonList(val), SimpleFilter.NOT);
                         filters.add(not);
                     }
                 }
@@ -558,16 +573,13 @@ public class SimpleFilter {
             }
         }
 
-        SimpleFilter sf = null;
-
-        if (filters.size() == 1) {
-            sf = filters.get(0);
-        } else if (attrs.size() > 1) {
-            sf = new SimpleFilter(null, filters, SimpleFilter.AND);
-        } else if (filters.isEmpty()) {
-            sf = new SimpleFilter(null, null, SimpleFilter.MATCH_ALL);
+        switch (filters.size()) {
+            case 0:
+                return MATCH_ALL_FILTER;
+            case 1:
+                return filters.get(0);
+            default:
+                return new SimpleFilter(null, filters, SimpleFilter.AND);
         }
-
-        return sf;
     }
 }

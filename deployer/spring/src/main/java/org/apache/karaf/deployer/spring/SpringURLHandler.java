@@ -75,7 +75,7 @@ public class SpringURLHandler extends AbstractURLStreamHandlerService {
                 return new ByteArrayInputStream(os.toByteArray());
             } catch (Exception e) {
                 logger.error("Error opening Spring xml url", e);
-                throw (IOException) new IOException("Error opening Spring xml url").initCause(e);
+                throw new IOException("Error opening Spring xml url", e);
             }
         }
     }

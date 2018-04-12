@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.URI;
+import java.util.Objects;
 
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
@@ -31,69 +33,101 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
  */
 public class RepositoryImpl implements Repository {
 
+    /** {@link URI original URI} of the resource where feature declarations were loaded from */
     private final URI uri;
-    private final String blacklisted;
+
+    /** Transformed {@link Features model} of the repository */
     private Features features;
 
+    private boolean blacklisted;
+
     public RepositoryImpl(URI uri) {
-        this(uri, null);
+        this(uri, false);
     }
 
-    public RepositoryImpl(URI uri, String blacklisted) {
+    public RepositoryImpl(URI uri, boolean validate) {
         this.uri = uri;
+        load(validate);
+    }
+
+    /**
+     * Constructs a repository without any downloading
+     * @param uri
+     * @param features
+     * @param blacklisted
+     */
+    public RepositoryImpl(URI uri, Features features, boolean blacklisted) {
+        this.uri = uri;
+        this.features = features;
         this.blacklisted = blacklisted;
     }
 
+    @Override
     public URI getURI() {
         return uri;
     }
 
-    public String getName() throws IOException {
-        load();
+    @Override
+    public String getName() {
         return features.getName();
     }
 
-    public URI[] getRepositories() throws IOException {
-        load();
-        URI[] result = new URI[features.getRepository().size()];
-        for (int i = 0; i < features.getRepository().size(); i++) {
-            String uri = features.getRepository().get(i);
-            uri = uri.trim();
-            result[i] = URI.create(uri);
-        }
-        return result;
+    @Override
+    public URI[] getRepositories() {
+        return features.getRepository().stream()
+                .map(String::trim)
+                .map(URI::create)
+                .toArray(URI[]::new);
     }
 
-    public URI[] getResourceRepositories() throws IOException {
-        load();
-        URI[] result = new URI[features.getResourceRepository().size()];
-        for (int i = 0; i < features.getResourceRepository().size(); i++) {
-            String uri = features.getResourceRepository().get(i);
-            uri = uri.trim();
-            result[i] = URI.create(uri);
-        }
-        return result;
+    @Override
+    public URI[] getResourceRepositories() {
+        return features.getResourceRepository().stream()
+                .map(String::trim)
+                .map(URI::create)
+                .toArray(URI[]::new);
     }
 
-    public org.apache.karaf.features.Feature[] getFeatures() throws IOException {
-        load();
-        return features.getFeature().toArray(new org.apache.karaf.features.Feature[features.getFeature().size()]);
+    @Override
+    public Feature[] getFeatures() {
+        return features.getFeature()
+                .toArray(new Feature[features.getFeature().size()]);
     }
 
-
-    public void load() throws IOException {
-        load(false);
+    public Features getFeaturesInternal() {
+        return features;
     }
 
-    public void load(boolean validate) throws IOException {
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+        features.setBlacklisted(blacklisted);
+    }
+
+    private void load(boolean validate) {
         if (features == null) {
-            try (
-                    InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())
-            ) {
+            try (InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())) {
                 features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
-                Blacklist.blacklist(features, blacklisted);
             } catch (Exception e) {
-                throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+                throw new RuntimeException(e.getMessage() + " : " + uri, e);
+            }
+        }
+    }
+
+    /**
+     * An extension point to alter {@link Features JAXB model of features}
+     * @param processor
+     */
+    public void processFeatures(FeaturesProcessor processor) {
+        processor.process(features);
+        if (blacklisted) {
+            // all features of blacklisted repository are blacklisted too
+            for (org.apache.karaf.features.internal.model.Feature feature : features.getFeature()) {
+                feature.setBlacklisted(true);
             }
         }
     }
@@ -112,5 +146,22 @@ public class RepositoryImpl implements Repository {
         }
     }
 
-}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RepositoryImpl that = (RepositoryImpl) o;
+        return Objects.equals(uri, that.uri);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri);
+    }
+
+    @Override
+    public String toString() {
+        return getURI().toString();
+    }
+
+}

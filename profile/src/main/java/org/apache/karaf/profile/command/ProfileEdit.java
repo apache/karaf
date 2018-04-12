@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.profile.command;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -26,9 +24,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jline.TerminalSupport;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
+import org.apache.karaf.profile.ProfileConstants;
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -37,10 +35,6 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Terminal;
-import org.jledit.ConsoleEditor;
-import org.jledit.ContentManager;
-import org.jledit.EditorFactory;
-import org.jledit.simple.SimpleConsoleEditor;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -55,15 +49,6 @@ public class ProfileEdit implements Action {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProfileEdit.class);
 
-    static final String FEATURE_PREFIX = "feature.";
-    static final String REPOSITORY_PREFIX = "repository.";
-    static final String BUNDLE_PREFIX = "bundle.";
-    static final String OVERRIDE_PREFIX = "override.";
-    static final String CONFIG_PREFIX = "config.";
-    static final String SYSTEM_PREFIX = "system.";
-    static final String LIB_PREFIX = "lib.";
-    static final String ENDORSED_PREFIX = "endorsed.";
-    static final String EXT_PREFIX = "ext.";
     static final String DELIMITER = ",";
     static final String PID_KEY_SEPARATOR = "/";
 
@@ -131,15 +116,7 @@ public class ProfileEdit implements Action {
     private ConfigurationAdmin configurationAdmin;
 
     @Reference
-    private EditorFactory editorFactory;
-
-    @Reference
     Terminal terminal;
-
-    public void init() {
-        // TODO: Karaf 2.4 has a bug to lookup this class, so we bind it manually - Karaf 2.4.1 should have this fixed
-        this.editorFactory.bind("simple", SimpleConsoleEditor.class);
-    }
 
     @Override
     public Object execute() throws Exception {
@@ -171,15 +148,15 @@ public class ProfileEdit implements Action {
         }
         if (libs != null && libs.length > 0) {
             editInLine = true;
-            handleLibraries(builder, libs, profile, "lib", LIB_PREFIX);
+            handleLibraries(builder, libs, profile, "lib", ProfileConstants.LIB_PREFIX);
         }
         if (endorsed != null && endorsed.length > 0) {
             editInLine = true;
-            handleLibraries(builder, endorsed, profile, "endorsed lib", ENDORSED_PREFIX);
+            handleLibraries(builder, endorsed, profile, "endorsed lib", ProfileConstants.ENDORSED_PREFIX);
         }
         if (extension != null && extension.length > 0) {
             editInLine = true;
-            handleLibraries(builder, extension, profile, "extension lib", EXT_PREFIX);
+            handleLibraries(builder, extension, profile, "extension lib", ProfileConstants.EXT_PREFIX);
         }
         if (bundles != null && bundles.length > 0) {
             editInLine = true;
@@ -223,14 +200,14 @@ public class ProfileEdit implements Action {
      * Adds or remove the specified features to the specified profile.
      */
     private void handleFeatures(ProfileBuilder builder, String[] features, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String feature : features) {
             if (delete) {
                 System.out.println("Deleting feature:" + feature + " from profile:" + profile.getId());
             } else {
                 System.out.println("Adding feature:" + feature + " to profile:" + profile.getId());
             }
-            updateConfig(conf, FEATURE_PREFIX + feature.replace('/', '_'), feature, set, delete);
+            updateConfig(conf, ProfileConstants.FEATURE_PREFIX + feature.replace('/', '_'), feature, set, delete);
             builder.addConfiguration(Profile.INTERNAL_PID, conf);
         }
     }
@@ -239,14 +216,14 @@ public class ProfileEdit implements Action {
      * Adds or remove the specified feature repositories to the specified profile.
      */
     private void handleFeatureRepositories(ProfileBuilder builder, String[] repositories, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String repositoryURI : repositories) {
             if (set) {
                 System.out.println("Adding feature repository:" + repositoryURI + " to profile:" + profile.getId());
             } else if (delete) {
                 System.out.println("Deleting feature repository:" + repositoryURI + " from profile:" + profile.getId());
             }
-            updateConfig(conf, REPOSITORY_PREFIX + repositoryURI.replace('/', '_'), repositoryURI, set, delete);
+            updateConfig(conf, ProfileConstants.REPOSITORY_PREFIX + repositoryURI.replace('/', '_'), repositoryURI, set, delete);
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
     }
@@ -259,7 +236,7 @@ public class ProfileEdit implements Action {
      * @param libPrefix The prefix of the lib.
      */
     private void handleLibraries(ProfileBuilder builder, String[] libs, Profile profile, String libType, String libPrefix) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String lib : libs) {
             if (set) {
                 System.out.println("Adding "+libType+":" + lib + " to profile:" + profile.getId());
@@ -277,14 +254,14 @@ public class ProfileEdit implements Action {
      * @param profile   The target profile.
      */
     private void handleBundles(ProfileBuilder builder, String[] bundles, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String bundle : bundles) {
             if (set) {
                 System.out.println("Adding bundle:" + bundle + " to profile:" + profile.getId());
             } else if (delete) {
                 System.out.println("Deleting bundle:" + bundle + " from profile:" + profile.getId());
             }
-            updateConfig(conf, BUNDLE_PREFIX + bundle.replace('/', '_'), bundle, set, delete);
+            updateConfig(conf, ProfileConstants.BUNDLE_PREFIX + bundle.replace('/', '_'), bundle, set, delete);
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
     }
@@ -295,14 +272,14 @@ public class ProfileEdit implements Action {
      * @param profile       The target profile.
      */
     private void handleOverrides(ProfileBuilder builder, String[] overrides, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String override : overrides) {
             if (set) {
                 System.out.println("Adding override:" + override + " to profile:" + profile.getId());
             } else if (delete) {
                 System.out.println("Deleting override:" + override + " from profile:" + profile.getId());
             }
-            updateConfig(conf, OVERRIDE_PREFIX + override.replace('/', '_'), override, set, delete);
+            updateConfig(conf, ProfileConstants.OVERRIDE_PREFIX + override.replace('/', '_'), override, set, delete);
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
     }
@@ -325,7 +302,7 @@ public class ProfileEdit implements Action {
             } else {
                 currentPid = pidProperty;
             }
-            Map<String, String> conf = getConfigurationFromBuilder(builder, currentPid);
+            Map<String, Object> conf = getConfigurationFromBuilder(builder, currentPid);
             
             // We only support import when a single pid is specified
             if (pidProperties.length == 1 && importPid) {
@@ -375,7 +352,7 @@ public class ProfileEdit implements Action {
      * @param profile               The target profile.
      */
     private void handleSystemProperties(ProfileBuilder builder, String[] systemProperties, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String systemProperty : systemProperties) {
             Map<String, String> configMap = extractConfigs(systemProperty);
             for (Map.Entry<String, String> configEntries : configMap.entrySet()) {
@@ -390,7 +367,7 @@ public class ProfileEdit implements Action {
                 } else {
                     System.out.println("Removing value:" + value + " key:" + key + " from system properties and profile:" + profile.getId());
                 }
-                updatedDelimitedList(conf, SYSTEM_PREFIX + key, value, delimiter, set, delete, append, remove);
+                updatedDelimitedList(conf, ProfileConstants.SYSTEM_PREFIX + key, value, delimiter, set, delete, append, remove);
             }
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
@@ -402,7 +379,7 @@ public class ProfileEdit implements Action {
      * @param profile               The target profile.
      */
     private void handleConfigProperties(ProfileBuilder builder, String[] configProperties, Profile profile) {
-        Map<String, String> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
+        Map<String, Object> conf = getConfigurationFromBuilder(builder, Profile.INTERNAL_PID);
         for (String configProperty : configProperties) {
             Map<String, String> configMap = extractConfigs(configProperty);
             for (Map.Entry<String, String> configEntries : configMap.entrySet()) {
@@ -415,13 +392,14 @@ public class ProfileEdit implements Action {
                 } else if (set) {
                     System.out.println("Setting value:" + value + " key:" + key + " from config properties and profile:" + profile.getId());
                 }
-                updatedDelimitedList(conf, CONFIG_PREFIX + key, value, delimiter, set, delete, append, remove);
+                updatedDelimitedList(conf, ProfileConstants.CONFIG_PREFIX + key, value, delimiter, set, delete, append, remove);
             }
         }
         builder.addConfiguration(Profile.INTERNAL_PID, conf);
     }
 
     private void openInEditor(Profile profile, String resource) throws Exception {
+        /* TODO:JLINE
         String id = profile.getId();
         String location = id + " " + resource;
         //Call the editor
@@ -431,11 +409,12 @@ public class ProfileEdit implements Action {
         editor.setContentManager(new DatastoreContentManager(profileService));
         editor.open(location, id);
         editor.start();
+        */
     }
 
-    public void updatedDelimitedList(Map<String, String> map, String key, String value, String delimiter, boolean set, boolean delete, boolean append, boolean remove) {
+    public void updatedDelimitedList(Map<String, Object> map, String key, String value, String delimiter, boolean set, boolean delete, boolean append, boolean remove) {
         if (append || remove) {
-            String oldValue = map.containsKey(key) ? map.get(key) : "";
+            String oldValue = map.containsKey(key) ? (String) map.get(key) : "";
             List<String> parts = new LinkedList<>(Arrays.asList(oldValue.split(delimiter)));
             //We need to remove any possible blanks.
             parts.remove("");
@@ -460,7 +439,7 @@ public class ProfileEdit implements Action {
         }
     }
 
-    private void updateConfig(Map<String, String> map, String key, String value, boolean set, boolean delete) {
+    private void updateConfig(Map<String, Object> map, String key, Object value, boolean set, boolean delete) {
         if (set) {
             map.put(key, value);
         } else if (delete) {
@@ -471,12 +450,12 @@ public class ProfileEdit implements Action {
     /**
      * Imports the pid to the target Map.
      */
-    private void importPidFromLocalConfigAdmin(String pid, Map<String, String> target) {
+    private void importPidFromLocalConfigAdmin(String pid, Map<String, Object> target) {
         try {
             Configuration[] configuration = configurationAdmin.listConfigurations("(service.pid=" + pid + ")");
             if (configuration != null && configuration.length > 0) {
-                Dictionary dictionary = configuration[0].getProperties();
-                Enumeration keyEnumeration = dictionary.keys();
+                Dictionary<String, Object> dictionary = configuration[0].getProperties();
+                Enumeration<String> keyEnumeration = dictionary.keys();
                 while (keyEnumeration.hasMoreElements()) {
                     String key = String.valueOf(keyEnumeration.nextElement());
                     //file.install.filename needs to be skipped as it specific to the current container.
@@ -515,8 +494,6 @@ public class ProfileEdit implements Action {
     }
 
     /**
-     * Gets the {@link jline.Terminal} from the current session.
-     */
     private jline.Terminal getTerminal() throws Exception {
         try {
             return (jline.Terminal) terminal.getClass().getMethod("getTerminal").invoke(terminal);
@@ -535,10 +512,6 @@ public class ProfileEdit implements Action {
         }
     }
 
-    private Map<String, String> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
-        return builder.getConfiguration(pid);
-    }
-
     static class DatastoreContentManager implements ContentManager {
 
         private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -549,9 +522,6 @@ public class ProfileEdit implements Action {
             this.profileService = profileService;
         }
 
-        /**
-         * Loads content from the specified location.
-         */
         @Override
         public String load(String location) throws IOException {
             try {
@@ -569,9 +539,6 @@ public class ProfileEdit implements Action {
             }
         }
 
-        /**
-         * Saves content to the specified location.
-         */
         @Override
         public boolean save(String content, String location) {
             try {
@@ -591,20 +558,20 @@ public class ProfileEdit implements Action {
             return true;
         }
 
-        /**
-         * Saves the {@link String} content to the specified location using the specified {@link java.nio.charset.Charset}.
-         */
         @Override
         public boolean save(String content, Charset charset, String location) {
             return save(content, location);
         }
 
-        /**
-         * Detect the Charset of the content in the specified location.
-         */
         @Override
         public Charset detectCharset(String location) {
             return UTF_8;
         }
     }
+        */
+
+    private Map<String, Object> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
+        return builder.getConfiguration(pid);
+    }
+
 }

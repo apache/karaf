@@ -46,7 +46,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
 
@@ -163,6 +162,9 @@ public final class JaxbUtil {
                 break;
             case FeaturesNamespaces.URI_1_4_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.4.0.xsd";
+                break;
+            case FeaturesNamespaces.URI_1_5_0:
+                schemaLocation = "/org/apache/karaf/features/karaf-features-1.5.0.xsd";
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported namespace: " + namespace);

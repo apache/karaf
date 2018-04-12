@@ -60,6 +60,8 @@ public class Activator extends BaseActivator implements ManagedService {
     
     private ServiceTracker<KeystoreInstance, KeystoreInstance> keystoreInstanceServiceTracker;
 
+    private EventAdminLogger eventAdminLogger;
+
     protected void doStart() throws Exception {
         // Verify dependencies
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
@@ -67,6 +69,26 @@ public class Activator extends BaseActivator implements ManagedService {
         if (configurationAdmin == null || keystoreManager == null) {
             return;
         }
+
+        EventAdminLogger logger = null;
+        if (getBoolean("audit.eventadmin.enabled", true)) {
+            try {
+                logger = new EventAdminLoggerImpl(bundleContext);
+            } catch (Throwable ignore) {
+                // Ignore the listener if EventAdmin package isn't present
+            }
+        }
+        if (logger == null) {
+            logger = new EventAdminLogger() {
+                @Override
+                public void close() {
+                }
+                @Override
+                public void log(String methodName, String[] signature, Object result, Throwable error, Object... params) {
+                }
+            };
+        }
+        eventAdminLogger = logger;
 
         String rmiRegistryHost = getString("rmiRegistryHost", "");
         int rmiRegistryPort = getInt("rmiRegistryPort", 1099);
@@ -88,23 +110,28 @@ public class Activator extends BaseActivator implements ManagedService {
         String keyStore = getString("keyStore", "karaf.ks");
         String keyAlias = getString("keyAlias", "karaf");
         String trustStore = getString("trustStore", "karaf.ts");
+        boolean createRmiRegistry = getBoolean("createRmiRegistry", true);
+        boolean locateRmiRegistry = getBoolean("locateRmiRegistry", true);
+        boolean locateExistingMBeanServerIfPossible = getBoolean("locateExistingMBeanServerIfPossible", true);
 
         KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
+        guard.setLogger(eventAdminLogger);
         guard.setConfigAdmin(configurationAdmin);
 
         rmiRegistryFactory = new RmiRegistryFactory();
-        rmiRegistryFactory.setCreate(true);
-        rmiRegistryFactory.setLocate(true);
+        rmiRegistryFactory.setCreate(createRmiRegistry);
+        rmiRegistryFactory.setLocate(locateRmiRegistry);
         rmiRegistryFactory.setHost(rmiRegistryHost);
         rmiRegistryFactory.setPort(rmiRegistryPort);
         rmiRegistryFactory.setBundleContext(bundleContext);
         rmiRegistryFactory.init();
 
         mbeanServerFactory = new MBeanServerFactory();
-        mbeanServerFactory.setLocateExistingServerIfPossible(true);
+        mbeanServerFactory.setLocateExistingServerIfPossible(locateExistingMBeanServerIfPossible);
         mbeanServerFactory.init();
 
         MBeanServer mbeanServer = mbeanServerFactory.getServer();
+        mbeanServer = new EventAdminMBeanServerWrapper(mbeanServer, eventAdminLogger);
 
         JaasAuthenticator jaasAuthenticator = new JaasAuthenticator();
         jaasAuthenticator.setRealm(jmxRealm);
@@ -117,7 +144,7 @@ public class Activator extends BaseActivator implements ManagedService {
         connectorServerFactory.setDaemon(daemon);
         connectorServerFactory.setThreaded(threaded);
         connectorServerFactory.setObjectName(objectName);
-        Map<String, Object> environment = new HashMap<String, Object>();
+        Map<String, Object> environment = new HashMap<>();
         environment.put("jmx.remote.authenticator", jaasAuthenticator);
         try {
             connectorServerFactory.setEnvironment(environment);
@@ -141,35 +168,35 @@ public class Activator extends BaseActivator implements ManagedService {
         registerMBean(securityMBean, "type=security,area=jmx");
 
         register(MBeanServer.class, mbeanServer);
-        
-        keystoreInstanceServiceTracker = new ServiceTracker<KeystoreInstance, KeystoreInstance>(
-            bundleContext, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
+
+        if (secured) {
+            keystoreInstanceServiceTracker = new ServiceTracker<>(
+                    bundleContext, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
                 @Override
                 public KeystoreInstance addingService(ServiceReference<KeystoreInstance> reference) {
-                    if (secured) {
-                        try {
-                            connectorServerFactory.init();
-                        } catch (Exception e) {
-                            LOG.error("Can't re-init JMXConnectorServer with SSL enabled when register a keystore:" + e.getMessage());
-                        }
+                    try {
+                        connectorServerFactory.init();
+                    } catch (Exception e) {
+                        LOG.error("Can't re-init JMXConnectorServer with SSL enabled when register a keystore:" + e.getMessage());
                     }
                     return null;
                 }
+
                 @Override
                 public void modifiedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
                 }
+
                 @Override
                 public void removedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
-                    if (secured) {
-                        try {
-                            connectorServerFactory.init();
-                        } catch (Exception e) {
-                            LOG.error("Can't re-init JMXConnectorServer with SSL enabled when unregister a keystore: " + e.getMessage());
-                        }
+                    try {
+                        connectorServerFactory.init();
+                    } catch (Exception e) {
+                        LOG.error("Can't re-init JMXConnectorServer with SSL enabled when unregister a keystore: " + e.getMessage());
                     }
                 }
             });
-        keystoreInstanceServiceTracker.open();
+            keystoreInstanceServiceTracker.open();
+        }
     }
 
     protected void doStop() {
@@ -199,7 +226,18 @@ public class Activator extends BaseActivator implements ManagedService {
             rmiRegistryFactory = null;
         }
         if (keystoreInstanceServiceTracker != null) {
-            keystoreInstanceServiceTracker.close();
+            try {
+                keystoreInstanceServiceTracker.close();
+            } finally {
+                keystoreInstanceServiceTracker = null;
+            }
+        }
+        if (eventAdminLogger != null) {
+            try {
+                eventAdminLogger.close();
+            } finally {
+                eventAdminLogger = null;
+            }
         }
     }
 

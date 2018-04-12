@@ -33,31 +33,40 @@ public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
         super(KarsMBean.class);
     }
 
+    @Override
     public List<String> getKars() throws MBeanException {
         try {
             return karService.list();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
+    @Override
     public void create(String repoName, List<String> features) {
         karService.create(repoName, features, null);
     }
 
+    @Override
     public void install(String url) throws MBeanException {
+        install(url, false);
+    }
+
+    @Override
+    public void install(String url, boolean noAutoStartBundles) throws MBeanException {
         try {
-            karService.install(new URI(url));
+            karService.install(new URI(url), noAutoStartBundles);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
+    @Override
     public void uninstall(String name) throws MBeanException {
         try {
             karService.uninstall(name);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

@@ -35,11 +35,11 @@ public class TestBundleFactory {
         if (keyProp.length % 2 != 0) {
             throw new IllegalArgumentException("");
         }
-        Hashtable<String, Object> keyPropMap = new Hashtable<String, Object>();
+        Hashtable<String, Object> keyPropMap = new Hashtable<>();
         int c = 0;
         while (c < keyProp.length) {
             String key = (String)keyProp[c++];
-            Object value = (Object)keyProp[c++];
+            Object value = keyProp[c++];
             keyPropMap.put(key, value);
             expect(serviceRef.getProperty(key)).andReturn(value).anyTimes();
         }
@@ -50,7 +50,7 @@ public class TestBundleFactory {
     Bundle createBundle(long id, String name) {
         Bundle bundle = createMock(Bundle.class);
         expect(bundle.getBundleId()).andReturn(id).anyTimes();
-        Dictionary<String, String> headers = new Hashtable<String, String>();
+        Dictionary<String, String> headers = new Hashtable<>();
         headers.put(Constants.BUNDLE_NAME, name);
         expect(bundle.getHeaders()).andReturn(headers).anyTimes();
         return bundle;
@@ -64,9 +64,11 @@ public class TestBundleFactory {
         ServiceReference<?> ref1 = createServiceRef(Constants.OBJECTCLASS, new String[]{"org.example.MyService"},
             "key1", "value1");
         ServiceReference<?> ref2 = createServiceRef(Constants.OBJECTCLASS, new String[]{"org.example.OtherService"}, "key2", 1);
+        // No ObjectClass which can happen for gogo commands
+        ServiceReference<?> ref3 = createServiceRef(Constants.OBJECTCLASS, new String[]{}, "osgi.command.scope", "task");
 
         addRegisteredServices(bundle1, ref1, ref2);
-        addRegisteredServices(bundle2, ref2);
+        addRegisteredServices(bundle2, ref2, ref3);
         expect(bundle3.getRegisteredServices()).andReturn(null).anyTimes();
 
         expect(bundle1.getServicesInUse()).andReturn(null).anyTimes();
@@ -75,8 +77,9 @@ public class TestBundleFactory {
         
         expect(ref1.getUsingBundles()).andReturn(new Bundle[]{bundle2, bundle3}).anyTimes();
         expect(ref2.getUsingBundles()).andReturn(new Bundle[]{bundle3}).anyTimes();
+        expect(ref3.getUsingBundles()).andReturn(new Bundle[]{bundle3}).anyTimes();
 
-        replay(bundle1, bundle2, bundle3, ref1, ref2);
+        replay(bundle1, bundle2, bundle3, ref1, ref2, ref3);
         return new Bundle[] { bundle1, bundle2, bundle3 };
     }
     

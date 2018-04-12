@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -27,6 +28,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+
+import org.apache.karaf.features.Blacklisting;
 
 /**
  * <p>Root element of Feature definition. It contains optional attribute which allow
@@ -49,20 +52,25 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;/complexType&gt;
  * </pre>
  */
-@XmlRootElement(name = "features")
+@XmlRootElement(name = "features", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "features", propOrder = {"repository", "resourceRepository", "feature"})
-public class Features {
+public class Features implements Blacklisting {
 
     @XmlSchemaType(name = "anyURI")
+    @XmlElement(name = "repository", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> repository;
-    @XmlSchemaType(name = "anyURI") @XmlElement(name = "resource-repository")
+    @XmlSchemaType(name = "anyURI") 
+    @XmlElement(name = "resource-repository", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> resourceRepository;
+    @XmlElement(name = "feature", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Feature> feature;
     @XmlAttribute
     protected String name;
     @XmlTransient
     private String namespace;
+    @XmlTransient
+    private boolean blacklisted;
 
     /**
      * <p>Get the value of the repository property.</p>
@@ -173,6 +181,16 @@ public class Features {
                 f.postUnmarshall();
             }
         }
+        trim(repository);
+        trim(resourceRepository);
+    }
+
+    private static void trim(List<String> list) {
+        if (list != null) {
+            for (ListIterator<String> it = list.listIterator(); it.hasNext();) {
+                it.set(it.next().trim());
+            }
+        }
     }
 
     public void setNamespace(String namespace) {
@@ -182,4 +200,14 @@ public class Features {
     public String getNamespace() {
         return namespace;
     }
+
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+    }
+
 }

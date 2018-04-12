@@ -26,41 +26,42 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
 import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.internal.model.Library;
-import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
-import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.service.Blacklist;
+import org.apache.karaf.features.internal.model.Library;
 import org.apache.karaf.features.internal.service.Deployer;
+import org.apache.karaf.features.internal.service.FeaturesProcessor;
 import org.apache.karaf.features.internal.service.State;
+import org.apache.karaf.features.internal.service.StaticInstallSupport;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.util.maven.Parser;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.resource.Resource;
-import org.osgi.resource.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssemblyDeployCallback implements Deployer.DeployCallback {
+/**
+ * Callback through which {@link Deployer} will interact with the distribution that's being assembled.
+ */
+public class AssemblyDeployCallback extends StaticInstallSupport implements Deployer.DeployCallback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
 
@@ -72,32 +73,56 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     private final Path systemDirectory;
     private final Deployer.DeploymentState dstate;
     private final AtomicLong nextBundleId = new AtomicLong(0);
+    private final FeaturesProcessor processor;
 
     private final Map<String, Bundle> bundles = new HashMap<>();
 
-    public AssemblyDeployCallback(DownloadManager manager, Builder builder, BundleRevision systemBundle, Collection<Features> repositories) throws Exception {
+    /**
+     * Create a {@link Deployer.DeployCallback} performing actions on runtime with single system bundle installed
+     * and with access to all non-blacklisted features.
+     * @param manager
+     * @param builder
+     * @param systemBundle
+     * @param repositories
+     * @param processor
+     */
+    public AssemblyDeployCallback(DownloadManager manager, Builder builder, BundleRevision systemBundle, Collection<Features> repositories,
+                                  FeaturesProcessor processor) {
         this.manager = manager;
         this.builder = builder;
         this.homeDirectory = builder.homeDirectory;
         this.etcDirectory = homeDirectory.resolve("etc");
         this.systemDirectory = homeDirectory.resolve("system");
         this.defaultStartLevel = builder.defaultStartLevel;
+        this.processor = processor;
+
         dstate = new Deployer.DeploymentState();
         dstate.bundles = new HashMap<>();
-        dstate.features = new HashMap<>();
         dstate.bundlesPerRegion = new HashMap<>();
         dstate.filtersPerRegion = new HashMap<>();
         dstate.state = new State();
 
         MapUtils.addToMapSet(dstate.bundlesPerRegion, FeaturesService.ROOT_REGION, 0l);
         dstate.bundles.put(0l, systemBundle.getBundle());
+
+        Collection<org.apache.karaf.features.Feature> features = new LinkedList<>();
         for (Features repo : repositories) {
+            if (repo.isBlacklisted()) {
+                continue;
+            }
             for (Feature f : repo.getFeature()) {
-                dstate.features.put(f.getId(), f);
+                if (!f.isBlacklisted()) {
+                    features.add(f);
+                }
             }
         }
+        dstate.partitionFeatures(features);
     }
 
+    /**
+     * Get startup bundles with related start-level
+     * @return
+     */
     public Map<String, Integer> getStartupBundles() {
         Map<String, Integer> startup = new HashMap<>();
         for (Map.Entry<String, Bundle> bundle : bundles.entrySet()) {
@@ -115,51 +140,74 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     }
 
     @Override
-    public void print(String message, boolean verbose) {
-    }
-
-    @Override
     public void saveState(State state) {
         dstate.state.replace(state);
     }
 
     @Override
-    public void persistResolveRequest(Deployer.DeploymentRequest request) throws IOException {
+    public void persistResolveRequest(Deployer.DeploymentRequest request) {
     }
 
     @Override
-    public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
-        // Check blacklist
-        if (Blacklist.isFeatureBlacklisted(builder.getBlacklistedFeatures(), feature.getName(), feature.getVersion())) {
-            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
-                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
-            }
-        }
+    public void installConfigs(org.apache.karaf.features.Feature feature) throws IOException {
+        assertNotBlacklisted(feature);
         // Install
-        LOGGER.info("Installing feature config for " + feature.getId());
+        Downloader downloader = manager.createDownloader();
         for (Config config : ((Feature) feature).getConfig()) {
-            Path configFile = etcDirectory.resolve(config.getName());
-            if (!Files.exists(configFile)) {
-                Files.write(configFile, config.getValue().getBytes());
-            } else if (config.isAppend()) {
-                Files.write(configFile, config.getValue().getBytes(), StandardOpenOption.APPEND);
+            Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
+            if (Files.exists(configFile) && !config.isAppend()) {
+                LOGGER.info("      not changing existing config file: {}", homeDirectory.relativize(configFile));
+                continue;
+            }
+            if (config.isExternal()) {
+                downloader.download(config.getValue().trim(), provider -> {
+                    Path input = provider.getFile().toPath();
+                    byte[] data = Files.readAllBytes(input);
+                    if (config.isAppend()) {
+                        LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
+                        Files.write(configFile, data, StandardOpenOption.APPEND);
+                    } else {
+                        LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                        Files.write(configFile, data);
+                    }
+                });
+            } else {
+                byte[] data = config.getValue().getBytes();
+                if (config.isAppend()) {
+                    LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
+                    Files.write(configFile, data, StandardOpenOption.APPEND);
+                } else {
+                    LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                    Files.write(configFile, data);
+                }
             }
         }
-        Downloader downloader = manager.createDownloader();
         for (final ConfigFile configFile : ((Feature) feature).getConfigfile()) {
-            downloader.download(configFile.getLocation(), new DownloadCallback() {
-                @Override
-                public void downloaded(StreamProvider provider) throws Exception {
+            String path = configFile.getFinalname();
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            path = substFinalName(path);
+            final Path output = homeDirectory.resolve(path);
+            final String finalPath = path;
+            if (configFile.isOverride() || !Files.exists(output)) {
+                downloader.download(configFile.getLocation(), provider -> {
                     Path input = provider.getFile().toPath();
-                    String path = configFile.getFinalname();
-                    if (path.startsWith("/")) {
-                        path = path.substring(1);
+                    if (configFile.isOverride()) {
+                        LOGGER.info("      overwriting config file: {}", finalPath);
+                    } else {
+                        LOGGER.info("      adding config file: {}", finalPath);
                     }
-                    Path output = homeDirectory.resolve(path);
                     Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
-                }
-            });
+                });
+            }
         }
+    }
+
+    @Override
+    public void installLibraries(org.apache.karaf.features.Feature feature) throws IOException {
+        assertNotBlacklisted(feature);
+        Downloader downloader = manager.createDownloader();
         List<String> libraries = new ArrayList<>();
         for (Library library : ((Feature) feature).getLibraries()) {
             String lib = library.getLocation() +
@@ -171,13 +219,25 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
         if (!libraries.isEmpty()) {
             Path configPropertiesPath = etcDirectory.resolve("config.properties");
             Properties configProperties = new Properties(configPropertiesPath.toFile());
-            builder.downloadLibraries(downloader, configProperties, libraries);
+            builder.downloadLibraries(downloader, configProperties, libraries, "   ");
         }
         try {
             downloader.await();
         } catch (Exception e) {
             throw new IOException("Error downloading configuration files", e);
         }
+    }
+    
+    private void assertNotBlacklisted(org.apache.karaf.features.Feature feature) {
+        if (feature.isBlacklisted()) {
+            if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
+                throw new RuntimeException("Feature " + feature.getId() + " is blacklisted");
+            }
+        }
+    }
+
+    @Override
+    public void callListeners(DeploymentEvent deployEvent) {
     }
 
     @Override
@@ -187,13 +247,14 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     @Override
     public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
         // Check blacklist
-        if (Blacklist.isBundleBlacklisted(builder.getBlacklistedBundles(), uri)) {
+        if (processor.isBundleBlacklisted(uri)) {
             if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
                 throw new RuntimeException("Bundle " + uri + " is blacklisted");
             }
         }
+
         // Install
-        LOGGER.info("Installing bundle " + uri);
+        LOGGER.info("      adding maven artifact: " + uri);
         try {
             String regUri;
             String path;
@@ -202,7 +263,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
                 path = Parser.pathFromMaven(uri);
             } else {
                 uri = uri.replaceAll("[^0-9a-zA-Z.\\-_]+", "_");
-		        if (uri.length() > 256) {
+                if (uri.length() > 256) {
                     //to avoid the File name too long exception
                     uri = uri.substring(0, 255);
                 }
@@ -216,7 +277,7 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
             Hashtable<String, String> headers = new Hashtable<>();
             try (JarFile jar = new JarFile(bundleSystemFile.toFile())) {
                 Attributes attributes = jar.getManifest().getMainAttributes();
-                for (Map.Entry attr : attributes.entrySet()) {
+                for (Map.Entry<Object, Object> attr : attributes.entrySet()) {
                     headers.put(attr.getKey().toString(), attr.getValue().toString());
                 }
             }
@@ -233,37 +294,32 @@ public class AssemblyDeployCallback implements Deployer.DeployCallback {
     }
 
     @Override
-    public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void uninstall(Bundle bundle) throws BundleException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void startBundle(Bundle bundle) throws BundleException {
-    }
-
-    @Override
-    public void stopBundle(Bundle bundle, int options) throws BundleException {
-    }
-
-    @Override
     public void setBundleStartLevel(Bundle bundle, int startLevel) {
         bundle.adapt(BundleStartLevel.class).setStartLevel(startLevel);
     }
 
     @Override
-    public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
+    public void bundleBlacklisted(BundleInfo bundleInfo) {
+        LOGGER.info("      skipping blacklisted bundle: {}", bundleInfo.getLocation());
     }
 
-    @Override
-    public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
+    private String substFinalName(String finalname) {
+        final String markerVarBeg = "${";
+        final String markerVarEnd = "}";
+
+        boolean startsWithVariable = finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
+        if (startsWithVariable) {
+            String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd));
+            switch (marker) {
+            case "karaf.base":
+                return this.homeDirectory + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
+            case "karaf.etc":
+                return this.etcDirectory + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
+            default:
+                break;
+            }
+        }
+        return finalname;
     }
 
-    @Override
-    public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
-    }
 }

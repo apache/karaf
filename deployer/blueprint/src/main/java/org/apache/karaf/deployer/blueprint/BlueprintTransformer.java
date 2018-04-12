@@ -20,11 +20,12 @@ package org.apache.karaf.deployer.blueprint;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class BlueprintTransformer {
         }
 
         // get original last modification date
-        long lastModified = url.openConnection().getLastModified();
+        long lastModified = getLastModified(url);
 
         JarOutputStream out = new JarOutputStream(os);
         ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
@@ -137,10 +138,10 @@ public class BlueprintTransformer {
             line = line.trim();
             if (line.length() > 0) {
                 String parts[] = line.split("\\s*,\\s*");
-                for (int i = 0; i < parts.length; i++) {
-                    int n = parts[i].lastIndexOf('.');
+                for (String part : parts) {
+                    int n = part.lastIndexOf('.');
                     if (n > 0) {
-                        String pkg = parts[i].substring(0, n);
+                        String pkg = part.substring(0, n);
                         if (!pkg.startsWith("java.")) {
                             refers.add(pkg);
                         }
@@ -167,6 +168,13 @@ public class BlueprintTransformer {
     protected static Document parse(URL url) throws Exception {
         try (InputStream is = url.openStream()) {
             return XmlUtils.parse(is);
+        }
+    }
+
+    protected static long getLastModified(URL url) throws IOException {
+        URLConnection urlConnection = url.openConnection();
+        try(InputStream is = urlConnection.getInputStream()) {
+            return urlConnection.getLastModified();
         }
     }
 

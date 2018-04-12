@@ -25,9 +25,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.karaf.features.internal.util.JsonReader;
-import org.apache.karaf.features.internal.util.JsonWriter;
+import org.apache.karaf.util.json.JsonReader;
+import org.apache.karaf.util.json.JsonWriter;
 
+@SuppressWarnings({
+    "rawtypes"
+   })
 public abstract class StateStorage {
 
     public void load(State state) throws IOException {

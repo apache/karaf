@@ -31,13 +31,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -58,6 +59,8 @@ import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.DownloadCallback;
@@ -74,26 +77,27 @@ import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.State;
+import org.apache.karaf.features.internal.service.StaticInstallSupport;
 import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.profile.assembly.CustomDownloadManager;
+import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.karaf.tooling.utils.ReactorMavenResolver;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.settings.Settings;
+import org.eclipse.aether.repository.WorkspaceReader;
 import org.ops4j.pax.url.mvn.MavenResolver;
 import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -102,8 +106,6 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Requirement;
-import org.osgi.resource.Resource;
-import org.osgi.resource.Wire;
 import org.osgi.service.resolver.ResolutionException;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
@@ -115,7 +117,7 @@ public class VerifyMojo extends MojoSupport {
     protected Set<String> descriptors;
 
     @Parameter(property = "features")
-    protected Set<String> features;
+    protected List<String> features;
 
     @Parameter(property = "framework")
     protected Set<String> framework;
@@ -132,6 +134,9 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(property = "dist-dir")
     protected String distDir;
 
+    @Parameter(property = "karaf-version")
+    protected String karafVersion;
+
     @Parameter(property = "additional-metadata")
     protected File additionalMetadata;
 
@@ -147,34 +152,56 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
+    @Component(role = WorkspaceReader.class, hint = "reactor")
+    protected WorkspaceReader reactor;
+
+    @Parameter(property = "skip", defaultValue = "${features.verify.skip}")
+    protected boolean skip;
+
     protected MavenResolver resolver;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        Hashtable<String, String> config = new Hashtable<>();
-        StringBuilder remote = new StringBuilder();
-        for (Object obj : project.getRemoteProjectRepositories()) {
-            if (remote.length() > 0) {
-                remote.append(",");
-            }
-            remote.append(invoke(obj, "getUrl"));
-            remote.append("@id=").append(invoke(obj, "getId"));
-            if (!((Boolean) invoke(getPolicy(obj, false), "isEnabled"))) {
-                remote.append("@noreleases");
-            }
-            if ((Boolean) invoke(getPolicy(obj, true), "isEnabled")) {
-                remote.append("@snapshots");
-            }
+    public void execute() throws MojoExecutionException {
+        if (skip) {
+            return;
         }
-        getLog().info("Using repositories: " + remote.toString());
-        config.put("maven.repositories", remote.toString());
+
+        if (karafVersion == null) {
+            karafVersion = org.apache.karaf.util.Version.karafVersion();
+        }
+
+        Hashtable<String, String> config = new Hashtable<>();
+        String remoteRepositories = MavenUtil.remoteRepositoryList(project.getRemoteProjectRepositories());
+        getLog().info("Using repositories: " + remoteRepositories);
+        config.put("maven.repositories", remoteRepositories);
         config.put("maven.localRepository", localRepo.getBasedir());
+
+        if (mavenSession.getRequest().getUserSettingsFile().exists()) {
+            config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
+        }
+
         // TODO: add more configuration bits ?
-        resolver = MavenResolvers.createMavenResolver(config, "maven");
+        resolver = new ReactorMavenResolver(reactor, MavenResolvers.createMavenResolver(config, "maven"));
         doExecute();
     }
 
-    private Object invoke(Object object, String getter) throws MojoExecutionException {
+    private String getVersion(String id, String def) {
+        String v = getVersion(id);
+        return v != null ? v : def;
+    }
+
+    private String getVersion(String id) {
+        Artifact artifact = project.getArtifactMap().get(id);
+        if (artifact != null) {
+            return artifact.getBaseVersion();
+        } else if (id.startsWith("org.apache.karaf")) {
+            return karafVersion;
+        } else {
+            return null;
+        }
+    }
+
+    private static Object invoke(Object object, String getter) throws MojoExecutionException {
         try {
             return object.getClass().getMethod(getter).invoke(object);
         } catch (Exception e) {
@@ -182,11 +209,11 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    private Object getPolicy(Object object, boolean snapshots) throws MojoExecutionException {
+    private static Object getPolicy(Object object, boolean snapshots) throws MojoExecutionException {
         return invoke(object, "getPolicy", new Class[] { Boolean.TYPE }, new Object[] { snapshots });
     }
 
-    private Object invoke(Object object, String getter, Class[] types, Object[] params) throws MojoExecutionException {
+    private static Object invoke(Object object, String getter, Class<?>[] types, Object[] params) throws MojoExecutionException {
         try {
             return object.getClass().getMethod(getter, types).invoke(object, params);
         } catch (Exception e) {
@@ -194,7 +221,7 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    protected void doExecute() throws MojoExecutionException, MojoFailureException {
+    protected void doExecute() throws MojoExecutionException {
         System.setProperty("karaf.home", "target/karaf");
         System.setProperty("karaf.data", "target/karaf/data");
 
@@ -214,13 +241,30 @@ public class VerifyMojo extends MojoSupport {
             }
         }
 
+        Set<String> allDescriptors = new LinkedHashSet<>();
+        if (descriptors == null) {
+            if (framework == null) {
+                framework = Collections.singleton("framework");
+            }
+            descriptors = new LinkedHashSet<>();
+            if (framework.contains("framework")) {
+                allDescriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
+            }
+            allDescriptors.add("file:" + project.getBuild().getDirectory() + "/feature/feature.xml");
+        } else {
+            allDescriptors.addAll(descriptors);
+            if (framework != null && framework.contains("framework")) {
+                allDescriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
+            }
+        }
+
         // TODO: allow using external configuration ?
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(8);
         DownloadManager manager = new CustomDownloadManager(resolver, executor);
         final Map<String, Features> repositories;
         Map<String, List<Feature>> allFeatures = new HashMap<>();
         try {
-            repositories = loadRepositories(manager, descriptors);
+            repositories = loadRepositories(manager, allDescriptors);
             for (String repoUri : repositories.keySet()) {
                 List<Feature> features = repositories.get(repoUri).getFeature();
                 // Ack features to inline configuration files urls
@@ -260,18 +304,7 @@ public class VerifyMojo extends MojoSupport {
             }
         }
         if (features != null && !features.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (String feature : features) {
-                if (sb.length() > 0) {
-                    sb.append("|");
-                }
-                String p = feature.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*");
-                sb.append(p);
-                if (!feature.contains("/")) {
-                    sb.append("/.*");
-                }
-            }
-            Pattern pattern = Pattern.compile(sb.toString());
+            Pattern pattern = getPattern(features);
             for (Iterator<Feature> iterator = featuresToTest.iterator(); iterator.hasNext();) {
                 Feature feature = iterator.next();
                 String id = feature.getName() + "/" + feature.getVersion();
@@ -284,20 +317,23 @@ public class VerifyMojo extends MojoSupport {
         for (String fmk : framework) {
             properties.put("feature.framework." + fmk, fmk);
         }
-        List<Exception> failures = new ArrayList<>();
+        Set<String> successes = new LinkedHashSet<>();
+        Set<String> ignored = new LinkedHashSet<>();
+        Map<String, Exception> failures = new LinkedHashMap<>();
         for (Feature feature : featuresToTest) {
+            String id = feature.getId();
             try {
-                String id = feature.getName() + "/" + feature.getVersion();
                 verifyResolution(new CustomDownloadManager(resolver, executor),
                                  repositories, Collections.singleton(id), properties);
+                successes.add(id);
                 getLog().info("Verification of feature " + id + " succeeded");
             } catch (Exception e) {
-                if (e.getCause() instanceof ResolutionException) {
+                if (e.getCause() instanceof ResolutionException || !getLog().isDebugEnabled()) {
                     getLog().warn(e.getMessage());
                 } else {
                     getLog().warn(e);
                 }
-                failures.add(e);
+                failures.put(id, e);
                 if ("first".equals(fail)) {
                     throw e;
                 }
@@ -306,9 +342,11 @@ public class VerifyMojo extends MojoSupport {
                 Set<String> ids = new LinkedHashSet<>();
                 ids.add(feature.getId());
                 ids.addAll(cond.getCondition());
+                String cid = String.join("+", ids);
                 try {
                     verifyResolution(manager, repositories, ids, properties);
-                    getLog().info("Verification of feature " + ids + " succeeded");
+                    successes.add(cid);
+                    getLog().info("Verification of feature " + cid + " succeeded");
                 } catch (Exception e) {
                     if (ignoreMissingConditions && e.getCause() instanceof ResolutionException) {
                         boolean ignore = true;
@@ -319,26 +357,62 @@ public class VerifyMojo extends MojoSupport {
                                     && cond.getCondition().contains(req.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE).toString()));
                         }
                         if (ignore) {
-                            getLog().warn("Feature resolution failed for " + ids
+                            ignored.add(cid);
+                            getLog().warn("Feature resolution failed for " + cid
                                     + "\nMessage: " + e.getCause().getMessage());
                             continue;
                         }
                     }
-                    if (e.getCause() instanceof ResolutionException) {
+                    if (e.getCause() instanceof ResolutionException || !getLog().isDebugEnabled()) {
                         getLog().warn(e.getMessage());
                     } else {
                         getLog().warn(e);
                     }
-                    failures.add(e);
+                    failures.put(cid, e);
                     if ("first".equals(fail)) {
                         throw e;
                     }
                 }
             }
         }
-        if ("end".equals(fail) && !failures.isEmpty()) {
-            throw new MojoExecutionException("Verification failures", new MultiException("Verification failures", failures));
+        int nb = successes.size() + ignored.size() + failures.size();
+        getLog().info("Features verified: " + nb + ", failures: " + failures.size() + ", ignored: " + ignored.size());
+        if (!failures.isEmpty()) {
+            getLog().info("Failures: " + String.join(", ", failures.keySet()));
         }
+        if ("end".equals(fail) && !failures.isEmpty()) {
+            throw new MojoExecutionException("Verification failures", new MultiException("Verification failures", new ArrayList<>(failures.values())));
+        }
+    }
+
+    static Pattern getPattern(List<String> features) {
+        StringBuilder sb = new StringBuilder();
+        boolean prevIsNeg = false;
+        for (String feature : features) {
+            if (sb.length() > 0 && !prevIsNeg) {
+                sb.append("|");
+            }
+            sb.append("(");
+            feature = feature.trim();
+            boolean negative = feature.startsWith("!");
+            if (negative) {
+                feature = feature.substring("!".length());
+                sb.append("(?!");
+            }
+            String p = feature.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*");
+            sb.append(p);
+            if (!feature.contains("/")) {
+                sb.append("/.*");
+            }
+            if (negative) {
+                sb.append(")");
+            }
+            prevIsNeg = negative;
+        }
+        for (String feature : features) {
+            sb.append(")");
+        }
+        return Pattern.compile(sb.toString());
     }
 
     private void verifyResolution(DownloadManager manager, final Map<String, Features> repositories, Set<String> features, Hashtable<String, String> properties) throws MojoExecutionException {
@@ -349,7 +423,7 @@ public class VerifyMojo extends MojoSupport {
 
 
             // Install framework
-            Deployer.DeploymentRequest request = createDeploymentRequest();
+            Deployer.DeploymentRequest request = Deployer.DeploymentRequest.defaultDeploymentRequest();
 
             for (String fmwk : framework) {
                 MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, fmwk);
@@ -359,7 +433,6 @@ public class VerifyMojo extends MojoSupport {
             } catch (Exception e) {
                 throw new MojoExecutionException("Unable to resolve framework features", e);
             }
-
 
             /*
             boolean resolveOptionalImports = getResolveOptionalImports(properties);
@@ -385,34 +458,20 @@ public class VerifyMojo extends MojoSupport {
             }
             */
 
-
             // Install features
             for (String feature : features) {
                 MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, feature);
             }
             try {
-                Set<String> prereqs = new HashSet<>();
-                while (true) {
-                    try {
-                        deployer.deploy(callback.getDeploymentState(), request);
-                        break;
-                    } catch (Deployer.PartialDeploymentException e) {
-                        if (!prereqs.containsAll(e.getMissing())) {
-                            prereqs.addAll(e.getMissing());
-                        } else {
-                            throw new Exception("Deployment aborted due to loop in missing prerequisites: " + e.getMissing());
-                        }
-                    }
-                }
+                deployer.deployFully(callback.getDeploymentState(), request);
+
                 // TODO: find unused resources ?
             } catch (Exception e) {
                 throw new MojoExecutionException("Feature resolution failed for " + features
-                        + "\nMessage: " + e.getMessage()
+                        + "\nMessage: " + (e instanceof ResolutionException ? e.getMessage() : e.toString())
                         + "\nRepositories: " + toString(new TreeSet<>(repositories.keySet()))
                         + "\nResources: " + toString(new TreeSet<>(manager.getProviders().keySet())), e);
             }
-
-
         } catch (MojoExecutionException e) {
             throw e;
         } catch (Exception e) {
@@ -420,19 +479,7 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    private Deployer.DeploymentRequest createDeploymentRequest() {
-        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
-        request.bundleUpdateRange = FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE;
-        request.featureResolutionRange = FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE;
-        request.serviceRequirements = FeaturesService.SERVICE_REQUIREMENTS_DEFAULT;
-        request.overrides = new HashSet<>();
-        request.requirements = new HashMap<>();
-        request.stateChanges = new HashMap<>();
-        request.options = EnumSet.noneOf(FeaturesService.Option.class);
-        return request;
-    }
-
-    private String toString(Collection<String> collection) {
+    private static String toString(Collection<String> collection) {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n");
         for (String s : collection) {
@@ -448,17 +495,26 @@ public class VerifyMojo extends MojoSupport {
             configPropURL = new URL(configuration);
         } else {
             Artifact karafDistro = project.getArtifactMap().get(distribution);
-            if (karafDistro == null) {
-                throw new MojoFailureException("The karaf distribution " + distribution + " is not a dependency");
+            if (karafDistro != null) {
+                String dir = distDir;
+                if ("kar".equals(karafDistro.getType()) && dir == null) {
+                    dir = "resources";
+                }
+                if (dir == null) {
+                    dir = karafDistro.getArtifactId() + "-" + karafDistro.getBaseVersion();
+                }
+                configPropURL = new URL("jar:file:" + karafDistro.getFile() + "!/" + dir + "/etc/config.properties");
+            } else {
+                String version = getVersion(distribution, "RELEASE");
+                String[] dist = distribution.split(":");
+                File distFile = resolver.resolve(dist[0], dist[1], null, "zip", version);
+                String resolvedVersion = distFile.getName().substring(dist[1].length() + 1, distFile.getName().length() - 4);
+                String dir = distDir;
+                if (dir == null) {
+                    dir = dist[1] + "-" + resolvedVersion;
+                }
+                configPropURL = new URL("jar:file:" + distFile + "!/" + dir + "/etc/config.properties");
             }
-            if ("kar".equals(karafDistro.getType()) && distDir == null) {
-                distDir = "resources";
-            }
-            String dir = distDir;
-            if (dir == null) {
-                dir = karafDistro.getArtifactId() + "-" + karafDistro.getBaseVersion();
-            }
-            configPropURL = new URL("jar:file:" + karafDistro.getFile() + "!/" + dir + "/etc/config.properties");
         }
         org.apache.felix.utils.properties.Properties configProps = PropertiesLoader.loadPropertiesFile(configPropURL, true);
 //        copySystemProperties(configProps);
@@ -488,7 +544,7 @@ public class VerifyMojo extends MojoSupport {
 //        attributes = DeploymentBuilder.overrideAttributes(attributes, metadata);
 
         final Hashtable<String, String> headers = new Hashtable<>();
-        for (Map.Entry attr : attributes.entrySet()) {
+        for (Map.Entry<Object, Object> attr : attributes.entrySet()) {
             headers.put(attr.getKey().toString(), attr.getValue().toString());
         }
 
@@ -544,11 +600,8 @@ public class VerifyMojo extends MojoSupport {
                 key = key.substring(prefix.length());
                 String[] parts = key.split("#");
                 if (parts.length == 3) {
-                    Map<VersionRange, Map<String, String>> ranges = result.get(parts[0]);
-                    if (ranges == null) {
-                        ranges = new HashMap<>();
-                        result.put(parts[0], ranges);
-                    }
+                    Map<VersionRange, Map<String, String>> ranges =
+                            result.computeIfAbsent(parts[0], k -> new HashMap<>());
                     String version = parts[1];
                     if (!version.startsWith("[") && !version.startsWith("(")) {
                         Processor processor = new Processor();
@@ -557,12 +610,7 @@ public class VerifyMojo extends MojoSupport {
                         version = macro.process("${range;[==,=+)}");
                     }
                     VersionRange range = new VersionRange(version);
-                    Map<String, String> hdrs = ranges.get(range);
-                    if (hdrs == null) {
-                        hdrs = new HashMap<>();
-                        ranges.put(range, hdrs);
-                    }
-                    hdrs.put(parts[2], val);
+                    ranges.computeIfAbsent(range, k -> new HashMap<>()).put(parts[2], val);
                 }
             }
         }
@@ -581,7 +629,7 @@ public class VerifyMojo extends MojoSupport {
                     new Class[] { Bundle.class },
                     new InvocationHandler() {
                         @Override
-                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        public Object invoke(Object proxy, Method method, Object[] args) {
                             if (method.getName().equals("hashCode")) {
                                 return FakeBundleRevision.this.hashCode();
                             } else if (method.getName().equals("equals")) {
@@ -675,36 +723,39 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    public static class DummyDeployCallback implements Deployer.DeployCallback {
+    public static class DummyDeployCallback extends StaticInstallSupport implements Deployer.DeployCallback {
 
         private final Bundle systemBundle;
         private final Deployer.DeploymentState dstate;
         private final AtomicLong nextBundleId = new AtomicLong(0);
 
-        public DummyDeployCallback(Bundle sysBundle, Collection<Features> repositories) throws Exception {
+        public DummyDeployCallback(Bundle sysBundle, Collection<Features> repositories) {
             systemBundle = sysBundle;
             dstate = new Deployer.DeploymentState();
             dstate.bundles = new HashMap<>();
-            dstate.features = new HashMap<>();
             dstate.bundlesPerRegion = new HashMap<>();
             dstate.filtersPerRegion = new HashMap<>();
             dstate.state = new State();
 
             MapUtils.addToMapSet(dstate.bundlesPerRegion, FeaturesService.ROOT_REGION, 0l);
             dstate.bundles.put(0l, systemBundle);
+
+            Collection<org.apache.karaf.features.Feature> features = new LinkedList<>();
             for (Features repo : repositories) {
+                if (repo.isBlacklisted()) {
+                    continue;
+                }
                 for (Feature f : repo.getFeature()) {
-                    dstate.features.put(f.getId(), f);
+                    if (!f.isBlacklisted()) {
+                        features.add(f);
+                    }
                 }
             }
+            dstate.partitionFeatures(features);
         }
 
         public Deployer.DeploymentState getDeploymentState() {
             return dstate;
-        }
-
-        @Override
-        public void print(String message, boolean verbose) {
         }
 
         @Override
@@ -713,15 +764,23 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
-        public void persistResolveRequest(Deployer.DeploymentRequest request) throws IOException {
+        public void persistResolveRequest(Deployer.DeploymentRequest request) {
         }
 
         @Override
-        public void installFeature(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        public void installConfigs(org.apache.karaf.features.Feature feature) {
+        }
+        
+        @Override
+        public void installLibraries(org.apache.karaf.features.Feature feature) {
         }
 
         @Override
         public void callListeners(FeatureEvent featureEvent) {
+        }
+
+        @Override
+        public void callListeners(DeploymentEvent deployEvent) {
         }
 
         @Override
@@ -733,7 +792,7 @@ public class VerifyMojo extends MojoSupport {
                 while ((entry = zis.getNextEntry()) != null) {
                     if (MANIFEST_NAME.equals(entry.getName())) {
                         Attributes attributes = new Manifest(zis).getMainAttributes();
-                        for (Map.Entry attr : attributes.entrySet()) {
+                        for (Map.Entry<Object, Object> attr : attributes.entrySet()) {
                             headers.put(attr.getKey().toString(), attr.getValue().toString());
                         }
                     }
@@ -749,38 +808,10 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
-        public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
-            throw new UnsupportedOperationException();
+        public void bundleBlacklisted(BundleInfo bundleInfo) {
+
         }
 
-        @Override
-        public void uninstall(Bundle bundle) throws BundleException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void startBundle(Bundle bundle) throws BundleException {
-        }
-
-        @Override
-        public void stopBundle(Bundle bundle, int options) throws BundleException {
-        }
-
-        @Override
-        public void setBundleStartLevel(Bundle bundle, int startLevel) {
-        }
-
-        @Override
-        public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
-        }
-
-        @Override
-        public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
-        }
-
-        @Override
-        public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
-        }
     }
 
     public class MavenResolverLog extends org.apache.felix.resolver.Logger {

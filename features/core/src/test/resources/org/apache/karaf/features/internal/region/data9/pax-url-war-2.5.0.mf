@@ -1,0 +1,6 @@
+Manifest-Version: 1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: pax-url-war
+Bundle-Version: 2.5.0
+Import-Package: org.ops4j.pax.web.api;version="[6,7)"
+

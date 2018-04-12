@@ -47,11 +47,23 @@ public class FindClass implements Action {
 
     protected void findResource() {
         Bundle[] bundles = bundleContext.getBundles();
-        String filter = "*" + className + "*";
+        String path;
+        String filter;
+        int idx = className.lastIndexOf('.');
+        if (idx >= 0) {
+            path = className.substring(0, idx).replace('.', '/');
+            if (path.isEmpty() || path.charAt(0) != '/') {
+                path = "/" + path;
+            }
+            filter = className.substring(idx + 1) + ".class";
+        } else {
+            path = "/";
+            filter = "*" + className + "*";
+        }
         for (Bundle bundle:bundles){
             BundleWiring wiring = bundle.adapt(BundleWiring.class);
             if (wiring != null){
-                Collection<String> resources = wiring.listResources("/", filter, BundleWiring.LISTRESOURCES_RECURSE);
+                Collection<String> resources = wiring.listResources(path, filter, BundleWiring.LISTRESOURCES_RECURSE);
                 if (resources.size() > 0){
                     String title = ShellUtil.getBundleName(bundle);
                     System.out.println("\n" + title);

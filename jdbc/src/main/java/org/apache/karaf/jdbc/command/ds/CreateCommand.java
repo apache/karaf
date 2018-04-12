@@ -46,9 +46,12 @@ public class CreateCommand extends JdbcCommandSupport {
     @Option(name = "-p", aliases = { "--password" }, description = "The database password", required = false, multiValued = false)
     String password;
 
+    @Option(name = "-dt", aliases = { "--databaseType" }, description = "The database type (ConnectionPoolDataSource, XADataSource or DataSource)", required = false, multiValued = false)
+    String databaseType;
+
     @Override
     public Object execute() throws Exception {
-        this.getJdbcService().create(name, driverName, driverClass, databaseName, url, username, password);
+        this.getJdbcService().create(name, driverName, driverClass, databaseName, url, username, password, databaseType);
         return null;
     }
 

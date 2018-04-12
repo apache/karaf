@@ -189,8 +189,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             int size = old.length;
             E[] toAdd = newElementArray(c.size());
             int i = 0;
-            for (Iterator it = c.iterator(); it.hasNext();) {
-                E o = (E) it.next();
+            for (E o : c) {
                 if (indexOf(o) < 0) {
                     toAdd[i++] = o;
                 }
@@ -283,10 +282,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
                 return false;
             }
         }
-        if (ourIt.hasNext()) {
-            return false;
-        }
-        return true;
+        return !ourIt.hasNext();
     }
 
     public E get(int index) {
@@ -296,9 +292,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
 
     public int hashCode() {
         int hashCode = 1;
-        Iterator it = listIterator();
-        while (it.hasNext()) {
-            Object obj = it.next();
+        for (Object obj : this) {
             hashCode = 31 * hashCode + (obj == null ? 0 : obj.hashCode());
         }
         return hashCode;
@@ -441,9 +435,8 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     public String toString() {
         StringBuilder sb = new StringBuilder("[");
 
-        Iterator it = listIterator();
-        while (it.hasNext()) {
-            sb.append(String.valueOf(it.next()));
+        for (Object o : this) {
+            sb.append(String.valueOf(o));
             sb.append(", ");
         }
         if (sb.length() > 1) {
@@ -632,9 +625,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         if (size == 0) {
             return false;
         }
-        Iterator it = c.iterator();
-        while (it.hasNext()) {
-            Object next = it.next();
+        for (Object next : c) {
             if (indexOf(next, data, start, size) < 0) {
                 return false;
             }
@@ -746,10 +737,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         }
 
         public boolean hasNext() {
-            if (current < size) {
-                return true;
-            }
-            return false;
+            return current < size;
         }
 
         public boolean hasPrevious() {
@@ -1141,8 +1129,8 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         int size = back.length;
         oos.defaultWriteObject();
         oos.writeInt(size);
-        for (int i = 0; i < size; i++) {
-            oos.writeObject(back[i]);
+        for (E aBack : back) {
+            oos.writeObject(aBack);
         }
     }
 

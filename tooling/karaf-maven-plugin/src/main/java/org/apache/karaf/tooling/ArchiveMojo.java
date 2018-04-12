@@ -91,6 +91,18 @@ public class ArchiveMojo extends MojoSupport {
     private boolean archiveZip = true;
 
     /**
+     * Whether to attach the resulting assembly to the project as an artifact.
+     */
+    @Parameter(defaultValue="true")
+    private boolean attach = true;
+
+    /**
+     * If supplied, the classifer for the artifact when attached.
+     */
+    @Parameter
+    private String classifier;
+
+    /**
      * use symbolic links in tar.gz or zip archives
      *
      * Symbolic links are not very well supported by windows Platform.
@@ -121,13 +133,25 @@ public class ArchiveMojo extends MojoSupport {
 	private void archive(String type) throws IOException {
         Artifact artifact1 = factory.createArtifactWithClassifier(project.getArtifact().getGroupId(), project.getArtifact().getArtifactId(), project.getArtifact().getVersion(), type, "bin");
         File target1 = archive(targetServerDirectory, destDir, artifact1);
-        projectHelper.attachArtifact( project, artifact1.getType(), null, target1 );
+
+        // artifact1 is created with explicit classifier "bin", which is dropped below when attachArtifact is called
+        // which means we can't use artifact1.equals(artifact) directly with artifact1
+        Artifact artifact2 = factory.createArtifact(artifact1.getGroupId(), artifact1.getArtifactId(), artifact1.getVersion(), artifact1.getScope(), artifact1.getType());
+        for (Artifact artifact : project.getAttachedArtifacts()) {
+            if (artifact2.equals(artifact)) {
+                getLog().debug("Artifact " + artifact2 + " already attached");
+                return;
+            }
+        }
+        if (attach) {
+            projectHelper.attachArtifact(project, artifact1.getType(), classifier, target1);
+        }
     }
 
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
             IOException {
         String serverName = null;
-        if (targetFile != null && project.getPackaging().equals("karaf-assembly")) {
+        if (targetFile != null) {
             serverName = targetFile.getName();
         } else {
            serverName = artifact.getArtifactId() + "-" + artifact.getVersion();

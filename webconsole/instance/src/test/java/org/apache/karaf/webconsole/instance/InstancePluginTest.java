@@ -34,7 +34,6 @@ import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
 import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 
 public class InstancePluginTest extends TestCase {
     public void testParseStringList() throws Exception {
@@ -47,7 +46,7 @@ public class InstancePluginTest extends TestCase {
     @SuppressWarnings("unchecked")
     private List<String> testParseStringList(String s) throws Exception {
         InstancePlugin ap = new InstancePlugin();
-        Method m = ap.getClass().getDeclaredMethod("parseStringList", new Class [] {String.class});
+        Method m = ap.getClass().getDeclaredMethod("parseStringList", String.class);
         m.setAccessible(true);
         return (List<String>) m.invoke(ap, s);
     }
@@ -63,7 +62,7 @@ public class InstancePluginTest extends TestCase {
         InstancePlugin ap = new InstancePlugin();
         ap.setInstanceService(instanceService);
 
-        final Map<String, String> params = new HashMap<String, String>();
+        final Map<String, String> params = new HashMap<>();
         params.put("action", "create");
         params.put("name", "instance1");
         params.put("sshPort", "123");
@@ -72,12 +71,9 @@ public class InstancePluginTest extends TestCase {
         params.put("featureURLs", "http://someURL");
         params.put("features", "abc,def");
         HttpServletRequest req = EasyMock.createMock(HttpServletRequest.class);
-        EasyMock.expect(req.getParameter((String) EasyMock.anyObject())).andAnswer(new IAnswer<String>() {
-            public String answer() throws Throwable {
-                return params.get(EasyMock.getCurrentArguments()[0]);
-            }
-        }).anyTimes();
-        
+        EasyMock.expect(req.getParameter(EasyMock.anyObject())).andAnswer(
+                () -> params.get(EasyMock.getCurrentArguments()[0])).anyTimes();
+
         HttpServletResponse res = EasyMock.createNiceMock(HttpServletResponse.class);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter pw = new PrintWriter(baos);

@@ -42,12 +42,11 @@ public class ObjectClassCompleter implements Completer {
         this.context = context;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         Map<String, Integer> serviceNamesMap = ListServices.getServiceNamesMap(context);
         Set<String> serviceNames = serviceNamesMap.keySet();
-        List<String> strings = new ArrayList<String>();
+        List<String> strings = new ArrayList<>();
         for (String name : serviceNames) {
             strings.add(ObjectClassMatcher.getShortName(name));
         }

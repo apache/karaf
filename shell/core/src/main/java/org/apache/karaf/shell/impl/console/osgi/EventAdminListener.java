@@ -22,8 +22,8 @@ import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.gogo.api.CommandSessionListener;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.CommandSessionListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -36,7 +36,7 @@ public class EventAdminListener implements CommandSessionListener, Closeable
 
     public EventAdminListener(BundleContext bundleContext)
     {
-        tracker = new ServiceTracker<EventAdmin, EventAdmin>(bundleContext, EventAdmin.class.getName(), null);
+        tracker = new ServiceTracker<>(bundleContext, EventAdmin.class.getName(), null);
         tracker.open();
     }
 
@@ -45,21 +45,35 @@ public class EventAdminListener implements CommandSessionListener, Closeable
     }
 
     public void beforeExecute(CommandSession session, CharSequence command) {
-        if (command.toString().trim().length() > 0) {
-            EventAdmin admin = tracker.getService();
-            if (admin != null) {
-                Map<String, Object> props = new HashMap<String, Object>();
-                props.put("command", command.toString());
-                Event event = new Event("org/apache/karaf/shell/console/EXECUTING", props);
-                admin.postEvent(event);
-            }
-        }
     }
 
     public void afterExecute(CommandSession session, CharSequence command, Exception exception) {
+        sendEvent(session, command, null, exception);
     }
 
     public void afterExecute(CommandSession session, CharSequence command, Object result) {
+        sendEvent(session, command, result, null);
+    }
+
+    private void sendEvent(CommandSession session, CharSequence command, Object result, Exception exception) {
+        EventAdmin admin = tracker.getService();
+        if (admin != null) {
+            Map<String, Object> props = new HashMap<>();
+            Object script = session.get("script");
+            if (script != null) {
+                props.put("script", script.toString());
+            } else if (command.toString().trim().length() > 0) {
+                props.put("command", command.toString());
+            }
+            if (result != null) {
+                props.put("result", result);
+            }
+            if (exception != null) {
+                props.put("exception", exception);
+            }
+            Event event = new Event("org/apache/karaf/shell/console/EXECUTED", props);
+            admin.postEvent(event);
+        }
     }
 
 }

@@ -38,7 +38,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.support.ShellUtil;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleCapability;
@@ -86,17 +86,17 @@ public class Headers extends BundlesCommand {
 
     protected String generateFormattedOutput(Bundle bundle) {
         StringBuilder output = new StringBuilder();
-        Map<String, Object> otherAttribs = new TreeMap<String, Object>();
-        Map<String, Object> karafAttribs = new TreeMap<String, Object>();
-        Map<String, Object> bundleAttribs = new TreeMap<String, Object>();
-        Map<String, Object> serviceAttribs = new TreeMap<String, Object>();
-        Map<String, Object> packagesAttribs = new TreeMap<String, Object>();
+        Map<String, Object> otherAttribs = new TreeMap<>();
+        Map<String, Object> karafAttribs = new TreeMap<>();
+        Map<String, Object> bundleAttribs = new TreeMap<>();
+        Map<String, Object> serviceAttribs = new TreeMap<>();
+        Map<String, Object> packagesAttribs = new TreeMap<>();
         Dictionary<String, String> dict = bundle.getHeaders();
         Enumeration<String> keys = dict.keys();
 
         // do an initial loop and separate the attributes in different groups
         while (keys.hasMoreElements()) {
-            String k = (String) keys.nextElement();
+            String k = keys.nextElement();
             Object v = dict.get(k);
             if (k.startsWith(KARAF_PREFIX)) {
                 // starts with Karaf-xxx
@@ -170,26 +170,25 @@ public class Headers extends BundlesCommand {
             output.append('\n');
         }
 
-        Map<String, ClauseFormatter> formatters = new HashMap<String, ClauseFormatter>();
+        Map<String, ClauseFormatter> formatters = new HashMap<>();
         formatters.put(REQUIRE_BUNDLE_ATTRIB, new ClauseFormatter() {
             public void pre(Clause clause, StringBuilder output) {
                 boolean isSatisfied = checkBundle(clause.getName(), clause.getAttribute("bundle-version"));
-                Ansi.ansi(output).fg(isSatisfied ? Ansi.Color.DEFAULT : Ansi.Color.RED).a("");
+                output.append(isSatisfied ? SimpleAnsi.COLOR_DEFAULT : SimpleAnsi.COLOR_RED);
             }
             public void post(Clause clause, StringBuilder output) {
-                Ansi.ansi(output).reset().a("");
+                output.append(SimpleAnsi.RESET);
             }
         });
         formatters.put(IMPORT_PACKAGES_ATTRIB, new ClauseFormatter() {
             public void pre(Clause clause, StringBuilder output) {
                 boolean isSatisfied = checkPackage(clause.getName(), clause.getAttribute("version"));
                 boolean isOptional = "optional".equals(clause.getDirective("resolution"));
-                Ansi.ansi(output).fg(isSatisfied ? Ansi.Color.DEFAULT : Ansi.Color.RED)
-                                 .a(isSatisfied || isOptional ? Ansi.Attribute.INTENSITY_BOLD_OFF : Ansi.Attribute.INTENSITY_BOLD)
-                                 .a("");
+                output.append(isSatisfied ? SimpleAnsi.COLOR_DEFAULT : SimpleAnsi.COLOR_RED);
+                output.append(isSatisfied || isOptional ? SimpleAnsi.INTENSITY_NORMAL : SimpleAnsi.INTENSITY_BOLD);
             }
             public void post(Clause clause, StringBuilder output) {
-                Ansi.ansi(output).reset().a("");
+                output.append(SimpleAnsi.RESET);
             }
         });
 
@@ -242,8 +241,7 @@ public class Headers extends BundlesCommand {
     }
 
     protected int getTermWidth() {
-        return terminal.getWidth();
-
+        return terminal != null ? terminal.getWidth() : 0;
     }
 
     protected void formatClause(Clause clause, StringBuilder builder, int indent) {
@@ -257,16 +255,8 @@ public class Headers extends BundlesCommand {
         String name = clause.getName();
         Directive[] directives = clause.getDirectives();
         Attribute[] attributes = clause.getAttributes();
-        Arrays.sort(directives, new Comparator<Directive>() {
-            public int compare(Directive o1, Directive o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        Arrays.sort(attributes, new Comparator<Attribute>() {
-            public int compare(Attribute o1, Attribute o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        Arrays.sort(directives, Comparator.comparing(Directive::getName));
+        Arrays.sort(attributes, Comparator.comparing(Attribute::getName));
         builder.append(name);
         for (int i = 0; directives != null && i < directives.length; i++) {
             if (noUses && directives[i].getName().equalsIgnoreCase("uses")) {

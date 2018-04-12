@@ -16,12 +16,7 @@
  */
 package org.apache.karaf.log.command;
 
-import java.io.IOException;
 import java.io.PrintStream;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.api.action.Command;
@@ -29,122 +24,87 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.ops4j.pax.logging.spi.PaxAppender;
-import org.ops4j.pax.logging.spi.PaxLoggingEvent;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 @Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
 @Service
 public class LogTail extends DisplayLog {
-
     @Reference
     Session session;
 
     @Reference
-    LogService logService;
-
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    BundleContext context;
 
     @Override
     public Object execute() throws Exception {
-        PrintEventThread printThread = new PrintEventThread();
-        ReadKeyBoardThread readKeyboardThread = new ReadKeyBoardThread(Thread.currentThread());
-        executorService.execute(printThread);
-        executorService.execute(readKeyboardThread);
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                Thread.sleep(200);
-            } catch (java.lang.InterruptedException e) {
-                break;
-            }
+        if (entries == 0) {
+            entries = 50;
         }
-        printThread.abort();
-        readKeyboardThread.abort();
-        executorService.shutdownNow();  
-        return null;      
+        int minLevel = getMinLevel(level);
+        // Do not use System.out as it may write to the wrong console depending on the thread that calls our log handler
+        PrintStream out = session.getConsole();
+        display(out, minLevel);
+        out.flush();
+
+        PaxAppender appender = event -> printEvent(out, event, minLevel);
+        ServiceTracker<LogService, LogService> tracker = new LogServiceTracker(context, LogService.class, null, appender);
+        tracker.open();
+        try {
+            synchronized (this) {
+                wait();
+            }
+            out.println("Stopping tail as log.core bundle was stopped.");
+        } catch (InterruptedException e) {
+            // Ignore as it will happen if the user breaks the tail using Ctrl-C
+        } finally {
+            tracker.close();
+        }
+        out.println();
+        return null;
     }
-   
-    class ReadKeyBoardThread implements Runnable {
-        private Thread sessionThread;
-        boolean readKeyboard = true;
-        public ReadKeyBoardThread(Thread thread) {
-            this.sessionThread = thread;
-        }
-
-        public void abort() {
-            readKeyboard = false;            
-        }
-
-        public void run() {
-            while (readKeyboard) {
-                try {
-                    int c = session.getKeyboard().read();
-                    if (c < 0) {
-                        sessionThread.interrupt();
-                        break;
-                    }
-                } catch (IOException e) {
-                    break;
-                }
-                
-            }
-        }
-    } 
     
-    class PrintEventThread implements Runnable {
+    private synchronized void stopTail() {
+        notifyAll();
+    }
 
-        PrintStream out = System.out;
-        boolean doDisplay = true;
+    /**
+     * Track LogService dynamically so we can react when the log core bundle stops even while we block for the tail
+     */
+    private final class LogServiceTracker extends ServiceTracker<LogService, LogService> {
 
-        public void run() {
-            int minLevel = Integer.MAX_VALUE;
-            if (level != null) {
-                switch (level.toLowerCase()) {
-                case "debug": minLevel = DEBUG_INT; break;
-                case "info":  minLevel = INFO_INT; break;
-                case "warn":  minLevel = WARN_INT; break;
-                case "error": minLevel = ERROR_INT; break;
-                }
-            }
-            Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
-            for (PaxLoggingEvent event : le) {
-                if (event != null) {
-                    int sl = event.getLevel().getSyslogEquivalent();
-                    if (sl <= minLevel) {
-                        printEvent(out, event);
-                    }
-                }
-            }
-            // Tail
-            final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
-            PaxAppender appender = new PaxAppender() {
-                public void doAppend(PaxLoggingEvent event) {
-                        queue.add(event);
-                }
-            };
-            try {
-                logService.addAppender(appender);
-                
-                while (doDisplay) {
-                    PaxLoggingEvent event = queue.take();
-                    if (event != null) {
-                        int sl = event.getLevel().getSyslogEquivalent();
-                        if (sl <= minLevel) {
-                            printEvent(out, event);
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                // Ignore
-            } finally {
-                logService.removeAppender(appender);
-            }
-            out.println();
-            
+        private final static String SSHD_LOGGER = "org.apache.sshd";
+
+        private final PaxAppender appender;
+
+        private String sshdLoggerLevel;
+    
+        private LogServiceTracker(BundleContext context, Class<LogService> clazz,
+                                  ServiceTrackerCustomizer<LogService, LogService> customizer,
+                                  PaxAppender appender) {
+            super(context, clazz, customizer);
+            this.appender = appender;
         }
-
-        public void abort() {
-            doDisplay = false;
+    
+        @Override
+        public LogService addingService(ServiceReference<LogService> reference) {
+            LogService service = super.addingService(reference);
+            sshdLoggerLevel = service.getLevel(SSHD_LOGGER).get(SSHD_LOGGER);
+            service.setLevel(SSHD_LOGGER, "ERROR");
+            service.addAppender(appender);
+            return service;
         }
-
+    
+        @Override
+        public void removedService(ServiceReference<LogService> reference, LogService service) {
+            if (sshdLoggerLevel != null) {
+                service.setLevel(SSHD_LOGGER, sshdLoggerLevel);
+            }
+            service.removeAppender(appender);
+            stopTail();
+        }
     }
 
 }

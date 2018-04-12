@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.assemblies</groupId>
         <artifactId>assemblies</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -118,30 +118,41 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <installedFeatures>
-                        <feature>wrapper</feature>
-                    </installedFeatures>
                     <bootFeatures>
-                        <feature>framework</feature>
                         <feature>jaas</feature>
                         <feature>shell</feature>
                         <feature>feature</feature>
                         <feature>ssh</feature>
-                        <feature>management</feature>
                         <feature>bundle</feature>
                         <feature>config</feature>
-                        <feature>deployer</feature>
-                        <feature>diagnostic</feature>
-                        <feature>instance</feature>
-                        <feature>kar</feature>
                         <feature>log</feature>
-                        <feature>package</feature>
-                        <feature>service</feature>
-                        <feature>system</feature>
                     </bootFeatures>
+                    <pidsToExtract>
+                        !jmx.acl.*,
+                        !org.apache.karaf.command.acl.*,
+                        *
+                    </pidsToExtract>
+                    <javase>1.8</javase>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>fix-distro</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete dir="${project.build.directory}/assembly/system/org/eclipse" />
+                                <delete dir="${project.build.directory}/assembly/system/org/ops4j/pax/logging/pax-logging-logback" />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

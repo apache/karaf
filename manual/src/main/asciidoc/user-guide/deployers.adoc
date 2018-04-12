@@ -84,7 +84,7 @@ The `name` and `version` of the file are extracted using a heuristic that will m
 
 For example `my-config-1.0.1.xml` will lead to `name = my-config` and `version = 1.0.1`.
 
-The default imported packages are extracted from the spring file definition and includes all classes referenced directly.
+The default imported packages are extracted from the blueprint file definition and includes all classes referenced directly.
 
 If you need to customize the generated manifest, you can do so by including an xml element in your blueprint configuration:
 

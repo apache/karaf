@@ -26,6 +26,8 @@ import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+
 import org.apache.felix.utils.properties.Properties;
 
 import org.junit.Before;
@@ -33,7 +35,7 @@ import org.junit.Test;
 
 
 public class OracleJDBCLockTest extends BaseJDBCLockTest {
-    
+
     @Before
     @Override
     public void setUp() throws Exception {
@@ -41,10 +43,10 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
         driver = "oracle.jdbc.driver.OracleDriver";
         url = "jdbc:oracle:thin:@172.16.16.132:1521:XE";
         momentDatatype = "NUMBER(20)";
-        
+
         super.setUp();
     }
-    
+
     OracleJDBCLock createLock(Properties props) {
         return new OracleJDBCLock(props) {
             @Override
@@ -60,9 +62,14 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
             long getCurrentTimeMillis() {
                 return 1;
             }
+
+            @Override
+            public void log(Level level, String msg, Exception e) {
+                // Suppress log
+            }
         };
     }
-    
+
     @Test
     @Override
     public void lockShouldReturnTrueItTheTableIsNotLocked() throws Exception {
@@ -81,60 +88,60 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
         expect(resultSet.next()).andReturn(Boolean.TRUE);
         expect(resultSet.getInt(1)).andReturn(1);
         preparedStatement.close();
-        
+
         replay(connection, metaData, statement, preparedStatement, resultSet);
-        
-        boolean lockAquired = lock.lock();
-        
+
+        boolean lockAcquired = lock.lock();
+
         verify(connection, metaData, statement, preparedStatement, resultSet);
-        assertTrue(lockAquired);
+        assertTrue(lockAcquired);
     }
-    
+
     @Test
     @Override
     public void lockShouldReturnFalseIfAnotherRowIsLocked() throws Exception {
         initShouldNotCreateTheSchemaIfItAlreadyExists();
         reset(connection, metaData, statement, preparedStatement, resultSet);
-        
+
         expect(connection.isClosed()).andReturn(false);
         expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andThrow(new SQLException());
         preparedStatement.close();
-        
+
         replay(connection, metaData, statement, preparedStatement, resultSet);
-        
-        boolean lockAquired = lock.lock();
-        
+
+        boolean lockAcquired = lock.lock();
+
         verify(connection, metaData, statement, preparedStatement, resultSet);
-        assertFalse(lockAquired);
+        assertFalse(lockAcquired);
     }
-    
+
     @Test
     @Override
     public void lockShouldReturnFalseIfTheRowIsAlreadyLocked() throws Exception {
         initShouldNotCreateTheSchemaIfItAlreadyExists();
         reset(connection, metaData, statement, preparedStatement, resultSet);
-        
+
         expect(connection.isClosed()).andReturn(false);
         expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andThrow(new SQLException());
         preparedStatement.close();
-        
+
         replay(connection, metaData, statement, preparedStatement, resultSet);
-        
-        boolean lockAquired = lock.lock();
-        
+
+        boolean lockAcquired = lock.lock();
+
         verify(connection, metaData, statement, preparedStatement, resultSet);
-        assertFalse(lockAquired);
+        assertFalse(lockAcquired);
     }
-    
+
     @Test
     public void isAliveShouldReturnTrueIfItHoldsTheLock() throws Exception {
         initShouldNotCreateTheSchemaIfItAlreadyExists();
         reset(connection, metaData, statement, preparedStatement, resultSet);
-        
+
         expect(connection.isClosed()).andReturn(false);
         expect(connection.isClosed()).andReturn(false);
         expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
@@ -148,40 +155,40 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
         expect(resultSet.next()).andReturn(Boolean.TRUE);
         expect(resultSet.getInt(1)).andReturn(1);
         preparedStatement.close();
-        
+
         replay(connection, metaData, statement, preparedStatement, resultSet);
-        
+
         boolean alive = lock.isAlive();
-        
+
         verify(connection, metaData, statement, preparedStatement, resultSet);
         assertTrue(alive);
     }
-    
+
     @Test
     public void isAliveShouldReturnFalseIfItNotHoldsTheLock() throws Exception {
         initShouldNotCreateTheSchemaIfItAlreadyExists();
         reset(connection, metaData, statement, preparedStatement, resultSet);
-        
+
         expect(connection.isClosed()).andReturn(false);
         expect(connection.isClosed()).andReturn(false);
         expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andThrow(new SQLException());
         preparedStatement.close();
-        
+
         replay(connection, metaData, statement, preparedStatement, resultSet);
-        
+
         boolean alive = lock.isAlive();
-        
+
         verify(connection, metaData, statement, preparedStatement, resultSet);
         assertFalse(alive);
     }
-    
+
     @Test
     public void lockShouldReturnFalseIfTableIsEmpty() throws Exception {
         initShouldNotCreateTheSchemaIfItAlreadyExists();
         reset(connection, metaData, statement, preparedStatement, resultSet);
-        
+
         expect(connection.isClosed()).andReturn(false);
         expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
@@ -194,12 +201,12 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
         expect(resultSet.next()).andReturn(Boolean.TRUE);
         expect(resultSet.getInt(1)).andReturn(0);
         preparedStatement.close();
-        
+
         replay(connection, metaData, statement, preparedStatement, resultSet);
-        
-        boolean lockAquired = lock.lock();
-        
+
+        boolean lockAcquired = lock.lock();
+
         verify(connection, metaData, statement, preparedStatement, resultSet);
-        assertFalse(lockAquired);
+        assertFalse(lockAcquired);
     }
 }

@@ -24,7 +24,7 @@ public interface SystemService {
     /**
      * Types defining what to remove on a restart of Karaf
      */
-    public enum Swipe {
+    enum Swipe {
         /** Delete nothing; simple restart */
         NONE,
         /** Delete only the cache; everything else remains */

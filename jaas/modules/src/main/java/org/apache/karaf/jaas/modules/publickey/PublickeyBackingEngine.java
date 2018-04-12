@@ -26,7 +26,6 @@ import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,7 @@ public class PublickeyBackingEngine implements BackingEngine {
 
         String newPublickey = publickey;
 
-        String userInfos = (String) users.get(username);
+        String userInfos = users.get(username);
 
         //If user already exists, update publickey
         if (userInfos != null && userInfos.length() > 0) {
@@ -96,7 +95,7 @@ public class PublickeyBackingEngine implements BackingEngine {
 
     @Override
     public List<UserPrincipal> listUsers() {
-        List<UserPrincipal> result = new ArrayList<UserPrincipal>();
+        List<UserPrincipal> result = new ArrayList<>();
 
         for (Object user : users.keySet()) {
             String userName = (String) user;
@@ -110,6 +109,16 @@ public class PublickeyBackingEngine implements BackingEngine {
     }
 
     @Override
+    public UserPrincipal lookupUser(String username) {
+        for (UserPrincipal userPrincipal : listUsers()) {
+            if (userPrincipal.getName().equals(username)) {
+                return userPrincipal;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<RolePrincipal> listRoles(Principal principal) {
         String userName = principal.getName();
         if (principal instanceof  GroupPrincipal) {
@@ -120,8 +129,8 @@ public class PublickeyBackingEngine implements BackingEngine {
 
     private List<RolePrincipal> listRoles(String name) {
 
-        List<RolePrincipal> result = new ArrayList<RolePrincipal>();
-        String userInfo = (String) users.get(name);
+        List<RolePrincipal> result = new ArrayList<>();
+        String userInfo = users.get(name);
         String[] infos = userInfo.split(",");
         for (int i = 1; i < infos.length; i++) {
             String roleName = infos[i];
@@ -143,7 +152,7 @@ public class PublickeyBackingEngine implements BackingEngine {
 
     @Override
     public void addRole(String username, String role) {
-        String userInfos = (String) users.get(username);
+        String userInfos = users.get(username);
         if (userInfos != null) {
             for (RolePrincipal rp : listRoles(username)) {
                 if (role.equals(rp.getName())) {
@@ -165,7 +174,7 @@ public class PublickeyBackingEngine implements BackingEngine {
         String[] infos = null;
         StringBuffer userInfoBuffer = new StringBuffer();
 
-        String userInfos = (String) users.get(username);
+        String userInfos = users.get(username);
 
         //If user already exists, remove the role
         if (userInfos != null && userInfos.length() > 0) {
@@ -197,8 +206,8 @@ public class PublickeyBackingEngine implements BackingEngine {
     }
 
     private List<GroupPrincipal> listGroups(String userName) {
-        List<GroupPrincipal> result = new ArrayList<GroupPrincipal>();
-        String userInfo = (String) users.get(userName);
+        List<GroupPrincipal> result = new ArrayList<>();
+        String userInfo = users.get(userName);
         if (userInfo != null) {
             String[] infos = userInfo.split(",");
             for (int i = 1; i < infos.length; i++) {
@@ -249,7 +258,7 @@ public class PublickeyBackingEngine implements BackingEngine {
     }
 
     public Map<GroupPrincipal, String> listGroups() {
-        Map<GroupPrincipal, String> result = new HashMap<GroupPrincipal, String>();
+        Map<GroupPrincipal, String> result = new HashMap<>();
         for (String name : users.keySet()) {
             if (name.startsWith(GROUP_PREFIX)) {
                 result.put(new GroupPrincipal(name.substring(GROUP_PREFIX.length())), users.get(name));

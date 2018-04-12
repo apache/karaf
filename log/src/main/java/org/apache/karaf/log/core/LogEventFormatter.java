@@ -20,6 +20,6 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 public interface LogEventFormatter {
 
-    public abstract String format(PaxLoggingEvent event, String overridenPattern, boolean noColor);
+    String format(PaxLoggingEvent event, String overridenPattern, boolean noColor);
 
 }

@@ -17,11 +17,13 @@
 
 package org.apache.karaf.features;
 
-public interface Dependency {
+public interface Dependency extends Blacklisting {
 
     String getName();
 
     String getVersion();
+
+    boolean hasVersion();
 
     boolean isPrerequisite();
 

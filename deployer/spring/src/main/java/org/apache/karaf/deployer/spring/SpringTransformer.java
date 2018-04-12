@@ -20,10 +20,12 @@ package org.apache.karaf.deployer.spring;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
@@ -44,9 +46,6 @@ import org.apache.karaf.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.osgi.framework.Constants;
 
 public class SpringTransformer {
@@ -92,7 +91,7 @@ public class SpringTransformer {
         }
 
         // get original last modification date
-        long lastModified = url.openConnection().getLastModified();
+        long lastModified = getLastModified(url);
 
         JarOutputStream out = new JarOutputStream(os);
         ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
@@ -118,7 +117,7 @@ public class SpringTransformer {
 
     public static Set<String> analyze(Source source) throws Exception {
 
-        Set<String> refers = new TreeSet<String>();
+        Set<String> refers = new TreeSet<>();
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         Result r = new StreamResult(bout);
@@ -134,12 +133,12 @@ public class SpringTransformer {
             line = line.trim();
             if (line.length() > 0) {
                 String parts[] = line.split("\\s*,\\s*");
-                for (int i = 0; i < parts.length; i++) {
-                    int n = parts[i].lastIndexOf('.');
+                for (String part : parts) {
+                    int n = part.lastIndexOf('.');
                     if (n > 0) {
-                        String pkg = parts[i].substring(0, n);
+                        String pkg = part.substring(0, n);
                         if (!pkg.startsWith("java.")) {
-                            refers.add(parts[i].substring(0, n));
+                            refers.add(part.substring(0, n));
                         }
                     }
                 }
@@ -164,6 +163,13 @@ public class SpringTransformer {
     protected static Document parse(URL url) throws Exception {
         try (InputStream is = url.openStream()) {
             return XmlUtils.parse(is);
+        }
+    }
+
+    protected static long getLastModified(URL url) throws IOException {
+        URLConnection urlConnection = url.openConnection();
+        try(InputStream is = urlConnection.getInputStream()) {
+            return urlConnection.getLastModified();
         }
     }
 

@@ -18,28 +18,25 @@
  */
 package org.apache.karaf.shell.compat;
 
-import java.util.ArrayList;
+import java.lang.reflect.Method;
 import java.util.List;
 
-import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.api.console.Parser;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.CommandWithAction;
-import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.CommandWithAction;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> {
-
     SessionFactory sessionFactory;
     BundleContext context;
     ServiceTracker<?, ?> tracker;
@@ -53,9 +50,11 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
     }
 
     public void init() throws Exception {
-        Filter filter = context.createFilter(String.format("(&(%s=*)(%s=*))",
-                CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION));
-        this.tracker = new ServiceTracker<Object, Object>(context, filter, this);
+        Filter filter = context.createFilter(String.format("(&(%s=*)(%s=*)(|(%s=%s)(%s=%s)))",
+                CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION,
+                Constants.OBJECTCLASS, CommandWithAction.class.getName(),
+                Constants.OBJECTCLASS, org.apache.felix.gogo.commands.CommandWithAction.class.getName()));
+        this.tracker = new ServiceTracker<>(context, filter, this);
         this.tracker.open();
     }
 
@@ -66,6 +65,7 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
     @Override
     public Object addingService(final ServiceReference reference) {
         Object service = context.getService(reference);
+
         if (service instanceof CommandWithAction) {
             final CommandWithAction oldCommand = (CommandWithAction) service;
             final org.apache.karaf.shell.api.console.Command command = new org.apache.karaf.shell.api.console.Command() {
@@ -84,20 +84,22 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                     final Command cmd = oldCommand.getActionClass().getAnnotation(Command.class);
                     if (cmd != null) {
                         return cmd.description();
-                    } else {
-                        return getName();
                     }
+
+                    try {
+                        Method method = oldCommand.getActionClass().getMethod("description");
+                        method.setAccessible(true);
+                        return (String) method.invoke(oldCommand.createNewAction());
+                    } catch (Throwable ignore) {
+                    }
+
+                    return getName();
                 }
 
                 @Override
                 public Completer getCompleter(final boolean scoped) {
                     final ArgumentCompleter completer = new ArgumentCompleter(oldCommand, getScope(), getName(), scoped);
-                    return new Completer() {
-                        @Override
-                        public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-                            return completer.complete(session, commandLine, candidates);
-                        }
-                    };
+                    return completer::complete;
                 }
 
                 @Override
@@ -132,20 +134,22 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
                     final org.apache.felix.gogo.commands.Command cmd = oldCommand.getActionClass().getAnnotation(org.apache.felix.gogo.commands.Command.class);
                     if (cmd != null) {
                         return cmd.description();
-                    } else {
-                        return getName();
                     }
+
+                    try {
+                        Method method = oldCommand.getActionClass().getMethod("description");
+                        method.setAccessible(true);
+                        return (String) method.invoke(oldCommand.createNewAction());
+                    } catch (Throwable ignore) {
+                    }
+
+                    return getName();
                 }
 
                 @Override
                 public Completer getCompleter(final boolean scoped) {
                     final OldArgumentCompleter completer = new OldArgumentCompleter(oldCommand, getScope(), getName(), scoped);
-                    return new Completer() {
-                        @Override
-                        public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-                            return completer.complete(session, commandLine, candidates);
-                        }
-                    };
+                    return completer::complete;
                 }
 
                 @Override
@@ -163,96 +167,7 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
             sessionFactory.getRegistry().register(command);
             return command;
         } else {
-            final String scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE).toString();
-            final Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
-
-            List<org.apache.karaf.shell.api.console.Command> commands = new ArrayList<>();
-
-            if (function.getClass().isArray()) {
-                for (final Object f : ((Object[]) function)) {
-                    final Function target;
-
-                    target = new CommandProxy(context, reference, f.toString());
-                    org.apache.karaf.shell.api.console.Command command = new org.apache.karaf.shell.api.console.Command() {
-                        @Override
-                        public String getScope() {
-                            return scope;
-                        }
-
-                        @Override
-                        public String getName() {
-                            return f.toString();
-                        }
-
-                        @Override
-                        public String getDescription() {
-                            Object property = reference.getProperty("osgi.command.description");
-                            if (property != null) {
-                                return property.toString();
-                            } else {
-                                return getName();
-                            }
-                        }
-
-                        @Override
-                        public Completer getCompleter(final boolean scoped) {
-                            return null;
-                        }
-
-                        @Override
-                        public Parser getParser() {
-                            return null;
-                        }
-
-                        @Override
-                        public Object execute(Session session, List<Object> arguments) throws Exception {
-                            // TODO: remove not really nice cast
-                            CommandSession commandSession = (CommandSession) session.get(".commandSession");
-                            return target.execute(commandSession, arguments);
-                        }
-                    };
-                    sessionFactory.getRegistry().register(command);
-                    commands.add(command);
-                }
-            } else {
-                final Function target = new CommandProxy(context, reference, function.toString());
-                org.apache.karaf.shell.api.console.Command command = new org.apache.karaf.shell.api.console.Command() {
-                    @Override
-                    public String getScope() {
-                        return scope;
-                    }
-
-                    @Override
-                    public String getName() {
-                        return function.toString();
-                    }
-
-                    @Override
-                    public String getDescription() {
-                        return reference.getProperty("osgi.command.description").toString();
-                    }
-
-                    @Override
-                    public Completer getCompleter(final boolean scoped) {
-                        return null;
-                    }
-
-                    @Override
-                    public Parser getParser() {
-                        return null;
-                    }
-
-                    @Override
-                    public Object execute(Session session, List<Object> arguments) throws Exception {
-                        // TODO: remove not really nice cast
-                        CommandSession commandSession = (CommandSession) session.get(".commandSession");
-                        return target.execute(commandSession, arguments);
-                    }
-                };
-                sessionFactory.getRegistry().register(command);
-                commands.add(command);
-            }
-            return commands;
+            return null;
         }
     }
 

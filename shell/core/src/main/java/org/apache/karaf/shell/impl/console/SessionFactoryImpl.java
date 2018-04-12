@@ -20,20 +20,29 @@ package org.apache.karaf.shell.impl.console;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import org.apache.felix.gogo.jline.Builtin;
+import org.apache.felix.gogo.jline.Posix;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
+import org.apache.felix.gogo.runtime.Reflective;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.api.console.Command;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.impl.console.commands.ExitCommand;
+import org.apache.karaf.shell.impl.console.commands.Procedural;
 import org.apache.karaf.shell.impl.console.commands.SubShellCommand;
 import org.apache.karaf.shell.impl.console.commands.help.HelpCommand;
 
@@ -41,15 +50,51 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     final CommandProcessorImpl commandProcessor;
     final ThreadIO threadIO;
-    final Map<String, SubShellCommand> subshells = new HashMap<String, SubShellCommand>();
+    final Map<String, SubShellCommand> subshells = new HashMap<>();
     boolean closed;
 
     public SessionFactoryImpl(ThreadIO threadIO) {
         super(null);
         this.threadIO = threadIO;
-        commandProcessor = new CommandProcessorImpl(threadIO);
+        commandProcessor = new CommandProcessorImpl(threadIO) {
+            @Override
+            public Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
+                return SessionFactoryImpl.this.invoke(session, target, name, args);
+            }
+
+            @Override
+            public Path redirect(CommandSessionImpl session, Path path, int mode) {
+                return SessionFactoryImpl.this.redirect(session, path, mode);
+            }
+        };
         register(new ExitCommand());
         new HelpCommand(this);
+        register(new ShellCommand("addCommand", "Add a command", commandProcessor, "addCommand"));
+        register(new ShellCommand("removeCommand", "Remove a command", commandProcessor, "removeCommand"));
+        register(new ShellCommand("eval", "Evaluate", commandProcessor, "eval"));
+
+        Builtin builtin = new Builtin();
+        for (String name : new String[]{"format", "getopt", "new", "set", "tac", "type", "jobs", "fg", "bg", "keymap", "setopt", "unsetopt", "complete", "history", "widget", "__files", "__directories", "__usage_completion"}) {
+            register(new ShellCommand(name, null, builtin, name));
+        }
+
+        Procedural procedural = new Procedural();
+        for (String name : new String[]{"each", "if", "not", "throw", "try", "until", "while", "break", "continue"}) {
+            register(new ShellCommand(name, null, procedural, name));
+        }
+
+        Posix posix = new Posix(commandProcessor);
+        for (String name : new String[]{"cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "nano", "head", "tail", "clear", "wc", "date", "tmux", "ttop"}) {
+            register(new ShellCommand(name, null, posix, name));
+        }
+    }
+
+    protected Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
+        return Reflective.invoke(session, target, name, args);
+    }
+
+    protected Path redirect(CommandSessionImpl session, Path path, int mode) {
+        return session.currentDir().resolve(path);
     }
 
     public CommandProcessorImpl getCommandProcessor() {
@@ -112,6 +157,9 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
                 throw new IllegalStateException("SessionFactory has been closed");
             }
             final Session session = new ConsoleSessionImpl(this, commandProcessor, threadIO, in, out, err, term, encoding, closeCallback);
+            if (this.session == null) {
+                this.session = session;
+            }
             return session;
         }
     }
@@ -136,6 +184,84 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         synchronized (commandProcessor) {
             closed = true;
             commandProcessor.stop();
+        }
+    }
+
+    private static class ShellCommand implements Command {
+        private final String name;
+        private final String desc;
+        private final Executable consumer;
+
+        interface Executable {
+            Object execute(CommandSession session, List<Object> args) throws Exception;
+        }
+
+        interface ExecutableStr {
+            void execute(CommandSession session, String[] args) throws Exception;
+        }
+
+        public ShellCommand(String name, String desc, Executable consumer) {
+            this.name = name;
+            this.desc = desc;
+            this.consumer = consumer;
+        }
+
+        public ShellCommand(String name, String desc, ExecutableStr consumer) {
+            this(name, desc, wrap(consumer));
+        }
+
+        public ShellCommand(String name, String desc, Object target, String method) {
+            this(name, desc, wrap(target, method));
+        }
+
+        private static Executable wrap(Object target, String name) {
+            return (session, args) -> Reflective.invoke(session, target, name, args);
+        }
+
+        private static Executable wrap(ExecutableStr command) {
+            return (session, args) -> {
+                command.execute(session, asStringArray(args));
+                return null;
+            };
+        }
+
+        private static String[] asStringArray(List<Object> args) {
+            String[] argv = new String[args.size()];
+            for (int i = 0; i < argv.length; i++) {
+                argv[i] = Objects.toString(args.get(i));
+            }
+            return argv;
+        }
+
+        @Override
+        public String getScope() {
+            return "shell";
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getDescription() {
+            return desc;
+        }
+
+        @Override
+        public Completer getCompleter(boolean scoped) {
+            return null;
+        }
+
+        @Override
+        public Parser getParser() {
+            return null;
+        }
+
+        @Override
+        public Object execute(Session session, List<Object> arguments) throws Exception {
+            CommandSession cmdSession = (CommandSession) session.get(".commandSession");
+            return consumer.execute(cmdSession, arguments);
         }
     }
 

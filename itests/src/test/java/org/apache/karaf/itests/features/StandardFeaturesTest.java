@@ -14,9 +14,10 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -24,13 +25,14 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class StandardFeaturesTest extends KarafTestSupport {
-
+    
+   
+    
     @Test
     public void checkInstalledFeaturesBoot() throws Exception {
+        System.out.println("===>checkInstalledFeaturesBoot");
         assertFeatureInstalled("wrap");
-        assertFeatureInstalled("aries-blueprint");
         assertFeatureInstalled("shell");
-        assertFeatureInstalled("shell-compat");
         assertFeatureInstalled("jaas");
         assertFeatureInstalled("ssh");
         assertFeatureInstalled("management");
@@ -46,29 +48,14 @@ public class StandardFeaturesTest extends KarafTestSupport {
         assertFeatureInstalled("system");
     }
 	
-	@Test
-	/**
-	 * Regression test for https://issues.apache.org/jira/browse/KARAF-2566
-	 * @throws Exception
-	 */
-	public void checkInteractionOfHttpAndAriesAnnotationFeature() throws Exception {
-		installAssertAndUninstallFeatures("aries-annotation", "pax-http");
-		installAssertAndUninstallFeatures("pax-http", "aries-annotation");
-    }
-
     @Test
-    @Ignore("Waiting for KARAF-3181")
     public void installFrameworkSecurityFeature() throws Exception {
         installAssertAndUninstallFeatures("framework-security");
     }
 
     public void installServiceSecurityFeature() throws Exception {
+        System.out.println("===>installServiceSecurityFeature");
         installAssertAndUninstallFeatures("service-security");
-    }
-
-    @Test
-    public void installAriesAnnotationFeature() throws Exception {
-        installAssertAndUninstallFeatures("aries-annotation");
     }
 
     @Test

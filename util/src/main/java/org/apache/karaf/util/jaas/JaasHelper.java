@@ -73,6 +73,14 @@ public class JaasHelper {
         return false;
     }
 
+    public static void runAs(final Subject subject,
+                             final Runnable action) {
+        if (action == null) {
+            throw new NullPointerException();
+        }
+        doAs(subject, (PrivilegedAction<Object>)(() -> { action.run(); return null; } ));
+    }
+
     public static <T> T doAs(final Subject subject,
                              final PrivilegedAction<T> action) {
         if (action == null) {
@@ -81,14 +89,8 @@ public class JaasHelper {
         // set up the new Subject-based AccessControlContext for doPrivileged
         final AccessControlContext currentAcc = AccessController.getContext();
         final AccessControlContext newAcc = AccessController.doPrivileged
-                (new PrivilegedAction<AccessControlContext>() {
-                    public AccessControlContext run() {
-                        if (subject == null)
-                            return new AccessControlContext(currentAcc, null);
-                        else
-                            return new AccessControlContext(currentAcc, new OsgiSubjectDomainCombiner(subject));
-                    }
-                });
+                ((PrivilegedAction<AccessControlContext>) () -> new AccessControlContext(currentAcc,
+                        subject != null ? new OsgiSubjectDomainCombiner(subject) : null));
         // call doPrivileged and push this new context on the stack
         return AccessController.doPrivileged(action, newAcc);
     }
@@ -101,14 +103,8 @@ public class JaasHelper {
         // set up the new Subject-based AccessControlContext for doPrivileged
         final AccessControlContext currentAcc = AccessController.getContext();
         final AccessControlContext newAcc = AccessController.doPrivileged
-                (new PrivilegedAction<AccessControlContext>() {
-                    public AccessControlContext run() {
-                        if (subject == null)
-                            return new AccessControlContext(currentAcc, null);
-                        else
-                            return new AccessControlContext(currentAcc, new OsgiSubjectDomainCombiner(subject));
-                    }
-                });
+                ((PrivilegedAction<AccessControlContext>) () -> new AccessControlContext(currentAcc,
+                        subject != null ? new OsgiSubjectDomainCombiner(subject) : null));
         // call doPrivileged and push this new context on the stack
         return AccessController.doPrivileged(action, newAcc);
     }
@@ -145,8 +141,8 @@ public class JaasHelper {
             ProtectionDomain[] optimized = new ProtectionDomain[domains.length];
             ProtectionDomain pd;
             int num = 0;
-            for (int i = 0; i < domains.length; i++) {
-                if ((pd = domains[i]) != null) {
+            for (ProtectionDomain domain : domains) {
+                if ((pd = domain) != null) {
                     boolean found = false;
                     for (int j = 0; j < num && !found; j++) {
                         found = (optimized[j] == pd);

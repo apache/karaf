@@ -17,7 +17,6 @@
 package org.apache.karaf.http.core;
 
 import org.ops4j.pax.web.service.spi.WebEvent;
-import org.osgi.framework.Bundle;
 
 public class ServletInfo {
     private String name;

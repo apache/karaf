@@ -68,22 +68,21 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     public TabularData getBundles() throws MBeanException {
         try {
             CompositeType bundleType = new CompositeType("Bundle", "OSGi Bundle",
-                    new String[]{"ID", "Name", "Version", "Start Level", "State"},
-                    new String[]{"ID of the Bundle", "Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle"},
-                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING});
+                    new String[]{"ID", "Name", "Symbolic Name", "Version", "Start Level", "State", "Update Location"},
+                    new String[]{"ID of the Bundle", "Name of the Bundle", "Symbolic Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle", "Update location of the Bundle"},
+                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING});
             TabularType tableType = new TabularType("Bundles", "Tables of all bundles", bundleType, new String[]{"ID"});
             TabularData table = new TabularDataSupport(tableType);
 
             Bundle[] bundles = bundleContext.getBundles();
 
-            for (int i = 0; i < bundles.length; i++) {
+            for (Bundle bundle : bundles) {
                 try {
-                    Bundle bundle = bundles[i];
                     BundleInfo info = bundleService.getInfo(bundle);
                     String bundleStateString = info.getState().toString();
                     CompositeData data = new CompositeDataSupport(bundleType,
-                            new String[]{"ID", "Name", "Version", "Start Level", "State"},
-                            new Object[]{info.getBundleId(), info.getSymbolicName(), info.getVersion(), info.getStartLevel(), bundleStateString});
+                            new String[]{"ID", "Name", "Symbolic Name", "Version", "Start Level", "State", "Update Location"},
+                            new Object[]{info.getBundleId(), info.getName(), info.getSymbolicName(), info.getVersion(), info.getStartLevel(), bundleStateString, info.getUpdateLocation()});
                     table.put(data);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
@@ -91,7 +90,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             }
             return table;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -105,7 +104,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
             return getBundleStartLevel(bundles.get(0)).getStartLevel();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -117,7 +116,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 getBundleStartLevel(bundle).setStartLevel(bundleStartLevel);
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -138,15 +137,23 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 getFrameworkWiring().refreshBundles(bundles);
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
     public void update(String bundleId) throws MBeanException {
-        update(bundleId, null);
+        update(bundleId, null, false);
+    }
+
+    public void update(String bundleId, boolean refresh) throws MBeanException {
+        update(bundleId, null, refresh);
     }
 
     public void update(String bundleId, String location) throws MBeanException {
+        update(bundleId, location, false);
+    }
+
+    public void update(String bundleId, String location, boolean refresh) throws MBeanException {
         try {
             List<Bundle> bundles = selectBundles(bundleId);
 
@@ -163,8 +170,13 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
             InputStream is = new URL(location).openStream();
             bundles.get(0).update(is);
+
+            if (refresh) {
+                FrameworkWiring wiring = bundleContext.getBundle(0).adapt(FrameworkWiring.class);
+                wiring.refreshBundles(null);
+            }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -177,7 +189,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             List<Bundle> bundles = selectBundles(bundleId);
             getFrameworkWiring().resolveBundles(bundles);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -194,7 +206,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 bundle.start();
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -210,7 +222,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             }
             return bundle.getBundleId();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -222,7 +234,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 bundle.start();
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -234,7 +246,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 bundle.stop();
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -246,7 +258,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 bundle.uninstall();
             }
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -282,7 +294,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
             return table;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -300,7 +312,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         try {
             return bundleService.getStatus(bundleId);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

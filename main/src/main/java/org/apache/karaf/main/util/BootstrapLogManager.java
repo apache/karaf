@@ -28,10 +28,10 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.properties.InterpolationHelper;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
@@ -104,11 +104,37 @@ public class BootstrapLogManager {
 	}
 
     private List<Handler> getDefaultHandlersInternal() {
-        if (Boolean.getBoolean("karaf.log.console")) {
-            return Arrays.asList(new ConsoleHandler(), getDefaultHandlerInternal());
-        } else {
-            return Collections.singletonList(getDefaultHandlerInternal());
+        String consoleLevel = System.getProperty("karaf.log.console", "OFF");
+        Level level = null;
+        try {
+            level = Level.parse(consoleLevel);
+        } catch (IllegalArgumentException e) {
+            // KARAF-5116: let's try *some* of log4j(2) log levels (org.apache.karaf.log.core.Level)
+            switch (consoleLevel) {
+                case "TRACE":
+                    level = Level.FINEST;
+                    break;
+                case "DEBUG":
+                    level = Level.FINE;
+                    break;
+                case "WARN":
+                    level = Level.WARNING;
+                    break;
+                case "ERROR":
+                    level = Level.SEVERE;
+                    break;
+                case "DEFAULT":
+                    level = Level.INFO;
+                    break;
+                case "OFF":
+                default:
+                    level = Level.OFF;
+                    break;
+            }
         }
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(level);
+        return Arrays.asList(handler, getDefaultHandlerInternal());
     }
 
 	private Properties loadPaxLoggingConfig() {

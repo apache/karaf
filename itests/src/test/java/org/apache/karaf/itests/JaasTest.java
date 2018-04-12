@@ -16,13 +16,10 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.IOException;
 import javax.inject.Inject;
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.junit.Ignore;
@@ -66,17 +63,14 @@ public class JaasTest extends KarafTestSupport {
 
     private void doLogin() throws Exception {
         final String userPassRealm = "karaf";
-        LoginContext lc = new LoginContext(userPassRealm, new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (int i = 0; i < callbacks.length; i++) {
-                    Callback callback = callbacks[i];
-                    if (callback instanceof PasswordCallback) {
-                        PasswordCallback passwordCallback = (PasswordCallback)callback;
-                        passwordCallback.setPassword(userPassRealm.toCharArray());
-                    } else if (callback instanceof NameCallback) {
-                        NameCallback nameCallback = (NameCallback)callback;
-                        nameCallback.setName(userPassRealm);
-                    }
+        LoginContext lc = new LoginContext(userPassRealm, callbacks -> {
+            for (Callback callback : callbacks) {
+                if (callback instanceof PasswordCallback) {
+                    PasswordCallback passwordCallback = (PasswordCallback) callback;
+                    passwordCallback.setPassword(userPassRealm.toCharArray());
+                } else if (callback instanceof NameCallback) {
+                    NameCallback nameCallback = (NameCallback) callback;
+                    nameCallback.setName(userPassRealm);
                 }
             }
         });

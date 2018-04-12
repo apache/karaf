@@ -26,7 +26,6 @@ import org.apache.karaf.jaas.modules.ldap.LDAPCache;
 import org.apache.karaf.jaas.modules.properties.AutoEncryptionSupport;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 import org.apache.karaf.jaas.modules.publickey.PublickeyBackingEngineFactory;
-import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
@@ -38,8 +37,7 @@ import org.osgi.service.cm.ManagedService;
 @Managed("org.apache.karaf.jaas")
 @Services(provides = {
         @ProvideService(JaasRealm.class),
-        @ProvideService(BackingEngineFactory.class),
-        @ProvideService(EncryptionService.class)
+        @ProvideService(BackingEngineFactory.class)
 })
 public class Activator extends BaseActivator implements ManagedService {
 
@@ -110,8 +108,11 @@ public class Activator extends BaseActivator implements ManagedService {
         populate(config, ENCRYPTION_ALGORITHM, "MD5");
         populate(config, ENCRYPTION_ENCODING, "hexadecimal");
         populate(config, EVENTADMIN_ENABLED, "true");
-        populate(config, "audit.file.enabled", "true");
+        populate(config, "audit.file.enabled", "false");
         populate(config, "audit.file.file", System.getProperty("karaf.data") + "/security/audit.log");
+        populate(config, "audit.log.enabled", "false");
+        populate(config, "audit.log.logger", "org.apache.karaf.jaas.modules.audit.LogAuditLoginModule");
+        populate(config, "audit.log.level", "info");
         populate(config, "audit.eventadmin.enabled", "true");
         populate(config, "audit.eventadmin.topic", "org/apache/karaf/login");
         config.put(BundleContext.class.getName(), bundleContext);

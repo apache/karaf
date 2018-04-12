@@ -38,10 +38,10 @@ public class TestDownloadManager implements DownloadManager, Downloader {
 
     private final MultiException exception = new MultiException("Error");
     private final ConcurrentMap<String, StreamProvider> providers = new ConcurrentHashMap<>();
-    private final Class loader;
+    private final Class<?> loader;
     private final String dir;
 
-    public TestDownloadManager(Class loader, String dir) {
+    public TestDownloadManager(Class<?> loader, String dir) {
         this.loader = loader;
         this.dir = dir;
     }
@@ -88,7 +88,12 @@ public class TestDownloadManager implements DownloadManager, Downloader {
             byte[] data = null;
             IOException exception = null;
             try {
-                Manifest man = new Manifest(loader.getResourceAsStream(dir + "/" + location + ".mf"));
+                String loc = dir + "/" + location + ".mf";
+                InputStream is = loader.getResourceAsStream(loc);
+                if (is == null) {
+                    throw new IllegalStateException("Could not find resource: " + loc);
+                }
+                Manifest man = new Manifest(is);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 JarOutputStream jos = new JarOutputStream(baos, man);
                 jos.close();

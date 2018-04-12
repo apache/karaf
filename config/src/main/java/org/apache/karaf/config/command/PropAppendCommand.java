@@ -16,8 +16,9 @@
  */
 package org.apache.karaf.config.command;
 
-import java.util.Dictionary;
+import java.util.Collection;
 
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -37,12 +38,14 @@ public class PropAppendCommand extends ConfigPropertyCommandSupport {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void propertyAction(Dictionary props) {
+    public void propertyAction(TypedProperties props) {
         final Object currentValue = props.get(prop);
         if (currentValue == null) {
             props.put(prop, value);
         } else if (currentValue instanceof String) {
             props.put(prop, currentValue + value);
+        } else if (currentValue instanceof Collection) {
+            ((Collection) currentValue).add(value);
         } else {
             System.err.println("Append Failed: current value is not a String.");
         }

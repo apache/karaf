@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.osgi.framework.BundleContext;
@@ -76,9 +75,9 @@ public final class JDBCUtils {
             if (tokens.length > 1) {
                 filter = tokens[1];
             }
-            ServiceReference[] references = bc.getServiceReferences(clazz, filter);
+            ServiceReference<?>[] references = bc.getServiceReferences(clazz, filter);
             if (references != null) {
-                ServiceReference ref = references[0];
+                ServiceReference<?> ref = references[0];
                 Object ds = bc.getService(ref);
                 bc.ungetService(ref);
                 return ds;

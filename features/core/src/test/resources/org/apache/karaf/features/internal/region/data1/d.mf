@@ -1,0 +1,6 @@
+Manifest-Version: 1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: d
+Bundle-Version: 1.0.0
+Require-Capability: ns;filter:="(ns=c)"
+

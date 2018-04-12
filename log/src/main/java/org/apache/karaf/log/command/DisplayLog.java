@@ -42,6 +42,8 @@ public class DisplayLog implements Action {
     public final static int INFO_INT  = 6;
     public final static int DEBUG_INT = 7;
 
+    private final static String SSHD_LOGGER = "org.apache.sshd";
+
     @Option(name = "-n", aliases = {}, description="Number of entries to display", required = false, multiValued = false)
     int entries;
 
@@ -66,48 +68,62 @@ public class DisplayLog implements Action {
 
     @Override
     public Object execute() throws Exception {
+        final PrintStream out = System.out;
+        int minLevel = getMinLevel(level);
+        String sshdLoggerLevel = logService.getLevel(SSHD_LOGGER).get(SSHD_LOGGER);
+        logService.setLevel(SSHD_LOGGER, "ERROR");
+        display(out, minLevel);
+        out.println();
+        logService.setLevel(SSHD_LOGGER, sshdLoggerLevel);
+        return null;
+    }
 
+    protected void display(final PrintStream out, int minLevel) {
+        Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
+        for (PaxLoggingEvent event : le) {
+            printEvent(out, event, minLevel);
+        }
+    }
+
+    protected static int getMinLevel(String levelSt) {
         int minLevel = Integer.MAX_VALUE;
-        if (level != null) {
-            switch (level.toLowerCase()) {
+        if (levelSt != null) {
+            switch (levelSt.toLowerCase()) {
             case "debug": minLevel = DEBUG_INT; break;
             case "info":  minLevel = INFO_INT; break;
             case "warn":  minLevel = WARN_INT; break;
             case "error": minLevel = ERROR_INT; break;
             }
         }
-
-
-        final PrintStream out = System.out;
-
-        Iterable<PaxLoggingEvent> le = logService.getEvents(entries == 0 ? Integer.MAX_VALUE : entries);
-        for (PaxLoggingEvent event : le) {
-            int sl = event.getLevel().getSyslogEquivalent();
-            if (sl <= minLevel) {
-                printEvent(out, event);
-            }
-        }
-        out.println();
-        return null;
+        return minLevel;
     }
         
     protected boolean checkIfFromRequestedLog(PaxLoggingEvent event) {
     	return event.getLoggerName().contains(logger);
     }
 
-    protected void printEvent(final PrintStream out, PaxLoggingEvent event) {
+    protected void printEvent(PrintStream out, PaxLoggingEvent event, int minLevel) {
         try {
-            if ((logger != null) &&
-                    (event != null) &&
-                    (checkIfFromRequestedLog(event))) {
-                out.append(formatter.format(event, overridenPattern, noColor));
-            } else if ((event != null) && (logger == null)) {
-                out.append(formatter.format(event, overridenPattern, noColor));
+            if (event != null) {
+                int sl = event.getLevel().getSyslogEquivalent();
+                if (sl <= minLevel) {
+                    printEvent(out, event);
+                }
             }
         } catch (NoClassDefFoundError e) {
             // KARAF-3350: Ignore NoClassDefFoundError exceptions
             // Those exceptions may happen if the underlying pax-logging service
             // bundle has been refreshed somehow.
+        }
+    }
+
+    protected void printEvent(final PrintStream out, PaxLoggingEvent event) {
+        if ((logger != null) &&
+                (event != null) &&
+                (checkIfFromRequestedLog(event))) {
+            out.append(formatter.format(event, overridenPattern, noColor));
+        } else if ((event != null) && (logger == null)) {
+            out.append(formatter.format(event, overridenPattern, noColor));
         }
     }
 }

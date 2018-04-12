@@ -63,4 +63,7 @@ public class MBeanInvocationHandler implements InvocationHandler {
         }
     }
 
+    public MBeanServer getDelegate() {
+        return wrapped;
+    }
 }

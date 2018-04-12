@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,6 +32,11 @@
     <artifactId>tooling</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Tooling</name>
+
+    <properties>
+        <maven.version>3.5.0</maven.version>
+        <maven.resolver.version>1.0.3</maven.resolver.version>
+    </properties>
 
     <modules>
         <module>utils</module>

@@ -37,12 +37,11 @@ public class ListCommand extends ConfigCommandSupport {
     protected Object doExecute() throws Exception {
         Configuration[] configs = configRepository.getConfigAdmin().listConfigurations(query);
         if (configs != null) {
-            Map<String, Configuration> sortedConfigs = new TreeMap<String, Configuration>();
+            Map<String, Configuration> sortedConfigs = new TreeMap<>();
             for (Configuration config : configs) {
                 sortedConfigs.put(config.getPid(), config);
             }
-            for (String pid : sortedConfigs.keySet()) {
-                Configuration config = sortedConfigs.get(pid);
+            for (Configuration config : sortedConfigs.values()) {
                 System.out.println("----------------------------------------------------------------");
                 System.out.println("Pid:            " + config.getPid());
                 if (config.getFactoryPid() != null) {
@@ -52,13 +51,13 @@ public class ListCommand extends ConfigCommandSupport {
                 if (config.getProperties() != null) {
                     System.out.println("Properties:");
                     Dictionary props = config.getProperties();
-                    Map<String, Object> sortedProps = new TreeMap<String, Object>();
+                    Map<String, Object> sortedProps = new TreeMap<>();
                     for (Enumeration e = props.keys(); e.hasMoreElements();) {
                         Object key = e.nextElement();
                         sortedProps.put(key.toString(), props.get(key));
                     }
-                    for (String key : sortedProps.keySet()) {
-                        System.out.println("   " + key + " = " + sortedProps.get(key));
+                    for (Map.Entry<String, Object> entry : sortedProps.entrySet()) {
+                        System.out.println("   " + entry.getKey() + " = " + displayValue(entry.getValue()));
                     }
                 }
             }

@@ -73,17 +73,17 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
             }
             return table;
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
     public void start(Long bundleId) throws MBeanException {
         try {
-            List<Long> list = new ArrayList<Long>();
+            List<Long> list = new ArrayList<>();
             list.add(bundleId);
             webContainerService.start(list);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -91,17 +91,17 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         try {
             webContainerService.start(bundleIds);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
     public void stop(Long bundleId) throws MBeanException {
         try {
-            List<Long> list = new ArrayList<Long>();
+            List<Long> list = new ArrayList<>();
             list.add(bundleId);
             webContainerService.stop(list);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -109,7 +109,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         try {
             webContainerService.stop(bundleIds);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

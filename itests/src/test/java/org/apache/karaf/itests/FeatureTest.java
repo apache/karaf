@@ -15,23 +15,47 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.MavenUtils;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class FeatureTest extends KarafTestSupport {
+
+
+    @Configuration
+    public Option[] config() {
+        String version = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
+        List<Option> result = new LinkedList<>(Arrays.asList(super.config()));
+        result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresRepositories",
+                        "mvn:org.apache.karaf.features/framework/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/spring/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/enterprise-legacy/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/standard/" + version + "/xml/features"));
+        return result.toArray(new Option[result.size()]);
+    }
 
     @Test
     public void bootFeatures() throws Exception {
@@ -99,7 +123,7 @@ public class FeatureTest extends KarafTestSupport {
     public void repoAddRemoveCommandWithRegex() throws Exception {
         System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features"));
         assertContains("apache-karaf-cellar", executeCommand("feature:repo-list"));
-        System.out.println(executeCommand("feature:repo-remove .*apache-karaf-cellar.*"));
+        System.out.println(executeCommand("feature:repo-remove '.*apache-karaf-cellar.*'"));
         assertContainsNot("apache-karaf-cellar", executeCommand("feature:repo-list"));
     }
 
@@ -121,7 +145,7 @@ public class FeatureTest extends KarafTestSupport {
 
     @Test
     public void repoRefreshCommand() throws Exception {
-        String refreshedRepo = executeCommand("feature:repo-refresh .*pax.*");
+        String refreshedRepo = executeCommand("feature:repo-refresh '.*org.ops4j.pax.[wc].*'");
         assertContains("pax-cdi", refreshedRepo);
         assertContains("pax-web", refreshedRepo);
     }

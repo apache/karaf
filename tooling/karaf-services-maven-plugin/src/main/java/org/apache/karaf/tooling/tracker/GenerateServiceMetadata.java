@@ -17,7 +17,7 @@
 package org.apache.karaf.tooling.tracker;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -78,6 +78,9 @@ public class GenerateServiceMetadata extends AbstractMojo {
     @Parameter(defaultValue = "project")
     protected String classLoader;
     
+    @Parameter(defaultValue=".*")
+    protected String artifactInclude;
+
     @Component
     private BuildContext buildContext;
 
@@ -85,8 +88,8 @@ public class GenerateServiceMetadata extends AbstractMojo {
         try {
             boolean addSourceDirectory = false;
 
-            StringBuilder requirements = new StringBuilder();
-            StringBuilder capabilities = new StringBuilder();
+            List<String> requirements = new ArrayList<>();
+            List<String> capabilities = new ArrayList<>();
 
             ClassFinder finder = createFinder(classLoader);
             List<Class<?>> classes = finder.findAnnotatedClasses(Services.class);
@@ -96,7 +99,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 URL classUrl = clazz.getClassLoader().getResource(clazz.getName().replace('.', '/') + ".class");
                 URL outputDirectoryUrl = new File(project.getBuild().getOutputDirectory()).toURI().toURL();
                 if (classUrl == null || !classUrl.getPath().startsWith(outputDirectoryUrl.getPath())) {
-                    System.out.println("Ignoring " + classUrl);
+                    getLog().info("Ignoring " + classUrl);
                     continue;
                 }
 
@@ -104,28 +107,18 @@ public class GenerateServiceMetadata extends AbstractMojo {
                     activators.add(clazz);
                 }
 
-                Properties props = new Properties();
+                writeServiceProperties(clazz);
+
                 Services services = clazz.getAnnotation(Services.class);
                 if (services != null) {
                     for (RequireService req : services.requires()) {
-                        String fltWithClass = combine(req.filter(), "(objectClass=" + req.value().getName() + ")");
-                        addServiceReq(requirements, fltWithClass);
-                        props.setProperty(req.value().getName(), req.filter());
+                        requirements.add(getRequirement(req));
                     }
                     for (ProvideService cap : services.provides()) {
-                        addServiceCap(capabilities, cap);
+                        capabilities.add(getCapability(cap));
                     }
                 }
-                Managed managed = clazz.getAnnotation(Managed.class);
-                if (managed != null) {
-                    props.setProperty("pid", managed.value());
-                }
-
-                File file = new File(outputDirectory, "OSGI-INF/karaf-tracker/" + clazz.getName());
-                file.getParentFile().mkdirs();
-                try (OutputStream os = buildContext.newFileOutputStream(file)) {
-                    props.store(os, null);
-                }
+                
                 addSourceDirectory = true;
             }
 
@@ -135,9 +128,10 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 project.addResource(resource);
             }
 
-            project.getProperties().setProperty(requirementsProperty, requirements.toString());
-            project.getProperties().setProperty(capabilitiesProperty, capabilities.toString());
+            project.getProperties().setProperty(requirementsProperty, String.join(",", requirements));
+            project.getProperties().setProperty(capabilitiesProperty, String.join(",", capabilities));
             if (activators.size() == 1) {
+                getLog().info("Activator " + activators.get(0).getName());
                 project.getProperties().setProperty(activatorProperty, activators.get(0).getName());
             }
             project.getProperties().setProperty("BNDExtension-Private-Package", "org.apache.karaf.util.tracker");
@@ -146,10 +140,11 @@ public class GenerateServiceMetadata extends AbstractMojo {
             List<Class<?>> services = finder.findAnnotatedClasses(Service.class);
             Set<String> packages = new TreeSet<>();
             for (Class<?> clazz : services) {
+                getLog().info("Service " + clazz.getPackage().getName());
                 packages.add(clazz.getPackage().getName());
             }
             if (!packages.isEmpty()) {
-                project.getProperties().setProperty("BNDExtension-Karaf-Commands", join(packages, ","));
+                project.getProperties().setProperty("BNDExtension-Karaf-Commands", String.join(",", packages));
             }
 
         } catch (Exception e) {
@@ -157,32 +152,33 @@ public class GenerateServiceMetadata extends AbstractMojo {
         }
     }
 
-    private String join(Set<String> packages, String separator) {
-        StringBuilder sb = new StringBuilder();
-        for (String pkg : packages) {
-            if (sb.length() > 0) {
-                sb.append(separator);
+    private String getRequirement(RequireService req) {
+        String fltWithClass = combine(req.filter(), "(objectClass=" + req.value().getName() + ")");
+        return "osgi.service;effective:=active;filter:=\"" + fltWithClass + "\"";
+    }
+    
+    private String getCapability(ProvideService cap) {
+        return "osgi.service;effective:=active;objectClass=" + cap.value().getName();
+    }
+
+    private void writeServiceProperties(Class<?> serviceClazz) throws IOException {
+        Properties props = new Properties();
+        Services services = serviceClazz.getAnnotation(Services.class);
+        if (services != null) {
+            for (RequireService req : services.requires()) {
+                props.setProperty(req.value().getName(), req.filter());
             }
-            sb.append(pkg);
         }
-        return sb.toString();
-    }
+        Managed managed = serviceClazz.getAnnotation(Managed.class);
+        if (managed != null) {
+            props.setProperty("pid", managed.value());
+        }
 
-    private void addServiceCap(StringBuilder capabilities, ProvideService cap) {
-        if (capabilities.length() > 0) {
-            capabilities.append(",");
+        File file = new File(outputDirectory, "OSGI-INF/karaf-tracker/" + serviceClazz.getName());
+        file.getParentFile().mkdirs();
+        try (OutputStream os = buildContext.newFileOutputStream(file)) {
+            props.store(os, null);
         }
-        capabilities.append("osgi.service;effective:=active;objectClass=")
-                    .append(cap.value().getName());
-    }
-
-    private void addServiceReq(StringBuilder requirements, String fltWithClass) {
-        if (requirements.length() > 0) {
-            requirements.append(",");
-        }
-        requirements.append("osgi.service;effective:=active;filter:=\"")
-                    .append(fltWithClass)
-                    .append("\"");
     }
 
     private String combine(String filter1, String filter2) {
@@ -198,12 +194,16 @@ public class GenerateServiceMetadata extends AbstractMojo {
         if ("project".equals(classloaderType)) {
             List<URL> urls = new ArrayList<>();
 
-            urls.add( new File(project.getBuild().getOutputDirectory()).toURI().toURL() );
-            for ( Artifact artifact : project.getArtifacts() ) {
-                File file = artifact.getFile();
-                if ( file != null ) {
-                    urls.add( file.toURI().toURL() );
-                    System.out.println("classpath: " + file);
+            urls.add(new File(project.getBuild().getOutputDirectory()).toURI().toURL());
+            for (Artifact artifact : project.getArtifacts()) {
+                if (artifactInclude != null && artifactInclude.length() > 0 && artifact.getArtifactId().matches(artifactInclude)) {
+                    File file = artifact.getFile();
+                    if (file != null) {
+                        getLog().debug("Use artifact " + artifact.getArtifactId() + ": " + file);
+                        urls.add(file.toURI().toURL());
+                    }
+                } else {
+                    getLog().debug("Ignore artifact " + artifact.getArtifactId());
                 }
             }
             ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());

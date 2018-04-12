@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.karaf.features.BundleInfo;
@@ -28,10 +29,14 @@ import org.apache.karaf.features.ConfigInfo;
 
 @XmlTransient
 public class Content {
-
+    
+    @XmlElement(name = "config", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Config> config;
+    @XmlElement(name = "configfile", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<ConfigFile> configfile;
+    @XmlElement(name = "feature", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Dependency> feature;
+    @XmlElement(name = "bundle", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Bundle> bundle;
 
     /**
@@ -54,7 +59,7 @@ public class Content {
      */
     public List<Config> getConfig() {
         if (config == null) {
-            config = new ArrayList<Config>();
+            config = new ArrayList<>();
         }
         return this.config;
     }
@@ -135,19 +140,19 @@ public class Content {
     }
 
     public List<org.apache.karaf.features.Dependency> getDependencies() {
-        return Collections.<org.apache.karaf.features.Dependency>unmodifiableList(getFeature());
+        return Collections.unmodifiableList(getFeature());
     }
 
     public List<BundleInfo> getBundles() {
-        return Collections.<BundleInfo>unmodifiableList(getBundle());
+        return Collections.unmodifiableList(getBundle());
     }
 
     public List<ConfigInfo> getConfigurations() {
-    	return Collections.<ConfigInfo>unmodifiableList(getConfig());
+    	return Collections.unmodifiableList(getConfig());
     }
 
     public List<ConfigFileInfo> getConfigurationFiles() {
-        return Collections.<ConfigFileInfo>unmodifiableList(getConfigfile());
+        return Collections.unmodifiableList(getConfigfile());
     }
 
 }

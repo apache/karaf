@@ -29,7 +29,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +39,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.gogo.runtime.Token;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -60,9 +60,9 @@ public class DefaultActionPreparator {
     public boolean prepare(Action action, Session session, List<Object> params) throws Exception {
 
         Command command = action.getClass().getAnnotation(Command.class);
-        Map<Option, Field> options = new HashMap<Option, Field>();
-        Map<Argument, Field> arguments = new HashMap<Argument, Field>();
-        List<Argument> orderedArguments = new ArrayList<Argument>();
+        Map<Option, Field> options = new HashMap<>();
+        Map<Argument, Field> arguments = new HashMap<>();
+        List<Argument> orderedArguments = new ArrayList<>();
 
         for (Class<?> type = action.getClass(); type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {
@@ -89,8 +89,7 @@ public class DefaultActionPreparator {
         assertIndexesAreCorrect(action.getClass(), orderedArguments);
 
         String commandErrorSt = COLOR_RED + "Error executing command " + command.scope() + ":" + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL + COLOR_DEFAULT + ": ";
-        for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
-            Object param = it.next();
+        for (Object param : params) {
             if (HelpOption.HELP.name().equals(param)) {
                 int termWidth = session.getTerminal() != null ? session.getTerminal().getWidth() : 80;
                 boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
@@ -107,15 +106,25 @@ public class DefaultActionPreparator {
         for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
             Object param = it.next();
 
-            if (processOptions && param instanceof String && ((String) param).startsWith("-")) {
-                boolean isKeyValuePair = ((String) param).indexOf('=') != -1;
+            String paramValue = null;
+            if (param instanceof String) {
+                paramValue = (String)param;
+            }
+            if (param instanceof Token) {
+                paramValue = param.toString();
+            }
+
+            if (processOptions
+                    && paramValue != null
+                    && paramValue.startsWith("-")) {
+                boolean isKeyValuePair = paramValue.indexOf('=') != -1;
                 String name;
                 Object value = null;
                 if (isKeyValuePair) {
-                    name = ((String) param).substring(0, ((String) param).indexOf('='));
-                    value = ((String) param).substring(((String) param).indexOf('=') + 1);
+                    name = paramValue.substring(0, paramValue.indexOf('='));
+                    value = paramValue.substring(paramValue.indexOf('=') + 1);
                 } else {
-                    name = (String) param;
+                    name = paramValue;
                 }
                 Option option = null;
                 for (Option opt : options.keySet()) {
@@ -126,9 +135,9 @@ public class DefaultActionPreparator {
                 }
                 if (option == null) {
                     throw new CommandException(commandErrorSt
-                                + "undefined option " + INTENSITY_BOLD + param + INTENSITY_NORMAL + "\n"
+                                + "undefined option " + INTENSITY_BOLD + paramValue + INTENSITY_NORMAL + "\n"
                                 + "Try <command> --help' for more information.",
-                                        "Undefined option: " + param);
+                                        "Undefined option: " + paramValue);
                 }
                 Field field = options.get(option);
                 if (value == null && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
@@ -139,8 +148,8 @@ public class DefaultActionPreparator {
                 }
                 if (value == null) {
                         throw new CommandException(commandErrorSt
-                                + "missing value for option " + INTENSITY_BOLD + param + INTENSITY_NORMAL,
-                                "Missing value for option: " + param
+                                + "missing value for option " + INTENSITY_BOLD + paramValue + INTENSITY_NORMAL,
+                                "Missing value for option: " + paramValue
                         );
                 }
                 if (option.multiValued()) {
@@ -274,6 +283,16 @@ public class DefaultActionPreparator {
                 public Class<? extends Annotation> annotationType() {
                     return delegate.annotationType();
                 }
+
+                @Override
+                public boolean censor() {
+                    return delegate.censor();
+                }
+
+                @Override
+                public char mask() {
+                    return delegate.mask();
+                }
             };
         }
         return argument;
@@ -291,11 +310,7 @@ public class DefaultActionPreparator {
         Command command = action.getClass().getAnnotation(Command.class);
         if (command != null) {
             List<Argument> argumentsSet = new ArrayList<Argument>(arguments.keySet());
-            Collections.sort(argumentsSet, new Comparator<Argument>() {
-                public int compare(Argument o1, Argument o2) {
-                    return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
-                }
-            });
+            argumentsSet.sort(Comparator.comparing(Argument::index));
             Set<Option> optionsSet = new HashSet<Option>(options.keySet());
             optionsSet.add(HelpOption.HELP);
             if (command != null && (command.description() != null || command.name() != null)) {
@@ -394,12 +409,15 @@ public class DefaultActionPreparator {
     }
 
     public Object getDefaultValue(Action action, Field field) {
-        try {
-            field.setAccessible(true);
-            return field.get(action);
-        } catch (Exception e) {
-            return null;
+        if (field != null) {
+            try {
+                field.setAccessible(true);
+                return field.get(action);
+            } catch (Exception e) {
+                return null;
+            }
         }
+        return null;
     }
 
     private String loadDescription(Class<?> clazz, String desc) {

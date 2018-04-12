@@ -16,90 +16,54 @@
  */
 package org.apache.karaf.jaas.modules.syncope;
 
-import org.junit.Test;
-import org.junit.Assert;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.junit.Test;
 
 public class SyncopeLoginModuleTest {
 
     @Test
-    public void testRolesExtraction() throws Exception {
-        String syncopeResponse = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<user>\n" +
-                "    <attributes>\n" +
-                "        <attribute>\n" +
-                "            <readonly>false</readonly>\n" +
-                "            <schema>cool</schema>\n" +
-                "            <value>false</value>\n" +
-                "        </attribute>\n" +
-                "        <attribute>\n" +
-                "            <readonly>false</readonly>\n" +
-                "            <schema>email</schema>\n" +
-                "            <value>karaf@example.net</value>\n" +
-                "        </attribute>\n" +
-                "        <attribute>\n" +
-                "            <readonly>false</readonly>\n" +
-                "            <schema>fullname</schema>\n" +
-                "            <value>karaf</value>\n" +
-                "        </attribute>\n" +
-                "        <attribute>\n" +
-                "            <readonly>false</readonly>\n" +
-                "            <schema>gender</schema>\n" +
-                "            <value>M</value>\n" +
-                "        </attribute>\n" +
-                "        <attribute>\n" +
-                "            <readonly>false</readonly>\n" +
-                "            <schema>surname</schema>\n" +
-                "            <value>karaf</value>\n" +
-                "        </attribute>\n" +
-                "        <attribute>\n" +
-                "            <readonly>false</readonly>\n" +
-                "            <schema>userId</schema>\n" +
-                "            <value>karaf@example.net</value>\n" +
-                "        </attribute>\n" +
-                "    </attributes>\n" +
-                "    <derivedAttributes/>\n" +
-                "    <id>100</id>\n" +
-                "    <propagationStatuses/>\n" +
-                "    <resources/>\n" +
-                "    <virtualAttributes/>\n" +
-                "    <creationDate>2014-08-12T18:37:09.202+02:00</creationDate>\n" +
-                "    <failedLogins>0</failedLogins>\n" +
-                "    <lastLoginDate>2014-08-13T09:38:02.204+02:00</lastLoginDate>\n" +
-                "    <memberships>\n" +
-                "        <membership>\n" +
-                "            <attributes/>\n" +
-                "            <derivedAttributes/>\n" +
-                "            <id>100</id>\n" +
-                "            <propagationStatuses/>\n" +
-                "            <resources/>\n" +
-                "            <virtualAttributes/>\n" +
-                "            <resources/>\n" +
-                "            <roleId>100</roleId>\n" +
-                "            <roleName>admin</roleName>\n" +
-                "        </membership>\n" +
-                "        <membership>\n" +
-                "            <attributes/>\n" +
-                "            <derivedAttributes/>\n" +
-                "            <id>101</id>\n" +
-                "            <propagationStatuses/>\n" +
-                "            <resources/>\n" +
-                "            <virtualAttributes/>\n" +
-                "            <resources/>\n" +
-                "            <roleId>101</roleId>\n" +
-                "            <roleName>another</roleName>\n" +
-                "        </membership>\n" +
-                "    </memberships>\n" +
-                "    <password>36460D3A3C1E27C0DB2AF23344475EE712DD3C9D</password>\n" +
-                "    <status>active</status>\n" +
-                "    <username>karaf</username>\n" +
-                "</user>\n";
+    public void testRolesExtractionSyncope1() throws Exception {
+        String syncopeResponse = read("syncope1Response.xml");
         SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
-        List<String> roles = syncopeLoginModule.extractingRoles(syncopeResponse);
-        Assert.assertEquals(2, roles.size());
-        Assert.assertEquals("admin", roles.get(0));
-        Assert.assertEquals("another", roles.get(1));
+        List<String> roles = syncopeLoginModule.extractingRolesSyncope1(syncopeResponse);
+        assertThat(roles, contains("admin", "another"));
+    }
+
+    @Test
+    public void testRolesExtractionSyncope2() throws Exception {
+        String syncopeResponse = read("syncope2Response.json");
+        SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
+        Map<String, String> options = Collections.singletonMap(SyncopeLoginModule.USE_ROLES_FOR_SYNCOPE2, "true");
+        syncopeLoginModule.initialize(null, null, Collections.emptyMap(), options);
+        List<String> roles = syncopeLoginModule.extractingRolesSyncope2(syncopeResponse);
+        assertThat(roles, contains("admin", "another"));
+    }
+
+    @Test
+    public void testGroupsExtractionSyncope2() throws Exception {
+        String syncopeResponse = read("syncope2Response.json");
+        SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
+        List<String> roles = syncopeLoginModule.extractingRolesSyncope2(syncopeResponse);
+        assertThat(roles, contains("manager"));
+    }
+
+    private String read(String resourceName) throws URISyntaxException, IOException {
+        URI response = this.getClass().getResource(resourceName).toURI();
+        return Files.lines(Paths.get(response), Charset.forName("UTF-8"))
+            .collect(Collectors.joining("\n"));
     }
 
 }

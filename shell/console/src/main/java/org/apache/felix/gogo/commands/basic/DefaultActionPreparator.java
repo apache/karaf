@@ -80,9 +80,9 @@ public class DefaultActionPreparator implements ActionPreparator {
     };
 
     public boolean prepare(Action action, CommandSession session, List<Object> params) throws Exception {
-        Map<Option, Field> options = new HashMap<Option, Field>();
-        Map<Argument, Field> arguments = new HashMap<Argument, Field>();
-        List<Argument> orderedArguments = new ArrayList<Argument>();
+        Map<Option, Field> options = new HashMap<>();
+        Map<Argument, Field> arguments = new HashMap<>();
+        List<Argument> orderedArguments = new ArrayList<>();
         // Introspect
         for (Class type = action.getClass(); type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {
@@ -144,8 +144,8 @@ public class DefaultActionPreparator implements ActionPreparator {
             }
         }
         // Populate
-        Map<Option, Object> optionValues = new HashMap<Option, Object>();
-        Map<Argument, Object> argumentValues = new HashMap<Argument, Object>();
+        Map<Option, Object> optionValues = new HashMap<>();
+        Map<Argument, Object> argumentValues = new HashMap<>();
         boolean processOptions = true;
         int argIndex = 0;
         for (Iterator<Object> it = params.iterator(); it.hasNext(); ) {
@@ -214,7 +214,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                 if (option.multiValued()) {
                     List<Object> l = (List<Object>) optionValues.get(option);
                     if (l == null) {
-                        l = new ArrayList<Object>();
+                        l = new ArrayList<>();
                         optionValues.put(option, l);
                     }
                     l.add(value);
@@ -246,7 +246,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                 if (argument.multiValued()) {
                     List<Object> l = (List<Object>) argumentValues.get(argument);
                     if (l == null) {
-                        l = new ArrayList<Object>();
+                        l = new ArrayList<>();
                         argumentValues.put(argument, l);
                     }
                     l.add(param);
@@ -362,13 +362,9 @@ public class DefaultActionPreparator implements ActionPreparator {
         Command command = action.getClass().getAnnotation(Command.class);
         if (command != null) {
             
-            List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
-            Collections.sort(arguments, new Comparator<Argument>() {
-                public int compare(Argument o1, Argument o2) {
-                    return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
-                }
-            });
-            Set<Option> options = new HashSet<Option>(optionsMap.keySet());
+            List<Argument> arguments = new ArrayList<>(argsMap.keySet());
+            arguments.sort(Comparator.comparing(Argument::index));
+            Set<Option> options = new HashSet<>(optionsMap.keySet());
             options.add(HELP);
             boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
             if (command != null && (command.description() != null || command.name() != null)) {

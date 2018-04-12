@@ -16,18 +16,7 @@
  */
 package org.apache.karaf.log.core.internal;
 
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Map;
-import java.util.TreeMap;
-
-import org.apache.karaf.log.core.Level;
-import org.apache.karaf.log.core.LogService;
-import org.ops4j.pax.logging.spi.PaxAppender;
-import org.ops4j.pax.logging.spi.PaxLoggingEvent;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 public interface LogServiceInternal {
 

@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -32,13 +33,14 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.felix.utils.properties.Properties;
-
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.info.ServerInfo;
+import org.apache.karaf.main.internal.Systemd;
 import org.apache.karaf.main.lock.Lock;
 import org.apache.karaf.main.lock.LockCallBack;
 import org.apache.karaf.main.lock.NoLock;
@@ -75,18 +77,19 @@ public class Main {
      */
     public static final String STARTUP_PROPERTIES_FILE_NAME = "startup.properties";
 
-
-    Logger LOG = Logger.getLogger(this.getClass().getName());
+    private static final Logger LOG = Logger.getLogger(Main.class.getName());
 
     private ConfigProperties config;
-    private Framework framework = null;
+    private Framework framework;
     private final String[] args;
     private int exitCode;
     private ShutdownCallback shutdownCallback;
     private KarafActivatorManager activatorManager;
-    private Lock lock;
-    private KarafLockCallback lockCallback;
-    private boolean exiting;
+    private volatile Lock lock;
+    private final KarafLockCallback lockCallback = new KarafLockCallback();
+    private volatile boolean exiting;
+    private AutoCloseable shutdownThread;
+    private Thread monitorThread;
     
     /**
      * <p>
@@ -200,7 +203,7 @@ public class Main {
                 System.err.println("Error occurred shutting down framework: " + ex);
                 ex.printStackTrace();
             } finally {
-                if (restartJvm) {
+                if (restartJvm && restart) {
                     System.exit(10);
                 } else if (!restart) {
                     System.exit(main.getExitCode());
@@ -227,13 +230,15 @@ public class Main {
     }
 
     public void launch() throws Exception {
-        config = new ConfigProperties();
+        if (config == null) {
+            config = new ConfigProperties();
+        }
+        config.performInit();
         if (config.delayConsoleStart) {
             System.out.println(config.startupMessage);
         }
         String log4jConfigPath = System.getProperty("karaf.etc") + "/org.ops4j.pax.logging.cfg";
         BootstrapLogManager.setProperties(config.props, log4jConfigPath);
-        lockCallback = new KarafLockCallback();
         InstanceHelper.updateInstancePid(config.karafHome, config.karafBase, true);
         BootstrapLogManager.configureLogger(LOG);
 
@@ -249,11 +254,47 @@ public class Main {
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
         framework = factory.newFramework(config.props);
 
-        /*
-         * KARAF-3706: disable the logger related code to avoid the exception
-         * It needs to be revisited when the FELIX-4871 is fixed.
-         */
-        // Hack to set felix logger
+        setLogger();
+
+        framework.init();
+        framework.getBundleContext().addFrameworkListener(lockCallback);
+        framework.start();
+
+        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
+        sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
+
+        // If we have a clean state, install everything
+        if (framework.getBundleContext().getBundles().length == 1) {
+
+            LOG.info("Installing and starting initial bundles");
+            File startupPropsFile = new File(config.karafEtc, STARTUP_PROPERTIES_FILE_NAME);
+            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
+            installAndStartBundles(resolver, framework.getBundleContext(), bundles);
+            LOG.info("All initial bundles installed and set to start");
+        }
+
+        ServerInfo serverInfo = new ServerInfoImpl(args, config);
+        framework.getBundleContext().registerService(ServerInfo.class, serverInfo, null);
+
+        activatorManager = new KarafActivatorManager(classLoader, framework);
+        activatorManager.startKarafActivators();
+        
+        setStartLevel(config.lockStartLevel);
+        // Progress bar
+        if (config.delayConsoleStart) {
+            new StartupListener(LOG, framework.getBundleContext());
+        }
+        monitorThread = monitor();
+        registerSignalHandler();
+        watchdog();
+    }
+
+    /*
+     * Hack to set felix logger
+     * KARAF-3706: disable the logger related code to avoid the exception
+     * It needs to be revisited when the FELIX-4871 is fixed.
+     */
+    private void setLogger() {
         try {
             if (framework.getClass().getName().startsWith("org.apache.felix.")) {
                 Field field = framework.getClass().getDeclaredField("m_logger");
@@ -288,40 +329,48 @@ public class Main {
         } catch (Throwable t) {
             t.printStackTrace();
         }
-
-        framework.init();
-        framework.getBundleContext().addFrameworkListener(lockCallback);
-        framework.start();
-
-        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
-        sl.setInitialBundleStartLevel(config.defaultBundleStartlevel);
-
-        // If we have a clean state, install everything
-        if (framework.getBundleContext().getBundles().length == 1) {
-
-            LOG.info("Installing and starting initial bundles");
-            File startupPropsFile = new File(config.karafEtc, STARTUP_PROPERTIES_FILE_NAME);
-            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
-            installAndStartBundles(resolver, framework.getBundleContext(), bundles);
-            LOG.info("All initial bundles installed and set to start");
-        }
-
-        ServerInfo serverInfo = new ServerInfoImpl(args, config);
-        framework.getBundleContext().registerService(ServerInfo.class, serverInfo, null);
-
-        activatorManager = new KarafActivatorManager(classLoader, framework);
-        activatorManager.startKarafActivators();
-        
-        setStartLevel(config.lockStartLevel);
-        // Progress bar
-        if (config.delayConsoleStart) {
-            new StartupListener(LOG, framework.getBundleContext());
-        }
-        monitor();
     }
 
-    private void monitor() {
-        new Thread("Karaf Lock Monitor Thread") {
+    private void registerSignalHandler() {
+        if (!Boolean.valueOf(System.getProperty("karaf.handle.sigterm", "true"))) {
+            return;
+        }
+
+        try {
+            final Class<?> signalClass = Class.forName("sun.misc.Signal");
+            final Class<?> signalHandlerClass = Class.forName("sun.misc.SignalHandler");
+
+            Object signalHandler = Proxy.newProxyInstance(getClass().getClassLoader(),
+                new Class<?>[] {
+                    signalHandlerClass
+                },
+                    (proxy, method, args) -> {
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                try {
+                                    exiting = true;
+                                    framework.stop();
+                                } catch (BundleException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
+                        return null;
+                    }
+            );
+
+            signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(
+                null,
+                signalClass.getConstructor(String.class).newInstance("TERM"),
+                signalHandler
+            );
+        } catch (Exception e) {
+        }
+    }
+
+    private Thread monitor() {
+        Thread th = new Thread("Karaf Lock Monitor Thread") {
             public void run() {
                 try {
                     doMonitor();
@@ -329,7 +378,9 @@ public class Main {
                     e.printStackTrace();
                 }
             }
-        }.start();
+        };
+        th.start();
+        return th;
     }
 
     private void doMonitor() throws Exception {
@@ -337,7 +388,7 @@ public class Main {
         File dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA));
         while (!exiting) {
             if (lock.lock()) {
-                lockCallback.lockAquired();
+                lockCallback.lockAcquired();
                 for (;;) {
                     if (!dataDir.isDirectory()) {
                         LOG.info("Data directory does not exist anymore, halting");
@@ -348,10 +399,16 @@ public class Main {
                     if (!lock.isAlive() || exiting) {
                         break;
                     }
-                    Thread.sleep(config.lockDelay);
+                    try {
+                        Thread.sleep(config.lockDelay);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
                 }
                 if (!exiting) {
                     lockCallback.lockLost();
+                } else {
+                    lockCallback.stopShutdownThread();
                 }
             } else {
                 if (config.lockSlaveBlock) {
@@ -362,16 +419,50 @@ public class Main {
                     lockCallback.waitingForLock();
                 }
             }
-            Thread.sleep(config.lockDelay);
+            try {
+                Thread.sleep(config.lockDelay);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
         }
     }
 
     Lock getLock() {
         return lock;
     }
-    
+
+    private void watchdog() {
+        if(Boolean.getBoolean("karaf.systemd.enabled")) {
+            new Thread("Karaf Systemd Watchdog Thread") {
+                public void run() {
+                    try {
+                        doWatchdog();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+        }
+    }
+
+    private void doWatchdog() throws Exception {
+        Systemd systemd = new Systemd();
+        long timeout = systemd.getWatchdogTimeout(TimeUnit.MILLISECONDS);
+
+        int code;
+        while (!exiting && timeout > 0) {
+            code = systemd.notifyWatchdog();
+            if(code < 0) {
+                System.err.println("Systemd sd_notify failed with error code: " + code);
+                break;
+            }
+
+            Thread.sleep(timeout / 2);
+        }
+    }
+
     private ClassLoader createClassLoader(ArtifactResolver resolver) throws Exception {
-        List<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<>();
         urls.add(resolver.resolve(config.frameworkBundle).toURL());
         File[] libs = new File(config.karafHome, "lib").listFiles();
         if (libs != null) {
@@ -422,7 +513,7 @@ public class Main {
     
     public List<BundleInfo> readBundlesFromStartupProperties(File startupPropsFile) {
         Properties startupProps = PropertiesLoader.loadPropertiesOrFail(startupPropsFile);
-        List<BundleInfo> bundeList = new ArrayList<BundleInfo>();
+        List<BundleInfo> bundeList = new ArrayList<>();
         for (String key : startupProps.keySet()) {
             try {
                 BundleInfo bi = new BundleInfo();
@@ -462,20 +553,22 @@ public class Main {
     }
 
     private boolean isNotFragment(Bundle b) {
-        String fragmentHostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
+        String fragmentHostHeader = b.getHeaders().get(Constants.FRAGMENT_HOST);
         return fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0;
     }
 
     private List<File> getBundleRepos() {
-        List<File> bundleDirs = new ArrayList<File>();
-        File baseSystemRepo = new File(config.karafHome, config.defaultRepo);
-        if (!baseSystemRepo.exists() && baseSystemRepo.isDirectory()) {
-            throw new RuntimeException("system repo folder not found: " + baseSystemRepo.getAbsolutePath());
-        }
-        bundleDirs.add(baseSystemRepo);
-
+        List<File> bundleDirs = new ArrayList<>();
         File homeSystemRepo = new File(config.karafHome, config.defaultRepo);
+        if (!homeSystemRepo.isDirectory()) {
+            throw new RuntimeException("system repo folder not found: " + homeSystemRepo.getAbsolutePath());
+        }
         bundleDirs.add(homeSystemRepo);
+
+        File baseSystemRepo = new File(config.karafBase, config.defaultRepo);
+        if (baseSystemRepo.isDirectory() && !baseSystemRepo.equals(homeSystemRepo)) {
+            bundleDirs.add(baseSystemRepo);
+        }
 
         String locations = config.bundleLocations;
         if (locations != null) {
@@ -531,6 +624,14 @@ public class Main {
         framework.adapt(FrameworkStartLevel.class).setStartLevel(level);
     }
 
+    public ConfigProperties getConfig() {
+        return config;
+    }
+
+    public void setConfig(ConfigProperties config) {
+        this.config = config;
+    }
+
     public void awaitShutdown() throws Exception {
         if (framework == null) {
             return;
@@ -544,7 +645,7 @@ public class Main {
                 while (framework.getState() != Bundle.STARTING && framework.getState() != Bundle.ACTIVE) {
                     Thread.sleep(10);
                 }
-                monitor();
+                monitorThread = monitor();
             } else {
                 return;
             }
@@ -556,46 +657,51 @@ public class Main {
             return true;
         }
         try {
-            int step = 5000;
-
-            // Notify the callback asap
+            int timeout = config.shutdownTimeout;
+            if (config.shutdownTimeout <= 0) {
+                timeout = Integer.MAX_VALUE;
+            }
+            
             if (shutdownCallback != null) {
-                shutdownCallback.waitingForShutdown(step);
+                shutdownCallback.waitingForShutdown(timeout);
             }
 
             exiting = true;
 
             if (framework.getState() == Bundle.ACTIVE || framework.getState() == Bundle.STARTING) {
-                new Thread() {
-                    public void run() {
-                        try {
-                            framework.stop();
-                        } catch (BundleException e) {
-                            System.err.println("Error stopping karaf: " + e.getMessage());
-                        }
+                new Thread(() -> {
+                    try {
+                        framework.stop();
+                    } catch (BundleException e) {
+                        System.err.println("Error stopping karaf: " + e.getMessage());
                     }
-                }.start();
+                }).start();
             }
 
-            int timeout = config.shutdownTimeout;
-            if (config.shutdownTimeout <= 0) {
-                timeout = Integer.MAX_VALUE;
-            }
+            int step = 5000;      
             while (timeout > 0) {
                 timeout -= step;
-                if (shutdownCallback != null) {
-                    shutdownCallback.waitingForShutdown(step * 2);
-                }
                 FrameworkEvent event = framework.waitForStop(step);
                 if (event.getType() != FrameworkEvent.WAIT_TIMEDOUT) {
-                    activatorManager.stopKarafActivators();
+                    if (activatorManager != null) {
+                        activatorManager.stopKarafActivators();
+                    }
                     return true;
                 }
             }
+
             return false;
         } finally {
             if (lock != null) {
                 exiting = true;
+                if (monitorThread != null) {
+                    try {
+                        monitorThread.interrupt();
+                        monitorThread.join();
+                    } finally {
+                        monitorThread = null;
+                    }
+                }
                 lock.release();
             }
         }
@@ -606,6 +712,7 @@ public class Main {
 
         @Override
         public void lockLost() {
+            stopShutdownThread();
             if (framework.getState() == Bundle.ACTIVE) {
                 LOG.warning("Lock lost. Setting startlevel to " + config.lockStartLevel);
                 synchronized (startLevelLock) {
@@ -624,10 +731,22 @@ public class Main {
             }
         }
 
+        public void stopShutdownThread() {
+            if (shutdownThread != null) {
+                try {
+                    shutdownThread.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    shutdownThread = null;
+                }
+            }
+        }
+
         @Override
-        public void lockAquired() {
+        public void lockAcquired() {
             LOG.info("Lock acquired. Setting startlevel to " + config.defaultStartLevel);
-            InstanceHelper.setupShutdown(config, framework);
+            shutdownThread = InstanceHelper.setupShutdown(config, framework);
             setStartLevel(config.defaultStartLevel);
         }
 

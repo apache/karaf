@@ -19,14 +19,37 @@ package org.apache.karaf.features;
 /**
  * A bundle info holds info about a Bundle.
  */
-public interface BundleInfo {
+public interface BundleInfo extends Blacklisting {
 
     String getLocation();
+
+    String getOriginalLocation();
 
     int getStartLevel();
 
     boolean isStart();
 
     boolean isDependency();
+
+    BundleInfo.BundleOverrideMode isOverriden();
+
+    public enum BundleOverrideMode {
+        /**
+         * No override
+         */
+        NONE,
+
+        /**
+         * Compatibility with <code>${karaf.etc}/overrides.properties</code> - requires access to original and
+         * replacement bundle's headers to compare version and symbolic name.
+         */
+        OSGI,
+
+        /**
+         * Simpler option that's just static override - doesn't require accessing and checking the bundle/resource
+         * being overriden.
+         */
+        MAVEN
+    }
 
 }

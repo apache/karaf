@@ -25,7 +25,7 @@ public interface Encryption {
      * @param plain the password in plain format.
      * @return the encrypted password format.
      */
-    public String encryptPassword(String plain);
+    String encryptPassword(String plain);
     
     /**
      * Check password.
@@ -34,6 +34,6 @@ public interface Encryption {
      * @param password the encrypted format to compare with.
      * @return true if the password match, false else.
      */
-    public boolean checkPassword(String input, String password);
+    boolean checkPassword(String input, String password);
 
 }

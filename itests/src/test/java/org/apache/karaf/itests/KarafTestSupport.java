@@ -15,6 +15,8 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
@@ -61,9 +63,14 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
+import org.ops4j.pax.exam.RerunTestException;
 import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
@@ -81,6 +88,7 @@ import org.slf4j.LoggerFactory;
 
 public class KarafTestSupport {
 
+    private static final EnumSet<org.apache.karaf.features.FeaturesService.Option> NO_AUTO_REFRESH = EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles);
     public static final String MIN_RMI_SERVER_PORT = "44444";
     public static final String MAX_RMI_SERVER_PORT = "66666";
     public static final String MIN_HTTP_PORT = "9080";
@@ -112,12 +120,51 @@ public class KarafTestSupport {
 
     @Inject
     protected ConfigurationAdmin configurationAdmin;
-
+    
+    
     /**
      * To make sure the tests run only when the boot features are fully installed
      */
     @Inject
     BootFinished bootFinished;
+    
+    public static class Retry implements TestRule {
+        private static boolean retry = true;
+        
+        public Retry(boolean retry) {
+            Retry.retry = retry;
+        }
+
+        public Statement apply(Statement base, Description description) {
+            return statement(base, description);
+        }
+
+        private Statement statement(final Statement base, final Description description) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    // implement retry logic here
+                    // retry once to honor the FeatureService refresh
+                    try {
+                        base.evaluate();
+                        return;
+                    } catch (Throwable t) {
+                        LOG.debug(t.getMessage(), t);
+                        if (retry && !(t instanceof org.junit.AssumptionViolatedException)) {
+                            retry = false;
+                            throw new RerunTestException("rerun this test pls", t);
+                        } else {
+                            throw t;
+                        }
+                    }
+                                        
+                }
+            };
+        }
+    }
+
+    @Rule
+    public Retry retry = new Retry(true);
 
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
@@ -141,31 +188,47 @@ public class KarafTestSupport {
         String rmiRegistryPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_REG_PORT), Integer.parseInt(MAX_RMI_REG_PORT)));
         String rmiServerPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_SERVER_PORT), Integer.parseInt(MAX_RMI_SERVER_PORT)));
         String sshPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_SSH_PORT), Integer.parseInt(MAX_SSH_PORT)));
+        String localRepository = System.getProperty("org.ops4j.pax.url.mvn.localRepository");
+        if (localRepository == null) {
+            localRepository = "";
+        }
 
         return new Option[]{
-            // KarafDistributionOption.debugConfiguration("8889", true),
+            //KarafDistributionOption.debugConfiguration("8889", true),
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
             // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
             configureSecurity().disableKarafMBeanServerBuilder(),
+            configureConsole().ignoreLocalConsole(),
             keepRuntimeFolder(),
             logLevel(LogLevel.INFO),
+            mavenBundle().groupId("org.awaitility").artifactId("awaitility").versionAsInProject(),
+            mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").versionAsInProject(),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
+            //replaceConfigurationFile("etc/host.key", getConfigFile("/etc/host.key")),
+            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "updateSnapshots", "none"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", httpPort),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
             editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
+            editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.localRepository", localRepository),
             editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
             editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version")),
             editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version")),
             editConfigurationFilePut("etc/system.properties", "spring41.version", System.getProperty("spring41.version")),
             editConfigurationFilePut("etc/system.properties", "spring42.version", System.getProperty("spring42.version")),
+            editConfigurationFilePut("etc/system.properties", "spring43.version", System.getProperty("spring43.version")),
+            editConfigurationFilePut("etc/system.properties", "spring50.version", System.getProperty("spring50.version")),
+            editConfigurationFilePut("etc/system.properties", "spring.security31.version", System.getProperty("spring.security31.version")),
+            editConfigurationFilePut("etc/system.properties", "spring.security42.version", System.getProperty("spring.security42.version")),
+            editConfigurationFilePut("etc/system.properties", "activemq.version", System.getProperty("activemq.version")),
+            editConfigurationFilePut("etc/branding.properties", "welcome", ""), // No welcome banner
+            editConfigurationFilePut("etc/branding-ssh.properties", "welcome", "")
         };
     }
 
-    private int getAvailablePort(int min, int max) {
+    public static int getAvailablePort(int min, int max) {
         for (int i = min; i <= max; i++) {
-            try {
-                ServerSocket socket = new ServerSocket(i);
+            try (ServerSocket socket = new ServerSocket(i)) {
                 return socket.getLocalPort();
             } catch (Exception e) {
                 System.err.println("Port " + i + " not available, trying next one");
@@ -206,39 +269,31 @@ public class KarafTestSupport {
         final SessionFactory sessionFactory = getOsgiService(SessionFactory.class);
         final Session session = sessionFactory.create(System.in, printStream, System.err);
 
-        final Callable<String> commandCallable = new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                try {
-                    if (!silent) {
-                        System.err.println(command);
-                    }
-                    session.execute(command);
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage(), e);
+        final Callable<String> commandCallable = () -> {
+            try {
+                if (!silent) {
+                    System.err.println(command);
                 }
-                printStream.flush();
-                return byteArrayOutputStream.toString();
+                Object result = session.execute(command);
+                if (result != null) {
+                    session.getConsole().println(result.toString());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
             }
+            printStream.flush();
+            return byteArrayOutputStream.toString();
         };
 
         FutureTask<String> commandFuture;
         if (principals.length == 0) {
-            commandFuture = new FutureTask<String>(commandCallable);
+            commandFuture = new FutureTask<>(commandCallable);
         } else {
             // If principals are defined, run the command callable via Subject.doAs()
-            commandFuture = new FutureTask<String>(new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    Subject subject = new Subject();
-                    subject.getPrincipals().addAll(Arrays.asList(principals));
-                    return Subject.doAs(subject, new PrivilegedExceptionAction<String>() {
-                        @Override
-                        public String run() throws Exception {
-                            return commandCallable.call();
-                        }
-                    });
-                }
+            commandFuture = new FutureTask<>(() -> {
+                Subject subject = new Subject();
+                subject.getPrincipals().addAll(Arrays.asList(principals));
+                return Subject.doAs(subject, (PrivilegedExceptionAction<String>) commandCallable::call);
             });
         }
 
@@ -249,7 +304,7 @@ public class KarafTestSupport {
             e.printStackTrace(System.err);
             response = "SHELL COMMAND TIMED OUT: ";
         } catch (ExecutionException e) {
-            Throwable cause = e.getCause().getCause();
+            Throwable cause = e.getCause() != null ? (e.getCause().getCause() != null ? e.getCause().getCause() : e.getCause()) : e;
             throw new RuntimeException(cause.getMessage(), cause);
 	} catch (InterruptedException e) {
 	    throw new RuntimeException(e.getMessage(), e);
@@ -340,7 +395,7 @@ public class KarafTestSupport {
     }
 
     protected void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
-        ServiceTracker<Object, Object> st = new ServiceTracker<Object, Object>(bundleContext, bundleContext.createFilter(filter), null);
+        ServiceTracker<Object, Object> st = new ServiceTracker<>(bundleContext, bundleContext.createFilter(filter), null);
         try {
             st.open();
             st.waitForService(timeout);
@@ -388,7 +443,7 @@ public class KarafTestSupport {
      */
     @SuppressWarnings("rawtypes")
     private static Collection<ServiceReference> asCollection(ServiceReference[] references) {
-        return references != null ? Arrays.asList(references) : Collections.<ServiceReference>emptyList();
+        return references != null ? Arrays.asList(references) : Collections.emptyList();
     }
 
     public JMXConnector getJMXConnector() throws Exception {
@@ -397,7 +452,7 @@ public class KarafTestSupport {
 
     public JMXConnector getJMXConnector(String userName, String passWord) throws Exception {
         JMXServiceURL url = new JMXServiceURL(getJmxServiceUrl());
-        Hashtable<String, Object> env = new Hashtable<String, Object>();
+        Hashtable<String, Object> env = new Hashtable<>();
         String[] credentials = new String[]{ userName, passWord };
         env.put("jmx.remote.credentials", credentials);
         JMXConnector connector = JMXConnectorFactory.connect(url, env);
@@ -441,13 +496,14 @@ public class KarafTestSupport {
                 return;
             }
         }
+        
         Assert.fail("Feature " + featureName + (featureVersion != null ? "/" + featureVersion : "") + " should be installed but is not");
     }
 
     public void assertFeaturesInstalled(String ... expectedFeatures) throws Exception {
-        Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures));
+        Set<String> expectedFeaturesSet = new HashSet<>(Arrays.asList(expectedFeatures));
         Feature[] features = featureService.listInstalledFeatures();
-        Set<String> installedFeatures = new HashSet<String>();
+        Set<String> installedFeatures = new HashSet<>();
         for (Feature feature : features) {
             installedFeatures.add(feature.getName());
         }
@@ -486,25 +542,25 @@ public class KarafTestSupport {
         Assert.assertFalse("Should not contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }
 
-	protected void assertBundleInstalled(String name) {
-	    Assert.assertNotNull("Bundle " + name + " should be installed", findBundleByName(name));
-	}
+    protected void assertBundleInstalled(String name) {
+        Assert.assertNotNull("Bundle " + name + " should be installed", findBundleByName(name));
+    }
 
-	protected void assertBundleNotInstalled(String name) {
-	    Assert.assertNull("Bundle " + name + " should not be installed", findBundleByName(name));
-	}
+    protected void assertBundleNotInstalled(String name) {
+        Assert.assertNull("Bundle " + name + " should not be installed", findBundleByName(name));
+    }
 
-	protected Bundle findBundleByName(String symbolicName) {
-	    for (Bundle bundle : bundleContext.getBundles()) {
-	        if (bundle.getSymbolicName().equals(symbolicName)) {
-	            return bundle;
-	        }
-	    }
-	    return null;
-	}
+    protected Bundle findBundleByName(String symbolicName) {
+        for (Bundle bundle : bundleContext.getBundles()) {
+            if (bundle.getSymbolicName().equals(symbolicName)) {
+                return bundle;
+            }
+        }
+        return null;
+    }
 
     protected void installAndAssertFeature(String feature) throws Exception {
-        featureService.installFeature(feature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.installFeature(feature, NO_AUTO_REFRESH);
         assertFeatureInstalled(feature);
     }
 
@@ -514,24 +570,24 @@ public class KarafTestSupport {
 
     protected void installAssertAndUninstallFeatures(String... feature) throws Exception {
         boolean success = false;
-    	try {
-			for (String curFeature : feature) {
-				featureService.installFeature(curFeature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-			    assertFeatureInstalled(curFeature);
-			}
-            success = true;
-		} finally {
+        Set<String> features = new HashSet<>(Arrays.asList(feature));
+        try {
+            System.out.println("Installing " + features);
+            featureService.installFeatures(features, NO_AUTO_REFRESH);
             for (String curFeature : feature) {
-                System.out.println("Uninstalling " + curFeature);
-                try {
-                    featureService.uninstallFeature(curFeature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-                } catch (Exception e) {
-                    if (success) {
-                        throw e;
-                    }
+                assertFeatureInstalled(curFeature);
+            }
+            success = true;
+        } finally {
+            System.out.println("Uninstalling " + features);
+            try {
+                featureService.uninstallFeatures(features, NO_AUTO_REFRESH);
+            } catch (Exception e) {
+                if (success) {
+                    throw e;
                 }
             }
-		}
+        }
     }
 
     /**
@@ -541,30 +597,30 @@ public class KarafTestSupport {
      * @param featuresBefore
      * @throws Exception
      */
-	protected void uninstallNewFeatures(Set<Feature> featuresBefore)
-			throws Exception {
-		Feature[] features = featureService.listInstalledFeatures();
+    protected void uninstallNewFeatures(Set<Feature> featuresBefore) throws Exception {
+        Feature[] features = featureService.listInstalledFeatures();
+        Set<String> uninstall = new HashSet<>();
         for (Feature curFeature : features) {
-			if (!featuresBefore.contains(curFeature)) {
-				try {
-					System.out.println("Uninstalling " + curFeature.getName());
-					featureService.uninstallFeature(curFeature.getName(), curFeature.getVersion(),
-                                                    EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-				} catch (Exception e) {
-					LOG.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
+            if (!featuresBefore.contains(curFeature)) {
+                uninstall.add(curFeature.getId());
+            }
+        }
+        try {
+            System.out.println("Uninstalling " + uninstall);
+            featureService.uninstallFeatures(uninstall, NO_AUTO_REFRESH);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
     protected void close(Closeable closeAble) {
-    	if (closeAble != null) {
-    		try {
-				closeAble.close();
-			} catch (IOException e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
-    	}
+        if (closeAble != null) {
+            try {
+                closeAble.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        }
     }
 
 }

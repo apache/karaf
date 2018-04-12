@@ -40,7 +40,7 @@ public class Activator implements BundleActivator {
 
         final OsgiKeystoreManager keystoreManager = new OsgiKeystoreManager();
 
-        keystoreInstanceServiceTracker = new ServiceTracker<KeystoreInstance, KeystoreInstance>(
+        keystoreInstanceServiceTracker = new ServiceTracker<>(
                 context, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
             @Override
             public KeystoreInstance addingService(ServiceReference<KeystoreInstance> reference) {
@@ -48,9 +48,11 @@ public class Activator implements BundleActivator {
                 keystoreManager.register(service, null);
                 return service;
             }
+
             @Override
             public void modifiedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
             }
+
             @Override
             public void removedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
                 keystoreManager.unregister(service, null);
@@ -62,7 +64,7 @@ public class Activator implements BundleActivator {
         osgiConfiguration = new OsgiConfiguration();
         osgiConfiguration.init();
 
-        jaasRealmServiceTracker = new ServiceTracker<JaasRealm, JaasRealm>(
+        jaasRealmServiceTracker = new ServiceTracker<>(
                 context, JaasRealm.class, new ServiceTrackerCustomizer<JaasRealm, JaasRealm>() {
             @Override
             public JaasRealm addingService(ServiceReference<JaasRealm> reference) {
@@ -70,9 +72,11 @@ public class Activator implements BundleActivator {
                 osgiConfiguration.register(service, null);
                 return service;
             }
+
             @Override
             public void modifiedService(ServiceReference<JaasRealm> reference, JaasRealm service) {
-           }
+            }
+
             @Override
             public void removedService(ServiceReference<JaasRealm> reference, JaasRealm service) {
                 osgiConfiguration.unregister(service, null);

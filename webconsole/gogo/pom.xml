@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.webconsole</groupId>
         <artifactId>webconsole</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -66,6 +66,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>${servlet.spec.groupId}</groupId>
             <artifactId>${servlet.spec.artifactId}</artifactId>
             <scope>provided</scope>
@@ -83,15 +88,13 @@
             <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -122,10 +125,13 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            jline;version="[${jline.version}, ${jline.version}]",
 			                org.apache.felix.webconsole*;version="[3,5)",
+                            javax.servlet*;version=2.4,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.felix.utils.json
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

@@ -16,7 +16,6 @@
 package org.apache.karaf.jaas.command;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -89,14 +88,14 @@ public abstract class JaasCommandSupport implements Action {
         if (hidden) {
             return realms;
         } else {
-            Map<String, JaasRealm> map = new TreeMap<String, JaasRealm>();
+            Map<String, JaasRealm> map = new TreeMap<>();
             for (JaasRealm realm : realms) {
                 if (!map.containsKey(realm.getName())
                         || realm.getRank() > map.get(realm.getName()).getRank()) {
                     map.put(realm.getName(), realm);
                 }
             }
-            return new ArrayList<JaasRealm>(map.values());
+            return new ArrayList<>(map.values());
         }
     }
 

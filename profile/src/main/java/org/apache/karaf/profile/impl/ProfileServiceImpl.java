@@ -71,12 +71,7 @@ public class ProfileServiceImpl implements ProfileService {
         } catch (InterruptedException ex) {
             throw new IllegalStateException(message, ex);
         }
-        return new LockHandle() {
-            @Override
-            public void close() {
-                lock.unlock();
-            }
-        };
+        return lock::unlock;
     }
 
     protected ReadWriteLock getLock() {

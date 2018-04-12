@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -82,7 +81,7 @@ public class Kar {
         InputStream is = null;
         JarInputStream zipIs = null;
         FeatureDetector featureDetector = new FeatureDetector();
-        this.featureRepos = new ArrayList<URI>();
+        this.featureRepos = new ArrayList<>();
         this.shouldInstallFeatures = true;
 
         try {
@@ -115,7 +114,7 @@ public class Kar {
 
             ZipEntry entry = zipIs.getNextEntry();
             while (entry != null) {
-                if (entry.getName().startsWith("repository")) {
+                if (entry.getName().startsWith("repository/")) {
                     String path = entry.getName().substring("repository/".length());
                     File destFile = new File(repoDir, path);
                     extract(zipIs, entry, destFile);
@@ -128,8 +127,8 @@ public class Kar {
                     }
                 }
 
-                if (entry.getName().startsWith("resource")) {
-                    String path = entry.getName().substring("resource/".length());
+                if (entry.getName().startsWith("resources/")) {
+                    String path = entry.getName().substring("resources/".length());
                     File destFile = new File(resourceDir, path);
                     extract(zipIs, entry, destFile);
                 }

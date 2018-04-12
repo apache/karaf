@@ -19,7 +19,7 @@ package org.apache.karaf.management;
 import org.osgi.framework.BundleContext;
 
 import java.io.IOException;
-import java.net.Inet4Address;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
@@ -31,9 +31,8 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
-
-import javax.net.ServerSocketFactory;
-import javax.net.SocketFactory;
+import java.util.Iterator;
+import java.util.Map;
 
 public class RmiRegistryFactory {
 
@@ -128,7 +127,7 @@ public class RmiRegistryFactory {
         }
         if (registry != null) {
             // register the registry as an OSGi service
-            Hashtable<String, Object> props = new Hashtable<String, Object>();
+            Hashtable<String, Object> props = new Hashtable<>();
             props.put("port", getPort());
             props.put("host", getHost());
             bundleContext.registerService(Registry.class, registry, props);
@@ -140,6 +139,27 @@ public class RmiRegistryFactory {
             Registry reg = registry;
             registry = null;
             UnicastRemoteObject.unexportObject(reg, true);
+
+            // clear TCPEndpointCache
+            try {
+                Class<?> cls = getClass().getClassLoader().loadClass("sun.rmi.transport.tcp.TCPEndpoint");
+                Field localEndpointsField = cls.getDeclaredField("localEndpoints");
+                Field ssfField = cls.getDeclaredField("ssf");
+                localEndpointsField.setAccessible(true);
+                ssfField.setAccessible(true);
+                Object localEndpoints = localEndpointsField.get(null);
+                if (localEndpoints != null) {
+                    Map<Object, Object> map = (Map<Object, Object>) localEndpoints;
+                    for (Iterator<Object> it = map.keySet().iterator(); it.hasNext(); ) {
+                        Object key = it.next();
+                        Object ssf = ssfField.get(key);
+                        if (ssf != null && ssf.getClass().getPackage().getName().equals("org.apache.karaf.management")) {
+                            it.remove();
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
         }
     }
 

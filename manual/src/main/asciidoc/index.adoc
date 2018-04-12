@@ -36,7 +36,7 @@ include::user-guide/directory-structure.adoc[]
 
 include::user-guide/start-stop.adoc[]
 
-include::user-guide/wrapper.adoc[]
+include::user-guide/os-integration.adoc[]
 
 include::user-guide/console.adoc[]
 
@@ -44,7 +44,7 @@ include::user-guide/remote.adoc[]
 
 include::user-guide/log.adoc[]
 
-include::user-guide/configugration.adoc[]
+include::user-guide/configuration.adoc[]
 
 include::user-guide/urls.adoc[]
 
@@ -85,6 +85,8 @@ include::user-guide/failover.adoc[]
 include::user-guide/monitoring.adoc[]
 
 include::user-guide/webconsole.adoc[]
+
+include::user-guide/scheduler.adoc[]
 
 include::user-guide/tuning.adoc[]
 

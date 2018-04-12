@@ -16,188 +16,108 @@
  */
 package org.apache.karaf.jaas.modules.properties;
 
-import junit.framework.TestCase;
-import org.apache.felix.utils.properties.Properties;
-import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class PropertiesBackingEngineTest extends TestCase {
+import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
+public class PropertiesBackingEngineTest {
+    private File f;
+
+    @Before
+    public void start() throws IOException {
+        f = File.createTempFile(getClass().getName(), ".tmp");
+    }
+
+    @Test
     public void testUserRoles() throws IOException {
-        File f = File.createTempFile(getClass().getName(), ".tmp");
-        try {
-            Properties p = new Properties(f);
+        Properties p = new Properties(f);
 
-            PropertiesBackingEngine engine = new PropertiesBackingEngine(p);
-            engine.addUser("a", "aa");
-            assertEquals(1, engine.listUsers().size());
-            UserPrincipal upa = engine.listUsers().iterator().next();
-            assertEquals("a", upa.getName());
-            engine.addUser("b", "bb");
+        PropertiesBackingEngine engine = new PropertiesBackingEngine(p);
+        engine.addUser("a", "aa");
+        engine.addUser("b", "bb");
 
-            engine.addRole("a", "role1");
-            engine.addRole("a", "role2");
-            assertEquals(2, engine.listRoles(upa).size());
+        engine.addRole("a", "role1");
+        engine.addRole("a", "role2");
+        
+        UserPrincipal upa = getUser(engine, "a");
+        Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2"));
 
-            boolean foundR1 = false;
-            boolean foundR2 = false;
-            for (RolePrincipal rp : engine.listRoles(upa)) {
-                if ("role1".equals(rp.getName())) {
-                    foundR1 = true;
-                } else if ("role2".equals(rp.getName())) {
-                    foundR2 = true;
-                }
-            }
-            assertTrue(foundR1);
-            assertTrue(foundR2);
+        engine.addGroup("a", "g");
+        engine.addGroupRole("g", "role2");
+        engine.addGroupRole("g", "role3");
+        engine.addGroup("b", "g");
+        engine.addGroup("b", "g2");
+        engine.addGroupRole("g2", "role4");
 
-            engine.addGroup("a", "g");
-            engine.addGroupRole("g", "role2");
-            engine.addGroupRole("g", "role3");
-            engine.addGroup("b", "g");
-            engine.addGroup("b", "g2");
-            engine.addGroupRole("g2", "role4");
+        Assert.assertThat(names(engine.listUsers()), containsInAnyOrder("a", "b"));
+        Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
 
-            assertEquals(2, engine.listUsers().size());
-            UserPrincipal upa_1 = null;
-            UserPrincipal upb_1 = null;
-            for (UserPrincipal u : engine.listUsers()) {
-                if ("a".equals(u.getName())) {
-                    upa_1 = u;
-                } else if ("b".equals(u.getName())) {
-                    upb_1 = u;
-                }
-            }
-            assertNotNull(upa_1);
-            assertNotNull(upb_1);
+        checkLoading();
 
-            assertEquals(3, engine.listRoles(upa).size());
-            boolean foundR1_2 = false;
-            boolean foundR2_2 = false;
-            boolean foundR3_2 = false;
-            for (RolePrincipal rp : engine.listRoles(upa)) {
-                if ("role1".equals(rp.getName())) {
-                    foundR1_2 = true;
-                } else if ("role2".equals(rp.getName())) {
-                    foundR2_2 = true;
-                } else if ("role3".equals(rp.getName())) {
-                    foundR3_2 = true;
-                }
-            }
-            assertTrue(foundR1_2);
-            assertTrue(foundR2_2);
-            assertTrue(foundR3_2);
+        assertNotNull(engine.lookupUser("a"));
+        assertEquals("a", engine.lookupUser("a").getName());
 
-            // check that the loading works
-            PropertiesBackingEngine engine2 = new PropertiesBackingEngine(new Properties(f));
-            assertEquals(2, engine2.listUsers().size());
-            UserPrincipal upa_2 = null;
-            UserPrincipal upb_2 = null;
-            for (UserPrincipal u : engine2.listUsers()) {
-                if ("a".equals(u.getName())) {
-                    upa_2 = u;
-                } else if ("b".equals(u.getName())) {
-                    upb_2 = u;
-                }
-            }
-            assertNotNull(upa_2);
-            assertNotNull(upb_2);
+        // removing some stuff
+        UserPrincipal upb = getUser(engine, "b");
+        assertEquals(1, engine.listGroups(upa).size());
+        assertEquals(2, engine.listGroups(upb).size());
 
-            assertEquals(3, engine2.listRoles(upa_2).size());
-            boolean foundR1_3 = false;
-            boolean foundR2_3 = false;
-            boolean foundR3_3 = false;
-            for (RolePrincipal rp : engine2.listRoles(upa_2)) {
-                if ("role1".equals(rp.getName())) {
-                    foundR1_3 = true;
-                } else if ("role2".equals(rp.getName())) {
-                    foundR2_3 = true;
-                } else if ("role3".equals(rp.getName())) {
-                    foundR3_3 = true;
-                }
-            }
-            assertTrue(foundR1_3);
-            assertTrue(foundR2_3);
-            assertTrue(foundR3_3);
+        GroupPrincipal gp = engine.listGroups(upa).iterator().next();
+        engine.deleteGroupRole("g", "role2");
+        Assert.assertThat(names(engine.listRoles(gp)), containsInAnyOrder("role3"));
 
-            assertEquals(3, engine2.listRoles(upb_2).size());
-            boolean foundR2_4 = false;
-            boolean foundR3_4 = false;
-            boolean foundR4_4 = false;
-            for (RolePrincipal rp : engine2.listRoles(upb_2)) {
-                if ("role2".equals(rp.getName())) {
-                    foundR2_4 = true;
-                } else if ("role3".equals(rp.getName())) {
-                    foundR3_4 = true;
-                } else if ("role4".equals(rp.getName())) {
-                    foundR4_4 = true;
-                }
-            }
-            assertTrue(foundR2_4);
-            assertTrue(foundR3_4);
-            assertTrue(foundR4_4);
+        // role2 should still be there as it was added to the user directly too
+        Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
+        Assert.assertThat(names(engine.listRoles(upb)), containsInAnyOrder("role3", "role4"));
 
-            // removing some stuff
-            UserPrincipal upb = null;
-            for (UserPrincipal up : engine.listUsers()) {
-                if ("b".equals(up.getName())) {
-                    upb = up;
-                }
-            }
-            assertEquals(1, engine.listGroups(upa).size());
-            assertEquals(2, engine.listGroups(upb).size());
+        engine.deleteGroup("b", "g");
+        engine.deleteGroup("b", "g2");
+        assertEquals(0, engine.listRoles(upb).size());
 
-            GroupPrincipal gp = engine.listGroups(upa).iterator().next();
-            engine.deleteGroupRole("g", "role2");
-            assertEquals(1, engine.listRoles(gp).size());
-            assertEquals("role3", engine.listRoles(gp).iterator().next().getName());
+        engine.deleteUser("b");
+        engine.deleteUser("a");
+        assertEquals("Properties should be empty now", 0, p.size());
+    }
 
-            // check that the user roles are reported correctly
-            assertEquals("role2 should still be there as it was added to the user directly too", 3, engine.listRoles(upa).size());
-            boolean foundR1_5 = false;
-            boolean foundR2_5 = false;
-            boolean foundR3_5 = false;
-            for (RolePrincipal rp : engine.listRoles(upa)) {
-                if ("role1".equals(rp.getName())) {
-                    foundR1_5 = true;
-                } else if ("role2".equals(rp.getName())) {
-                    foundR2_5 = true;
-                } else if ("role3".equals(rp.getName())) {
-                    foundR3_5 = true;
-                }
-            }
-            assertTrue(foundR1_5);
-            assertTrue(foundR2_5);
-            assertTrue(foundR3_5);
+    private void checkLoading() throws IOException {
+        PropertiesBackingEngine engine = new PropertiesBackingEngine(new Properties(f));
+        assertEquals(2, engine.listUsers().size());
+        UserPrincipal upa_2 = getUser(engine, "a");
+        UserPrincipal upb_2 = getUser(engine, "b");
+ 
+        assertEquals(3, engine.listRoles(upa_2).size());
+        Assert.assertThat(names(engine.listRoles(upa_2)), containsInAnyOrder("role1", "role2", "role3"));
 
-            assertEquals(2, engine.listRoles(upb).size());
-            boolean foundR3_6 = false;
-            boolean foundR4_6 = false;
-            for (RolePrincipal rp : engine.listRoles(upb)) {
-                if ("role3".equals(rp.getName())) {
-                    foundR3_6 = true;
-                } else if ("role4".equals(rp.getName())) {
-                    foundR4_6 = true;
-                }
-            }
-            assertTrue(foundR3_6);
-            assertTrue(foundR4_6);
+        assertEquals(3, engine.listRoles(upb_2).size());
+        Assert.assertThat(names(engine.listRoles(upb_2)), containsInAnyOrder("role2", "role3", "role4"));
+    }
+    
+    private UserPrincipal getUser(PropertiesBackingEngine engine, String name) {
+        List<UserPrincipal> matchingUsers = engine.listUsers().stream()
+            .filter(user->name.equals(user.getName())).collect(Collectors.toList());
+        Assert.assertFalse("User with name " + name + " was not found", matchingUsers.isEmpty());
+        return matchingUsers.iterator().next();
+    }
 
-            engine.deleteGroup("b", "g");
-            engine.deleteGroup("b", "g2");
-            assertEquals(0, engine.listRoles(upb).size());
-
-            engine.deleteUser("b");
-            engine.deleteUser("a");
-            assertEquals("Properties should be empty now", 0, p.size());
-        } finally {
-            if (!f.delete()) {
-                fail("Could not delete temporary file: " + f);
-            }
+    @After
+    public void cleanup() {
+        if (!f.delete()) {
+            fail("Could not delete temporary file: " + f);
         }
     }
 

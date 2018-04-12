@@ -67,6 +67,18 @@ You can use feature_name or feature_name/feature_version formats.
 the "system" internal repository.  Therefore at runtime the feature may be installed without access to external repositories.
 You can use feature_name or feature_name/feature_version formats.
 
+You can also define the libraries shipped in your custom distribution. For instance, it could be interesting if you
+want to extend your distribution with some JDBC drivers.
+
+The plugin accepts the `<libraries/>` element where you can add `<library/>` containing the URL of the library.
+For instance:
+
+----
+<libraries>
+    <library>mvn:org.postgresql/postgresql/9.3-1102-jdbc41;type:=endorsed</library>
+</libraries>
+----
+
 ===== Minimal Distribution Example
 
 This is the minimal assembly pom changed to use the packaging and annotated
@@ -124,20 +136,6 @@ This is the minimal assembly pom changed to use the packaging and annotated
         </resources>
 
         <plugins>
-            <!-- if you want to include resources in the distribution -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <id>process-resources</id>
-                        <goals>
-                            <goal>resources</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- karaf-maven-plugin will call both assembly and archive goals -->
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
@@ -219,20 +217,6 @@ For instance, to pre-install Spring 4.0.7.RELEASE_1 feature in your custom distr
         </resources>
 
         <plugins>
-            <!-- if you want to include resources in the distribution -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <id>process-resources</id>
-                        <goals>
-                            <goal>resources</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>

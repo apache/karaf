@@ -54,40 +54,35 @@ public class JdbcServiceImpl implements JdbcService {
     private ConfigurationAdmin configAdmin;
     
     @Override
-    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws Exception {
+    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws Exception {
         if (driverName == null && driverClass == null) {
             throw new IllegalStateException("No driverName or driverClass supplied");
         }
         if (datasources().contains(name)) {
             throw new IllegalArgumentException("There is already a DataSource with the name " + name);
         }
-        Dictionary<String, String> properties = new Hashtable<String, String>();
+        Dictionary<String, String> properties = new Hashtable<>();
         properties.put(DataSourceFactory.JDBC_DATASOURCE_NAME, name);
-        if (driverName != null) {
-            properties.put(DataSourceFactory.OSGI_JDBC_DRIVER_NAME, driverName);
-        }
-        if (driverClass != null) {
-            properties.put(DataSourceFactory.OSGI_JDBC_DRIVER_CLASS, driverClass);
-        }
-        if (databaseName != null) {
-            properties.put(DataSourceFactory.JDBC_DATABASE_NAME, databaseName);
-        }
-        if (url != null) {
-            properties.put(DataSourceFactory.JDBC_URL, url);
-        }
-        if (user != null) {
-            properties.put(DataSourceFactory.JDBC_USER, user);
-        }
-        if (password != null) {
-            properties.put(DataSourceFactory.JDBC_PASSWORD, password);
-        }
+        put(properties, DataSourceFactory.OSGI_JDBC_DRIVER_NAME, driverName);
+        put(properties, DataSourceFactory.OSGI_JDBC_DRIVER_CLASS, driverClass);
+        put(properties, DataSourceFactory.JDBC_DATABASE_NAME, databaseName);
+        put(properties, DataSourceFactory.JDBC_URL, url);
+        put(properties, DataSourceFactory.JDBC_USER, user);
+        put(properties, DataSourceFactory.JDBC_PASSWORD, password);
+        put(properties, "dataSourceType", databaseType);
         Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.datasource", null);
         config.update(properties);
     }
 
+    private void put(Dictionary<String, String> properties, String key, String value) {
+        if (value != null) {
+            properties.put(key, value);
+        }
+    }
+
     @Override
     public void delete(String name) throws Exception {
-        String filter = String.format("(%s=%s)", DataSourceFactory.JDBC_DATASOURCE_NAME, name);
+        String filter = String.format("(&(service.factoryPid=org.ops4j.datasource)(%s=%s))", DataSourceFactory.JDBC_DATASOURCE_NAME, name);
         Configuration[] configs = configAdmin.listConfigurations(filter);
         for (Configuration config : configs) {
             config.delete();
@@ -98,29 +93,38 @@ public class JdbcServiceImpl implements JdbcService {
     @Override
     public List<String> datasources() throws Exception {
         List<String> datasources = new ArrayList<>();
-        Collection<ServiceReference<DataSource>> references = bundleContext.getServiceReferences(DataSource.class, null);
-        if (references == null) {
-            return datasources;
-        }
-        for (ServiceReference reference : references) {
-            String dsName = (String)reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME);
-            if (dsName != null) {
-                datasources.add(dsName);
+
+        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null,
+                "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
+                        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
+        if (references != null) {
+            for (ServiceReference reference : references) {
+                if (reference.getProperty("osgi.jndi.service.name") != null) {
+                    datasources.add(reference.getProperty("osgi.jndi.service.name").toString());
+                } else if (reference.getProperty("datasource") != null) {
+                    datasources.add(reference.getProperty("datasource").toString());
+                } else if (reference.getProperty("name") != null) {
+                    datasources.add(reference.getProperty("name").toString());
+                } else if (reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME) != null) {
+                    datasources.add(reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME).toString());
+                } else {
+                    datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
+                }
             }
         }
+
         return datasources;
     }
 
     @Override
     public Map<String, List<String>> query(String datasource, String query) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
-        try {
-            Map<String, List<String>> map = new HashMap<String, List<String>>();
+        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
+            Map<String, List<String>> map = new HashMap<>();
             Statement statement = jdbcConnector.createStatement();
             ResultSet resultSet = jdbcConnector.register(statement.executeQuery(query));
             ResultSetMetaData metaData = resultSet.getMetaData();
             for (int c = 1; c <= metaData.getColumnCount(); c++) {
-                map.put(metaData.getColumnLabel(c), new ArrayList<String>());
+                map.put(metaData.getColumnLabel(c), new ArrayList<>());
             }
             while (resultSet.next()) {
                 for (int c = 1; c <= metaData.getColumnCount(); c++) {
@@ -128,32 +132,25 @@ public class JdbcServiceImpl implements JdbcService {
                 }
             }
             return map;
-        } finally {
-            jdbcConnector.close();
         }
     }
 
     @Override
     public void execute(String datasource, String command) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
-        try {
+        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             jdbcConnector.createStatement().execute(command);
-        } finally {
-            jdbcConnector.close();
         }
     }
 
     @Override
     public Map<String, List<String>> tables(String datasource) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
-        try {
-
+        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
             ResultSet resultSet = jdbcConnector.register(dbMetaData.getTables(null, null, null, null));
             ResultSetMetaData metaData = resultSet.getMetaData();
-            Map<String, List<String>> map = new HashMap<String, List<String>>();
+            Map<String, List<String>> map = new HashMap<>();
             for (int c = 1; c <= metaData.getColumnCount(); c++) {
-                map.put(metaData.getColumnLabel(c), new ArrayList<String>());
+                map.put(metaData.getColumnLabel(c), new ArrayList<>());
             }
             while (resultSet.next()) {
                 for (int c = 1; c <= metaData.getColumnCount(); c++) {
@@ -161,17 +158,14 @@ public class JdbcServiceImpl implements JdbcService {
                 }
             }
             return map;
-        } finally {
-            jdbcConnector.close();
         }
     }
 
     @Override
     public Map<String, String> info(String datasource) throws Exception {
-        JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource));
-        try {
+        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, String> map = new HashMap<>();
             map.put("db.product", dbMetaData.getDatabaseProductName());
             map.put("db.version", dbMetaData.getDatabaseProductVersion());
             map.put("url", dbMetaData.getURL());
@@ -182,8 +176,6 @@ public class JdbcServiceImpl implements JdbcService {
         } catch (Exception e) {
             LOGGER.error("Can't get information about datasource {}", datasource, e);
             throw e;
-        } finally {
-            jdbcConnector.close();
         }
     }
 

@@ -21,6 +21,7 @@ package org.apache.karaf.shell.impl.console.osgi.secured;
 import java.util.List;
 
 import org.apache.felix.gogo.runtime.Closure;
+import org.apache.felix.gogo.runtime.Token;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.api.console.Command;
@@ -63,7 +64,7 @@ public class SecuredCommand implements Command, Function {
 
     @Override
     public Object execute(Session session, List<Object> arguments) throws Exception {
-        factory.checkSecurity(this, session, arguments);
+        factory.checkSecurity(getScope(), getName(), arguments);
         return command.execute(session, arguments);
     }
 
@@ -76,16 +77,40 @@ public class SecuredCommand implements Command, Function {
             Object v = arguments.get(i);
             if (v instanceof Closure) {
                 final Closure closure = (Closure) v;
-                arguments.set(i, new org.apache.karaf.shell.api.console.Function() {
-                    @Override
-                    public Object execute(Session session, List<Object> arguments) throws Exception {
-                        return closure.execute(commandSession, arguments);
-                    }
-                });
+                arguments.set(i, new VersatileFunction(closure));
+            }
+            if (v instanceof Token) {
+                arguments.set(i, v.toString());
             }
         }
         return execute(session, arguments);
     }
 
+    static class VersatileFunction implements org.apache.felix.service.command.Function,
+            org.apache.karaf.shell.api.console.Function {
+
+        private final Closure closure;
+
+        VersatileFunction(Closure closure) {
+            this.closure = closure;
+        }
+
+
+        @Override
+        public Object execute(CommandSession commandSession, List<Object> list) throws Exception {
+            return closure.execute(commandSession, list);
+        }
+
+        @Override
+        public Object execute(Session session, List<Object> arguments) throws Exception {
+            CommandSession commandSession = (CommandSession) session.get(".commandSession");
+            return closure.execute(commandSession, arguments);
+        }
+
+        @Override
+        public String toString() {
+            return closure.toString();
+        }
+    }
 
 }

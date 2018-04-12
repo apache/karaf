@@ -17,8 +17,10 @@
 package org.apache.karaf.features.internal.download.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
 
 public class MavenDownloadTask extends AbstractRetryableDownloadTask {
@@ -30,8 +32,41 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
         this.resolver = resolver;
     }
 
-    protected File download() throws Exception {
-        return resolver.resolve(url);
+    @Override
+    public String getUrl() {
+        try {
+            // This ensures the version of the artifact is resolved in the returned url
+            return Parser.pathToMaven(Parser.pathFromMaven(url, getFile().toString()));
+        } catch (IOException e) {
+            return super.getUrl();
+        }
+    }
+
+    @Override
+    protected File download(Exception previousException) throws Exception {
+        return resolver.resolve(url, previousException);
+    }
+
+    /**
+     * Maven artifact may be looked up in several repositories. Only if exception for <strong>each</strong>
+     * repository is not retryable, we won't retry.
+     * @param e
+     * @return
+     */
+    @Override
+    protected Retry isRetryable(IOException e) {
+        // convert pax-url-aether "retry" to features.core "retry" concept
+        switch (resolver.isRetryableException(e)) {
+            case NEVER:
+                return Retry.NO_RETRY;
+            case LOW:
+            case HIGH:
+                // no need to repeat many times
+                return Retry.QUICK_RETRY;
+            case UNKNOWN:
+            default:
+                return Retry.DEFAULT_RETRY;
+        }
     }
 
 }

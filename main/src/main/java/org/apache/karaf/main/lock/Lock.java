@@ -21,9 +21,9 @@ package org.apache.karaf.main.lock;
 public interface Lock {
 
     /**
-     * A KeepAlive function to maintain the lock. 
-     * Indicates whether or not the lock could be aquired.
-     * 
+     * A KeepAlive function to maintain the lock.
+     * Indicates whether or not the lock could be acquired.
+     *
      * @return True if connection lock retained, false otherwise.
      * @throws Exception If the lock can't be acquired.
      */
@@ -31,14 +31,14 @@ public interface Lock {
 
     /**
      * Terminate the lock connection safely.
-     * 
+     *
      * @throws Exception If the lock can't be released.
      */
     void release() throws Exception;
 
     /**
      * Indicate whether or not the lock still exists.
-     * 
+     *
      * @return True, if the lock still exists, otherwise false.
      * @throws Exception If an error occurs while checking if the lock is alive.
      */

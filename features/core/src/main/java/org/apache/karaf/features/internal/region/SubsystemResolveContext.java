@@ -20,11 +20,12 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.karaf.features.FeaturesService;
@@ -37,7 +38,6 @@ import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.namespace.service.ServiceNamespace;
@@ -64,16 +64,16 @@ public class SubsystemResolveContext extends ResolveContext {
 
     private final Subsystem root;
     private final Map<String, Region> regions;
-    private final Set<Resource> mandatory = new HashSet<>();
-    private final CandidateComparator candidateComparator = new CandidateComparator(mandatory);
+    private final Map<Resource, Integer> distance;
+    private final CandidateComparator candidateComparator = new CandidateComparator(this::getResourceCost);
 
-    private final Map<Resource, Subsystem> resToSub = new HashMap<Resource, Subsystem>();
+    private final Map<Resource, Subsystem> resToSub = new HashMap<>();
     private final Repository repository;
     private final Repository globalRepository;
     private final Downloader downloader;
-    private final String serviceRequirements;
+    private final FeaturesService.ServiceRequirementsBehavior serviceRequirements;
 
-    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader, String serviceRequirements) throws BundleException {
+    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader, FeaturesService.ServiceRequirementsBehavior serviceRequirements) {
         this.root = root;
         this.globalRepository = globalRepository != null ? new SubsystemRepository(globalRepository) : null;
         this.downloader = downloader;
@@ -89,7 +89,7 @@ public class SubsystemResolveContext extends ResolveContext {
         // Add a heuristic to sort capabilities :
         //  if a capability comes from a resource which needs to be installed,
         //  prefer that one over any capabilities from other resources
-        findMandatory();
+        distance = computeDistances(root);
     }
     
     public Repository getRepository() {
@@ -100,58 +100,52 @@ public class SubsystemResolveContext extends ResolveContext {
         return globalRepository;
     }
 
-    void findMandatory() {
-        mandatory.add(root);
-        int nbMandatory;
-        // Iterate while we find more mandatory resources
-        do {
-            nbMandatory = mandatory.size();
-            for (Resource res : new ArrayList<>(mandatory)) {
-                // Check mandatory requirements of mandatory resources
-                for (Requirement req : res.getRequirements(null)) {
-                    if (isOptional(req) || isDynamic(req)) {
-                        continue;
-                    }
-                    List<Capability> caps = findProviders(req);
-                    // If there's a single provider for any kind of mandatory requirement,
-                    // this means the resource is also mandatory
-                    if (caps.size() == 1) {
-                        mandatory.add(caps.get(0).getResource());
-                    } else {
-                        // In case there are multiple providers
-                        // check if there is a single provider which has
-                        // a mandatory identity requirement on a mandatory
-                        // resource, in which case we also assume this one
-                        // is mandatory
-                        Set<Resource> mand = new HashSet<>();
-                        for (Capability cap : caps) {
-                            Resource r = cap.getResource();
-                            if (mandatory.contains(r)) {
-                                mand.add(r);
-                            } else {
-                                for (Requirement req2 : r.getRequirements(null)) {
-                                    if (!IDENTITY_NAMESPACE.equals(req2.getNamespace()) || isOptional(req2) || isDynamic(req2)) {
-                                        continue;
-                                    }
-                                    List<Capability> caps2 = findProviders(req2);
-                                    if (caps2.size() == 1) {
-                                        Resource r2 =  caps2.get(0).getResource();
-                                        if (mandatory.contains(r2)) {
-                                            mand.add(r);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (mand.size() == 1) {
-                            mandatory.add(mand.iterator().next());
-                        } else {
-                            mand.clear();
-                        }
+    private Map<Resource, Integer> computeDistances(Resource root) {
+        Map<Resource, Integer> distance = new HashMap<>();
+        Set<Resource> settledNodes = new HashSet<>();
+        distance.put(root, 0);
+        List<Resource> unSettledNodes = new ArrayList<>();
+        unSettledNodes.add(root);
+
+        while (!unSettledNodes.isEmpty()) {
+            unSettledNodes.sort(Comparator.comparingInt(r -> distance.getOrDefault(r, Integer.MAX_VALUE)));
+            Resource node = unSettledNodes.remove(0);
+            if (settledNodes.add(node)) {
+                Map<Resource, Integer> edge = computeEdges(node);
+                for (Resource target : edge.keySet()) {
+                    int d = distance.getOrDefault(node, Integer.MAX_VALUE) + edge.get(target);
+                    distance.merge(target, d, Math::min);
+                    if (!settledNodes.contains(target)) {
+                        unSettledNodes.add(target);
                     }
                 }
             }
-        } while (mandatory.size() != nbMandatory);
+        }
+        return distance;
+    }
+
+    private Map<Resource, Integer> computeEdges(Resource resource) {
+        Map<Resource, Integer> edges = new HashMap<>();
+        String owner = ResolverUtil.getOwnerName(resource);
+        for (Requirement req : resource.getRequirements(null)) {
+            if (isOptional(req) || isDynamic(req)) {
+                continue;
+            }
+            List<Capability> caps = findProviders(req);
+            for (Capability cap : caps) {
+                Resource r = cap.getResource();
+                // If there's a single provider for any kind of mandatory requirement,
+                // this means the resource is also mandatory.
+                // Else prefer resources from the same subsystem (with the same owner).
+                int v = (caps.size() == 1) ? 0 : (Objects.equals(ResolverUtil.getOwnerName(r), owner)) ? 1 : 10;
+                edges.merge(r, v, Math::min);
+            }
+        }
+        return edges;
+    }
+
+    private int getResourceCost(Resource resource) {
+        return distance.getOrDefault(resource, Integer.MAX_VALUE);
     }
 
     static boolean isOptional(Requirement req) {
@@ -164,6 +158,11 @@ public class SubsystemResolveContext extends ResolveContext {
         return PackageNamespace.RESOLUTION_DYNAMIC.equals(resolution);
     }
 
+    /**
+     * {@link #resToSub} will quickly map all {@link Subsystem#getInstallable() installable resources} to their
+     * {@link Subsystem}
+     * @param subsystem
+     */
     void prepare(Subsystem subsystem) {
         resToSub.put(subsystem, subsystem);
         for (Resource res : subsystem.getInstallable()) {
@@ -176,7 +175,7 @@ public class SubsystemResolveContext extends ResolveContext {
 
     @Override
     public Collection<Resource> getMandatoryResources() {
-        return Collections.<Resource>singleton(root);
+        return Collections.singleton(root);
     }
 
     @Override
@@ -215,49 +214,46 @@ public class SubsystemResolveContext extends ResolveContext {
                     Resource resource = cap.getResource();
                     String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
                     if (!providers.contains(resource)) {
-                        Set<Resource> newRes = new HashSet<>();
+                        Set<Resource> oldRes = new HashSet<>(providers);
+                        providers.clear();
                         String r1 = getRegion(resource).getName();
                         boolean superceded = false;
-                        for (Resource r : providers) {
+                        for (Resource r : oldRes) {
                             String id2 = ResolverUtil.getSymbolicName(r) + "|" + ResolverUtil.getVersion(r);
                             if (id.equals(id2)) {
                                 String r2 = getRegion(r).getName();
                                 if (r1.equals(r2)) {
                                     if (r instanceof BundleRevision) {
-                                        newRes.add(r);
+                                        providers.add(r);
                                         superceded = true;
                                     } else if (resource instanceof BundleRevision) {
-                                        newRes.add(resource);
+                                        providers.add(resource);
                                     } else {
                                         throw new InternalError();
                                     }
                                 } else if (r1.startsWith(r2)) {
-                                    newRes.add(r);
+                                    providers.add(r);
                                     superceded = true;
                                 } else if (r2.startsWith(r1)) {
-                                    newRes.add(resource);
+                                    providers.add(resource);
                                 } else {
-                                    newRes.add(r);
+                                    providers.add(r);
                                 }
                             } else {
-                                newRes.add(r);
+                                providers.add(r);
                             }
                         }
                         if (!superceded) {
-                            newRes.add(resource);
+                            providers.add(resource);
                         }
-                        providers = newRes;
                     }
                 }
-                for (Iterator<Capability> it = caps.iterator(); it.hasNext();) {
-                    Capability cap = it.next();
-                    if (!providers.contains(cap.getResource())) {
-                        it.remove();
-                    }
-                }
+                caps.removeIf(cap -> !providers.contains(cap.getResource()));
             }
             // Sort caps
-            Collections.sort(caps, candidateComparator);
+            if (distance != null && caps.size() > 1) {
+                caps.sort(candidateComparator);
+            }
         }
         return caps;
     }
@@ -283,7 +279,7 @@ public class SubsystemResolveContext extends ResolveContext {
     @Override
     public boolean isEffective(Requirement requirement) {
         boolean isServiceReq = ServiceNamespace.SERVICE_NAMESPACE.equals(requirement.getNamespace());
-        return !(isServiceReq && FeaturesService.SERVICE_REQUIREMENTS_DISABLE.equals(serviceRequirements));
+        return !(isServiceReq && FeaturesService.ServiceRequirementsBehavior.Disable == serviceRequirements);
     }
 
     @Override
@@ -311,7 +307,7 @@ public class SubsystemResolveContext extends ResolveContext {
             List<Capability> identities = resource.getCapabilities(IDENTITY_NAMESPACE);
             if (identities != null && !identities.isEmpty()) {
                 Capability identity = identities.iterator().next();
-                Map<String, Object> attrs = new HashMap<String, Object>();
+                Map<String, Object> attrs = new HashMap<>();
                 attrs.put(BUNDLE_SYMBOLICNAME_ATTRIBUTE, identity.getAttributes().get(IDENTITY_NAMESPACE));
                 attrs.put(BUNDLE_VERSION_ATTRIBUTE, identity.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE));
                 return filter.isAllowed(VISIBLE_BUNDLE_NAMESPACE, attrs);
@@ -324,7 +320,7 @@ public class SubsystemResolveContext extends ResolveContext {
     class SubsystemRepository implements Repository {
 
         private final Repository repository;
-        private final Map<Subsystem, Map<Capability, Capability>> mapping = new HashMap<Subsystem, Map<Capability, Capability>>();
+        private final Map<Subsystem, Map<Capability, Capability>> mapping = new HashMap<>();
 
         public SubsystemRepository(Repository repository) {
             this.repository = repository;
@@ -333,18 +329,14 @@ public class SubsystemResolveContext extends ResolveContext {
         @Override
         public Map<Requirement, Collection<Capability>> findProviders(Collection<? extends Requirement> requirements) {
             Map<Requirement, Collection<Capability>> base = repository.findProviders(requirements);
-            Map<Requirement, Collection<Capability>> result = new HashMap<Requirement, Collection<Capability>>();
+            Map<Requirement, Collection<Capability>> result = new HashMap<>();
             for (Map.Entry<Requirement, Collection<Capability>> entry : base.entrySet()) {
-                List<Capability> caps = new ArrayList<Capability>();
+                List<Capability> caps = new ArrayList<>();
                 Subsystem ss = getSubsystem(entry.getKey().getResource());
                 while (!ss.isAcceptDependencies()) {
                     ss = ss.getParent();
                 }
-                Map<Capability, Capability> map = mapping.get(ss);
-                if (map == null) {
-                    map = new HashMap<Capability, Capability>();
-                    mapping.put(ss, map);
-                }
+                Map<Capability, Capability> map = mapping.computeIfAbsent(ss, k -> new HashMap<>());
                 for (Capability cap : entry.getValue()) {
                     Capability wrapped = map.get(cap);
                     if (wrapped == null) {

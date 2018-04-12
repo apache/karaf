@@ -17,8 +17,6 @@
 package org.apache.karaf.packages.core.internal;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -44,7 +42,7 @@ public class PackageServiceImpl implements PackageService {
 
     public List<PackageVersion> getExports() {
         Bundle[] bundles = bundleContext.getBundles();
-        SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<String, PackageVersion>();
+        SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<>();
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
             if (rev != null) {
@@ -54,11 +52,8 @@ public class PackageServiceImpl implements PackageService {
                     String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
                     Version version = (Version)attr.get("version");
                     String key = packageName + ":" + version.toString();
-                    PackageVersion pVer = packageVersionMap.get(key);
-                    if (pVer == null) {
-                        pVer = new PackageVersion(packageName, version);
-                        packageVersionMap.put(key, pVer);
-                    }
+                    PackageVersion pVer =
+                            packageVersionMap.computeIfAbsent(key, k -> new PackageVersion(packageName, version));
                     pVer.addBundle(bundle);
                 }
             }
@@ -104,7 +99,7 @@ public class PackageServiceImpl implements PackageService {
         Bundle bundle = bundleContext.getBundle(bundleId);
         BundleRevision rev = bundle.adapt(BundleRevision.class);
         List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
-        List<String> exports = new ArrayList<String>();
+        List<String> exports = new ArrayList<>();
         for (BundleCapability cap : caps) {
             Map<String, Object> attr = cap.getAttributes();
             String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
@@ -118,7 +113,7 @@ public class PackageServiceImpl implements PackageService {
         Bundle bundle = bundleContext.getBundle(bundleId);
         BundleRevision rev = bundle.adapt(BundleRevision.class);
         List<BundleRequirement> reqs = rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
-        List<String> imports = new ArrayList<String>();
+        List<String> imports = new ArrayList<>();
         for (BundleRequirement req : reqs) {
             PackageRequirement packageReq = create(req, bundle);
             imports.add(packageReq.getPackageName());

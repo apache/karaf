@@ -25,8 +25,6 @@ import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import java.io.File;
-
 @Services(
         requires = @RequireService(ConfigurationAdmin.class),
         provides = @ProvideService(ConfigRepository.class)
@@ -39,7 +37,7 @@ public class Activator extends BaseActivator {
             return;
         }
 
-        ConfigRepository configRepository = new ConfigRepositoryImpl(configurationAdmin, new File(System.getProperty("karaf.etc")));
+        ConfigRepository configRepository = new ConfigRepositoryImpl(configurationAdmin);
         register(ConfigRepository.class, configRepository);
 
         ConfigMBeanImpl configMBean = new ConfigMBeanImpl();

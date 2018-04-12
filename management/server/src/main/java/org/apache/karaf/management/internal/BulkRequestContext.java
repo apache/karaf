@@ -43,8 +43,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 public class BulkRequestContext {
 
-    private List<String> allPids = new ArrayList<String>();
-    private List<Dictionary<String, Object>> whiteListProperties = new ArrayList<Dictionary<String, Object>>();
+    private List<String> allPids = new ArrayList<>();
+    private List<Dictionary<String, Object>> whiteListProperties = new ArrayList<>();
 
     private ConfigurationAdmin configAdmin;
 
@@ -54,7 +54,7 @@ public class BulkRequestContext {
     private Set<Principal> principals = new HashSet<>();
 
     // cache with lifecycle bound to BulkRequestContext instance
-    private Map<String, Dictionary<String, Object>> cachedConfigurations = new HashMap<String, Dictionary<String, Object>>();
+    private Map<String, Dictionary<String, Object>> cachedConfigurations = new HashMap<>();
 
     private BulkRequestContext() {}
 

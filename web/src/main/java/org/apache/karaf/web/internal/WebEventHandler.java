@@ -27,14 +27,14 @@ import java.util.Map;
  */
 public class WebEventHandler implements WebListener {
 
-    private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();
+    private final Map<Long, WebEvent> bundleEvents = new HashMap<>();
 
     public Map<Long, WebEvent> getBundleEvents() {
         return bundleEvents;
     }
 
     public void webEvent(WebEvent event) {
-        getBundleEvents().put(event.getBundleId(), event);
+        getBundleEvents().put(event.getBundle().getBundleId(), event);
     }
 
 }

@@ -16,9 +16,6 @@
  */
 package org.apache.karaf.packages.command;
 
-import org.apache.karaf.packages.core.internal.filter.Expression;
-import org.apache.karaf.packages.core.internal.filter.FilterParser;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class PackageImportTest {

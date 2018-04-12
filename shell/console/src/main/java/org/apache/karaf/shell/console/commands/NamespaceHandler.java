@@ -84,13 +84,13 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         } else if(SHELL_NAMESPACE_1_1_0.equals(namespace)) {
             return getClass().getResource("karaf-shell-1.1.0.xsd");
         }
-        return getClass().getResource("karaf-shell-1.1.0.xsd");
+        return null;
     }
 
 	public Set<Class> getManagedClasses() {
-		return new HashSet<Class>(Arrays.asList(
-			BlueprintCommand.class
-		));
+		return new HashSet<>(Arrays.asList(
+                BlueprintCommand.class
+        ));
 	}
 
     public ComponentMetadata decorate(Node node, ComponentMetadata component, ParserContext context) {
@@ -268,7 +268,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     }
 
     private Metadata parseOptionalCompleters(ParserContext context, ComponentMetadata enclosingComponent, Element element) {
-        Metadata metadata = context.parseElement(MapMetadata.class, context.getEnclosingComponent(), (Element) element);
+        Metadata metadata = context.parseElement(MapMetadata.class, context.getEnclosingComponent(), element);
         return metadata;
     }
 

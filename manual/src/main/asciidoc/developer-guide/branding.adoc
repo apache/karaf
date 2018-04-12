@@ -51,10 +51,18 @@ prompt = \u001B[1m${USER}@${APPLICATION}\u001B[0m>
 
 Start Karaf and you will see your branded Karaf console.
 
+=== Adding a branding-ssh.properties file to etc
+
+In a similar way, a `etc/branding-ssh.properties` file can be added. It should contain the same
+`welcome` and `prompt` entries but those will be used for external clients connecting through ssh.
+The values default to the ones in `etc/branding.properties` if this file is not defined.
+
+
+
 ==== Branding bundle
 
 At startup, Apache Karaf is looking for a bundle which exports the `org.apache.karaf.branding` package, containing
-a `branding.properties` file.
+a `branding.properties` and/or `branding-ssh.properties` file.
 
 Basically, a branding bundle is a very simple bundle, just containing a `org/apache/karaf/branding/branding.properties`
 file.

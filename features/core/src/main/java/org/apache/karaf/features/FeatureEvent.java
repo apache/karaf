@@ -20,7 +20,7 @@ import java.util.EventObject;
 
 public class FeatureEvent extends EventObject {
 
-    public static enum EventType {
+    public enum EventType {
         FeatureInstalled,
         FeatureUninstalled
     }

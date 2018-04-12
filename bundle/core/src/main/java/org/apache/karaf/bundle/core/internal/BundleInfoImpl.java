@@ -47,22 +47,22 @@ public class BundleInfoImpl implements BundleInfo {
     private static Map<Integer, BundleState> bundleStateMap;
     
     static {
-        bundleStateMap = new HashMap<Integer, BundleState>();
+        bundleStateMap = new HashMap<>();
         bundleStateMap.put(Bundle.ACTIVE, BundleState.Active);
         bundleStateMap.put(Bundle.INSTALLED, BundleState.Installed);
         bundleStateMap.put(Bundle.RESOLVED, BundleState.Resolved);
         bundleStateMap.put(Bundle.STARTING, BundleState.Starting);
         bundleStateMap.put(Bundle.STOPPING, BundleState.Stopping);
-    };
+    }
 
     public BundleInfoImpl(Bundle bundle, BundleState extState) {
         BundleStartLevel bsl = bundle.adapt(BundleStartLevel.class);
         this.startLevel = bsl.getStartLevel();
-        this.name = (String)bundle.getHeaders().get(Constants.BUNDLE_NAME);
+        this.name = bundle.getHeaders().get(Constants.BUNDLE_NAME);
         this.symbolicName = bundle.getSymbolicName();
-        String locationFromHeader = (String)bundle.getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
+        String locationFromHeader = bundle.getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
         this.updateLocation = locationFromHeader != null ? locationFromHeader : bundle.getLocation();
-        this.version = (String)bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+        this.version = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
         this.revisions = populateRevisions(bundle);
         this.bundleId = bundle.getBundleId();
         this.state = (extState != BundleState.Unknown) ? extState : getBundleState(bundle);
@@ -71,8 +71,8 @@ public class BundleInfoImpl implements BundleInfo {
 
     private void populateFragementInfos(Bundle bundle) {
         this.isFragment = bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
-        this.fragments = new ArrayList<Bundle>();
-        this.fragmentHosts = new ArrayList<Bundle>();
+        this.fragments = new ArrayList<>();
+        this.fragmentHosts = new ArrayList<>();
         BundleRevisions revisions = bundle.adapt(BundleRevisions.class);
         if (revisions == null) {
             return;

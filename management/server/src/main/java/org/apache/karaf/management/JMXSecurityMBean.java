@@ -33,13 +33,13 @@ public interface JMXSecurityMBean {
      * {@link #CAN_INVOKE_RESULT_ROW_TYPE} entries.
      * It has a composite key composed by the "ObjectName" and "Method" columns.
      */
-    static final TabularType CAN_INVOKE_TABULAR_TYPE = SecurityMBeanOpenTypeInitializer.TABULAR_TYPE;
+    TabularType CAN_INVOKE_TABULAR_TYPE = SecurityMBeanOpenTypeInitializer.TABULAR_TYPE;
 
     /**
      * A row as returned by the {@link #CAN_INVOKE_TABULAR_TYPE}. The columns of the row are defined
      * by {@link #CAN_INVOKE_RESULT_COLUMNS}
      */
-    static final CompositeType CAN_INVOKE_RESULT_ROW_TYPE = SecurityMBeanOpenTypeInitializer.ROW_TYPE;
+    CompositeType CAN_INVOKE_RESULT_ROW_TYPE = SecurityMBeanOpenTypeInitializer.ROW_TYPE;
 
     /**
      * The columns contained in a {@link #CAN_INVOKE_RESULT_ROW_TYPE}. The data types for these columns are
@@ -50,7 +50,7 @@ public interface JMXSecurityMBean {
      *     <li>"CanInvoke": {@link SimpleType#BOOLEAN}</li>
      * </ul>
      */
-    static final String[] CAN_INVOKE_RESULT_COLUMNS = SecurityMBeanOpenTypeInitializer.COLUMNS;
+    String[] CAN_INVOKE_RESULT_COLUMNS = SecurityMBeanOpenTypeInitializer.COLUMNS;
 
     /**
      * Checks whether the current user can invoke any methods on a JMX MBean.
@@ -109,7 +109,7 @@ public interface JMXSecurityMBean {
     TabularData canInvoke(Map<String, List<String>> bulkQuery) throws Exception;
 
     // a member class is used to initialize final fields, as this needs to do some exception handling...
-    static class SecurityMBeanOpenTypeInitializer {
+    class SecurityMBeanOpenTypeInitializer {
 
         private static final String[] COLUMNS = new String[]{ "ObjectName", "Method", "CanInvoke" };
         private static final CompositeType ROW_TYPE;

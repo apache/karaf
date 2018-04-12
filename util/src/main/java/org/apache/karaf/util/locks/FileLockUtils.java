@@ -24,92 +24,76 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.properties.TypedProperties;
 
 public final class FileLockUtils {
 
     private FileLockUtils() { }
 
-    public static interface Runnable {
-        void run(RandomAccessFile file) throws IOException;
+    public interface Runnable<T> {
+        void run(T file) throws IOException;
     }
 
-    public static interface Callable<T> {
-        T call(RandomAccessFile file) throws IOException;
+    public interface Callable<T, U> {
+        U call(T file) throws IOException;
     }
 
-    public static interface RunnableWithProperties {
-        void run(Properties properties) throws IOException;
-    }
-
-    public static interface CallableWithProperties<T> {
-        T call(Properties properties) throws IOException;
-    }
-
-    public static void execute(File file, Runnable callback) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        try {
+    public static void execute(File file, Runnable<? super RandomAccessFile> callback) throws IOException {
+        try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
             FileLock lock = raf.getChannel().lock();
             try {
                 callback.run(raf);
             } finally {
                 lock.release();
             }
-        } finally {
-            raf.close();
         }
     }
 
-    public static <T> T execute(File file, Callable<T> callback) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        try {
+    public static <T> T execute(File file, Callable<? super RandomAccessFile, T> callback) throws IOException {
+        try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
             FileLock lock = raf.getChannel().lock();
-            
             try {
                 return callback.call(raf);
             } finally {
                 lock.release();
             }
-        } finally {
-            raf.close();
         }
     }
 
-    public static void execute(File file, final RunnableWithProperties callback, final boolean writeToFile) throws IOException {
-        execute(file, new Runnable() {
-            public void run(RandomAccessFile file) throws IOException {
-                byte[] buffer = new byte[(int) file.length()];
-                file.readFully(buffer);
-                Properties props = new Properties();
-                props.load(new ByteArrayInputStream(buffer));
-                callback.run(props);
-                if (writeToFile) {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    props.store(baos, null);
-                    file.setLength(0);
-                    file.write(baos.toByteArray());
-                }
+    public static void execute(File file, Runnable<? super TypedProperties> callback, boolean writeToFile) throws IOException {
+        execute(file, raf -> {
+            TypedProperties props = load(raf);
+            callback.run(props);
+            if (writeToFile) {
+                save(props, raf);
             }
         });
     }
 
-    public static <T> T execute(File file, final CallableWithProperties<T> callback, final boolean writeToFile) throws IOException {
-        return execute(file, new Callable<T>() {
-            public T call(RandomAccessFile file) throws IOException {
-                byte[] buffer = new byte[(int) file.length()];
-                file.readFully(buffer);
-                Properties props = new Properties();
-                props.load(new ByteArrayInputStream(buffer));
-                T result = callback.call(props);
-                if (writeToFile) {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    props.store(baos, null);
-                    file.setLength(0);
-                    file.write(baos.toByteArray());
-                }
-                return result;
+    public static <T> T execute(File file, Callable<? super TypedProperties, T> callback, boolean writeToFile) throws IOException {
+        return execute(file, raf -> {
+            TypedProperties props = load(raf);
+            T result = callback.call(props);
+            if (writeToFile) {
+                save(props, raf);
             }
+            return result;
         });
+    }
+
+    private static TypedProperties load(RandomAccessFile raf) throws IOException {
+        byte[] buffer = new byte[(int) raf.length()];
+        raf.readFully(buffer);
+        TypedProperties props = new TypedProperties();
+        props.load(new ByteArrayInputStream(buffer));
+        return props;
+    }
+
+    private static void save(TypedProperties props, RandomAccessFile raf) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        props.save(baos);
+        raf.setLength(0);
+        raf.write(baos.toByteArray());
     }
 
 }

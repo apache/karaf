@@ -49,6 +49,8 @@ import static java.lang.String.format;
 
 public class BundleServiceImpl implements BundleService {
 
+    private static final String KARAF_SYSTEM_BUNDLES_START_LEVEL = "karaf.systemBundlesStartLevel";
+
     private static Logger LOG = LoggerFactory.getLogger(BundleService.class);
 
     /**
@@ -143,7 +145,7 @@ public class BundleServiceImpl implements BundleService {
     public int getSystemBundleThreshold() {
         int sbsl = 50;
         try {
-            final String sbslProp = bundleContext.getProperty("karaf.systemBundlesStartLevel");
+            final String sbslProp = bundleContext.getProperty(KARAF_SYSTEM_BUNDLES_START_LEVEL);
             if (sbslProp != null) {
                 sbsl = Integer.valueOf(sbslProp);
             }

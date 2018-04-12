@@ -31,9 +31,8 @@ public class KarafRealm implements JaasRealm {
     private static final String PROPERTIES_MODULE = "org.apache.karaf.jaas.modules.properties.PropertiesLoginModule";
     private static final String PUBLIC_KEY_MODULE = "org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule";
     private static final String FILE_AUDIT_MODULE = "org.apache.karaf.jaas.modules.audit.FileAuditLoginModule";
+    private static final String LOG_AUDIT_MODULE = "org.apache.karaf.jaas.modules.audit.LogAuditLoginModule";
     private static final String EVENTADMIN_AUDIT_MODULE = "org.apache.karaf.jaas.modules.audit.EventAdminAuditLoginModule";
-
-    private static final String MODULE = "org.apache.karaf.jaas.module";
 
     private final BundleContext bundleContext;
     private volatile Map<String, Object> properties;
@@ -59,7 +58,7 @@ public class KarafRealm implements JaasRealm {
 
     @Override
     public AppConfigurationEntry[] getEntries() {
-        Map<String, Object> propertiesOptions = new HashMap<String, Object>();
+        Map<String, Object> propertiesOptions = new HashMap<>();
         propertiesOptions.put(BundleContext.class.getName(), bundleContext);
         propertiesOptions.put(ProxyLoginModule.PROPERTY_MODULE, PROPERTIES_MODULE);
         propertiesOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
@@ -72,7 +71,7 @@ public class KarafRealm implements JaasRealm {
         propertiesOptions.put("encryption.algorithm", properties.get("encryption.algorithm"));
         propertiesOptions.put("encryption.encoding", properties.get("encryption.encoding"));
 
-        Map<String, Object> publicKeyOptions = new HashMap<String, Object>();
+        Map<String, Object> publicKeyOptions = new HashMap<>();
         publicKeyOptions.put(BundleContext.class.getName(), bundleContext);
         publicKeyOptions.put(ProxyLoginModule.PROPERTY_MODULE, PUBLIC_KEY_MODULE);
         publicKeyOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
@@ -86,6 +85,14 @@ public class KarafRealm implements JaasRealm {
         fileOptions.put("enabled", properties.get("audit.file.enabled"));
         fileOptions.put("file", properties.get("audit.file.file"));
 
+        Map<String, Object> logOptions = new HashMap<>();
+        logOptions.put(BundleContext.class.getName(), bundleContext);
+        logOptions.put(ProxyLoginModule.PROPERTY_MODULE, LOG_AUDIT_MODULE);
+        logOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
+        logOptions.put("enabled", properties.get("audit.log.enabled"));
+        logOptions.put("logger", properties.get("audit.log.logger"));
+        logOptions.put("level", properties.get("audit.log.level"));
+
         Map<String, Object> eventadminOptions = new HashMap<>();
         eventadminOptions.putAll(properties);
         eventadminOptions.put(BundleContext.class.getName(), bundleContext);
@@ -98,6 +105,7 @@ public class KarafRealm implements JaasRealm {
                 new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, propertiesOptions),
                 new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, publicKeyOptions),
                 new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, fileOptions),
+                new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, logOptions),
                 new AppConfigurationEntry(ProxyLoginModule.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, eventadminOptions)
         };
     }

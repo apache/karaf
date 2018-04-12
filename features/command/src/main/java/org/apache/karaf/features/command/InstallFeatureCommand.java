@@ -31,8 +31,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class InstallFeatureCommand extends FeaturesCommandSupport {
 
-    private static String DEFAULT_VERSION = "0.0.0";
-
     @Argument(index = 0, name = "features", description = "The name and version of the features to install. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
     @Completion(AvailableFeatureCompleter.class)
     List<String> features;
@@ -58,6 +56,12 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "--store", description = "Store the resolution into the given file and result for offline analysis")
     String outputFile;
 
+    @Option(name = "--features-wiring", description = "Print the wiring between features")
+    boolean featuresWiring;
+
+    @Option(name = "--all-wiring", description = "Print the full wiring")
+    boolean allWiring;
+
     @Option(name = "-g", aliases = "--region", description = "Region to install to")
     String region;
 
@@ -68,7 +72,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
         addOption(FeaturesService.Option.NoAutoManageBundles, noManage);
         addOption(FeaturesService.Option.Verbose, verbose);
         addOption(FeaturesService.Option.Upgrade, upgrade);
+        addOption(FeaturesService.Option.DisplayFeaturesWiring, featuresWiring);
+        addOption(FeaturesService.Option.DisplayAllWiring, allWiring);
         admin.setResolutionOutputFile(outputFile);
-        admin.installFeatures(new HashSet<String>(features), region, options);
+        admin.installFeatures(new HashSet<>(features), region, options);
     }
 }

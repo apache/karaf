@@ -16,17 +16,9 @@
  */
 package org.apache.karaf.bundle.command;
 
-import java.util.List;
-
-import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 
 @Command(scope = "bundle", name = "id", description = "Gets the bundle ID.")
 @Service

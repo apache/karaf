@@ -23,10 +23,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
@@ -75,10 +78,10 @@ import org.apache.felix.utils.version.VersionCleaner;
         })
 public class Feature extends Content implements org.apache.karaf.features.Feature {
 
-    public static final String VERSION_SEPARATOR = "/";
+    public static final char VERSION_SEPARATOR = '/';
     public static final String DEFAULT_VERSION = "0.0.0";
 
-
+    @XmlElement(name = "details", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected String details;
     @XmlAttribute(required = true)
     protected String name;
@@ -94,10 +97,15 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected Integer startLevel;
     @XmlAttribute
     protected Boolean hidden;
+    @XmlElement(name = "conditional", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Conditional> conditional;
+    @XmlElement(name = "capability", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Capability> capability;
+    @XmlElement(name = "requirement", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Requirement> requirement;
+    @XmlElement(name = "scoping", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected Scoping scoping;
+    @XmlElement(name = "library", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Library> library;
     @XmlTransient
     protected String namespace;
@@ -105,6 +113,8 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     protected List<String> resourceRepositories;
     @XmlTransient
     protected String repositoryUrl;
+    @XmlTransient
+    private boolean blacklisted;
 
     public Feature() {
     }
@@ -119,10 +129,10 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     }
 
     public static org.apache.karaf.features.Feature valueOf(String str) {
-        if (str.contains(VERSION_SEPARATOR)) {
-            String strName = str.substring(0, str.indexOf(VERSION_SEPARATOR));
-            String strVersion = str.substring(str.indexOf(VERSION_SEPARATOR)
-                    + VERSION_SEPARATOR.length(), str.length());
+        int idx = str.indexOf(VERSION_SEPARATOR);
+        if (idx >= 0) {
+            String strName = str.substring(0, idx);
+            String strVersion = str.substring(idx + 1, str.length());
             return new Feature(strName, strVersion);
         } else {
             return new Feature(str);
@@ -383,10 +393,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         if (name != null ? !name.equals(feature.name) : feature.name != null) {
             return false;
         }
-        if (version != null ? !version.equals(feature.version) : feature.version != null) {
-            return false;
-        }
-        return true;
+        return version != null ? version.equals(feature.version) : feature.version == null;
     }
 
     @Override
@@ -426,6 +433,15 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
                 c.setOwner(this);
             }
         }
+        if (config != null) {
+            for (Config c : config) {
+                String v = c.getValue();
+                v = Stream.of(v.split("\n"))
+                        .map(String::trim)
+                        .collect(Collectors.joining("\n", "", "\n"));
+                c.setValue(v);
+            }
+        }
     }
 
     @Override
@@ -441,7 +457,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     public List<String> getResourceRepositories() {
         return resourceRepositories != null
                 ? resourceRepositories
-                : Collections.<String>emptyList();
+                : Collections.emptyList();
     }
 
     public void setResourceRepositories(List<String> resourceRepositories) {
@@ -456,4 +472,14 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     public void setRepositoryUrl(String repositoryUrl) {
         this.repositoryUrl = repositoryUrl;
     }
+
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+    }
+
 }

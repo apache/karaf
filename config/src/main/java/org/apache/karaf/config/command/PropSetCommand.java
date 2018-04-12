@@ -16,8 +16,12 @@
  */
 package org.apache.karaf.config.command;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Dictionary;
 
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -33,11 +37,11 @@ public class PropSetCommand extends ConfigPropertyCommandSupport {
     String prop;
 
     @Argument(index = 1, name = "value", description = "The value of the property", required = true, multiValued = false)
-    String value;
+    Object value;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void propertyAction(Dictionary props) {
+    public void propertyAction(TypedProperties props) {
         props.put(prop, value);
     }
+
 }

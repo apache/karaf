@@ -74,12 +74,12 @@ public class GuardProxyCatalog implements ServiceListener {
     private static final String ROLE_WILDCARD = "*";
 
     private final BundleContext myBundleContext;
-    private final Map<String, Filter> filters = new ConcurrentHashMap<String, Filter>();
+    private final Map<String, Filter> filters = new ConcurrentHashMap<>();
 
     final ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> configAdminTracker;
     final ServiceTracker<ProxyManager, ProxyManager> proxyManagerTracker;
-    final ConcurrentMap<Long, ServiceRegistrationHolder> proxyMap = new ConcurrentHashMap<Long, ServiceRegistrationHolder>();
-    final BlockingQueue<CreateProxyRunnable> createProxyQueue = new LinkedBlockingQueue<CreateProxyRunnable>();
+    final ConcurrentMap<Long, ServiceRegistrationHolder> proxyMap = new ConcurrentHashMap<>();
+    final BlockingQueue<CreateProxyRunnable> createProxyQueue = new LinkedBlockingQueue<>();
     final String compulsoryRoles;
 
     // These two variables control the proxy creator thread, which is started as soon as a ProxyManager Service
@@ -104,12 +104,12 @@ public class GuardProxyCatalog implements ServiceListener {
 
         Filter caFilter = getNonProxyFilter(bc, ConfigurationAdmin.class);
         LOG.trace("Creating Config Admin Tracker using filter {}", caFilter);
-        configAdminTracker = new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(bc, caFilter, null);
+        configAdminTracker = new ServiceTracker<>(bc, caFilter, null);
         configAdminTracker.open();
 
         Filter pmFilter = getNonProxyFilter(bc, ProxyManager.class);
         LOG.trace("Creating Proxy Manager Tracker using filter {}", pmFilter);
-        proxyManagerTracker = new ServiceTracker<ProxyManager, ProxyManager>(bc, pmFilter, new ServiceProxyCreatorCustomizer());
+        proxyManagerTracker = new ServiceTracker<>(bc, pmFilter, new ServiceProxyCreatorCustomizer());
         proxyManagerTracker.open();
     }
 
@@ -294,7 +294,7 @@ public class GuardProxyCatalog implements ServiceListener {
     }
 
     private static Dictionary<String, Object> copyProperties(ServiceReference<?> sr) {
-        Dictionary<String, Object> p = new Hashtable<String, Object>();
+        Dictionary<String, Object> p = new Hashtable<>();
 
         for (String key : sr.getPropertyKeys()) {
             p.put(key, sr.getProperty(key));
@@ -306,7 +306,7 @@ public class GuardProxyCatalog implements ServiceListener {
     // as there can be different roles for different methods and also roles based on arguments passed in.
     Set<String> getServiceInvocationRoles(ServiceReference<?> serviceReference) throws Exception {
         boolean definitionFound = false;
-        Set<String> allRoles = new HashSet<String>();
+        Set<String> allRoles = new HashSet<>();
 
         // This can probably be optimized. Maybe we can cache the config object relevant instead of
         // walking through all of the ones that have 'service.guard'.
@@ -407,7 +407,7 @@ public class GuardProxyCatalog implements ServiceListener {
 
         @Override
         public Object getService(Bundle bundle, ServiceRegistration<Object> registration) {
-            Set<Class<?>> allClasses = new HashSet<Class<?>>();
+            Set<Class<?>> allClasses = new HashSet<>();
 
             // This needs to be done on the Client BundleContext since the bundle might be backed by a Service Factory
             // in which case it needs to be given a chance to produce the right service for this client.
@@ -466,7 +466,7 @@ public class GuardProxyCatalog implements ServiceListener {
             }
 
             // The ordering of the keys is important because the first value when iterating has the highest specificity
-            TreeMap<Specificity, List<String>> roleMappings = new TreeMap<ACLConfigurationParser.Specificity, List<String>>();
+            TreeMap<Specificity, List<String>> roleMappings = new TreeMap<>();
             boolean foundMatchingConfig = false;
 
             // This can probably be optimized. Maybe we can cache the config object relevant instead of
@@ -478,7 +478,7 @@ public class GuardProxyCatalog implements ServiceListener {
                     Filter filter = myBundleContext.createFilter((String) guardFilter);
                     if (filter.match(serviceReference)) {
                         foundMatchingConfig = true;
-                        List<String> roles = new ArrayList<String>();
+                        List<String> roles = new ArrayList<>();
                         Specificity s = ACLConfigurationParser.
                                 getRolesForInvocation(m.getName(), args, sig, config.getProperties(), roles);
                         if (s != Specificity.NO_MATCH) {
@@ -548,28 +548,25 @@ public class GuardProxyCatalog implements ServiceListener {
         }
 
         private Thread newProxyProducingThread(final ProxyManager proxyManager) {
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (runProxyCreator) {
-                        CreateProxyRunnable proxyCreator = null;
-                        try {
-                            proxyCreator = createProxyQueue.take(); // take waits until there is something on the queue
-                        } catch (InterruptedException ie) {
-                            // part of normal behaviour
-                        }
+            Thread t = new Thread(() -> {
+                while (runProxyCreator) {
+                    CreateProxyRunnable proxyCreator = null;
+                    try {
+                        proxyCreator = createProxyQueue.take(); // take waits until there is something on the queue
+                    } catch (InterruptedException ie) {
+                        // part of normal behaviour
+                    }
 
-                        if (proxyCreator != null) {
-                            try {
-                                proxyCreator.run(proxyManager);
-                            } catch (Exception e) {
-                                LOG.warn("Problem creating secured service proxy", e);
-                            }
+                    if (proxyCreator != null) {
+                        try {
+                            proxyCreator.run(proxyManager);
+                        } catch (Exception e) {
+                            LOG.warn("Problem creating secured service proxy", e);
                         }
                     }
-                    // finished running
-                    proxyCreatorThread = null;
                 }
+                // finished running
+                proxyCreatorThread = null;
             });
             t.setName(PROXY_CREATOR_THREAD_NAME);
             t.setDaemon(true);

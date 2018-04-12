@@ -23,7 +23,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -54,7 +53,7 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
     }
 
     @Override
-    protected File download() throws Exception {
+    protected File download(Exception previousExceptionNotUsed) throws Exception {
         URL url = createUrl(getUrl());
         Path path = Files.createTempFile("download-", null);
         try (InputStream is = url.openStream()) {
@@ -76,7 +75,7 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
         if(url.contains("\\")){
             url = url.replace("\\","/");
         }
-        String scheme = new URI(url).getScheme();
+        String scheme = url.substring(0, url.indexOf(':'));
         switch (scheme) {
         case WRAP_URI_PREFIX:
             return new org.ops4j.pax.url.wrap.Handler();

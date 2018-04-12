@@ -23,7 +23,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.sshd.SshServer;
+import org.apache.sshd.server.SshServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +41,9 @@ public class SshServerAction implements Action
 
     @Option(name = "-i", aliases = { "--idle-timeout" }, description = "The session idle timeout in milliseconds", required = false, multiValued = false)
     private long idleTimeout = 1800000;
+    
+    @Option(name = "-n", aliases = { "--nio-workers" }, description = "The number of NIO worker threads to use", required = false, multiValued = false)
+    private int nioWorkers = 2;
 
     @Option(name = "-w", aliases = { "--welcome-banner" }, description = "The welcome banner to display when logging in", required = false, multiValued = false)
     private String welcomeBanner;
@@ -61,6 +64,9 @@ public class SshServerAction implements Action
         // idle timeout
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(idleTimeout));
         
+        // nio-workes
+        server.getProperties().put(SshServer.NIO_WORKERS, Integer.toString(nioWorkers));
+        
         // welcome banner
         if (welcomeBanner != null) {
             server.getProperties().put(SshServer.WELCOME_BANNER, welcomeBanner);
@@ -69,7 +75,7 @@ public class SshServerAction implements Action
         // starting the SSHd server
         server.start();
 
-        System.out.println("SSH server listening on port " + port + " (idle timeout " + idleTimeout + "ms)");
+        System.out.println("SSH server listening on port " + port + " (idle timeout " + idleTimeout + "ms) " + " (nio worker Threads " + nioWorkers + ") ");
 
         if (!background) {
             synchronized (this) {

@@ -130,7 +130,7 @@ public class Exports implements Action {
     }
 
     private SortedMap<String, PackageVersion> getDuplicatePackages(Bundle[] bundles) {
-        SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<String, PackageVersion>();
+        SortedMap<String, PackageVersion> packageVersionMap = new TreeMap<>();
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
             if (rev != null) {
@@ -140,11 +140,8 @@ public class Exports implements Action {
                     String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
                     Version version = (Version)attr.get("version");
                     String key = packageName + ":" + version.toString();
-                    PackageVersion pVer = packageVersionMap.get(key);
-                    if (pVer == null) {
-                        pVer = new PackageVersion(packageName, version);
-                        packageVersionMap.put(key, pVer);
-                    }
+                    PackageVersion pVer =
+                            packageVersionMap.computeIfAbsent(key, k -> new PackageVersion(packageName, version));
                     pVer.addBundle(bundle);
                 }
             }

@@ -29,7 +29,6 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +42,6 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.HelpOption;
 import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.commands.ansi.SimpleAnsi;
 import org.apache.karaf.shell.console.Completer;
 
 public class ActionMetaData {
@@ -92,13 +90,9 @@ public class ActionMetaData {
 
     public void printUsage(Action action, PrintStream out, boolean globalScope, int termWidth) {
         if (command != null) {
-            List<Argument> argumentsSet = new ArrayList<Argument>(arguments.keySet());
-            Collections.sort(argumentsSet, new Comparator<Argument>() {
-                public int compare(Argument o1, Argument o2) {
-                    return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
-                }
-            });
-            Set<Option> optionsSet = new HashSet<Option>(options.keySet());
+            List<Argument> argumentsSet = new ArrayList<>(arguments.keySet());
+            argumentsSet.sort(Comparator.comparing(Argument::index));
+            Set<Option> optionsSet = new HashSet<>(options.keySet());
             optionsSet.add(HelpOption.HELP);
             if (command != null && (command.description() != null || command.name() != null)) {
                 out.println(INTENSITY_BOLD + "DESCRIPTION" + INTENSITY_NORMAL);

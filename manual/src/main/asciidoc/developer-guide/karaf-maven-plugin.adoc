@@ -16,7 +16,7 @@
 
 The Karaf Maven plugin allows you:
 
-* to work with Karaf features: validate a features descriptor, add features bundle into a repository, create a KAR archive from a features descriptor, etc.
+* to work with Karaf features: verify and validate a features descriptor, add features bundle into a repository, create a KAR archive from a features descriptor, etc.
 * to create Karaf commands help: it generates help from Karaf commands
 * to modify Karaf instances and create distributions
 
@@ -55,10 +55,10 @@ Then specify the packaging in your project as usual, e.g.
 |Packaging |Description
 
 |feature
-|The feature packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor`
+|The feature packaging verifies a features.xml descriptor using the `karaf:verify` goal.
 
 |kar
-|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:features-create-kar`
+|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:features-create-kar` goal.
 
 |karaf-assembly
 |Assembles a Karaf server based on the features descriptors and kar files listed as Maven dependencies.
@@ -131,11 +131,9 @@ The example below generates help for the commands in the current project:
 You should use the features or kar packaging instead of these individual goals.
 ====
 
-The `karaf-maven-plugin` provides several goals to help you create and validate features XML descriptors as well as leverage your features to create a custom Karaf distribution.
+The `karaf-maven-plugin` provides several goals to help you create and verify features XML descriptors as well as leverage your features to create a custom Karaf distribution.
 
 ===== `karaf:features-generate-descriptor`
-
-Except in unusual circumstances, use the `<packaging>feature</packaging>` to run this goal.
 
 The `karaf:features-generate-descriptor` goal generates a features XML file based on the Maven dependencies.
 By default, it will follow Maven transitive dependencies, stopping when it encounters bundles already present in features that are Maven dependencies.
@@ -209,19 +207,29 @@ This can be overridden by specifying the bundle in the source feature.xml with t
         <artifactId>karaf-maven-plugin</artifactId>
         <version>${project.version}</version>
         <extensions>true</extensions>
-          <configuration>
-            <startLevel>80</startLevel>
-            <aggregateFeatures>true</aggregateFeatures>
-          </configuration>
-        </plugin>
+        <configuration>
+          <enableGeneration>true</enableGeneration>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-features-file</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>features-generate-descriptor</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
 ----
 
-===== `karaf:features-validate-descriptor`
+===== `karaf:verify`
 
-The `karaf:features-validate-descriptor` goal validates a features XML descriptor by checking if all the required imports
+Except in unusual circumstances, use the `<packaging>feature</packaging>` to run this goal.
+
+The `karaf:verify` goal verifies and validates a features XML descriptor by checking if all the required imports
 for the bundles defined in the features can be matched to a provided export.
 
 By default, the plugin tries to add the Karaf core features (standard and enterprise) in the repositories set.
@@ -240,28 +248,29 @@ It reads the definition for the packages that are exported by the system bundle 
       <plugin>
         <groupId>org.apache.karaf.tooling</groupId>
         <artifactId>karaf-maven-plugin</artifactId>
-        <version>${project.version}</version>
-          <executions>
-            <execution>
-              <id>validate</id>
-              <phase>process-resources</phase>
-              <goals>
-                <goal>features-validate-descriptor</goal>
-              </goals>
-              <configuration>
-                <file>target/features.xml</file>
-                <karafConfig>src/main/resources/config.properties</karafConfig>
-              </configuration>
-            </execution>
-          </executions>
-          <dependencies>
-            <dependency>
-              <groupId>org.slf4j</groupId>
-              <artifactId>slf4j-simple</artifactId>
-              <version>1.4.3</version>
-	        </dependency>
-          </dependencies>
-        </plugin>
+        <configuration>
+        </configuration>
+        <executions>
+          <execution>
+            <id>verify</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>mvn:org.apache.karaf.features/framework/4.0.4/xml/features</descriptor>
+                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
+              </descriptors>
+              <distribution>org.apache.karaf.features:framework</distribution>
+              <javase>1.8</javase>
+              <framework>
+                <feature>framework</feature>
+              </framework>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
@@ -272,25 +281,22 @@ It reads the definition for the packages that are exported by the system bundle 
 |===
 |Name |Type |Description
 
-|`file`
-|`File`
-|The features XML descriptor file to validate. Default value: `${project.build.directory}/classes/features.xml`
-
-|`karafConfig`
-|`String`
-|The Karaf `config.properties` file to use during the validation process. Default value: `config.properties`
-
-|`jreVersion`
-|`String`
-|The JRE version that is used during the validation process. Default value: `jre-1.5`
-
-|`karafVersion`
-|`String`
-|The target Karaf version used to get the Karaf core features (standard and enterprise). Default is the version of the plugin
-
-|`repositories`
+|`descriptors`
 |`String[]`
-|Additional features XML descriptors that will be used during the validation process
+|The list of features XML repositories to use for the verify
+
+|`features`
+|`String[]`
+|The list of features to verify. If not specified, all features in the descriptors will be verified.
+
+|`framework`
+|`String[]`
+|The features providing the Karaf framework (optional)
+
+|`javase`
+|`String`
+|The Java version to use for the verify
+
 |===
 
 ===== `karaf:features-add-to-repository`
@@ -473,6 +479,14 @@ The example below create archives for the given Karaf instance:
 |`targetFile`
 |`File`
 |The target file to set as the project's artifact. Default value: ${project.file}
+
+|`archiveZip`
+|`Boolean`
+|Switches creation of *.zip artifact on or off. Default value: true
+
+|`archiveTarGz`
+|`Boolean`
+|Switches creation of *.tar.gz artifact on or off. Default value: true
 |===
 
 ===== `karaf:assembly`

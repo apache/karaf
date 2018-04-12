@@ -16,12 +16,14 @@
  */
 package org.apache.karaf.management;
 
-import java.io.IOException;
+import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+
+import java.rmi.server.RemoteServer;
+import java.security.Principal;
 
 import javax.management.remote.JMXAuthenticator;
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -53,24 +55,33 @@ public class JaasAuthenticator implements JMXAuthenticator {
         }
         try {
             Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (int i = 0; i < callbacks.length; i++) {
-                        if (callbacks[i] instanceof NameCallback) {
-                            ((NameCallback) callbacks[i]).setName(params[0]);
-                        } else if (callbacks[i] instanceof PasswordCallback) {
-                            ((PasswordCallback) callbacks[i]).setPassword((params[1].toCharArray()));
-                        } else {
-                            throw new UnsupportedCallbackException(callbacks[i]);
-                        }
+            try {
+                subject.getPrincipals().add(new ClientPrincipal("jmx", RemoteServer.getClientHost()));
+            } catch (Throwable t) {
+                // Ignore
+            }
+            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
+                for (int i = 0; i < callbacks.length; i++) {
+                    if (callbacks[i] instanceof NameCallback) {
+                        ((NameCallback) callbacks[i]).setName(params[0]);
+                    } else if (callbacks[i] instanceof PasswordCallback) {
+                        ((PasswordCallback) callbacks[i]).setPassword((params[1].toCharArray()));
+                    } else {
+                        throw new UnsupportedCallbackException(callbacks[i]);
                     }
                 }
             });
             loginContext.login();
 
-            if (subject.getPrincipals().size() == 0) {
-                // there must be some Principals, but which ones required are tested later
-                throw new FailedLoginException("User does not have the required role");
+            int roleCount = 0;
+            for (Principal principal : subject.getPrincipals()) {
+                if (principal instanceof RolePrincipal) {
+                    roleCount++;
+                }
+            }
+
+            if (roleCount == 0) {
+                throw new FailedLoginException("User doesn't have role defined");
             }
 
             return subject;

@@ -20,7 +20,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
@@ -55,13 +57,18 @@ public abstract class UrlLoader {
             }
         }
         try {
-            URLConnection connection = new java.net.URL(url).openConnection();
+            URL u = new java.net.URL(url);
+            URLConnection connection = u.openConnection();
             if (connection instanceof HttpURLConnection) {
                 HttpURLConnection con = (HttpURLConnection) connection;
                 if (lastModified > 0) {
                     con.setIfModifiedSince(lastModified);
                 }
                 con.setRequestProperty(HEADER_ACCEPT_ENCODING, GZIP);
+                if (u.getUserInfo() != null)  {
+                    String encoded = java.util.Base64.getEncoder().encodeToString((u.getUserInfo()).getBytes(StandardCharsets.UTF_8));
+                    connection.setRequestProperty("Authorization", "Basic " + encoded);
+                }
                 int rc = con.getResponseCode();
                 if (rc == HTTP_NOT_MODIFIED) {
                     lastChecked = time;
@@ -71,31 +78,47 @@ public abstract class UrlLoader {
                     throw new IOException("Unexpected http response loading " + url + " : " + rc + " " + con.getResponseMessage());
                 }
             }
-            long lm = connection.getLastModified();
-            if (lm > 0 && lm <= lastModified) {
+            
+            if (didNotChange(connection)) {
                 lastChecked = time;
                 return false;
             }
-            try (
-                    BufferedInputStream bis = new BufferedInputStream(connection.getInputStream())
-            ) {
-                // Auto-detect gzipped streams
-                InputStream is = bis;
-                bis.mark(512);
-                int b0 = bis.read();
-                int b1 = bis.read();
-                bis.reset();
-                if (b0 == 0x1f && b1 == 0x8b) {
-                    is = new GZIPInputStream(bis);
-                }
-                boolean r = doRead(is);
-                lastModified = lm;
-                lastChecked = time;
-                return r;
-            }
+            boolean wasRead = read(connection);
+            lastModified = connection.getLastModified();
+            lastChecked = time;
+            return wasRead;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean didNotChange(URLConnection connection) {
+        long lm = connection.getLastModified();
+        return lm > 0 && lm <= lastModified;
+    }
+
+    private boolean read(URLConnection connection) throws IOException {
+        InputStream is = null;
+        try {
+            is = new BufferedInputStream(connection.getInputStream());
+            if (isGzipStream(is)) {
+                is = new GZIPInputStream(is);
+            }
+            return doRead(is);
+        } finally {
+            // cannot be use try-with-resources, as it would not close GZIPInpuStream
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+
+    private boolean isGzipStream(InputStream is) throws IOException {
+        is.mark(512);
+        int b0 = is.read();
+        int b1 = is.read();
+        is.reset();
+        return (b0 == 0x1f && b1 == 0x8b);
     }
 
     protected abstract boolean doRead(InputStream is) throws IOException;

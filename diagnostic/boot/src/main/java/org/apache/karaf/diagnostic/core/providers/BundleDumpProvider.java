@@ -33,7 +33,7 @@ public class BundleDumpProvider extends TextDumpProvider {
     /**
      * Static map with state mask to string representation.
      */
-    private static Map<Integer, String> stateMap = new HashMap<Integer, String>();
+    private static Map<Integer, String> stateMap = new HashMap<>();
 
     /**
      * Map bundle states to string representation.

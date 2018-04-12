@@ -16,12 +16,10 @@
  */
 package org.apache.karaf.config.command;
 
-import java.util.Dictionary;
-
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-
 
 @Command(scope = "config", name = "property-delete", description = "Deletes a property from the configuration being edited.")
 @Service
@@ -30,9 +28,8 @@ public class PropDelCommand extends ConfigPropertyCommandSupport {
     @Argument(index = 0, name = "property", description = "The name of the property to delete", required = true, multiValued = false)
     String prop;
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public void propertyAction(Dictionary props) {
+    public void propertyAction(TypedProperties props) {
         props.remove(prop);
     }
 }

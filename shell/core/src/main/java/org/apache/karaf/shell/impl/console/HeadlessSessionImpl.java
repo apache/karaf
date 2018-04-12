@@ -21,6 +21,8 @@ package org.apache.karaf.shell.impl.console;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
@@ -70,6 +72,7 @@ public class HeadlessSessionImpl implements Session {
                 session.put(key.toString(), sysProps.get(key));
             }
         }
+        session.put(".processor", processor);
         session.put(".session", this);
         session.put(".commandSession", session);
         if (parent == null) {
@@ -78,6 +81,8 @@ public class HeadlessSessionImpl implements Session {
             session.put("USER", ShellUtil.getCurrentUserName());
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         }
+        session.put(CommandSession.OPTION_NO_GLOB, Boolean.TRUE);
+        session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
     }
 
     public CommandSession getSession() {
@@ -137,6 +142,16 @@ public class HeadlessSessionImpl implements Session {
     @Override
     public SessionFactory getFactory() {
         return factory;
+    }
+
+    @Override
+    public Path currentDir() {
+        return session.currentDir();
+    }
+
+    @Override
+    public void currentDir(Path path) {
+        session.currentDir(path);
     }
 
     @Override

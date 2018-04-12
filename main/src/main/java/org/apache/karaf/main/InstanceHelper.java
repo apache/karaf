@@ -20,7 +20,6 @@ package org.apache.karaf.main;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.Writer;
@@ -32,13 +31,13 @@ import java.nio.channels.FileLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.felix.utils.properties.Properties;
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.util.locks.FileLockUtils;
 import org.osgi.framework.launch.Framework;
 
 public class InstanceHelper {
 
-    static void updateInstancePid(final File karafHome, File karafBase, final boolean isStartingInstance) {
+    static void updateInstancePid(final File karafHome, final File karafBase, final boolean isStartingInstance) {
         try {
             final String instanceName = System.getProperty("karaf.name");
             final String pid = isStartingInstance ? getPid() : "0";
@@ -62,48 +61,44 @@ public class InstanceHelper {
                 }
                 // don't instance.properties if we're stopping and can't acquire lock
                 if (!isStartingInstance) {
-                    RandomAccessFile raf = new RandomAccessFile(propertiesFile, "rw");
                     boolean proceed = true;
-                    try {
+                    try (RandomAccessFile raf = new RandomAccessFile(propertiesFile, "rw")) {
                         FileLock lock = raf.getChannel().tryLock();
                         if (lock == null) {
                             proceed = false;
                         } else {
                             lock.release();
                         }
-                    } finally {
-                        // if proceed is true than we got the lock or OverlappingFileLockException
-                        // but we may proceed in either case
-                        raf.close();
                     }
+                    // if proceed is true than we got the lock or OverlappingFileLockException
+                    // but we may proceed in either case
+
                     if (!proceed) {
                         // we didn't acquire lock, it may mean that root container is holding the lock when
                         // stopping the child
                         return;
                     }
                 }
-                FileLockUtils.execute(propertiesFile, new FileLockUtils.RunnableWithProperties() {
-                    public void run(Properties props) throws IOException {
-                        if (props.isEmpty()) {
-                            // it's the first instance running, so we consider as root
-                            props.setProperty("count", "1");
-                            props.setProperty("item.0.name", instanceName);
-                            props.setProperty("item.0.loc", karafHome.getAbsolutePath());
-                            props.setProperty("item.0.pid", pid);
-                            props.setProperty("item.0.root", "true");
-                        } else {
-                            int count = Integer.parseInt(props.getProperty("count"));
-                            for (int i = 0; i < count; i++) {
-                                String name = props.getProperty("item." + i + ".name");
-                                if (name.equals(instanceName)) {
-                                    props.setProperty("item." + i + ".pid", pid);
-                                    return;
-                                }
+                FileLockUtils.execute(propertiesFile, (TypedProperties props) -> {
+                    if (props.isEmpty()) {
+                        // it's the first instance running, so we consider as root
+                        props.put("count", "1");
+                        props.put("item.0.name", instanceName);
+                        props.put("item.0.loc", karafBase.getAbsolutePath());
+                        props.put("item.0.pid", pid);
+                        props.put("item.0.root", "true");
+                    } else {
+                        int count = Integer.parseInt(props.get("count").toString());
+                        for (int i = 0; i < count; i++) {
+                            String name = props.get("item." + i + ".name").toString();
+                            if (name.equals(instanceName)) {
+                                props.put("item." + i + ".pid", pid);
+                                return;
                             }
-                            // it's not found, let assume it's the root instance, so 0
-                            props.setProperty("item.0.name", instanceName);
-                            props.setProperty("item.0.pid", pid);
                         }
+                        // it's not found, let assume it's the root instance, so 0
+                        props.put("item.0.name", instanceName);
+                        props.put("item.0.pid", pid);
                     }
                 }, true);
             }
@@ -139,7 +134,7 @@ public class InstanceHelper {
         }
     }
 
-    static void setupShutdown(ConfigProperties config, Framework framework) {
+    static AutoCloseable setupShutdown(ConfigProperties config, Framework framework) {
         writePid(config.pidFile);
         try {
             int port = config.shutdownPort;
@@ -152,17 +147,20 @@ public class InstanceHelper {
                     port = shutdownSocket.getLocalPort();
                 }
                 if (portFile != null) {
-                    Writer w = new OutputStreamWriter(new FileOutputStream(portFile));
+                    File portF = new File(portFile);
+                    portF.getParentFile().mkdirs();
+                    Writer w = new OutputStreamWriter(new FileOutputStream(portF));
                     w.write(Integer.toString(port));
                     w.close();
                 }
-                Thread thread = new ShutdownSocketThread(shutdown, shutdownSocket, framework);
-                thread.setDaemon(true);
+                ShutdownSocketThread thread = new ShutdownSocketThread(shutdown, shutdownSocket, framework);
                 thread.start();
+                return thread;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
 }

@@ -44,9 +44,10 @@ public interface JdbcMBean {
      * @param url The JDBC URL.
      * @param user The database username.
      * @param password The database password.
+     * @param databaseType The database type (ConnectionPoolDataSource, XADataSource or DataSource).
      * @throws MBeanException In case of MBean failure.
      */
-    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password) throws MBeanException;
+    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws MBeanException;
 
     /**
      * Delete a JDBC datasource.

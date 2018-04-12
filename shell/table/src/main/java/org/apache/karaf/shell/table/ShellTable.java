@@ -21,10 +21,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @deprecated use {@link org.apache.karaf.shell.support.table.ShellTable} instead
+ */
+@Deprecated
 public class ShellTable {
 
-    private List<Col> cols = new ArrayList<Col>();
-    private List<Row> rows = new ArrayList<Row>();
+    private List<Col> cols = new ArrayList<>();
+    private List<Row> rows = new ArrayList<>();
     boolean showHeaders = true;
     private String separator = " | ";
     private int size;

@@ -31,7 +31,7 @@ public class PublickeyBackingEngineFactory implements BackingEngineFactory {
 
     private static final String USER_FILE = "users";
 
-    public BackingEngine build(Map options) {
+    public BackingEngine build(Map<String, ?> options) {
         PublickeyBackingEngine engine = null;
         String usersFile = (String) options.get(USER_FILE);
 
@@ -39,12 +39,11 @@ public class PublickeyBackingEngineFactory implements BackingEngineFactory {
         Properties users;
         try {
             users = new Properties(f);
-            engine = new PublickeyBackingEngine(users);
+            return new PublickeyBackingEngine(users);
         } catch (IOException ioe) {
             logger.warn("Cannot open keys file:" + usersFile);
-        } finally {
-            return engine;
         }
+        return engine;
     }
 
     public String getModuleClass() {

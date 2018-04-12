@@ -20,9 +20,8 @@ package org.apache.karaf.main;
 
 import java.io.File;
 
-import junit.framework.Assert;
-
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.launch.Framework;

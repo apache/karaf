@@ -1,1 +1,0 @@
-Grep uses Java regular expressions for pattern matching.  For more informations, see http://download.oracle.com/javase/1.5.0/docs/api/java/util/regex/Pattern.html

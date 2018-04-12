@@ -43,7 +43,7 @@ public class RepositoryTest extends TestCase {
         assertNotNull(features[0].getConfigurations());
         assertEquals(1, features[0].getConfigurations().size());
         assertNotNull(features[0].getConfigurations().get(0).getName());
-		assertEquals("c1", features[0].getConfigurations().get(0).getName());
+        assertEquals("c1", features[0].getConfigurations().get(0).getName());
         assertEquals(1, features[0].getConfigurations().get(0).getProperties().size());
         assertEquals("v", features[0].getConfigurations().get(0).getProperties().get("k"));
         assertNotNull(features[0].getDependencies());
@@ -85,12 +85,10 @@ public class RepositoryTest extends TestCase {
         assertEquals("f1", features[0].getName());
         assertNotNull(features[0].getConfigurations());
         assertEquals(1, features[0].getConfigurations().size());
-		assertNotNull(features[0].getConfigurations().get(0).getName());
-		assertEquals("c1", features[0].getConfigurations().get(0).getName());
-		assertEquals(1, features[0].getConfigurations().get(0).getProperties()
-				.size());
-		assertEquals("v", features[0].getConfigurations().get(0)
-				.getProperties().get("k"));
+        assertNotNull(features[0].getConfigurations().get(0).getName());
+        assertEquals("c1", features[0].getConfigurations().get(0).getName());
+        assertEquals(1, features[0].getConfigurations().get(0).getProperties().size());
+        assertEquals("v", features[0].getConfigurations().get(0).getProperties().get("k"));
         assertNotNull(features[0].getDependencies());
         assertEquals(0, features[0].getDependencies().size());
         assertNotNull(features[0].getBundles());
@@ -179,9 +177,8 @@ public class RepositoryTest extends TestCase {
 
     public void testShowWrongUriInException() throws Exception {
         String uri = "src/test/resources/org/apache/karaf/shell/features/repo1.xml";
-        RepositoryImpl r = new RepositoryImpl(new URI(uri));
         try {
-            r.load();
+            new RepositoryImpl(new URI(uri));
         } catch (Exception e) {
             assertTrue(e.getMessage().contains(uri));
         }

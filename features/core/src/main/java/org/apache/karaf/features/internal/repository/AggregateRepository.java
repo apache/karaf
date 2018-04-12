@@ -37,9 +37,9 @@ public class AggregateRepository implements Repository {
 
     @Override
     public Map<Requirement, Collection<Capability>> findProviders(Collection<? extends Requirement> requirements) {
-        Map<Requirement, Collection<Capability>> result = new HashMap<Requirement, Collection<Capability>>();
+        Map<Requirement, Collection<Capability>> result = new HashMap<>();
         for (Requirement requirement : requirements) {
-            List<Capability> caps = new ArrayList<Capability>();
+            List<Capability> caps = new ArrayList<>();
             for (Repository repository : repositories) {
                 Map<Requirement, Collection<Capability>> resMap =
                         repository.findProviders(Collections.singleton(requirement));

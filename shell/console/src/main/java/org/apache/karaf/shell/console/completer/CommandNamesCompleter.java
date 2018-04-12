@@ -30,7 +30,6 @@ import org.apache.karaf.shell.console.CommandSessionHolder;
 import org.apache.karaf.shell.console.Completer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 
 /**
@@ -42,7 +41,7 @@ public class CommandNamesCompleter implements Completer {
     public static final String COMMANDS = ".commands";
 
     private CommandSession session;
-    private final Set<String> commands = new CopyOnWriteArraySet<String>();
+    private final Set<String> commands = new CopyOnWriteArraySet<>();
 
     public CommandNamesCompleter() {
         this(CommandSessionHolder.getSession());
@@ -72,7 +71,7 @@ public class CommandNamesCompleter implements Completer {
     @SuppressWarnings("unchecked")
     protected void checkData() {
         if (commands.isEmpty()) {
-            Set<String> names = new HashSet<String>((Set<String>) session.get(COMMANDS));
+            Set<String> names = new HashSet<>((Set<String>) session.get(COMMANDS));
             for (String name : names) {
                 commands.add(name);
                 if (name.indexOf(':') > 0) {
@@ -88,11 +87,7 @@ public class CommandNamesCompleter implements Completer {
             if (context == null) {
                 throw new IllegalStateException("Bundle is stopped");
             }
-            ServiceListener listener = new ServiceListener() {
-                public void serviceChanged(ServiceEvent event) {
-                    commands.clear();
-                }
-            };
+            ServiceListener listener = event -> commands.clear();
             context.addServiceListener(listener,
                     String.format("(&(%s=*)(%s=*))",
                             CommandProcessor.COMMAND_SCOPE,

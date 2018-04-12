@@ -18,10 +18,8 @@ package org.apache.karaf.shell.impl.console.commands.help.wikidoc;
 
 import java.io.PrintStream;
 
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.apache.karaf.shell.support.table.ShellTable;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.Ansi.Attribute;
-import org.fusesource.jansi.Ansi.Color;
 
 /**
  * Translates the Wiki tags to Ansi escape sequences to display them on the console
@@ -62,19 +60,25 @@ public class AnsiPrintingWikiVisitor implements WikiVisitor {
 
 	@Override
 	public void heading(int level, String header) {
-		sb.append(Ansi.ansi().a(Attribute.INTENSITY_BOLD).a(header)
-				.a(Attribute.INTENSITY_BOLD_OFF).toString());
+		sb.append(SimpleAnsi.INTENSITY_BOLD)
+				.append(header)
+				.append(SimpleAnsi.INTENSITY_NORMAL);
 	}
 	
 	@Override
 	public void link(String target, String title) {
-		sb.append(Ansi.ansi().fg(Color.YELLOW)
-				.a(target).fg(Color.DEFAULT));
+		sb.append(SimpleAnsi.COLOR_YELLOW)
+				.append(target)
+				.append(SimpleAnsi.COLOR_DEFAULT);
 	}
 
 	@Override
 	public void enumeration(String text) {
-		sb.append(Ansi.ansi().a(" * ").fg(Color.CYAN).a(text).fg(Color.DEFAULT).a(" "));
+		sb.append(" * ")
+				.append(SimpleAnsi.COLOR_CYAN)
+				.append(text)
+				.append(SimpleAnsi.COLOR_DEFAULT)
+				.append(" ");
 	}
 
 	@Override
@@ -85,9 +89,9 @@ public class AnsiPrintingWikiVisitor implements WikiVisitor {
 	@Override
 	public void bold(boolean on) {
 		if (on) {
-			sb.append(Ansi.ansi().bold().toString());
+			sb.append(SimpleAnsi.INTENSITY_BOLD);
 		} else {
-			sb.append(Ansi.ansi().boldOff().toString());
+			sb.append(SimpleAnsi.INTENSITY_NORMAL);
 		}
 	}
 

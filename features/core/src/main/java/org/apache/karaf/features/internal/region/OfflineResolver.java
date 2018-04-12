@@ -23,10 +23,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
@@ -35,7 +33,7 @@ import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
-import org.apache.karaf.features.internal.util.JsonReader;
+import org.apache.karaf.util.json.JsonReader;
 import org.osgi.framework.BundleException;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
@@ -76,17 +74,16 @@ public class OfflineResolver {
 
         Resolver resolver = new ResolverImpl(new Logger(Logger.LOG_ERROR));
         Map<Resource, List<Wire>> wiring = resolver.resolve(new ResolveContext() {
-            private final Set<Resource> mandatory = new HashSet<>();
-            private final CandidateComparator candidateComparator = new CandidateComparator(mandatory);
+            private final CandidateComparator candidateComparator = new CandidateComparator(r -> 0);
 
             @Override
             public Collection<Resource> getMandatoryResources() {
-                List<Resource> resources = new ArrayList<Resource>();
+                List<Resource> resources = new ArrayList<>();
                 Requirement req = new RequirementImpl(
                         null,
                         IDENTITY_NAMESPACE,
-                        Collections.<String, String>emptyMap(),
-                        Collections.<String, Object>emptyMap(),
+                        Collections.emptyMap(),
+                        Collections.emptyMap(),
                         SimpleFilter.parse("(" + IDENTITY_NAMESPACE + "=root)"));
                 Collection<Capability> identities = repository.findProviders(Collections.singleton(req)).get(req);
                 for (Capability identity : identities) {

@@ -24,9 +24,9 @@ import org.osgi.framework.Bundle;
  */
 public interface BundleStateService {
 
-    public final static String NAME_BLUEPRINT = "Blueprint";
-    public final static String NAME_SPRING_DM = "Spring DM";
-    public final static String NAME_DS = "Declarative Services";
+    String NAME_BLUEPRINT = "Blueprint";
+    String NAME_SPRING_DM = "Spring DM";
+    String NAME_DS = "Declarative Services";
 
     /**
      * Name of the framework the implementation supports.

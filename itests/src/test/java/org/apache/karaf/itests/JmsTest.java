@@ -13,122 +13,143 @@
  */
 package org.apache.karaf.itests;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
-
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.both;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.ops4j.pax.exam.CoreOptions.composite;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.jms.ConnectionFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
-import java.net.Socket;
-import java.net.URI;
-import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.MavenUtils;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class JmsTest extends KarafTestSupport {
+    private static final String JMX_CF_NAME = "testMBean";
+    private static final String JMX_QUEUE_NAME = "queueMBean";
+    private MBeanServer mbeanServer;
+    private ObjectName objName;
+    private String activemqVersion;
+
+    @Configuration
+    public Option[] config() {
+        String version = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
+        MavenArtifactUrlReference activeMqUrl = maven().groupId("org.apache.activemq")
+            .artifactId("activemq-karaf").versionAsInProject().type("xml").classifier("features");
+        MavenArtifactUrlReference springLegacyUrl = maven().groupId("org.apache.karaf.features")
+            .artifactId("spring-legacy").version(version).type("xml").classifier("features");
+        return new Option[] //
+        {
+         composite(super.config()), //
+         features(activeMqUrl, "jms", "activemq-broker-noweb", "shell-compat"),
+         features(springLegacyUrl, "spring")
+        };
+    }
 
     @Before
-    public void installJmsFeatureAndActiveMQBroker() throws Exception {
-        installAndAssertFeature("jms");
-        featureService.addRepository(new URI("mvn:org.apache.activemq/activemq-karaf/5.10.0/xml/features"));
-        installAndAssertFeature("activemq-broker-noweb");
-        // check if ActiveMQ is completely started
-        System.out.println("Waiting for the ActiveMQ transport connector on 61616 ...");
-        boolean bound = false;
-        while (!bound) {
-            try {
-                Thread.sleep(2000);
-                Socket socket = new Socket("localhost", 61616);
-                bound = true;
-            } catch (Exception e) {
-                // wait the connection
-            }
+    public void setup() throws Exception {
+        await("ActiveMQ transport up").atMost(30, SECONDS).until(this::jmsTransportPresent);
+        mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        objName = new ObjectName("org.apache.karaf:type=jms,name=root");
+        activemqVersion = System.getProperty("activemq.version");
+    }
+
+    @Test(timeout = 60000)
+    public void testCommands() throws Exception {
+        execute("jms:create -t activemq -u karaf -p karaf --url tcp://localhost:61616 test");
+        waitForConnectionFactory("name=test");
+
+        assertThat(execute("jms:connectionfactories"), containsString("jms/test"));
+        assertThat(execute("jms:info test"), both(containsString("ActiveMQ")).and(containsString(activemqVersion)));
+
+        execute("jms:send test queue message");
+        assertThat(execute("jms:count test queue"), containsString("1"));
+        assertThat(execute("jms:consume test queue"), containsString("1 message"));
+
+        execute("jms:send test queue message");
+        assertThat(execute("jms:move test queue other"), containsString("1 message"));
+
+        assertThat(execute("jms:queues test"), both(containsString("queue")).and(containsString("other")));
+        assertThat(execute("jms:browse test other"),
+                   both(containsString("queue")).and(containsString("queue://other")));
+        execute("jms:consume test other");
+        execute("jms:delete test");
+    }
+
+    @Test(timeout = 60000)
+    public void testMBean() throws Exception {
+        checkJMXCreateConnectionFactory();
+
+        invoke("send", JMX_CF_NAME, JMX_QUEUE_NAME, "message", null, "karaf", "karaf");
+        Integer count = invoke("count", JMX_CF_NAME, JMX_QUEUE_NAME, "karaf", "karaf");
+        assertTrue("Queue size > 0", count > 0);
+
+        List<String> queues = invoke("queues", JMX_CF_NAME, "karaf", "karaf");
+        assertThat(queues, hasItem(JMX_QUEUE_NAME));
+
+        invoke("delete", JMX_CF_NAME);
+    }
+
+    public boolean jmsTransportPresent() throws IOException {
+        try (Socket socket = new Socket("localhost", 61616)) {
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
-    @Test(timeout = 120000)
-    public void testCommands() throws Exception {
-        // jms:create command
-        System.out.println(executeCommand("jms:create -t ActiveMQ -u karaf -p karaf --url tcp://localhost:61616 test"));
-        // give time to fileinstall to load the blueprint file by looking for the connection factory OSGi service
-        getOsgiService(ConnectionFactory.class, "name=test" , 30000);
-        // jms:connectionfactories command
-        String connectionFactories = executeCommand("jms:connectionfactories");
-        System.out.println(connectionFactories);
-        assertContains("jms/test", connectionFactories);
-        // jms:info command
-        String info = executeCommand("jms:info test");
-        System.out.println(info);
-        assertContains("ActiveMQ", info);
-        assertContains("5.10.0", info);
-        // jms:send command
-        System.out.println(executeCommand("jms:send test queue message"));
-        // jms:count command
-        String count = executeCommand("jms:count test queue");
-        System.out.println(count);
-        assertContains("1", count);
-        // jms:consume command
-        String consumed = executeCommand("jms:consume test queue");
-        System.out.println(consumed);
-        assertContains("1 message", consumed);
-        // jms:send & jms:move commands
-        System.out.print(executeCommand("jms:send test queue message"));
-        String move = executeCommand("jms:move test queue other");
-        System.out.println(move);
-        assertContains("1 message", move);
-        // jms:queues command
-        String queues = executeCommand("jms:queues test");
-        System.out.println(queues);
-        assertContains("queue", queues);
-        assertContains("other", queues);
-        // jms:browse command
-        String browse = executeCommand("jms:browse test other");
-        System.out.println(browse);
-        assertContains("message", browse);
-        assertContains("queue://other", browse);
-        // jms:consume command
-        System.out.println(executeCommand("jms:consume test other"));
-        // jms:delete command
-        System.out.println(executeCommand("jms:delete test"));
-        // jms:connectionfactories command
-        connectionFactories = executeCommand("jms:connectionfactories");
-        System.out.println(connectionFactories);
+    private String execute(String command) {
+        String output = executeCommand(command);
+        System.out.println(output);
+        return output;
     }
 
-    @Test(timeout = 120000)
-    public void testMBean() throws Exception {
-        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("org.apache.karaf:type=jms,name=root");
-        // create operation
-        System.out.println("JMS MBean create operation invocation");
-        mbeanServer.invoke(name, "create", new String[]{"testMBean", "activemq", "tcp://localhost:61616", "karaf", "karaf"}, new String[]{"java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
-        // give time to fileinstall to load the blueprint file by looking for the connection factory OSGi service
-        getOsgiService(ConnectionFactory.class, "name=testMBean", 30000);
-        List<String> connectionFactories = (List<String>) mbeanServer.getAttribute(name, "Connectionfactories");
-        assertEquals(true, connectionFactories.size() >= 1);
-        // send operation
-        System.out.println("JMS MBean send operation invocation");
-        mbeanServer.invoke(name, "send", new String[]{"testMBean", "queueMBean", "message", null, "karaf", "karaf"}, new String[]{"java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
-        // count operation
-        System.out.println("JMS MBean count operation invocation");
-        Integer count = (Integer) mbeanServer.invoke(name, "count", new String[]{"testMBean", "queueMBean", "karaf", "karaf"}, new String[]{"java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
-        assertEquals(1, count.intValue());
-        // queues operation
-        System.out.print("JMS MBean queues operation invocation: ");
-        List<String> queues = (List<String>) mbeanServer.invoke(name, "queues", new String[]{"testMBean", "karaf", "karaf"}, new String[]{"java.lang.String", "java.lang.String", "java.lang.String"});
-        System.out.println(queues);
-        assertTrue(queues.size() >= 1);
-        // delete operation
-        System.out.println("JMS MBean delete operation invocation");
-        mbeanServer.invoke(name, "delete", new String[]{"testMBean"}, new String[]{"java.lang.String"});
+    private void checkJMXCreateConnectionFactory() throws Exception {
+        invoke("create", JMX_CF_NAME, "activemq", "tcp://localhost:61616", "karaf", "karaf");
+        waitForConnectionFactory("name=" + JMX_CF_NAME);
+        @SuppressWarnings("unchecked")
+        List<String> connectionFactories = (List<String>)mbeanServer.getAttribute(objName,
+                                                                                  "Connectionfactories");
+        assertTrue(connectionFactories.size() > 0);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T invoke(String operationName, String... parameters) throws Exception {
+        String[] types = new String[parameters.length];
+        Arrays.fill(types, String.class.getName());
+        System.out.println("Invoking jmx call " + operationName);
+        return (T)mbeanServer.invoke(objName, operationName, parameters, types);
+    }
+
+    /**
+     * Give fileinstall some time to load the blueprint file by looking for the connection factory OSGi
+     * service
+     */
+    private ConnectionFactory waitForConnectionFactory(String filter) {
+        return getOsgiService(ConnectionFactory.class, filter, 30000);
     }
 
 }

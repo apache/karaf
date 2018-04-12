@@ -29,7 +29,7 @@ public class AnsiSplitterTest {
     @Test
     public void testWindow() throws IOException {
         String text = "\u001B[1mThis is bold.\u001B[22m";
-        assertEquals("\u001B[1mis\u001B[22m", AnsiSplitter.substring(text, 5, 7, 4));
+        assertEquals("\u001B[1mis\u001B[0m", AnsiSplitter.substring(text, 5, 7, 4));
         assertEquals(13, AnsiSplitter.length(text, 4));
     }
 

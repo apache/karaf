@@ -36,7 +36,7 @@ public class FileAuditLoginModule extends AbstractAuditLoginModule {
     private String logFile;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler,
-                           Map sharedState, Map options) {
+                           Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, sharedState, options);
         logFile = (String) options.get(LOG_FILE_OPTION);
     }

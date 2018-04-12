@@ -20,7 +20,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.Principal;
 import java.security.PublicKey;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAKey;
@@ -56,7 +55,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
-        usersFile = (String) options.get(USERS_FILE) + "";
+        usersFile = options.get(USERS_FILE) + "";
         if (debug) {
             LOG.debug("Initialized debug=" + debug + " usersFile=" + usersFile);
         }
@@ -94,7 +93,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         String userInfos = null;
 
         try {
-            userInfos = (String) users.get(user);
+            userInfos = users.get(user);
         } catch (NullPointerException e) {
             //error handled in the next statement
         }
@@ -119,13 +118,13 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
             }
         }
 
-        principals = new HashSet<Principal>();
+        principals = new HashSet<>();
         principals.add(new UserPrincipal(user));
         for (int i = 1; i < infos.length; i++) {
             if (infos[i].trim().startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
                 // it's a group reference
                 principals.add(new GroupPrincipal(infos[i].trim().substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
-                String groupInfo = (String) users.get(infos[i].trim());
+                String groupInfo = users.get(infos[i].trim());
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
                     for (int j = 1; j < roles.length; j++) {
@@ -146,7 +145,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         return true;
     }
 
-    private String getString(PublicKey key) throws FailedLoginException {
+    public static String getString(PublicKey key) throws FailedLoginException {
         try {
             if (key instanceof DSAPublicKey) {
                 DSAPublicKey dsa = (DSAPublicKey) key;
@@ -176,13 +175,13 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         }
     }
 
-    private void write(DataOutputStream dos, BigInteger integer) throws IOException {
+    private static void write(DataOutputStream dos, BigInteger integer) throws IOException {
         byte[] data = integer.toByteArray();
         dos.writeInt(data.length);
         dos.write(data, 0, data.length);
     }
 
-    private void write(DataOutputStream dos, String str) throws IOException {
+    private static void write(DataOutputStream dos, String str) throws IOException {
         byte[] data = str.getBytes();
         dos.writeInt(data.length);
         dos.write(data);

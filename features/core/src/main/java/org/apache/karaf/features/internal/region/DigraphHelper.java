@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,8 +35,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
-import org.apache.karaf.features.internal.util.JsonReader;
-import org.apache.karaf.features.internal.util.JsonWriter;
+import org.apache.karaf.util.json.JsonReader;
+import org.apache.karaf.util.json.JsonWriter;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -46,7 +48,7 @@ import org.osgi.framework.InvalidSyntaxException;
 
 public final class DigraphHelper {
 
-    private static final String DIGRAPH_FILE = "digraph.json";
+    public static final String DIGRAPH_FILE = "digraph.json";
 
     private static final String REGIONS = "regions";
     private static final String EDGES = "edges";
@@ -70,35 +72,12 @@ public final class DigraphHelper {
                 digraph = readDigraph(new DataInputStream(in), bundleContext, threadLocal);
             }
         }
-        // Create default region is missing
-        Region defaultRegion = digraph.getRegion(FeaturesServiceImpl.ROOT_REGION);
-        if (defaultRegion == null) {
-            defaultRegion = digraph.createRegion(FeaturesServiceImpl.ROOT_REGION);
-        }
-        // Add all unknown bundle to default region
-        Set<Long> ids = new HashSet<>();
-        for (Bundle bundle : bundleContext.getBundles()) {
-            long id = bundle.getBundleId();
-            ids.add(id);
-            if (digraph.getRegion(id) == null) {
-                defaultRegion.addBundle(id);
-            }
-        }
-        // Clean stalled bundles
-        for (Region region : digraph) {
-            Set<Long> bundleIds = new HashSet<>(region.getBundleIds());
-            bundleIds.removeAll(ids);
-            for (long id : bundleIds) {
-                region.removeBundle(id);
-            }
-        }
         return digraph;
     }
 
-    public static void saveDigraph(BundleContext bundleContext, RegionDigraph digraph) throws IOException {
-        File digraphFile = bundleContext.getDataFile(DIGRAPH_FILE);
+    public static void saveDigraph(File outFile, RegionDigraph digraph) {
         try (
-                FileOutputStream out = new FileOutputStream(digraphFile)
+            FileOutputStream out = new FileOutputStream(outFile)
         ) {
             saveDigraph(digraph, out);
         } catch (Exception e) {
@@ -106,7 +85,9 @@ public final class DigraphHelper {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+     "unchecked", "rawtypes"
+    })
     static StandardRegionDigraph readDigraph(InputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws IOException, BundleException, InvalidSyntaxException {
         StandardRegionDigraph digraph = new StandardRegionDigraph(bundleContext, threadLocal);
         Map json = (Map) JsonReader.read(in);
@@ -157,4 +138,61 @@ public final class DigraphHelper {
         JsonWriter.write(out, json);
     }
 
+    public static Map<String, Set<Long>> getBundlesPerRegion(RegionDigraph digraph) {
+        Map<String, Set<Long>> bundlesPerRegion = new HashMap<>();
+        if (digraph != null) {
+            for (Region region : digraph.getRegions()) {
+                bundlesPerRegion.put(region.getName(), new HashSet<>(region.getBundleIds()));
+            }
+        }
+        return bundlesPerRegion;
+    }
+    
+    public static Map<String, Map<String, Map<String, Set<String>>>> getPolicies(RegionDigraph digraph) {
+        Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion = new HashMap<>();
+        if (digraph == null) {
+            return filtersPerRegion;
+        }
+        for (Region region : digraph.getRegions()) {
+            Map<String, Map<String, Set<String>>> edges = new HashMap<>();
+            for (RegionDigraph.FilteredRegion fr : digraph.getEdges(region)) {
+                Map<String, Set<String>> policy = new HashMap<>();
+                Map<String, Collection<String>> current = fr.getFilter().getSharingPolicy();
+                for (Map.Entry<String, Collection<String>> entry : current.entrySet()) {
+                	for(String f : entry.getValue()) {
+                		 addToMapSet(policy, entry.getKey(), f);
+                	}
+                }
+                edges.put(fr.getRegion().getName(), policy);
+            }
+            filtersPerRegion.put(region.getName(), edges);
+        }
+        return filtersPerRegion;
+    }
+
+    public static void verifyUnmanagedBundles(BundleContext bundleContext, RegionDigraph dg) throws BundleException {
+        // Create default region is missing
+        Region defaultRegion = dg.getRegion(FeaturesServiceImpl.ROOT_REGION);
+        if (defaultRegion == null) {
+            defaultRegion = dg.createRegion(FeaturesServiceImpl.ROOT_REGION);
+        }
+        dg.setDefaultRegion(defaultRegion);
+        // Add all unknown bundle to default region
+        Set<Long> ids = new HashSet<>();
+        for (Bundle bundle : bundleContext.getBundles()) {
+            long id = bundle.getBundleId();
+            ids.add(id);
+            if (dg.getRegion(id) == null) {
+                defaultRegion.addBundle(id);
+            }
+        }
+        // Clean stalled bundles
+        for (Region region : dg) {
+            Set<Long> bundleIds = new HashSet<>(region.getBundleIds());
+            bundleIds.removeAll(ids);
+            for (long id : bundleIds) {
+                region.removeBundle(id);
+            }
+        }
+    }
 }

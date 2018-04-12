@@ -17,10 +17,12 @@
  */
 package org.apache.karaf.tooling.features;
 
+import static java.lang.String.format;
+import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,10 +30,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +46,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
@@ -50,8 +54,12 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.model.ObjectFactory;
 import org.apache.karaf.tooling.utils.DependencyHelper;
 import org.apache.karaf.tooling.utils.DependencyHelperFactory;
+import org.apache.karaf.tooling.utils.LocalDependency;
 import org.apache.karaf.tooling.utils.ManifestUtils;
+import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.karaf.tooling.utils.SimpleLRUCache;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -63,6 +71,12 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesExecution;
@@ -70,14 +84,13 @@ import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
+import org.eclipse.aether.artifact.DefaultArtifact;
 import org.xml.sax.SAXException;
-
-import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
 /**
  * Generates the features XML file starting with an optional source feature.xml and adding
  * project dependencies as bundles and feature/car dependencies.
- * 
+ *
  * NB this requires a recent maven-install-plugin such as 2.3.1
  */
 @Mojo(name = "features-generate-descriptor", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
@@ -117,7 +130,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
      *
      */
     @Parameter
-    private List<String> excludedArtifactIds = new ArrayList<String>();
+    private List<String> excludedArtifactIds = new ArrayList<>();
 
     /**
      * The resolver to use for the feature.  Normally null or "OBR" or "(OBR)"
@@ -222,6 +235,59 @@ public class GenerateDescriptorMojo extends MojoSupport {
     @Parameter(defaultValue = "${project.artifactId}")
     private String primaryFeatureName;
 
+    /**
+     * Flag indicating whether bundles should use the version range declared in the POM. If <code>false</code>,
+     * the actual version of the resolved artifacts will be used.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean useVersionRange;
+
+    /**
+     * Flag indicating whether the plugin should determine whether transitive dependencies are declared with
+     * a version range. If this flag is set to <code>true</code> and a transitive dependency has been found
+     * which had been declared with a version range, that version range will be used to build the appropriate
+     * bundle element instead of the newest version. This flag has only an effect when {@link #useVersionRange}
+     * is <code>true</code>
+     */
+    @Parameter(defaultValue = "false")
+    private boolean includeTransitiveVersionRanges;
+
+    @Parameter
+    private Boolean enableGeneration;
+
+    /**
+     * Flag indicating whether the plugin should simplify bundle dependencies. If the flag is set to {@code true}
+     * and a bundle dependency is determined to be included in a feature dependency, the bundle dependency is
+     * dropped.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean simplifyBundleDependencies;
+
+    /**
+     * Maximum size of the artifact LRU cache. This cache is used to prevent repeated artifact-to-file resolution.
+     */
+    @Parameter(defaultValue = "1024")
+    private int artifactCacheSize;
+
+    /**
+     * Maximum size of the Features LRU cache. This cache is used to prevent repeated deserialization of features
+     * XML files.
+     */
+    @Parameter(defaultValue = "256")
+    private int featuresCacheSize;
+
+    /**
+     * Name of features which are prerequisites (they still need to be defined separately).
+     */
+    @Parameter
+    private List<String> prerequisiteFeatures = new ArrayList<>();
+
+    /**
+     * Name of features which are dependencies (they still need to be defined separately).
+     */
+    @Parameter
+    private List<String> dependencyFeatures = new ArrayList<>();
+
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
     // *************************************************
@@ -234,13 +300,19 @@ public class GenerateDescriptorMojo extends MojoSupport {
     private PlexusContainer container;
 
     @Component
+    private RepositorySystem repoSystem;
+
+    @Component
     protected MavenResourcesFiltering mavenResourcesFiltering;
 
     @Component
     protected MavenFileFilter mavenFileFilter;
 
+	@Component
+	private ProjectBuilder mavenProjectBuilder;
+
     // dependencies we are interested in
-    protected Map<?, String> localDependencies;
+    protected Collection<LocalDependency> localDependencies;
 
     // log of what happened during search
     protected String treeListing;
@@ -251,23 +323,42 @@ public class GenerateDescriptorMojo extends MojoSupport {
     // maven log
     private Log log;
 
+    // If useVersionRange is true, this map will be used to cache
+    // resolved MavenProjects
+    private final Map<Artifact, MavenProject> resolvedProjects = new HashMap<>();
+
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project, this.mavenSession, getLog());
+            if (enableGeneration == null) {
+                String packaging = this.project.getPackaging();
+                enableGeneration = !"feature".equals(packaging);
+            }
+
+            if (!enableGeneration) {
+                if (inputFile.exists()) {
+                    File dir = outputFile.getParentFile();
+                    if (!dir.isDirectory() && !dir.mkdirs()) {
+                        throw new MojoExecutionException("Could not create directory for features file: " + dir);
+                    }
+                    filter(inputFile, outputFile);
+                    projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                    return;
+                }
+            }
+
+            this.dependencyHelper = DependencyHelperFactory.createDependencyHelper(this.container, this.project,
+                this.mavenSession, this.artifactCacheSize, getLog());
             this.dependencyHelper.getDependencies(project, includeTransitiveDependency);
             this.localDependencies = dependencyHelper.getLocalDependencies();
             this.treeListing = dependencyHelper.getTreeListing();
             File dir = outputFile.getParentFile();
             if (dir.isDirectory() || dir.mkdirs()) {
-                PrintStream out = new PrintStream(new FileOutputStream(outputFile));
-                try {
+                try (PrintStream out = new PrintStream(new FileOutputStream(outputFile))) {
                     writeFeatures(out);
-                } finally {
-                    out.close();
                 }
                 // now lets attach it
                 projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
-
             } else {
                 throw new MojoExecutionException("Could not create directory for features file: " + dir);
             }
@@ -276,6 +367,52 @@ public class GenerateDescriptorMojo extends MojoSupport {
             throw new MojoExecutionException("Unable to create features.xml file: " + e, e);
         }
     }
+
+	private MavenProject resolveProject(final Object artifact) throws MojoExecutionException {
+		MavenProject resolvedProject = project;
+		if (includeTransitiveVersionRanges) {
+			resolvedProject = resolvedProjects.get(artifact);
+			if (resolvedProject == null) {
+				final ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
+
+				// Fixes KARAF-4626; if the system properties are not transferred to the request,
+				// test-feature-use-version-range-transfer-properties will fail
+				request.setSystemProperties(System.getProperties());
+
+				request.setResolveDependencies(true);
+				request.setRemoteRepositories(project.getPluginArtifactRepositories());
+				request.setLocalRepository(localRepo);
+				request.setProfiles(new ArrayList<>(mavenSession.getRequest().getProfiles()));
+				request.setActiveProfileIds(new ArrayList<>(mavenSession.getRequest().getActiveProfiles()));
+				dependencyHelper.setRepositorySession(request);
+				final Artifact pomArtifact = repoSystem.createArtifact(dependencyHelper.getGroupId(artifact),
+						dependencyHelper.getArtifactId(artifact), dependencyHelper.getBaseVersion(artifact), "pom");
+				try {
+					resolvedProject = mavenProjectBuilder.build(pomArtifact, request).getProject();
+					resolvedProjects.put(pomArtifact, resolvedProject);
+				} catch (final ProjectBuildingException e) {
+					throw new MojoExecutionException(
+							format("Maven-project could not be built for artifact %s", pomArtifact), e);
+				}
+			}
+		}
+		return resolvedProject;
+	}
+
+	private String getVersionOrRange(final Object parent, final Object artifact) throws MojoExecutionException {
+		String versionOrRange = dependencyHelper.getBaseVersion(artifact);
+		if (useVersionRange) {
+			for (final org.apache.maven.model.Dependency dependency : resolveProject(parent).getDependencies()) {
+
+				if (dependency.getGroupId().equals(dependencyHelper.getGroupId(artifact))
+						&& dependency.getArtifactId().equals(dependencyHelper.getArtifactId(artifact))) {
+					versionOrRange = dependency.getVersion();
+					break;
+				}
+			}
+		}
+		return versionOrRange;
+	}
 
     /*
      * Write all project dependencies as feature
@@ -312,9 +449,6 @@ public class GenerateDescriptorMojo extends MojoSupport {
         if (feature.getDescription() == null) {
             feature.setDescription(project.getName());
         }
-        if (resolver != null) {
-            feature.setResolver(resolver);
-        }
         if (installMode != null) {
             feature.setInstall(installMode);
         }
@@ -323,59 +457,85 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
         if (includeProjectArtifact) {
             Bundle bundle = objectFactory.createBundle();
-            bundle.setLocation(this.dependencyHelper.artifactToMvn(project.getArtifact()));
+            bundle.setLocation(this.dependencyHelper.artifactToMvn(project.getArtifact(), project.getVersion()));
             if (startLevel != null) {
                 bundle.setStartLevel(startLevel);
             }
             feature.getBundle().add(bundle);
         }
         boolean needWrap = false;
-        for (Map.Entry<?, String> entry : localDependencies.entrySet()) {
-            Object artifact = entry.getKey();
+
+        // First pass to look for features
+        // Track other features we depend on and their repositories (we track repositories instead of building them from
+        // the feature's Maven artifact to allow for multi-feature repositories)
+        // TODO Initialise the repositories from the existing feature file if any
+        Map<Dependency, Feature> otherFeatures = new HashMap<>();
+        Map<Feature, String> featureRepositories = new HashMap<>();
+        FeaturesCache cache = new FeaturesCache(featuresCacheSize, artifactCacheSize);
+        for (final LocalDependency entry : localDependencies) {
+            Object artifact = entry.getArtifact();
 
             if (excludedArtifactIds.contains(this.dependencyHelper.getArtifactId(artifact))) {
                 continue;
             }
 
-            if (this.dependencyHelper.isArtifactAFeature(artifact)) {
-                if (aggregateFeatures && FEATURE_CLASSIFIER.equals(this.dependencyHelper.getClassifier(artifact))) {
-                    File featuresFile = this.dependencyHelper.resolve(artifact, getLog());
-                    if (featuresFile == null || !featuresFile.exists()) {
-                        throw new MojoExecutionException("Cannot locate file for feature: " + artifact + " at " + featuresFile);
-                    }
-                    Features includedFeatures = readFeaturesFile(featuresFile);
-                    //TODO check for duplicates?
-                    features.getFeature().addAll(includedFeatures.getFeature());
-                }
-            } else if (addBundlesToPrimaryFeature) {
-                String bundleName = this.dependencyHelper.artifactToMvn(artifact);
-                File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
-                Manifest manifest = getManifest(bundleFile);
+            processFeatureArtifact(features, feature, otherFeatures, featureRepositories, cache, artifact,
+                    entry.getParent(), true);
+        }
+        // Do not retain cache beyond this point
+        cache = null;
 
-                if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
-                    bundleName = "wrap:" + bundleName;
-                    needWrap = true;
+        // Second pass to look for bundles
+        if (addBundlesToPrimaryFeature) {
+            localDependency:
+            for (final LocalDependency entry : localDependencies) {
+                Object artifact = entry.getArtifact();
+
+                if (excludedArtifactIds.contains(this.dependencyHelper.getArtifactId(artifact))) {
+                    continue;
                 }
 
-                Bundle bundle = null;
-                for (Bundle b : feature.getBundle()) {
-                    if (bundleName.equals(b.getLocation())) {
-                        bundle = b;
-                        break;
+                if (!this.dependencyHelper.isArtifactAFeature(artifact)) {
+                    String bundleName = this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(entry.getParent(), artifact));
+
+                    for (ConfigFile cf : feature.getConfigfile()) {
+                        if (bundleName.equals(cf.getLocation().replace('\n', ' ').trim())) {
+                            // The bundle matches a configfile, ignore it
+                            continue localDependency;
+                        }
                     }
-                }
-                if (bundle == null) {
-                    bundle = objectFactory.createBundle();
-                    bundle.setLocation(bundleName);
-                    if (!"provided".equals(entry.getValue()) || !ignoreScopeProvided) {
-                        feature.getBundle().add(bundle);
+
+                    File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
+                    Manifest manifest = getManifest(bundleFile);
+                    if (manifest == null || !ManifestUtils.isBundle(manifest)) {
+                        bundleName = "wrap:" + bundleName;
+                        needWrap = true;
                     }
-                }
-                if ("runtime".equals(entry.getValue())) {
-                    bundle.setDependency(true);
-                }
-                if (startLevel != null && bundle.getStartLevel() == 0) {
-                    bundle.setStartLevel(startLevel);
+
+                    Bundle bundle = null;
+                    for (Bundle b : feature.getBundle()) {
+                        if (bundleName.equals(b.getLocation())) {
+                            bundle = b;
+                            break;
+                        }
+                    }
+                    if (bundle == null) {
+                        bundle = objectFactory.createBundle();
+                        bundle.setLocation(bundleName);
+                        // Check the features this feature depends on don't already contain the dependency
+                        // TODO Perhaps only for transitive dependencies?
+                        boolean includedTransitively =
+                            simplifyBundleDependencies && isBundleIncludedTransitively(feature, otherFeatures, bundle);
+                        if (!includedTransitively && (!"provided".equals(entry.getScope()) || !ignoreScopeProvided)) {
+                            feature.getBundle().add(bundle);
+                        }
+                    }
+                    if ("runtime".equals(entry.getScope())) {
+                        bundle.setDependency(true);
+                    }
+                    if (startLevel != null && bundle.getStartLevel() == 0) {
+                        bundle.setStartLevel(startLevel);
+                    }
                 }
             }
         }
@@ -387,9 +547,22 @@ public class GenerateDescriptorMojo extends MojoSupport {
             wrapDependency.setPrerequisite(true);
             feature.getFeature().add(wrapDependency);
         }
-        
+
         if ((!feature.getBundle().isEmpty() || !feature.getFeature().isEmpty()) && !features.getFeature().contains(feature)) {
             features.getFeature().add(feature);
+        }
+
+        // Add any missing repositories for the included features
+        for (Feature includedFeature : features.getFeature()) {
+            for (Dependency dependency : includedFeature.getFeature()) {
+                Feature dependedFeature = otherFeatures.get(dependency);
+                if (dependedFeature != null && !features.getFeature().contains(dependedFeature)) {
+                    String repository = featureRepositories.get(dependedFeature);
+                    if (repository != null && !features.getRepository().contains(repository)) {
+                        features.getRepository().add(repository);
+                    }
+                }
+            }
         }
 
         JaxbUtil.marshal(features, out);
@@ -401,42 +574,125 @@ public class GenerateDescriptorMojo extends MojoSupport {
         getLog().info("...done!");
     }
 
+    private void processFeatureArtifact(Features features, Feature feature, Map<Dependency, Feature> otherFeatures,
+                                        Map<Feature, String> featureRepositories, FeaturesCache cache,
+                                        Object artifact, Object parent, boolean add)
+            throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
+        if (this.dependencyHelper.isArtifactAFeature(artifact) && FEATURE_CLASSIFIER.equals(
+                this.dependencyHelper.getClassifier(artifact))) {
+            File featuresFile = this.dependencyHelper.resolve(artifact, getLog());
+            if (featuresFile == null || !featuresFile.exists()) {
+                throw new MojoExecutionException(
+                        "Cannot locate file for feature: " + artifact + " at " + featuresFile);
+            }
+            Features includedFeatures = cache.getFeature(featuresFile);
+            for (String repository : includedFeatures.getRepository()) {
+                processFeatureArtifact(features, feature, otherFeatures, featureRepositories, cache,
+                        cache.getArtifact(repository), parent, false);
+            }
+            for (Feature includedFeature : includedFeatures.getFeature()) {
+                Dependency dependency = new Dependency(includedFeature.getName(), includedFeature.getVersion());
+                dependency.setPrerequisite(prerequisiteFeatures.contains(dependency.getName()));
+                dependency.setDependency(dependencyFeatures.contains(dependency.getName()));
+                // Determine what dependency we're actually going to use
+                Dependency matchingDependency = findMatchingDependency(feature.getFeature(), dependency);
+                if (matchingDependency != null) {
+                    // The feature already has a matching dependency, merge
+                    mergeDependencies(matchingDependency, dependency);
+                    dependency = matchingDependency;
+                }
+                // We mustn't de-duplicate here, we may have seen a feature in !add mode
+                otherFeatures.put(dependency, includedFeature);
+                if (add) {
+                    if (!feature.getFeature().contains(dependency)) {
+                        feature.getFeature().add(dependency);
+                    }
+                    if (aggregateFeatures) {
+                        features.getFeature().add(includedFeature);
+                    }
+                }
+                if (!featureRepositories.containsKey(includedFeature)) {
+                    featureRepositories.put(includedFeature,
+                            this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(parent, artifact)));
+                }
+            }
+        }
+    }
+
+    private static Dependency findMatchingDependency(Collection<Dependency> dependencies, Dependency reference) {
+        String referenceName = reference.getName();
+        for (Dependency dependency : dependencies) {
+            if (referenceName.equals(dependency.getName())) {
+                return dependency;
+            }
+        }
+        return null;
+    }
+
+    private static void mergeDependencies(Dependency target, Dependency source) {
+        if (target.getVersion() == null || Feature.DEFAULT_VERSION.equals(target.getVersion())) {
+            target.setVersion(source.getVersion());
+        }
+        if (source.isDependency()) {
+            target.setDependency(true);
+        }
+        if (source.isPrerequisite()) {
+            target.setPrerequisite(true);
+        }
+    }
+
+    private boolean isBundleIncludedTransitively(Feature feature, Map<Dependency, Feature> otherFeatures,
+                                                 Bundle bundle) {
+        for (Dependency dependency : feature.getFeature()) {
+            // Match dependencies “generously” (we might be matching single-version dependencies with version ranges)
+            Dependency otherDependency = findMatchingDependency(otherFeatures.keySet(), dependency);
+            Feature otherFeature = otherDependency != null ? otherFeatures.get(otherDependency) : null;
+            if (otherFeature != null) {
+                if (otherFeature.getBundle().contains(bundle) || isBundleIncludedTransitively(otherFeature,
+                    otherFeatures, bundle)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Extract the MANIFEST from the give file.
      */
 
     private Manifest getManifest(File file) throws IOException {
-        InputStream is;
+        final InputStream is;
         try {
-            is = new BufferedInputStream(new FileInputStream(file));
+            is = Files.newInputStream(file.toPath());
         } catch (Exception e) {
             getLog().warn("Error while opening artifact", e);
             return null;
         }
 
-        try {
-            is.mark(256 * 1024);
-            JarInputStream jar = new JarInputStream(is);
-            Manifest m = jar.getManifest();
-            if (m == null) {
-                getLog().warn("Manifest not present in the first entry of the zip - " + file.getName());
+        try (BufferedInputStream bis = new BufferedInputStream(is)) {
+            bis.mark(256 * 1024);
+
+            try (JarInputStream jar = new JarInputStream(bis)) {
+                Manifest m = jar.getManifest();
+                if (m == null) {
+                    getLog().warn("Manifest not present in the first entry of the zip - " + file.getName());
+                }
+                return m;
             }
-            jar.close();
-            return m;
-        } finally {
-            // just in case when we did not open bundle
-            is.close();
         }
     }
 
-    private Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
+    static Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
         return JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
     }
 
+    @Override
     public void setLog(Log log) {
         this.log = log;
     }
 
+    @Override
     public Log getLog() {
         if (log == null) {
             setLog(new SystemStreamLog());
@@ -514,7 +770,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
     @Parameter
     protected Map<String, String> systemProperties;
 
-    private void checkChanges(Features newFeatures, ObjectFactory objectFactory) throws Exception, IOException, JAXBException, XMLStreamException {
+    private void checkChanges(Features newFeatures, ObjectFactory objectFactory) throws Exception {
         if (checkDependencyChange) {
             //combine all the dependencies to one feature and strip out versions
             Features features = objectFactory.createFeaturesRoot();
@@ -534,17 +790,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 }
             }
 
-            Collections.sort(feature.getBundle(), new Comparator<Bundle>() {
-
-                public int compare(Bundle bundle, Bundle bundle1) {
-                    return bundle.getLocation().compareTo(bundle1.getLocation());
-                }
-            });
-            Collections.sort(feature.getFeature(), new Comparator<Dependency>() {
-                public int compare(Dependency dependency, Dependency dependency1) {
-                    return dependency.getName().compareTo(dependency1.getName());
-                }
-            });
+            feature.getBundle().sort(Comparator.comparing(Bundle::getLocation));
+            feature.getFeature().sort(Comparator.comparing(Dependency::getName));
 
             if (dependencyCache.exists()) {
                 //filter dependencies file
@@ -553,8 +800,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 Features oldfeatures = readFeaturesFile(filteredDependencyCache);
                 Feature oldFeature = oldfeatures.getFeature().get(0);
 
-                List<Bundle> addedBundles = new ArrayList<Bundle>(feature.getBundle());
-                List<Bundle> removedBundles = new ArrayList<Bundle>();
+                List<Bundle> addedBundles = new ArrayList<>(feature.getBundle());
+                List<Bundle> removedBundles = new ArrayList<>();
                 for (Bundle test : oldFeature.getBundle()) {
                     boolean t1 = addedBundles.contains(test);
                     int s1 = addedBundles.size();
@@ -571,8 +818,8 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     }
                 }
 
-                List<Dependency> addedDependencys = new ArrayList<Dependency>(feature.getFeature());
-                List<Dependency> removedDependencys = new ArrayList<Dependency>();
+                List<Dependency> addedDependencys = new ArrayList<>(feature.getFeature());
+                List<Dependency> removedDependencys = new ArrayList<>();
                 for (Dependency test : oldFeature.getFeature()) {
                     boolean t1 = addedDependencys.contains(test);
                     int s1 = addedDependencys.size();
@@ -639,7 +886,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         }
     }
 
-    private Features toFeatures(Collection<Bundle> addedBundles, Collection<Dependency> addedDependencys, ObjectFactory objectFactory) {
+    private static Features toFeatures(Collection<Bundle> addedBundles, Collection<Dependency> addedDependencys, ObjectFactory objectFactory) {
         Features features = objectFactory.createFeaturesRoot();
         Feature feature = objectFactory.createFeature();
         feature.getBundle().addAll(addedBundles);
@@ -649,16 +896,13 @@ public class GenerateDescriptorMojo extends MojoSupport {
     }
 
 
-    private void writeDependencies(Features features, File file) throws JAXBException, IOException {
+    private static void writeDependencies(Features features, File file) throws JAXBException, IOException {
         file.getParentFile().mkdirs();
         if (!file.getParentFile().exists() || !file.getParentFile().isDirectory()) {
             throw new IOException("Cannot create directory at " + file.getParent());
         }
-        FileOutputStream out = new FileOutputStream(file);
-        try {
+        try (OutputStream out = new FileOutputStream(file)) {
             JaxbUtil.marshal(features, out);
-        } finally {
-            out.close();
         }
     }
 
@@ -692,14 +936,36 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
     protected String saveTreeListing() throws IOException {
         File treeListFile = new File(filteredDependencyCache.getParentFile(), "treeListing.txt");
-        OutputStream os = new FileOutputStream(treeListFile);
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-        try {
+        try (OutputStream os = new FileOutputStream(treeListFile);
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os))) {
             writer.write(treeListing);
-        } finally {
-            writer.close();
         }
         return "\tTree listing is saved here: " + treeListFile.getAbsolutePath() + "\n";
     }
 
+    private static final class FeaturesCache {
+        // Maven-to-Aether Artifact cache, as parsing strings is expensive
+        private final SimpleLRUCache<String, DefaultArtifact> artifactCache;
+        private final SimpleLRUCache<File, Features> featuresCache;
+
+        FeaturesCache(int featuresCacheSize, int artifactCacheSize) {
+            featuresCache = new SimpleLRUCache<>(featuresCacheSize);
+            artifactCache = new SimpleLRUCache<>(artifactCacheSize);
+        }
+
+        DefaultArtifact getArtifact(String mavenName) {
+            return artifactCache.computeIfAbsent(mavenName, MavenUtil::mvnToArtifact);
+        }
+
+        Features getFeature(final File featuresFile) throws XMLStreamException, JAXBException, IOException {
+            final Features existing = featuresCache.get(featuresFile);
+            if (existing != null) {
+                return existing;
+            }
+
+            final Features computed = readFeaturesFile(featuresFile);
+            featuresCache.put(featuresFile, computed);
+            return computed;
+        }
+    }
 }

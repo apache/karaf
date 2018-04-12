@@ -18,21 +18,20 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.server.UserAuth;
-import org.apache.sshd.server.auth.UserAuthKeyboardInteractive;
-import org.apache.sshd.server.auth.UserAuthPassword;
-import org.apache.sshd.server.auth.UserAuthPublicKey;
-
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.sshd.common.NamedFactory;
+import org.apache.sshd.server.auth.UserAuth;
+import org.apache.sshd.server.auth.keyboard.UserAuthKeyboardInteractiveFactory;
+import org.apache.sshd.server.auth.password.UserAuthPasswordFactory;
+import org.apache.sshd.server.auth.pubkey.UserAuthPublicKeyFactory;
+
 /**
  * <p>A factory for user authentication factories to set on
- * {@link org.apache.sshd.SshServer#setUserAuthFactories(java.util.List)} based on a
+ * {@link org.apache.sshd.server.SshServer#setUserAuthFactories(java.util.List)} based on a
  * comma-separated list of authentication methods.</p>
  *
  * <p>Currently, the following methods are supported:</p>
@@ -50,17 +49,16 @@ public class UserAuthFactoriesFactory {
     private Set<String> methodSet;
     private List<NamedFactory<UserAuth>> factories;
 
-   public void setAuthMethods(String methods) {
-        this.methodSet = new HashSet<String>();
-        this.factories = new ArrayList<NamedFactory<UserAuth>>();
-        String[] ams = methods.split(",");
-        for (String am : ams) {
+   public void setAuthMethods(String[] methods) {
+        this.methodSet = new HashSet<>();
+        this.factories = new ArrayList<>();
+        for (String am : methods) {
             if (PASSWORD_METHOD.equals(am)) {
-                this.factories.add(new UserAuthPassword.Factory());
+                this.factories.add(new UserAuthPasswordFactory());
             } else if (KEYBOARD_INTERACTIVE_METHOD.equals(am)) {
-                this.factories.add(new UserAuthKeyboardInteractive.Factory());
+                this.factories.add(new UserAuthKeyboardInteractiveFactory());
             } else if (PUBLICKEY_METHOD.equals(am)) {
-                this.factories.add(new UserAuthPublicKey.Factory());
+                this.factories.add(new UserAuthPublicKeyFactory());
             } else {
                 throw new IllegalArgumentException("Invalid authentication method " + am + " specified");
             }

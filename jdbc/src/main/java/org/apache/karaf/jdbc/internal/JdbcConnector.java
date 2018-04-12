@@ -40,12 +40,7 @@ public class JdbcConnector implements Closeable {
     public JdbcConnector(final BundleContext bundleContext, final ServiceReference<?> reference) {
         this.datasource = (CommonDataSource)bundleContext.getService(reference);
         this.resources = new LinkedList<>();
-        this.resources.addFirst(new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-                bundleContext.ungetService(reference);
-            }
-        });
+        this.resources.addFirst(() -> bundleContext.ungetService(reference));
     }
     
     public Connection connect() throws SQLException {
@@ -72,12 +67,7 @@ public class JdbcConnector implements Closeable {
     }
 
     public XAConnection register(final XAConnection closeable) {
-        register(new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-                closeable.close();
-            }
-        });
+        register(closeable::close);
         return closeable;
     }
 

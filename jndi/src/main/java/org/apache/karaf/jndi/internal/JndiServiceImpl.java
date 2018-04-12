@@ -49,7 +49,7 @@ public class JndiServiceImpl implements JndiService {
 
     @Override
     public Map<String, String> names(String name) throws Exception {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         if (name.startsWith(OSGI_JNDI_CONTEXT_PREFIX)) {
             // OSGi service binding
             // make a lookup using directly the OSGi service
@@ -104,7 +104,7 @@ public class JndiServiceImpl implements JndiService {
     }
 
     public List<String> contexts(String name) throws Exception {
-        List<String> contexts = new ArrayList<String>();
+        List<String> contexts = new ArrayList<>();
         Context context = new InitialContext();
         NamingEnumeration<NameClassPair> pairs = context.list(name);
         while (pairs.hasMoreElements()) {
@@ -170,16 +170,16 @@ public class JndiServiceImpl implements JndiService {
         Context context = new InitialContext();
         String[] splitted = name.split("/");
         if (splitted.length > 0) {
-            for (int i = 0; i < splitted.length; i++) {
+            for (String split : splitted) {
                 try {
-                    Object o = context.lookup(splitted[i]);
+                    Object o = context.lookup(split);
                     if (!(o instanceof Context)) {
-                        throw new NamingException("Name " + splitted[i] + " already exists");
+                        throw new NamingException("Name " + split + " already exists");
                     }
                 } catch (NameNotFoundException e) {
-                    context.createSubcontext(splitted[i]);
+                    context.createSubcontext(split);
                 }
-                context = (Context) context.lookup(splitted[i]);
+                context = (Context) context.lookup(split);
             }
         } else {
             context.createSubcontext(name);
@@ -241,7 +241,7 @@ public class JndiServiceImpl implements JndiService {
                 ServiceReference<?>[] services = bundle.getRegisteredServices();
                 if (services != null) {
                     for (ServiceReference service : services) {
-                        if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY) != null && ((String) service.getProperty(OSGI_JNDI_SERVICE_PROPERTY)).equals(name.substring(OSGI_JNDI_CONTEXT_PREFIX.length() + 1))) {
+                        if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY) != null && service.getProperty(OSGI_JNDI_SERVICE_PROPERTY).equals(name.substring(OSGI_JNDI_CONTEXT_PREFIX.length() + 1))) {
                             Object actualService = bundleContext.getService(service);
                             try {
                                 if (proxyManager.isProxy(actualService)) {

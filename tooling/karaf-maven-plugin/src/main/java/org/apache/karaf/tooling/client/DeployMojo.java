@@ -1,5 +1,4 @@
-/**
- *
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,23 +18,23 @@ package org.apache.karaf.tooling.client;
 
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.sshd.ClientChannel;
-import org.apache.sshd.ClientSession;
-import org.apache.sshd.SshClient;
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.LocalAgentFactory;
-import org.apache.sshd.client.UserInteraction;
+import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.auth.keyboard.UserInteraction;
+import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.RuntimeSshException;
-import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 
+import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.Ansi.Color;
 import org.fusesource.jansi.AnsiConsole;
@@ -45,13 +44,10 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import javax.management.remote.MBeanServerForwarder;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Console;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +57,7 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.security.KeyPair;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -112,10 +109,12 @@ public class DeployMojo extends MojoSupport {
             Artifact projectArtifact = project.getArtifact();
             artifacts.add("mvn:" + projectArtifact.getGroupId() + "/" + projectArtifact.getArtifactId() + "/" + projectArtifact.getVersion());
         }
-        artifacts.addAll(artifactLocations);
+        if (artifactLocations != null) {
+            artifacts.addAll(artifactLocations);
+        }
         if (useSsh)
-            deployWithSsh(artifactLocations);
-        else deployWithJmx(artifactLocations);
+            deployWithSsh(artifacts);
+        else deployWithJmx(artifacts);
     }
 
     protected void deployWithJmx(List<String> locations) throws MojoExecutionException {
@@ -150,11 +149,12 @@ public class DeployMojo extends MojoSupport {
             setupAgent(user, keyFile, client);
 
             client.setUserInteraction( new UserInteraction() {
-                public void welcome(String banner) {
+                @Override
+                public void welcome(ClientSession s, String banner, String lang) {
                     console.printf(banner);
                 }
-
-                public String[] interactive(String destination, String name, String instruction, String[] prompt, boolean[] echo)
+                @Override
+                public String[] interactive(ClientSession s, String name, String instruction, String lang, String[] prompt, boolean[] echo)
                 {
                     String[] answers = new String[prompt.length];
                     try {
@@ -173,6 +173,17 @@ public class DeployMojo extends MojoSupport {
                     }
                     return answers;
                 }
+                @Override
+                public boolean isInteractionAllowed(ClientSession session) {
+                    return true;
+                }
+                @Override
+                public void serverVersionInfo(ClientSession session, List<String> lines) {
+                }
+                @Override
+                public String getUpdatedPassword(ClientSession session, String prompt, String lang) {
+                    return null;
+                }
             });
             client.start();
             if (console != null) {
@@ -190,14 +201,14 @@ public class DeployMojo extends MojoSupport {
                 print.println("bundle:install -s " + location);
             }
 
-            final ClientChannel channel = session.createChannel("exec", print.toString().concat(NEW_LINE));
+            final ClientChannel channel = session.createChannel("exec", writer.toString().concat(NEW_LINE));
             channel.setIn(new ByteArrayInputStream(new byte[0]));
             final ByteArrayOutputStream sout = new ByteArrayOutputStream();
             final ByteArrayOutputStream serr = new ByteArrayOutputStream();
             channel.setOut( AnsiConsole.wrapOutputStream(sout));
             channel.setErr( AnsiConsole.wrapOutputStream(serr));
             channel.open();
-            channel.waitFor(ClientChannel.CLOSED, 0);
+            channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
 
             sout.writeTo(System.out);
             serr.writeTo(System.err);
@@ -215,6 +226,7 @@ public class DeployMojo extends MojoSupport {
             throw e;
         }
         catch (Throwable t) {
+            t.printStackTrace();
             throw new MojoExecutionException(t, t.getMessage(), t.toString());
         }
         finally {
@@ -243,8 +255,7 @@ public class DeployMojo extends MojoSupport {
             is.close();
             agent.addIdentity(keyPair, user);
             if (keyFile != null) {
-                String[] keyFiles = new String[] { keyFile.getAbsolutePath() };
-                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(keyFiles);
+                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(keyFile.getAbsoluteFile().toPath());
                 for (KeyPair key : fileKeyPairProvider.loadKeys()) {
                     agent.addIdentity(key, user);
                 }

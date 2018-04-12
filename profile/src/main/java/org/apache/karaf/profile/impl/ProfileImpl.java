@@ -24,8 +24,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
+import org.apache.karaf.features.FeaturePattern;
+import org.apache.karaf.features.LocationPattern;
 import org.apache.karaf.profile.Profile;
 
 import static org.apache.karaf.profile.impl.Utils.assertNotNull;
@@ -37,13 +40,13 @@ import static org.apache.karaf.profile.impl.Utils.assertTrue;
  */
 final class ProfileImpl implements Profile {
 
-    private static final Pattern ALLOWED_PROFILE_NAMES_PATTERN = Pattern.compile("^[A-Za-z0-9]+[\\.A-Za-z0-9_-]*$");
+    private static final Pattern ALLOWED_PROFILE_NAMES_PATTERN = Pattern.compile("^[A-Za-z0-9]+[.A-Za-z0-9_-]*$");
 
     private final String profileId;
     private final Map<String, String> attributes;
     private final List<String> parents = new ArrayList<>();
     private final Map<String, byte[]> fileConfigurations = new HashMap<>();
-    private final Map<String, Map<String, String>> configurations = new HashMap<>();
+    private final Map<String, Map<String, Object>> configurations = new HashMap<>();
     private final boolean isOverlay;
     private int hash;
 
@@ -53,7 +56,7 @@ final class ProfileImpl implements Profile {
         assertNotNull(profileId, "profileId is null");
         assertNotNull(parents, "parents is null");
         assertNotNull(fileConfigs, "fileConfigs is null");
-        assertTrue(ALLOWED_PROFILE_NAMES_PATTERN.matcher(profileId).matches(), "Profile id '" + profileId + "' is invalid. Profile id must be: lower-case letters, numbers, and . _ or - characters");
+        assertTrue(ALLOWED_PROFILE_NAMES_PATTERN.matcher(profileId).matches(), "Profile id '" + profileId + "' is invalid. Profile id must be: upper-case or lower-case letters, numbers, and . _ or - characters");
 
         this.profileId = profileId;
         this.isOverlay = isOverlay;
@@ -72,12 +75,8 @@ final class ProfileImpl implements Profile {
             }
         }
 
-        // Attributes are agent configuration with prefix 'attribute.'
+        // Attributes are profile configuration properties with prefix "attribute." contained in "profile" PID
         attributes = getPrefixedMap(ATTRIBUTE_PREFIX);
-    }
-
-    public String getId() {
-        return profileId;
     }
 
     @Override
@@ -95,15 +94,20 @@ final class ProfileImpl implements Profile {
         return getPrefixedMap(SYSTEM_PREFIX);
     }
 
+    @Override
+    public String getId() {
+        return profileId;
+    }
+
     private Map<String, String> getPrefixedMap(String prefix) {
         Map<String, String> map = new HashMap<>();
-        Map<String, String> agentConfig = configurations.get(Profile.INTERNAL_PID);
-        if (agentConfig != null) {
+        Map<String, Object> profileConfig = configurations.get(Profile.INTERNAL_PID);
+        if (profileConfig != null) {
             int prefixLength = prefix.length();
-            for (Entry<String, String> entry : agentConfig.entrySet()) {
+            for (Entry<String, Object> entry : profileConfig.entrySet()) {
                 String key = entry.getKey();
                 if (key.startsWith(prefix)) {
-                    map.put(key.substring(prefixLength), entry.getValue());
+                    map.put(key.substring(prefixLength), entry.getValue().toString());
                 }
             }
         }
@@ -111,8 +115,8 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
-    public List<String> getLibraries() {
-        return getContainerConfigList(ConfigListType.LIBRARIES);
+    public List<String> getParentIds() {
+        return Collections.unmodifiableList(parents);
     }
 
     @Override
@@ -131,6 +135,47 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
+    public List<LocationPattern> getBlacklistedBundles() {
+        return getContainerConfigList(ConfigListType.BLACKLISTED_BUNDLES).stream()
+                .map(LocationPattern::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FeaturePattern> getBlacklistedFeatures() {
+        return getContainerConfigList(ConfigListType.BLACKLISTED_FEATURES).stream()
+                .map(FeaturePattern::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LocationPattern> getBlacklistedRepositories() {
+        return getContainerConfigList(ConfigListType.BLACKLISTED_REPOSITORIES).stream()
+                .map(LocationPattern::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getLibraries() {
+        return getContainerConfigList(ConfigListType.LIBRARIES);
+    }
+
+    @Override
+    public List<String> getBootLibraries() {
+        return getContainerConfigList(ConfigListType.BOOT_LIBRARIES);
+    }
+
+    @Override
+    public List<String> getEndorsedLibraries() {
+        return getContainerConfigList(ConfigListType.ENDORSED_LIBRARIES);
+    }
+
+    @Override
+    public List<String> getExtLibraries() {
+        return getContainerConfigList(ConfigListType.EXT_LIBRARIES);
+    }
+
+    @Override
     public List<String> getOverrides() {
         return getContainerConfigList(ConfigListType.OVERRIDES);
     }
@@ -141,27 +186,22 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
-    public List<String> getParentIds() {
-        return Collections.unmodifiableList(parents);
-    }
-
-    @Override
-    public boolean isAbstract() {
-        return Boolean.parseBoolean(getAttributes().get(ABSTRACT));
-    }
-
-    @Override
-    public boolean isHidden() {
-        return Boolean.parseBoolean(getAttributes().get(HIDDEN));
-    }
-
     public boolean isOverlay() {
         return isOverlay;
     }
 
     @Override
-    public Map<String, byte[]> getFileConfigurations() {
-        return Collections.unmodifiableMap(fileConfigurations);
+    public boolean isAbstract() {
+        return parseBoolean(attributes.get(ABSTRACT));
+    }
+
+    @Override
+    public boolean isHidden() {
+        return parseBoolean(attributes.get(HIDDEN));
+    }
+
+    private Boolean parseBoolean(Object obj) {
+        return obj instanceof Boolean ? (Boolean) obj : obj != null && Boolean.parseBoolean(obj.toString());
     }
 
     @Override
@@ -170,28 +210,34 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
+    public Map<String, byte[]> getFileConfigurations() {
+        return Collections.unmodifiableMap(fileConfigurations);
+    }
+
+    @Override
     public byte[] getFileConfiguration(String fileName) {
         return fileConfigurations.get(fileName);
     }
 
-    public Map<String, Map<String, String>> getConfigurations() {
+    @Override
+    public Map<String, Map<String, Object>> getConfigurations() {
         return Collections.unmodifiableMap(configurations);
     }
 
     @Override
-    public Map<String, String> getConfiguration(String pid) {
-        Map<String, String> config = configurations.get(pid);
-        config = config != null ? config : Collections.<String, String> emptyMap();
+    public Map<String, Object> getConfiguration(String pid) {
+        Map<String, Object> config = configurations.get(pid);
+        config = config != null ? config : Collections.emptyMap();
         return Collections.unmodifiableMap(config);
     }
 
     private List<String> getContainerConfigList(ConfigListType type) {
-        Map<String, String> containerProps = getConfiguration(Profile.INTERNAL_PID);
+        Map<String, Object> containerProps = getConfiguration(Profile.INTERNAL_PID);
         List<String> rc = new ArrayList<>();
-        String prefix = type + ".";
-        for (Map.Entry<String, String> e : containerProps.entrySet()) {
+        String prefix = type.value + ".";
+        for (Map.Entry<String, Object> e : containerProps.entrySet()) {
             if ((e.getKey()).startsWith(prefix)) {
-                rc.add(e.getValue());
+                rc.add(e.getValue().toString());
             }
         }
         return rc;
@@ -226,20 +272,26 @@ final class ProfileImpl implements Profile {
 
     @Override
     public String toString() {
-        return "Profile[id=" + profileId + ",attrs=" + getAttributes() + "]";
+        return "Profile[id=" + profileId + ", attrs=" + getAttributes() + "]";
     }
 
     enum ConfigListType {
         BUNDLES("bundle"),
+        BLACKLISTED_BUNDLES("blacklisted.bundle"),
         FEATURES("feature"),
+        BLACKLISTED_FEATURES("blacklisted.feature"),
         LIBRARIES("library"),
+        BOOT_LIBRARIES("boot"),
+        ENDORSED_LIBRARIES("endorsed"),
+        EXT_LIBRARIES("ext"),
         OPTIONALS("optional"),
         OVERRIDES("override"),
-        REPOSITORIES("repository");
+        REPOSITORIES("repository"),
+        BLACKLISTED_REPOSITORIES("blacklisted.repository");
 
         private String value;
 
-        private ConfigListType(String value) {
+        ConfigListType(String value) {
             this.value = value;
         }
 
@@ -247,4 +299,5 @@ final class ProfileImpl implements Profile {
             return value;
         }
     }
+
 }

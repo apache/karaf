@@ -15,24 +15,25 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+
+import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.Principal;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
@@ -43,13 +44,11 @@ import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(FrameworkRunner.class)
 @CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP")})
@@ -60,30 +59,10 @@ import static org.junit.Assert.assertTrue;
 )
 public class LdapCacheTest extends AbstractLdapTestUnit {
 
-    private static boolean portUpdated;
-
     @Before
     public void updatePort() throws Exception {
-        if (!portUpdated) {
-            String basedir = System.getProperty("basedir");
-            if (basedir == null) {
-                basedir = new File(".").getCanonicalPath();
-            }
-
-            // Read in ldap.properties and substitute in the correct port
-            File f = new File(basedir + "/src/test/resources/org/apache/karaf/jaas/modules/ldap/ldap.properties");
-
-            FileInputStream inputStream = new FileInputStream(f);
-            String content = IOUtils.toString(inputStream, "UTF-8");
-            inputStream.close();
-            content = content.replaceAll("portno", "" + super.getLdapServer().getPort());
-
-            File f2 = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldap.properties");
-            FileOutputStream outputStream = new FileOutputStream(f2);
-            IOUtils.write(content, outputStream, "UTF-8");
-            outputStream.close();
-            portUpdated = true;
-        }
+        ldapProps("org/apache/karaf/jaas/modules/ldap/ldap.properties", 
+                  LdapLoginModuleTest::replacePort);
     }
 
     @After
@@ -95,17 +74,7 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
     public void testAdminLogin() throws Exception {
         Properties options = ldapLoginModuleOptions();
         LDAPLoginModule module = new LDAPLoginModule();
-        CallbackHandler cb = new CallbackHandler() {
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback cb : callbacks) {
-                    if (cb instanceof NameCallback) {
-                        ((NameCallback) cb).setName("admin");
-                    } else if (cb instanceof PasswordCallback) {
-                        ((PasswordCallback) cb).setPassword("admin123".toCharArray());
-                    }
-                }
-            }
-        };
+        CallbackHandler cb = new NamePasswordCallbackHandler("admin", "admin123");
         Subject subject = new Subject();
         module.initialize(subject, cb, null, options);
 
@@ -115,42 +84,16 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
 
         assertEquals(2, subject.getPrincipals().size());
 
-        boolean foundUser = false;
-        boolean foundRole = false;
-        for (Principal pr : subject.getPrincipals()) {
-            if (pr instanceof UserPrincipal) {
-                assertEquals("admin", pr.getName());
-                foundUser = true;
-            } else if (pr instanceof RolePrincipal) {
-                assertEquals("admin", pr.getName());
-                foundRole = true;
-            }
-        }
-        assertTrue(foundUser);
-        assertTrue(foundRole);
+        assertThat(names(subject.getPrincipals(UserPrincipal.class)), containsInAnyOrder("admin"));
+        assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("admin"));
 
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
 
-        DirContext context = new LDAPCache(new LDAPOptions(options)).open();
-
-        // Make "admin" user a member of a new "another" group
-
-//        dn: cn=admin,ou=groups,dc=example,dc=com
-//        objectClass: top
-//        objectClass: groupOfNames
-//        cn: admin
-//        member: cn=admin,ou=people,dc=example,dc=com
-        Attributes entry = new BasicAttributes();
-        entry.put(new BasicAttribute("cn", "another"));
-        Attribute oc = new BasicAttribute("objectClass");
-        oc.add("top");
-        oc.add("groupOfNames");
-        entry.put(oc);
-        Attribute mb = new BasicAttribute("member");
-        mb.add("cn=admin,ou=people,dc=example,dc=com");
-        entry.put(mb);
-        context.createSubcontext("cn=another,ou=groups,dc=example,dc=com", entry);
+        LDAPCache ldapCache = new LDAPCache(new LDAPOptions(options));
+        DirContext context = ldapCache.open();
+        addUserToGroup(context, "cn=admin,ou=people,dc=example,dc=com", "another");
+        ldapCache.close();
 
         Thread.sleep(100);
 
@@ -161,6 +104,19 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
         assertTrue(module.login());
         assertTrue(module.commit());
         assertEquals("Postcondition", 3, subject.getPrincipals().size());
+    }
+
+    private void addUserToGroup(DirContext context, String userCn, String group) throws NamingException {
+        Attributes entry = new BasicAttributes();
+        entry.put(new BasicAttribute("cn", group));
+        Attribute oc = new BasicAttribute("objectClass");
+        oc.add("top");
+        oc.add("groupOfNames");
+        entry.put(oc);
+        Attribute mb = new BasicAttribute("member");
+        mb.add(userCn);
+        entry.put(mb);
+        context.createSubcontext("cn=" + group +",ou=groups,dc=example,dc=com", entry);
     }
 
     protected Properties ldapLoginModuleOptions() throws IOException {

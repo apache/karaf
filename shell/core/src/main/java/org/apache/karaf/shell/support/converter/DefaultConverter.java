@@ -26,6 +26,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -51,6 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultConverter
 {
 
@@ -199,9 +201,19 @@ public class DefaultConverter
             return Byte.valueOf(value);
         } else if (Enum.class.isAssignableFrom(toType)) {
             return Enum.valueOf((Class<Enum>) toType, value);
+        } else if (URI.class == toType) {
+            return createUri(value);
         } else {
             return createObject(value, toType);
         }
+    }
+
+    /**
+     * Escape quote marks in order to allow bnd instructions that require it.
+     * <p>See jira issue KARAF-4964</p>
+     */
+    private static URI createUri(String value) throws Exception {
+        return URI.create(value.replaceAll("\"", "%22"));
     }
 
     private static Object createObject(String value, Class type) throws Exception {
@@ -385,7 +397,7 @@ public class DefaultConverter
 
     private static final Map<Class, Class> primitives;
     static {
-        primitives = new HashMap<Class, Class>();
+        primitives = new HashMap<>();
         primitives.put(byte.class, Byte.class);
         primitives.put(short.class, Short.class);
         primitives.put(char.class, Character.class);

@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.command.completers.StartedFeatureCompleter;
@@ -30,7 +29,7 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "feature", name = "stop", description = "Start features with the specified name and version.")
+@Command(scope = "feature", name = "stop", description = "Stop features with the specified name and version.")
 @Service
 public class StopFeaturesCommand extends FeaturesCommandSupport {
 
@@ -52,8 +51,7 @@ public class StopFeaturesCommand extends FeaturesCommandSupport {
         addOption(FeaturesService.Option.Verbose, verbose);
         Map<String, Map<String, FeatureState>> stateChanges = new HashMap<>();
         Map<String, FeatureState> regionChanges = new HashMap<>();
-        for (String featureName : features) {
-            String featureId = getFeatureId(admin, featureName);
+        for (String featureId : getFeatureIds(admin, features)) {
             regionChanges.put(featureId, FeatureState.Resolved);
         }
         stateChanges.put(region, regionChanges);

@@ -25,7 +25,6 @@ import java.util.Hashtable;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -34,9 +33,10 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
-import org.apache.felix.webconsole.internal.servlet.Base64;
+import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -54,6 +54,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
 
     private String realm;
     private String role;
+    private int sessionTimeout;
 
     public JaasSecurityProvider() {
         updated(null);
@@ -75,8 +76,9 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         this.role = role;
     }
 
+    @Override
     public Object authenticate(final String username, final String password) {
-        return doAuthenticate( username, password );
+        return doAuthenticate( "?", username, password );
     }
 
     @Override
@@ -86,6 +88,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         }
         realm = getString(properties, "realm", "karaf");
         role = getString(properties, "role", System.getProperty("karaf.admin.role", "admin"));
+        sessionTimeout = Integer.parseInt(getString(properties, "sessionTimeout", "0"));
     }
 
     private String getString(Dictionary<String, ?> properties, String key, String def) {
@@ -98,19 +101,18 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         return def;
     }
 
-    public Subject doAuthenticate(final String username, final String password) {
+    public Subject doAuthenticate(final String address, final String username, final String password) {
         try {
             Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (int i = 0; i < callbacks.length; i++) {
-                        if (callbacks[i] instanceof NameCallback) {
-                            ((NameCallback) callbacks[i]).setName(username);
-                        } else if (callbacks[i] instanceof PasswordCallback) {
-                            ((PasswordCallback) callbacks[i]).setPassword(password.toCharArray());
-                        } else {
-                            throw new UnsupportedCallbackException(callbacks[i]);
-                        }
+            subject.getPrincipals().add(new ClientPrincipal("webconsole", address));
+            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
+                for (Callback callback : callbacks) {
+                    if (callback instanceof NameCallback) {
+                        ((NameCallback) callback).setName(username);
+                    } else if (callback instanceof PasswordCallback) {
+                        ((PasswordCallback) callback).setPassword(password.toCharArray());
+                    } else {
+                        throw new UnsupportedCallbackException(callback);
                     }
                 }
             });
@@ -152,6 +154,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         return true;
     }
 
+    @Override
     public boolean authenticate( HttpServletRequest request, HttpServletResponse response )
     {
         // Return immediately if the header is missing
@@ -179,7 +182,24 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
                         String password = srcString.substring( i + 1 );
 
                         // authenticate
-                        Subject subject = doAuthenticate( username, password );
+                        Subject subject = null;
+                        try
+                        {
+                            HttpSession session = request.getSession(false);
+                            if ( session != null )
+                            {
+                                subject = (Subject) session.getAttribute( KarafOsgiManager.SUBJECT_RUN_AS );
+                            }
+                        }
+                        catch ( Throwable t )
+                        {
+                            // ignore
+                        }
+                        if ( subject == null )
+                        {
+                            String addr = request.getRemoteHost() + ":" + request.getRemotePort();
+                            subject = doAuthenticate( addr, username, password );
+                        }
                         if ( subject != null )
                         {
                             // as per the spec, set attributes
@@ -192,35 +212,49 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
                             // set the JAAS subject
                             request.setAttribute( KarafOsgiManager.SUBJECT_RUN_AS, subject );
 
+                            // create a session and store the information
+                            try
+                            {
+                                HttpSession session = request.getSession(true);
+                                if (sessionTimeout != 0)
+                                {
+                                    session.setMaxInactiveInterval(sessionTimeout);
+                                }
+                                session.setAttribute( KarafOsgiManager.SUBJECT_RUN_AS, subject );
+                            }
+                            catch ( Throwable t )
+                            {
+                                // ignore
+                            }
+
                             // succeed
                             return true;
                         }
                     }
                     catch ( Exception e )
                     {
-                        // Ignore
+                        LOG.warn("Error during authentication", e);
                     }
                 }
             }
         }
 
-        // request authentication
-        try
-        {
-            response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
-            response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
-            response.setContentLength( 0 );
-            response.flushBuffer();
-        }
-        catch ( IOException ioe )
-        {
-            // failed sending the response ... cannot do anything about it
-        }
+        requireAuthentication(response);
 
         // inform HttpService that authentication failed
         return false;
     }
 
+    private void requireAuthentication(HttpServletResponse response) {
+        response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
+        response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
+        response.setContentLength( 0 );
+        try {
+            response.flushBuffer();
+        } catch (IOException e) {
+            LOG.debug("Error flushing after sending auth required", e);
+        }
+    }
 
     private static String base64Decode( String srcString )
     {

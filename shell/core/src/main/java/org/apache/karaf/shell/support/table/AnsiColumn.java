@@ -15,17 +15,17 @@
  */
 package org.apache.karaf.shell.support.table;
 
-import org.fusesource.jansi.Ansi;
+import org.jline.utils.AttributedStringBuilder;
 
 /**
  * Colored support for column.
  */
 public class AnsiColumn extends Col {
 
-    private Ansi.Color color;
+    private int color;
     private boolean bold;
 
-    public AnsiColumn(String header, Ansi.Color color, boolean bold) {
+    public AnsiColumn(String header, int color, boolean bold) {
         super(header);
         this.color = color;
         this.bold = bold;
@@ -35,20 +35,20 @@ public class AnsiColumn extends Col {
     public String getContent(String content) {
         String in = super.getContent(content);
 
-        Ansi ansi = Ansi.ansi();
-        ansi.fg(color);
+        AttributedStringBuilder sb = new AttributedStringBuilder();
+        sb.style(sb.style().foreground(color));
 
         if (bold)
-            ansi.a(Ansi.Attribute.INTENSITY_BOLD);
+            sb.style(sb.style().bold());
 
-        ansi.a(in);
+        sb.append(in);
 
         if (bold)
-            ansi.a(Ansi.Attribute.INTENSITY_BOLD_OFF);
+            sb.style(sb.style().boldOff());
 
-        ansi.fg(Ansi.Color.DEFAULT);
+        sb.style(sb.style().foregroundOff());
 
-        return ansi.toString();
+        return sb.toAnsi();
     }
 
 }

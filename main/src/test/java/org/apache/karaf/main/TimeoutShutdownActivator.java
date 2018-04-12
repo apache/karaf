@@ -23,7 +23,7 @@ import org.osgi.framework.BundleContext;
 
 public class TimeoutShutdownActivator implements BundleActivator {
 
-    public static int TIMEOUT = 10000;
+    public static int TIMEOUT = 1000;
 
     public void start(BundleContext context) throws Exception {
         System.err.println("Starting timeout activator");

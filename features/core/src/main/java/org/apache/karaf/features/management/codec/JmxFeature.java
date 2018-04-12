@@ -41,6 +41,7 @@ import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
 
+@SuppressWarnings("rawtypes")
 public class JmxFeature {
 
     /**
@@ -165,7 +166,7 @@ public class JmxFeature {
 				FEATURE_CONFIG_ELEMENT_TABLE);
 		for (Object key : props.keySet()) {
 			String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG_ELEMENT;
-			Object[] itemValues = { (String) key,
+			Object[] itemValues = {key,
 					props.getProperty((String) key) };
 			CompositeData element = new CompositeDataSupport(
 					FEATURE_CONFIG_ELEMENT, itemNames, itemValues);

@@ -16,10 +16,10 @@
  */
 package org.apache.karaf.scr.examples.component.factories.impl;
 
-import aQute.bnd.annotation.component.Activate;
-import aQute.bnd.annotation.component.Component;
-import aQute.bnd.annotation.component.Deactivate;
 import org.apache.karaf.scr.examples.component.factories.GreeterServiceComponentFactory;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -18,6 +18,8 @@ package org.apache.karaf.service.guard.tools;
 
 import java.util.*;
 
+import org.apache.karaf.service.guard.impl.GuardProxyCatalog;
+
 public class ACLConfigurationParser {
 
     // note that the order of the enums is important. Needs to be from most specific to least specific.
@@ -27,8 +29,14 @@ public class ACLConfigurationParser {
         NAME_MATCH,
         WILDCARD_MATCH,
         NO_MATCH
-    };
+    }
 
+    static String compulsoryRoles;
+    
+    static {
+        compulsoryRoles = System.getProperty(GuardProxyCatalog.KARAF_SECURED_COMMAND_COMPULSORY_ROLES_PROPERTY);
+    }
+    
     /**
      * <p>Returns the roles that can invoke the given operation. This is determined by matching the
      * operation details against configuration provided.</p>
@@ -78,7 +86,34 @@ public class ACLConfigurationParser {
     public static Specificity getRolesForInvocation(String methodName, Object[] params, String[] signature,
                                                     Dictionary<String, Object> config, List<String> addToRoles) {
         Dictionary<String, Object> properties = trimKeys(config);
+        String pid = (String)properties.get("service.pid");
+        Specificity s = getRolesBasedOnSignature(methodName, params, signature, properties, addToRoles);
+        if (s != Specificity.NO_MATCH) {
+            return s;
+        }
 
+        s = getRolesBasedOnSignature(methodName, params, null, properties, addToRoles);
+        if (s != Specificity.NO_MATCH) {
+            return s;
+        }
+
+        List<String> roles = getMethodNameWildcardRoles(properties, methodName);
+        if (roles != null) {
+            addToRoles.addAll(roles);
+            return Specificity.WILDCARD_MATCH;
+        } else if (compulsoryRoles != null && !pid.contains("jmx.acl")){
+            addToRoles.addAll(ACLConfigurationParser.parseRoles(compulsoryRoles));
+            return Specificity.NAME_MATCH;
+        } else {
+            return Specificity.NO_MATCH;
+        }
+            
+    }
+    
+    public static Specificity getRolesForInvocationForAlias(String methodName, Object[] params, String[] signature,
+                                                    Dictionary<String, Object> config, List<String> addToRoles) {
+        Dictionary<String, Object> properties = trimKeys(config);
+        String pid = (String)properties.get("service.pid");
         Specificity s = getRolesBasedOnSignature(methodName, params, signature, properties, addToRoles);
         if (s != Specificity.NO_MATCH) {
             return s;
@@ -95,6 +130,13 @@ public class ACLConfigurationParser {
             return Specificity.WILDCARD_MATCH;
         } else {
             return Specificity.NO_MATCH;
+        }
+            
+    }
+    
+    public static void getCompulsoryRoles(List<String> roles) {
+        if (compulsoryRoles != null) {
+            roles.addAll(ACLConfigurationParser.parseRoles(compulsoryRoles));
         }
     }
 
@@ -138,7 +180,7 @@ public class ACLConfigurationParser {
     }
 
     private static Dictionary<String, Object> trimKeys(Dictionary<String, Object> properties) {
-        Dictionary<String, Object> d = new Hashtable<String, Object>();
+        Dictionary<String, Object> d = new Hashtable<>();
         for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
             String key = e.nextElement();
             Object value = properties.get(key);
@@ -182,7 +224,7 @@ public class ACLConfigurationParser {
             roleStr = roleStr.substring(0, hashIdx);
         }
 
-        List<String> roles = new ArrayList<String>();
+        List<String> roles = new ArrayList<>();
         for (String role : roleStr.split("[,]")) {
             String trimmed = role.trim();
             if (trimmed.length() > 0) {
@@ -230,7 +272,7 @@ public class ACLConfigurationParser {
     }
 
     private static List<String> getRegexRoles(Dictionary<String, Object> properties, String methodName, String[] signature, Object[] params) {
-        List<String> roles = new ArrayList<String>();
+        List<String> roles = new ArrayList<>();
         boolean matchFound = false;
         String methodSig = getSignature(methodName, signature);
         String prefix = methodSig + "[/";
@@ -251,7 +293,7 @@ public class ACLConfigurationParser {
     }
 
     private static List<String> getExactArgOrRegexRoles(Dictionary<String, Object> properties, String methodName, String[] signature) {
-        List<String> roles = new ArrayList<String>();
+        List<String> roles = new ArrayList<>();
         boolean matchFound = false;
         String methodSig = getSignature(methodName, signature);
         String prefix = methodSig + "[";
@@ -269,11 +311,9 @@ public class ACLConfigurationParser {
     }
 
     private static List<String> getMethodNameWildcardRoles(Dictionary<String, Object> properties, String methodName) {
-        SortedMap<String, String> wildcardRules = new TreeMap<String, String>(new Comparator<String>() {
-            public int compare(String s1, String s2) {
-                // returns longer entries before shorter ones...
-                return s2.length() - s1.length();
-            }
+        SortedMap<String, String> wildcardRules = new TreeMap<>((s1, s2) -> {
+            // returns longer entries before shorter ones...
+            return s2.length() - s1.length();
         });
         
         for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
@@ -321,7 +361,7 @@ public class ACLConfigurationParser {
     }
 
     private static List<String> getRegexDecl(String key) {
-        List<String> l = new ArrayList<String>();
+        List<String> l = new ArrayList<>();
 
         boolean inRegex = false;
         StringBuilder curRegex = new StringBuilder();

@@ -72,10 +72,17 @@ public class MavenDownloadManager implements DownloadManager {
         return new MavenDownloader();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+     "unchecked", "rawtypes"
+    })
     @Override
     public Map<String, StreamProvider> getProviders() {
         return (Map) Collections.synchronizedMap(downloaded);
+    }
+
+    @Override
+    public void close() {
+        executorService.shutdown();
     }
 
     protected class MavenDownloader implements Downloader {
@@ -124,26 +131,23 @@ public class MavenDownloadManager implements DownloadManager {
                 allPending++;
             }
             final AbstractDownloadTask downloadTask = task;
-            task.addListener(new FutureListener<AbstractDownloadTask>() {
-                @Override
-                public void operationComplete(AbstractDownloadTask future) {
-                    try {
-                        // Call the callback
-                        if (downloadCallback != null) {
-                            downloadCallback.downloaded(downloadTask);
-                        }
-                        // Make sure we log any download error if the callback suppressed it
-                        downloadTask.getFile();
-                    } catch (Throwable e) {
-                        exception.addSuppressed(e);
-                    } finally {
-                        synchronized (lock) {
-                            downloading.remove(location);
-                            downloaded.put(location, downloadTask);
-                            --allPending;
-                            if (--pending == 0) {
-                                lock.notifyAll();
-                            }
+            task.addListener(future -> {
+                try {
+                    // Call the callback
+                    if (downloadCallback != null) {
+                        downloadCallback.downloaded(downloadTask);
+                    }
+                    // Make sure we log any download error if the callback suppressed it
+                    downloadTask.getFile();
+                } catch (Throwable e) {
+                    exception.addSuppressed(e);
+                } finally {
+                    synchronized (lock) {
+                        downloading.remove(location);
+                        downloaded.put(location, downloadTask);
+                        --allPending;
+                        if (--pending == 0) {
+                            lock.notifyAll();
                         }
                     }
                 }
@@ -189,30 +193,24 @@ public class MavenDownloadManager implements DownloadManager {
             @Override
             public void run() {
                 try {
-                    MavenDownloader.this.download(innerUrl, new DownloadCallback() {
-                        @Override
-                        public void downloaded(StreamProvider provider) throws Exception {
-                            try {
-                                AbstractDownloadTask future = (AbstractDownloadTask) provider;
-                                String file = future.getFile().toURI().toURL().toExternalForm();
-                                String real = url.replace(innerUrl, file);
-                                MavenDownloader.this.download(real, new DownloadCallback() {
-                                    @Override
-                                    public void downloaded(StreamProvider provider) throws Exception {
-                                        try {
-                                            setFile(provider.getFile());
-                                        } catch (IOException e) {
-                                            setException(e);
-                                        } catch (Throwable t) {
-                                            setException(new IOException(t));
-                                        }
-                                    }
-                                });
-                            } catch (IOException e) {
-                                setException(e);
-                            } catch (Throwable t) {
-                                setException(new IOException(t));
-                            }
+                    MavenDownloader.this.download(innerUrl, provider -> {
+                        try {
+                            AbstractDownloadTask future = (AbstractDownloadTask) provider;
+                            String file = future.getFile().toURI().toURL().toExternalForm();
+                            String real = url.replace(innerUrl, file);
+                            MavenDownloader.this.download(real, provider1 -> {
+                                try {
+                                    setFile(provider1.getFile());
+                                } catch (IOException e) {
+                                    setException(e);
+                                } catch (Throwable t) {
+                                    setException(new IOException(t));
+                                }
+                            });
+                        } catch (IOException e) {
+                            setException(e);
+                        } catch (Throwable t) {
+                            setException(new IOException(t));
                         }
                     });
                 } catch (IOException e) {

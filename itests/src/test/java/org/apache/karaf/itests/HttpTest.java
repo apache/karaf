@@ -22,9 +22,12 @@ import javax.management.openmbean.TabularData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+
+
 
 import java.lang.management.ManagementFactory;
 
@@ -34,9 +37,9 @@ public class HttpTest extends KarafTestSupport {
 
     @Before
     public void installHttpFeature() throws Exception {
-    	installAndAssertFeature("webconsole");
+        installAndAssertFeature("webconsole");
     }
-
+    
     @Test
     public void list() throws Exception {
         waitForService("(objectClass=javax.servlet.ServletContext)", 5000);

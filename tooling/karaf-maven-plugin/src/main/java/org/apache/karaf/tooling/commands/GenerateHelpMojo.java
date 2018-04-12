@@ -20,7 +20,6 @@ package org.apache.karaf.tooling.commands;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import java.util.TreeSet;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -111,7 +109,7 @@ public class GenerateHelpMojo extends AbstractMojo {
                 helpPrinter = new DocBookCommandHelpPrinter();
             }
 
-            Map<String, Set<String>> commands = new TreeMap<String, Set<String>>();
+            Map<String, Set<String>> commands = new TreeMap<>();
 
             String commandSuffix = null;
             if (FORMAT_ASCIIDOC.equals(format)) {
@@ -138,12 +136,7 @@ public class GenerateHelpMojo extends AbstractMojo {
                     out.close();
                     outStream.close();
 
-                    Set<String> cmds = commands.get(cmd.scope());
-                    if (cmds == null) {
-                        cmds = new TreeSet<String>();
-                        commands.put(cmd.scope(), cmds);
-                    }
-                    cmds.add(cmd.name());
+                    commands.computeIfAbsent(cmd.scope(), k -> new TreeSet<>()).add(cmd.name());
                     getLog().info("Found command: " + cmd.scope() + ":" + cmd.name());
                 } catch (Exception e) {
                     getLog().warn("Unable to write help for " + clazz.getName(), e);
@@ -168,11 +161,11 @@ public class GenerateHelpMojo extends AbstractMojo {
         }
     }
 
-    private ClassFinder createFinder(String classloaderType) throws DependencyResolutionRequiredException, MalformedURLException,
-        Exception, MojoFailureException {
+    private ClassFinder createFinder(String classloaderType) throws
+            Exception {
         ClassFinder finder;
         if ("project".equals(classloaderType)) {
-            List<URL> urls = new ArrayList<URL>();
+            List<URL> urls = new ArrayList<>();
             for (Object object : project.getCompileClasspathElements()) {
                 String path = (String) object;
                 urls.add(new File(path).toURI().toURL());

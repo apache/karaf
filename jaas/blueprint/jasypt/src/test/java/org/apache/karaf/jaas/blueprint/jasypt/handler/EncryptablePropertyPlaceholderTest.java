@@ -99,7 +99,7 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
         StreamUtils.copy(bundle.build(), fos);
         fos.close();
         JarInputStream jis = new JarInputStream(new FileInputStream(file));
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         for (Map.Entry entry : jis.getManifest().getMainAttributes().entrySet()) {
             headers.put(entry.getKey().toString(), entry.getValue().toString());
         }
@@ -199,7 +199,7 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
      * Provides an iterable collection of references, even if the original array is null
      */
     private static final Collection<ServiceReference> asCollection(ServiceReference[] references) {
-        List<ServiceReference> result = new LinkedList<ServiceReference>();
+        List<ServiceReference> result = new LinkedList<>();
         if (references != null) {
             for (ServiceReference reference : references) {
                 result.add(reference);

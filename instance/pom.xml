@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -103,16 +103,9 @@
                 </includes>
             </resource>
             <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.info</include>
-                </includes>
-            </resource>
-            <resource>
                 <directory>${project.build.directory}/generated-resources</directory>
                 <includes>
-                    <include>**/*.*</include>
+                    <include>**/*</include>
                 </includes>
             </resource>
         </resources>
@@ -128,42 +121,47 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/generated-resources/org/apache/karaf/instance/</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-resources/org/apache/karaf/instance</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/../assemblies/features/base/src/main/resources</directory>
                                     <excludes>
-                                        <exclude>**/org.apache.karaf.management.cfg</exclude>
-                                        <exclude>**/org.apache.karaf.shell.cfg</exclude>
-                                        <exclude>**/system.properties</exclude>
-                                        <exclude>**/README</exclude>
+                                        <exclude>**/etc/system.properties</exclude>
                                     </excludes>
                                 </resource>
                                 <resource>
                                     <directory>${project.basedir}/../assemblies/features/base/src/main/filtered-resources</directory>
                                     <filtering>true</filtering>
-                                    <includes>
-                                        <include>**/*.properties</include>
-                                        <include>**/*.cfg</include>
-                                        <include>**/*.xml</include>
-                                        <include>**/*.info</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                	<directory>${project.basedir}/../assemblies/features/base/src/main/snapshot</directory>
-                                	<filtering>true</filtering>
-                                    <includes>
-                                        <include>**/*.cfg</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${project.basedir}/../assemblies/features/framework/src/main/resources</directory>
-                                    <includes>
-                                        <include>**/*.cfg</include>
-                                    </includes>
+                                    <excludes>
+                                        <exclude>**/bin/karaf</exclude>
+                                        <exclude>**/bin/karaf.bat</exclude>
+                                        <exclude>**/bin/start</exclude>
+                                        <exclude>**/bin/start.bat</exclude>
+                                        <exclude>**/bin/stop</exclude>
+                                        <exclude>**/bin/stop.bat</exclude>
+                                    </excludes>
                                 </resource>
                             </resources>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <useDefaultDelimiters>false</useDefaultDelimiters>
+                    <delimiters>
+                        <delimiter>@@</delimiter>
+                    </delimiters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>filter</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -190,6 +188,8 @@
                         <Private-Package>
                             org.apache.karaf.jpm,
                             org.apache.karaf.jpm.impl,
+                            org.apache.karaf.jpm.impl.unix,
+                            org.apache.karaf.jpm.impl.windows,
                             org.apache.karaf.instance.main,
                             org.apache.karaf.instance.command,
                             org.apache.karaf.instance.command.completers,
@@ -197,6 +197,7 @@
                             org.apache.karaf.instance.core.internal.osgi,
                             org.apache.felix.utils.properties;-split-package:=merge-first,
                             org.apache.karaf.util,
+                            org.apache.karaf.util.config,
                             org.apache.karaf.util.locks,
                         </Private-Package>
                     </instructions>

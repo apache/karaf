@@ -67,7 +67,7 @@ public abstract class BaseClause {
             sb.append(":Double=");
             sb.append(val);
         } else if (val instanceof Iterable) {
-            Iterable it = (Iterable) val;
+            Iterable<?> it = (Iterable<?>) val;
             String scalar = null;
             for (Object o : it) {
                 String ts;

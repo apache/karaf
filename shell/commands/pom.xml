@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.shell</groupId>
         <artifactId>shell</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -43,8 +43,8 @@
             <artifactId>org.apache.karaf.shell.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jledit</groupId>
-            <artifactId>core</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.gogo.runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
@@ -110,9 +110,6 @@
                         <Bundle-Activator>
                             org.apache.karaf.shell.commands.impl.info.Activator
                         </Bundle-Activator>
-                        <Require-Capability>
-                            osgi.service;filter:="(objectClass=org.jledit.EditorFactory)";effective:=active
-                        </Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>

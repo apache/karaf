@@ -49,7 +49,7 @@ Jasypt (http://jasypt.sourceforge.net/).
 Licensed under the Apache License 2.0.
 
 This product uses software developed at
-JLine (http://jline.sourceforge.net).
+JLine (https://github.com/jline/).
 Licensed under the BSD License.
 
 This product uses software developed at
@@ -59,10 +59,6 @@ Licensed under the MIT License.
 This product uses software developed at
 SpringSource (http://www.springsource.org/).
 Licensed under the Apache License 2.0.
-
-This product includes software from http://www.json.org.
-Copyright (c) 2002 JSON.org
-
 
 III. License Summary
 - Apache License 2.0

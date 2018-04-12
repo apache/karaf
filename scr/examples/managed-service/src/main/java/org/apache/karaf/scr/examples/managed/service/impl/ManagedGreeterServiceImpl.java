@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.scr.examples.managed.service.impl;
 
-import aQute.bnd.annotation.component.*;
 import org.apache.karaf.scr.examples.managed.service.ManagedGreeterService;
+import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * the name attribute and setting the configuration policy to required. The default is optional and when the
  * component attempts to activate it will throw a RuntimeException.
  */
-@Component(name = ManagedGreeterServiceImpl.COMPONENT_NAME, configurationPolicy = ConfigurationPolicy.require)
+@Component(name = ManagedGreeterServiceImpl.COMPONENT_NAME, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class ManagedGreeterServiceImpl implements ManagedGreeterService {
 
     public static final String COMPONENT_NAME = "ManagedGreeterService";

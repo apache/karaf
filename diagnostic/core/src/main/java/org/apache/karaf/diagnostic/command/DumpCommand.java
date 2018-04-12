@@ -19,7 +19,6 @@ package org.apache.karaf.diagnostic.command;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.karaf.diagnostic.core.Dump;
 import org.apache.karaf.diagnostic.core.DumpDestination;

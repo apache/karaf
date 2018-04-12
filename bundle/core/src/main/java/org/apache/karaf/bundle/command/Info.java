@@ -38,7 +38,7 @@ public class Info extends BundlesCommand {
      */
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
-        session.execute("help 'bundle|" + bundle.getBundleId() + "'");
+        session.execute("*:help 'bundle|" + bundle.getBundleId() + "'");
     }
 
 }

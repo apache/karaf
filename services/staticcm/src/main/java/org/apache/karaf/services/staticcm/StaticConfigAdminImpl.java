@@ -20,6 +20,7 @@ package org.apache.karaf.services.staticcm;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
 
@@ -134,7 +135,9 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
                 return config;
             }
         }
-        return null;
+        Hashtable<String, Object> cfg = new Hashtable<>();
+        cfg.put(Constants.SERVICE_PID, pid);
+        return new StaticConfigurationImpl(pid, null, cfg);
     }
 
     @Override

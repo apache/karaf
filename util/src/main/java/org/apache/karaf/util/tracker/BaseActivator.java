@@ -25,35 +25,48 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaseActivator implements BundleActivator, SingleServiceTracker.SingleServiceListener, Runnable {
+public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected BundleContext bundleContext;
 
     protected ExecutorService executor = new ThreadPoolExecutor(0, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>());
+            new LinkedBlockingQueue<>(), this);
     private AtomicBoolean scheduled = new AtomicBoolean();
 
     private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
 
-    private List<ServiceRegistration> registrations;
+    private final Queue<ServiceRegistration> registrations = new ConcurrentLinkedQueue<>();
     private Map<String, SingleServiceTracker> trackers = new HashMap<>();
     private ServiceRegistration managedServiceRegistration;
     private Dictionary<String, ?> configuration;
+
+    private static final AtomicInteger poolNumber = new AtomicInteger(1);
+    private final ThreadGroup group;
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private final String namePrefix;
+
+    public BaseActivator() {
+        SecurityManager s = System.getSecurityManager();
+        group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+        namePrefix = "activator-" + poolNumber.getAndIncrement() + "-thread-";
+    }
 
     public long getSchedulerStopTimeout() {
         return schedulerStopTimeout;
@@ -69,10 +82,12 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
         scheduled.set(true);
         doOpen();
         scheduled.set(false);
-        if (managedServiceRegistration == null && trackers.isEmpty()) {
+        if (managedServiceRegistration == null
+                && trackers.values().stream()
+                    .allMatch(t -> t.getService() != null)) {
             try {
                 doStart();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.warn("Error starting activator", e);
                 doStop();
             }
@@ -120,11 +135,12 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     protected void doStop() {
-        if (registrations != null) {
-            for (ServiceRegistration reg : registrations) {
-                reg.unregister();
+        while (true) {
+            ServiceRegistration reg = registrations.poll();
+            if (reg == null) {
+                break;
             }
-            registrations = null;
+            reg.unregister();
         }
     }
 
@@ -223,19 +239,26 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
         return def;
     }
 
-    @Override
-    public void serviceFound() {
-        reconfigure();
-    }
-
-    @Override
-    public void serviceLost() {
-        reconfigure();
-    }
-
-    @Override
-    public void serviceReplaced() {
-        reconfigure();
+    protected String[] getStringArray(String key, String def) {
+        Object val = null;
+        if (configuration != null) {
+            val = configuration.get(key);
+        }
+        if (val == null) {
+            val = def;
+        }
+        if (val == null) {
+            return null;
+        }
+        Stream<String> s;
+        if (val instanceof String[]) {
+            return (String[]) val;
+        } else if (val instanceof Iterable) {
+            return StreamSupport.stream(((Iterable<?>) val).spliterator(), false)
+                    .map(Object::toString).toArray(String[]::new);
+        } else {
+            return val.toString().split(",");
+        }
     }
 
     protected void reconfigure() {
@@ -264,7 +287,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
      */
     protected void trackService(Class<?> clazz) throws InvalidSyntaxException {
         if (!trackers.containsKey(clazz.getName())) {
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, this);
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(clazz.getName(), tracker);
         }
@@ -282,7 +305,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
             if (filter != null && filter.isEmpty()) {
                 filter = null;
             }
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, this);
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(clazz.getName(), tracker);
         }
@@ -290,7 +313,7 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
 
     protected void trackService(String className, String filter) throws InvalidSyntaxException {
         if (!trackers.containsKey(className)) {
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, className, filter, this);
+            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, className, filter, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(className, tracker);
         }
@@ -311,6 +334,14 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
         return clazz.cast(tracker.getService());
     }
 
+    protected <T> ServiceReference<T> getTrackedServiceRef(Class<T> clazz) {
+        SingleServiceTracker tracker = trackers.get(clazz.getName());
+        if (tracker == null) {
+            throw new IllegalStateException("Service not tracked for class " + clazz);
+        }
+        return tracker.getServiceReference();
+    }
+
     /**
      * Called in {@link #doStart()}.
      *
@@ -318,8 +349,19 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
      * @param type The MBean type to register.
      */
     protected void registerMBean(Object mbean, String type) {
+        String name = "org.apache.karaf:" + type + ",name=" + System.getProperty("karaf.name");
+        registerMBeanWithName(mbean, name);
+    }
+
+    /**
+     * Called in {@link #doStart()}.
+     *
+     * @param mbean The MBean to register.
+     * @param name The MBean name.
+     */
+    protected void registerMBeanWithName(Object mbean, String name) {
         Hashtable<String, Object> props = new Hashtable<>();
-        props.put("jmx.objectname", "org.apache.karaf:" + type + ",name=" + System.getProperty("karaf.name"));
+        props.put("jmx.objectname", name);
         trackRegistration(bundleContext.registerService(getInterfaceNames(mbean), mbean, props));
     }
 
@@ -372,9 +414,6 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
     }
 
     private void trackRegistration(ServiceRegistration registration) {
-        if (registrations == null) {
-            registrations = new ArrayList<>();
-        }
         registrations.add(registration);
     }
 
@@ -391,6 +430,16 @@ public class BaseActivator implements BundleActivator, SingleServiceTracker.Sing
             names.add(cl.getName());
             addSuperInterfaces(names, cl);
         }
+    }
+
+    @Override
+    public Thread newThread(Runnable r) {
+        Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+        if (t.isDaemon())
+            t.setDaemon(false);
+        if (t.getPriority() != Thread.NORM_PRIORITY)
+            t.setPriority(Thread.NORM_PRIORITY);
+        return t;
     }
 
 }

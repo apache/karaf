@@ -38,7 +38,7 @@ The Maven Quickstart archetype can create an empty Maven project where you can p
 You can directly use:
 
 ----
-mvn archetype:create \
+mvn archetype:generate \
   -DarchetypeArtifactId=maven-archetype-quickstart \
   -DgroupId=org.apache.karaf.shell.samples \
   -DartifactId=shell-sample-commands \
@@ -78,7 +78,7 @@ Alternatively, you can simply create the directory `shell-sample-commands` and c
   <dependencies>
     <dependency>
       <groupId>org.apache.karaf.shell</groupId>
-      <artifactId>org.apache.karaf.shell.console</artifactId>
+      <artifactId>org.apache.karaf.shell.core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -284,7 +284,7 @@ public class SimpleNameCompleter implements Completer {
         delegate.getStrings().add("Mike");
         delegate.getStrings().add("Eric");
         delegate.getStrings().add("Jenny");
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, candidates);
     }
 
 }

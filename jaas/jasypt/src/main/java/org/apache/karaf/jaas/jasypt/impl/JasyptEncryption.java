@@ -18,8 +18,6 @@ import java.util.Map;
 
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.EncryptionService;
-import org.jasypt.digest.config.DigesterConfig;
-import org.jasypt.digest.config.SimpleDigesterConfig;
 import org.jasypt.digest.config.SimpleStringDigesterConfig;
 import org.jasypt.exceptions.EncryptionInitializationException;
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;

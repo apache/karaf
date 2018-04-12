@@ -16,70 +16,112 @@
  */
 package org.apache.karaf.features;
 
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import junit.framework.TestCase;
 import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
+import org.junit.Before;
+import org.junit.Test;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-public class AppendTest extends TestCase {
+public class AppendTest {
 
-	public void testLoad() throws Exception {
+    private IMocksControl c;
+    private Feature feature;
+    private ConfigurationAdmin admin;
+    private FeatureConfigInstaller installer;
+    
+    @Before
+    public void before() throws Exception {
+        System.setProperty("karaf.data", "data");
+        System.setProperty("karaf.etc", "target");
+        RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f08.xml").toURI());
+        Feature[] features = r.getFeatures();
+        feature = features[0];
+        checkFeature(feature);
+        c = EasyMock.createControl();
+        admin = c.createMock(ConfigurationAdmin.class);
+        installer = new FeatureConfigInstaller(admin);
+    }
 
-		System.setProperty("karaf.data", "data");
-		System.setProperty("karaf.etc", "etc");
+    @Test
+    public void testNoChange() throws Exception {
+        Hashtable<String, Object> original = new Hashtable<>();
+        original.put("javax.servlet.context.tempdir", "bar");
+        expectConfig(admin, original);
 
-		RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f08.xml").toURI());
-		// Check repo
-		Feature[] features = r.getFeatures();
-		assertNotNull(features);
-		assertEquals(1, features.length);
-		Feature feature = features[0];
+        c.replay();
+        installer.installFeatureConfigs(feature);
+        c.verify();
+    }
 
-		ConfigInfo configInfo = feature.getConfigurations().get(0);
-		assertNotNull(configInfo);
-		assertTrue(configInfo.isAppend());
+    @Test
+    public void testAppendWhenFileExists() throws Exception {
+        testAppendInternal(true);
+    }
+    
+    @Test
+    public void testAppendWhenNoFileExists() throws Exception {
+        testAppendInternal(false);
+    }
 
-		Properties properties = configInfo.getProperties();
-		assertNotNull(properties);
-		String property = properties.getProperty("javax.servlet.context.tempdir");
-		assertNotNull(property);
-		assertFalse(property.contains("${"));
-        assertEquals(property, "data/pax-web-jsp");
+    private void testAppendInternal(boolean cfgFileExists) throws IOException, InvalidSyntaxException, FileNotFoundException {
+        File cfgFile = new File("target/org.ops4j.pax.web.cfg");
+        cfgFile.delete();
+        if (cfgFileExists) {
+            cfgFile.createNewFile();
+        }
+        Hashtable<String, Object> original = new Hashtable<>();
+        original.put("foo", "bar");
+        Configuration config = expectConfig(admin, original);
+        Capture<Dictionary<String, ?>> captured = EasyMock.newCapture();
+        config.update(EasyMock.capture(captured));
+        expectLastCall();
+        c.replay();
+        installer.installFeatureConfigs(feature);
+        c.verify();
+        assertEquals("data/pax-web-jsp", captured.getValue().get("javax.servlet.context.tempdir"));
+        Properties props = new Properties();
+        props.load(new FileInputStream(cfgFile));
+        String v = props.getProperty("javax.servlet.context.tempdir");
+        assertTrue("${karaf.data}/pax-web-jsp".equals(v) || "data/pax-web-jsp".equals(v));
+//        assertEquals("${karaf.data}/pax-web-jsp", props.getProperty("javax.servlet.context.tempdir"));
+    }
 
-		ConfigurationAdmin admin = EasyMock.createMock(ConfigurationAdmin.class);
-		Configuration config = EasyMock.createMock(Configuration.class);
-		EasyMock.expect(admin.listConfigurations(EasyMock.eq("(service.pid=org.ops4j.pax.web)")))
-				.andReturn(new Configuration[] { config });
-		Hashtable<String, Object> original = new Hashtable<>();
-        original.put("javax.servlet.context.tempdir", "data/pax-web-jsp");
-		EasyMock.expect(config.getProperties()).andReturn(original);
+    private Configuration expectConfig(ConfigurationAdmin admin, Hashtable<String, Object> original)
+        throws IOException, InvalidSyntaxException {
+        Configuration config = c.createMock(Configuration.class);
+        expect(admin.listConfigurations(eq("(service.pid=org.ops4j.pax.web)")))
+            .andReturn(new Configuration[] {
+                                            config
+        }).atLeastOnce();
+        expect(config.getProperties()).andReturn(original).atLeastOnce();
+        return config;
+    }
 
-		Hashtable<String, Object> expected = new Hashtable<>();
-        expected.put("org.ops4j.pax.web", "data/pax-web-jsp");
-		expected.put("org.apache.karaf.features.configKey", "org.ops4j.pax.web");
-		expected.put("foo", "bar");
-		EasyMock.expectLastCall();
-		EasyMock.replay(admin, config);
+    private void checkFeature(Feature feature) {
+        ConfigInfo configInfo = feature.getConfigurations().get(0);
+        assertTrue(configInfo.isAppend());
 
-		FeatureConfigInstaller installer = new FeatureConfigInstaller(admin);
-		installer.installFeatureConfigs(feature);
-		EasyMock.verify(admin, config);
-
-		EasyMock.reset(admin, config);
-		EasyMock.expect(admin.listConfigurations(EasyMock.eq("(service.pid=org.ops4j.pax.web)")))
-				.andReturn(new Configuration[]{config});
-		original = new Hashtable<>();
-		original.put("org.apache.karaf.features.configKey", "org.ops4j.pax.web");
-		original.put("javax.servlet.context.tempdir", "value");
-		original.put("foo", "bar");
-		EasyMock.expect(config.getProperties()).andReturn(original);
-		EasyMock.replay(admin, config);
-		installer.installFeatureConfigs(feature);
-		EasyMock.verify(admin, config);
-	}
+        Properties properties = configInfo.getProperties();
+        String tempDir = properties.getProperty("javax.servlet.context.tempdir");
+        assertEquals("data/pax-web-jsp", tempDir);
+    }
 }

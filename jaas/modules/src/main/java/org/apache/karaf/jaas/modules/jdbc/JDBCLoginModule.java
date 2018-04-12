@@ -28,13 +28,8 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
-import javax.sql.XADataSource;
 import java.io.IOException;
-import java.security.Principal;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -115,16 +110,20 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
                 }
                 principals.add(new UserPrincipal(user));
 
-                List<String> roles = JDBCUtils.rawSelect(connection, roleQuery, user);
-                for (String role : roles) {
-                    if (role.startsWith(BackingEngine.GROUP_PREFIX)) {
-                        principals.add(new GroupPrincipal(role.substring(BackingEngine.GROUP_PREFIX.length())));
-                        for (String r : JDBCUtils.rawSelect(connection, roleQuery, role)) {
-                            principals.add(new RolePrincipal(r));
+                if (roleQuery != null && !"".equals(roleQuery.trim())) {
+                    List<String> roles = JDBCUtils.rawSelect(connection, roleQuery, user);
+                    for (String role : roles) {
+                        if (role.startsWith(BackingEngine.GROUP_PREFIX)) {
+                            principals.add(new GroupPrincipal(role.substring(BackingEngine.GROUP_PREFIX.length())));
+                            for (String r : JDBCUtils.rawSelect(connection, roleQuery, role)) {
+                                principals.add(new RolePrincipal(r));
+                            }
+                        } else {
+                            principals.add(new RolePrincipal(role));
                         }
-                    } else {
-                        principals.add(new RolePrincipal(role));
                     }
+                } else {
+                    LOGGER.debug("No roleQuery specified so no roles have been retrieved for the authenticated user");
                 }
             }
         } catch (Exception ex) {

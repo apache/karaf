@@ -38,6 +38,7 @@ public class LDAPOptions {
     public static final String USER_BASE_DN = "user.base.dn";
     public static final String USER_FILTER = "user.filter";
     public static final String USER_SEARCH_SUBTREE = "user.search.subtree";
+    public static final String USER_PUBKEY_ATTRIBUTE = "user.pubkey.attribute";
     public static final String ROLE_BASE_DN = "role.base.dn";
     public static final String ROLE_FILTER = "role.filter";
     public static final String ROLE_NAME_ATTRIBUTE = "role.name.attribute";
@@ -45,6 +46,7 @@ public class LDAPOptions {
     public static final String ROLE_MAPPING = "role.mapping";
     public static final String AUTHENTICATION = "authentication";
     public static final String ALLOW_EMPTY_PASSWORDS = "allowEmptyPasswords";
+    public static final String DISABLE_CACHE = "disableCache";
     public static final String INITIAL_CONTEXT_FACTORY = "initial.context.factory";
     public static final String CONTEXT_PREFIX = "context.";
     public static final String SSL = "ssl";
@@ -55,6 +57,7 @@ public class LDAPOptions {
     public static final String SSL_KEYALIAS = "ssl.keyalias";
     public static final String SSL_TRUSTSTORE = "ssl.truststore";
     public static final String SSL_TIMEOUT = "ssl.timeout";
+    public static final String USERNAMES_TRIM = "usernames.trim";
     public static final String DEFAULT_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
     public static final String DEFAULT_AUTHENTICATION = "simple";
     public static final int DEFAULT_SSL_TIMEOUT = 10;
@@ -81,6 +84,10 @@ public class LDAPOptions {
         return options.hashCode();
     }
 
+    public boolean isUsernameTrim() {
+        return Boolean.parseBoolean((String) options.get(USERNAMES_TRIM));
+    }
+
     public String getUserFilter() {
         return (String) options.get(USER_FILTER);
     }
@@ -91,6 +98,10 @@ public class LDAPOptions {
 
     public boolean getUserSearchSubtree() {
         return Boolean.parseBoolean((String) options.get(USER_SEARCH_SUBTREE));
+    }
+
+    public String getUserPubkeyAttribute() {
+        return (String) options.get(USER_PUBKEY_ATTRIBUTE);
     }
 
     public String getRoleFilter() {
@@ -114,18 +125,15 @@ public class LDAPOptions {
     }
 
     private Map<String, Set<String>> parseRoleMapping(String option) {
-        Map<String, Set<String>> roleMapping = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> roleMapping = new HashMap<>();
         if (option != null) {
             LOGGER.debug("Parse role mapping {}", option);
             String[] mappings = option.split(";");
             for (String mapping : mappings) {
-                String[] map = mapping.split("=", 2);
-                String ldapRole = map[0].trim();
-                String[] karafRoles = map[1].split(",");
-                if (roleMapping.get(ldapRole) == null) {
-                    roleMapping.put(ldapRole, new HashSet<String>());
-                }
-                final Set<String> karafRolesSet = roleMapping.get(ldapRole);
+                int index = mapping.lastIndexOf("=");
+                String ldapRole = mapping.substring(0,index).trim();
+                String[] karafRoles = mapping.substring(index+1).split(",");
+                final Set<String> karafRolesSet = roleMapping.computeIfAbsent(ldapRole, k -> new HashSet<>());
                 for (String karafRole : karafRoles) {
                     karafRolesSet.add(karafRole.trim());
                 }
@@ -144,9 +152,15 @@ public class LDAPOptions {
         env.put(Context.INITIAL_CONTEXT_FACTORY, getInitialContextFactory());
         env.put(Context.PROVIDER_URL, getConnectionURL());
         if (getConnectionUsername() != null && getConnectionUsername().trim().length() > 0) {
-            env.put(Context.SECURITY_AUTHENTICATION, getAuthentication());
+            String auth = getAuthentication();
+            if (auth == null) {
+                auth = DEFAULT_AUTHENTICATION;
+            }
+            env.put(Context.SECURITY_AUTHENTICATION, auth);
             env.put(Context.SECURITY_PRINCIPAL, getConnectionUsername());
             env.put(Context.SECURITY_CREDENTIALS, getConnectionPassword());
+        } else if (getAuthentication() != null) {
+            env.put(Context.SECURITY_AUTHENTICATION, getAuthentication());
         }
         if (getSsl()) {
             setupSsl(env);
@@ -156,17 +170,17 @@ public class LDAPOptions {
 
     protected void setupSsl(Hashtable<String, Object> env) throws NamingException {
         BundleContext bundleContext = FrameworkUtil.getBundle(LDAPOptions.class).getBundleContext();
-        ServiceReference ref = null;
+        ServiceReference<KeystoreManager> ref = null;
         try {
             LOGGER.debug("Setting up SSL");
             env.put(Context.SECURITY_PROTOCOL, "ssl");
             env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
-            ref = bundleContext.getServiceReference(KeystoreManager.class.getName());
-            KeystoreManager manager = (KeystoreManager) bundleContext.getService(ref);
+            ref = bundleContext.getServiceReference(KeystoreManager.class);
+            KeystoreManager manager = bundleContext.getService(ref);
             SSLSocketFactory factory = manager.createSSLFactory(
                     getSslProvider(), getSslProtocol(), getSslAlgorithm(), getSslKeystore(),
                     getSslKeyAlias(), getSslTrustStore(), getSslTimeout());
-            ManagedSSLSocketFactory.setSocketFactory(factory);
+            ManagedSSLSocketFactory.setSocketFactory(new ManagedSSLSocketFactory(factory));
             Thread.currentThread().setContextClassLoader(ManagedSSLSocketFactory.class.getClassLoader());
         } catch (Exception e) {
             throw new NamingException("Unable to setup SSL support for LDAP: " + e.getMessage());
@@ -202,11 +216,7 @@ public class LDAPOptions {
     }
 
     public String getAuthentication() {
-        String authentication = (String) options.get(AUTHENTICATION);
-        if (authentication == null) {
-            authentication = DEFAULT_AUTHENTICATION;
-        }
-        return authentication;
+        return (String) options.get(AUTHENTICATION);
     }
 
     public boolean getSsl() {
@@ -258,4 +268,10 @@ public class LDAPOptions {
     public boolean getAllowEmptyPasswords() {
         return Boolean.parseBoolean((String) options.get(ALLOW_EMPTY_PASSWORDS));
     }
+
+    public boolean getDisableCache() {
+        final Object object = options.get(DISABLE_CACHE);
+        return object == null || Boolean.parseBoolean((String) object);
+    }
+
 }

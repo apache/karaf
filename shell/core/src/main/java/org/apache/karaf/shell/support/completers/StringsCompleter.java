@@ -20,7 +20,6 @@ package org.apache.karaf.shell.support.completers;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -40,16 +39,11 @@ public class StringsCompleter
     private final boolean caseSensitive;
 
     public StringsCompleter() {
-        this(true);
+        this(false);
     }
 
     public StringsCompleter(final boolean caseSensitive) {
-        this.strings = new TreeSet<String>(new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return caseSensitive ? o1.compareTo(o2) : o1.compareToIgnoreCase(o2);
-            }
-        });
+        this.strings = new TreeSet<>(caseSensitive ? String::compareTo : String::compareToIgnoreCase);
         this.caseSensitive = caseSensitive;
     }
 
@@ -77,7 +71,6 @@ public class StringsCompleter
         return strings;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         // buffer could be null
         assert candidates != null;
@@ -102,12 +95,7 @@ public class StringsCompleter
             }
 
             // noinspection unchecked
-            candidates.add(match);
-        }
-
-        if (candidates.size() == 1) {
-            // noinspection unchecked
-            candidates.set(0, candidates.get(0) + " ");
+            candidates.add(match + " ");
         }
 
         return candidates.isEmpty() ? -1 : commandLine.getBufferPosition() - commandLine.getArgumentPosition();

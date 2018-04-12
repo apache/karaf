@@ -69,6 +69,7 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
 
     private final Map<String, String[]> userDnAndNamespace;
     private final Map<String, String[]> userRoles;
+    private final Map<String, String[]> userPubkeys;
     private final LDAPOptions options;
     private DirContext context;
 
@@ -76,6 +77,7 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         this.options = options;
         userDnAndNamespace = new HashMap<>();
         userRoles = new HashMap<>();
+        userPubkeys = new HashMap<>();
     }
 
     @Override
@@ -117,17 +119,21 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         final SearchControls constraints = new SearchControls();
         constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-        String filter = options.getUserFilter();
-        filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
-        filter = filter.replace("\\", "\\\\");
-        eventContext.addNamingListener(options.getUserBaseDn(), filter, constraints, this);
+        if (!options.getDisableCache()) {
+            String filter = options.getUserFilter();
+            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
+            filter = filter.replace("\\", "\\\\");
+            eventContext.addNamingListener(options.getUserBaseDn(), filter, constraints, this);
 
-        filter = options.getRoleFilter();
-        filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
-        filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement("*"));
-        filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement("*"));
-        filter = filter.replace("\\", "\\\\");
-        eventContext.addNamingListener(options.getRoleBaseDn(), filter, constraints, this);
+            filter = options.getRoleFilter();
+            if (filter != null) {
+                filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement("*"));
+                filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement("*"));
+                filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement("*"));
+                filter = filter.replace("\\", "\\\\");
+                eventContext.addNamingListener(options.getRoleBaseDn(), filter, constraints, this);
+            }
+        }
 
         return context;
     }
@@ -136,7 +142,7 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         String[] result = userDnAndNamespace.get(user);
         if (result == null) {
             result = doGetUserDnAndNamespace(user);
-            if (result != null) {
+            if (result != null && !options.getDisableCache()) {
                 userDnAndNamespace.put(user, result);
             }
         }
@@ -161,14 +167,14 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         LOGGER.debug("  base DN: " + options.getUserBaseDn());
         LOGGER.debug("  filter: " + filter);
 
-        NamingEnumeration namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
+        NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
         try {
             if (!namingEnumeration.hasMore()) {
                 LOGGER.warn("User " + user + " not found in LDAP.");
                 return null;
             }
             LOGGER.debug("Found the user DN.");
-            SearchResult result = (SearchResult) namingEnumeration.next();
+            SearchResult result = namingEnumeration.next();
 
             // We need to do the following because slashes are handled badly. For example, when searching
             // for a user with lots of special characters like cn=admin,=+<>#;\
@@ -201,10 +207,24 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         String[] result = userRoles.get(userDn);
         if (result == null) {
             result = doGetUserRoles(user, userDn, userDnNamespace);
-            userRoles.put(userDn, result);
+            if (!options.getDisableCache()) {
+                userRoles.put(userDn, result);
+            }
         }
         return result;
     }
+
+    public synchronized String[] getUserPubkeys(String userDn) throws NamingException {
+        String[] result = userPubkeys.get(userDn);
+        if (result == null) {
+            result = doGetUserPubkeys(userDn);
+            if (!options.getDisableCache()) {
+                userPubkeys.put(userDn, result);
+            }
+        }
+        return result;
+    }
+
 
     protected Set<String> tryMappingRole(String role) {
         Set<String> roles = new HashSet<>();
@@ -234,52 +254,84 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         }
 
         String filter = options.getRoleFilter();
-        filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
-        filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDn));
-        filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDnNamespace));
-        filter = filter.replace("\\", "\\\\");
+        if (filter != null) {
+            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
+            filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDn));
+            filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDnNamespace));
+            filter = filter.replace("\\", "\\\\");
 
-        LOGGER.debug("Looking for the user roles in LDAP with ");
-        LOGGER.debug("  base DN: " + options.getRoleBaseDn());
-        LOGGER.debug("  filter: " + filter);
+            LOGGER.debug("Looking for the user roles in LDAP with ");
+            LOGGER.debug("  base DN: " + options.getRoleBaseDn());
+            LOGGER.debug("  filter: " + filter);
 
-        NamingEnumeration namingEnumeration = context.search(options.getRoleBaseDn(), filter, controls);
-        try {
-            List<String> rolesList = new ArrayList<>();
-            while (namingEnumeration.hasMore()) {
-                SearchResult result = (SearchResult) namingEnumeration.next();
-                Attributes attributes = result.getAttributes();
-                Attribute roles1 = attributes.get(options.getRoleNameAttribute());
-                if (roles1 != null) {
-                    for (int i = 0; i < roles1.size(); i++) {
-                        String role = (String) roles1.get(i);
-                        if (role != null) {
-                            LOGGER.debug("User {} is a member of role {}", user, role);
-                            // handle role mapping
-                            Set<String> roleMappings = tryMappingRole(role);
-                            if (roleMappings.isEmpty()) {
-                                rolesList.add(role);
-                            } else {
-                                for (String roleMapped : roleMappings) {
-                                    rolesList.add(roleMapped);
+            NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getRoleBaseDn(), filter, controls);
+            try {
+                List<String> rolesList = new ArrayList<>();
+                while (namingEnumeration.hasMore()) {
+                    SearchResult result = namingEnumeration.next();
+                    Attributes attributes = result.getAttributes();
+                    Attribute roles1 = attributes.get(options.getRoleNameAttribute());
+                    if (roles1 != null) {
+                        for (int i = 0; i < roles1.size(); i++) {
+                            String role = (String) roles1.get(i);
+                            if (role != null) {
+                                LOGGER.debug("User {} is a member of role {}", user, role);
+                                // handle role mapping
+                                Set<String> roleMappings = tryMappingRole(role);
+                                if (roleMappings.isEmpty()) {
+                                    rolesList.add(role);
+                                } else {
+                                    for (String roleMapped : roleMappings) {
+                                        rolesList.add(roleMapped);
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-            }
-            return rolesList.toArray(new String[rolesList.size()]);
-        } finally {
-            if (namingEnumeration != null) {
-                try {
-                    namingEnumeration.close();
-                } catch (NamingException e) {
-                    // Ignore
+                }
+                return rolesList.toArray(new String[rolesList.size()]);
+            } finally {
+                if (namingEnumeration != null) {
+                    try {
+                        namingEnumeration.close();
+                    } catch (NamingException e) {
+                        // Ignore
+                    }
                 }
             }
+        } else {
+            LOGGER.debug("The user role filter is null so no roles are retrieved");
+            return new String[] {};
         }
     }
+
+    private String[] doGetUserPubkeys(String userDn) throws NamingException {
+        DirContext context = open();
+
+        String userPubkeyAttribute = options.getUserPubkeyAttribute();
+        if (userPubkeyAttribute != null) {
+            LOGGER.debug("Looking for public keys of user {} in attribute {}", userDn, userPubkeyAttribute);
+
+            Attributes attributes = context.getAttributes(userDn, new String[]{userPubkeyAttribute});
+            Attribute pubkeyAttribute = attributes.get(userPubkeyAttribute);
+
+            List<String> pubkeyList = new ArrayList<>();
+            if (pubkeyAttribute != null) {
+                for (int i = 0; i < pubkeyAttribute.size(); i++) {
+                    String pk = (String) pubkeyAttribute.get(i);
+                    if (pk != null) {
+                        pubkeyList.add(pk);
+                    }
+                }
+            }
+            return pubkeyList.toArray(new String[pubkeyList.size()]);
+        } else {
+            LOGGER.debug("The user public key attribute is null so no keys were retrieved");
+            return new String[] {};
+        }
+    }
+
 
     @Override
     public void objectAdded(NamingEvent evt) {
@@ -309,5 +361,6 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
     protected synchronized void clearCache() {
         userDnAndNamespace.clear();
         userRoles.clear();
+        userPubkeys.clear();
     }
 }

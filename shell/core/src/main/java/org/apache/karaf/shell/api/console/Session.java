@@ -18,9 +18,11 @@
  */
 package org.apache.karaf.shell.api.console;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 
 /**
  * A <code>Session</code> can be used to execute commands.
@@ -35,7 +37,7 @@ import java.io.PrintStream;
  *     <li>{@link Terminal}</li>
  * </ul>
  */
-public interface Session extends Runnable {
+public interface Session extends Runnable, Closeable {
 
     //
     // Session properties
@@ -49,6 +51,7 @@ public interface Session extends Runnable {
     String PRINT_STACK_TRACES = "karaf.printStackTraces";
     String LAST_EXCEPTION = "karaf.lastException";
     String IGNORE_INTERRUPTS = "karaf.ignoreInterrupts";
+    String IS_LOCAL = "karaf.shell.local";
     String COMPLETION_MODE = "karaf.completionMode";
 
     String COMPLETION_MODE_GLOBAL = "global";
@@ -156,6 +159,10 @@ public interface Session extends Runnable {
      * @return the full qualified command name
      */
     String resolveCommand(String name);
+
+    Path currentDir();
+
+    void currentDir(Path path);
 
     /**
      * Close this session. After the session is closed, it will throw

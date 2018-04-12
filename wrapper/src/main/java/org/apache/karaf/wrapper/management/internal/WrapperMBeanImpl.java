@@ -47,7 +47,7 @@ public class WrapperMBeanImpl extends StandardMBean implements WrapperMBean {
         try {
             wrapperService.install();
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 
@@ -55,7 +55,7 @@ public class WrapperMBeanImpl extends StandardMBean implements WrapperMBean {
         try {
             return wrapperService.install(name, displayName, description, startType);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
     
@@ -63,7 +63,7 @@ public class WrapperMBeanImpl extends StandardMBean implements WrapperMBean {
         try {
             return wrapperService.install(name, displayName, description, startType, envs, includes);
         } catch (Exception e) {
-            throw new MBeanException(null, e.getMessage());
+            throw new MBeanException(null, e.toString());
         }
     }
 

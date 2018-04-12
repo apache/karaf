@@ -32,7 +32,7 @@ public class Activator extends BaseActivator {
 
     @Override
     protected void doStart() throws Exception {
-        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        Hashtable<String, Object> props = new Hashtable<>();
         props.put("url.handler.protocol", "blueprint");
         register(URLStreamHandlerService.class, new BlueprintURLHandler(), props);
         register(new Class[] { ArtifactUrlTransformer.class, ArtifactListener.class },

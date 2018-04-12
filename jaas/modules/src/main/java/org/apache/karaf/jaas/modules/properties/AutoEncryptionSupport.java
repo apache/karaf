@@ -32,7 +32,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.utils.properties.Properties;
-import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.apache.karaf.util.StreamUtils;
 import org.slf4j.Logger;
@@ -119,7 +118,7 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
             String storedPassword = infos[0];
 
             // check if the stored password is flagged as encrypted
-            String encryptedPassword = getEncryptedPassword(storedPassword);
+            String encryptedPassword = encryptionSupport.encrypt(storedPassword);
             if (!storedPassword.equals(encryptedPassword)) {
                 LOGGER.debug("The password isn't flagged as encrypted, encrypt it.");
                 userInfos = encryptedPassword + ",";
@@ -140,31 +139,6 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
         }
         if (changed) {
             users.save();
-        }
-    }
-
-    String getEncryptedPassword(String password) {
-        Encryption encryption = encryptionSupport.getEncryption();
-        String encryptionPrefix = encryptionSupport.getEncryptionPrefix();
-        String encryptionSuffix = encryptionSupport.getEncryptionSuffix();
-
-        if (encryption == null) {
-            return password;
-        } else {
-            boolean prefix = encryptionPrefix == null || password.startsWith(encryptionPrefix);
-            boolean suffix = encryptionSuffix == null || password.endsWith(encryptionSuffix);
-            if (prefix && suffix) {
-                return password;
-            } else {
-                String p = encryption.encryptPassword(password);
-                if (encryptionPrefix != null) {
-                    p = encryptionPrefix + p;
-                }
-                if (encryptionSuffix != null) {
-                    p = p + encryptionSuffix;
-                }
-                return p;
-            }
         }
     }
 

@@ -27,12 +27,9 @@ import javax.sql.DataSource;
 
 import java.security.Principal;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -49,10 +46,12 @@ public class JDBCBackingEngine implements BackingEngine {
     private String deleteAllUserRolesStatement = "DELETE FROM ROLES WHERE USERNAME=?";
     private String deleteUserStatement = "DELETE FROM USERS WHERE USERNAME=?";
     private String selectUsersQuery = "SELECT USERNAME FROM USERS";
+    private String selectUserQuery = "SELECT USERNAME FROM USERS WHERE USERNAME=?";
     private String selectRolesQuery = "SELECT ROLE FROM ROLES WHERE USERNAME=?";
 
     public JDBCBackingEngine(DataSource dataSource) {
         this.dataSource = dataSource;
+        this.encryptionSupport = EncryptionSupport.noEncryptionSupport();
     }
 
     public JDBCBackingEngine(DataSource dataSource, EncryptionSupport encryptionSupport) {
@@ -70,19 +69,10 @@ public class JDBCBackingEngine implements BackingEngine {
         if (username.startsWith(GROUP_PREFIX)) {
             throw new IllegalArgumentException("Prefix not permitted: " + GROUP_PREFIX);
         }
-        //If encryption support is enabled, encrypt password
-        if (encryptionSupport != null && encryptionSupport.getEncryption() != null) {
-            password = encryptionSupport.getEncryption().encryptPassword(password);
-            if (encryptionSupport.getEncryptionPrefix() != null) {
-                password = encryptionSupport.getEncryptionPrefix() + password;
-            }
-            if (encryptionSupport.getEncryptionSuffix() != null) {
-                password = password + encryptionSupport.getEncryptionSuffix();
-            }
-        }
+        String encPassword = encryptionSupport.encrypt(password);
         try {
             try (Connection connection = dataSource.getConnection()) {
-                rawUpdate(connection, addUserStatement, username, password);
+                rawUpdate(connection, addUserStatement, username, encPassword);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error adding user", e);
@@ -126,6 +116,21 @@ public class JDBCBackingEngine implements BackingEngine {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error listing users", e);
+        }
+    }
+
+    @Override
+    public UserPrincipal lookupUser(String username) {
+        try {
+            try (Connection connection = dataSource.getConnection()) {
+                List<String> names = rawSelect(connection, selectUserQuery, username);
+                if (names.size() == 0) {
+                    return null;
+                }
+                return new UserPrincipal(username);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error getting user", e);
         }
     }
 

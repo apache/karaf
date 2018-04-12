@@ -27,7 +27,7 @@ public class UserAddCommand extends JaasCommandSupport {
     @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)
     private String username;
 
-    @Argument(index = 1, name = "password", description = "Password", required = true, multiValued = false)
+    @Argument(index = 1, name = "password", description = "Password", required = true, multiValued = false, censor = true, mask = '#')
     private String password;
 
     @Override

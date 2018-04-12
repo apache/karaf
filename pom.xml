@@ -24,14 +24,14 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>15</version>
+        <version>18</version>
         <relativePath />
     </parent>
 
     <groupId>org.apache.karaf</groupId>
     <artifactId>karaf</artifactId>
     <packaging>pom</packaging>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.1-SNAPSHOT</version>
     <name>Apache Karaf</name>
     <inceptionYear>2007</inceptionYear>
 
@@ -56,7 +56,6 @@
         <module>web</module>
         <module>wrapper</module>
         <module>webconsole</module>
-        <module>exception</module>
         <module>scheduler</module>
         <module>scr</module>
         <module>diagnostic</module>
@@ -65,11 +64,15 @@
         <module>jdbc</module>
         <module>jms</module>
         <module>jpa</module>
+        <module>maven</module>
         <module>services</module>
+        <module>audit</module>
         <module>subsystem</module>
         <module>profile</module>
         <module>event</module>
         <module>tooling</module>
+        <module>manual</module>
+        <module>specs</module>
         <module>assemblies</module>
         <module>demos</module>
         <module>archetypes</module>
@@ -77,9 +80,9 @@
     </modules>
 
     <scm>
-        <connection>scm:git:https://git-wip-us.apache.org/repos/asf/karaf.git</connection>
-        <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/karaf.git</developerConnection>
-        <url>https://git-wip-us.apache.org/repos/asf?p=karaf.git;a=summary</url>
+        <connection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</connection>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</developerConnection>
+        <url>https://gitbox.apache.org/repos/asf?p=karaf.git;a=summary</url>
       <tag>HEAD</tag>
   </scm>
 
@@ -133,34 +136,40 @@
     </developers>
 
     <prerequisites>
-        <maven>3.0.3</maven>
+        <maven>3.0.5</maven>
     </prerequisites>
 
     <properties>
+        <activemq.version>5.15.0</activemq.version>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <aspectj.bundle.version>1.7.4_1</aspectj.bundle.version>
-        <ant.bundle.version>1.8.2_2</ant.bundle.version>
+        <ant.bundle.version>1.9.7_1</ant.bundle.version>
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
-        <asm.version>5.0.4</asm.version>
-        <asm.springsource.version>1.5.3</asm.springsource.version>
-        <cglib.bundle.version>3.2.0_1</cglib.bundle.version>
+        <asm.version>6.0</asm.version>
+        <awaitility.version>3.0.0</awaitility.version>
+        <cglib.bundle.version>3.2.4_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
-
+        
+        <jna.version>4.5.1</jna.version>
+        <jaxb.version>2.2.11</jaxb.version> 
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-codec.version>1.10</commons-codec.version>
-        <commons-compress.version>1.10</commons-compress.version>
+        <commons-compress.version>1.16.1</commons-compress.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-dbcp.version>1.4_3</commons-dbcp.version>
         <commons-fileupload.version>1.3.1</commons-fileupload.version>
         <commons-jexl.version>2.1.1</commons-jexl.version>
         <commons-lang.version>2.6</commons-lang.version>
+        <commons-lang3.version>3.7</commons-lang3.version>
+        <commons-logging.version>1.2</commons-logging.version>
         <commons-pool.version>1.6</commons-pool.version>
-        <commons-io.version>2.4</commons-io.version>
+        <commons-io.version>2.6</commons-io.version>
 
         <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
-        <eclipselink.version>2.6.1</eclipselink.version>
+        <eclipselink.version>2.7.1</eclipselink.version>
         <jasypt.bundle.version>1.9.2_1</jasypt.bundle.version>
         <jolokia.version>1.5.0</jolokia.version>
+        <jolokia.version>1.3.5</jolokia.version>
         <serp.bundle.version>1.14.1_1</serp.bundle.version>
         <servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
 	    <servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
@@ -170,54 +179,56 @@
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
 
-        <easymock.version>3.4</easymock.version>
-        <equinox.groupId>org.eclipse.birt.runtime</equinox.groupId>
+        <easymock.version>3.5.1</easymock.version>
+        <objenesis.version>2.6</objenesis.version>
+        <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
-        <equinox.version>3.10.2.v20150203-1939</equinox.version>
+        <equinox.version>3.12.50</equinox.version>
         <bndlib.version>2.4.0</bndlib.version>
-        <equinox.region.version>1.1.0.v20120522-1841</equinox.region.version>
+        <equinox.region.version>1.2.101.v20150831-1342</equinox.region.version>
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
 
-        <felix.bundlerepository.version>2.0.6</felix.bundlerepository.version>
-        <felix.configadmin.version>1.8.8</felix.configadmin.version>
+        <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
+        <felix.configadmin.version>1.8.16</felix.configadmin.version>
         <felix.connect.version>0.1.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
-        <felix.fileinstall.version>3.5.2</felix.fileinstall.version>
-        <felix.framework.version>5.5.0-SNAPSHOT</felix.framework.version>
-        <felix.framework.security.version>2.4.0</felix.framework.security.version>
-        <felix.gogo.version>0.16.2</felix.gogo.version>
+        <felix.fileinstall.version>3.6.4</felix.fileinstall.version>
+        <felix.framework.version>5.6.10</felix.framework.version>
+        <felix.framework.security.version>2.6.0</felix.framework.security.version>
+        <felix.gogo.runtime.version>1.0.12</felix.gogo.runtime.version>
+        <felix.gogo.jline.version>1.0.12</felix.gogo.jline.version>
+        <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
-        <felix.plugin.version>3.0.1</felix.plugin.version>
-        <felix.utils.version>1.8.2</felix.utils.version>
-        <felix.webconsole.version>4.2.14</felix.webconsole.version>
+        <felix.plugin.version>3.5.0</felix.plugin.version>
+        <felix.utils.version>1.10.4</felix.utils.version>
+        <felix.webconsole.version>4.3.4</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
-        <felix.metatype.version>1.1.2</felix.metatype.version>
-        <felix.eventadmin.version>1.4.6</felix.eventadmin.version>
-        <felix.eventadmin.webconsole.plugin.version>1.1.4</felix.eventadmin.webconsole.plugin.version>
+        <felix.memoryusage.webconsole.plugin.version>1.0.8</felix.memoryusage.webconsole.plugin.version>
+        <felix.metatype.version>1.1.6</felix.metatype.version>
+        <felix.eventadmin.version>1.4.10</felix.eventadmin.version>
+        <felix.eventadmin.webconsole.plugin.version>1.1.8</felix.eventadmin.webconsole.plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
-        <felix.scr.version>2.0.2</felix.scr.version>
-        <felix.scr.compat.version>1.0.2</felix.scr.compat.version>
-        <felix.scr.webconsole.plugin.version>2.0.2</felix.scr.webconsole.plugin.version>
-        <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
-        <felix.resolver.version>1.9.0-SNAPSHOT</felix.resolver.version>
+        <felix.scr.version>2.0.14</felix.scr.version>
+        <felix.scr.webconsole.plugin.version>2.0.8</felix.scr.webconsole.plugin.version>
+        <felix.scr.annotation.version>1.12.0</felix.scr.annotation.version>
+        <felix.resolver.version>1.14.0</felix.resolver.version>
 
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
         <aries.application.management.version>1.0.0</aries.application.management.version>
-        <aries.blueprint.annotation.version>1.0.1</aries.blueprint.annotation.version>
-        <aries.blueprint.annotation.api.version>1.0.1</aries.blueprint.annotation.api.version>
         <aries.blueprint.api.version>1.0.1</aries.blueprint.api.version>
-        <aries.blueprint.core.version>1.6.0</aries.blueprint.core.version>
+        <aries.blueprint.core.version>1.9.0</aries.blueprint.core.version>
         <aries.blueprint.core.compatibility.version>1.0.0</aries.blueprint.core.compatibility.version>
-        <aries.blueprint.cm.version>1.0.8</aries.blueprint.cm.version>
-        <aries.blueprint.jexl.evaluator.version>1.0.0</aries.blueprint.jexl.evaluator.version>
+        <aries.blueprint.cm.version>1.2.0</aries.blueprint.cm.version>
         <aries.blueprint.web.version>1.0.1</aries.blueprint.web.version>
+        <aries.blueprint.spring.version>0.6.0</aries.blueprint.spring.version>
+        <aries.blueprint.spring.extender.version>0.4.0</aries.blueprint.spring.extender.version>
         <aries.jmx.api.version>1.1.5</aries.jmx.api.version>
-        <aries.jmx.core.version>1.1.6</aries.jmx.core.version>
-        <aries.jmx.blueprint.api.version>1.1.5</aries.jmx.blueprint.api.version>
-        <aries.jmx.blueprint.core.version>1.1.5</aries.jmx.blueprint.core.version>
-        <aries.jmx.whiteboard.version>1.1.5</aries.jmx.whiteboard.version>
-        <aries.jpa.version>2.3.0</aries.jpa.version>
+        <aries.jmx.core.version>1.1.8</aries.jmx.core.version>
+        <aries.jmx.blueprint.api.version>1.2.0</aries.jmx.blueprint.api.version>
+        <aries.jmx.blueprint.core.version>1.2.0</aries.jmx.blueprint.core.version>
+        <aries.jmx.whiteboard.version>1.2.0</aries.jmx.whiteboard.version>
+        <aries.jpa.version>2.6.1</aries.jpa.version>
         <aries.jpa.blueprint.aries.version>1.0.4</aries.jpa.blueprint.aries.version>
         <aries.jpa.api.version>1.0.2</aries.jpa.api.version>
         <aries.jpa.container.version>1.0.4</aries.jpa.container.version>
@@ -226,70 +237,87 @@
         <aries.jndi.api.version>1.1.0</aries.jndi.api.version>
         <aries.jndi.core.version>1.0.2</aries.jndi.core.version>
         <aries.jndi.url.version>1.1.0</aries.jndi.url.version>
-        <aries.proxy.version>1.0.5</aries.proxy.version>
-        <aries.proxy.api.version>1.0.1</aries.proxy.api.version>
-        <aries.subsystem.api.version>2.0.8</aries.subsystem.api.version>
-        <aries.subsystem.core.version>2.0.8</aries.subsystem.core.version>
-        <aries.transaction.manager.version>1.3.0</aries.transaction.manager.version>
+        <aries.proxy.version>1.1.1</aries.proxy.version>
+        <aries.proxy.api.version>1.1.0</aries.proxy.api.version>
+        <aries.spifly.version>1.0.10</aries.spifly.version>
+        <aries.subsystem.api.version>2.0.10</aries.subsystem.api.version>
+        <aries.subsystem.core.version>2.0.10</aries.subsystem.core.version>
+        <aries.transaction.manager.version>1.3.3</aries.transaction.manager.version>
         <aries.transaction.blueprint.version>1.1.1</aries.transaction.blueprint.version>
         <aries.transaction.blueprint.version2>2.1.0</aries.transaction.blueprint.version2>
-        <aries.transaction.jdbc.version>2.1.1</aries.transaction.jdbc.version>
-        <aries.util.version>1.1.1</aries.util.version>
+        <aries.util.version>1.1.3</aries.util.version>
+        <atomikos.version>4.0.4</atomikos.version>
 
-        <narayana.version>5.3.1.Final</narayana.version>
-        <gemini.blueprint.version>1.0.2.RELEASE</gemini.blueprint.version>
+        <geronimo.transaction.manager.version>3.1.3</geronimo.transaction.manager.version>
+        <guava.version>20.0</guava.version>
+        <narayana.version>5.7.2.Final</narayana.version>
         <hibernate.annotations.common.version>3.3.0.ga</hibernate.annotations.common.version>
         <hibernate.annotations.version>3.4.0.GA</hibernate.annotations.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
         <hibernate3.version>3.3.2.GA</hibernate3.version>
         <hibernate42.version>4.2.15.Final</hibernate42.version>
         <hibernate43.version>4.3.6.Final</hibernate43.version>
-        <hibernate.validator.version>5.2.4.Final</hibernate.validator.version>
-        <jansi.version>1.11</jansi.version>
+        <hibernate.version>5.2.9.Final</hibernate.version>
+        <hibernate.validator.version>6.0.9.Final</hibernate.validator.version>
+        <jansi.version>1.17</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jline.version>2.14.1</jline.version>
-        <jledit.version>0.2.1</jledit.version>
+        <jetty.version>9.4.6.v20170531</jetty.version>
+        <jline.version>3.6.2</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
-        <maven.version>2.0.9</maven.version>
+        <maven.version>3.5.2</maven.version>
+        <maven.wagon.version>3.0.0</maven.wagon.version>
+        <maven-plugin-annotations.version>3.5</maven-plugin-annotations.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
+        <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
-        <org.json.version>20150729</org.json.version>
 
-        <pax.cdi.version>0.12.0</pax.cdi.version>
-        <pax.exam.version>4.8.0</pax.exam.version>
-        <pax.logging.version>1.8.5</pax.logging.version>
+        <pax.cdi.version>1.0.0</pax.cdi.version>
+        <pax.exam.version>4.11.0</pax.exam.version>
+        <pax.logging.version>1.10.1</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
-        <pax.url.version>2.4.6</pax.url.version>
-        <pax.web.version>6.0.0-SNAPSHOT</pax.web.version>
-        <pax.tinybundle.version>2.1.1</pax.tinybundle.version>
-        <pax.jdbc.version>0.8.0</pax.jdbc.version>
+        <pax.swissbox.version>1.8.3</pax.swissbox.version>
+        <pax.url.version>2.5.4</pax.url.version>
+        <pax.web.version>7.0.0</pax.web.version>
+        <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
+        <pax.jdbc.version>1.2.0</pax.jdbc.version>
+        <pax.jms.version>0.3.0</pax.jms.version>
+        <pax.transx.version>0.2.0</pax.transx.version>
 
         <portlet-api.version>2.0</portlet-api.version>
         <slf4j.version>1.7.12</slf4j.version>
-        <servicemix.specs.version>2.6.0</servicemix.specs.version>
+        <servicemix.specs.version>2.9.0</servicemix.specs.version>
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring31.version>3.1.4.RELEASE</spring31.version>
-        <spring32.version>3.2.14.RELEASE_1</spring32.version>
-        <spring40.version>4.0.7.RELEASE_3</spring40.version>
-        <spring41.version>4.1.7.RELEASE_2</spring41.version>
-        <spring42.version>4.2.4.RELEASE_1</spring42.version>
+        <spring32.version>3.2.18.RELEASE_1</spring32.version>
+        <spring40.version>4.0.9.RELEASE_1</spring40.version>
+        <spring41.version>4.1.9.RELEASE_1</spring41.version>
+        <spring42.version>4.2.9.RELEASE_1</spring42.version>
+        <spring43.version>4.3.14.RELEASE_1</spring43.version>
+        <spring50.version>5.0.4.RELEASE_1</spring50.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
+        <spring.security42.version>4.2.4.RELEASE_1</spring.security42.version>
 
-        <sshd.version>0.14.0</sshd.version>
+        <sshd.version>1.7.0</sshd.version>
         <derby-version>10.12.1.1</derby-version>
-        <directory-version>2.0.0-M20</directory-version>
+        <directory-version>2.0.0-M24</directory-version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
-        <xbean.version>3.18</xbean.version>
-        <xerces.version>2.11.0</xerces.version>
-        <xalan.bundle.version>2.7.2_2</xalan.bundle.version>
+        <xbean.version>4.7</xbean.version>
+        <xerces.version>2.11.0_1</xerces.version>
+        <xalan.bundle.version>2.7.2_3</xalan.bundle.version>
         <xalan-serializer.bundle.version>2.7.2_1</xalan-serializer.bundle.version>
-        <javax.mail.version>1.4.5</javax.mail.version>
+        <javax.mail.version>1.4.7</javax.mail.version>
+
+        <websocket.version>1.1</websocket.version>
+        <winsw.version>1.18</winsw.version>
+
+
+        <surefire.argLine />
 
         <!-- Further used maven plugin versions; e.g. in the docs -->
-        <plugin.depends.version>1.3.1</plugin.depends.version>
+        <plugin.depends.version>1.4.0</plugin.depends.version>
 
         <!-- General Settings -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -312,29 +340,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <!-- ServiceMix repo -->
-        <repository>
-            <id>servicemix</id>
-            <name>Apache ServiceMix Repository</name>
-            <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>sonatype</id>
-            <name>sonatype</name>
-            <url>http://repository.sonatype.org/content/groups/sonatype-public-grid</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
         <!-- OPS4J SNAPSHOT repository -->
         <repository>
             <id>ops4j.sonatype.snapshots.deploy</id>
@@ -347,66 +352,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <!-- Gemini Blueprint repository -->
-        <repository>
-            <id>zodiac-repository</id>
-            <name>Zodiac Release Repository</name>
-            <url>http://repository.springsource.com/maven/bundles/release</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>spring-ebr-repository</id>
-            <name>Spring EBR Repository</name>
-            <url>http://repository.springsource.com/maven/bundles/external</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <!-- OSSRH snapshots -->
-        <repository>
-            <id>ossrh.sonatype.snapshots.deploy</id>
-            <name>OSSRH snapshot repository</name>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>ops4j.snapshots</id>
-            <name>OPS4j Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <!-- Jolokia snapshots -->
-        <!--
-        <repository>
-            <id>labs-consol-snapshot</id>
-            <name>ConSol* Labs Repository (Snapshots)</name>
-            <url>http://labs.consol.de/maven/snapshots-repository</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-        -->
     </repositories>
     <pluginRepositories>
         <!-- Apache snapshots -->
@@ -455,12 +400,27 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
-                <artifactId>org.apache.karaf.exception</artifactId>
+                <artifactId>org.apache.karaf.client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf</groupId>
-                <artifactId>org.apache.karaf.client</artifactId>
+                <groupId>org.apache.karaf.specs</groupId>
+                <artifactId>org.apache.karaf.specs.locator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.specs</groupId>
+                <artifactId>org.apache.karaf.specs.activator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.specs</groupId>
+                <artifactId>org.apache.karaf.specs.java.xml</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.specs</groupId>
+                <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -590,6 +550,11 @@
 
             <dependency>
                 <groupId>org.apache.karaf.features</groupId>
+                <artifactId>org.apache.karaf.features.extension</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
                 <artifactId>org.apache.karaf.features.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -598,6 +563,7 @@
                 <artifactId>org.apache.karaf.features.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
 
             <dependency>
                 <groupId>org.apache.karaf.profile</groupId>
@@ -758,11 +724,6 @@
 
             <dependency>
                 <groupId>org.apache.karaf.scr</groupId>
-                <artifactId>org.apache.karaf.scr.command</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.scr</groupId>
                 <artifactId>org.apache.karaf.scr.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -846,12 +807,6 @@
               <type>xml</type>
               <classifier>features</classifier>
               <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>${org.json.version}</version>
             </dependency>
 
             <dependency>
@@ -986,6 +941,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
+                <version>${felix.memoryusage.webconsole.plugin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.fileinstall</artifactId>
                 <version>${felix.fileinstall.version}</version>
                 <exclusions>
@@ -998,6 +958,11 @@
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.httplite.complete</artifactId>
+                <version>${felix.httplite.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -1025,11 +990,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.scr.compat</artifactId>
-                <version>${felix.scr.compat.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.resolver</artifactId>
                 <version>${felix.resolver.version}</version>
             </dependency>
@@ -1039,10 +999,40 @@
                 <version>${felix.connect.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.ow2.asm</groupId>
-                <artifactId>asm-all</artifactId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-util</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-tree</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-analysis</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-commons</artifactId>
                 <version>${asm.version}</version>
             </dependency>
 
@@ -1063,8 +1053,48 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.maven</groupId>
-                <artifactId>maven-project</artifactId>
+                <artifactId>maven-compat</artifactId>
                 <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-core</artifactId>
+                <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-artifact</artifactId>
+                <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-settings</artifactId>
+                <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-settings-builder</artifactId>
+                <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-dependency-tree</artifactId>
+                <version>2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-provider-api</artifactId>
+                <version>${maven.wagon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-http</artifactId>
+                <version>${maven.wagon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-http-lightweight</artifactId>
+                <version>${maven.wagon.version}</version>
             </dependency>
             <dependency>
                 <groupId>xerces</groupId>
@@ -1157,22 +1187,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.eclipse.gemini</groupId>
-                <artifactId>org.eclipse.gemini.blueprint.extender</artifactId>
-                <version>${gemini.blueprint.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.gemini</groupId>
-                <artifactId>org.eclipse.gemini.blueprint.core</artifactId>
-                <version>${gemini.blueprint.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.gemini</groupId>
-                <artifactId>org.eclipse.gemini.blueprint.io</artifactId>
-                <version>${gemini.blueprint.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-jms_1.1_spec</artifactId>
                 <version>${geronimo.jms-spec.version}</version>
@@ -1184,31 +1198,14 @@
                 <version>${log4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>jline</groupId>
+                <groupId>org.fusesource.jansi</groupId>
+                <artifactId>jansi</artifactId>
+                <version>${jansi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jline</groupId>
                 <artifactId>jline</artifactId>
                 <version>${jline.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.fusesource.jansi</groupId>
-                        <artifactId>jansi</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.jledit</groupId>
-                <artifactId>core</artifactId>
-                <version>${jledit.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.fusesource.jansi</groupId>
-                        <artifactId>jansi</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.maven.artifact</groupId>
-                <artifactId>maven-artifact</artifactId>
-                <version>3.0-alpha-1</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -1281,6 +1278,16 @@
                 <version>${pax.base.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ops4j.base</groupId>
+                <artifactId>ops4j-base-util-property</artifactId>
+                <version>${pax.base.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.base</groupId>
+                <artifactId>ops4j-base-util-collections</artifactId>
+                <version>${pax.base.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-aether</artifactId>
                 <version>${pax.url.version}</version>
@@ -1333,7 +1340,16 @@
                         <groupId>commons-httpclient</groupId>
                         <artifactId>commons-httpclient</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.ops4j.pax.url</groupId>
+                        <artifactId>pax-url-aether-support</artifactId>
+                    </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.swissbox</groupId>
+                <artifactId>pax-swissbox-property</artifactId>
+                <version>${pax.swissbox.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
@@ -1350,6 +1366,11 @@
                 <groupId>org.easymock</groupId>
                 <artifactId>easymock</artifactId>
                 <version>${easymock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>${objenesis.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.specs</groupId>
@@ -1471,22 +1492,6 @@
 
             <dependency>
                 <groupId>org.apache.aries.blueprint</groupId>
-                <artifactId>org.apache.aries.blueprint.annotation.api</artifactId>
-                <version>${aries.blueprint.annotation.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.blueprint</groupId>
-                <artifactId>org.apache.aries.blueprint.annotation.impl</artifactId>
-                <version>${aries.blueprint.annotation.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.blueprint</groupId>
                 <artifactId>org.apache.aries.blueprint.api</artifactId>
                 <version>${aries.blueprint.api.version}</version>
             </dependency>
@@ -1506,24 +1511,13 @@
                 <version>${aries.blueprint.core.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.aries.blueprint</groupId>
-                <artifactId>org.apache.aries.blueprint.jexl.evaluator</artifactId>
-                <version>${aries.blueprint.jexl.evaluator.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.aries.proxy</groupId>
                 <artifactId>org.apache.aries.proxy.api</artifactId>
                 <version>${aries.proxy.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.proxy</groupId>
-                <artifactId>org.apache.aries.proxy.impl</artifactId>
+                <artifactId>org.apache.aries.proxy</artifactId>
                 <version>${aries.proxy.version}</version>
             </dependency>
             <dependency>
@@ -1641,12 +1635,12 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.runtime</artifactId>
-                <version>${felix.gogo.version}</version>
+                <version>${felix.gogo.runtime.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.gogo.commands</artifactId>
-                <version>${felix.gogo.version}</version>
+                <artifactId>org.apache.felix.gogo.jline</artifactId>
+                <version>${felix.gogo.jline.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
@@ -1694,6 +1688,11 @@
                 <version>${pax.web.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ops4j.pax.jms</groupId>
+                <artifactId>pax-jms-api</artifactId>
+                <version>${pax.jms.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-finder-shaded</artifactId>
                 <version>${xbean.version}</version>
@@ -1718,6 +1717,26 @@
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${commons-collections.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
@@ -1734,6 +1753,21 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
                 <version>${jasypt.bundle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.narayana.osgi</groupId>
+                <artifactId>narayana-osgi-jta</artifactId>
+                <version>${narayana.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate.validator.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -1760,7 +1794,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.5.1</version>
+                    <version>3.7.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1770,7 +1804,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>1.4.1</version>
+                    <version>3.0.0-M1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1780,12 +1814,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.3</version>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.0.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1815,7 +1849,7 @@
                         <useReleaseProfile>false</useReleaseProfile>
                         <preparationGoals>clean install</preparationGoals>
                         <goals>deploy</goals>
-                        <arguments>-Prelease,deploy,src,manual</arguments>
+                        <arguments>-Prelease,deploy,src</arguments>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                     </configuration>
                 </plugin>
@@ -1831,12 +1865,16 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.17</version>
+                    <version>2.20.1</version>
+                    <configuration>
+                            <forkMode>once</forkMode>
+                            <argLine>${surefire.argLine}</argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.7</version>
+                    <version>3.0.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.servicemix.tooling</groupId>
@@ -1846,12 +1884,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.0.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1889,27 +1927,27 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>1.4.0</version>
+                    <version>1.6.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.10</version>
+                    <version>3.0.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.10</version>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.5</version>
+                    <version>3.6</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.2.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>
@@ -1976,19 +2014,6 @@
                                         <ignore />
                                     </action>
                                 </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.apache.servicemix.tooling</groupId>
-                                        <artifactId>depends-maven-plugin</artifactId>
-                                        <versionRange>[0,)</versionRange>
-                                        <goals>
-                                            <goal>generate-depends-file</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
@@ -2032,10 +2057,10 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>[3,4)</version>
+                                    <version>[3.3.9,4)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>[1.8,1.9]</version>
+                                    <version>[1.8,)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -2102,7 +2127,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>3.0.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -2117,7 +2142,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>2.16</version>
+                <version>2.18.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -2133,13 +2158,8 @@
             <properties>
               <maven.test.skip>true</maven.test.skip>
               <invoker.skip>true</invoker.skip>
+              <archetype.test.skip>true</archetype.test.skip>
             </properties>
-        </profile>
-        <profile>
-            <id>manual</id>
-            <modules>
-                <module>manual</module>
-            </modules>
         </profile>
         <profile>
             <id>rat</id>
@@ -2151,7 +2171,7 @@
                     <plugin>
                         <groupId>org.apache.rat</groupId>
                         <artifactId>apache-rat-plugin</artifactId>
-                        <version>0.11</version>
+                        <version>0.12</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>
@@ -2187,12 +2207,17 @@
                                 <exclude>**/foo</exclude>
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>
+                                <!-- jline -->
+                                <exclude>**/src/main/java/jline/**/*.java</exclude>
                                 <!-- test manifests -->
                                 <exclude>**/*.mf</exclude>
                                 <!-- test json files -->
                                 <exclude>**/*.json</exclude>
+                                <!-- test wiring resource files -->
+                                <exclude>**/src/test/resources/wirings/1</exclude>
                                 <!-- SSH keys -->
 				                <exclude>**/*.key</exclude>
+                                <exclude>**/*.id_rsa</exclude>
                                 <!-- For Jenkins, ignore the .repository -->
                                 <exclude>.repository/**</exclude>
                                 <!-- jar files -->
@@ -2337,6 +2362,22 @@
             <properties>
                 <javadoc.opts>-Xdoclint:none</javadoc.opts>
             </properties>
+        </profile>
+        <profile>
+            <id>java9</id>
+            <properties>
+                <easymock.version>3.5</easymock.version>
+                <surefire.argLine>--add-opens java.base/java.security=ALL-UNNAMED
+                                  --add-opens java.base/java.net=ALL-UNNAMED 
+                                  --add-opens java.base/java.lang=ALL-UNNAMED
+                                  --add-opens java.base/java.util=ALL-UNNAMED
+                                  --add-opens java.naming/javax.naming.spi=ALL-UNNAMED
+                                  --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED
+                                  --add-modules java.activation,java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws</surefire.argLine>
+            </properties>
+            <activation>
+                <jdk>9</jdk>
+            </activation>
         </profile>
     </profiles>
 </project>

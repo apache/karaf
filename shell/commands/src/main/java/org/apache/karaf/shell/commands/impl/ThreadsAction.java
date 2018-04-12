@@ -71,7 +71,7 @@ public class ThreadsAction implements Action {
 
     @Override
     public Object execute() throws Exception {
-        Map<Long, ThreadInfo> threadInfos = new TreeMap<Long, ThreadInfo>();
+        Map<Long, ThreadInfo> threadInfos = new TreeMap<>();
         ThreadMXBean threadsBean = ManagementFactory.getThreadMXBean();
         ThreadInfo[] infos;
         if (threadsBean.isObjectMonitorUsageSupported() && threadsBean.isSynchronizerUsageSupported()) {
@@ -139,7 +139,7 @@ public class ThreadsAction implements Action {
                     break;
                 }
             }
-            groups = new ArrayList<ThreadGroupData>();
+            groups = new ArrayList<>();
             for (ThreadGroup tg : childGroups) {
                 if (tg != null) {
                     groups.add(new ThreadGroupData(tg, infos));
@@ -154,7 +154,7 @@ public class ThreadsAction implements Action {
                     break;
                 }
             }
-            threads = new ArrayList<ThreadData>();
+            threads = new ArrayList<>();
             for (Thread t : childThreads) {
                 if (t != null) {
                     threads.add(new ThreadData(t, infos.get(t.getId())));
@@ -239,18 +239,19 @@ public class ThreadsAction implements Action {
 
         public boolean isInteresting() {
             int nb = 0;
-            StackTraceElement[] stacktrace = info.getStackTrace();
-            for (int i = 0; i < stacktrace.length; i++) {
-                StackTraceElement ste = stacktrace[i];
-                boolean interestingLine = true;
-                for (String pkg : packages) {
-                    if (ste.getClassName().startsWith(pkg)) {
-                        interestingLine = false;
-                        break;
+            if (info != null && info.getStackTrace() != null) {
+                StackTraceElement[] stacktrace = info.getStackTrace();
+                for (StackTraceElement ste : stacktrace) {
+                    boolean interestingLine = true;
+                    for (String pkg : packages) {
+                        if (ste.getClassName().startsWith(pkg)) {
+                            interestingLine = false;
+                            break;
+                        }
                     }
-                }
-                if (interestingLine) {
-                    nb++;
+                    if (interestingLine) {
+                        nb++;
+                    }
                 }
             }
             return nb >= threshold;

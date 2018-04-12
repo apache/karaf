@@ -23,7 +23,7 @@ package org.apache.karaf.main.lock;
  */
 public interface LockCallBack {
 
-    void lockAquired();
+    void lockAcquired();
 
     void lockLost();
 

@@ -57,8 +57,8 @@ public class ListRealmsCommand extends JaasCommandSupport {
                 AppConfigurationEntry[] entries = realm.getEntries();
 
                 if (entries != null && entries.length > 0) {
-                    for (int i = 0; i < entries.length; i++) {
-                        String moduleClass = (String) entries[i].getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                    for (AppConfigurationEntry entry : entries) {
+                        String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
                         table.addRow().addContent(index++, realmName, moduleClass);
                     }
                 }

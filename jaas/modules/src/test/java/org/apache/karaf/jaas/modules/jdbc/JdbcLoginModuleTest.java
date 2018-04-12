@@ -15,7 +15,6 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,17 +22,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.sql.DataSource;
 
-import org.apache.derby.jdbc.EmbeddedDataSource40;
+import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,64 +38,53 @@ import org.osgi.framework.ServiceReference;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class JdbcLoginModuleTest {
 
-    private EmbeddedDataSource40 dataSource;
+    private EmbeddedDataSource dataSource;
     private Map<String, Object> options;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
         System.setProperty("derby.stream.error.file", "target/derby.log");
 
         // Create datasource
-        dataSource = new EmbeddedDataSource40();
+        dataSource = new EmbeddedDataSource();
         dataSource.setDatabaseName("memory:db");
         dataSource.setCreateDatabase("create");
 
         // Delete tables
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
-            try {
-                try (Statement statement = connection.createStatement()) {
+            try (Statement statement = connection.createStatement()) {
                     statement.execute("drop table USERS");
-                }
             } catch (SQLException e) {
                 // Ignore
             }
-            try {
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute("drop table ROLES");
-                }
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("drop table ROLES");
             } catch (SQLException e) {
                 // Ignore
             }
-            connection.commit();
-        }
-
-        // Create tables
-        try (Connection connection = dataSource.getConnection()) {
             try (Statement statement = connection.createStatement()) {
                 statement.execute("create table USERS (USERNAME VARCHAR(32) PRIMARY KEY, PASSWORD VARCHAR(32))");
-            }
-            try (Statement statement = connection.createStatement()) {
                 statement.execute("create table ROLES (USERNAME VARCHAR(32), ROLE VARCHAR(1024))");
             }
             connection.commit();
         }
 
-        // Mocks
         BundleContext context = EasyMock.createMock(BundleContext.class);
-        ServiceReference reference = EasyMock.createMock(ServiceReference.class);
+        ServiceReference<DataSource> reference = EasyMock.createMock(ServiceReference.class);
 
-        // Create options
         options = new HashMap<>();
         options.put(JDBCUtils.DATASOURCE, "osgi:" + DataSource.class.getName());
         options.put(BundleContext.class.getName(), context);
 
         expect(context.getServiceReferences(DataSource.class.getName(), null)).andReturn(new ServiceReference[] { reference });
-        expect(context.getService(reference)).andReturn(dataSource);
+        expect((DataSource)context.getService(reference)).andReturn(dataSource);
         expect(context.ungetService(reference)).andReturn(true);
 
         EasyMock.replay(context);
@@ -115,7 +99,7 @@ public class JdbcLoginModuleTest {
         JDBCLoginModule module = new JDBCLoginModule();
 
         Subject subject = new Subject();
-        module.initialize(subject, getCallbackHandler("abc", "xyz"), null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("abc", "xyz"), null, options);
 
         module.login();
         module.commit();
@@ -137,7 +121,7 @@ public class JdbcLoginModuleTest {
         JDBCLoginModule module = new JDBCLoginModule();
 
         Subject subject = new Subject();
-        module.initialize(subject, getCallbackHandler("abc", "xyz"), null, options);
+        module.initialize(subject, new NamePasswordCallbackHandler("abc", "xyz"), null, options);
 
         module.login();
         module.commit();
@@ -150,87 +134,71 @@ public class JdbcLoginModuleTest {
 
     @Test
     public void testEngine() throws Exception {
-        JDBCBackingEngine engine = new JDBCBackingEngine(dataSource);
+        UserPrincipal user = new UserPrincipal("abc");
+        GroupPrincipal group1 = new GroupPrincipal("group1");
+        RolePrincipal role1 = new RolePrincipal("role1");
+        RolePrincipal role2 = new RolePrincipal("role2");
+        RolePrincipal role3 = new RolePrincipal("role3");
 
+        JDBCBackingEngine engine = new JDBCBackingEngine(dataSource);
         assertTrue(engine.listUsers().isEmpty());
 
         engine.addUser("abc", "xyz");
+        assertTrue(engine.listUsers().contains(user));
+        assertTrue(engine.listRoles(user).isEmpty());
+        assertTrue(engine.listRoles(group1).isEmpty());
+        assertTrue(engine.listGroups(user).isEmpty());
 
-        assertTrue(engine.listUsers().contains(new UserPrincipal("abc")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).isEmpty());
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).isEmpty());
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).isEmpty());
+        assertNotNull(engine.lookupUser("abc"));
+        assertEquals("abc", engine.lookupUser("abc").getName());
 
         engine.addRole("abc", "role1");
-
-        assertTrue(engine.listUsers().contains(new UserPrincipal("abc")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).contains(new RolePrincipal("role1")));
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).isEmpty());
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).isEmpty());
+        assertTrue(engine.listUsers().contains(user));
+        assertTrue(engine.listRoles(user).contains(role1));
+        assertTrue(engine.listRoles(group1).isEmpty());
+        assertTrue(engine.listGroups(user).isEmpty());
 
         engine.addGroupRole("group1", "role2");
-
-        assertTrue(engine.listUsers().contains(new UserPrincipal("abc")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).contains(new RolePrincipal("role1")));
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).contains(new RolePrincipal("role2")));
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).isEmpty());
+        assertTrue(engine.listUsers().contains(user));
+        assertTrue(engine.listRoles(user).contains(role1));
+        assertTrue(engine.listRoles(group1).contains(role2));
+        assertTrue(engine.listGroups(user).isEmpty());
 
         engine.addGroup("abc", "group1");
-
-        assertTrue(engine.listUsers().contains(new UserPrincipal("abc")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).contains(new RolePrincipal("role1")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).contains(new RolePrincipal("role2")));
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).contains(new RolePrincipal("role2")));
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).contains(new GroupPrincipal("group1")));
+        assertTrue(engine.listUsers().contains(user));
+        assertTrue(engine.listRoles(user).contains(role1));
+        assertTrue(engine.listRoles(user).contains(role2));
+        assertTrue(engine.listRoles(group1).contains(role2));
+        assertTrue(engine.listGroups(user).contains(group1));
 
         engine.deleteRole("abc", "role1");
-
-        assertTrue(engine.listUsers().contains(new UserPrincipal("abc")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).contains(new RolePrincipal("role2")));
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).contains(new RolePrincipal("role2")));
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).contains(new GroupPrincipal("group1")));
+        assertTrue(engine.listUsers().contains(user));
+        assertTrue(engine.listRoles(user).contains(role2));
+        assertTrue(engine.listRoles(group1).contains(role2));
+        assertTrue(engine.listGroups(user).contains(group1));
 
         engine.deleteGroupRole("group1", "role2");
-
-        assertTrue(engine.listUsers().contains(new UserPrincipal("abc")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).isEmpty());
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).isEmpty());
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).contains(new GroupPrincipal("group1")));
+        assertTrue(engine.listUsers().contains(user));
+        assertTrue(engine.listRoles(user).isEmpty());
+        assertTrue(engine.listRoles(group1).isEmpty());
+        assertTrue(engine.listGroups(user).contains(group1));
 
         engine.addGroupRole("group1", "role3");
-
-        assertTrue(engine.listUsers().contains(new UserPrincipal("abc")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).contains(new RolePrincipal("role3")));
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).contains(new RolePrincipal("role3")));
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).contains(new GroupPrincipal("group1")));
+        assertTrue(engine.listUsers().contains(user));
+        assertTrue(engine.listRoles(user).contains(role3));
+        assertTrue(engine.listRoles(group1).contains(role3));
+        assertTrue(engine.listGroups(user).contains(group1));
 
         engine.deleteGroup("abc", "group1");
-
-        assertTrue(engine.listUsers().contains(new UserPrincipal("abc")));
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).isEmpty());
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).isEmpty());
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).isEmpty());
+        assertTrue(engine.listUsers().contains(user));
+        assertTrue(engine.listRoles(user).isEmpty());
+        assertTrue(engine.listRoles(group1).isEmpty());
+        assertTrue(engine.listGroups(user).isEmpty());
 
         engine.deleteUser("abc");
-
         assertTrue(engine.listUsers().isEmpty());
-        assertTrue(engine.listRoles(new UserPrincipal("abc")).isEmpty());
-        assertTrue(engine.listRoles(new GroupPrincipal("group1")).isEmpty());
-        assertTrue(engine.listGroups(new UserPrincipal("abc")).isEmpty());
-    }
-
-    private CallbackHandler getCallbackHandler(final String user, final String password) {
-        return new CallbackHandler() {
-                @Override
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (Callback cb : callbacks) {
-                        if (cb instanceof NameCallback) {
-                            ((NameCallback) cb).setName(user);
-                        } else if (cb instanceof PasswordCallback) {
-                            ((PasswordCallback) cb).setPassword(password.toCharArray());
-                        }
-                    }
-                }
-            };
+        assertTrue(engine.listRoles(user).isEmpty());
+        assertTrue(engine.listRoles(group1).isEmpty());
+        assertTrue(engine.listGroups(user).isEmpty());
     }
 }

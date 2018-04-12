@@ -18,11 +18,19 @@
 package org.apache.karaf.shell.support.completers;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
+import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
+import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
 
 /**
  * <p>A file name completer takes the buffer and issues a list of
@@ -53,92 +61,105 @@ public class FileCompleter implements Completer
     private static final boolean OS_IS_WINDOWS = isWindows();
     
     public static boolean isWindows() {
-        return (OS.indexOf("win") >= 0);
-
+        return OS.contains("win");
     }
 
     public int complete(final Session session, CommandLine commandLine, final List<String> candidates) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void completeCandidates(final Session session, CommandLine commandLine, final List<Candidate> candidates) {
         // buffer can be null
         if (candidates == null) {
-            return 0;
+            return;
         }
 
-        String buffer = commandLine.getCursorArgument();
-        buffer = buffer != null ? buffer.substring(0, commandLine.getArgumentPosition()) : "";
-
+        String buffer = commandLine.getCursorArgument().substring(0, commandLine.getArgumentPosition());
         if (OS_IS_WINDOWS) {
-            buffer = buffer.replace('/', '\\');
+            buffer = buffer.replaceAll("/", File.separator);
         }
 
-        String translated = buffer;
+        Terminal terminal = (Terminal) session.get(".jline.terminal");
 
-        File homeDir = getUserHome();
-
-        // Special character: ~ maps to the user's home directory
-        if (translated.startsWith("~" + separator())) {
-            translated = homeDir.getPath() + translated.substring(1);
+        Path current;
+        String curBuf;
+        int lastSep = buffer.lastIndexOf(separator());
+        if (lastSep >= 0) {
+            curBuf = buffer.substring(0, lastSep + 1);
+            if (curBuf.startsWith("~")) {
+                if (curBuf.startsWith("~" + separator())) {
+                    current = getUserHome().resolve(curBuf.substring(2));
+                } else {
+                    current = getUserHome().getParent().resolve(curBuf.substring(1));
+                }
+            } else {
+                current = getUserDir().resolve(curBuf);
+            }
+        } else {
+            curBuf = "";
+            current = getUserDir();
         }
-        else if (translated.startsWith("~")) {
-            translated = homeDir.getParentFile().getAbsolutePath();
+        try {
+            Files.newDirectoryStream(current, this::accept).forEach(p -> {
+                String value = curBuf + p.getFileName().toString();
+                if (Files.isDirectory(p)) {
+                    String s = OS_IS_WINDOWS ? "\\\\" : "/";
+                    candidates.add(new Candidate(
+                            value + s,
+                            getDisplay(terminal, p),
+                            null, null,
+                            s,
+                            null,
+                            false));
+                } else {
+                    candidates.add(new Candidate(value, getDisplay(terminal, p),
+                            null, null, null, null, true));
+                }
+            });
+        } catch (IOException e) {
+            // Ignore
         }
-        else if (!(translated.startsWith(separator()))) {
-            String cwd = getUserDir().getAbsolutePath();
-            translated = cwd + separator() + translated;
+    }
+
+    protected boolean accept(Path path) {
+        try {
+            return !Files.isHidden(path);
+        } catch (IOException e) {
+            return false;
         }
-
-        File file = new File(translated);
-        final File dir;
-
-        if (translated.endsWith(separator())) {
-            dir = file;
-        }
-        else {
-            dir = file.getParentFile();
-        }
-
-        File[] entries = dir == null ? new File[0] : dir.listFiles();
-
-        return matchFiles(buffer, translated, entries, candidates) + commandLine.getBufferPosition() - commandLine.getArgumentPosition();
     }
 
     protected String separator() {
         return File.separator;
     }
 
-    protected File getUserHome() {
-        return new File(System.getProperty("user.home"));
+    protected Path getUserDir() {
+        return Paths.get(System.getProperty("user.dir"));
     }
 
-    protected File getUserDir() {
-        return new File(".");
+    protected Path getUserHome() {
+        return Paths.get(System.getProperty("user.home"));
     }
 
-    protected int matchFiles(final String buffer, final String translated, final File[] files, final List<String> candidates) {
-        if (files == null) {
-            return -1;
+    protected String getDisplay(Terminal terminal, Path p) {
+        // TODO: use $LS_COLORS for output
+        String name = p.getFileName().toString();
+        if (Files.isDirectory(p)) {
+            AttributedStringBuilder sb = new AttributedStringBuilder();
+            sb.style(AttributedStyle.BOLD.foreground(AttributedStyle.RED));
+            sb.append(name);
+            sb.style(AttributedStyle.DEFAULT);
+            sb.append(OS_IS_WINDOWS ? "\\\\" : "/");
+            name = sb.toAnsi(terminal);
+        } else if (Files.isSymbolicLink(p)) {
+            AttributedStringBuilder sb = new AttributedStringBuilder();
+            sb.style(AttributedStyle.BOLD.foreground(AttributedStyle.RED));
+            sb.append(name);
+            sb.style(AttributedStyle.DEFAULT);
+            sb.append("@");
+            name = sb.toAnsi(terminal);
         }
-
-        int matches = 0;
-
-        // first pass: just count the matches
-        for (File file : files) {
-            if (file.getAbsolutePath().startsWith(translated)) {
-                matches++;
-            }
-        }
-        for (File file : files) {
-            if (file.getAbsolutePath().startsWith(translated)) {
-                CharSequence name = file.getName() + (matches == 1 && file.isDirectory() ? separator() : " ");
-                candidates.add(render(file, name).toString());
-            }
-        }
-
-        final int index = buffer.lastIndexOf(separator());
-
-        return index + separator().length();
-    }
-
-    protected CharSequence render(final File file, final CharSequence name) {
         return name;
     }
+
 }

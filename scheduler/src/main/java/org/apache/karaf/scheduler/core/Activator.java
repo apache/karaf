@@ -18,28 +18,56 @@ package org.apache.karaf.scheduler.core;
 
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.osgi.service.cm.ManagedService;
+import org.quartz.impl.jdbcjobstore.JobStoreSupport;
+import org.quartz.impl.jdbcjobstore.JobStoreTX;
+import org.quartz.impl.jdbcjobstore.StdJDBCDelegate;
+import org.quartz.simpl.RAMJobStore;
 import org.quartz.simpl.SimpleThreadPool;
+import org.quartz.spi.JobStore;
 import org.quartz.spi.ThreadPool;
+import org.quartz.utils.ConnectionProvider;
+
+import java.util.Enumeration;
+import java.util.Properties;
 
 @Services(provides = @ProvideService(Scheduler.class))
-public class Activator extends BaseActivator {
+@Managed("org.apache.karaf.scheduler.quartz")
+public class Activator extends BaseActivator implements ManagedService {
 
-    private ThreadPool threadPool;
     private QuartzScheduler scheduler;
     private WhiteboardHandler whiteboardHandler;
 
     @Override
     protected void doStart() throws Exception {
-        threadPool = new SimpleThreadPool(4, Thread.NORM_PRIORITY);
-        scheduler = new QuartzScheduler(threadPool);
-        whiteboardHandler = new WhiteboardHandler(bundleContext, scheduler);
+        Properties properties = new Properties();
+        if (getConfiguration() == null) {
+            return;
+        }
+        Enumeration<String> keys = getConfiguration().keys();
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            if (key.startsWith("org.quartz")) {
+                Object value = getConfiguration().get(key);
+                properties.put(key, value);
+            }
+        }
+        scheduler = new QuartzScheduler(properties);
         register(Scheduler.class, scheduler);
+        whiteboardHandler = new WhiteboardHandler(bundleContext, scheduler);
+
+        SchedulerMBeanImpl mBean = new SchedulerMBeanImpl();
+        mBean.setScheduler(scheduler);
+        registerMBean(mBean, "type=scheduler");
     }
 
     @Override
     protected void doStop() {
+        super.doStop();
+
         if (whiteboardHandler != null) {
             whiteboardHandler.deactivate();
             whiteboardHandler = null;

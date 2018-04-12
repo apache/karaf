@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -46,12 +45,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.ConfigFileInfo;
-import org.apache.karaf.features.Dependency;
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.*;
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.maven.Parser;
@@ -70,13 +64,14 @@ public class KarServiceImpl implements KarService {
     private FeaturesService featuresService;
     
     private boolean noAutoRefreshBundles;
+    private boolean noAutoStartBundles;
     private List<Kar> unsatisfiedKars;
     private AtomicBoolean busy;
     private DelayedDeployerThread delayedDeployerThread;
 
-    public KarServiceImpl(String karafBase, String karafData, FeaturesService featuresService) {
+    public KarServiceImpl(String karafBase, String karStorage, FeaturesService featuresService) {
         this.base = new File(karafBase);
-        this.storage = new File(new File(karafData), "kar");
+        this.storage = new File(karStorage);
         this.featuresService = featuresService;
         this.storage.mkdirs();
         if (!storage.isDirectory()) {
@@ -85,17 +80,27 @@ public class KarServiceImpl implements KarService {
         unsatisfiedKars = Collections.synchronizedList(new ArrayList<Kar>());
         busy = new AtomicBoolean();
     }
-    
+
     @Override
     public void install(URI karUri) throws Exception {
+        install(karUri, false);
+    }
+
+    @Override
+    public void install(URI karUri, boolean noAutoStartBundles) throws Exception {
         String karName = new Kar(karUri).getKarName();
         LOGGER.debug("Installing KAR {} from {}", karName, karUri);
         File karDir = new File(storage, karName);
-        install(karUri, karDir, base);
+        install(karUri, karDir, base, noAutoStartBundles);
+    }
+
+    @Override
+    public void install(URI karUri, File repoDir, File resourceDir) throws Exception {
+        install(karUri, repoDir, resourceDir, false);
     }
     
     @Override
-    public void install(URI karUri, File repoDir, File resourceDir) throws Exception {
+    public void install(URI karUri, File repoDir, File resourceDir, boolean noAutoStartBundles) throws Exception {
         busy.set(true);
         try {
             Kar kar = new Kar(karUri);
@@ -108,30 +113,30 @@ public class KarServiceImpl implements KarService {
             if (kar.isShouldInstallFeatures()) {
                 List<URI> featureRepos = kar.getFeatureRepos();
                 Dependency missingDependency = findMissingDependency(featureRepos);
-                if(missingDependency==null) {
-                    installFeatures(featureRepos);              
+                if (missingDependency == null) {
+                    installFeatures(featureRepos, noAutoStartBundles);
                 }
                 else {
                     LOGGER.warn("Feature dependency {} is not available. Kar deployment postponed to see if it is about to be deployed",missingDependency);
                     unsatisfiedKars.add(kar);
-                    if(delayedDeployerThread==null) {
-                        delayedDeployerThread = new DelayedDeployerThread();                        
+                    if (delayedDeployerThread == null) {
+                        delayedDeployerThread = new DelayedDeployerThread(noAutoStartBundles);
                         delayedDeployerThread.start();
                     }
                 }
             }
-            if(!unsatisfiedKars.isEmpty()) {
+            if (!unsatisfiedKars.isEmpty()) {
                 for (Iterator<Kar> iterator = unsatisfiedKars.iterator(); iterator.hasNext();) {
                     Kar delayedKar = iterator.next();
                     if(findMissingDependency(delayedKar.getFeatureRepos())==null) {
                         LOGGER.info("Dependencies of kar {} are now satisfied. Installing",delayedKar.getKarName());
                         iterator.remove();
-                        installFeatures(delayedKar.getFeatureRepos());
+                        installFeatures(delayedKar.getFeatureRepos(), noAutoStartBundles);
                     }
                 }
             }
-            if(unsatisfiedKars.isEmpty()) {
-                if(delayedDeployerThread!=null) {
+            if (unsatisfiedKars.isEmpty()) {
+                if (delayedDeployerThread != null) {
                     delayedDeployerThread.cancel();                 
                 }
                 delayedDeployerThread = null;
@@ -168,7 +173,7 @@ public class KarServiceImpl implements KarService {
 
 
     private List<URI> readFromFile(File repoListFile) {
-        ArrayList<URI> uriList = new ArrayList<URI>();
+        ArrayList<URI> uriList = new ArrayList<>();
         FileReader fr = null;
         try {
             fr = new FileReader(repoListFile);
@@ -237,7 +242,7 @@ public class KarServiceImpl implements KarService {
     
     @Override
     public List<String> list() throws Exception {
-        List<String> kars = new ArrayList<String>();
+        List<String> kars = new ArrayList<>();
         for (File kar : storage.listFiles()) {
             if (kar.isDirectory()) {
                 kars.add(kar.getName());
@@ -257,7 +262,7 @@ public class KarServiceImpl implements KarService {
     private void addToFeaturesRepositories(URI uri) throws Exception {
         try {
             featuresService.removeRepository(uri);
-            featuresService.addRepository(uri);
+            featuresService.addRepository(uri, false);
             LOGGER.info("Added feature repository '{}'", uri);
         } catch (Exception e) {
             LOGGER.warn("Unable to add repository '{}'", uri, e);
@@ -269,21 +274,29 @@ public class KarServiceImpl implements KarService {
      *
      * @param featuresRepositories the list of features XML.
      */
-    private void installFeatures(List<URI> featuresRepositories) throws Exception {
+    private void installFeatures(List<URI> featuresRepositories, boolean noAutoStartBundles) throws Exception {
         for (Repository repository : featuresService.listRepositories()) {
             for (URI karFeatureRepoUri : featuresRepositories) {
                 if (repository.getURI().equals(karFeatureRepoUri)) {
                     try {
                         for (Feature feature : repository.getFeatures()) {
-                            try {
-                                LOGGER.debug("noAutoRefreshBundles is " + isNoAutoRefreshBundles());
-                                if (isNoAutoRefreshBundles()) {
-                                    featuresService.installFeature(feature, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-                                } else {
-                                    featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                            if (feature.getInstall() == null || Feature.DEFAULT_INSTALL_MODE.equals(feature.getInstall())) {
+                                EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);
+                                try {
+                                    LOGGER.debug("noAutoRefreshBundles is {}", isNoAutoRefreshBundles());
+                                    if (isNoAutoRefreshBundles()) {
+                                        options.add(FeaturesService.Option.NoAutoRefreshBundles);
+                                    }
+                                    LOGGER.debug("noAutoStartBundles is {} (default {})", noAutoStartBundles, this.noAutoStartBundles);
+                                    if (noAutoStartBundles || this.noAutoStartBundles) {
+                                        options.add(FeaturesService.Option.NoAutoStartBundles);
+                                    }
+                                    featuresService.installFeature(feature, options);
+                                } catch (Exception e) {
+                                    LOGGER.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
                                 }
-                            } catch (Exception e) {
-                                LOGGER.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                            } else {
+                                LOGGER.warn("Feature " + feature.getName() + "/" + feature.getVersion() + " has install flag set to \"manual\", so it's not automatically installed");
                             }
                         }
                     } catch (Exception e) {
@@ -310,10 +323,10 @@ public class KarServiceImpl implements KarService {
             Manifest manifest = createNonAutoStartManifest(repo.getURI());
             jos = new JarOutputStream(new BufferedOutputStream(fos, 100000), manifest);
             
-            Map<URI, Integer> locationMap = new HashMap<URI, Integer>();
+            Map<URI, Integer> locationMap = new HashMap<>();
             copyResourceToJar(jos, repo.getURI(), locationMap);
         
-            Map<String, Feature> featureMap = new HashMap<String, Feature>();
+            Map<String, Feature> featureMap = new HashMap<>();
             for (Feature feature : repo.getFeatures()) {
                 featureMap.put(feature.getName(), feature);
             }
@@ -338,7 +351,7 @@ public class KarServiceImpl implements KarService {
     }
 
     private Set<Feature> getFeatures(Map<String, Feature> featureMap, List<String> features, int depth) {
-        Set<Feature> featureSet = new HashSet<Feature>();
+        Set<Feature> featureSet = new HashSet<>();
         if (depth > 5) {
             // Break after some recursions to avoid endless loops 
             return featureSet;
@@ -355,7 +368,7 @@ public class KarServiceImpl implements KarService {
             } else {
                 featureSet.add(feature);
                 List<Dependency> deps = feature.getDependencies();
-                List<String> depNames = new ArrayList<String>();
+                List<String> depNames = new ArrayList<>();
                 for (Dependency dependency : deps) {
                     depNames.add(dependency.getName());
                 }
@@ -365,7 +378,7 @@ public class KarServiceImpl implements KarService {
         return featureSet;
     }
 
-    private Manifest createNonAutoStartManifest(URI repoUri) throws UnsupportedEncodingException, IOException {
+    private Manifest createNonAutoStartManifest(URI repoUri) throws IOException {
         String manifestSt = "Manifest-Version: 1.0\n" +
             Kar.MANIFEST_ATTR_KARAF_FEATURE_START +": false\n" +
             Kar.MANIFEST_ATTR_KARAF_FEATURE_REPOS + ": " + repoUri.toString() + "\n";
@@ -386,13 +399,26 @@ public class KarServiceImpl implements KarService {
 
     private void copyFeatureToJar(JarOutputStream jos, Feature feature, Map<URI, Integer> locationMap)
         throws URISyntaxException {
+        // add bundles
         for (BundleInfo bundleInfo : feature.getBundles()) {
-            URI location = new URI(bundleInfo.getLocation());
+            URI location = new URI(bundleInfo.getLocation().trim());
             copyResourceToJar(jos, location, locationMap);
         }
+        // add config files
         for (ConfigFileInfo configFileInfo : feature.getConfigurationFiles()) {
-            URI location = new URI(configFileInfo.getLocation());
+            URI location = new URI(configFileInfo.getLocation().trim());
             copyResourceToJar(jos, location, locationMap);
+        }
+        // add bundles and config files in conditionals
+        for (Conditional conditional : feature.getConditional()) {
+            for (BundleInfo bundleInfo : conditional.getBundles()) {
+                URI location = new URI(bundleInfo.getLocation().trim());
+                copyResourceToJar(jos, location, locationMap);
+            }
+            for (ConfigFileInfo configFileInfo : conditional.getConfigurationFiles()) {
+                URI location = new URI(configFileInfo.getLocation().trim());
+                copyResourceToJar(jos, location, locationMap);
+            }
         }
     }
 
@@ -427,10 +453,12 @@ public class KarServiceImpl implements KarService {
                 if (repository.getURI().equals(karFeatureRepoUri)) {
                     try {
                         for (Feature feature : repository.getFeatures()) {
-                            try {
-                                featuresService.uninstallFeature(feature.getName(), feature.getVersion());
-                            } catch (Exception e) {
-                                LOGGER.warn("Unable to uninstall Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                            if (feature.getInstall() == null || Feature.DEFAULT_INSTALL_MODE.equals(feature.getInstall())) {
+                                try {
+                                    featuresService.uninstallFeature(feature.getName(), feature.getVersion());
+                                } catch (Exception e) {
+                                    LOGGER.warn("Unable to uninstall Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                                }
                             }
                         }
                     } catch (Exception e) {
@@ -449,13 +477,23 @@ public class KarServiceImpl implements KarService {
         this.noAutoRefreshBundles = noAutoRefreshBundles;
     }
 
-    private class DelayedDeployerThread extends Thread
-    {
+    public boolean isNoAutoStartBundles() {
+        return noAutoStartBundles;
+    }
+
+    public void setNoAutoStartBundles(boolean noAutoStartBundles) {
+        this.noAutoStartBundles = noAutoStartBundles;
+    }
+
+    private class DelayedDeployerThread extends Thread {
+
+        private boolean noAutoStartBundles;
         private AtomicBoolean cancel;
         
-        public DelayedDeployerThread() {
+        public DelayedDeployerThread(boolean noAutoStartBundles) {
             super("Delayed kar deployment");
             cancel = new AtomicBoolean();
+            this.noAutoStartBundles = noAutoStartBundles;
         }
         
         public void cancel() {
@@ -482,7 +520,7 @@ public class KarServiceImpl implements KarService {
                 Kar kar = iterator.next();
                 iterator.remove();
                 try {   
-                    installFeatures(kar.getFeatureRepos());
+                    installFeatures(kar.getFeatureRepos(), noAutoStartBundles);
                 } catch (Exception e) {
                     LOGGER.error("Delayed deployment of kar "+kar.getKarName()+" failed",e);
                 }

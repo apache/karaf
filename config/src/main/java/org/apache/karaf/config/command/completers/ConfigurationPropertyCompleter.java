@@ -53,7 +53,6 @@ public class ConfigurationPropertyCompleter implements Completer {
     @Reference
     private ConfigurationAdmin configAdmin;
 
-    @SuppressWarnings("rawtypes")
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         StringsCompleter strings = new StringsCompleter();
         if (session != null) {
@@ -98,7 +97,7 @@ public class ConfigurationPropertyCompleter implements Completer {
      */
     @SuppressWarnings("rawtypes")
     private Set<String> getPropertyNames(String pid) {
-        Set<String> propertyNames = new HashSet<String>();
+        Set<String> propertyNames = new HashSet<>();
         if (pid != null) {
             Configuration configuration = null;
             try {

@@ -41,7 +41,6 @@ import org.apache.karaf.instance.core.internal.InstanceServiceImpl;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.impl.action.command.DefaultActionPreparator;
-import org.fusesource.jansi.AnsiConsole;
 
 public class Execute {
     static Class<? extends Action> x = CreateCommand.class;
@@ -59,7 +58,7 @@ public class Execute {
             StartCommand.class,
             StatusCommand.class,
             StopCommand.class};
-    private static final Map<String, Class<?>> COMMANDS = new TreeMap<String, Class<?>>();
+    private static final Map<String, Class<?>> COMMANDS = new TreeMap<>();
 
     static {
         for (Class<?> c : COMMAND_CLASSES) {
@@ -87,8 +86,6 @@ public class Execute {
     private static final String PROP_KARAF_OPTS = "karaf.opts";
 
     public static void main(String[] args) throws Exception {
-        AnsiConsole.systemInstall();
-
         if (args.length == 0) {
             listCommands();
             exit(0);
@@ -139,7 +136,7 @@ public class Execute {
 
     static void execute(InstanceCommandSupport command, File storageFile, String[] args) throws Exception {
         DefaultActionPreparator dap = new DefaultActionPreparator();
-        List<Object> params = new ArrayList<Object>(Arrays.asList(args));
+        List<Object> params = new ArrayList<>(Arrays.asList(args));
         params.remove(0); // this is the actual command name
 
         if (!dap.prepare(command, null, params)) {
@@ -166,7 +163,7 @@ public class Execute {
         if (exitAllowed) {
             System.exit(rc);
         } else {
-            throw new RuntimeException("" + rc);
+            throw new RuntimeException(Integer.toString(rc));
         }
     }
 

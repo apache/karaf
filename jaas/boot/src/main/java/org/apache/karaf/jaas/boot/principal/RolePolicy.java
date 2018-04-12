@@ -54,7 +54,7 @@ public enum RolePolicy {
 
     private String value;
 
-    private static final Map<String, RolePolicy> policies = new HashMap<String, RolePolicy>();
+    private static final Map<String, RolePolicy> policies = new HashMap<>();
 
     static {
         for (RolePolicy s : EnumSet.allOf(RolePolicy.class)) {
@@ -62,7 +62,7 @@ public enum RolePolicy {
         }
     }
 
-    private RolePolicy(String value) {
+    RolePolicy(String value) {
         this.value = value;
     }
 

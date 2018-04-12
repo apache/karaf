@@ -18,14 +18,14 @@
 package org.apache.karaf.tooling.utils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -128,14 +128,6 @@ public abstract class MojoSupport extends AbstractMojo {
     // called by Plexus when injecting the mojo's session
     public void setMavenSession(MavenSession mavenSession) {
         this.mavenSession = mavenSession;
-
-        if (mavenSession != null) {
-            // check for custom settings.xml and pass it onto pax-url-aether
-            File settingsFile = mavenSession.getRequest().getUserSettingsFile();
-            if (settingsFile != null && settingsFile.isFile()) {
-                System.setProperty("org.ops4j.pax.url.mvn.settings", settingsFile.getPath());
-            }
-        }
     }
 
     protected Map createManagedVersionMap(String projectId,
@@ -144,10 +136,7 @@ public abstract class MojoSupport extends AbstractMojo {
         if (dependencyManagement != null
                 && dependencyManagement.getDependencies() != null) {
             map = new HashMap();
-            for (Iterator i = dependencyManagement.getDependencies().iterator(); i
-                    .hasNext();) {
-                Dependency d = (Dependency) i.next();
-
+            for (Dependency d : dependencyManagement.getDependencies()) {
                 try {
                     VersionRange versionRange = VersionRange
                             .createFromVersionSpec(d.getVersion());
@@ -191,13 +180,13 @@ public abstract class MojoSupport extends AbstractMojo {
 
             return getLocalRepoUrl() + "/" + dir + name;
         }
-        if (System.getProperty("os.name").startsWith("Windows") && uri.startsWith("file:")) {
-                String baseDir = uri.substring(5).replace('\\', '/').replaceAll(" ", "%20");
-                String result = baseDir;
-                if (baseDir.indexOf(":") > 0) {
-                        result = "file:///" + baseDir;
-                }
-                return result;
+        uri = uri.replaceAll(" ", "%20");
+        if (uri.startsWith("file:") && File.separatorChar != '/') {
+            String baseDir = uri.substring(5).replace(File.separatorChar, '/');
+            if (baseDir.indexOf(':') >= 0) {
+                baseDir = "///" + baseDir;
+            }
+            return "file:" + baseDir;
         }
         return uri;
     }
@@ -279,9 +268,12 @@ public abstract class MojoSupport extends AbstractMojo {
         //check if the resourceLocation descriptor contains also remote repository information.
         ArtifactRepository repo = null;
         if (resourceLocation.startsWith("http://")) {
-            final int repoDelimIntex = resourceLocation.indexOf('!');
-            String repoUrl = resourceLocation.substring(0, repoDelimIntex);
-
+            final int repoDelimIndex = resourceLocation.indexOf('!');
+            String repoUrl = resourceLocation.substring(0, repoDelimIndex);
+            int paramIndex = repoUrl.indexOf("@");
+            if (paramIndex >= 0) {
+                repoUrl = repoUrl.substring(0, paramIndex);
+            }
             repo = new DefaultArtifactRepository(
                     repoUrl,
                     repoUrl,
@@ -290,9 +282,9 @@ public abstract class MojoSupport extends AbstractMojo {
             if (mavenProxy != null) {
                 repo.setProxy(mavenProxy);
             }
-            resourceLocation = resourceLocation.substring(repoDelimIntex + 1);
-
+            resourceLocation = resourceLocation.substring(repoDelimIndex + 1);
         }
+
         String[] parts = resourceLocation.split("/");
         String groupId = parts[0];
         String artifactId = parts[1];
@@ -351,11 +343,8 @@ public abstract class MojoSupport extends AbstractMojo {
         File targetDir = destFile.getParentFile();
         ensureDirExists(targetDir);
 
-        try {
-            try (
-                FileInputStream is = new FileInputStream(sourceFile);
-                FileOutputStream bos = new FileOutputStream(destFile)
-            ) {
+        try (InputStream is = Files.newInputStream(sourceFile.toPath())) {
+            try (OutputStream bos = Files.newOutputStream(destFile.toPath())) {
                 StreamUtils.copy(is, bos);
             }
         } catch (IOException e) {

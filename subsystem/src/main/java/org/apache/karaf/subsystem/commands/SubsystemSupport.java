@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.osgi.service.subsystem.Subsystem;
-import org.osgi.service.subsystem.SubsystemConstants;
 
 public abstract class SubsystemSupport {
 
@@ -56,7 +55,7 @@ public abstract class SubsystemSupport {
         if (id == null || id.isEmpty()) {
             return getSubsystems();
         }
-        List<Subsystem> subsystems = new ArrayList<Subsystem>();
+        List<Subsystem> subsystems = new ArrayList<>();
         // Try with the id
         Pattern pattern = Pattern.compile("^\\d+$");
         Matcher matcher = pattern.matcher(id);
@@ -102,7 +101,7 @@ public abstract class SubsystemSupport {
     }
 
     protected List<Long> getSubsytemIds(Collection<Subsystem> subsystems) {
-        List<Long> ids = new ArrayList<Long>();
+        List<Long> ids = new ArrayList<>();
         for (Subsystem ss : subsystems) {
             long id = ss.getSubsystemId();
             if (!ids.contains(id)) {
@@ -114,9 +113,9 @@ public abstract class SubsystemSupport {
     }
 
     protected List<Subsystem> getSubsystems() {
-        Map<Long, Subsystem> subsystems = new TreeMap<Long, Subsystem>();
+        Map<Long, Subsystem> subsystems = new TreeMap<>();
         doGetSubsystems(subsystems, getRoot());
-        return new ArrayList<Subsystem>(subsystems.values());
+        return new ArrayList<>(subsystems.values());
     }
 
     private void doGetSubsystems(Map<Long, Subsystem> subsystems, Subsystem subsystem) {

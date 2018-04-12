@@ -16,6 +16,7 @@
 
 The main information provided by a feature is the set of OSGi bundles that defines the application.  Such bundles are URLs pointing to the actual bundle jars.  For example, one would write the following definition:
 
+[source,options="nowrap"]
 ----
 <bundle>http://repo1.maven.org/maven2/org/apache/servicemix/nmr/org.apache.servicemix.nmr.api/1.0.0-m2/org.apache.servicemix.nmr.api-1.0.0-m2.jar</bundle>
 ----
@@ -45,16 +46,298 @@ The equivalent of the above bundle would be:
 
 In addition to being less verbose, the Maven url handlers can also resolve snapshots and can use a local copy of the jar if one is available in your Maven local repository.
 
-The `org.ops4j.pax.url.mvn` bundle resolves `mvn` URLs. It can be configured using the file `etc/org.ops4j.pax.url.cfg`
+The `org.ops4j.pax.url.mvn` bundle resolves `mvn` URLs. It can be configured using the file `etc/org.ops4j.pax.url.cfg`.
+Full reference of `org.ops4j.pax.url.mvn` PID configuration can be found https://ops4j1.jira.com/wiki/display/paxurl/Aether+Configuration[on pax-web Wiki page].
 
-The most important property is :
+The most important property is:
 
-* `org.ops4j.pax.url.mvn.repositories` : Comma separated list of repository remote repository URLs that are checked in order of occurence when resolving maven artifacts
+* `org.ops4j.pax.url.mvn.repositories` : Comma separated list of remote repository URLs that are checked in order of occurence when resolving maven artifacts
 
-By default, snapshots are disabled. To enable an URL for snapshots append @snapshots to a repository entry. For example
+Two other significant properties are:
+
+* `org.ops4j.pax.url.mvn.defaulRepositories` : Comma separated list of locations that are checked before querying remote repositories. These can be treated as read-only repositories, as nothing is written there during artifact resolution.
+* `org.ops4j.pax.url.mvn.localRepository` : by default (implicitly) it's standard `~/.m2/repository` location. This
+  local repository is used to store artifacts downloaded from one of remote repositories, so at next resolution attempt
+  no remote request is issued.
+
+By default, snapshots are disabled. To enable an URL for snapshots append `@snapshots` to a repository URI. For example
 
 ----
-http://www.example.org/repo@snapshots
+org.ops4j.pax.url.mvn.repositories = http://www.example.org/repo@snapshots
 ----
 
 Repositories on the local machine are supported through `file:/` URLs.
+
+==== Maven configuration commands
+
+Full configuration of `org.ops4j.pax.url.mvn` bundle can be done using `org.ops4j.pax.url.mvn` PID (see `etc/org.ops4j.pax.url.mvn.cfg` file). This however may be cumbersome in some scenarios.
+
+In order to make user's life easier and provide more _domain_ oriented approach, Karaf provides several shell commands that makes Maven configuration easier.
+
+===== maven:summary
+
+This command shows quick summary about current `org.ops4j.pax.url.mvn` PID configuration. For example:
+
+[source,options="nowrap"]
+----
+karaf@root()> maven:summary -s
+
+Option                    │ Value                                                          │ Source
+──────────────────────────┼────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────
+Local repository          │ /home/ggrzybek/.m2/repository                                  │ Implicit ${user.home}/.m2/repository
+Settings file             │ /home/ggrzybek/.m2/settings.xml                                │ Implicit ${user.home}/.m2/settings.xml
+Security settings file    │ /home/ggrzybek/.m2/settings-security.xml                       │ Implicit ${user.home}/.m2/settings-security.xml
+Global update policy      │                                                                │ Implicit "never", but doesn't override repository-specific value
+Global checksum policy    │ warn                                                           │ Default "warn"
+Update releases           │ false                                                          │ Default "false"
+Require Config Admin      │ true                                                           │ BundleContext property (org.ops4j.pax.url.mvn.requireConfigAdminConfig)
+Use fallback repository   │ false                                                          │ Explicit org.ops4j.pax.url.mvn PID configuration (org.ops4j.pax.url.mvn.useFallbackRepositories)
+Offline mode              │ false                                                          │ Default "false"
+SSL/TLS certificate check │ true                                                           │ Explicit org.ops4j.pax.url.mvn PID configuration (org.ops4j.pax.url.mvn.certificateCheck)
+Remote repositories       │ http://repo1.maven.org/maven2/                                 │ PID configuration
+                          │ http://repository.apache.org/content/groups/snapshots-group/   │ PID configuration
+                          │ https://oss.sonatype.org/content/repositories/snapshots/       │ PID configuration
+                          │ https://oss.sonatype.org/content/repositories/ops4j-snapshots/ │ PID configuration
+Default repositories      │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/system/         │ PID configuration
+                          │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/data/kar/       │ PID configuration
+HTTP proxies              │ proxy.everfree.forest:3128                                     │ Maven XML settings
+----
+
+* `-s` option show where the value of the option come from. It may be implicit, explicit or default. We can also see
+  whether the value was configured in PID or in `settings.xml` file.
+* `-p` option uses original option names from `org.ops4j.pax.url.mvn` PID instead of descriptive option names
+* `-d` option shows additional description, explaining what given option should be used for
+* `-x` option turns on password display - if there's master password configured, it'll be displayed in clear text.
+  This option may be used only by user with `admin` role.
+
+
+===== maven:repository-list
+
+This command displays all configured Maven repositories - in much more readable way than plain `config:proplist --pid org.ops4j.pax.url.mvn` command does.
+
+[source,options="nowrap"]
+----
+karaf@root()> maven:repository-list -v
+
+== Remote repositories
+ID                              │ URL                                                            │ Releases    │ Snapshots   │ Defined in
+────────────────────────────────┼────────────────────────────────────────────────────────────────┼─────────────┼─────────────┼───────────
+central                         │ http://repo1.maven.org/maven2/                                 │ yes (daily) │ no          │ PID
+apache                          │ http://repository.apache.org/content/groups/snapshots-group/   │ no          │ yes (daily) │ PID
+sonatype.snapshots.deploy       │ https://oss.sonatype.org/content/repositories/snapshots/       │ no          │ yes (daily) │ PID
+ops4j.sonatype.snapshots.deploy │ https://oss.sonatype.org/content/repositories/ops4j-snapshots/ │ no          │ yes (daily) │ PID
+special                         │ https://repository.everfree.forest/                            │ yes (daily) │ no          │ SETTINGS
+
+== Default repositories
+ID                      │ URL                                                      │ Releases    │ Snapshots
+────────────────────────┼──────────────────────────────────────────────────────────┼─────────────┼────────────
+system.repository       │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/system/   │ yes (daily) │ yes (daily)
+kar.repository          │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/data/kar/ │ yes (daily) │ yes (daily)
+child.system.repository │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/system/   │ yes (daily) │ yes (daily)
+----
+
+* `-v` option shows additional information about policies related to given repository
+* `-x` shows credentials for given repository (if defined)
+
+===== maven:password
+
+`org.ops4j.pax.url.mvn` bundle uses Aether library to handle Maven resolution. It uses `settings.xml` file if
+credentials have to be used when accessing remote Maven repositories. This isn't done by `org.ops4j.pax.url.mvn`,
+but by Aether itself (or rather maven-settings library). When dealing with `settings.xml` file, passwords that
+are stored there may need to be decrypted.
+Outside of Karaf, we can use `mvn -emp` and `mvn -ep` passwords and manually configure `~/.m2/settings-security.xml`
+file.
+
+Karaf makes the task of managing credentials easier.
+
+In order to use encrypted repository (or http proxy) passwords inside `settings.xml` file, Maven must know the _master
+password_ stored inside `settings-security.xml` file. This file isn't usually present inside `~/.m2` directory and if
+there's a need to use it, one has to be created manually.
+
+Here's the way to encrypt Maven _master password_ (which is used to encrypt ordinary passwords for repository or http proxies):
+
+[source,options="nowrap"]
+----
+karaf@root()> maven:password -emp
+Master password to encrypt: *****
+Encrypted master password: {y+p9TiYuwVEHMHV14ej0Ni34zBnXXQrIOqjww/3Ro6U=}
+----
+
+The above usage simply prints encrypted _master password_. We can however make this password persistent. This will
+result in new `settings-security.xml` file to be created and change in `org.ops4j.pax.url.mvn.security` property.
+
+NOTE: Karaf maven commands will never overwrite your current `~/.m2/settings.xml` or `~/.m2/settings-security.xml` files.
+If there's a need to change these files, maven commands will make a copy of existing file and set relevant `org.ops4j.pax.url.mvn` PID options
+to point to new locations.
+
+[source,options="nowrap"]
+----
+karaf@root()> maven:password -emp --persist
+Maven security settings will be stored in new file. This file will be used in org.ops4j.pax.url.mvn.security property. Continue? (y/N) y
+Master password to encrypt: *****
+Encrypted master password: {lPPIFSUcPrMHnhwdauttAJYZcOe1D9sYGj4rwoaTwnY=}
+New security settings stored in "/data/servers/apache-karaf-4.2.0-SNAPSHOT/data/cache/bundle53/data/maven-security-settings-1498120766139.xml"
+karaf@root()> maven:summary -x
+
+Option                    │ Value
+──────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+...
+Security settings file    │ /data/servers/apache-karaf-4.2.0-SNAPSHOT/data/cache/bundle53/data/maven-security-settings-1498120766139.xml
+Master password           │ admin
+...
+----
+
+Now, when Maven _master password_ is set, we can encrypt ordinary passwords that may be then used when defining/changing
+remote repositories or http proxies:
+
+[source,options="nowrap"]
+----
+karaf@root()> maven:password -ep
+Password to encrypt: *****
+Encrypted password: {fHl8U3pINkEH7RR1CufRT+utj5gJHfqsRgd6wTo92Eo=}
+You can use this encrypted password when defining repositories and proxies
+----
+
+===== Configuring repositories (default and remote)
+
+As mentioned before, there are two kinds of repositories that are used/queried by `org.ops4j.pax.url.mvn` bundle when resolving
+`mvn:` based URIs:
+
+default repositories:: These are read-only local repositories that are simply queried before performing any remote access.
+ The best example of such repository is `$KARAF_HOME/system` directory.
+
+remote repositories:: These are well-known Maven remote repositories - usually accessible over http(s) protocol. Popular
+ repositories are Sonatype Nexus or JFrog Artifactory.
+
+Both kinds of repositories may be created using `maven:repository-add` command.
+
+Here's how default repository may be created:
+
+[source,options="nowrap"]
+----
+karaf@root()> maven:repository-add --default -id my.default.repository --snapshots '${karaf.home}/special-repository'
+
+...
+== Default repositories
+ID                      │ URL                                                                │ Releases    │ Snapshots
+────────────────────────┼────────────────────────────────────────────────────────────────────┼─────────────┼────────────
+...
+my.default.repository   │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/special-repository/ │ yes (daily) │ yes (daily)
+----
+
+For remote repository, we can specify more options (like credentials or update policies):
+
+[source,options="nowrap"]
+----
+karaf@root()> maven:repository-add -idx 0 -id my.remote.repository --snapshots -up never --username admin --password '{fHl8U3pINkEH7RR1CufRT+utj5gJHfqsRgd6wTo92Eo=}' http://localhost/cloud-repository
+Maven settings will be updated and org.ops4j.pax.url.mvn.settings property will change. Continue? (y/N) y
+New settings stored in "/data/servers/apache-karaf-4.2.0-SNAPSHOT/data/cache/bundle53/data/maven-settings-1498121385253.xml"
+
+karaf@root()> maven:repository-list -x
+
+== Remote repositories
+ID                              │ URL                                                            │ Username │ Password
+────────────────────────────────┼────────────────────────────────────────────────────────────────┼──────────┼─────────
+my.remote.repository            │ http://localhost/cloud-repository/                             │ admin    │ admin
+...
+----
+
+In the above example, new `settings.xml` file was created. The reason is that although new repository itself was added
+to `org.ops4j.pax.url.mvn.repositories` property, the credentials had to be stored in `settings.xml` file:
+
+[source,options="nowrap"]
+----
+<servers>
+  <server>
+    <username>admin</username>
+    <password>{fHl8U3pINkEH7RR1CufRT+utj5gJHfqsRgd6wTo92Eo=}</password>
+    <id>my.remote.repository</id>
+  </server>
+</servers>
+----
+
+Here's summary of all options for `maven:repository-add` command:
+
+* `-id` mandatory identifier of repository
+* `-d` option may be used to configure default repositories instead of remote ones
+* `-nr` option disables non-SNAPSHOT artifacts resolution in this repository
+* `-s` option enables SNAPSHOT artifacts resolution in this repository
+* `-up` sets _update policy_ for given repository (`daily`, `always`, `never`, `interval:MINUTES`)
+* `-cp` sets _checksum policy_ for given repository (`fail`, `warn`, `ignore`)
+* `-f` disables confirmation prompts for commands
+* `-idx` allows to insert a repository at given position (instead of simply appending new repository at the end of current list of repositories)
+* `-u` sets username for remote repository access
+* `-p` sets password for remote repository access (may be encrypted using `maven:password -ep`)
+
+After creating a repository, it may be deleted (using `maven:repository-remove` command) or changed (`maven:repository-change` command).
+All the options are the same as in `maven:repository-add` command. When removing a repository, only `-id` (and possibly `-d`) options are needed.
+
+[source,options="nowrap"]
+----
+karaf@root()> repository-remove -d -id my.default.repository
+Are you sure to remove repository with ID "my.default.repository" for URL file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/special-repository/? (y/N) y
+
+karaf@root()> repository-change -id special --username discord --password d1sc0rd
+Maven settings will be updated and org.ops4j.pax.url.mvn.settings property will change. Continue? (y/N) y
+New settings stored in "/data/servers/apache-karaf-4.2.0-SNAPSHOT/data/cache/bundle53/data/maven-settings-1498122026388.xml"
+----
+
+===== Configuring HTTP proxies
+
+When accessing remote repositories using `org.ops4j.pax.url.mvn` (Aether library) there may be a need to let Maven/Aether
+know about HTTP proxies to use. HTTP proxies *can't be configured* inside `etc/org.ops4j.pax.url.mvn.cfg` file. It has to
+be done in `settings.xml` and its location has to be set in `org.ops4j.pax.url.mvn.settings` PID property.
+
+`maven:http-proxy` command can be used to add/change/remove HTTP proxy definition. It automatically does a copy
+of existing `settings.xml` file and changes `org.ops4j.pax.url.mvn.settings` PID property.
+
+For example:
+
+[source,options="nowrap"]
+----
+karaf@root()> maven:http-proxy-list -x
+
+ID       │ Host                  │ Port │ Non-proxy hosts │ Username │ Password
+─────────┼───────────────────────┼──────┼─────────────────┼──────────┼─────────────
+my.proxy │ proxy.everfree.forest │ 3128 │ 192.168.2.*     │ admin    │ super-secret
+
+karaf@root()> maven:http-proxy --remove -id my.proxy
+New settings stored in "/data/servers/apache-karaf-4.2.0-SNAPSHOT/data/cache/bundle53/data/maven-settings-1498122255098.xml"
+
+No HTTP proxies configured in /data/servers/apache-karaf-4.2.0-SNAPSHOT/data/cache/bundle53/data/maven-settings-1498122255098.xml
+
+karaf@root()> maven:http-proxy --add -id my.proxy --username discord --password '{fHl8U3pINkEH7RR1CufRT+utj5gJHfqsRgd6wTo92Eo=}' --non-proxy-hosts '127.*|192.168.*|localhost' proxy.everfree.forest:3128
+New settings stored in "/data/servers/apache-karaf-4.2.0-SNAPSHOT/data/cache/bundle53/data/maven-settings-1498122328731.xml"
+
+karaf@root()> maven:http-proxy-list -x
+
+ID       │ Host                  │ Port │ Non-proxy hosts           │ Username │ Password
+─────────┼───────────────────────┼──────┼───────────────────────────┼──────────┼─────────
+my.proxy │ proxy.everfree.forest │ 3128 │ 127.*|192.168.*|localhost │ discord  │ admin
+----
+
+Here's summary of options for `maven:http-proxy` command:
+
+* `-id` identifier of HTTP proxy
+* `-add` / `--change` / `--remove` is an operation to perform on proxy
+* `-f` disables confirmation prompts for commands
+* `-u` sets username for remote HTTP proxy
+* `-p` sets password for remote HTTP proxy (may be encrypted using `maven:password -ep`)
+* `-n` sets _non proxy hosts_ option, which is `|`-separated list of glob patterns for IP addresses/host names that should be
+  accessed bypassing HTTP proxy
+
+`maven:http-proxy` configures for example this section in `settings.xml`:
+
+[source,options="nowrap"]
+----
+<proxies>
+  <proxy>
+    <username>discord</username>
+    <password>{fHl8U3pINkEH7RR1CufRT+utj5gJHfqsRgd6wTo92Eo=}</password>
+    <port>3128</port>
+    <host>proxy.everfree.forest</host>
+    <nonProxyHosts>127.*|192.168.*|localhost</nonProxyHosts>
+    <id>my.proxy</id>
+  </proxy>
+</proxies>
+----

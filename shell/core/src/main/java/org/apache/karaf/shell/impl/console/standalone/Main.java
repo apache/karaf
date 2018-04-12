@@ -24,10 +24,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -44,10 +42,9 @@ import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.impl.action.command.ManagerImpl;
 import org.apache.karaf.shell.impl.console.JLineTerminal;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
-import org.apache.karaf.shell.impl.console.TerminalFactory;
 import org.apache.karaf.shell.support.NameScoping;
 import org.apache.karaf.shell.support.ShellUtil;
-import org.fusesource.jansi.AnsiConsole;
+import org.jline.terminal.TerminalBuilder;
 
 public class Main {
 
@@ -67,12 +64,13 @@ public class Main {
      */
     public void run(String args[]) throws Exception {
 
+        InputStream in = System.in;
+        PrintStream out = System.out;
+        PrintStream err = System.err;
+
         ThreadIOImpl threadio = new ThreadIOImpl();
         threadio.start();
 
-        InputStream in = unwrap(System.in);
-        PrintStream out = wrap(unwrap(System.out));
-        PrintStream err = wrap(unwrap(System.err));
         run(threadio, args, in, out, err);
 
         // TODO: do we need to stop the threadio that was started?
@@ -108,14 +106,11 @@ public class Main {
         }
 
         if (file != null) {
-            Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-            try {
+            try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
                 sb.setLength(0);
                 for (int c = reader.read(); c >= 0; c = reader.read()) {
                     sb.append((char) c);
                 }
-            } finally {
-                reader.close();
             }
         } else if (batch) {
             Reader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -138,33 +133,30 @@ public class Main {
 
     private void run(final SessionFactory sessionFactory, String command, final InputStream in, final PrintStream out, final PrintStream err, ClassLoader cl) throws Exception {
 
-        final TerminalFactory terminalFactory = new TerminalFactory();
-        try {
-            String term = System.getenv("TERM");
-            final Terminal terminal = new JLineTerminal(terminalFactory.getTerminal(), term);
-            Session session = createSession(sessionFactory, command.length() > 0 ? null : in, out, err, terminal);
-            session.put("USER", user);
-            session.put("APPLICATION", application);
+        try (org.jline.terminal.Terminal jlineTerminal = TerminalBuilder.terminal()) {
+            final Terminal terminal = new JLineTerminal(jlineTerminal);
+            try (Session session = createSession(sessionFactory, command.length() > 0 ? null : in, out, err, terminal)) {
+                session.put("USER", user);
+                session.put("APPLICATION", application);
 
-            discoverCommands(session, cl, getDiscoveryResource());
+                discoverCommands(session, cl, getDiscoveryResource());
 
-            if (command.length() > 0) {
-                // Shell is directly executing a sub/command, we don't setup a console
-                // in this case, this avoids us reading from stdin un-necessarily.
-                session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
-                session.put(Session.PRINT_STACK_TRACES, "execution");
-                try {
-                    session.execute(command);
-                } catch (Throwable t) {
-                    ShellUtil.logException(session, t);
+                if (command.length() > 0) {
+                    // Shell is directly executing a sub/command, we don't setup a console
+                    // in this case, this avoids us reading from stdin un-necessarily.
+                    session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
+                    session.put(Session.PRINT_STACK_TRACES, "execution");
+                    try {
+                        session.execute(command);
+                    } catch (Throwable t) {
+                        ShellUtil.logException(session, t);
+                    }
+
+                } else {
+                    // We are going into full blown interactive shell mode.
+                    session.run();
                 }
-
-            } else {
-                // We are going into full blown interactive shell mode.
-                session.run();
             }
-        } finally {
-            terminalFactory.destroy();
         }
     }
 
@@ -246,26 +238,8 @@ public class Main {
         return true;
     }
 
-    private static PrintStream wrap(PrintStream stream) {
-        OutputStream o = AnsiConsole.wrapOutputStream(stream);
-        if (o instanceof PrintStream) {
-            return ((PrintStream) o);
-        } else {
-            return new PrintStream(o);
-        }
-    }
-
-    private static <T> T unwrap(T stream) {
-        try {
-            Method mth = stream.getClass().getMethod("getRoot");
-            return (T) mth.invoke(stream);
-        } catch (Throwable t) {
-            return stream;
-        }
-    }
-
     private static List<URL> getFiles(File base) throws MalformedURLException {
-        List<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<>();
         getFiles(base, urls);
         return urls;
     }

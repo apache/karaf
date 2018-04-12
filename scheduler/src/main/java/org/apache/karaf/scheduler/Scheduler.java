@@ -17,10 +17,7 @@
 package org.apache.karaf.scheduler;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
-
-import org.quartz.SchedulerException;
 
 /**
  * A scheduler to schedule time/cron based jobs.
@@ -74,7 +71,7 @@ public interface Scheduler {
      *
      * @param job The job to execute (either {@link Job} or {@link Runnable}).
      * @param options Required options defining how to schedule the job.
-     * @throws SchedulerException if the job can't be scheduled.
+     * @throws SchedulerError if the job can't be scheduled.
      * @throws IllegalArgumentException If the preconditions are not met.
      * @see #NOW()
      * @see #NOW(int, long)
@@ -82,7 +79,16 @@ public interface Scheduler {
      * @see #AT(Date, int, long)
      * @see #EXPR(String)
      */
-    void schedule(Object job, ScheduleOptions options) throws IllegalArgumentException, SchedulerException;
+    void schedule(Object job, ScheduleOptions options) throws IllegalArgumentException, SchedulerError;
+
+    /**
+     * Update the scheduling of an existing job.
+     * @param jobName
+     * @param options
+     * @throws IllegalArgumentException
+     * @throws SchedulerError
+     */
+    void reschedule(String jobName, ScheduleOptions options) throws IllegalArgumentException, SchedulerError;
 
     /**
      * Remove a scheduled job by name.
@@ -92,7 +98,16 @@ public interface Scheduler {
      */
     boolean unschedule(String jobName);
 
-    Map<Object, ScheduleOptions> getJobs() throws SchedulerException;
+    Map<Object, ScheduleOptions> getJobs() throws SchedulerError;
+
+    /**
+     * Triggers a scheduled job.
+     *
+     * @param jobName The name of the job.
+     * @return <code>true</code> if the job was triggered, otherwise <code>false</code>
+     * @throws SchedulerError  if the job can't be triggered.
+     */
+    boolean trigger(String jobName) throws SchedulerError;
 
     /**
      * Create a schedule options to fire a job immediately and only once.

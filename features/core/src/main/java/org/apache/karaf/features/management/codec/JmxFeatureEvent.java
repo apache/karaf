@@ -67,7 +67,7 @@ public class JmxFeatureEvent {
         try {
             String description = "This type identify a Karaf feature event";
             String[] itemNames = FeaturesServiceMBean.FEATURE_EVENT;
-            OpenType[] itemTypes = new OpenType[itemNames.length];
+            OpenType<?>[] itemTypes = new OpenType[itemNames.length];
             String[] itemDescriptions = new String[itemNames.length];
             itemTypes[0] = SimpleType.STRING;
             itemTypes[1] = SimpleType.STRING;

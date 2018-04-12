@@ -34,7 +34,6 @@ import org.apache.felix.eventadmin.impl.util.LogWrapper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.metatype.MetaTypeProvider;
@@ -179,7 +178,7 @@ public class Configuration
                     interfaceNames = new String[] {ManagedService.class.getName(), MetaTypeProvider.class.getName()};
                     service = enhancedService;
                 }
-                Dictionary<String, Object> props = new Hashtable<String, Object>();
+                Dictionary<String, Object> props = new Hashtable<>();
                 props.put( Constants.SERVICE_PID, PID );
                 m_managedServiceReg = m_bundleContext.registerService( interfaceNames, service, props );
             }
@@ -194,20 +193,13 @@ public class Configuration
     {
         // do this in the background as we don't want to stop
         // the config admin
-        new Thread()
-        {
-
-            @Override
-            public void run()
+        new Thread(() -> {
+            synchronized ( Configuration.this )
             {
-                synchronized ( Configuration.this )
-                {
-                    Configuration.this.configure( config );
-                    Configuration.this.startOrUpdate();
-                }
+                Configuration.this.configure( config );
+                Configuration.this.startOrUpdate();
             }
-
-        }.start();
+        }).start();
 
     }
 
@@ -420,9 +412,8 @@ public class Configuration
         {
             if ( m_adapters != null )
             {
-                for(int i=0;i<m_adapters.length;i++)
-                {
-                    m_adapters[i].destroy(m_bundleContext);
+                for (AbstractAdapter adapter : m_adapters) {
+                    adapter.destroy(m_bundleContext);
                 }
                 m_adapters = null;
             }
@@ -460,11 +451,12 @@ public class Configuration
      */
     private void adaptEvents(final EventAdmin admin)
     {
-        m_adapters = new AbstractAdapter[4];
+        m_adapters = new AbstractAdapter[3];
         m_adapters[0] = new FrameworkEventAdapter(m_bundleContext, admin);
         m_adapters[1] = new BundleEventAdapter(m_bundleContext, admin);
         m_adapters[2] = new ServiceEventAdapter(m_bundleContext, admin);
-        m_adapters[3] = new LogEventAdapter(m_bundleContext, admin);
+        // KARAF: disable log events as they are published by PaxLogging
+        //m_adapters[3] = new LogEventAdapter(m_bundleContext, admin);
     }
 
     private Object tryToCreateMetaTypeProvider(final Object managedService)
@@ -486,14 +478,7 @@ public class Configuration
     {
         try
         {
-            return new ManagedService()
-            {
-                @Override
-                public void updated( Dictionary<String, ?> properties ) throws ConfigurationException
-                {
-                    updateFromConfigAdmin(properties);
-                }
-            };
+            return (ManagedService) this::updateFromConfigAdmin;
         }
         catch (Throwable t)
         {

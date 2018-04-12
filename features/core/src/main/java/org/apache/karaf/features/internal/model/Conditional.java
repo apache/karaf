@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import org.apache.karaf.features.Blacklisting;
 import org.apache.karaf.features.Feature;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -37,11 +38,16 @@ import org.apache.karaf.features.Feature;
         })
 public class Conditional extends Content implements org.apache.karaf.features.Conditional {
 
-    @XmlElement(name = "condition")
+    // TODO: use type that really reflects <xs:element name="condition" type="tns:dependency" /> ?
+    // i.e., org.apache.karaf.features.internal.model.Dependency
+    @XmlElement(name = "condition", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> condition;
 
     @XmlTransient
     protected Feature owner;
+
+    @XmlTransient
+    private boolean blacklisted;
 
     public Feature getOwner() {
         return owner;
@@ -74,7 +80,16 @@ public class Conditional extends Content implements org.apache.karaf.features.Co
         return f;
     }
 
-    private String getConditionId() {
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+    }
+
+    public String getConditionId() {
         StringBuffer sb = new StringBuffer();
         for (String cond : getCondition()) {
             if (sb.length() > 0) {

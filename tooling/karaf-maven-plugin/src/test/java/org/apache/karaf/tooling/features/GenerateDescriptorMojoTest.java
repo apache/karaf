@@ -22,7 +22,6 @@ package org.apache.karaf.tooling.features;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 

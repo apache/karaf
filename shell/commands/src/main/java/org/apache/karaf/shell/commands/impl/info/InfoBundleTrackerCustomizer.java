@@ -18,7 +18,6 @@ package org.apache.karaf.shell.commands.impl.info;
 
 import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
@@ -42,7 +41,6 @@ public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer<Serv
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public ServiceRegistration<InfoProvider> addingBundle(Bundle bundle, BundleEvent event) {
         Dictionary headers = bundle.getHeaders();
         String headerEntry = (String) headers.get("Karaf-Info");

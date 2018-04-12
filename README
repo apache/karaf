@@ -17,7 +17,7 @@
 
 Welcome to Apache Karaf
 =======================
-Apache Karaf is a modern and polymorphic container.
+Apache Karaf is a modern and polymorphic application container.
 It's a lightweight, powerful, and enterprise ready container powered by OSGi.
 The container is able to host different kind of applications, OSGi or non OSGi.
 
@@ -69,9 +69,9 @@ with JIRA here:
 We welcome contributions, and encourage you to get involved in the 
 Karaf community. If you'd like to learn more about how you can
 contribute, please see:
-    http://karaf.apache.org/index/community/contributing.html
+    http://karaf.apache.org/community.html#contribute
 
 Many thanks for using Apache Karaf.
 
-
+----
 The Karaf Team

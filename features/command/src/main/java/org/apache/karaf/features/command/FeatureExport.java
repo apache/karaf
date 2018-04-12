@@ -169,7 +169,7 @@ public class FeatureExport extends FeaturesCommandSupport {
      * @throws IOException
      *             If there is an issue performing the copy
      */
-    private static boolean copyFileToDirectory(final File file, final File directory) throws FileNotFoundException, IOException {
+    private static boolean copyFileToDirectory(final File file, final File directory) throws IOException {
         if (!directory.isDirectory()) {
             throw new IOException("Can't copy to non-directory specified: " + directory.getAbsolutePath());
         } else {

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.karaf.features.internal.util.StringArrayMap;
 import org.osgi.framework.Constants;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
@@ -36,10 +37,10 @@ public class CapabilityImpl extends BaseClause implements Capability {
 
     public CapabilityImpl(Resource resource, String namespace,
                           Map<String, String> dirs, Map<String, Object> attrs) {
-        this.namespace = namespace;
+        this.namespace = namespace.intern();
         this.resource = resource;
-        this.dirs = dirs;
-        this.attrs = attrs;
+        this.dirs = StringArrayMap.reduceMemory(dirs);
+        this.attrs = StringArrayMap.reduceMemory(attrs);
 
         // Handle mandatory directive
         Set<String> mandatory = Collections.emptySet();

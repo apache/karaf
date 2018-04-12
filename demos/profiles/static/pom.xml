@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>demos</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -122,9 +122,9 @@
                 <configuration>
                     <useReferenceUrls>true</useReferenceUrls>
                     <environment>static</environment>
-                    <profilesUri>
-                        jar:mvn:org.apache.karaf.demos.profiles/registry/${project.version}!/
-                    </profilesUri>
+                    <profilesUris>
+                        <uri>jar:mvn:org.apache.karaf.demos.profiles/registry/${project.version}!/</uri>
+                    </profilesUris>
                     <startupProfiles>
                         <profile>karaf</profile>
                         <profile>example-loanbroker-bank1</profile>
@@ -133,6 +133,9 @@
                         <profile>example-loanbroker-broker</profile>
                         <profile>activemq-broker</profile>
                     </startupProfiles>
+                    <blacklistedFeatures>
+                        <feature>spring/[4.0,4.2)</feature>
+                    </blacklistedFeatures>
                 </configuration>
             </plugin>
 

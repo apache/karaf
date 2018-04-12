@@ -17,9 +17,12 @@
 package org.apache.karaf.features;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.osgi.namespace.service.ServiceNamespace;
 
 /**
  * The service managing features repositories.
@@ -28,25 +31,20 @@ public interface FeaturesService {
 
     String ROOT_REGION = "root";
 
-    String UPDATE_SNAPSHOTS_NONE = "none";
-    String UPDATE_SNAPSHOTS_CRC = "crc";
-    String DEFAULT_UPDATE_SNAPSHOTS = UPDATE_SNAPSHOTS_CRC;
-    String UPDATE_SNAPSHOTS_ALWAYS = "always";
+    SnapshotUpdateBehavior DEFAULT_UPDATE_SNAPSHOTS = SnapshotUpdateBehavior.Crc;
 
     String DEFAULT_FEATURE_RESOLUTION_RANGE = "${range;[====,====]}";
     String DEFAULT_BUNDLE_UPDATE_RANGE = "${range;[==,=+)}";
 
     String UPDATEABLE_URIS = "mvn:.*SNAPSHOT|(?!mvn:).*";
 
-    String SERVICE_REQUIREMENTS_DISABLE = "disable";
-    String SERVICE_REQUIREMENTS_DEFAULT = "default";
-    String SERVICE_REQUIREMENTS_ENFORCE = "enforce";
-
     int DEFAULT_DOWNLOAD_THREADS = 8;
     long DEFAULT_SCHEDULE_DELAY = 250;
     int DEFAULT_SCHEDULE_MAX_RUN = 9;
     long DEFAULT_REPOSITORY_EXPIRATION = 60000; // 1 minute
 
+    boolean DEFAULT_CONFIG_CFG_STORE = true;
+    boolean DEFAULT_DIGRAPH_MBEAN = true;
 
     enum Option {
         NoFailOnFeatureNotFound,
@@ -57,7 +55,61 @@ public interface FeaturesService {
         NoAutoManageBundles,
         Simulate,
         Verbose,
-        Upgrade
+        Upgrade,
+        DisplayFeaturesWiring,
+        DisplayAllWiring
+    }
+
+    /**
+     * Configuration options for handling requirements from {@link ServiceNamespace#SERVICE_NAMESPACE} namespace
+     */
+    enum ServiceRequirementsBehavior {
+        /** Remove and do not consider any {@link ServiceNamespace#SERVICE_NAMESPACE} requirements */
+        Disable("disable"),
+        /** Consider {@link ServiceNamespace#SERVICE_NAMESPACE} requirements only for <code>http://karaf.apache.org/xmlns/features/v1.2.1</code> XSD and below */
+        Default("default"),
+        /** Always consider {@link ServiceNamespace#SERVICE_NAMESPACE} requirements */
+        Enforce("enforce");
+
+        private String value;
+
+        ServiceRequirementsBehavior(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static ServiceRequirementsBehavior fromString(String serviceRequirements) {
+            return Arrays.stream(values()).filter(sub -> sub.value.equalsIgnoreCase(serviceRequirements)).findFirst().orElse(Default);
+        }
+    }
+
+    /**
+     * Configuration options for checking whether update'able bundle should really be updated
+     */
+    enum SnapshotUpdateBehavior {
+        /** Never update */
+        None("none"),
+        /** Update if CRC differs */
+        Crc("crc"),
+        /** Always update */
+        Always("always");
+
+        private String value;
+
+        SnapshotUpdateBehavior(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static SnapshotUpdateBehavior fromString(String updateSnapshots) {
+            return Arrays.stream(values()).filter(sub -> sub.value.equals(updateSnapshots)).findFirst().orElse(Crc);
+        }
     }
 
     /**
@@ -67,6 +119,8 @@ public interface FeaturesService {
      * @throws Exception When validation fails.
      */
     void validateRepository(URI uri) throws Exception;
+
+    boolean isRepositoryUriBlacklisted(URI uri);
 
     void addRepository(URI uri) throws Exception;
 
@@ -122,6 +176,12 @@ public interface FeaturesService {
 
     void updateFeaturesState(Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options) throws Exception;
 
+    void updateReposAndRequirements(Set<URI> repos,
+                                    Map<String, Set<String>> requirements,
+                                    EnumSet<Option> options) throws Exception;
+
+    Repository createRepository(URI uri) throws Exception;
+
     Feature[] listFeatures() throws Exception;
 
     Feature[] listRequiredFeatures() throws Exception;
@@ -142,6 +202,8 @@ public interface FeaturesService {
 
     Feature[] getFeatures(String name) throws Exception;
 
+    void refreshRepositories(Set<URI> uris) throws Exception;
+
     void refreshRepository(URI uri) throws Exception;
 
     URI getRepositoryUriFor(String name, String version);
@@ -152,6 +214,14 @@ public interface FeaturesService {
 
     void unregisterListener(FeaturesListener listener);
 
+    void registerListener(DeploymentListener listener);
+
+    void unregisterListener(DeploymentListener listener);
+
     FeatureState getState(String featureId);
+
+    String getFeatureXml(Feature feature);
+
+    void refreshFeatures(EnumSet<Option> options) throws Exception;
 
 }

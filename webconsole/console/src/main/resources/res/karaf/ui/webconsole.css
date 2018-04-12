@@ -25,7 +25,7 @@
  *      the plugin in the renderContent (or service) method
  *
  * See also http://felix.apache.org/site/branding-the-web-console.html
- */
+ */ 
 #main {
 	width: 90% !important;
 	margin-left: 5%;
@@ -105,10 +105,10 @@
 	margin: 0;
 }
 
-/* The following styles are not complete. They usually apply only padding,
+/* The following styles are not complete. They usually apply only padding, 
  * margin... mostly *WHERE* the elements are visualised. Visual styling like
  * colors and fonts are applied automatically by a JavaScript that borrows
- * the visual element styles from the JQuery UI theme
+ * the visual element styles from the JQuery UI theme 
  */
 
 /* input box, checkbox & buttons styling */
@@ -189,5 +189,13 @@ ul.icons li {
 	list-style: none
 }
 /* language selection element */
-#langSelect { position: absolute;	top: 5px; right: 5px }
+#langSelect { position: absolute; top: 5px; right: 5px }
 #langSelect img   { display: block; padding: 2px 0 }
+/* logout element */
+.logoutButton { float: right; text-decoration: none }
+
+
+.filterBox      { float: left; margin-left: 1em }
+.servicesFilter { width: 400px; }
+.servicesFilterApply { width: 85px; }
+

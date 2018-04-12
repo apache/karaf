@@ -38,22 +38,19 @@ public abstract class SingleServiceTracker<T> {
 
     private final BundleContext ctx;
     private final Class<T> clazz;
-    private final AtomicReference<T> service = new AtomicReference<T>();
-    private final AtomicReference<ServiceReference<T>> ref = new AtomicReference<ServiceReference<T>>();
+    private final AtomicReference<T> service = new AtomicReference<>();
+    private final AtomicReference<ServiceReference<T>> ref = new AtomicReference<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
 
-    private final ServiceListener listener = new ServiceListener() {
-        @SuppressWarnings("unchecked")
-        public void serviceChanged(ServiceEvent event) {
-            if (open.get()) {
-                if (event.getType() == ServiceEvent.UNREGISTERING) {
-                    ServiceReference<T> deadRef = (ServiceReference<T>) event.getServiceReference();
-                    if (deadRef.equals(ref.get())) {
-                        findMatchingReference(deadRef);
-                    }
-                } else if (event.getType() == ServiceEvent.REGISTERED && ref.get() == null) {
-                    findMatchingReference(null);
+    private final ServiceListener listener = event -> {
+        if (open.get()) {
+            if (event.getType() == ServiceEvent.UNREGISTERING) {
+                ServiceReference<T> deadRef = (ServiceReference<T>) event.getServiceReference();
+                if (deadRef.equals(ref.get())) {
+                    findMatchingReference(deadRef);
                 }
+            } else if (event.getType() == ServiceEvent.REGISTERED && ref.get() == null) {
+                findMatchingReference(null);
             }
         }
     };
@@ -93,7 +90,6 @@ public abstract class SingleServiceTracker<T> {
         boolean clear = true;
         ServiceReference<T> ref = ctx.getServiceReference(clazz);
         if (ref != null) {
-            @SuppressWarnings("unchecked")
             T service = ctx.getService(ref);
             if (service != null) {
                 clear = false;
@@ -139,7 +135,7 @@ public abstract class SingleServiceTracker<T> {
         return result;
     }
 
-    public Class getTrackedClass() {
+    public Class<?> getTrackedClass() {
         return clazz;
     }
 

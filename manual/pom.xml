@@ -17,13 +17,13 @@
 	<parent>
 		<groupId>org.apache.karaf</groupId>
 		<artifactId>karaf</artifactId>
-		<version>4.1.0-SNAPSHOT</version>
+		<version>4.2.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>manual</artifactId>
 	<name>Apache Karaf :: Manual</name>
-	<packaging>pom</packaging>
+	<packaging>bundle</packaging>
 
 	<build>
 		<plugins>
@@ -123,11 +123,6 @@
 						<version>${project.version}</version>
 					</dependency>
 					<dependency>
-						<groupId>org.apache.karaf.scr</groupId>
-						<artifactId>org.apache.karaf.scr.command</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
 						<groupId>org.apache.karaf.jdbc</groupId>
 						<artifactId>org.apache.karaf.jdbc.core</artifactId>
 						<version>${project.version}</version>
@@ -177,11 +172,16 @@
 						<artifactId>org.apache.karaf.subsystem.core</artifactId>
 						<version>${project.version}</version>
 					</dependency>
+					<dependency>
+						<groupId>org.apache.karaf.maven</groupId>
+						<artifactId>org.apache.karaf.maven.core</artifactId>
+						<version>${project.version}</version>
+					</dependency>
 					<!-- Additional Required Dependencies -->
 					<dependency>
 						<groupId>org.apache.felix</groupId>
 						<artifactId>org.apache.felix.gogo.runtime</artifactId>
-						<version>${felix.gogo.version}</version>
+						<version>${felix.gogo.runtime.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.osgi</groupId>
@@ -238,6 +238,17 @@
 					<content>${project.build.directory}/generated-docs</content>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<instructions>
+						<Web-ContextPath>/documentation</Web-ContextPath>
+						<Include-Resource>target/generated-docs</Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -267,8 +278,8 @@
 											<arg value="--log" />
 											<arg value="${project.build.directory}/prince.log" />
 										</exec>
-										<attachartifact file="target/documentation.html" type="html"/>
-										<attachartifact file="target/documentation.pdf" type="pdf"/>
+										<attachartifact file="target/documentation.html" type="html" />
+										<attachartifact file="target/documentation.pdf" type="pdf" />
 									</tasks>
 								</configuration>
 							</execution>

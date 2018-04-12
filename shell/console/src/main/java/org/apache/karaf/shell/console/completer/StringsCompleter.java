@@ -33,7 +33,7 @@ import org.apache.karaf.shell.console.Completer;
 public class StringsCompleter
     implements Completer
 {
-    private final SortedSet<String> strings = new TreeSet<String>();
+    private final SortedSet<String> strings = new TreeSet<>();
     private final boolean caseSensitive;
 
     public StringsCompleter() {

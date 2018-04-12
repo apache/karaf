@@ -81,9 +81,6 @@ public class NameScoping {
             return false;
 
         Object value = session.get(MULTI_SCOPE_MODE_KEY);
-        if (value != null && value.equals("false")) {
-            return false;
-        }
-        return true;
+        return !(value != null && value.equals("false"));
     }
 }

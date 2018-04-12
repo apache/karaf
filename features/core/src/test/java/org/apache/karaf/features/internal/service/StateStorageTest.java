@@ -39,7 +39,7 @@ public class StateStorageTest {
         oldState.bundleChecksums.put(4l, 32794l);
         oldState.requirements.put("bar", Collections.singleton("f1"));
         oldState.managedBundles.put("reg", Collections.singleton(32l));
-        oldState.managedBundles.put("reg2", new HashSet<Long>(Arrays.asList(24l, 43l)));
+        oldState.managedBundles.put("reg2", new HashSet<>(Arrays.asList(24l, 43l)));
         oldState.repositories.add("repo");
 
         TestStorage storage = new TestStorage();

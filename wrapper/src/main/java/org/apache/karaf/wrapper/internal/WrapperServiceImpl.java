@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.wrapper.internal;
 
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.apache.karaf.wrapper.WrapperService;
-import org.fusesource.jansi.Ansi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -302,8 +302,8 @@ public class WrapperServiceImpl implements WrapperService {
     private void mkdir(File file) {
         if (!file.exists()) {
             LOGGER.info("Creating missing directory: {}", file.getPath());
-            System.out.println(Ansi.ansi().a("Creating missing directory: ")
-                    .a(Ansi.Attribute.INTENSITY_BOLD).a(file.getPath()).a(Ansi.Attribute.RESET).toString());
+            System.out.println("Creating missing directory: "
+                    + SimpleAnsi.INTENSITY_BOLD + file.getPath() + SimpleAnsi.INTENSITY_NORMAL);
             file.mkdirs();
         }
     }
@@ -311,8 +311,8 @@ public class WrapperServiceImpl implements WrapperService {
     private void copyResourceTo(File outFile, String resource, boolean text) throws Exception {
         if (!outFile.exists()) {
             LOGGER.info("Creating file: {}", outFile.getPath());
-            System.out.println(Ansi.ansi().a("Creating file: ")
-                    .a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
+            System.out.println("Creating file: "
+                    + SimpleAnsi.INTENSITY_BOLD + outFile.getPath() + SimpleAnsi.INTENSITY_NORMAL);
             InputStream is = WrapperServiceImpl.class.getResourceAsStream(resource);
             if (is == null) {
                 throw new IllegalArgumentException("Resource " + resource + " doesn't exist");
@@ -348,17 +348,17 @@ public class WrapperServiceImpl implements WrapperService {
             }
         } else {
             LOGGER.warn("File already exists. Move it out of the way if you wish to recreate it: {}", outFile.getPath());
-            System.out.println(Ansi.ansi()
-                    .fg(Ansi.Color.RED).a("File already exists").a(Ansi.Attribute.RESET)
-                    .a(". Move it out of the way if you wish to recreate it: ").a(outFile.getPath()).toString());
+            System.out.println(
+                    SimpleAnsi.COLOR_RED + "File already exists" + SimpleAnsi.COLOR_DEFAULT
+                            + ". Move it out of the way if you wish to recreate it: " + outFile.getPath());
         }
     }
 
     private void copyFilteredResourceTo(File outFile, String resource, HashMap<String, String> props, String[] envs, String[] includes) throws Exception {
         if (!outFile.exists()) {
             LOGGER.info("Creating file: {}", outFile.getPath());
-            System.out.println(Ansi.ansi().a("Creating file: ")
-                    .a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
+            System.out.println("Creating file: "
+                    + SimpleAnsi.INTENSITY_BOLD + outFile.getPath() + SimpleAnsi.INTENSITY_NORMAL);
             InputStream is = WrapperServiceImpl.class.getResourceAsStream(resource);
             if (is == null) {
                 throw new IllegalArgumentException("Resource " + resource + " doesn't exist");
@@ -393,27 +393,17 @@ public class WrapperServiceImpl implements WrapperService {
             }
         } else {
             LOGGER.warn("File already exists. Move it out of the way if you wish to recreate it: {}", outFile.getPath());
-            System.out.println(Ansi.ansi()
-                    .fg(Ansi.Color.RED).a("File already exists").a(Ansi.Attribute.RESET)
-                    .a(". Move it out of the way if you wish to recreate it: ").a(outFile.getPath()).toString());
+            System.out.println(
+                    SimpleAnsi.COLOR_RED + "File already exists" + SimpleAnsi.COLOR_DEFAULT
+                            + ". Move it out of the way if you wish to recreate it: " + outFile.getPath());
         }
     }
 
-    private void safeClose(InputStream is) throws IOException {
-        if (is == null)
+    private void safeClose(Closeable c) throws IOException {
+        if (c == null)
             return;
         try {
-            is.close();
-        } catch (Throwable ignore) {
-            // nothing to do
-        }
-    }
-
-    private void safeClose(OutputStream is) throws IOException {
-        if (is == null)
-            return;
-        try {
-            is.close();
+            c.close();
         } catch (Throwable ignore) {
             // nothing to do
         }
@@ -441,14 +431,15 @@ public class WrapperServiceImpl implements WrapperService {
     private void createJar(File outFile, String resource) throws Exception {
         if (!outFile.exists()) {
             LOGGER.info("Creating file: {}", outFile.getPath());
-            System.out.println(Ansi.ansi().a("Creating file: ")
-                    .a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
+            System.out.println("Creating file: "
+                    + SimpleAnsi.INTENSITY_BOLD + outFile.getPath() + SimpleAnsi.INTENSITY_NORMAL);
             InputStream is = getClass().getClassLoader().getResourceAsStream(resource);
             if (is == null) {
                 throw new IllegalStateException("Resource " + resource + " not found!");
             }
+            JarOutputStream jar = null;
             try {
-                JarOutputStream jar = new JarOutputStream(new FileOutputStream(outFile));
+                jar = new JarOutputStream(new FileOutputStream(outFile));
                 int idx = resource.indexOf('/');
                 while (idx > 0) {
                     jar.putNextEntry(new ZipEntry(resource.substring(0, idx + 1)));
@@ -464,6 +455,7 @@ public class WrapperServiceImpl implements WrapperService {
                 jar.close();
             } finally {
                 safeClose(is);
+                safeClose(jar);
             }
         }
     }

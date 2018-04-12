@@ -14,6 +14,7 @@
  */
 package org.apache.karaf.jaas.modules.syncope;
 
+import org.apache.felix.utils.json.JSONParser;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -32,7 +33,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.*;
 
 /**
@@ -43,14 +43,22 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
     private final static Logger LOGGER = LoggerFactory.getLogger(SyncopeLoginModule.class);
 
     public final static String ADDRESS = "address";
+    public final static String VERSION = "version";
+    public final static String USE_ROLES_FOR_SYNCOPE2 = "useRolesForSyncope2";
     public final static String ADMIN_USER = "admin.user"; // for the backing engine
     public final static String ADMIN_PASSWORD = "admin.password"; // for the backing engine
 
     private String address;
+    private String version;
+    private boolean useRolesForSyncope2;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         address = (String) options.get(ADDRESS);
+        version = (String) options.get(VERSION);
+        if (options.containsKey(USE_ROLES_FOR_SYNCOPE2)) {
+            useRolesForSyncope2 = Boolean.parseBoolean((String) options.get(USE_ROLES_FOR_SYNCOPE2));
+        }
     }
 
     public boolean login() throws LoginException {
@@ -73,7 +81,7 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
             tmpPassword = new char[0];
         }
         String password = new String(tmpPassword);
-        principals = new HashSet<Principal>();
+        principals = new HashSet<>();
 
         // authenticate the user on Syncope
         LOGGER.debug("Authenticate user {} on Syncope located {}", user, address);
@@ -81,8 +89,14 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
         Credentials creds = new UsernamePasswordCredentials(user, password);
         client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
         HttpGet get = new HttpGet(address + "/users/self");
-        get.setHeader("Content-Type", "application/xml");
-        List<String> roles = new ArrayList<String>();
+
+        boolean version2 = version != null && (version.equals("2.x") || version.equals("2"));
+        if (version2) {
+            get.setHeader("Content-Type", "application/json");
+        } else {
+            get.setHeader("Content-Type", "application/xml");
+        }
+        List<String> roles = new ArrayList<>();
         try {
             CloseableHttpResponse response = client.execute(get);
             LOGGER.debug("Syncope HTTP response status code: {}", response.getStatusLine().getStatusCode());
@@ -94,7 +108,12 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
             LOGGER.debug("Populating principals with user");
             principals.add(new UserPrincipal(user));
             LOGGER.debug("Retrieving user {} roles", user);
-            roles = extractingRoles(EntityUtils.toString(response.getEntity()));
+            String responseSt = EntityUtils.toString(response.getEntity());
+            if (version2) {
+                roles = extractingRolesSyncope2(responseSt);
+            } else {
+                roles = extractingRolesSyncope1(responseSt);
+            }
         } catch (Exception e) {
             LOGGER.error("User {} authentication failed", user, e);
             throw new LoginException("User " + user + " authentication failed: " + e.getMessage());
@@ -109,14 +128,14 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
     }
 
     /**
-     * Extract the user roles from the Syncope entity response.
+     * Extract the user roles from the XML provided by Syncope 1.x.
      *
      * @param response the HTTP response from Syncope.
      * @return the list of user roles.
      * @throws Exception in case of extraction failure.
      */
-    protected List<String> extractingRoles(String response) throws Exception {
-        List<String> roles = new ArrayList<String>();
+    protected List<String> extractingRolesSyncope1(String response) throws Exception {
+        List<String> roles = new ArrayList<>();
         if (response != null && !response.isEmpty()) {
             // extract the <memberships> element if it exists
             int index = response.indexOf("<memberships>");
@@ -124,7 +143,7 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
                 response = response.substring(index + "<memberships>".length());
                 index = response.indexOf("</memberships>");
                 response = response.substring(0, index);
-    
+
                 // looking for the roleName elements
                 index = response.indexOf("<roleName>");
                 while (index != -1) {
@@ -140,6 +159,36 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
                 }
             }
 
+        }
+        return roles;
+    }
+
+    /**
+     * Extract the user roles from the JSON provided by Syncope 2.x.
+     *
+     * @param response the HTTP response from Syncope.
+     * @return the list of user roles.
+     * @throws Exception in case of extracting failure.
+     */
+    @SuppressWarnings("unchecked")
+    protected List<String> extractingRolesSyncope2(String response) throws Exception {
+        List<String> roles = new ArrayList<>();
+        if (response != null && !response.isEmpty()) {
+            JSONParser parser = new JSONParser(response);
+            if (useRolesForSyncope2) {
+                return (List<String>) parser.getParsed().get("roles");
+            } else {
+                // extract the <memberships> element if it exists
+                List<Map<String, String>> memberships =
+                    (List<Map<String, String>>) parser.getParsed().get("memberships");
+                if (memberships != null) {
+                    for (Map<String, String> membership : memberships) {
+                        if (membership.containsKey("groupName")) {
+                            roles.add(membership.get("groupName"));
+                        }
+                    }
+                }
+            }
         }
         return roles;
     }

@@ -32,8 +32,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ProfileCreate implements Action {
 
-    @Option(name = "--version", description = "The profile version. Defaults to the current default version.")
-    private String versionId;
     @Option(name = "--parents", multiValued = true, required = false, description = "Optionally specifies one or multiple parent profiles. To specify multiple parent profiles, specify this flag multiple times on the command line. For example, --parents foo --parents bar.")
     private List<String> parents;
     @Argument(index = 0)

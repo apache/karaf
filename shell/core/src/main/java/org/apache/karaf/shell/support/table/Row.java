@@ -24,8 +24,8 @@ public class Row {
     private List<String> content;
     
     Row() {
-        data = new ArrayList<Object>();
-        content = new ArrayList<String>();
+        data = new ArrayList<>();
+        content = new ArrayList<>();
     }
     
     Row(List<Col> cols) {
@@ -33,6 +33,10 @@ public class Row {
         for (Col col : cols) {
             data.add(col.getHeader());
         }
+    }
+
+    public void addContent(List<Object> data) {
+        this.data = data;
     }
 
     public void addContent(Object ... cellDataAr) {

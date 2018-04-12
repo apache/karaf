@@ -49,7 +49,7 @@ class FeatureDetector {
      */
     boolean isFeaturesRepository(File artifact) {
         try {
-            if (artifact.isFile() && artifact.getName().endsWith(".xml")) {
+            if (artifact.isFile() && artifact.getName().endsWith(".xml") && !artifact.getName().startsWith("maven-metadata")) {
                 Document doc = parse(artifact);
                 String name = doc.getDocumentElement().getLocalName();
                 String uri  = doc.getDocumentElement().getNamespaceURI();

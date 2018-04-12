@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.config.command;
 
-import java.util.Dictionary;
-import java.util.Properties;
-
+import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.command.completers.ConfigurationCompleter;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
@@ -32,14 +30,13 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     @Completion(ConfigurationCompleter.class)
     protected String pid;
 
-    @SuppressWarnings("rawtypes")
     protected Object doExecute() throws Exception {
-        Dictionary props = getEditedProps();
+        TypedProperties props = getEditedProps();
         if (props == null && pid == null) {
             System.err.println("No configuration is being edited--run the edit command first");
         } else {
             if (props == null) {
-                props = new Properties();
+                props = new TypedProperties();
             }
             propertyAction(props);
             if(requiresUpdate(pid)) {
@@ -54,8 +51,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      *
      * @param props the dictionary where to apply the action.
      */
-    @SuppressWarnings("rawtypes")
-    protected abstract void propertyAction(Dictionary props);
+    protected abstract void propertyAction(TypedProperties props);
 
     /**
      * Check if the configuration requires to be updated.
@@ -65,11 +61,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      * @return <code>true</code> if the configuration requires an update, <code>false</code> else.
      */
     protected boolean requiresUpdate(String pid) {
-        if (pid != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return pid != null;
     }
 
     /**
@@ -78,10 +70,14 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
      * @return the edited dictionary.
      * @throws Exception in case of configuration failure.
      */
-    @SuppressWarnings("rawtypes")
     @Override
-    protected Dictionary getEditedProps() throws Exception {
-        Dictionary props = this.configRepository.getConfigProperties(pid);
-        return (props != null) ? props : super.getEditedProps();
+    protected TypedProperties getEditedProps() throws Exception {
+        if (pid != null) {
+            return this.configRepository.getConfig(pid);
+        }
+        else {
+            return super.getEditedProps();
+        }
     }
+
 }

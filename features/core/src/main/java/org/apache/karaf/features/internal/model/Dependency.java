@@ -19,9 +19,9 @@ package org.apache.karaf.features.internal.model;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-
 
 /**
  * <p>Dependency of feature.</p>
@@ -46,9 +46,21 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     @XmlAttribute
     protected String version;
     @XmlAttribute
-    protected boolean prerequisite;
+    protected Boolean prerequisite;
     @XmlAttribute
-    protected boolean dependency;
+    protected Boolean dependency;
+
+    @XmlTransient
+    private boolean blacklisted;
+
+    public Dependency() {
+        // Nothing to do
+    }
+
+    public Dependency(String name, String version) {
+        this.name = name;
+        this.version = version;
+    }
 
     /**
      * Feature name should be non empty string.
@@ -56,6 +68,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
      * @return possible object is
      * {@link String }
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -76,6 +89,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
      * @return possible object is
      * {@link String }
      */
+    @Override
     public String getVersion() {
         if (version == null) {
             return Feature.DEFAULT_VERSION;
@@ -94,26 +108,64 @@ public class Dependency implements org.apache.karaf.features.Dependency {
         this.version = value;
     }
 
+    /**
+     * Since version has a default value ("0.0.0"), returns whether or not the version has been set.
+     */
     @Override
-    public boolean isPrerequisite() {
-        return prerequisite;
+    public boolean hasVersion() {
+        return version != null;
     }
 
-    public void setPrerequisite(boolean prerequisite) {
+    @Override
+    public boolean isPrerequisite() {
+        return prerequisite == null ? false : prerequisite;
+    }
+
+    public void setPrerequisite(Boolean prerequisite) {
         this.prerequisite = prerequisite;
     }
 
     @Override
     public boolean isDependency() {
-        return dependency;
+        return dependency == null ? false : dependency;
     }
 
-    public void setDependency(boolean dependency) {
+    public void setDependency(Boolean dependency) {
         this.dependency = dependency;
+    }
+
+    @Override
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
     }
 
     public String toString() {
         return getName() + Feature.VERSION_SEPARATOR + getVersion();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Dependency that = (Dependency) o;
+
+        if (prerequisite != null ? !prerequisite.equals(that.prerequisite) : that.prerequisite != null) return false;
+        if (dependency != null ? !dependency.equals(that.dependency) : that.dependency != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        return version != null ? version.equals(that.version) : that.version == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (prerequisite != null ? prerequisite.hashCode() : 0);
+        result = 31 * result + (dependency != null ? dependency.hashCode() : 0);
+        return result;
+    }
 }

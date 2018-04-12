@@ -16,6 +16,7 @@ package org.apache.karaf.itests;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -23,6 +24,7 @@ import org.apache.karaf.jndi.JndiService;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
+
 public class JndiTest extends KarafTestSupport {
 
     @Before
@@ -30,7 +32,8 @@ public class JndiTest extends KarafTestSupport {
         installAndAssertFeature("jndi");
         getOsgiService(JndiService.class, 30000);
     }
-
+    
+    
     @Test
     public void testCommand() throws Exception {
         String output = executeCommand("jndi:names");

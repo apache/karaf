@@ -27,17 +27,24 @@ import java.util.concurrent.Callable;
 
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Registry;
+import org.apache.karaf.shell.api.console.Session;
 
 public class RegistryImpl implements Registry {
 
     protected final Registry parent;
-    protected final Map<Object, Object> services = new LinkedHashMap<Object, Object>();
-    private final Map<String, List<Command>> commands = new HashMap<String, List<Command>>();
+    protected final Map<Object, Object> services = new LinkedHashMap<>();
+    protected Session session;
+    private final Map<String, List<Command>> commands = new HashMap<>();
 
     public RegistryImpl(Registry parent) {
         this.parent = parent;
     }
 
+    public RegistryImpl(Registry parent, Session session) {
+        this.parent = parent;
+        this.session = session;
+    }
+    
     @Override
     public List<Command> getCommands() {
         return getServices(Command.class);
@@ -63,7 +70,7 @@ public class RegistryImpl implements Registry {
     @Override
     public <T> void register(Callable<T> factory, Class<T> clazz) {
         synchronized (services) {
-            services.put(factory, new Factory<T>(clazz, factory));
+            services.put(factory, new Factory<>(clazz, factory));
         }
     }
 
@@ -74,12 +81,7 @@ public class RegistryImpl implements Registry {
             if (service instanceof Command) {
                 Command cmd = (Command) service;
                 String key = cmd.getScope() + ":" + cmd.getName();
-                List<Command> cmds = commands.get(key);
-                if (cmds == null) {
-                    cmds = new ArrayList<Command>();
-                    commands.put(key, cmds);
-                }
-                cmds.add(cmd);
+                commands.computeIfAbsent(key, k -> new ArrayList<>()).add(cmd);
             }
         }
     }
@@ -107,10 +109,10 @@ public class RegistryImpl implements Registry {
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             try {
-                                return clazz.cast(((Factory) service).callable.call());
+                                return clazz.cast(((Factory<?>) service).callable.call());
                             } catch (Exception e) {
                                 // TODO: log exception
                             }
@@ -131,14 +133,14 @@ public class RegistryImpl implements Registry {
 
     @Override
     public <T> List<T> getServices(Class<T> clazz) {
-        List<T> list = new ArrayList<T>();
+        List<T> list = new ArrayList<>();
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             try {
-                                list.add(clazz.cast(((Factory) service).callable.call()));
+                                list.add(clazz.cast(((Factory<?>) service).callable.call()));
                             } catch (Exception e) {
                                 // TODO: log exception
                             }
@@ -162,7 +164,7 @@ public class RegistryImpl implements Registry {
         synchronized (services) {
             for (Object service : services.values()) {
                 if (service instanceof Factory) {
-                    if (clazz.isAssignableFrom(((Factory) service).clazz)) {
+                    if (clazz.isAssignableFrom(((Factory<?>) service).clazz)) {
                         if (isVisible(service)) {
                             return true;
                         }

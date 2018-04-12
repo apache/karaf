@@ -16,23 +16,25 @@
  */
 package org.apache.karaf.jms.internal;
 
-import org.apache.activemq.ActiveMQConnection;
-import org.apache.activemq.advisory.DestinationSource;
-import org.apache.activemq.command.ActiveMQQueue;
-import org.apache.activemq.command.ActiveMQTopic;
-import org.apache.activemq.pool.PooledConnection;
 import org.apache.karaf.jms.JmsMessage;
 import org.apache.karaf.jms.JmsService;
-import org.apache.karaf.util.TemplateUtils;
+import org.ops4j.pax.jms.service.ConnectionFactoryFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 import javax.jms.*;
+import javax.jms.Queue;
 
 import java.io.*;
-import java.lang.IllegalStateException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of the JMS Service.
@@ -40,11 +42,11 @@ import java.util.*;
 public class JmsServiceImpl implements JmsService {
 
     private BundleContext bundleContext;
-    private File deployFolder;
+    private ConfigurationAdmin configAdmin;
+    private Path deployFolder;
     
     public JmsServiceImpl() {
-        File karafBase = new File(System.getProperty("karaf.base"));
-        deployFolder = new File(karafBase, "deploy");
+        deployFolder = Paths.get(System.getProperty("karaf.base"), "deploy");
     }
 
     @Override
@@ -54,255 +56,230 @@ public class JmsServiceImpl implements JmsService {
 
     @Override
     public void create(String name, String type, String url, String username, String password) throws Exception {
-        if (!type.equalsIgnoreCase("activemq") && !type.equalsIgnoreCase("webspheremq")) {
+        if (type == null) {
             throw new IllegalArgumentException("JMS connection factory type not known");
         }
 
-        File outFile = getConnectionFactoryFile(name);
-        String template;
-        HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("name", name);
+        if (connectionFactories().contains(name)) {
+            throw new IllegalArgumentException("There is already a ConnectionFactory with the name " + name);
+        }
 
-        if (type.equalsIgnoreCase("activemq")) {
-            // activemq
-            properties.put("url", url);
-            properties.put("username", username);
-            properties.put("password", password);
-            template = "connectionfactory-activemq.xml";
-        } else {
-            // webspheremq
-            String[] splitted = url.split("/");
-            if (splitted.length != 4) {
-                throw new IllegalStateException("WebsphereMQ URI should be in the following format: host/port/queuemanager/channel");
-            }
-            
-            properties.put("host", splitted[0]);
-            properties.put("port", splitted[1]);
-            properties.put("queuemanager", splitted[2]);
-            properties.put("channel", splitted[3]);
-            template = "connectionfactory-webspheremq.xml";
-        }
-        InputStream is = this.getClass().getResourceAsStream(template);
-        if (is == null) {
-            throw new IllegalArgumentException("Template resource " + template + " doesn't exist");
-        }
-        TemplateUtils.createFromTemplate(outFile, is, properties);
+        Dictionary<String, String> properties = new Hashtable<>();
+        properties.put("osgi.jndi.service.name", "jms/" + name);
+        properties.put(ConnectionFactoryFactory.JMS_CONNECTIONFACTORY_NAME, name);
+        properties.put(ConnectionFactoryFactory.JMS_CONNECTIONFACTORY_TYPE, type);
+        put(properties, ConnectionFactoryFactory.JMS_URL, url);
+        put(properties, ConnectionFactoryFactory.JMS_USER, username);
+        put(properties, ConnectionFactoryFactory.JMS_PASSWORD, password);
+        Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.connectionfactory", null);
+        config.update(properties);
     }
 
-    private File getConnectionFactoryFile(String name) {
-        return new File(deployFolder, "connectionfactory-" + name + ".xml");
+    private void put(Dictionary<String, String> properties, String key, String value) {
+        if (value != null) {
+            properties.put(key, value);
+        }
     }
 
     @Override
     public void delete(String name) throws Exception {
-        File connectionFactoryFile = getConnectionFactoryFile(name);
-        if (!connectionFactoryFile.exists()) {
-            throw new IllegalStateException("The JMS connection factory file " + connectionFactoryFile.getPath() + " doesn't exist");
+        String filter = String.format("(&(service.factoryPid=org.ops4j.connectionfactory)(%s=%s))", ConnectionFactoryFactory.JMS_CONNECTIONFACTORY_NAME, name);
+        Configuration[] configs = configAdmin.listConfigurations(filter);
+        for (Configuration config : configs) {
+            config.delete();
         }
-        connectionFactoryFile.delete();
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public List<String> connectionFactories() throws Exception {
-        List<String> connectionFactories = new ArrayList<String>();
-        ServiceReference[] references = bundleContext.getServiceReferences(ConnectionFactory.class.getName(), null);
-        if (references != null) {
-            for (ServiceReference reference : references) {
-                if (reference.getProperty("osgi.jndi.service.name") != null) {
-                    connectionFactories.add((String) reference.getProperty("osgi.jndi.service.name"));
-                } else if (reference.getProperty("name") != null) {
-                    connectionFactories.add((String) reference.getProperty("name"));
-                } else {
-                    connectionFactories.add(reference.getProperty(Constants.SERVICE_ID).toString());
-                }
-            }
+        return bundleContext.getServiceReferences(ConnectionFactory.class, null).stream()
+                .map(this::getConnectionFactoryName)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    private String getConnectionFactoryName(ServiceReference<ConnectionFactory> reference) {
+        if (reference.getProperty("osgi.jndi.service.name") != null) {
+            return (String) reference.getProperty("osgi.jndi.service.name");
+        } else if (reference.getProperty("name") != null) {
+            return (String) reference.getProperty("name");
+        } else {
+            return reference.getProperty(Constants.SERVICE_ID).toString();
         }
-        return connectionFactories;
     }
 
     @Override
     public List<String> connectionFactoryFileNames() throws Exception {
-        String[] connectionFactoryFileNames = deployFolder.list(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.startsWith("connectionfactory-") && name.endsWith(".xml");
-            }
-        });
-
-        return Arrays.asList(connectionFactoryFileNames);
+        return Files.list(deployFolder)
+                .map(Path::getFileName)
+                .map(Path::toString)
+                .filter(name -> name.startsWith("connectionfactory-") && name.endsWith(".xml"))
+                .collect(Collectors.toList());
     }
 
     @Override
     public Map<String, String> info(String connectionFactory, String username, String password) throws IOException, JMSException {
-        JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
-        try {
-            ConnectionMetaData metaData = connector.connect().getMetaData();
-            Map<String, String> map = new HashMap<String, String>();
+        try (JMSContext context = createContext(connectionFactory, username, password)) {
+            ConnectionMetaData metaData = context.getMetaData();
+            Map<String, String> map = new HashMap<>();
             map.put("product", metaData.getJMSProviderName());
             map.put("version", metaData.getProviderVersion());
             return map;
-        } finally {
-            connector.close();
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public int count(String connectionFactory, final String destination, String username, String password) throws IOException, JMSException {
-        JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
-        try  {
-            Session session = connector.createSession();
-            QueueBrowser browser = session.createBrowser(session.createQueue(destination));
-            Enumeration<Message> enumeration = browser.getEnumeration();
-            int count = 0;
-            while (enumeration.hasMoreElements()) {
-                enumeration.nextElement();
-                count++;
+        try (JMSContext context = createContext(connectionFactory, username, password)) {
+            try (QueueBrowser browser = context.createBrowser(context.createQueue(destination))) {
+                @SuppressWarnings("unchecked")
+                Enumeration<Message> enumeration = browser.getEnumeration();
+                int count = 0;
+                while (enumeration.hasMoreElements()) {
+                    enumeration.nextElement();
+                    count++;
+                }
+                return count;
             }
-            browser.close();
-            return count;
-        } finally {
-            connector.close();
         }
     }
 
-    private DestinationSource getDestinationSource(Connection connection) throws JMSException {
-        if (connection instanceof PooledConnection) {
-            connection = ((PooledConnection) connection).getConnection();
+    private JMSContext createContext(String name, String username, String password) {
+        return createContext(name, username, password, JMSContext.AUTO_ACKNOWLEDGE);
+    }
+
+    private JMSContext createContext(String name, String username, String password, int sessionMode) {
+        ServiceReference<ConnectionFactory> sr = lookupConnectionFactory(name);
+        ConnectionFactory cf = bundleContext.getService(sr);
+        try {
+            return cf.createContext(username, password, sessionMode);
+        } finally {
+            bundleContext.ungetService(sr);
         }
-        if (connection instanceof ActiveMQConnection) {
-            return ((ActiveMQConnection) connection).getDestinationSource();
-        } else {
-            return null;
+    }
+
+    private ServiceReference<ConnectionFactory> lookupConnectionFactory(String name) {
+        try {
+            Collection<ServiceReference<ConnectionFactory>> references = bundleContext.getServiceReferences(
+                    ConnectionFactory.class,
+                    "(|(osgi.jndi.service.name=" + name + ")(name=" + name + ")(service.id=" + name + "))");
+            return references.stream()
+                    .sorted(Comparator.<ServiceReference<?>>naturalOrder().reversed())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("No JMS connection factory found for " + name));
+        } catch (InvalidSyntaxException e) {
+            throw new RuntimeException("Error finding connection factory service " + name, e);
         }
+    }
+
+    private DestinationSource getDestinationSource(JMSContext context) throws JMSException {
+        List<DestinationSource.Factory> factories = Arrays.asList(
+                new ActiveMQDestinationSourceFactory(),
+                new ArtemisDestinationSourceFactory()
+        );
+        DestinationSource source = null;
+        for (DestinationSource.Factory factory : factories) {
+            source = factory.create(context);
+            if (source != null) {
+                break;
+            }
+        }
+        if (source == null) {
+            source = d -> Collections.emptyList();
+        }
+        return source;
     }
     
     @Override
     public List<String> queues(String connectionFactory, String username, String password) throws JMSException, IOException {
-        JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
-        try {
-            List<String> queues = new ArrayList<String>();
-            DestinationSource destinationSource = getDestinationSource(connector.connect());
-            if (destinationSource != null) {
-                Set<ActiveMQQueue> activeMQQueues = destinationSource.getQueues();
-                for (ActiveMQQueue activeMQQueue : activeMQQueues) {
-                    queues.add(activeMQQueue.getQueueName());
-                }
-            }
-            return queues;
-        } finally {
-            connector.close();
+        try (JMSContext context = createContext(connectionFactory, username, password)) {
+            return getDestinationSource(context).getNames(DestinationSource.DestinationType.Queue);
         }
     }
 
     @Override
     public List<String> topics(String connectionFactory, String username, String password) throws IOException, JMSException {
-        JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
-        try {
-            DestinationSource destinationSource = getDestinationSource(connector.connect());
-            List<String> topics = new ArrayList<String>();
-            if (destinationSource != null) {
-                Set<ActiveMQTopic> activeMQTopics = destinationSource.getTopics();
-                for (ActiveMQTopic activeMQTopic : activeMQTopics) {
-                    topics.add(activeMQTopic.getTopicName());
-                }
-            }
-            return topics;
-        } finally {
-            connector.close();
+        try (JMSContext context = createContext(connectionFactory, username, password)) {
+            return getDestinationSource(context).getNames(DestinationSource.DestinationType.Topic);
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<JmsMessage> browse(String connectionFactory, final String queue, final String filter,
                                    String username, String password) throws JMSException, IOException {
-        JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
-        try {
-            List<JmsMessage> messages = new ArrayList<JmsMessage>();
-            Session session = connector.createSession();
-            QueueBrowser browser = session.createBrowser(session.createQueue(queue), filter);
-            Enumeration<Message> enumeration = browser.getEnumeration();
-            while (enumeration.hasMoreElements()) {
-                Message message = enumeration.nextElement();
+        try (JMSContext context = createContext(connectionFactory, username, password)) {
+            try (QueueBrowser browser = context.createBrowser(context.createQueue(queue), filter)) {
+                List<JmsMessage> messages = new ArrayList<>();
+                @SuppressWarnings("unchecked")
+                Enumeration<Message> enumeration = browser.getEnumeration();
+                while (enumeration.hasMoreElements()) {
+                    Message message = enumeration.nextElement();
 
-                messages.add(new JmsMessage(message));
+                    messages.add(new JmsMessage(message));
+                }
+                return messages;
             }
-            browser.close();
-            return messages;
-        } finally {
-            connector.close();
         }
     }
 
     @Override
     public void send(String connectionFactory, final String queue, final String body, final String replyTo,
                      String username, String password) throws IOException, JMSException {
-        JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
-        try {
-            Session session = connector.createSession();
-            Message message = session.createTextMessage(body);
+        try (JMSContext context = createContext(connectionFactory, username, password)) {
+            JMSProducer producer = context.createProducer();
             if (replyTo != null) {
-                message.setJMSReplyTo(session.createQueue(replyTo));
+                producer.setJMSReplyTo(context.createQueue(replyTo));
             }
-            MessageProducer producer = session.createProducer(session.createQueue(queue));
-            producer.send(message);
-            producer.close();
-        } finally {
-            connector.close();
+            producer.send(context.createQueue(queue), body);
         }
     }
 
     @Override
     public int consume(String connectionFactory, final String queue, final String selector, String username,
                        String password) throws Exception {
-        JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
-        try {
-            int count = 0;
-            Session session = connector.createSession();
-            MessageConsumer consumer = session.createConsumer(session.createQueue(queue), selector);
-            Message message;
-            do {
-                message = consumer.receive(5000L);
-                if (message != null) {
-                    count++;
-                }
-            } while (message != null);
-            return count;
-        } finally {
-            connector.close();
+        try (JMSContext context = createContext(connectionFactory, username, password)) {
+            try (JMSConsumer consumer = context.createConsumer(context.createQueue(queue), selector)) {
+                int count = 0;
+                Message message;
+                do {
+                    message = consumer.receive(500L);
+                    if (message != null) {
+                        count++;
+                    }
+                } while (message != null);
+                return count;
+            }
         }
     }
 
     @Override
     public int move(String connectionFactory, final String sourceQueue, final String targetQueue,
                     final String selector, String username, String password) throws IOException, JMSException {
-        JmsConnector connector = new JmsConnector(bundleContext, connectionFactory, username, password);
-        try {
-            int count = 0;
-            Session session = connector.createSession(Session.SESSION_TRANSACTED);
-            MessageConsumer consumer = session.createConsumer(session.createQueue(sourceQueue), selector);
-            Message message;
-            do {
-                message = consumer.receive(5000L);
-                if (message != null) {
-                    MessageProducer producer = session.createProducer(session.createQueue(targetQueue));
-                    producer.send(message);
-                    count++;
+        try (JMSContext context = createContext(connectionFactory, username, password, JMSContext.SESSION_TRANSACTED)) {
+            Queue source = context.createQueue(sourceQueue);
+            Queue target = context.createQueue(targetQueue);
+            try (JMSConsumer consumer = context.createConsumer(source, selector)) {
+                int count = 0;
+                while (true) {
+                    Message message = consumer.receive(500L);
+                    if (message != null) {
+                        context.createProducer().send(target, message);
+                        context.commit();
+                        count++;
+                    } else {
+                        break;
+                    }
                 }
-            } while (message != null);
-            session.commit();
-            consumer.close();
-            return count;
-        } finally {
-            connector.close();
+                return count;
+            }
         }
-    }
+   }
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
+    }
 }

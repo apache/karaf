@@ -74,18 +74,17 @@ public class MBeanServerFactory {
         if (this.server == null) {
             init();
         }
-        return server;
+        return this.server;
     }
 
     public void init() throws Exception {
         if (this.locateExistingServerIfPossible || this.agentId != null) {
             try {
                 List servers = javax.management.MBeanServerFactory.findMBeanServer(agentId);
-                MBeanServer server = null;
                 if (servers != null && servers.size() > 0) {
                     this.server = (MBeanServer) servers.get(0);
                 }
-                if (server == null && agentId == null) {
+                if (this.server == null && agentId == null) {
                     this.server = ManagementFactory.getPlatformMBeanServer();
                 }
                 if (this.server == null) {

@@ -25,7 +25,6 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -43,9 +42,11 @@ import org.slf4j.LoggerFactory;
 public class LDAPLoginModule extends AbstractKarafLoginModule {
 
     private static Logger logger = LoggerFactory.getLogger(LDAPLoginModule.class);
-
+    
+        
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
+        LDAPCache.clear();
     }
 
     public boolean login() throws LoginException {
@@ -71,7 +72,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             throw new LoginException(unsupportedCallbackException.getMessage() + " not available to obtain information from user.");
         }
 
-        user = ((NameCallback) callbacks[0]).getName();
+        user = Util.doRFC2254Encoding(((NameCallback) callbacks[0]).getName());
 
         char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
 
@@ -80,6 +81,11 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         // valid password (because if authentication = none, the password could be any 
         // value - it is ignored).
         LDAPOptions options = new LDAPOptions(this.options);
+        if(options.isUsernameTrim()){
+            if(user != null){
+                user = user.trim();
+            }
+        }
         String authentication = options.getAuthentication();
         if ("none".equals(authentication) && (user != null || tmpPassword != null)) {
             logger.debug("Changing from authentication = none to simple since user or password was specified.");
@@ -99,7 +105,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             tmpPassword = new char[0];
         }
         String password = new String(tmpPassword);
-        principals = new HashSet<Principal>();
+        principals = new HashSet<>();
 
         LDAPCache cache = LDAPCache.getCache(options);
 
@@ -131,7 +137,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             context.close();
         } catch (Exception e) {
             logger.warn("User " + user + " authentication failed.", e);
-            return false;
+            throw new LoginException("Authentication failed: " + e.getMessage());
         } finally {
             if (context != null) {
                 try {

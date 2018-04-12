@@ -27,7 +27,6 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.action.command.ManagerImpl;
 import org.apache.karaf.shell.impl.action.osgi.CommandExtender;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
-import org.apache.karaf.shell.impl.console.TerminalFactory;
 import org.apache.karaf.shell.impl.console.osgi.secured.SecuredSessionFactoryImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -35,24 +34,28 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator implements BundleActivator {
 
     private static final String START_CONSOLE = "karaf.startLocalConsole";
+    private static final Logger LOGGER = LoggerFactory.getLogger(Activator.class);
 
     private ThreadIOImpl threadIO;
 
     private SessionFactoryImpl sessionFactory;
-    private ServiceRegistration sessionFactoryRegistration;
+    private ServiceRegistration<SessionFactory> sessionFactoryRegistration;
 
     private CommandExtender actionExtender;
 
     private Closeable eventAdminListener;
 
-    private TerminalFactory terminalFactory;
     private LocalConsoleManager localConsoleManager;
 
     ServiceTracker<CommandLoggingFilter, CommandLoggingFilter> filterTracker;
+
+    CommandTracker commandTracker;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -64,7 +67,7 @@ public class Activator implements BundleActivator {
         sessionFactory.getCommandProcessor().addConstant(".context", context.getBundle(0).getBundleContext());
 
         final CopyOnWriteArraySet<CommandLoggingFilter> listeners = new CopyOnWriteArraySet<>();
-        filterTracker = new ServiceTracker<CommandLoggingFilter, CommandLoggingFilter>(
+        filterTracker = new ServiceTracker<>(
                 context, CommandLoggingFilter.class, new ServiceTrackerCustomizer<CommandLoggingFilter, CommandLoggingFilter>() {
             @Override
             public CommandLoggingFilter addingService(ServiceReference<CommandLoggingFilter> reference) {
@@ -98,15 +101,19 @@ public class Activator implements BundleActivator {
 
         sessionFactory.register(new ManagerImpl(sessionFactory, sessionFactory));
 
-        sessionFactoryRegistration = context.registerService(SessionFactory.class.getName(), sessionFactory, null);
+        sessionFactoryRegistration = context.registerService(SessionFactory.class, sessionFactory, null);
 
         actionExtender = new CommandExtender(sessionFactory);
         actionExtender.start(context);
 
+        commandTracker = new CommandTracker(sessionFactory, context);
+        commandTracker.open();
+
         if (Boolean.parseBoolean(context.getProperty(START_CONSOLE))) {
-            terminalFactory = new TerminalFactory();
-            localConsoleManager = new LocalConsoleManager(context, terminalFactory, sessionFactory);
+            localConsoleManager = new LocalConsoleManager(context, sessionFactory);
             localConsoleManager.start();
+        } else {
+            LOGGER.info("Not starting local console. To activate set " + START_CONSOLE + "=true");
         }
     }
 
@@ -116,10 +123,10 @@ public class Activator implements BundleActivator {
         sessionFactoryRegistration.unregister();
         if (localConsoleManager != null) {
             localConsoleManager.stop();
-            terminalFactory.destroy();
         }
         sessionFactory.stop();
         actionExtender.stop(context);
+        commandTracker.close();
         threadIO.stop();
         if (eventAdminListener != null) {
             eventAdminListener.close();

@@ -22,7 +22,7 @@
 #
 
 # set the JAVA_HOME to launch the wrapper
-set JAVA_HOME="${java.home}"
+JAVA_HOME="${java.home}"
 
 # Application
 APP_NAME="${name}"
@@ -40,7 +40,7 @@ PRIORITY=
 DATADIR="${karaf.data}"
 
 # Location of the pid file.
-PIDDIR="${karaf.data}"
+PIDDIR="${karaf.base}"
 
 # If uncommented, causes the Wrapper to be shutdown using an anchor file.
 #  When launched with the 'start' command, it will also ignore all INT and
@@ -134,7 +134,7 @@ fi
 
 # Process ID
 ANCHORFILE="$PIDDIR/$APP_NAME.anchor"
-PIDFILE="$PIDDIR/$APP_NAME.pid"
+PIDFILE="$PIDDIR/$APP_NAME.wrapper.pid"
 LOCKDIR="/var/lock/subsys"
 LOCKFILE="$LOCKDIR/$APP_NAME"
 pid=""
@@ -422,7 +422,7 @@ start() {
         exec $COMMAND_LINE
     else
         echo "$APP_LONG_NAME is already running."
-        exit 1
+        exit 0
     fi
 }
 

@@ -18,7 +18,6 @@ package org.apache.karaf.features.internal.resolver;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -28,6 +27,7 @@ import java.util.Set;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.internal.util.StringArrayMap;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -57,6 +57,8 @@ public final class ResourceBuilder {
     private static final int DELIMITER = 2;
     private static final int STARTQUOTE = 4;
     private static final int ENDQUOTE = 8;
+
+    private static final Map<String, String> DEFAULT_DIRECTIVES = Collections.singletonMap(ServiceNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, ServiceNamespace.EFFECTIVE_ACTIVE);
 
     private ResourceBuilder() {
     }
@@ -111,18 +113,16 @@ public final class ResourceBuilder {
         // Now that we have symbolic name and version, create the resource
         String type = headerMap.get(Constants.FRAGMENT_HOST) == null ? IdentityNamespace.TYPE_BUNDLE : IdentityNamespace.TYPE_FRAGMENT;
         {
-            Map<String, String> dirs = new HashMap<>();
-            Map<String, Object> attrs = new HashMap<>();
+            Map<String, Object> attrs = new StringArrayMap<>(3);
             attrs.put(IdentityNamespace.IDENTITY_NAMESPACE, bundleSymbolicName);
             attrs.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, type);
             attrs.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, bundleVersion);
-            CapabilityImpl identity = new CapabilityImpl(resource, IdentityNamespace.IDENTITY_NAMESPACE, dirs, attrs);
+            CapabilityImpl identity = new CapabilityImpl(resource, IdentityNamespace.IDENTITY_NAMESPACE, Collections.emptyMap(), attrs);
             resource.addCapability(identity);
         }
         if (uri != null) {
-            Map<String, Object> attrs = new HashMap<>();
-            attrs.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, uri);
-            resource.addCapability(new CapabilityImpl(resource, ContentNamespace.CONTENT_NAMESPACE, Collections.<String, String>emptyMap(), attrs));
+            resource.addCapability(new CapabilityImpl(resource, ContentNamespace.CONTENT_NAMESPACE, Collections.emptyMap(),
+                Collections.singletonMap(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, uri)));
         }
 
         // Add a bundle and host capability to all
@@ -138,9 +138,14 @@ public final class ResourceBuilder {
             String attachment = bundleCap.dirs.get(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE);
             attachment = (attachment == null) ? Constants.FRAGMENT_ATTACHMENT_RESOLVETIME : attachment;
             if (!attachment.equalsIgnoreCase(Constants.FRAGMENT_ATTACHMENT_NEVER)) {
-                Map<String, Object> hostAttrs = new HashMap<>(bundleCap.attrs);
-                Object value = hostAttrs.remove(BundleRevision.BUNDLE_NAMESPACE);
-                hostAttrs.put(BundleRevision.HOST_NAMESPACE, value);
+                Map<String, Object> hostAttrs = new StringArrayMap<>(bundleCap.attrs.size());
+                for (Map.Entry<String, Object> e : bundleCap.attrs.entrySet()) {
+                    String k = e.getKey();
+                    if (BundleRevision.BUNDLE_NAMESPACE.equals(k)) {
+                        k = BundleRevision.HOST_NAMESPACE;
+                    }
+                    hostAttrs.put(k, e.getValue());
+                }
                 resource.addCapability(new CapabilityImpl(
                         resource, BundleRevision.HOST_NAMESPACE,
                         bundleCap.dirs,
@@ -190,7 +195,7 @@ public final class ResourceBuilder {
         // Parse Bundle-RequiredExecutionEnvironment.
         //
         List<Requirement> breeReqs =
-                parseBreeHeader((String) headerMap.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT), resource);
+                parseBreeHeader(headerMap.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT), resource);
 
         //
         // Parse Export-Package.
@@ -244,7 +249,7 @@ public final class ResourceBuilder {
                 }
             }
         }
-        
+
         // Combine all capabilities.
         resource.addCapabilities(exportCaps);
         resource.addCapabilities(provideCaps);
@@ -334,15 +339,13 @@ public final class ResourceBuilder {
         List<Capability> capList = new ArrayList<>();
         for (ParsedHeaderClause clause : clauses) {
             for (String path : clause.paths) {
-                Map<String, String> dirs = new LinkedHashMap<>();
-                dirs.put(ServiceNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, ServiceNamespace.EFFECTIVE_ACTIVE);
                 Map<String, Object> attrs = new LinkedHashMap<>();
                 attrs.put(Constants.OBJECTCLASS, path);
                 attrs.putAll(clause.attrs);
                 capList.add(new CapabilityImpl(
                         resource,
                         ServiceNamespace.SERVICE_NAMESPACE,
-                        dirs,
+                        DEFAULT_DIRECTIVES,
                         attrs));
             }
         }
@@ -357,7 +360,7 @@ public final class ResourceBuilder {
                     String multiple = clause.dirs.get("multiple");
                     String avail = clause.dirs.get("availability");
                     String filter = (String) clause.attrs.get("filter");
-                    Map<String, String> dirs = new LinkedHashMap<>();
+                    Map<String, String> dirs = new LinkedHashMap<>(2);
                     dirs.put(ServiceNamespace.REQUIREMENT_EFFECTIVE_DIRECTIVE, ServiceNamespace.EFFECTIVE_ACTIVE);
                     if ("optional".equals(avail)) {
                         dirs.put(ServiceNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, ServiceNamespace.RESOLUTION_OPTIONAL);
@@ -377,7 +380,7 @@ public final class ResourceBuilder {
                             resource,
                             ServiceNamespace.SERVICE_NAMESPACE,
                             dirs,
-                            Collections.<String, Object>emptyMap(),
+                            Collections.emptyMap(),
                             SimpleFilter.parse(filter)));
                 }
             }
@@ -412,7 +415,7 @@ public final class ResourceBuilder {
                 // Inject filter directive.
                 // TODO: OSGi R4.3 - Can we insert this on demand somehow?
                 Map<String, String> dirs = clause.dirs;
-                Map<String, String> newDirs = new HashMap<>(dirs.size() + 1);
+                Map<String, String> newDirs = new StringArrayMap<>(dirs.size() + 1);
                 newDirs.putAll(dirs);
                 newDirs.put(Constants.FILTER_DIRECTIVE, sf.toString());
 
@@ -422,7 +425,7 @@ public final class ResourceBuilder {
                                 resource,
                                 BundleRevision.PACKAGE_NAMESPACE,
                                 newDirs,
-                                Collections.<String, Object>emptyMap(),
+                                Collections.emptyMap(),
                                 sf)
                 );
             }
@@ -761,7 +764,7 @@ public final class ResourceBuilder {
             for (String pkgName : clause.paths) {
                 // Prepend the package name to the array of attributes.
                 Map<String, Object> attrs = clause.attrs;
-                Map<String, Object> newAttrs = new HashMap<>(attrs.size() + 1);
+                Map<String, Object> newAttrs = new StringArrayMap<>(attrs.size() + 1);
                 newAttrs.putAll(attrs);
                 newAttrs.put(BundleRevision.PACKAGE_NAMESPACE, pkgName);
 
@@ -836,7 +839,7 @@ public final class ResourceBuilder {
             // Inject filter directive.
             // TODO: OSGi R4.3 - Can we insert this on demand somehow?
             Map<String, String> dirs = clauses.get(0).dirs;
-            Map<String, String> newDirs = new HashMap<>(dirs.size() + 1);
+            Map<String, String> newDirs = new StringArrayMap<>(dirs.size() + 1);
             newDirs.putAll(dirs);
             newDirs.put(Constants.FILTER_DIRECTIVE, sf.toString());
 
@@ -850,7 +853,7 @@ public final class ResourceBuilder {
     }
 
     private static List<Requirement> parseBreeHeader(String header, Resource resource) {
-        List<String> filters = new ArrayList<String>();
+        List<String> filters = new ArrayList<>();
         for (String entry : parseDelimitedString(header, ",")) {
             List<String> names = parseDelimitedString(entry, "/");
             List<String> left = parseDelimitedString(names.get(0), "-");
@@ -899,16 +902,18 @@ public final class ResourceBuilder {
             }
 
             String nameClause;
-            if (rName != null)
+            if (rName != null) {
                 nameClause = "(" + ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE + "=" + lName + "/" + rName + ")";
-            else
+            } else {
                 nameClause = "(" + ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE + "=" + lName + ")";
+            }
 
             String filter;
-            if (versionClause != null)
+            if (versionClause != null) {
                 filter = "(&" + nameClause + versionClause + ")";
-            else
+            } else {
                 filter = nameClause;
+            }
 
             filters.add(filter);
         }
@@ -930,18 +935,19 @@ public final class ResourceBuilder {
             }
 
             SimpleFilter sf = SimpleFilter.parse(reqFilter);
-            return Collections.<Requirement>singletonList(new RequirementImpl(
+            return Collections.singletonList(new RequirementImpl(
                     resource,
                     ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE,
                     Collections.singletonMap(ExecutionEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, reqFilter),
-                    Collections.<String, Object>emptyMap(),
+                    Collections.emptyMap(),
                     sf));
         }
     }
 
     private static String getBreeVersionClause(Version ver) {
-        if (ver == null)
+        if (ver == null) {
             return null;
+        }
 
         return "(" + ExecutionEnvironmentNamespace.CAPABILITY_VERSION_ATTRIBUTE + "=" + ver + ")";
     }
@@ -982,7 +988,7 @@ public final class ResourceBuilder {
                 // Inject filter directive.
                 // TODO: OSGi R4.3 - Can we insert this on demand somehow?
                 Map<String, String> dirs = clause.dirs;
-                Map<String, String> newDirs = new HashMap<>(dirs.size() + 1);
+                Map<String, String> newDirs = new StringArrayMap<>(dirs.size() + 1);
                 newDirs.putAll(dirs);
                 newDirs.put(Constants.FILTER_DIRECTIVE, sf.toString());
 
@@ -1196,8 +1202,8 @@ public final class ResourceBuilder {
 
     static class ParsedHeaderClause {
         public final List<String> paths = new ArrayList<>();
-        public final Map<String, String> dirs = new LinkedHashMap<>();
-        public final Map<String, Object> attrs = new LinkedHashMap<>();
-        public final Map<String, String> types = new LinkedHashMap<>();
+        public final Map<String, String> dirs = new StringArrayMap<>(0);
+        public final Map<String, Object> attrs = new StringArrayMap<>(0);
+        public final Map<String, String> types = new StringArrayMap<>(0);
     }
 }

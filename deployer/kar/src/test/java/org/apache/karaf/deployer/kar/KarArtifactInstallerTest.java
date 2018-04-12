@@ -18,12 +18,14 @@
  */
 package org.apache.karaf.deployer.kar;
 
-import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.karaf.kar.KarService;
 import org.junit.Before;
@@ -72,4 +74,37 @@ public class KarArtifactInstallerTest {
 		assertFalse(karArtifactInstaller.canHandle(new File(badZipFile)));
 	}
 
+    /**
+     * This is test for KARAF-5533. Issue comes from fact that internally KAR service process file in it's own way.
+     *
+     * Because of that artifact installer must follow the same logic of service it calls, as returned list of installed.
+     * KAR files is not list of full file names, but files with stripped extensions.
+     *
+     * @throws Exception Any exception causes test failure.
+     */
+    @Test
+    public void shouldNotInstallSameFileTwice() throws Exception {
+        File file = new File(goodKarFile);
+        URI uri = file.toURI();
+
+        // make sure we have clean state.
+        presentKarList(Collections.emptyList());
+        karService.install(uri);
+
+        replay(karService);
+
+        karArtifactInstaller.install(file);
+        verify(karService);
+
+        // once again,
+        reset(karService);
+        presentKarList(Collections.singletonList(karArtifactInstaller.getKarName(file)));
+        replay(karService);
+        karArtifactInstaller.install(file);
+        verify(karService);
+    }
+
+    private void presentKarList(List<String> deployedKars) throws Exception {
+        expect(karService.list()).andReturn(deployedKars).once();
+    }
 }

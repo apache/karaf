@@ -35,7 +35,6 @@ import java.util.Set;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.CommandWithAction;
 import org.apache.karaf.shell.commands.CompleterValues;
 import org.apache.karaf.shell.commands.HelpOption;
@@ -69,9 +68,9 @@ public class ArgumentCompleter {
     final List<Completer> argsCompleters;
     final Map<String, Completer> optionalCompleters;
     final CommandWithAction function;
-    final Map<Option, Field> fields = new HashMap<Option, Field>();
-    final Map<String, Option> options = new HashMap<String, Option>();
-    final Map<Integer, Field> arguments = new HashMap<Integer, Field>();
+    final Map<Option, Field> fields = new HashMap<>();
+    final Map<String, Option> options = new HashMap<>();
+    final Map<Integer, Field> arguments = new HashMap<>();
     boolean strict = true;
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -118,7 +117,7 @@ public class ArgumentCompleter {
             Map<String, Completer> focl = ((CompletableFunction) function).getOptionalCompleters();
             List<Completer> fcl = ((CompletableFunction) function).getCompleters();
             if (focl != null || fcl != null) {
-                argsCompleters = new ArrayList<Completer>();
+                argsCompleters = new ArrayList<>();
                 if (fcl != null) {
                     for (Completer c : fcl) {
                         argsCompleters.add(c == null ? NullCompleter.INSTANCE : c);
@@ -129,7 +128,7 @@ public class ArgumentCompleter {
         }
         if (argsCompleters == null) {
             final Map<Integer, Object> values = getCompleterValues(function);
-            argsCompleters = new ArrayList<Completer>();
+            argsCompleters = new ArrayList<>();
             boolean multi = false;
             for (int key = 0; key < arguments.size(); key++) {
                 Completer completer = null;
@@ -170,7 +169,7 @@ public class ArgumentCompleter {
             if (argsCompleters.isEmpty() || !multi) {
                 argsCompleters.add(NullCompleter.INSTANCE);
             }
-            optionalCompleters = new HashMap<String, Completer>();
+            optionalCompleters = new HashMap<>();
             for (Option option : fields.keySet()) {
                 Completer completer = null;
                 Field field = fields.get(option);
@@ -205,7 +204,7 @@ public class ArgumentCompleter {
     }
 
     private Map<Integer, Object> getCompleterValues(CommandWithAction function) {
-        final Map<Integer, Object> values = new HashMap<Integer, Object>();
+        final Map<Integer, Object> values = new HashMap<>();
         Action action = null;
         try {
             for (Class<?> type = function.getActionClass(); type != null; type = type.getSuperclass()) {
@@ -263,7 +262,7 @@ public class ArgumentCompleter {
         } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
             completer = new StringsCompleter(new String[] {"false", "true"}, false);
         } else if (type.isAssignableFrom(Enum.class)) {
-            Set<String> values = new HashSet<String>();
+            Set<String> values = new HashSet<>();
             for (Object o : EnumSet.allOf((Class<Enum>) type)) {
                 values.add(o.toString());
             }
@@ -425,7 +424,7 @@ public class ArgumentCompleter {
     }
 
     protected boolean verifyCompleter(Completer completer, String argument) {
-        List<String> candidates = new ArrayList<String>();
+        List<String> candidates = new ArrayList<>();
         return completer.complete(argument, argument.length(), candidates) != -1 && !candidates.isEmpty();
     }
 

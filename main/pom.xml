@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -43,7 +43,7 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
-        </dependency>    
+        </dependency>
 
         <dependency>
             <groupId>org.ops4j.pax.tinybundles</groupId>
@@ -53,6 +53,14 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
         </dependency>
     </dependencies>
 
@@ -93,6 +101,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.main*,
+                            org.apache.karaf.jpm*,
                             org.apache.felix.utils.properties;-split-package:=merge-first,
                             org.apache.karaf.util.config,
                             org.apache.karaf.util.maven,

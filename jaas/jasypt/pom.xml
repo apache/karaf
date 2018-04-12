@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.jaas</groupId>
         <artifactId>jaas</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     
@@ -101,7 +101,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.aries.proxy</groupId>
-            <artifactId>org.apache.aries.proxy.impl</artifactId>
+            <artifactId>org.apache.aries.proxy</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -155,6 +155,9 @@
                         <Bundle-Activator>
                             org.apache.karaf.jaas.jasypt.impl.Activator
                         </Bundle-Activator>
+                        <Provide-Capability>
+                            osgi.service;effective:=active;name=jasypt;objectClass="org.apache.karaf.jaas.modules.EncryptionService"
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>

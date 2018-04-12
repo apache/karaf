@@ -42,20 +42,17 @@ public abstract class MultiServiceTracker<T> {
 
     private final BundleContext ctx;
     private final Class<T> clazz;
-    private final Map<ServiceReference<T>, T> refs = new HashMap<ServiceReference<T>, T>();
+    private final Map<ServiceReference<T>, T> refs = new HashMap<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
 
-    private final ServiceListener listener = new ServiceListener() {
-        @SuppressWarnings("unchecked")
-        public void serviceChanged(ServiceEvent event) {
-            if (open.get()) {
-                if (event.getType() == ServiceEvent.UNREGISTERING) {
-                    removeRef((ServiceReference<T>) event.getServiceReference());
-                } else if (event.getType() == ServiceEvent.REGISTERED) {
-                    addRef((ServiceReference<T>) event.getServiceReference());
-                }
-                updateState();
+    private final ServiceListener listener = event -> {
+        if (open.get()) {
+            if (event.getType() == ServiceEvent.UNREGISTERING) {
+                removeRef((ServiceReference<T>) event.getServiceReference());
+            } else if (event.getType() == ServiceEvent.REGISTERED) {
+                addRef((ServiceReference<T>) event.getServiceReference());
             }
+            updateState();
         }
     };
 
@@ -84,13 +81,14 @@ public abstract class MultiServiceTracker<T> {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public void close() {
         if (open.compareAndSet(true, false)) {
             ctx.removeServiceListener(listener);
 
             List<ServiceReference> oldRefs;
             synchronized (refs) {
-                oldRefs = new ArrayList<ServiceReference>(refs.keySet());
+                oldRefs = new ArrayList<>(refs.keySet());
                 refs.clear();
             }
             for (ServiceReference ref : oldRefs) {
@@ -100,7 +98,7 @@ public abstract class MultiServiceTracker<T> {
     }
 
     private void updateState() {
-        List<T> svcs = new ArrayList<T>();
+        List<T> svcs = new ArrayList<>();
         synchronized (refs) {
             svcs.addAll(refs.values());
         }

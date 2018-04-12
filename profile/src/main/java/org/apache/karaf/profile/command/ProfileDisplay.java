@@ -54,7 +54,7 @@ public class ProfileDisplay implements Action {
     private ProfileService profileService;
 
     @Override
-    public Object execute() throws Exception {
+    public Object execute() {
         displayProfile(profileService.getRequiredProfile(profileId));
         return null;
     }
@@ -85,18 +85,17 @@ public class ProfileDisplay implements Action {
             profile = profileService.getEffectiveProfile(profile);
         }
 
-        Map<String, Map<String, String>> configuration = new HashMap<>(profile.getConfigurations());
+        Map<String, Map<String, Object>> configuration = new HashMap<>(profile.getConfigurations());
         Map<String, byte[]> resources = profile.getFileConfigurations();
-        Map<String,String> agentConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
-        List<String> agentProperties = new ArrayList<String>();
-        List<String> systemProperties = new ArrayList<String>();
-        List<String> configProperties = new ArrayList<String>();
-        List<String> otherResources = new ArrayList<String>();
-        for (Map.Entry<String, String> entry : agentConfiguration.entrySet()) {
+        Map<String,Object> profileConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
+        List<String> profileProperties = new ArrayList<>();
+        List<String> systemProperties = new ArrayList<>();
+        List<String> configProperties = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : profileConfiguration.entrySet()) {
             String key = entry.getKey();
-            String value = entry.getValue();
-            if (value.contains(",")) {
-                value = "\t" + value.replace(",", ",\n\t\t");
+            Object value = entry.getValue();
+            if (value instanceof String && ((String) value).contains(",")) {
+                value = "\t" + ((String) value).replace(",", ",\n\t\t");
             }
 
             if (key.startsWith("system.")) {
@@ -108,7 +107,7 @@ public class ProfileDisplay implements Action {
             else if (!key.startsWith("feature.") && !key.startsWith("repository") &&
                         !key.startsWith("bundle.") && !key.startsWith("fab.") &&
                         !key.startsWith("override.") && !key.startsWith("attribute.")) {
-                agentProperties.add("  " + key + " = " + value);
+                profileProperties.add("  " + key + " = " + value);
             }
         }
 
@@ -132,8 +131,8 @@ public class ProfileDisplay implements Action {
                 printConfigList("Overrides : ", output, profile.getOverrides());
             }
 
-            if (agentProperties.size() > 0) {
-                printConfigList("Agent Properties : ", output, agentProperties);
+            if (profileProperties.size() > 0) {
+                printConfigList("Profile Properties : ", output, profileProperties);
             }
 
             if (systemProperties.size() > 0) {
@@ -149,10 +148,10 @@ public class ProfileDisplay implements Action {
 
         output.println("\nConfiguration details");
         output.println("----------------------------");
-        for (Map.Entry<String, Map<String, String>> cfg : configuration.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> cfg : configuration.entrySet()) {
             output.println("PID: " + cfg.getKey());
 
-            for (Map.Entry<String, String> values : cfg.getValue().entrySet()) {
+            for (Map.Entry<String, Object> values : cfg.getValue().entrySet()) {
                 output.println("  " + values.getKey() + " " + values.getValue());
             }
             output.println("\n");

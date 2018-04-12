@@ -18,7 +18,6 @@ package org.apache.karaf.jaas.command;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.config.impl.Config;
 import org.apache.karaf.jaas.config.impl.Module;
 import org.apache.karaf.shell.api.console.Session;
@@ -70,7 +69,7 @@ public class ManageRealmCommandTest {
 
         // prepare command
         cmd.index = index;
-        cmd.setRealms(Arrays.<JaasRealm> asList(realms));
+        cmd.setRealms(Arrays.asList(realms));
         cmd.setSession(session);
 
         for (Config realm : realms)

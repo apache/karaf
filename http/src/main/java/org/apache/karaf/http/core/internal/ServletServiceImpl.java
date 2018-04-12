@@ -17,7 +17,7 @@
 package org.apache.karaf.http.core.internal;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.servlet.Servlet;
@@ -35,28 +35,57 @@ public class ServletServiceImpl implements ServletService {
 
     @Override
     public List<ServletInfo> getServlets() {
-        List<ServletInfo> servletInfos = new ArrayList<ServletInfo>();
-        Collection<ServletEvent> events = servletEventHandler.getServletEvents();
+        List<ServletInfo> servletInfos = new ArrayList<>();
+        List<ServletEvent> events = servletEventHandler.getServletEvents();
+        events.sort(Comparator.<ServletEvent>comparingLong(s -> s.getBundle().getBundleId())
+                .thenComparing(ServletEvent::getServletName));
         for (ServletEvent event : events) {
-            String servletClassName = event.getServletClassName();
-            if (servletClassName.contains(".")) {
-                servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1, servletClassName.length());
+            Servlet servlet = event.getServlet();
+            String servletClassName = " ";
+            if (servlet != null) {
+                    servletClassName = servlet.getClass().getName();
+                    servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1,
+                                                                          servletClassName.length());
             }
             String servletName = event.getServletName() != null ? event.getServletName() : " ";
             if (servletName.contains(".")) {
                 servletName = servletName.substring(servletName.lastIndexOf(".") + 1, servletName.length());
             }
 
-            String alias = event.getAlias() != null ? event.getAlias() : " ";
+            String alias = event.getAlias();
+            String[] urls = event.getUrlParameter();
 
-            String[] urls = (String[])(event.getUrlParameter() != null ? event.getUrlParameter() : new String[] {""});
+            String contextPath = event.getBundle().getHeaders().get("Web-ContextPath");
+            if (contextPath == null) {
+                contextPath = event.getBundle().getHeaders().get("Webapp-Context"); // this one used by pax-web but is deprecated
+            }
+            if (contextPath != null) {
+                contextPath = contextPath.trim();
+                if (!contextPath.startsWith("/")) {
+                    contextPath = "/" + contextPath;
+                }
+                if (alias != null) {
+                    alias = contextPath + alias;
+                }
+                if (urls != null) {
+                    urls = urls.clone();
+                    for (int i = 0; i < urls.length; i++) {
+                        if (urls[i].startsWith("/")) {
+                            urls[i] = contextPath + urls[i];
+                        } else {
+                            urls[i] = contextPath + "/" + urls[i];
+                        }
+                    }
+                }
+            }
+
             ServletInfo info = new ServletInfo();
-            info.setBundleId(event.getBundleId());
+            info.setBundleId(event.getBundle().getBundleId());
             info.setName(servletName);
             info.setClassName(servletClassName);
             info.setState(event.getType());
-            info.setAlias(alias);
-            info.setUrls(urls);
+            info.setAlias(alias != null ? alias : " ");
+            info.setUrls(urls != null ? urls : new String[] {""});
             servletInfos.add(info);
         }
         return servletInfos;

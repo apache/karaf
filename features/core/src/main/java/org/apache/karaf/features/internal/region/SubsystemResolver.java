@@ -22,10 +22,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.felix.utils.collections.DictionaryAsMap;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
@@ -37,7 +39,7 @@ import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.SimpleFilter;
-import org.apache.karaf.features.internal.util.JsonWriter;
+import org.apache.karaf.util.json.JsonWriter;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
@@ -66,7 +68,7 @@ import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
 import static org.osgi.framework.namespace.IdentityNamespace.TYPE_BUNDLE;
 import static org.osgi.framework.namespace.IdentityNamespace.TYPE_FRAGMENT;
 
-public class SubsystemResolver {
+public class SubsystemResolver implements SubsystemResolverResolution, SubsystemResolverResult {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubsystemResolver.class);
 
@@ -86,17 +88,30 @@ public class SubsystemResolver {
     private RegionDigraph flatDigraph;
     private Map<String, Map<String, BundleInfo>> bundleInfos;
 
+    private SubsystemResolverCallback callback;
+
     public SubsystemResolver(Resolver resolver, DownloadManager manager) {
         this.resolver = resolver;
         this.manager = manager;
     }
 
+    public void setDeployCallback(SubsystemResolverCallback callback) {
+        this.callback = callback;
+    }
+
+    @Override
     public void prepare(
-            Collection<Feature> allFeatures,
+            Map<String, List<Feature>> allFeatures,
             Map<String, Set<String>> requirements,
             Map<String, Set<BundleRevision>> system
     ) throws Exception {
-        // Build subsystems on the fly
+        // #1. Build subsystems on the fly
+        //  - regions use hierarchical names with root region called "root" and child regions named "root/child",
+        //    "root/child/grandchild", etc.
+        //  - there can be only one root region and even if equinox Regions can be configured as digraph, only tree
+        //    structure is used
+        //  - each region will have corresponding Subsystem created and (being an OSGi Resource), will _require_
+        //    related requirements. Each region's subsystem will also _require_ all child subsystems
         for (Map.Entry<String, Set<String>> entry : requirements.entrySet()) {
             String[] parts = entry.getKey().split("/");
             if (root == null) {
@@ -106,9 +121,14 @@ public class SubsystemResolver {
             }
             Subsystem ss = root;
             for (int i = 1; i < parts.length; i++) {
-                ss = getOrCreateChild(ss, parts[i]);
+                String childName = Arrays.stream(Arrays.copyOfRange(parts, 0, i + 1)).collect(Collectors.joining("/"));
+                ss = getOrCreateChild(ss, childName, parts[i]);
             }
             for (String requirement : entry.getValue()) {
+                // #1a. each "[feature:]*" and "requirement:*" requirements are added directly as resource requirements:
+                //  - feature: ns=osgi.identity, 'osgi.identity=f1; type=karaf.feature; filter:="(&(osgi.identity=f1)(type=karaf.feature))"'
+                //  - requirement: as-is
+                //  - bundle: added only as downloadable bundle - used only by assembly builder
                 ss.require(requirement);
             }
         }
@@ -116,10 +136,18 @@ public class SubsystemResolver {
             return;
         }
 
-        // Pre-resolve
+        // #2. Pre-resolve
+        //  - for each region's subsystem X, feature requirements are changed into child subsystems of X
+        //  - for each feature, any dependant features (<feature>/<feature>) will become non-mandatory (why?)
+        //    child subsystem of the same region's subsystem as original feature
+        //  - for each feature, any conditional (<feature>/<conditional>) will become mandatory (why?)
+        //    child subsystem of the original feature's subsystem
         root.build(allFeatures);
 
-        // Add system resources
+        // #3. Add system resources
+        //  - from all unmanaged bundles we'll gather Provide-Capability headers' clauses in "osgi.service" namespace
+        //    and Export-Service headers
+        //  - these capabilities will be added to "dummy" Resource added as o.a.k.features.internal.region.Subsystem.installable
         BundleRevision sysBundleRev = null;
         boolean hasEeCap = false;
         for (Map.Entry<String, Set<BundleRevision>> entry : system.entrySet()) {
@@ -164,17 +192,18 @@ public class SubsystemResolver {
         }
     }
 
-    public Set<String> collectPrerequisites() throws Exception {
+    @Override
+    public Set<String> collectPrerequisites() {
         if (root != null) {
             return root.collectPrerequisites();
         }
-        return new HashSet<String>();
+        return new HashSet<>();
     }
 
+    @Override
     public Map<Resource, List<Wire>> resolve(
-            Set<String> overrides,
             String featureResolutionRange,
-            String serviceRequirements,
+            FeaturesService.ServiceRequirementsBehavior serviceRequirements,
             final Repository globalRepository,
             String outputFile) throws Exception {
 
@@ -183,8 +212,7 @@ public class SubsystemResolver {
         }
 
         // Download bundles
-        RepositoryManager repos = new RepositoryManager();
-        root.downloadBundles(manager, overrides, featureResolutionRange, serviceRequirements, repos);
+        root.downloadBundles(manager, featureResolutionRange, serviceRequirements, new RepositoryManager(), callback);
 
         // Populate digraph and resolve
         digraph = new StandardRegionDigraph(null, null);
@@ -199,9 +227,12 @@ public class SubsystemResolver {
             }
             json.put("repository", toJson(context.getRepository()));
             try {
+                // this is where the magic happens...
                 wiring = resolver.resolve(context);
                 json.put("success", "true");
+                json.put("wiring", toJson(wiring));
             } catch (Exception e) {
+                json.put("success", "false");
                 json.put("exception", e.toString());
                 throw e;
             } finally {
@@ -209,10 +240,11 @@ public class SubsystemResolver {
                         Paths.get(outputFile),
                         StandardCharsets.UTF_8,
                         StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-                    JsonWriter.write(writer, json);
+                    JsonWriter.write(writer, json, true);
                 }
             }
         } else {
+            // this is where the magic happens...
             wiring = resolver.resolve(context);
         }
         downloader.await();
@@ -220,12 +252,7 @@ public class SubsystemResolver {
         // Remove wiring to the fake environment resource
         if (environmentResource != null) {
             for (List<Wire> wires : wiring.values()) {
-                for (Iterator<Wire> iterator = wires.iterator(); iterator.hasNext();) {
-                    Wire wire = iterator.next();
-                    if (wire.getProvider() == environmentResource) {
-                        iterator.remove();
-                    }
-                }
+                wires.removeIf(wire -> wire.getProvider() == environmentResource);
             }
         }
         // Fragments are always wired to their host only, so create fake wiring to
@@ -235,13 +262,44 @@ public class SubsystemResolver {
         return wiring;
     }
 
-    private Object toJson(Repository repository) {
+    private static Object toJson(Map<Resource, List<Wire>> wiring) {
+        Map<String, List<Map<String, Object>>> wires = new HashMap<>();
+        for (Map.Entry<Resource, List<Wire>> reswiring : wiring.entrySet()) {
+            Resource resource = reswiring.getKey();
+            String id = toString(resource);
+            List<Map<String, Object>> reswires = new ArrayList<>();
+            for (Wire w : reswiring.getValue()) {
+                Map<String, Object> rw = new LinkedHashMap<>();
+                rw.put("requirement", toString(w.getRequirement()));
+                rw.put("capability", toString(w.getCapability()));
+                rw.put("requirer", toString(w.getRequirer()));
+                rw.put("provider", toString(w.getProvider()));
+                reswires.add(rw);
+            }
+            wires.put(id, reswires);
+        }
+        return wires;
+    }
+
+    private static String toString(Resource r) {
+        return toString(r.getCapabilities(IDENTITY_NAMESPACE).get(0));
+    }
+
+    private static String toString(Requirement r) {
+        return BaseClause.toString(null, r.getNamespace(), r.getAttributes(), r.getDirectives());
+    }
+
+    private static String toString(Capability c) {
+        return BaseClause.toString(null, c.getNamespace(), c.getAttributes(), c.getDirectives());
+    }
+
+    private static Object toJson(Repository repository) {
         Requirement req = new RequirementImpl(
                 null,
                 IDENTITY_NAMESPACE,
-                Collections.<String, String>emptyMap(),
-                Collections.<String, Object>emptyMap(),
-                new SimpleFilter(null, null, SimpleFilter.MATCH_ALL));
+                Collections.emptyMap(),
+                Collections.emptyMap(),
+                SimpleFilter.MATCH_ALL_FILTER);
         Collection<Capability> identities = repository.findProviders(Collections.singleton(req)).get(req);
         List<Object> resources = new ArrayList<>();
         for (Capability identity : identities) {
@@ -251,7 +309,7 @@ public class SubsystemResolver {
         return resources;
     }
 
-    private Object toJson(Resource resource) {
+    private static Object toJson(Resource resource) {
         Map<String, Object> obj = new HashMap<>();
         List<Object> caps = new ArrayList<>();
         List<Object> reqs = new ArrayList<>();
@@ -266,6 +324,7 @@ public class SubsystemResolver {
         return obj;
     }
 
+    @Override
     public Map<String, Map<String, BundleInfo>> getBundleInfos() {
         if (bundleInfos == null) {
             bundleInfos = new HashMap<>();
@@ -277,26 +336,24 @@ public class SubsystemResolver {
     private void addBundleInfos(Subsystem subsystem) {
         if (subsystem != null) {
             String region = getFlatSubsystemsMap().get(subsystem.getName());
-            Map<String, BundleInfo> bis = bundleInfos.get(region);
-            if (bis == null) {
-                bis = new HashMap<>();
-                bundleInfos.put(region, bis);
-            }
-            bis.putAll(subsystem.getBundleInfos());
+            bundleInfos.computeIfAbsent(region, k -> new HashMap<>()).putAll(subsystem.getBundleInfos());
             for (Subsystem child : subsystem.getChildren()) {
                 addBundleInfos(child);
             }
         }
     }
 
+    @Override
     public Map<String, StreamProvider> getProviders() {
         return manager.getProviders();
     }
 
+    @Override
     public Map<Resource, List<Wire>> getWiring() {
         return wiring;
     }
 
+    @Override
     public RegionDigraph getFlatDigraph() throws BundleException, InvalidSyntaxException {
         if (flatDigraph == null) {
             flatDigraph = new StandardRegionDigraph(null, null);
@@ -332,6 +389,11 @@ public class SubsystemResolver {
         return flatDigraph;
     }
 
+    /**
+     * A mapping from subsystem, to parent subsystem representing a region or {@link Feature#getScoping() scoped feature}.
+     *
+     * @return The map of subsystems.
+     */
     public Map<String, String> getFlatSubsystemsMap() {
         if (flatSubsystemsMap == null) {
             flatSubsystemsMap = new HashMap<>();
@@ -340,6 +402,7 @@ public class SubsystemResolver {
         return flatSubsystemsMap;
     }
 
+    @Override
     public Map<String, Set<Resource>> getBundlesPerRegions() {
         if (bundlesPerRegions == null) {
             bundlesPerRegions = invert(getBundles());
@@ -348,7 +411,6 @@ public class SubsystemResolver {
     }
 
     /**
-     * 
      * @return map of bundles and the region they are deployed in
      */
     public Map<Resource, String> getBundles() {
@@ -363,6 +425,7 @@ public class SubsystemResolver {
         return bundles;
     }
 
+    @Override
     public Map<String, Set<Resource>> getFeaturesPerRegions() {
         if (featuresPerRegions == null) {
             featuresPerRegions = invert(getFeatures());
@@ -370,6 +433,9 @@ public class SubsystemResolver {
         return featuresPerRegions;
     }
 
+    /**
+     * @return map of features and the region they are deployed in
+     */
     public Map<Resource, String> getFeatures() {
         if (features == null) {
             SimpleFilter sf = createFilter(IDENTITY_NAMESPACE, "*",
@@ -380,7 +446,7 @@ public class SubsystemResolver {
     }
 
     /**
-     * 
+     * Returns a mapping for resources that match given filter, to a subsystem that represents region or scoped feature.
      * @param resourceFilter
      * @return map from resource to region name
      */
@@ -411,7 +477,7 @@ public class SubsystemResolver {
         for (Map.Entry<Resource, List<Wire>> entry : wiring.entrySet()) {
             final Resource resource = entry.getKey();
             final Requirement requirement = getSubsystemRequirement(resource);
-            if (ResolverUtil.isFragment(resource)) {
+            if (ResolverUtil.isFragment(resource) && requirement != null) {
                 List<Wire> wires = entry.getValue();
                 final Resource host = wires.get(0).getProvider();
                 final Wire wire = findMatchingWire(sf, wiring.get(host));
@@ -442,7 +508,7 @@ public class SubsystemResolver {
         }
     }
 
-    private Requirement getSubsystemRequirement(Resource resource) {
+    static Requirement getSubsystemRequirement(Resource resource) {
         for (Requirement requirement : resource.getRequirements(null)) {
             if (IDENTITY_NAMESPACE.equals(requirement.getNamespace())
                     && TYPE_SUBSYSTEM.equals(requirement.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE))) {
@@ -452,7 +518,7 @@ public class SubsystemResolver {
         return null;
     }
 
-    private Capability findMatchingCapability(SimpleFilter filter, Collection<Capability> caps) {
+    private static Capability findMatchingCapability(SimpleFilter filter, Collection<Capability> caps) {
         for (Capability cap : caps) {
             if (CapabilitySet.matches(cap, filter)) {
                 return cap;
@@ -461,7 +527,7 @@ public class SubsystemResolver {
         return null;
     }
 
-    private Wire findMatchingWire(SimpleFilter filter, Collection<Wire> wires) {
+    private static Wire findMatchingWire(SimpleFilter filter, Collection<Wire> wires) {
         for (Wire wire : wires) {
             Capability cap = wire.getCapability();
             if (CapabilitySet.matches(cap, filter)) {
@@ -471,7 +537,7 @@ public class SubsystemResolver {
         return null;
     }
 
-    private SimpleFilter createFilter(String... s) {
+    private static SimpleFilter createFilter(String... s) {
         Map<String, Object> attrs = new HashMap<>();
         for (int i = 0; i < s.length - 1; i += 2) {
             attrs.put(s[i], s[i + 1]);
@@ -480,6 +546,12 @@ public class SubsystemResolver {
 
     }
 
+    /**
+     * Collect a mapping from every subsystem to their first parent subsystem that is not <em>flat</em>, i.e.,
+     * is not a subsystem for feature or represents a feature with scoping.
+     * @param subsystem
+     * @param toFlatten
+     */
     private void findSubsystemsToFlatten(Subsystem subsystem, Map<String, String> toFlatten) {
         Subsystem nonFlat = subsystem;
         while (isFlat(nonFlat)) {
@@ -493,20 +565,39 @@ public class SubsystemResolver {
         }
     }
 
-    private boolean isFlat(Subsystem subsystem) {
-        if (subsystem == null || subsystem.getFeature() == null)
+    /**
+     * Subsystem is <em>flat</em> if it represents a feature and doesn't declare scoping
+     * @param subsystem
+     * @return
+     */
+    private static boolean isFlat(Subsystem subsystem) {
+        if (subsystem == null || subsystem.getFeature() == null) {
             return false;
+        }
         return subsystem.getFeature() != null && subsystem.getFeature().getScoping() == null;
     }
 
-    private Subsystem getOrCreateChild(Subsystem ss, String name) {
-        Subsystem child = ss.getChild(name);
-        return child != null ? child : ss.createSubsystem(name, true);
+    private static Subsystem getOrCreateChild(Subsystem ss, String childName, String newName) {
+        Subsystem child = ss.getChild(childName);
+        return child != null ? child : ss.createSubsystem(newName, true);
     }
 
+    /**
+     * <p>Fills {@link RegionDigraph} using information in populated {@link Subsystem}. Each subsystem, not only
+     * subsystem representing a region, will be mapped to distinct region. We have subsystems created for:<ul>
+     *     <li>regions: "region", ..., "region/sub/region"</li>
+     *     <li>features: "region/sub/region#fx-version", ..., "region/sub/region#fz-version"</li>
+     *     <li>conditional features: "region/sub/region#fx#fx-condition-fy-version", ...</li>
+     * </ul></p>
+     * @param digraph
+     * @param subsystem
+     * @throws BundleException
+     * @throws InvalidSyntaxException
+     */
     private void populateDigraph(RegionDigraph digraph, Subsystem subsystem) throws BundleException, InvalidSyntaxException {
         Region region = digraph.createRegion(subsystem.getName());
         if (subsystem.getParent() != null) {
+            // there's always a parent, since we're traversing breadth-first
             Region parent = digraph.getRegion(subsystem.getParent().getName());
             digraph.connect(region, createRegionFilterBuilder(digraph, subsystem.getImportPolicy()).build(), parent);
             digraph.connect(parent, createRegionFilterBuilder(digraph, subsystem.getExportPolicy()).build(), region);
@@ -516,7 +607,7 @@ public class SubsystemResolver {
         }
     }
 
-    private RegionFilterBuilder createRegionFilterBuilder(RegionDigraph digraph, Map<String, Set<String>> sharingPolicy) throws InvalidSyntaxException {
+    private static RegionFilterBuilder createRegionFilterBuilder(RegionDigraph digraph, Map<String, Set<String>> sharingPolicy) throws InvalidSyntaxException {
         RegionFilterBuilder result = digraph.createRegionFilterBuilder();
         for (Map.Entry<String, Set<String>> entry : sharingPolicy.entrySet()) {
             for (String filter : entry.getValue()) {

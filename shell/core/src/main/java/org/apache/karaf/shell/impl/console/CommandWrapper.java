@@ -47,12 +47,7 @@ public class CommandWrapper implements Function {
             Object v = arguments.get(i);
             if (v instanceof Closure) {
                 final Closure closure = (Closure) v;
-                arguments.set(i, new org.apache.karaf.shell.api.console.Function() {
-                    @Override
-                    public Object execute(Session session, List<Object> arguments) throws Exception {
-                        return closure.execute(commandSession, arguments);
-                    }
-                });
+                arguments.set(i, (org.apache.karaf.shell.api.console.Function) (s, a) -> closure.execute(commandSession, a));
             }
         }
         return command.execute(session, arguments);

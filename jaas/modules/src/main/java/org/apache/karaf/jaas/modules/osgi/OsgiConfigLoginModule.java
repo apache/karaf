@@ -17,7 +17,6 @@
 package org.apache.karaf.jaas.modules.osgi;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
         try {
             String pid = (String) options.get(PID);
             Configuration config = ConfigAdminHolder.getService().getConfiguration(pid, null);
-            Dictionary properties = config.getProperties();
+            Dictionary<String, Object> properties = config.getProperties();
 
             Callback[] callbacks = new Callback[2];
 
@@ -86,7 +85,7 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
             	}
             }
 
-            principals = new HashSet<Principal>();
+            principals = new HashSet<>();
             principals.add(new UserPrincipal(user));
             for (int i = 1; i < infos.length; i++) {
                 principals.add(new RolePrincipal(infos[i]));

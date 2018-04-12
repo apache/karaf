@@ -38,7 +38,7 @@
         <method_context>
             <method_credential user='${KARAF_SERVICE_USER}' group='${KARAF_SERVICE_GROUP}'/>
             <method_environment>
-                <envvar name="JAVA_HOME" value="/usr/java"/>
+                <envvar name="JAVA_HOME" value="${JAVA_HOME}"/>
             </method_environment>
         </method_context>
 

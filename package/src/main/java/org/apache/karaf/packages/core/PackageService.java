@@ -17,7 +17,6 @@
 package org.apache.karaf.packages.core;
 
 import java.util.List;
-import java.util.SortedMap;
 
 public interface PackageService {
 

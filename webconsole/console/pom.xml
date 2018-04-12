@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.webconsole</groupId>
         <artifactId>webconsole</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,7 +35,6 @@
 
     <properties>
         <appendedResourcesDirectory>${project.basedir}/../../etc/appended-resources</appendedResourcesDirectory>
-        <org.json.version.osgi>0.0.0.${org.json.version}</org.json.version.osgi>
     </properties>
 
     <dependencies>
@@ -81,13 +80,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -131,8 +123,7 @@
                         <Export-Package>
                             org.apache.felix.webconsole;version="${felix.webconsole.api.version}";provide:=true,
                             org.apache.felix.webconsole.bundleinfo;version=1.0.0;provide:=true,
-                            org.apache.felix.webconsole.i18n;version=1.0.0;provide:=true,
-                            org.json;version="${org.json.version.osgi}"
+                            org.apache.felix.webconsole.i18n;version=1.0.0;provide:=true
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
@@ -143,7 +134,7 @@
                             org.osgi.service.metatype;resolution:=optional,
                             org.osgi.service.prefs;resolution:=optional,
                             javax.portlet;resolution:=optional,
-                            javax.servlet.*;version="[2.6, 4.0)",
+                            javax.servlet.*;version=2.4,
                             !org.apache.felix.bundlerepository,
                             !org.osgi.service.obr,
                             !org.osgi.service.cm,
@@ -169,12 +160,12 @@
                             org.apache.felix.webconsole;inline=**,
 
                             <!-- Import/Export-Package parsing -->
-                            org.apache.felix.utils;inline=org/apache/felix/utils/manifest/**,
+                            org.apache.felix.utils.manifest;inline=org/apache/felix/utils/manifest/**,
+                            org.apache.felix.utils.json;inline=org/apache/felix/utils/json/**,
                             org.apache.felix.framework;inline=org/apache/felix/framework/util/VersionRange**,
 
                             <!-- ServiceTracker -->
-                            org.osgi.compendium;
-                                inline=org/osgi/util/tracker/*,
+                            org.osgi.compendium;inline=org/osgi/util/tracker/*,
 
                             <!-- File Upload -->
                             commons-fileupload,

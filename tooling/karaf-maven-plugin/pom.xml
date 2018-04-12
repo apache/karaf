@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.tooling</groupId>
         <artifactId>tooling</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -34,6 +34,13 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <mvn.opts />
+        <invoker.skip />
+        <compiler.fork />
+        <jacoco-class-line-covered-ratio>0.00</jacoco-class-line-covered-ratio>
+        <jacoco-class-instruction-covered-ratio>0.00</jacoco-class-instruction-covered-ratio>
+        <jacoco-class-missed-count-maximum>1</jacoco-class-missed-count-maximum>
+        <plexus-utils.version>3.0.24</plexus-utils.version>
     </properties>
 
     <dependencies>
@@ -41,52 +48,49 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
-            <version>3.0.3</version>
         </dependency>
         <dependency>
-            <groupId>org.sonatype.aether</groupId>
-            <artifactId>aether-api</artifactId>
-            <version>1.11</version>
+            <groupId>org.apache.maven.resolver</groupId>
+            <artifactId>maven-resolver-api</artifactId>
+            <version>${maven.resolver.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.sonatype.aether</groupId>
-            <artifactId>aether-util</artifactId>
-            <version>1.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-api</artifactId>
-            <version>0.9.0.M2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-util</artifactId>
-            <version>0.9.0.M2</version>
+            <groupId>org.apache.maven.resolver</groupId>
+            <artifactId>maven-resolver-util</artifactId>
+            <version>${maven.resolver.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
-            <version>3.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
-            <version>3.0.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-resolver-provider</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
-            <version>3.0.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-resolver-provider</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.3</version>
+            <version>${maven-plugin-annotations.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.wagon</groupId>
             <artifactId>wagon-http</artifactId>
-            <version>2.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
@@ -104,12 +108,12 @@
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-filtering</artifactId>
-            <version>1.0-beta-4</version>
+            <version>3.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.0</version>
+            <version>${plexus-utils.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -119,7 +123,20 @@
                     <groupId>org.apache.felix</groupId>
                     <artifactId>org.apache.felix.bundlerepository</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.aether</groupId>
+                    <artifactId>aether-util</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.plexus</groupId>
+                    <artifactId>plexus-archiver</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-archiver</artifactId>
+            <version>3.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -202,19 +219,28 @@
             <groupId>org.apache.xbean</groupId>
             <artifactId>xbean-finder-shaded</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>${project.basedir}/src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>${project.basedir}/src/test/filtered-resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-invoker-plugin</artifactId>
-                <version>2.0.0</version>
+                <version>3.0.1</version>
                 <configuration>
                     <debug>true</debug>
                     <projectsDirectory>src/it</projectsDirectory>
@@ -222,10 +248,19 @@
                     <pomIncludes>
                         <pomInclude>*/pom.xml</pomInclude>
                     </pomIncludes>
+                    <pomExcludes>
+                        <!-- The following IT may fail as the SNAPSHOT is not on a remote repo -->
+                        <!-- So, it requires to skip test for the early first build to populate the local repo -->
+                        <pomExclude>test-run/pom.xml</pomExclude>
+                        <pomExclude>test-assembly/pom.xml</pomExclude>
+                        <pomExclude>test-check-dependencies-failure/pom.xml</pomExclude>
+                        <pomExclude>test-assembly-prop-edits/pom.xml</pomExclude>
+                    </pomExcludes>
                     <postBuildHookScript>verify</postBuildHookScript>
-                    <!--<localRepositoryPath>${project.build.directory}/system</localRepositoryPath>-->
-                    <!--<settingsFile>src/it/settings.xml</settingsFile>-->
-                    <mavenOpts>-Djava.io.tmpdir=${project.build.directory}</mavenOpts>
+                    <localRepositoryPath>${project.build.directory}/system</localRepositoryPath>
+                    <settingsFile>${project.build.testOutputDirectory}/settings.xml</settingsFile>
+                    <mergeUserSettings>true</mergeUserSettings>
+                    <mavenOpts>${mvn.opts}</mavenOpts>
                     <skipInstallation>${invoker.skip}</skipInstallation>
                     <skipInvocation>${invoker.skip}</skipInvocation>
                     <goals>
@@ -248,7 +283,12 @@
                         <configuration>
                             <invokerPropertiesFile>src/test/offline.properties</invokerPropertiesFile>
                             <pomExcludes>
+			        <!-- The following IT may fail as the SNAPSHOT is not on a remote repo -->
+                                <!-- So, it requires to skip test for the early first build to populate the local repo -->
+                                <pomExclude>test-run/pom.xml</pomExclude>
+                                <pomExclude>test-assembly/pom.xml</pomExclude>
                                 <pomExclude>test-check-dependencies-failure/pom.xml</pomExclude>
+                                <pomExclude>test-assembly-prop-edits/pom.xml</pomExclude>
                             </pomExcludes>
                         </configuration>
                     </execution>
@@ -263,6 +303,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.5</version>
                 <executions>
                     <execution>
                         <id>default-descriptor</id>
@@ -272,6 +313,66 @@
                         <phase>process-classes</phase>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <maxmem>256M</maxmem>
+                    <fork>${compiler.fork}</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <rules>
+                        <rule>
+                            <element>CLASS</element>
+
+                            <limits>
+                                <limit>
+                                    <counter>LINE</counter>
+                                    <value>COVEREDRATIO</value>
+                                    <minimum>${jacoco-class-line-covered-ratio}</minimum>
+                                </limit>
+                                <limit>
+                                    <counter>INSTRUCTION</counter>
+                                    <value>COVEREDRATIO</value>
+                                    <minimum>${jacoco-class-instruction-covered-ratio}</minimum>
+                                </limit>
+                                <limit>
+                                    <counter>CLASS</counter>
+                                    <value>MISSEDCOUNT</value>
+                                    <maximum>${jacoco-class-missed-count-maximum}</maximum>
+                                </limit>
+                            </limits>
+                        </rule>
+                    </rules>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -283,7 +384,101 @@
             <plugin>
                 <artifactId>maven-plugin-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </reporting>
+    <profiles>
+        <profile>
+	        <id>java9</id>
+	        <properties>
+                <plexus-utils.version>3.1.0</plexus-utils.version>
+                <mvn.opts>--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED --add-modules java.activation,java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
+	        </properties>
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                        <version>2.3.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax.activation</groupId>
+                        <artifactId>activation</artifactId>
+                        <version>1.1.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-core</artifactId>
+                        <version>${jaxb.version}</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>org.glassfish.jaxb</groupId>
+                                <artifactId>jaxb-core</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>org.glassfish.jaxb</groupId>
+                                <artifactId>txw2</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-impl</artifactId>
+                        <version>${jaxb.version}</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>javax.xml.bind</groupId>
+                                <artifactId>jsr173_api</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>javax.xml</groupId>
+                                <artifactId>jsr173</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>javax.activation</groupId>
+                                <artifactId>activation</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>javax.xml.bind</groupId>
+                                <artifactId>activation</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>javax.xml.bind</groupId>
+                                <artifactId>jaxb-api</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                </dependencies>
+	        <activation>
+        	    <jdk>9</jdk>
+            </activation>
+	</profile>
+        <profile>
+            <id>skiptests</id>
+            <properties>
+                <invoker.skip>true</invoker.skip>
+            </properties>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>skiptests2</id>
+            <properties>
+                <invoker.skip>true</invoker.skip>
+            </properties>
+            <activation>
+                <property>
+                    <name>maven.test.skip</name>
+                    <value>true</value>
+                </property>
+            </activation>
+        </profile>
+    </profiles>
+
 
 </project>
