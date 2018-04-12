@@ -17,9 +17,7 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
-import java.util.EnumSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.karaf.features.Feature;
@@ -85,5 +83,18 @@ public abstract class FeaturesCommandSupport implements Action {
             throw new IllegalArgumentException("More than one matching feature found for " + nameOrId);
         }
         return matchingFeatures[0].getId();
+    }
+
+    protected List<String> getFeatureIds(FeaturesService admin, List<String> nameOrIds) throws Exception {
+        List<String> ids = new ArrayList<>();
+        for (String nameOrId : nameOrIds) {
+            for (Feature f : admin.getFeatures(nameOrId)) {
+                ids.add(f.getId());
+            }
+        }
+        if (ids.isEmpty()) {
+            throw new IllegalArgumentException("No matching feature found for " + nameOrIds);
+        }
+        return ids;
     }
 }
