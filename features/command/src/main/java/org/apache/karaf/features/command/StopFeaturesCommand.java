@@ -51,8 +51,7 @@ public class StopFeaturesCommand extends FeaturesCommandSupport {
         addOption(FeaturesService.Option.Verbose, verbose);
         Map<String, Map<String, FeatureState>> stateChanges = new HashMap<>();
         Map<String, FeatureState> regionChanges = new HashMap<>();
-        for (String featureName : features) {
-            String featureId = getFeatureId(admin, featureName);
+        for (String featureId : getFeatureIds(admin, features)) {
             regionChanges.put(featureId, FeatureState.Resolved);
         }
         stateChanges.put(region, regionChanges);
