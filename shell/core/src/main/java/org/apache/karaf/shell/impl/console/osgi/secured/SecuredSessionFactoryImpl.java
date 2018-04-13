@@ -333,7 +333,10 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         }
         scope = scope.trim();
         synchronized (scopes) {
-            scopes.put(scope, config.getProperties());
+            if (scope.endsWith("*")) {
+                scope = "star";
+            }
+            scopes.put(scope, config.getProperties());                
         }
     }
 
@@ -345,6 +348,9 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
 
     private Dictionary<String, Object> getScopeConfig(String scope) {
         synchronized (scopes) {
+            if (scope.equals("*")) {
+                scope = "star";
+            }
             return scopes.get(scope);
         }
     }
