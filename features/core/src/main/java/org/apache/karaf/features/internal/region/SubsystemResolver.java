@@ -21,24 +21,33 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.felix.utils.collections.DictionaryAsMap;
+import org.apache.felix.utils.resource.CapabilityImpl;
+import org.apache.felix.utils.resource.CapabilitySet;
+import org.apache.felix.utils.resource.RequirementImpl;
+import org.apache.felix.utils.resource.ResourceBuilder;
+import org.apache.felix.utils.resource.ResourceImpl;
+import org.apache.felix.utils.resource.ResourceUtils;
+import org.apache.felix.utils.resource.SimpleFilter;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
-import org.apache.karaf.features.internal.resolver.BaseClause;
-import org.apache.karaf.features.internal.resolver.CapabilityImpl;
-import org.apache.karaf.features.internal.resolver.CapabilitySet;
-import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
-import org.apache.karaf.features.internal.resolver.ResourceBuilder;
-import org.apache.karaf.features.internal.resolver.ResourceImpl;
-import org.apache.karaf.features.internal.resolver.SimpleFilter;
 import org.apache.karaf.util.json.JsonWriter;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
@@ -286,11 +295,11 @@ public class SubsystemResolver implements SubsystemResolverResolution, Subsystem
     }
 
     private static String toString(Requirement r) {
-        return BaseClause.toString(null, r.getNamespace(), r.getAttributes(), r.getDirectives());
+        return ResourceUtils.toString(null, r.getNamespace(), r.getAttributes(), r.getDirectives());
     }
 
     private static String toString(Capability c) {
-        return BaseClause.toString(null, c.getNamespace(), c.getAttributes(), c.getDirectives());
+        return ResourceUtils.toString(null, c.getNamespace(), c.getAttributes(), c.getDirectives());
     }
 
     private static Object toJson(Repository repository) {
@@ -303,7 +312,7 @@ public class SubsystemResolver implements SubsystemResolverResolution, Subsystem
         Collection<Capability> identities = repository.findProviders(Collections.singleton(req)).get(req);
         List<Object> resources = new ArrayList<>();
         for (Capability identity : identities) {
-            String id = BaseClause.toString(null, identity.getNamespace(), identity.getAttributes(), identity.getDirectives());
+            String id = ResourceUtils.toString(null, identity.getNamespace(), identity.getAttributes(), identity.getDirectives());
             resources.add(toJson(identity.getResource()));
         }
         return resources;
@@ -314,10 +323,10 @@ public class SubsystemResolver implements SubsystemResolverResolution, Subsystem
         List<Object> caps = new ArrayList<>();
         List<Object> reqs = new ArrayList<>();
         for (Capability cap : resource.getCapabilities(null)) {
-            caps.add(BaseClause.toString(null, cap.getNamespace(), cap.getAttributes(), cap.getDirectives()));
+            caps.add(ResourceUtils.toString(null, cap.getNamespace(), cap.getAttributes(), cap.getDirectives()));
         }
         for (Requirement req : resource.getRequirements(null)) {
-            reqs.add(BaseClause.toString(null, req.getNamespace(), req.getAttributes(), req.getDirectives()));
+            reqs.add(ResourceUtils.toString(null, req.getNamespace(), req.getAttributes(), req.getDirectives()));
         }
         obj.put("capabilities", caps);
         obj.put("requirements", reqs);

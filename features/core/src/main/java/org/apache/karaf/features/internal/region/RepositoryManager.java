@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.karaf.features.internal.repository.BaseRepository;
+import org.apache.felix.utils.repository.BaseRepository;
 import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
 

@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.felix.utils.repository.BaseRepository;
 import org.apache.karaf.util.StreamUtils;
 import org.junit.Test;
 import org.osgi.resource.Resource;

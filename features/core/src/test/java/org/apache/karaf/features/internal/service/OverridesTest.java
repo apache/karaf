@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
-import org.apache.karaf.features.internal.resolver.ResourceBuilder;
+import org.apache.felix.utils.resource.ResourceBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleException;

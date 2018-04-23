@@ -27,9 +27,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.utils.resource.ResourceBuilder;
+import org.apache.felix.utils.resource.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
-import org.apache.karaf.features.internal.resolver.ResourceBuilder;
-import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;

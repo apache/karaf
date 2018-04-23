@@ -22,8 +22,8 @@ import java.lang.reflect.Proxy;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.apache.karaf.features.internal.resolver.ResourceBuilder;
-import org.apache.karaf.features.internal.resolver.ResourceImpl;
+import org.apache.felix.utils.resource.ResourceBuilder;
+import org.apache.felix.utils.resource.ResourceImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;

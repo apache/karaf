@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.karaf.features.internal.resolver.CapabilitySet;
-import org.apache.karaf.features.internal.resolver.SimpleFilter;
+import org.apache.felix.utils.resource.CapabilitySet;
+import org.apache.felix.utils.resource.SimpleFilter;
 import org.osgi.framework.Constants;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;

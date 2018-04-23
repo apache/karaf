@@ -28,13 +28,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.felix.utils.repository.BaseRepository;
+import org.apache.felix.utils.resource.CapabilityImpl;
+import org.apache.felix.utils.resource.RequirementImpl;
+import org.apache.felix.utils.resource.ResourceImpl;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.Downloader;
-import org.apache.karaf.features.internal.repository.BaseRepository;
-import org.apache.karaf.features.internal.resolver.CapabilityImpl;
-import org.apache.karaf.features.internal.resolver.RequirementImpl;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
-import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionFilter;

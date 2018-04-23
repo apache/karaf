@@ -28,11 +28,11 @@ import java.util.Map;
 
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
-import org.apache.karaf.features.internal.repository.BaseRepository;
-import org.apache.karaf.features.internal.resolver.RequirementImpl;
-import org.apache.karaf.features.internal.resolver.ResourceBuilder;
-import org.apache.karaf.features.internal.resolver.ResourceImpl;
-import org.apache.karaf.features.internal.resolver.SimpleFilter;
+import org.apache.felix.utils.repository.BaseRepository;
+import org.apache.felix.utils.resource.RequirementImpl;
+import org.apache.felix.utils.resource.ResourceBuilder;
+import org.apache.felix.utils.resource.ResourceImpl;
+import org.apache.felix.utils.resource.SimpleFilter;
 import org.apache.karaf.util.json.JsonReader;
 import org.osgi.framework.BundleException;
 import org.osgi.resource.Capability;

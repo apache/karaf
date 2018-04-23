@@ -186,8 +186,12 @@
                             org.apache.karaf.util.config;-split-package:=merge-first,
                             org.apache.karaf.util.maven;-split-package:=merge-first,
                             org.apache.karaf.util.tracker;-split-package:=merge-first,
+                            org.apache.felix.utils.collections;-split-package:=merge-first,
+                            org.apache.felix.utils.json;-split-package:=merge-first,
                             org.apache.felix.utils.manifest;-split-package:=merge-first,
                             org.apache.felix.utils.properties;-split-package:=merge-first,
+                            org.apache.felix.utils.repository;-split-package:=merge-first,
+                            org.apache.felix.utils.resource;-split-package:=merge-first,
                             org.apache.felix.utils.version;-split-package:=merge-first
                         </Private-Package>
                     </instructions>

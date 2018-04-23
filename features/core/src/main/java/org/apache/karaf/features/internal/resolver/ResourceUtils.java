@@ -20,9 +20,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.utils.collections.StringArrayMap;
+import org.apache.felix.utils.resource.CapabilityImpl;
+import org.apache.felix.utils.resource.RequirementImpl;
+import org.apache.felix.utils.resource.ResourceImpl;
+import org.apache.felix.utils.resource.SimpleFilter;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.internal.util.StringArrayMap;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
