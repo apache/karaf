@@ -559,15 +559,6 @@ public class Builder {
             Files.write(configFile, config.getValue());
         }
 
-        // 'improve' configuration files.
-        if (propertyEdits != null) {
-            KarafPropertiesEditor editor = new KarafPropertiesEditor();
-            editor.setInputEtc(etcDirectory.toFile())
-                    .setOutputEtc(etcDirectory.toFile())
-                    .setEdits(propertyEdits);
-            editor.run();
-        }
-
         //
         // Handle overrides
         //
@@ -617,6 +608,15 @@ public class Builder {
         // Installed stage
         //
         installStage(installedProfile, allBootFeatures);
+
+        // 'improve' configuration files.
+        if (propertyEdits != null) {
+            KarafPropertiesEditor editor = new KarafPropertiesEditor();
+            editor.setInputEtc(etcDirectory.toFile())
+                .setOutputEtc(etcDirectory.toFile())
+                .setEdits(propertyEdits);
+            editor.run();
+        }
     }
 
     private void reformatClauses(Properties config, String key) {
@@ -1023,6 +1023,11 @@ public class Builder {
         for (Map.Entry<Integer, Set<String>> entry : invertedStartupBundles.entrySet()) {
             String startLevel = Integer.toString(entry.getKey());
             for (String location : new TreeSet<>(entry.getValue())) {
+                // remove any custom deployer prefix
+                int mvnIndex = location.indexOf("mvn:");
+                if (mvnIndex > 0) {
+                    location = location.substring(mvnIndex);
+                }
                 if (useReferenceUrls) {
                     if (location.startsWith("mvn:")) {
                         location = "file:" + Parser.pathFromMaven(location);
@@ -1045,6 +1050,11 @@ public class Builder {
     private void installArtifact(Downloader downloader, String location) throws Exception {
         LOGGER.info("== Installing artifact " + location);
         location = DownloadManagerHelper.stripUrl(location);
+        // remove any custom deployer prefix
+        int mvnIndex = location.indexOf("mvn:");
+        if (mvnIndex > 0) {
+            location = location.substring(mvnIndex);
+        }
         if (location.startsWith("mvn:")) {
             if (location.endsWith("/")) {
                 // for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
