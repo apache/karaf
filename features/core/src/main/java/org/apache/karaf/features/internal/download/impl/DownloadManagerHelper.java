@@ -55,6 +55,14 @@ public final class DownloadManagerHelper {
         }
         return strippedUrl;
     }
+    
+    public static String stripStartLevel(String url) {
+        String strippedUrl = url;
+        if (strippedUrl.contains(";start-level=")) {
+            strippedUrl = strippedUrl.substring(0, strippedUrl.indexOf(";start-level="));
+        }
+        return strippedUrl;
+    }
 
     public static String stripInlinedMavenRepositoryUrl(String url) {
         if (url.startsWith("mvn:") && url.contains("!")) {
