@@ -52,9 +52,10 @@ public interface JmsMBean {
      * @param url The JMS connection factory URL. NB: when type is WebsphereMQ, the URL has the format host/port/queuemanager/channel.
      * @param username The JMS connection factory authentication username.
      * @param password The JMS connection factory authentication password.
+     * @param pool The JMS connection factory pooling to use.
      * @throws MBeanException If the MBean fails.
      */
-    void create(String name, String type, String url, String username, String password) throws MBeanException;
+    void create(String name, String type, String url, String username, String password, String pool) throws MBeanException;
 
     /**
      * Delete a JMS connection factory.

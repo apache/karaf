@@ -75,14 +75,15 @@ SYNTAX
 ARGUMENTS
         name
                 The JMS connection factory name
+                (required)
 
 OPTIONS
         -t, --type
-                The JMS connection factory type (ActiveMQ or WebsphereMQ)
-                (defaults to ActiveMQ)
-        -u, --username
-                Username to connect to the JMS broker
-                (defaults to karaf)
+                The JMS connection factory type (ActiveMQ, Artemis or WebsphereMQ)
+                (defaults to activemq)
+        --pool
+                The pool mechanism to use for this connection factory
+                (defaults to pooledjms)
         --help
                 Display this help message
         --url
@@ -91,6 +92,10 @@ OPTIONS
         -p, --password
                 Password to connect to the JMS broker
                 (defaults to karaf)
+        -u, --username
+                Username to connect to the JMS broker
+                (defaults to karaf)
+
 
 ----
 
@@ -99,12 +104,20 @@ OPTIONS
 * the `--url` option is required. It's the URL used by the JMS connection factory to connect to the broker. If the type is `activemq`, the URL looks like `tcp://localhost:61616`. If the type is `webspheremq`, the URL looks like `host/port/queuemanager/channel`.
 * the `-u` (`--username`) option is optional (karaf by default). In the case of the broker requires authentication, it's the username used.
 * the `-p` (`--password`) option is optional (karaf by default). In the case of the broker requires authentication, it's the password used.
+* the `--pool` option is optional (`pooledjms` by default). It allows you to define the pooling framework you want to use: pooledjms, narayana, transx.
+
 
 For instance, to create a JMS connection factory for a Apache ActiveMQ broker, you can do:
 
 ----
+karaf@root()> feature:install pax-jms-activemq
 karaf@root()> jms:create -t activemq --url tcp://localhost:61616 test
 ----
+
+[NOTE]
+====
+When you use ActiveMQ, Karaf uses `transx` as connection factory pooling framework.
+====
 
 [NOTE]
 ====

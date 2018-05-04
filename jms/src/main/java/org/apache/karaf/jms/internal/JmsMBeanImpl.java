@@ -51,9 +51,9 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public void create(String name, String type, String url, String username, String password) throws MBeanException {
+    public void create(String name, String type, String url, String username, String password, String pool) throws MBeanException {
         try {
-            jmsService.create(name, type, url, username, password);
+            jmsService.create(name, type, url, username, password, pool);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }

@@ -58,9 +58,10 @@ public interface JmsService {
      * @param url The JMS URL to use.
      * @param username The username to use.
      * @param password The password to use.
+     * @param pool Kind of pool to use.
      * @throws Exception If the service fails.
      */
-    void create(String name, String type, String url, String username, String password) throws Exception;
+    void create(String name, String type, String url, String username, String password, String pool) throws Exception;
 
     /**
      * Delete a JMS connection factory.

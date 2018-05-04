@@ -33,6 +33,7 @@ public class KarafTestWatcher extends TestWatcher {
     @Override
     protected void failed(Throwable e, Description description) {
         LOG.error(">>>>>> FAILED: {} , cause: {}", description.getDisplayName(), e.getMessage());
+        e.printStackTrace();
     }
 
     @Override
