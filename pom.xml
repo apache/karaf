@@ -199,7 +199,7 @@
         <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
         <felix.plugin.version>3.5.0</felix.plugin.version>
-        <felix.utils.version>1.10.4</felix.utils.version>
+        <felix.utils.version>1.11.0-SNAPSHOT</felix.utils.version>
         <felix.webconsole.version>4.3.4</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>
         <felix.memoryusage.webconsole.plugin.version>1.0.8</felix.memoryusage.webconsole.plugin.version>

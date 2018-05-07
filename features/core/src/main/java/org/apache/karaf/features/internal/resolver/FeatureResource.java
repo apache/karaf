@@ -19,6 +19,8 @@ package org.apache.karaf.features.internal.resolver;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.utils.resource.ResourceBuilder;
+import org.apache.felix.utils.resource.ResourceImpl;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
