@@ -208,7 +208,7 @@ detectJVM() {
 }
 
 checkJvmVersion() {
-    VERSION=$("${JAVA}" -version 2>&1 | grep -i version | sed 's/.*version ".*\.\(.*\)\..*"/\1/; 1q')
+    VERSION=$("${JAVA}" -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g ; s/\..*//g; s/-.*//g;')
     if [ "${VERSION}" -lt "8" ]; then
         die "JVM must be greater than 1.8"
     fi
