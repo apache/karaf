@@ -437,10 +437,10 @@ public class ConsoleSessionImpl implements Session {
             ParsedLine pl = reader.getParsedLine();
             if (pl instanceof ParsedLineImpl) {
                 command = ((ParsedLineImpl) pl).program();
+            } else if (pl != null) {
+                command = pl.line();
             } else {
-                if (pl != null) {
-                    command = pl.line();
-                }
+                command = reader.getBuffer().toString();
             }
         } catch (EndOfFileException e) {
             command = null;
