@@ -57,6 +57,10 @@ public class Activator implements BundleActivator {
 
     CommandTracker commandTracker;
 
+    ConverterTracker converterTracker;
+
+    ListenerTracker listenerTracker;
+
     @Override
     public void start(final BundleContext context) throws Exception {
         threadIO = new ThreadIOImpl();
@@ -109,6 +113,12 @@ public class Activator implements BundleActivator {
         commandTracker = new CommandTracker(sessionFactory, context);
         commandTracker.open();
 
+        converterTracker = new ConverterTracker(sessionFactory, context);
+        converterTracker.open();
+
+        listenerTracker = new ListenerTracker(sessionFactory, context);
+        listenerTracker.open();
+
         if (Boolean.parseBoolean(context.getProperty(START_CONSOLE))) {
             localConsoleManager = new LocalConsoleManager(context, sessionFactory);
             localConsoleManager.start();
@@ -127,9 +137,12 @@ public class Activator implements BundleActivator {
         sessionFactory.stop();
         actionExtender.stop(context);
         commandTracker.close();
+        converterTracker.close();
+        listenerTracker.close();
         threadIO.stop();
         if (eventAdminListener != null) {
             eventAdminListener.close();
         }
     }
+
 }
