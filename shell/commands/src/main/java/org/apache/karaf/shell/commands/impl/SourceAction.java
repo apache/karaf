@@ -32,7 +32,9 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.slf4j.Logger;
@@ -48,7 +50,8 @@ public class SourceAction implements Action {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Argument(index = 0, name = "script", description = "A URI pointing to the script", required = true, multiValued = false)
-    private URI script;
+    @Completion(FileOrUriCompleter.class)
+    private String script;
 
     @Argument(index = 1, name = "args", description = "Arguments for the script", required = false, multiValued = true)
     private List<Object> args;
@@ -62,13 +65,13 @@ public class SourceAction implements Action {
         Object arg0 = session.get("0");
         try {
             try {
-                URL url = script.toURL();
+                URL url = new URI(script).toURL();
                 log.info("Printing URL: " + url);
                 reader = new BufferedReader(new InputStreamReader(url.openStream()));
             }
             catch (MalformedURLException | IllegalArgumentException ignore) {
                 // fallback to a file
-                Path file = session.currentDir().resolve(script.getPath());
+                Path file = session.currentDir().resolve(script);
                 log.info("Printing file: " + file);
                 reader = new BufferedReader(Files.newBufferedReader(file));
             }
