@@ -55,7 +55,7 @@ detectOS() {
         HP-UX*)
             hpux=true
             # For HP-UX, set an environment variable
-	    export PS_PREFIX="UNIX95= "
+            export PS_PREFIX="UNIX95= "
             echo "${PS_PREFIX}"
             ;;
     esac
