@@ -18,15 +18,21 @@
  */
 package org.apache.karaf.shell.support;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.security.auth.Subject;
 
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.api.console.Session;
+import org.jline.utils.AttributedString;
+import org.jline.utils.StyleResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -34,12 +40,9 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_RED;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_BOLD;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_NORMAL;
-
 public class ShellUtil {
+
+    public static final String DEFAULT_KS_COLORS = "em=31:ee=1;31:st=31";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShellUtil.class);
 
@@ -150,36 +153,42 @@ public class ShellUtil {
             }
             // Display exception
             String pst = getPrintStackTraces(session);
+            Map<String, String> cm = getKsColorMap(session);
             if ("always".equals(pst)) {
-                session.getConsole().print(COLOR_RED);
-                t.printStackTrace(session.getConsole());
-                session.getConsole().print(COLOR_DEFAULT);
+                String str = applyStyle(getStackTrace(t), cm, "st");
+                session.getConsole().print(str);
             } else if ("CommandNotFoundException".equals(name)) {
-                String str = COLOR_RED + "Command not found: "
-                        + INTENSITY_BOLD + t.getClass().getMethod("getCommand").invoke(t) + INTENSITY_NORMAL
-                        + COLOR_DEFAULT;
+                String str = applyStyle("Command not found: ", cm, "em")
+                           + applyStyle((String) t.getClass().getMethod("getCommand").invoke(t), cm, "ee");
                 session.getConsole().println(str);
             } else if ("CommandException".equals(name)) {
                 String str;
                 try {
                     str = (String) t.getClass().getMethod("getNiceHelp").invoke(t);
                 } catch (Throwable ignore) {
-                    str = COLOR_RED + t.getMessage() + COLOR_DEFAULT;
+                    str = applyStyle(t.getMessage(), cm, "em");
                 }
                 session.getConsole().println(str);
             } else  if ("execution".equals(pst)) {
-                session.getConsole().print(COLOR_RED);
-                t.printStackTrace(session.getConsole());
-                session.getConsole().print(COLOR_DEFAULT);
+                String str = applyStyle(getStackTrace(t), cm, "st");
+                session.getConsole().print(str);
             } else {
-                String str = COLOR_RED + "Error executing command: "
-                        + (t.getMessage() != null ? t.getMessage() : t.getClass().getName())
-                        + COLOR_DEFAULT;
+                String str = applyStyle("Error executing command: ", cm, "em")
+                           + applyStyle(t.getMessage() != null ? t.getMessage() : t.getClass().getName(), cm, "ee");
                 session.getConsole().println(str);
             }
+            session.getConsole().flush();
         } catch (Exception ignore) {
             // ignore
         }
+    }
+
+    private static String getStackTrace(Throwable t) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        t.printStackTrace(pw);
+        pw.flush();
+        return sw.toString();
     }
 
     private static String getPrintStackTraces(Session session) {
@@ -204,6 +213,34 @@ public class ShellUtil {
         } else {
             return null;
         }
+    }
+
+    static String applyStyle(String text, Map<String, String> colors, String... types) {
+        String t = null;
+        for (String type : types) {
+            if (colors.get(type) != null) {
+                t = type;
+                break;
+            }
+        }
+        return new AttributedString(text, new StyleResolver(colors::get).resolve("." + t))
+                .toAnsi();
+    }
+
+    public static Map<String, String> getKsColorMap(Session session) {
+        return getColorMap(session, "KS", DEFAULT_KS_COLORS);
+    }
+
+    public static Map<String, String> getColorMap(Session session, String name, String def) {
+        Object obj = session.get(name + "_COLORS");
+        String str = obj != null ? obj.toString() : null;
+        if (str == null) {
+            str = def;
+        }
+        String sep = str.matches("[a-z]{2}=[0-9]*(;[0-9]+)*(:[a-z]{2}=[0-9]*(;[0-9]+)*)*") ? ":" : " ";
+        return Arrays.stream(str.split(sep))
+                .collect(Collectors.toMap(s -> s.substring(0, s.indexOf('=')),
+                        s -> s.substring(s.indexOf('=') + 1)));
     }
 
 }
