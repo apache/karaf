@@ -18,7 +18,7 @@
 
 realpath() {
   READLINK_EXISTS=$(command -v readlink &> /dev/null)
-  if [ -z $READLINK_EXISTS ]; then
+  if [ -z "$READLINK_EXISTS" ]; then
     OURPWD=${PWD}
     cd "$(dirname "${1}")" || exit 2
     LINK=$(ls -l "$(basename "${1}")" | awk -F"-> " '{print $2}')
@@ -93,7 +93,12 @@ checkRootInstance() {
           if ps -p "${ROOT_INSTANCE_PID}" > /dev/null
           then
               MAIN=org.apache.karaf.main.Main
-              PID_COMMAND=$(ps -p "${ROOT_INSTANCE_PID}" -o args | sed 1d)
+              DIST_OS=`uname -s | tr [:upper:] [:lower:] | tr -d [:blank:]`
+
+              case "$DIST_OS" in
+                'hp-ux')PID_COMMAND=$(UNIX95= ps -p "${ROOT_INSTANCE_PID}" -o args | sed 1d);;
+                *)PID_COMMAND=$(ps -p "${ROOT_INSTANCE_PID}" -o args | sed 1d);;
+              esac
               if [ "${PID_COMMAND#*$MAIN}" != "$PID_COMMAND" ]; then
                 ROOT_INSTANCE_RUNNING=true
               fi
