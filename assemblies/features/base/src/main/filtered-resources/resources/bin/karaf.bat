@@ -404,6 +404,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         rem If major version is 1 (meaning Java 1.6, 1.7, 1.8), we use endorsed lib
         if %JAVA_VERSION% GTR 8 (
             "%JAVA%" %JAVA_OPTS% %OPTS% ^
+                --add-reads=java.xml=java.logging ^
                 --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,java.xml.ws,ALL-UNNAMED ^
                 --patch-module java.base=lib/endorsed/org.apache.karaf.specs.locator-@@project.version@@.jar ^
                 --patch-module java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-@@project.version@@.jar ^

@@ -194,8 +194,8 @@
         <felix.fileinstall.version>3.6.4</felix.fileinstall.version>
         <felix.framework.version>5.6.10</felix.framework.version>
         <felix.framework.security.version>2.6.0</felix.framework.security.version>
-        <felix.gogo.runtime.version>1.0.12</felix.gogo.runtime.version>
-        <felix.gogo.jline.version>1.0.12</felix.gogo.jline.version>
+        <felix.gogo.runtime.version>1.1.0-SNAPSHOT</felix.gogo.runtime.version>
+        <felix.gogo.jline.version>1.1.0-SNAPSHOT</felix.gogo.jline.version>
         <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
         <felix.plugin.version>3.5.0</felix.plugin.version>
@@ -261,7 +261,7 @@
         <jansi.version>1.17.1</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
         <jetty.version>9.4.6.v20170531</jetty.version>
-        <jline.version>3.6.2</jline.version>
+        <jline.version>3.7.0</jline.version>
         <junit.version>4.12</junit.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>

@@ -315,6 +315,11 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
     }
 
     @Override
+    public void pause(boolean wait) throws InterruptedException {
+        terminal.pause(wait);
+    }
+
+    @Override
     public void resume() {
         terminal.resume();
     }

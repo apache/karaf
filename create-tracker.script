@@ -1,0 +1,45 @@
+create-tracker = {
+	trackingContext = $1
+	trackedClass = $2
+	serviceAdded = $3
+	serviceRemoved = $4
+	shellClassLoader = (($.session class) getClassLoader)
+	arrayClass = ($shellClassLoader loadClass java.lang.reflect.Array)
+	handler = {
+		proxy = $1
+		method = $2
+		arguments = $3
+		name = ($method name)
+		# echo "Invoking $name"
+		if { $name equals "addingService" } \
+		then {
+			ref = ($arrayClass get $arguments 0)
+			svc = ($.context getService $ref)
+			$serviceAdded execute $.commandSession [ $svc ]
+			$svc
+		} elif { $name equals "removedService" } \
+		then {
+			ref = ($arrayClass get $arguments 0)
+			svc = ($arrayClass get $arguments 1)
+			$serviceRemoved execute $.commandSession [ $svc ]
+			$.context ungetService $ref
+		}
+	}
+	# create handler
+	customizerClass = ($shellClassLoader loadClass org.osgi.util.tracker.ServiceTrackerCustomizer)
+	array = ([ $customizerClass ] toArray ($arrayClass newInstance "java.lang.Class" 1))
+	proxyClass = ($shellClassLoader loadClass java.lang.reflect.Proxy)
+	customizer = ($proxyClass newProxyInstance $shellClassLoader $array $handler)
+	# create tracker
+	trackerClass = ($shellClassLoader loadClass org.osgi.util.tracker.ServiceTracker)
+	constructor = ($trackerClass constructor org.osgi.framework.BundleContext java.lang.String org.osgi.util.tracker.ServiceTrackerCustomizer)
+	if { "java.lang.Class" equals ($trackedClass class) } \
+	then {
+		trackedClass = ($trackedClass name)
+	}
+	tracker = ($constructor newInstance $trackingContext $trackedClass $customizer)
+	$tracker
+}
+
+tracker = (create-tracker $.context "org.osgi.service.cm.ManagedService" { s = (($1 class) toString); echo "service-added $s" } { s = (($1 class) toString); echo "service-removed $s" })
+$tracker open true
