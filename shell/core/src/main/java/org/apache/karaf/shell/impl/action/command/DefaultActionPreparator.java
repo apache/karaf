@@ -372,6 +372,8 @@ public class DefaultActionPreparator {
                                 printDefaultsTo(out, argument.valueToShowInHelp());
                             }
                         }
+                    } else {
+                        printMeta(out, argument.required(), argument.multiValued());
                     }
                 }
                 out.println();
@@ -392,10 +394,14 @@ public class DefaultActionPreparator {
                             String defaultValue = getDefaultValueString(o);
                             if (defaultValue != null) {
                                 printDefaultsTo(out, defaultValue);
+                            } else {
+                              printMeta(out, option.required(), option.multiValued());
                             }
                         } else {
                             printDefaultsTo(out, option.valueToShowInHelp());
                         }
+                    } else {
+                        printMeta(out, option.required(), option.multiValued());
                     }
                 }
                 out.println();
@@ -439,6 +445,24 @@ public class DefaultActionPreparator {
 
     private void printDefaultsTo(PrintStream out, String value) {
         out.println("                (defaults to " + value + ")");
+    }
+
+    private void printMeta(PrintStream out, boolean required, boolean multivalued) {
+        if (required || multivalued) {
+            String text = "                (";
+            if (required) {
+                text += "required";
+                if (multivalued) {
+                    text += ", ";
+                }
+            }
+
+            if (multivalued) {
+                text += "multi-valued";
+            }
+            text += ")";
+            out.println(text);
+        }
     }
 
     static void printFormatted(String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
