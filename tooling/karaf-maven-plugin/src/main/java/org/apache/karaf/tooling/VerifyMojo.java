@@ -65,6 +65,7 @@ import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.LocationPattern;
 import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
@@ -76,6 +77,8 @@ import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
+import org.apache.karaf.features.internal.service.FeaturesProcessorImpl;
+import org.apache.karaf.features.internal.service.FeaturesServiceConfig;
 import org.apache.karaf.features.internal.service.State;
 import org.apache.karaf.features.internal.service.StaticInstallSupport;
 import org.apache.karaf.features.internal.util.MapUtils;
@@ -115,6 +118,9 @@ public class VerifyMojo extends MojoSupport {
 
     @Parameter(property = "descriptors")
     protected Set<String> descriptors;
+
+    @Parameter(property = "blacklistedDescriptors")
+    protected Set<String> blacklistedDescriptors;
 
     @Parameter(property = "features")
     protected List<String> features;
@@ -157,6 +163,12 @@ public class VerifyMojo extends MojoSupport {
 
     @Parameter(property = "skip", defaultValue = "${features.verify.skip}")
     protected boolean skip;
+
+    @Parameter(readonly = true, defaultValue = "${project.groupId}")
+    protected String selfGroupId;
+
+    @Parameter(readonly = true, defaultValue = "${project.artifactId}")
+    protected String selfArtifactId;
 
     protected MavenResolver resolver;
 
@@ -553,24 +565,39 @@ public class VerifyMojo extends MojoSupport {
     }
 
 
-    public static Map<String, Features> loadRepositories(DownloadManager manager, Set<String> uris) throws Exception {
+    public Map<String, Features> loadRepositories(DownloadManager manager, Set<String> uris) throws Exception {
         final Map<String, Features> loaded = new HashMap<>();
         final Downloader downloader = manager.createDownloader();
+
+        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig());
+        if (blacklistedDescriptors != null) {
+            blacklistedDescriptors.forEach(lp -> {
+                processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
+                        .add(new LocationPattern(lp));
+            });
+        }
+        processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
+                .add(new LocationPattern("mvn:" + selfGroupId + "/" + selfArtifactId));
+
         for (String repository : uris) {
-            downloader.download(repository, new DownloadCallback() {
-                @Override
-                public void downloaded(final StreamProvider provider) throws Exception {
-                    try (InputStream is = provider.open()) {
-                        Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
-                        synchronized (loaded) {
-                            loaded.put(provider.getUrl(), featuresModel);
-                            for (String innerRepository : featuresModel.getRepository()) {
-                                downloader.download(innerRepository, this);
+            if (!processor.isRepositoryBlacklisted(repository)) {
+                downloader.download(repository, new DownloadCallback() {
+                    @Override
+                    public void downloaded(final StreamProvider provider) throws Exception {
+                        try (InputStream is = provider.open()) {
+                            Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
+                            synchronized (loaded) {
+                                loaded.put(provider.getUrl(), featuresModel);
+                                for (String innerRepository : featuresModel.getRepository()) {
+                                    if (!processor.isRepositoryBlacklisted(innerRepository)) {
+                                        downloader.download(innerRepository, this);
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
         }
         downloader.await();
         return loaded;
