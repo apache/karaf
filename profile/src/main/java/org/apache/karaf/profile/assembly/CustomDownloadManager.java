@@ -51,7 +51,7 @@ public class CustomDownloadManager extends MavenDownloadManager {
 
     @Override
     public Downloader createDownloader() {
-        return new CustomMavenDownloader();
+        return new SyncDownloader(new CustomMavenDownloader());
     }
 
     class CustomMavenDownloader extends MavenDownloader {
