@@ -41,6 +41,8 @@ public class ConfigProperties {
      * hold the binary install of Karaf.
      */
     public static final String PROP_KARAF_HOME = "karaf.home";
+
+    public static final String PROP_KARAF_HOME_URI = "karaf.home.uri";
     /**
      * The environment variable for specifying the Karaf home directory.  The home directory
      * hold the binary install of Karaf.
@@ -51,6 +53,8 @@ public class ConfigProperties {
      * holds the configuration and data for a Karaf instance.
      */
     public static final String PROP_KARAF_BASE = "karaf.base";
+
+    public static final String PROP_KARAF_BASE_URI = "karaf.base.uri";
     /**
      * The environment variable for specifying the Karaf base directory.  The base directory
      * holds the configuration and data for a Karaf instance.
@@ -61,6 +65,8 @@ public class ConfigProperties {
      * holds the bundles data and cache for a Karaf instance.
      */
     public static final String PROP_KARAF_DATA = "karaf.data";
+
+    public static final String PROP_KARAF_DATA_URI = "karaf.data.uri";
     /**
      * The environment variable for specifying the Karaf data directory. The data directory
      * holds the bundles data and cache for a Karaf instance.
@@ -71,6 +77,8 @@ public class ConfigProperties {
      * holds the configuration for a Karaf instance.
      */
     public static final String PROP_KARAF_ETC = "karaf.etc";
+
+    public static final String PROP_KARAF_ETC_URI = "karaf.etc.uri";
     /**
      * The environment variable for specifying the Karaf etc directory. The etc directory
      * holds the configuration for a Karaf instance.
@@ -81,6 +89,8 @@ public class ConfigProperties {
      * holds the bundles data and cache for a Karaf instance.
      */
     public static final String PROP_KARAF_INSTANCES = "karaf.instances";
+
+    public static final String PROP_KARAF_INSTANCES_URI = "karaf.instances.uri";
     /**
      * The system property for specifying the Karaf data directory. The data directory
      * holds the bundles data and cache for a Karaf instance.
@@ -200,6 +210,12 @@ public class ConfigProperties {
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());
         System.setProperty(PROP_KARAF_ETC, karafEtc.getPath());
         System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
+
+        System.setProperty(PROP_KARAF_HOME_URI, karafHome.toURI().toASCIIString());
+        System.setProperty(PROP_KARAF_BASE_URI, karafBase.toURI().toASCIIString());
+        System.setProperty(PROP_KARAF_DATA_URI, karafData.toURI().toASCIIString());
+        System.setProperty(PROP_KARAF_ETC_URI, karafEtc.toURI().toASCIIString());
+        System.setProperty(PROP_KARAF_INSTANCES_URI, karafInstances.toURI().toASCIIString());
 
         if (!karafEtc.exists()) {
             throw new FileNotFoundException("Karaf etc folder not found: " + karafEtc.getAbsolutePath());
