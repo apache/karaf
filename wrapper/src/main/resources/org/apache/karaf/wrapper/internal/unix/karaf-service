@@ -170,10 +170,14 @@ case "$DIST_OS" in
 esac
 
 # Resolve the architecture
-DIST_ARCH=`uname -p | tr [:upper:] [:lower:] | tr -d [:blank:]`
-if [ "$DIST_ARCH" = "unknown" ]
-then
-    DIST_ARCH=`uname -m | tr [:upper:] [:lower:] | tr -d [:blank:]`
+uname -p >/dev/null 2>&1
+if [ "$?" -eq "0" ]; then
+    DIST_ARCH=`uname -p | tr [:upper:] [:lower:] | tr -d [:blank:]`
+else
+    uname -m >/dev/null 2>&1
+    if [ "$?" -eq "0" ]; then
+        DIST_ARCH=`uname -m | tr [:upper:] [:lower:] | tr -d [:blank:]`
+    fi
 fi
 case "$DIST_ARCH" in
     'amd64' | 'ia32' | 'ia64' | 'i386' | 'i486' | 'i586' | 'i686' | 'x86_64')
@@ -366,6 +370,9 @@ getpid() {
                 elif [ "$DIST_OS" = "aix" ]
                 then
                     pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD" | tail -1`
+                elif [ "$DIST_OS" = "hpux" ]
+                then
+                    pidtest=`UNIX95= $PSEXE -p $pid -o args | grep "$WRAPPER_CMD" | tail -1`
                 else
                     pidtest=`$PSEXE -p $pid -o command | grep $WRAPPER_CMD | tail -1`
                 fi

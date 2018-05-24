@@ -249,6 +249,42 @@ public class Install implements Action {
             System.out.println("    $ rm /etc/rc1.d/K20" + serviceFile.getName());
             System.out.println("    $ rm /etc/rc2.d/K20" + serviceFile.getName());
             System.out.println("    $ rm /etc/rc3.d/K20" + serviceFile.getName());
+        } else if (os.startsWith("HP-UX")) {
+            System.out.println("");
+            System.out.println(INTENSITY_BOLD + "HP-UX system detected :" + INTENSITY_NORMAL);
+            System.out.println("  To install the service (and enable at system boot):");
+            System.out.println("    $ cp /sbin/init.d/template /sbin/init.d/" + serviceFile.getName());
+            System.out.println("    $ cat /sbin/init.d/" + serviceFile.getName() +" | sed 's/<specific>/" + serviceFile.getName() + "/g' | \\ ");
+            System.out.println("      awk '/# Execute the commands to/{print;print \"                set_return\";next}1' | \\ ");
+            System.out.println("      sed 's/CONTROL_VARIABLE/CONTROL_VARIABLE_KARAF/g' | \\ ");
+            System.out.println("      sed 's@# Execute the commands to start your subsystem@        " + serviceFile.getPath() + " start@g' | \\ ");
+            System.out.println("      sed 's@# Execute the commands to stop your subsystem@        " + serviceFile.getPath() + " stop@g' | \\ ");
+            System.out.println("      sed 's/^[ \t]*.://g' > /sbin/init.d/" + serviceFile.getName() +".tmp");
+            System.out.println("    $ mv /sbin/init.d/" + serviceFile.getName() +".tmp /sbin/init.d/" + serviceFile.getName());
+            System.out.println("    $ chmod +x /sbin/init.d/" + serviceFile.getName());
+            System.out.println("    $ rm -f /sbin/init.d/" + serviceFile.getName() +".tmp");
+            System.out.println("    $ echo CONTROL_VARIABLE_KARAF=1 > /etc/rc.config.d/" + serviceFile.getName());
+            System.out.println("");
+            System.out.println("  To start the service when the machine is rebooted for multi-user run level");
+            System.out.println("  and stopped for the halt, single-user and reboot runlevels:");
+            System.out.println("    $ ln -s /sbin/init.d/" + serviceFile.getName() + " /sbin/rc2.d/K20" + serviceFile.getName());
+            System.out.println("    $ ln -s /sbin/init.d/" + serviceFile.getName() + " /sbin/rc3.d/S20" + serviceFile.getName());
+            System.out.println("");
+            System.out.println("    If your application makes use of other services, then you will need to make");
+            System.out.println("    sure that your application is started after, and then shutdown before. This");
+            System.out.println("    is done by controlling the startup/shutdown order by setting the right order");
+            System.out.println("    value, which in this example it set to 20.");
+            System.out.println("");
+            System.out.println("  To start the service:");
+            System.out.println("    $ /sbin/init.d/" + serviceFile.getName() + " start");
+            System.out.println("");
+            System.out.println("  To stop the service:");
+            System.out.println("    $ /sbin/init.d/" + serviceFile.getName() + " stop");
+            System.out.println("");
+            System.out.println("  To uninstall the service :");
+            System.out.println("    $ rm /sbin/init.d/" + serviceFile.getName());
+            System.out.println("    $ rm /sbin/rc2.d/K20" + serviceFile.getName());
+            System.out.println("    $ rm /sbin/rc3.d/S20" + serviceFile.getName());
         }
 
         return null;
