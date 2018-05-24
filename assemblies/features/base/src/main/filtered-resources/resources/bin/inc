@@ -32,6 +32,7 @@ detectOS() {
     darwin=false;
     aix=false;
     os400=false;
+    hpux=false;
     case "$(uname)" in
         CYGWIN*)
             cygwin=true
@@ -44,16 +45,20 @@ detectOS() {
             ;;
         AIX*)
             aix=true
+            # For AIX, set an environment variable
+            export LDR_CNTRL=MAXDATA=0xB0000000@DSA
+            echo ${LDR_CNTRL}
             ;;
         OS400*)
             os400=true
             ;;
+        HP-UX*)
+            hpux=true
+            # For HP-UX, set an environment variable
+            export PS_PREFIX="UNIX95= "
+            echo "${PS_PREFIX}"
+            ;;
     esac
-    # For AIX, set an environment variable
-    if ${aix}; then
-         export LDR_CNTRL=MAXDATA=0xB0000000@DSA
-         echo ${LDR_CNTRL}
-    fi
 }
 
 unlimitFD() {
