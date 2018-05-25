@@ -230,6 +230,8 @@
     <feature name="jms" description="JMS service and commands" version="${project.version}">
         <details>JMS support provinding service, commands, and MBean.</details>
         <feature>pax-jms-pool</feature>
+        <feature>pax-jms-config</feature>
+        <feature>pax-jms-pool-transx</feature>
         <feature>transaction</feature>
         <bundle dependency="true">mvn:javax.jms/javax.jms-api/2.0</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>

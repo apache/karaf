@@ -51,11 +51,11 @@ public class JmsServiceImpl implements JmsService {
 
     @Override
     public void create(String name, String type, String url) throws Exception {
-        create(name, type, url, null, null);
+        create(name, type, url, null, null, "jmspooled");
     }
 
     @Override
-    public void create(String name, String type, String url, String username, String password) throws Exception {
+    public void create(String name, String type, String url, String username, String password, String pool) throws Exception {
         if (type == null) {
             throw new IllegalArgumentException("JMS connection factory type not known");
         }
@@ -71,6 +71,12 @@ public class JmsServiceImpl implements JmsService {
         put(properties, ConnectionFactoryFactory.JMS_URL, url);
         put(properties, ConnectionFactoryFactory.JMS_USER, username);
         put(properties, ConnectionFactoryFactory.JMS_PASSWORD, password);
+        if (pool.equals("narayana")) {
+            put(properties, "pool", "narayana");
+        }
+        if (pool.equals("transx") || type.equalsIgnoreCase("activemq")) {
+            put(properties, "pool", "transx");
+        }
         Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.connectionfactory", null);
         config.update(properties);
     }

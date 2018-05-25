@@ -64,7 +64,7 @@ public class JmsTest extends KarafTestSupport {
         return new Option[] //
         {
          composite(super.config()), //
-         features(activeMqUrl, "jms", "activemq-broker-noweb", "shell-compat"),
+         features(activeMqUrl, "jms", "pax-jms-activemq", "activemq-broker-noweb", "shell-compat"),
          features(springLegacyUrl, "spring")
         };
     }
@@ -128,7 +128,7 @@ public class JmsTest extends KarafTestSupport {
     }
 
     private void checkJMXCreateConnectionFactory() throws Exception {
-        invoke("create", JMX_CF_NAME, "activemq", "tcp://localhost:61616", "karaf", "karaf");
+        invoke("create", JMX_CF_NAME, "activemq", "tcp://localhost:61616", "karaf", "karaf", "transx");
         waitForConnectionFactory("name=" + JMX_CF_NAME);
         @SuppressWarnings("unchecked")
         List<String> connectionFactories = (List<String>)mbeanServer.getAttribute(objName,
