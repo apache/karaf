@@ -157,7 +157,7 @@ public class Install implements Action {
                 System.out.println("    $ rm /etc/init.d/" + serviceFile.getName());
             } else {
 				System.out.println("");
-                System.out.println(INTENSITY_BOLD + "On Redhat/Fedora/CentOS Systems (SystemV):" + INTENSITY_NORMAL);
+                                System.out.println(INTENSITY_BOLD + "On Redhat/Fedora/CentOS Systems (SystemV):" + INTENSITY_NORMAL);
 				System.out.println("  To install the service:");
 				System.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
 				System.out.println("    $ chkconfig "+serviceFile.getName()+" --add");
@@ -179,7 +179,7 @@ public class Install implements Action {
 				System.out.println("    $ rm /etc/init.d/"+serviceFile.getName());
 
 				System.out.println("");
-                System.out.println(INTENSITY_BOLD + "On Ubuntu/Debian Systems (SystemV):" + INTENSITY_NORMAL);
+                                System.out.println(INTENSITY_BOLD + "On Ubuntu/Debian Systems (SystemV):" + INTENSITY_NORMAL);
 				System.out.println("  To install the service:");
 				System.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
 				System.out.println("");
@@ -222,7 +222,9 @@ public class Install implements Action {
             }
 
         } else if (os.startsWith("Solaris") || os.startsWith("SunOS")) {
-            System.out.println("  To install the service:");
+            System.out.println("");
+            System.out.println(INTENSITY_BOLD + "Solaris/SunOS system detected :" + INTENSITY_NORMAL);
+            System.out.println("  To install the service (and enable at system boot):");
             System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/init.d/");
             System.out.println("");
             System.out.println("  To start the service when the machine is rebooted for all multi-user run levels");
@@ -247,8 +249,34 @@ public class Install implements Action {
             System.out.println("    $ rm /etc/init.d/" + serviceFile.getName());
             System.out.println("    $ rm /etc/rc0.d/K20" + serviceFile.getName());
             System.out.println("    $ rm /etc/rc1.d/K20" + serviceFile.getName());
+            System.out.println("    $ rm /etc/rc2.d/S20" + serviceFile.getName());
+            System.out.println("    $ rm /etc/rc3.d/S20" + serviceFile.getName());
+        } else if (os.startsWith("AIX")) {
+            System.out.println("");
+            System.out.println(INTENSITY_BOLD + "AIX system detected :" + INTENSITY_NORMAL);
+            System.out.println("  To install the service (and enable at system boot):");
+            System.out.println("    $ ln -s " + serviceFile.getPath() + " /etc/rc.d/init.d/");
+            System.out.println("");
+            System.out.println("  To start the service when the machine is rebooted for all multi-user run levels");
+            System.out.println("  and stopped for the halt, single-user and reboot runlevels:");
+            System.out.println("    $ ln -s /etc/rc.d/init.d/" + serviceFile.getName() + " /etc/rc2.d/K20" + serviceFile.getName());
+            System.out.println("    $ ln -s /etc/rc.d/init.d/" + serviceFile.getName() + " /etc/rc2.d/S20" + serviceFile.getName());
+            System.out.println("");
+            System.out.println("    If your application makes use of other services, then you will need to make");
+            System.out.println("    sure that your application is started after, and then shutdown before. This");
+            System.out.println("    is done by controlling the startup/shutdown order by setting the right order");
+            System.out.println("    value, which in this example it set to 20."); 
+            System.out.println("");
+            System.out.println("  To start the service:");
+            System.out.println("    $ /etc/rc.d/init.d/" + serviceFile.getName() + " start");
+            System.out.println("");
+            System.out.println("  To stop the service:");
+            System.out.println("    $ /etc/rc.d/init.d/" + serviceFile.getName() + " stop");
+            System.out.println("");
+            System.out.println("  To uninstall the service :");
+            System.out.println("    $ rm /etc/rc.d/init.d/" + serviceFile.getName());
             System.out.println("    $ rm /etc/rc2.d/K20" + serviceFile.getName());
-            System.out.println("    $ rm /etc/rc3.d/K20" + serviceFile.getName());
+            System.out.println("    $ rm /etc/rc2.d/S20" + serviceFile.getName());
         } else if (os.startsWith("HP-UX")) {
             System.out.println("");
             System.out.println(INTENSITY_BOLD + "HP-UX system detected :" + INTENSITY_NORMAL);
