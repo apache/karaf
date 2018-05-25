@@ -33,6 +33,7 @@ detectOS() {
     aix=false;
     os400=false;
     hpux=false;
+    solaris=false;
     case "$(uname)" in
         CYGWIN*)
             cygwin=true
@@ -57,6 +58,9 @@ detectOS() {
             # For HP-UX, set an environment variable
             export PS_PREFIX="UNIX95= "
             echo "${PS_PREFIX}"
+            ;;
+        SunOS*)
+            solaris=true
             ;;
     esac
 }
@@ -213,7 +217,19 @@ detectJVM() {
 }
 
 checkJvmVersion() {
-    VERSION=$("${JAVA}" -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g ; s/\..*//g; s/-.*//g;')
+    # Use in priority xpg4 awk or nawk on SunOS as standard awk is outdated 
+    if ${solaris}; then
+        if [ -x /usr/xpg4/bin/awk ]; then
+            VERSION=$("${JAVA}" -version 2>&1 | /usr/xpg4/bin/awk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
+        elif [ -x /usr/bin/nawk ]; then
+            VERSION=$("${JAVA}" -version 2>&1 | /usr/bin/nawk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
+        else 
+            VERSION=$("${JAVA}" -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
+        fi
+    else    
+        VERSION=$("${JAVA}" -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
+    fi
+    # java must be at least version 8 
     if [ "${VERSION}" -lt "8" ]; then
         die "JVM must be greater than 1.8"
     fi
@@ -302,3 +318,4 @@ convertPaths() {
         fi
     fi
 }
+
