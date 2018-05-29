@@ -20,7 +20,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "jaas", name = "group-create", description = "create a group in a realm")
+@Command(scope = "jaas", name = "group-create", description = "Create a group in a realm")
 @Service
 public class GroupCreateCommand extends JaasCommandSupport {
    
