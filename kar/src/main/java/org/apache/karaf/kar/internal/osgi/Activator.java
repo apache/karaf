@@ -43,6 +43,7 @@ public class Activator extends BaseActivator implements ManagedService {
         }
 
         boolean noAutoRefreshBundles = getBoolean("noAutoRefreshBundles", false);
+        boolean noAutoStartBundles = getBoolean("noAutoStartBundles", false);
         String karStorage = getString("karStorage", System.getProperty("karaf.data") + File.separator + "kar");
 
         KarServiceImpl karService = new KarServiceImpl(
@@ -51,6 +52,7 @@ public class Activator extends BaseActivator implements ManagedService {
                 featuresService
         );
         karService.setNoAutoRefreshBundles(noAutoRefreshBundles);
+        karService.setNoAutoStartBundles(noAutoStartBundles);
         register(KarService.class, karService);
 
         KarsMBeanImpl mbean = new KarsMBeanImpl();
