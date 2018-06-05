@@ -16,13 +16,18 @@
  */
 package org.apache.karaf.bundle.command;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
 @Command(scope = "bundle", name = "classes", description = "Displays a list of classes/resources contained in the bundle")
@@ -37,6 +42,7 @@ public class Classes extends BundlesCommand {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         if (wiring != null){
             Collection<String> resources;
+            List<String> exports = getExports(bundle);
             if (displayAllFiles){
                 resources = wiring.listResources("/", null, BundleWiring.LISTRESOURCES_RECURSE);
             } else {
@@ -49,15 +55,46 @@ public class Classes extends BundlesCommand {
                 localResources = wiring.listResources("/", "/*.class", BundleWiring.LISTRESOURCES_RECURSE | BundleWiring.LISTRESOURCES_LOCAL);
             }
             for (String resource:resources){
-                if (localResources.contains(resource)) {
-                    System.out.println(SimpleAnsi.INTENSITY_BOLD + resource + SimpleAnsi.INTENSITY_NORMAL);
-                } else {
-                    System.out.println(resource);
+                StringBuilder stringBuilder = new StringBuilder();
+                boolean localResource = localResources.contains(resource);
+                if(localResource) {
+                    stringBuilder.append(SimpleAnsi.INTENSITY_BOLD);
                 }
+                if(ids == null || ids.size() != 1) {
+                    stringBuilder.append(bundle.getBundleId() + " | ");
+                }
+                stringBuilder.append(resource + " | ");
+                stringBuilder.append("exported: " + isExported(resource, exports));
+                if(localResource) {
+                    stringBuilder.append(SimpleAnsi.INTENSITY_NORMAL);
+                }
+
+                System.out.println(stringBuilder.toString());
             }
         } else {
             System.out.println("Bundle " + bundle.getBundleId() + " is not resolved.");
         }
+    }
+
+    private boolean isExported(String className, List<String> exports) throws Exception {
+        boolean exported = false;
+        String packageName = className.substring(0, className.lastIndexOf("/")).replaceAll("/", ".");
+        if(exports.contains(packageName)) {
+            exported = true;
+        }
+        return exported;
+    }
+
+    private List<String> getExports(Bundle bundle) throws Exception {
+        List<String> exports = new ArrayList<>();
+        BundleRevision rev = bundle.adapt(BundleRevision.class);
+        List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+        for (BundleCapability cap : caps) {
+            Map<String, Object> attr = cap.getAttributes();
+            String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
+            exports.add(packageName);
+        }
+        return exports;
     }
 
 
