@@ -51,8 +51,6 @@ import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.channel.PtyCapableChannelSession;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
-import org.apache.sshd.common.FactoryManager;
-import org.apache.sshd.common.PropertyResolverUtils;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.channel.PtyMode;
 import org.apache.sshd.common.config.keys.FilePasswordProvider;
@@ -178,8 +176,16 @@ public class Main {
             session.auth().verify();
 
             int exitStatus = 0;
+            String type = System.getProperty(TerminalBuilder.PROP_TYPE);
+            if (type == null) {
+                type = System.getenv("TERM");
+            }
+            if (type == null) {
+                type = Terminal.TYPE_DUMB;
+            }
             try (Terminal terminal = TerminalBuilder.builder()
                         .nativeSignals(true)
+                        .type(type)
                         .signalHandler(Terminal.SignalHandler.SIG_IGN)
                         .build()) {
                 if (config.getCommand().length() > 0) {
