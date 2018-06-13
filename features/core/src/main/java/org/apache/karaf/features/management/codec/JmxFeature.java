@@ -83,6 +83,7 @@ public class JmxFeature {
             itemValues[4] = getConfigList(feature.getConfigurations());
             itemValues[5] = getConfigFileList(feature.getConfigurationFiles());
             itemValues[6] = installed;
+            itemValues[7] = feature.isBlacklisted();
             data = new CompositeDataSupport(FEATURE, itemNames, itemValues);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Cannot form feature open data", e);
@@ -314,6 +315,7 @@ public class JmxFeature {
             itemTypes[4] = FEATURE_CONFIG_TABLE;
             itemTypes[5] = FEATURE_CONFIG_FILES_TABLE;
             itemTypes[6] = SimpleType.BOOLEAN;
+            itemTypes[7] = SimpleType.BOOLEAN;
 
             itemDescriptions[0] = "The name of the feature";
             itemDescriptions[1] = "The version of the feature";
@@ -322,6 +324,7 @@ public class JmxFeature {
             itemDescriptions[4] = "The feature configurations";
             itemDescriptions[5] = "The feature configuration files";
             itemDescriptions[6] = "Whether the feature is installed";
+            itemDescriptions[7] = "Whether the feature is blacklisted";
 
             return new CompositeType("Feature", description, itemNames,
                     itemDescriptions, itemTypes);

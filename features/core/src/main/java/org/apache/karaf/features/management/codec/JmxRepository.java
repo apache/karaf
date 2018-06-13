@@ -52,6 +52,7 @@ public class JmxRepository {
             itemValues[1] = repository.getURI().toString();
             itemValues[2] = toStringArray(repository.getRepositories());
             itemValues[3] = getFeatureIdentifierTable(Arrays.asList(repository.getFeatures()));
+            itemValues[4] = repository.isBlacklisted();
             data = new CompositeDataSupport(REPOSITORY, itemNames, itemValues);
         } catch (Exception e) {
             throw new IllegalStateException("Cannot form repository open data", e);
@@ -107,11 +108,13 @@ public class JmxRepository {
             itemTypes[1] = SimpleType.STRING;
             itemTypes[2] = new ArrayType<String>(1, SimpleType.STRING);
             itemTypes[3] = JmxFeature.FEATURE_IDENTIFIER_TABLE;
+            itemTypes[4] = SimpleType.BOOLEAN;
 
             itemDescriptions[0] = "The name of the repository";
             itemDescriptions[1] = "The uri of the repository";
             itemDescriptions[2] = "The dependent repositories";
             itemDescriptions[3] = "The list of included features";
+            itemDescriptions[4] = "Whether the repository is blacklisted";
 
             return new CompositeType("Repository", description, itemNames,
                     itemDescriptions, itemTypes);
