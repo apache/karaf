@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+
+        Licensed to the Apache Software Foundation (ASF) under one or more
+        contributor license agreements.  See the NOTICE file distributed with
+        this work for additional information regarding copyright ownership.
+        The ASF licenses this file to You under the Apache License, Version 2.0
+        (the "License"); you may not use this file except in compliance with
+        the License.  You may obtain a copy of the License at
+
+           http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    -->
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache.karaf</groupId>
+        <artifactId>karaf</artifactId>
+        <version>4.2.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>org.apache.karaf.examples</groupId>
+    <artifactId>apache-karaf-examples</artifactId>
+    <name>Apache Karaf :: Examples</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>karaf-bundle-example</module>
+        <module>karaf-blueprint-example</module>
+        <module>karaf-scr-example</module>
+        <module>karaf-branding-example</module>
+        <module>karaf-command-example</module>
+        <module>karaf-mbean-example</module>
+        <module>karaf-url-namespace-handler-example</module>
+        <module>karaf-log-appender-example</module>
+        <module>karaf-deployer-example</module>
+        <module>karaf-dump-example</module>
+        <!-- <module>karaf-jaas-config-example</module> -->
+        <!-- <module>karaf-jaas-login-module-example</module> -->
+        <!-- <module>karaf-encryption-example</module> -->
+        <module>karaf-servlet-example</module>
+        <module>karaf-war-example</module>
+        <!-- <module>karaf-jndi-example</module> -->
+        <module>karaf-jdbc-example</module>
+        <module>karaf-jms-example</module>
+        <module>karaf-jpa-example</module>
+        <!-- <module>karaf-cdi-example</module> -->
+        <module>karaf-rest-example</module>
+        <module>karaf-soap-example</module>
+        <module>karaf-scheduler-example</module>
+        <module>karaf-maven-example</module>
+        <!-- <module>karaf-camel-example</module> -->
+        <module>karaf-itest-example</module>
+        <module>karaf-profile-example</module>
+    </modules>
+
+</project>

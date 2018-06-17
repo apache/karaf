@@ -29,9 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.service.RepositoryCacheImpl;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 
@@ -80,48 +78,6 @@ public class BuilderTest {
         assertThat(builder.getPidsToExtract().get(0), equalTo("!jmx.acl.*"));
         assertThat(builder.getPidsToExtract().get(1), equalTo("!org.apache.karaf.command.acl.*"));
         assertThat(builder.getPidsToExtract().get(2), equalTo("*"));
-    }
-
-    @Test
-    @Ignore("This test can not run at this position as it needs the staticFramework kar which is not yet available")
-    public void testBuilder() throws Exception {
-
-        Path workDir = Paths.get("target/distrib");
-        recursiveDelete(workDir);
-
-        Builder builder = Builder.newInstance()
-                .staticFramework()
-                .profilesUris("jar:mvn:org.apache.karaf.demos.profiles/registry/4.0.0-SNAPSHOT!/")
-                .environment("static")
-                .profiles("karaf",
-                          "example-loanbroker-bank1",
-                          "example-loanbroker-bank2",
-                          "example-loanbroker-bank3",
-                          "example-loanbroker-broker",
-                          "activemq-broker")
-                .homeDirectory(workDir);
-
-        try {
-            builder.generateAssembly();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    //@Test
-    //@Ignore("no need to run this test")
-    public void consistencyReport() {
-        Map<String, Features> features = new LinkedHashMap<>();
-        Builder builder = new Builder();
-        File[] uris = new File("src/test/resources/repositories").listFiles((dir, name) -> name.endsWith(".xml"));
-        if (uris != null) {
-            for (File f : uris) {
-                features.put(f.getName(), new RepositoryImpl(f.toURI(), false).getFeaturesInternal());
-            }
-        }
-        builder.generateConsistencyReport(features, new File("target/consistency.xml"), false);
-        builder.generateConsistencyReport(features, new File("target/consistency-full.xml"), true);
     }
 
     private static void recursiveDelete(Path path) throws IOException {

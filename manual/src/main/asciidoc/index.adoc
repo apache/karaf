@@ -94,12 +94,6 @@ include::user-guide/tuning.adoc[]
 
 == Developer Guide
 
-[NOTE]
-====
-The developer guide is currently under a refactoring. The "new" developer guide will document samples providing
-in the Karaf Container distribution, in order to have more practical recipes.
-====
-
 include::developer-guide/developer-commands.adoc[]
 
 include::developer-guide/scripting.adoc[]
@@ -114,15 +108,15 @@ include::developer-guide/karaf-maven-plugin.adoc[]
 
 include::developer-guide/custom-distribution.adoc[]
 
-include::developer-guide/services.adoc[]
-
 include::developer-guide/creating-bundles.adoc[]
 
-include::developer-guide/blueprint.adoc[]
+==== Blueprint
 
-include::developer-guide/ds.adoc[]
+See https://github.com/apache/example/karaf-blueprint-example/README.md
 
-include::developer-guide/dev-cdi.adoc[]
+==== SCR
+
+See https://github.com/apache/example/karaf-scr-example/README.md
 
 include::developer-guide/archetypes.adoc[]
 
@@ -131,5 +125,55 @@ include::developer-guide/security-framework.adoc[]
 include::developer-guide/debugging.adoc[]
 
 include::developer-guide/writing-tests.adoc[]
+
+=== Dump extender
+
+See https://github.com/apache/karaf/examples/karaf-dump-example/README.md
+
+==== JDBC & JPA
+
+See https://github.com/apache/karaf/examples/karaf-jdbc-example/README.md
+
+See https://github.com/apache/karaf/examples/karaf-jpa-example/README.md
+
+==== JMS
+
+See https://github.com/apache/karaf/examples/karaf-jms-example/README.md
+
+==== Custom log appender
+
+See https://github.com/apache/karaf/examples/karaf-log-appender-example/README.md
+
+==== Custom JMX MBean
+
+See https://github.com/apache/karaf/examples/karaf-mbean-example/README.md
+
+==== Working with profiles
+
+See https://github.com/apache/karaf/examples/karaf-profile-example/README.md
+
+==== Servlet
+
+See https://github.com/apache/karaf/examples/karaf-servlet-example/README.md
+
+==== WAR
+
+See https://github.com/apache/karaf/examples/karaf-war-example/README.md
+
+==== REST service
+
+See https://github.com/apache/karaf/examples/karaf-rest-example/README.md
+
+==== SOAP service
+
+See https://github.com/apache/karaf/examples/karaf-soap-example/README.md
+
+==== Scheduling jobs
+
+See https://github.com/apache/karaf/examples/karaf-scheduler-example/README.md
+
+==== Custom URL handler
+
+See https://github.com/apache/karaf/examples/karaf-url-namespace-handler-example/README.md
 
 include::developer-guide/github-contributions.adoc[]

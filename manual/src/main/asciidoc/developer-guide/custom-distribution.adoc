@@ -27,6 +27,8 @@ This custom distribution could contain:
 * renamed or specific scripts in the bin folder
 * system documentation files
 
+See [example/karaf-maven-example/karaf-maven-example-assembly] for a custom distribution example.
+
 ==== Maven assembly
 
 The recommended way to create a Karaf server assembly is to use the karaf-assembly packaging with the karaf-maven-plugin.
@@ -549,7 +551,6 @@ assembly descriptor, configured in POM above to be `src/main/descriptors/bin.xml
             <directory>target/dependencies/apache-karaf-${karaf.version}</directory>
             <outputDirectory>/</outputDirectory>
             <excludes>
-                <exclude>**/demos/**</exclude>
                 <exclude>bin/**</exclude>
                 <exclude>etc/system.properties</exclude>
                 <exclude>etc/users.properties</exclude>
