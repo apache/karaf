@@ -45,6 +45,14 @@ public class ConfigTest extends KarafTestSupport {
         assertFalse(configListOutput.isEmpty());
     }
 
+    @Test
+    public void listShortCommand() throws Exception {
+        String configListOutput = executeCommand("config:list -s");
+        System.out.println(configListOutput);
+        assertFalse(configListOutput.isEmpty());
+        assertContains("org.apache.karaf.jaas\norg.apache.karaf.kar\n", configListOutput);
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void configsViaMBean() throws Exception {

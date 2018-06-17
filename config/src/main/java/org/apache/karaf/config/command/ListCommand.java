@@ -23,12 +23,16 @@ import java.util.TreeMap;
 
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.service.cm.Configuration;
 
 @Command(scope = "config", name = "list", description = "Lists existing configurations.")
 @Service
 public class ListCommand extends ConfigCommandSupport {
+
+    @Option(name = "-s", aliases = "--short", description = "Only list the PIDs, not the properties", required = false, multiValued = false)
+    boolean shortOutput;
 
     @Argument(index = 0, name = "query", description = "Query in LDAP syntax. Example: \"(service.pid=org.apache.karaf.log)\"", required = false, multiValued = false)
     String query;
@@ -41,23 +45,29 @@ public class ListCommand extends ConfigCommandSupport {
             for (Configuration config : configs) {
                 sortedConfigs.put(config.getPid(), config);
             }
-            for (Configuration config : sortedConfigs.values()) {
-                System.out.println("----------------------------------------------------------------");
-                System.out.println("Pid:            " + config.getPid());
-                if (config.getFactoryPid() != null) {
-                    System.out.println("FactoryPid:     " + config.getFactoryPid());
+            if (shortOutput) {
+                for (Configuration config : sortedConfigs.values()) {
+                    System.out.println(config.getPid());
                 }
-                System.out.println("BundleLocation: " + config.getBundleLocation());
-                if (config.getProperties() != null) {
-                    System.out.println("Properties:");
-                    Dictionary props = config.getProperties();
-                    Map<String, Object> sortedProps = new TreeMap<>();
-                    for (Enumeration e = props.keys(); e.hasMoreElements();) {
-                        Object key = e.nextElement();
-                        sortedProps.put(key.toString(), props.get(key));
+            } else {
+                for (Configuration config : sortedConfigs.values()) {
+                    System.out.println("----------------------------------------------------------------");
+                    System.out.println("Pid:            " + config.getPid());
+                    if (config.getFactoryPid() != null) {
+                        System.out.println("FactoryPid:     " + config.getFactoryPid());
                     }
-                    for (Map.Entry<String, Object> entry : sortedProps.entrySet()) {
-                        System.out.println("   " + entry.getKey() + " = " + displayValue(entry.getValue()));
+                    System.out.println("BundleLocation: " + config.getBundleLocation());
+                    if (config.getProperties() != null) {
+                        System.out.println("Properties:");
+                        Dictionary props = config.getProperties();
+                        Map<String, Object> sortedProps = new TreeMap<>();
+                        for (Enumeration e = props.keys(); e.hasMoreElements(); ) {
+                            Object key = e.nextElement();
+                            sortedProps.put(key.toString(), props.get(key));
+                        }
+                        for (Map.Entry<String, Object> entry : sortedProps.entrySet()) {
+                            System.out.println("   " + entry.getKey() + " = " + displayValue(entry.getValue()));
+                        }
                     }
                 }
             }
