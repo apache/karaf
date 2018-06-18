@@ -19,7 +19,9 @@ package org.apache.karaf.profile.impl.osgi;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.karaf.profile.ProfileMBean;
 import org.apache.karaf.profile.ProfileService;
+import org.apache.karaf.profile.impl.ProfileMBeanImpl;
 import org.apache.karaf.profile.impl.ProfileServiceImpl;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
@@ -38,6 +40,10 @@ public class Activator extends BaseActivator implements ManagedService {
         Path root = Paths.get(getString("profilesDirectory", System.getProperty("karaf.home") + "/profiles"));
         ProfileServiceImpl service = new ProfileServiceImpl(root);
         register(ProfileService.class, service);
+
+        ProfileMBeanImpl profileMBean = new ProfileMBeanImpl();
+        profileMBean.setProfileService(service);
+        registerMBean(profileMBean, "type=profile");
     }
 
 }
