@@ -107,6 +107,7 @@
             <artifactId>org.apache.aries.jndi.legacy.support</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <!-- application-without-isolation deps -->
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
@@ -155,12 +156,14 @@
             <artifactId>org.apache.aries.application.deployment.management</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <!-- without isolation -->
         <dependency>
             <groupId>org.apache.aries.application</groupId>
             <artifactId>org.apache.aries.application.runtime</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <!-- subsystems -->
         <dependency>
             <groupId>org.apache.karaf.services</groupId>
@@ -181,6 +184,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- hibernate deps -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-osgi</artifactId>
