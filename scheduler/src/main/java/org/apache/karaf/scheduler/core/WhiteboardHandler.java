@@ -20,6 +20,7 @@ import java.util.Date;
 
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.Scheduler;
+import org.apache.karaf.scheduler.command.Schedule;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -82,9 +83,9 @@ public class WhiteboardHandler {
      * Create unique identifier
      */
     private String getServiceIdentifier(final ServiceReference ref) {
-        String name = (String)ref.getProperty(Scheduler.PROPERTY_SCHEDULER_NAME);
+        String name = (String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_NAME);
         if ( name == null ) {
-            name = (String)ref.getProperty(Constants.SERVICE_PID);
+            name = (String) ref.getProperty(Constants.SERVICE_PID);
             if ( name == null ) {
                 name = "Registered Service";
             }
@@ -99,22 +100,38 @@ public class WhiteboardHandler {
      */
     private void register(final ServiceReference ref, final Object job) {
         final String name = getServiceIdentifier(ref);
-        final Boolean concurrent = (Boolean) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT);
+        Boolean concurrent = true;
+        if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT) != null) {
+            if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT) instanceof Boolean) {
+                concurrent = (Boolean) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT);
+            } else {
+                concurrent = new Boolean((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT));
+            }
+        }
         final String expression = (String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_EXPRESSION);
         try {
             if (expression != null) {
                 this.scheduler.schedule(job, this.scheduler.EXPR(expression)
                         .name(name)
-                        .canRunConcurrently((concurrent != null ? concurrent : true)));
+                        .canRunConcurrently(concurrent));
             } else {
-                final Long period = (Long) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD);
-                if (period != null) {
+                Long period = null;
+                if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD) != null) {
+                    if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD) instanceof Long) {
+                        period = (Long) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD);
+                    } else {
+                        period = new Long((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD));
+                    }
                     if (period < 1) {
                         this.logger.debug("Ignoring service {} : scheduler period is less than 1.", ref);
                     } else {
                         boolean immediate = false;
                         if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE) != null) {
-                            immediate = (Boolean) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE);
+                            if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE) instanceof Boolean) {
+                                immediate = (Boolean) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE);
+                            } else {
+                                immediate = new Boolean((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE));
+                            }
                         }
                         final Date date = new Date();
                         if (!immediate) {
