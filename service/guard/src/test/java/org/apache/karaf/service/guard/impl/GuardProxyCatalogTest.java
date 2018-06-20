@@ -1308,7 +1308,12 @@ public class GuardProxyCatalogTest {
 
         // Test that the actual proxy invokes the original service...
         ServiceFactory proxyServiceSF = (ServiceFactory) serviceMap.get(proxySR);
-        Object proxyService = proxyServiceSF.getService(clientBundle, null);
+        Object proxyService = null;
+        try {
+            proxyService = proxyServiceSF.getService(clientBundle, null);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotSame("The proxy should not be the same object as the original service", testService, proxyService);
 
         return proxyService;

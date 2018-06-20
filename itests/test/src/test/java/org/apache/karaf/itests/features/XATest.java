@@ -20,6 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -59,8 +60,8 @@ public class XATest extends KarafTestSupport {
         result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
         result.add(replaceConfigurationFile("etc/org.ops4j.datasource-derby.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-derby.cfg")));
         result.add(replaceConfigurationFile("etc/xa-test-camel.xml", getConfigFile("/org/apache/karaf/itests/features/xa-test-camel.xml")));
-        if (System.getProperty("java.version").startsWith("9")) {
-            //need asm 6.x which support java9 to run this test
+        if (JavaVersionUtil.getMajorVersion() >= 9) {
+            //need asm 6.x which support java9plus to run this test
             result.add(replaceConfigurationFile("system/org/apache/karaf/features/standard/" 
                 + version + "/standard-" + version + "-features.xml", 
                 getConfigFile("/etc/feature.xml")));
@@ -74,6 +75,7 @@ public class XATest extends KarafTestSupport {
 
         System.out.println("== Installing Artemis");
         featureService.installFeature("artemis", NO_AUTO_REFRESH);
+        Thread.sleep(15000);//sleep a while ensure the jms broker is up
         featureService.installFeature("jms", NO_AUTO_REFRESH);
         featureService.installFeature("pax-jms-artemis", NO_AUTO_REFRESH);
 

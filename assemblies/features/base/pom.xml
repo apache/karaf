@@ -37,6 +37,59 @@
     </properties>
 
     <dependencies>
+                    <dependency>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                        <version>2.3.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax.activation</groupId>
+                        <artifactId>activation</artifactId>
+                        <version>1.1.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-core</artifactId>
+                        <version>${jaxb.version}</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>org.glassfish.jaxb</groupId>
+                                <artifactId>jaxb-core</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>org.glassfish.jaxb</groupId>
+                                <artifactId>txw2</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-impl</artifactId>
+                        <version>${jaxb.version}</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>javax.xml.bind</groupId>
+                                <artifactId>jsr173_api</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>javax.xml</groupId>
+                                <artifactId>jsr173</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>javax.activation</groupId>
+                                <artifactId>activation</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>javax.xml.bind</groupId>
+                                <artifactId>activation</artifactId>
+                            </exclusion>
+                            <exclusion>
+                                <groupId>javax.xml.bind</groupId>
+                                <artifactId>jaxb-api</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+
         <dependency>
             <groupId>org.apache.karaf.specs</groupId>
             <artifactId>org.apache.karaf.specs.locator</artifactId>
@@ -135,25 +188,26 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.karaf.specs</groupId>
-                                    <artifactId>org.apache.karaf.specs.locator</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf.specs</groupId>
-                                    <artifactId>org.apache.karaf.specs.java.xml</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf.specs</groupId>
-                                    <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf.specs</groupId>
-                                    <artifactId>org.apache.karaf.specs.activator</artifactId>
+                                    <groupId>javax.xml.bind</groupId>
+                                    <artifactId>jaxb-api</artifactId>
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.activation</groupId>
+                                    <artifactId>activation</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.bind</groupId>
+                                    <artifactId>jaxb-core</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.bind</groupId>
+                                    <artifactId>jaxb-impl</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
+                                </artifactItem>
+               
                                 <artifactItem>
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.main</artifactId>

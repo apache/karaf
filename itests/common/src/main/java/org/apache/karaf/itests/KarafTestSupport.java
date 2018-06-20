@@ -57,9 +57,11 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import org.ops4j.pax.exam.*;
+import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.ops4j.pax.exam.options.extra.VMOption;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -179,7 +181,60 @@ public class KarafTestSupport {
             localRepository = "";
         }
 
-        return new Option[]{
+        if (JavaVersionUtil.getMajorVersion() >= 9) {
+
+            return new Option[]{
+                //debugConfiguration("8889", true),
+                KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+                // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
+                KarafDistributionOption.configureSecurity().disableKarafMBeanServerBuilder(),
+                KarafDistributionOption.configureConsole().ignoreLocalConsole(),
+                KarafDistributionOption.keepRuntimeFolder(),
+                KarafDistributionOption.logLevel(LogLevel.INFO),
+                CoreOptions.mavenBundle().groupId("org.awaitility").artifactId("awaitility").versionAsInProject(),
+                CoreOptions.mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").versionAsInProject(),
+                CoreOptions.mavenBundle().groupId("org.apache.karaf.itests").artifactId("common").versionAsInProject(),
+                CoreOptions.mavenBundle().groupId("javax.annotation").artifactId("javax.annotation-api").versionAsInProject(),
+                KarafDistributionOption.replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
+                //replaceConfigurationFile("etc/host.key", getConfigFile("/etc/host.key")),
+                KarafDistributionOption.editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "updateSnapshots", "none"),
+                KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", httpPort),
+                KarafDistributionOption.editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
+                KarafDistributionOption.editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
+                KarafDistributionOption.editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
+                KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.localRepository", localRepository),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring32.version", System.getProperty("spring32.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring40.version", System.getProperty("spring40.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring41.version", System.getProperty("spring41.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring42.version", System.getProperty("spring42.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring43.version", System.getProperty("spring43.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring50.version", System.getProperty("spring50.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring.security31.version", System.getProperty("spring.security31.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring.security42.version", System.getProperty("spring.security42.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "activemq.version", System.getProperty("activemq.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/branding.properties", "welcome", ""), // No welcome banner
+                KarafDistributionOption.editConfigurationFilePut("etc/branding-ssh.properties", "welcome", ""),
+                new VMOption("--add-opens"),
+                new VMOption("java.base/java.security=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.base/java.net=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.base/java.lang=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.base/java.util=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.naming/javax.naming.spi=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED"),
+                new VMOption("--add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED")
+            };
+        } else {
+                
+            return new Option[]{
                 //debugConfiguration("8889", true),
                 KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
@@ -210,7 +265,9 @@ public class KarafTestSupport {
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "activemq.version", System.getProperty("activemq.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/branding.properties", "welcome", ""), // No welcome banner
                 KarafDistributionOption.editConfigurationFilePut("etc/branding-ssh.properties", "welcome", "")
-        };
+            };  
+                                
+        }
     }
 
     public static int getAvailablePort(int min, int max) {
