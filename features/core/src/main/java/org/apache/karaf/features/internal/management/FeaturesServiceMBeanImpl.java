@@ -127,11 +127,19 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void addRepository(String uri) throws Exception {
-        featuresService.addRepository(new URI(uri));
+        URI repoUri = new URI(uri);
+        if (featuresService.isRepositoryUriBlacklisted(repoUri)) {
+            throw new RuntimeException("Feature URL " + uri + " is blacklisted");
+        }
+        featuresService.addRepository(repoUri);
     }
 
     public void addRepository(String uri, boolean install) throws Exception {
-        featuresService.addRepository(new URI(uri), install);
+        URI repoUri = new URI(uri);
+        if (featuresService.isRepositoryUriBlacklisted(repoUri)) {
+            throw new RuntimeException("Feature URL " + uri + " is blacklisted");
+        }
+        featuresService.addRepository(repoUri, install);
     }
 
     public void removeRepository(String uri) throws Exception {
