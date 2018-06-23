@@ -218,17 +218,17 @@ detectJVM() {
 
 checkJvmVersion() {
     # Use in priority xpg4 awk or nawk on SunOS as standard awk is outdated 
+    AWK=awk
     if ${solaris}; then
         if [ -x /usr/xpg4/bin/awk ]; then
-            VERSION=$("${JAVA}" -version 2>&1 | /usr/xpg4/bin/awk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
+            AWK=/usr/xpg4/bin/awk
         elif [ -x /usr/bin/nawk ]; then
-            VERSION=$("${JAVA}" -version 2>&1 | /usr/bin/nawk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
-        else 
-            VERSION=$("${JAVA}" -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
+            AWK=/usr/bin/nawk
         fi
-    else    
-        VERSION=$("${JAVA}" -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
     fi
+    
+    VERSION=$("${JAVA}" -version 2>&1 | ${AWK} -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
+    
     # java must be at least version 8 
     if [ "${VERSION}" -lt "8" ]; then
         die "JVM must be greater than 1.8"

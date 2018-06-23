@@ -17,15 +17,25 @@
 #
 
 realpath() {
+  # Use in priority xpg4 awk or nawk on SunOS as standard awk is outdated
+  AWK=awk
+  if ${solaris}; then
+      if [ -x /usr/xpg4/bin/awk ]; then
+          AWK=/usr/xpg4/bin/awk
+      elif [ -x /usr/bin/nawk ]; then
+          AWK=/usr/bin/nawk
+      fi
+  fi
+
   READLINK_EXISTS=$(command -v readlink &> /dev/null)
-  if [ -z "${READLINK_EXISTS}" ]; then
+  if [ -z "$READLINK_EXISTS" ]; then
     OURPWD=${PWD}
     cd "$(dirname "${1}")" || exit 2
-    LINK=$(ls -l "$(basename "${1}")" | awk -F"-> " '{print $2}')
+    LINK=$(ls -l "$(basename "${1}")" | ${AWK} -F"-> " '{print $2}')
     while [ "${LINK}" ]; do
         echo "link: ${LINK}" >&2
         cd "$(dirname "${LINK}")" || exit 2
-        LINK=$(ls -l "$(basename "${1}")" | awk -F"-> " '{print $2}')
+        LINK=$(ls -l "$(basename "${1}")" | ${AWK} -F"-> " '{print $2}')
     done
     REALPATH="${PWD}/$(basename "${1}")"
     cd "${OURPWD}" || exit 2
@@ -35,7 +45,7 @@ realpath() {
     cd "$(dirname "${1}")" || exit 2
     LINK=$(readlink "$(basename "${1}")")
     while [ "${LINK}" ]; do
-	    echo "link: ${LINK}" >&2
+            echo "link: ${LINK}" >&2
         cd "$(dirname "${LINK}")" || exit 2
         LINK=$(readlink "$(basename "${1}")")
     done
