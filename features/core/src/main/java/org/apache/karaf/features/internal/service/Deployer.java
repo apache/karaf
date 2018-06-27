@@ -732,6 +732,7 @@ public class Deployer {
             Set<Bundle> toRefreshToStopEarly = new HashSet<>(toRefresh.keySet());
             toRefreshToStopEarly.remove(dstate.serviceBundle);
             toRefreshToStopEarly.remove(dstate.configadminBundle);
+            toRefreshToStopEarly.remove(dstate.bundles.get(0L));
             toStop.addAll(toRefreshToStopEarly);
             toStart.addAll(toRefreshToStopEarly);
         }
