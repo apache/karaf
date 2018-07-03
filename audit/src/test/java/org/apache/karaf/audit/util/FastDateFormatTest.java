@@ -35,7 +35,7 @@ public class FastDateFormatTest {
         assertEquals("Nov  5", cal.getDate(time, FastDateFormat.MMM_D2));
         assertEquals("2017-11-05", cal.getDate(time, FastDateFormat.YYYY_MM_DD));
 
-        time += TimeUnit.DAYS.toMillis(5);
+        time += TimeUnit.DAYS.toMillis(5) + TimeUnit.HOURS.toMillis(1);
         assertEquals("Nov 10", cal.getDate(time, FastDateFormat.MMM_D2));
         assertEquals("2017-11-10", cal.getDate(time, FastDateFormat.YYYY_MM_DD));
     }
