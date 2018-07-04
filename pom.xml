@@ -192,7 +192,7 @@
         <felix.connect.version>0.2.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.fileinstall.version>3.6.4</felix.fileinstall.version>
-        <felix.framework.version>5.6.10</felix.framework.version>
+        <felix.framework.version>6.0.0</felix.framework.version>
         <felix.framework.security.version>2.6.0</felix.framework.security.version>
         <felix.gogo.runtime.version>1.1.0-SNAPSHOT</felix.gogo.runtime.version>
         <felix.gogo.jline.version>1.1.0-SNAPSHOT</felix.gogo.jline.version>
@@ -210,7 +210,7 @@
         <felix.scr.version>2.1.0</felix.scr.version>
         <felix.scr.webconsole.plugin.version>2.0.8</felix.scr.webconsole.plugin.version>
         <felix.scr.annotation.version>1.12.0</felix.scr.annotation.version>
-        <felix.resolver.version>1.16.0</felix.resolver.version>
+        <felix.resolver.version>2.0.0</felix.resolver.version>
 
         <aries.application.version>1.0.0</aries.application.version>
         <aries.application.api.version>1.0.0</aries.application.api.version>
@@ -268,7 +268,7 @@
         <maven-plugin-annotations.version>3.5</maven-plugin-annotations.version>
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
-        <osgi.version>6.0.0</osgi.version>
+        <osgi.version>7.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
 
         <pax.cdi.version>1.0.0</pax.cdi.version>
@@ -369,7 +369,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
+                <artifactId>osgi.core</artifactId>
                 <version>${osgi.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -824,7 +824,7 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.felix</groupId>
-                        <artifactId>org.osgi.compendium</artifactId>
+                        <artifactId>osgi.cmpn</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -835,7 +835,7 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.felix</groupId>
-                        <artifactId>org.osgi.compendium</artifactId>
+                        <artifactId>osgi.cmpn</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -851,7 +851,7 @@
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.compendium</artifactId>
+                <artifactId>osgi.cmpn</artifactId>
                 <version>${osgi.compendium.version}</version>
             </dependency>
             <dependency>
@@ -884,7 +884,7 @@
                     </exclusion>
                     <exclusion>
                         <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.core</artifactId>
+                        <artifactId>osgi.core</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.easymock</groupId>
@@ -899,11 +899,11 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.felix</groupId>
-                        <artifactId>org.osgi.core</artifactId>
+                        <artifactId>osgi.core</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.apache.felix</groupId>
-                        <artifactId>org.osgi.compendium</artifactId>
+                        <artifactId>osgi.cmpn</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>net.sf.kxml</groupId>
@@ -918,11 +918,11 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.core</artifactId>
+                        <artifactId>osgi.core</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.compendium</artifactId>
+                        <artifactId>osgi.cmpn</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -953,11 +953,11 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.core</artifactId>
+                        <artifactId>osgi.core</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.compendium</artifactId>
+                        <artifactId>osgi.cmpn</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -973,11 +973,11 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.core</artifactId>
+                        <artifactId>osgi.core</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.compendium</artifactId>
+                        <artifactId>osgi.cmpn</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>concurrent</groupId>
@@ -994,6 +994,12 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.resolver</artifactId>
                 <version>${felix.resolver.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
