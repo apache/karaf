@@ -24,6 +24,7 @@ import static org.apache.karaf.features.management.FeaturesServiceMBean.FEATURE_
 import static org.apache.karaf.features.management.FeaturesServiceMBean.FEATURE_DEPENDENCIES;
 import static org.apache.karaf.features.management.FeaturesServiceMBean.FEATURE_INSTALLED;
 import static org.apache.karaf.features.management.FeaturesServiceMBean.FEATURE_NAME;
+import static org.apache.karaf.features.management.FeaturesServiceMBean.FEATURE_REQUIRED;
 import static org.apache.karaf.features.management.FeaturesServiceMBean.FEATURE_VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -68,13 +69,14 @@ public class JmxFeatureTest {
         configFile.setFinalname("test-configfile.cfg");
         feature.getConfigfile().add(configFile);
 
-        JmxFeature jmxFeature = new JmxFeature(feature, true);
+        JmxFeature jmxFeature = new JmxFeature(feature, true, true);
         CompositeData compositeData = jmxFeature.asCompositeData();
 
         assertEquals("test-feature", compositeData.get(FEATURE_NAME));
         assertEquals("1.0.0", compositeData.get(FEATURE_VERSION));
         assertTrue((Boolean) compositeData.get(FEATURE_INSTALLED));
         assertTrue((Boolean) compositeData.get(FEATURE_BLACKLISTED));
+        assertTrue((Boolean) compositeData.get(FEATURE_REQUIRED));
 
         TabularData featureDependencies = (TabularData) compositeData.get(FEATURE_DEPENDENCIES);
         assertEquals(1, featureDependencies.size());
