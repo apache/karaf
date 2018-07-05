@@ -179,7 +179,7 @@
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
 
-        <easymock.version>3.7-SNAPSHOT</easymock.version>
+        <easymock.version>3.6</easymock.version>
         <objenesis.version>2.6</objenesis.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
