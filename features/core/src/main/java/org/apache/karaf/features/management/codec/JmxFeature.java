@@ -72,7 +72,7 @@ public class JmxFeature {
 
     private final CompositeData data;
 
-    public JmxFeature(Feature feature, boolean installed) {
+    public JmxFeature(Feature feature, boolean installed, boolean required) {
         try {
             String[] itemNames = FeaturesServiceMBean.FEATURE;
             Object[] itemValues = new Object[itemNames.length];
@@ -84,6 +84,7 @@ public class JmxFeature {
             itemValues[5] = getConfigFileList(feature.getConfigurationFiles());
             itemValues[6] = installed;
             itemValues[7] = feature.isBlacklisted();
+            itemValues[8] = required;
             data = new CompositeDataSupport(FEATURE, itemNames, itemValues);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Cannot form feature open data", e);
@@ -316,6 +317,7 @@ public class JmxFeature {
             itemTypes[5] = FEATURE_CONFIG_FILES_TABLE;
             itemTypes[6] = SimpleType.BOOLEAN;
             itemTypes[7] = SimpleType.BOOLEAN;
+            itemTypes[8] = SimpleType.BOOLEAN;
 
             itemDescriptions[0] = "The name of the feature";
             itemDescriptions[1] = "The version of the feature";
@@ -325,6 +327,7 @@ public class JmxFeature {
             itemDescriptions[5] = "The feature configuration files";
             itemDescriptions[6] = "Whether the feature is installed";
             itemDescriptions[7] = "Whether the feature is blacklisted";
+            itemDescriptions[8] = "Whether the feature is required";
 
             return new CompositeType("Feature", description, itemNames,
                     itemDescriptions, itemTypes);
