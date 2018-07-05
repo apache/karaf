@@ -41,7 +41,7 @@ public class HeapDumpProvider implements DumpProvider {
             Object diagnosticMXBean = ManagementFactory.newPlatformMXBeanProxy(mBeanServer,
                 "com.sun.management:type=HotSpotDiagnostic", diagnosticMXBeanClass);
 
-            heapDumpFile = File.createTempFile("heapdump", ".txt");
+            heapDumpFile = File.createTempFile("heapdump", ".hprof");
             heapDumpFile.delete();
             
             Method method = diagnosticMXBeanClass.getMethod("dumpHeap", String.class, boolean.class);
@@ -49,7 +49,7 @@ public class HeapDumpProvider implements DumpProvider {
 
             // copy the dump in the destination
             in = new FileInputStream(heapDumpFile);
-            out = destination.add("heapdump.txt");
+            out = destination.add("heapdump.hprof");
             byte[] buffer = new byte[2048];
             int l;
             while (((l = in.read(buffer)) != -1)) {
