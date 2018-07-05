@@ -36,6 +36,8 @@ public interface FeaturesServiceMBean {
 
     String FEATURE_BLACKLISTED = "Blacklisted";
 
+    String FEATURE_REQUIRED = "Required";
+
     String FEATURE_CONFIG_PID = "Pid";
     String FEATURE_CONFIG_ELEMENTS = "Elements";
     String FEATURE_CONFIG_APPEND = "Append";
@@ -61,7 +63,8 @@ public interface FeaturesServiceMBean {
      * The item names in the CompositeData representing a feature
      */
     String[] FEATURE = {FEATURE_NAME, FEATURE_VERSION, FEATURE_DEPENDENCIES, FEATURE_BUNDLES,
-        FEATURE_CONFIGURATIONS, FEATURE_CONFIGURATIONFILES, FEATURE_INSTALLED, FEATURE_BLACKLISTED};
+        FEATURE_CONFIGURATIONS, FEATURE_CONFIGURATIONFILES, FEATURE_INSTALLED, FEATURE_BLACKLISTED,
+        FEATURE_REQUIRED};
 
     String[] FEATURE_IDENTIFIER = {FEATURE_NAME, FEATURE_VERSION};
 
