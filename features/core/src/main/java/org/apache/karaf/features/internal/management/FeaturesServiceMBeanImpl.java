@@ -93,7 +93,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
             ArrayList<JmxFeature> features = new ArrayList<>();
             for (Feature feature : allFeatures) {
                 try {
-                    features.add(new JmxFeature(feature, insFeatures.contains(feature)));
+                    features.add(new JmxFeature(feature, insFeatures.contains(feature), featuresService.isRequired(feature)));
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }
@@ -266,12 +266,9 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     private TabularData infoFeature(Feature[] f) throws Exception {
         ArrayList<JmxFeature> features = new ArrayList<>();
         for (Feature feature:f) {
-            JmxFeature jmxFeature;
-            if (featuresService.isInstalled(feature)) {
-                jmxFeature = new JmxFeature(feature, true);
-            } else {
-                jmxFeature = new JmxFeature(feature, false);
-            }
+            boolean installed = featuresService.isInstalled(feature);
+            boolean required = featuresService.isRequired(feature);
+            JmxFeature jmxFeature = new JmxFeature(feature, installed, required);
             features.add(jmxFeature);
         }
         return JmxFeature.tableFrom(features);
