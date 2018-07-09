@@ -21,9 +21,12 @@ package org.apache.karaf.main;
 import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.karaf.main.util.Utils;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
@@ -32,24 +35,36 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 public class MainLockingTest {
-    
-    @Test
-    public void testLostMasterLock() throws Exception {
+    private File home;
+
+    private File data;
+
+    @Before
+    public void setUp() throws IOException {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
-        File home = new File(basedir, "test-karaf-home");
-        File data = new File(home, "data");
+        home = new File(basedir, "test-karaf-home");
+        data = new File(home, "data");
 
         Utils.deleteDirectory(data);
 
-        String[] args = new String[0];
         System.setProperty("karaf.home", home.toString());
         System.setProperty("karaf.data", data.toString());
         System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
 
-        System.setProperty("karaf.lock","true");
-        System.setProperty("karaf.lock.delay","1000");
-        System.setProperty("karaf.lock.class","org.apache.karaf.main.MockLock");
+        System.setProperty("karaf.lock", "true");
+        System.setProperty("karaf.lock.delay", "1000");
+        System.setProperty("karaf.lock.class", "org.apache.karaf.main.MockLock");
+    }
 
+    @After
+    public void tearDown() {
+        home = null;
+        data = null;
+    }
+
+    @Test
+    public void testLostMasterLock() throws Exception {
+        String[] args = new String[0];
         Main main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
@@ -89,4 +104,72 @@ public class MainLockingTest {
         // exit framework + lock loop
         main.destroy();
     }    
+
+    @Test
+    public void testMasterWritesPid() throws Exception {
+        // use data because it's always deleted at the beginning of the test
+        File pidFile = new File(data, "test-karaf.pid");
+        System.setProperty("karaf.pid.file", pidFile.toString());
+
+        try {
+            Assert.assertFalse(pidFile.isFile());
+
+            String[] args = new String[0];
+            Main main = new Main(args);
+            main.launch();
+
+            Thread.sleep(1000);
+
+            Framework framework = main.getFramework();
+            FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
+            Assert.assertEquals(100, sl.getStartLevel());
+
+            MockLock lock = (MockLock) main.getLock();
+
+            Assert.assertTrue(lock.lock());
+            Assert.assertTrue(lock.isAlive());
+            Assert.assertTrue(pidFile.isFile());
+
+            main.destroy();
+        } finally {
+            System.clearProperty("karaf.pid.file");
+        }
+    }
+
+    @Test
+    public void testSlaveWritesPid() throws Exception {
+        // simulate that the lock is not acquired (i.e. instance runs as slave)
+        System.setProperty("test.karaf.mocklock.initiallyLocked", "false");
+        System.setProperty("karaf.lock.level", "59");
+
+        // use data because it's always deleted at the beginning of the test
+        File pidFile = new File(data, "test-karaf.pid");
+        System.setProperty("karaf.pid.file", pidFile.toString());
+
+        try {
+            Assert.assertFalse(pidFile.isFile());
+
+            String[] args = new String[0];
+            Main main = new Main(args);
+            main.launch();
+
+            Thread.sleep(1000);
+
+            Framework framework = main.getFramework();
+            FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
+            Assert.assertEquals(59, sl.getStartLevel());
+
+            MockLock lock = (MockLock) main.getLock();
+
+            Assert.assertFalse(lock.lock());
+            Assert.assertTrue(lock.isAlive());
+            Assert.assertTrue(pidFile.isFile());
+
+            main.destroy();
+        } finally {
+            System.clearProperty("test.karaf.mocklock.initiallyLocked");
+            System.clearProperty("karaf.lock.level");
+            System.clearProperty("karaf.pid.file");
+        }
+    }
 }

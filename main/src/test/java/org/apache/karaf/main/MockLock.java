@@ -31,6 +31,8 @@ public class MockLock implements Lock {
     private Object lockLock = new Object();
     
     public MockLock(Properties props) {
+        /* KARAF-5798: allow tests to simulate slave instances */
+        lock = Boolean.valueOf(System.getProperty("test.karaf.mocklock.initiallyLocked", "true"));
     }
     
     public boolean lock() throws Exception {

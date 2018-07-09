@@ -239,7 +239,8 @@ public class Main {
         }
         String log4jConfigPath = System.getProperty("karaf.etc") + "/org.ops4j.pax.logging.cfg";
         BootstrapLogManager.setProperties(config.props, log4jConfigPath);
-        InstanceHelper.updateInstancePid(config.karafHome, config.karafBase, true);
+        /* KARAF-5798: write the PID whether or not the lock has been acquired */
+        InstanceHelper.writePid(config.pidFile);
         BootstrapLogManager.configureLogger(LOG);
 
         for (String provider : config.securityProviders) {
@@ -746,6 +747,8 @@ public class Main {
         @Override
         public void lockAcquired() {
             LOG.info("Lock acquired. Setting startlevel to " + config.defaultStartLevel);
+            /* KARAF-5798: instance PID should reflect the current running master */
+            InstanceHelper.updateInstancePid(config.karafHome, config.karafBase, true);
             shutdownThread = InstanceHelper.setupShutdown(config, framework);
             setStartLevel(config.defaultStartLevel);
         }
