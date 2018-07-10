@@ -19,15 +19,19 @@
 package org.apache.karaf.shell.ssh.keygenerator;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateCrtKey;
+import java.util.List;
 
+import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class OpenSSHGeneratorKeyFileProviderTest {
-    
+
     @Test
     public void writeSshKey() throws Exception {
         File temp = File.createTempFile(this.getClass().getCanonicalName(), ".pem");
@@ -42,5 +46,32 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         Assert.assertNotNull(keys);
         Assert.assertTrue("Loaded key is not RSA Key", keys.getPrivate() instanceof RSAPrivateCrtKey);
     }
-    
+
+    @Test
+    public void convertSimpleKey() throws Exception {
+        File temp = File.createTempFile(this.getClass().getCanonicalName(), ".pem");
+        temp.deleteOnExit();
+
+        SimpleGeneratorHostKeyProvider simpleGenerator = new SimpleGeneratorHostKeyProvider(temp);
+        simpleGenerator.setKeySize(2048);
+        simpleGenerator.setAlgorithm("DSA");
+        List<KeyPair> keys = simpleGenerator.loadKeys();
+        KeyPair simpleKeyPair = keys.stream().findFirst().get();
+
+        Assert.assertEquals("DSA", simpleKeyPair.getPrivate().getAlgorithm());
+
+        OpenSSHKeyPairProvider provider = new OpenSSHKeyPairProvider(temp, "DSA", 2048);
+        KeyPair convertedKeyPair = provider.loadKeys().iterator().next();
+        Assert.assertEquals("DSA", convertedKeyPair.getPrivate().getAlgorithm());
+
+        Assert.assertArrayEquals(simpleKeyPair.getPrivate().getEncoded(),convertedKeyPair.getPrivate().getEncoded());
+        Assert.assertArrayEquals(simpleKeyPair.getPublic().getEncoded(),convertedKeyPair.getPublic().getEncoded());
+
+        //also test that the original file has been replaced
+        PKCS8Key pkcs8 = new PKCS8Key(Files.newInputStream(temp.toPath()), null );
+        KeyPair keyPair = new KeyPair(pkcs8.getPublicKey(), pkcs8.getPrivateKey());
+        Assert.assertArrayEquals(simpleKeyPair.getPrivate().getEncoded(),keyPair.getPrivate().getEncoded());
+
+    }
+
 }
