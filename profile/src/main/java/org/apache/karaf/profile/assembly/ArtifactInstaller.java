@@ -30,6 +30,7 @@ import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.karaf.features.internal.download.impl.DownloadManagerHelper.removeTrailingSlash;
 import static org.apache.karaf.features.internal.download.impl.DownloadManagerHelper.stripUrl;
 
 /**
@@ -109,13 +110,6 @@ public class ArtifactInstaller {
         });
     }
 
-    /**
-     * for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
-     */
-    private String removeTrailingSlash(String location) {
-        return location.endsWith("/") ? location.substring(0, location.length() - 1) : location;
-    }
-    
     public static Path pathFromProviderUrl(Path systemDirectory, String url) throws MalformedURLException {
         String pathString;
         if (url.startsWith("file:")) {

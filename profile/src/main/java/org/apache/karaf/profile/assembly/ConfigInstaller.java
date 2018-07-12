@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.profile.assembly;
 
+import static org.apache.karaf.features.internal.download.impl.DownloadManagerHelper.removeTrailingSlash;
+import static org.apache.karaf.features.internal.download.impl.DownloadManagerHelper.stripUrl;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
@@ -38,9 +42,11 @@ import org.slf4j.LoggerFactory;
 public class ConfigInstaller {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigInstaller.class);
     private Path etcDirectory;
+    private Path homeDirectory;
     private List<String> pidsToExtract;
-    
-    public ConfigInstaller(Path etcDirectory, List<String> pidsToExtract) {
+
+    public ConfigInstaller(Path homeDirectory, Path etcDirectory, List<String> pidsToExtract) {
+        this.homeDirectory = homeDirectory;
         this.etcDirectory = etcDirectory;
         this.pidsToExtract = pidsToExtract;
     }
@@ -93,7 +99,54 @@ public class ConfigInstaller {
                     }
                 }
             }
+            for (ConfigFile configFile : content.getConfigfile()) {
+                if (pidMatching(FilenameUtils.getBaseName(configFile.getFinalname()))) {
+                    installConfig(downloader, configFile);
+                }
+            }
         }
+    }
+
+    private void installConfig(Downloader downloader, ConfigFile pConfigFile) throws Exception {
+        String path = pConfigFile.getFinalname();
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
+        Path configFileTarget = homeDirectory.resolve(substFinalName(path));
+        LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFileTarget));
+
+        String location = removeTrailingSlash(stripUrl(pConfigFile.getLocation().trim()));
+        if (!location.startsWith("mvn:")) {
+            LOGGER.warn("Ignoring non maven artifact " + location);
+            return;
+        }
+
+        downloader.download(location, provider -> {
+            synchronized (provider) {
+                Files.createDirectories(configFileTarget.getParent());
+                Files.copy(provider.getFile().toPath(), configFileTarget, StandardCopyOption.REPLACE_EXISTING);
+            }
+        });
+    }
+
+    private String substFinalName(String finalname) {
+        final String markerVarBeg = "${";
+        final String markerVarEnd = "}";
+
+        boolean startsWithVariable = finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
+        if (startsWithVariable) {
+            String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd));
+            switch (marker) {
+                case "karaf.base":
+                    return this.homeDirectory + finalname.substring(finalname.indexOf(markerVarEnd) + markerVarEnd.length());
+                case "karaf.etc":
+                    return this.etcDirectory + finalname.substring(finalname.indexOf(markerVarEnd) + markerVarEnd.length());
+                default:
+                    break;
+            }
+        }
+        return finalname;
     }
 
     private boolean pidMatching(String name) {

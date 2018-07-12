@@ -77,4 +77,14 @@ public final class DownloadManagerHelper {
         }
         return url;
     }
+
+    /**
+     * Remove the tailing '/' of bad formed URL (like in Camel for mustache-compiler).
+     *
+     * @param url the given URL.
+     * @return the stripped URL.
+     */
+    public static String removeTrailingSlash(String url) {
+        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    }
 }
