@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.properties.InterpolationHelper;
@@ -910,10 +911,16 @@ public class Builder {
             // Install config files
             for (ConfigFile configFile : feature.getConfigfile()) {
                 installArtifact(downloader, configFile.getLocation().trim());
+                if (pidMatching(FilenameUtils.getBaseName(configFile.getFinalname()))) {
+                    installConfig(downloader, configFile);
+                }
             }
             for (Conditional cond : feature.getConditional()) {
                 for (ConfigFile configFile : cond.getConfigfile()) {
                     installArtifact(downloader, configFile.getLocation().trim());
+                    if (pidMatching(FilenameUtils.getBaseName(configFile.getFinalname()))) {
+                        installConfig(downloader, configFile);
+                    }
                 }
             }
             // Extract configs
@@ -1242,6 +1249,57 @@ public class Builder {
         } else {
             LOGGER.warn("Ignoring non maven artifact " + location);
         }
+    }
+
+    private void installConfig(Downloader downloader, ConfigFile pConfigFile) throws Exception {
+        String path = pConfigFile.getFinalname();
+
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
+        Path configFileTarget = homeDirectory.resolve(substFinalName(path));
+        LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFileTarget));
+
+        String location = DownloadManagerHelper.stripUrl(pConfigFile.getLocation().trim());
+        if (location.startsWith("mvn:")) {
+            if (location.endsWith("/")) {
+                // for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
+                location = location.substring(0, location.length() - 1);
+            }
+
+            downloader.download(location, new DownloadCallback() {
+                @Override
+                public void downloaded(final StreamProvider pProvider) throws Exception {
+                    synchronized (pProvider) {
+                        Files.createDirectories(configFileTarget.getParent());
+                        Files.copy(pProvider.getFile().toPath(), configFileTarget, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                }
+
+            });
+        } else {
+            LOGGER.warn("Ignoring non maven artifact {}", location);
+        }
+    }
+
+    private String substFinalName(String finalname) {
+        final String markerVarBeg = "${";
+        final String markerVarEnd = "}";
+
+        boolean startsWithVariable = finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
+        if (startsWithVariable) {
+            String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd));
+            switch (marker) {
+                case "karaf.base":
+                    return this.homeDirectory + finalname.substring(finalname.indexOf(markerVarEnd) + markerVarEnd.length());
+                case "karaf.etc":
+                    return this.etcDirectory + finalname.substring(finalname.indexOf(markerVarEnd) + markerVarEnd.length());
+                default:
+                    break;
+            }
+        }
+        return finalname;
     }
 
     private List<String> getStaged(Stage stage, Map<String, Stage> data) {
