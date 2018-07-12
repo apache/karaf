@@ -74,7 +74,6 @@ public class ArtifactInstaller {
         }
         final String finalLocation = location;
         downloader.download(location, provider -> {
-            String uri = provider.getUrl();
             Path path = pathFromProviderUrl(systemDirectory, finalLocation);
             synchronized (provider) {
                 Files.createDirectories(path.getParent());
@@ -98,7 +97,6 @@ public class ArtifactInstaller {
         }
         final String finalLocation = location;
         downloader.download(location, provider -> {
-            String uri = provider.getUrl();
             if (blacklist.isBundleBlacklisted(finalLocation)) {
                 throw new RuntimeException("Bundle " + finalLocation + " is blacklisted");
             }
