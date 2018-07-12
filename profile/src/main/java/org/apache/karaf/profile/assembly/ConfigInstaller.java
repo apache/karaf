@@ -42,11 +42,11 @@ import org.slf4j.LoggerFactory;
 public class ConfigInstaller {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigInstaller.class);
     private Path etcDirectory;
-    private Path homeDirectory;
+    private Path baseDirectory;
     private List<String> pidsToExtract;
 
-    public ConfigInstaller(Path homeDirectory, Path etcDirectory, List<String> pidsToExtract) {
-        this.homeDirectory = homeDirectory;
+    public ConfigInstaller(Path baseDirectory, Path etcDirectory, List<String> pidsToExtract) {
+        this.baseDirectory = baseDirectory;
         this.etcDirectory = etcDirectory;
         this.pidsToExtract = pidsToExtract;
     }
@@ -101,22 +101,22 @@ public class ConfigInstaller {
             }
             for (ConfigFile configFile : content.getConfigfile()) {
                 if (pidMatching(FilenameUtils.getBaseName(configFile.getFinalname()))) {
-                    installConfig(downloader, configFile);
+                    installConfigFile(downloader, configFile);
                 }
             }
         }
     }
 
-    private void installConfig(Downloader downloader, ConfigFile pConfigFile) throws Exception {
-        String path = pConfigFile.getFinalname();
+    private void installConfigFile(Downloader downloader, ConfigFile configFile) throws Exception {
+        String path = configFile.getFinalname();
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
 
-        Path configFileTarget = homeDirectory.resolve(substFinalName(path));
-        LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFileTarget));
+        Path configFileTarget = baseDirectory.resolve(substFinalName(path));
+        LOGGER.info("      adding config file: {}", baseDirectory.relativize(configFileTarget));
 
-        String location = removeTrailingSlash(stripUrl(pConfigFile.getLocation().trim()));
+        String location = removeTrailingSlash(stripUrl(configFile.getLocation().trim()));
         if (!location.startsWith("mvn:")) {
             LOGGER.warn("Ignoring non maven artifact " + location);
             return;
@@ -138,8 +138,9 @@ public class ConfigInstaller {
         if (startsWithVariable) {
             String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd));
             switch (marker) {
+                case "karaf.home":
                 case "karaf.base":
-                    return this.homeDirectory + finalname.substring(finalname.indexOf(markerVarEnd) + markerVarEnd.length());
+                    return this.baseDirectory + finalname.substring(finalname.indexOf(markerVarEnd) + markerVarEnd.length());
                 case "karaf.etc":
                     return this.etcDirectory + finalname.substring(finalname.indexOf(markerVarEnd) + markerVarEnd.length());
                 default:
