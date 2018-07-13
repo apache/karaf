@@ -912,14 +912,14 @@ public class Builder {
             for (ConfigFile configFile : feature.getConfigfile()) {
                 installArtifact(downloader, configFile.getLocation().trim());
                 if (pidMatching(FilenameUtils.getBaseName(configFile.getFinalname()))) {
-                    installConfig(downloader, configFile);
+                    installConfigFile(downloader, configFile);
                 }
             }
             for (Conditional cond : feature.getConditional()) {
                 for (ConfigFile configFile : cond.getConfigfile()) {
                     installArtifact(downloader, configFile.getLocation().trim());
                     if (pidMatching(FilenameUtils.getBaseName(configFile.getFinalname()))) {
-                        installConfig(downloader, configFile);
+                        installConfigFile(downloader, configFile);
                     }
                 }
             }
@@ -1251,8 +1251,8 @@ public class Builder {
         }
     }
 
-    private void installConfig(Downloader downloader, ConfigFile pConfigFile) throws Exception {
-        String path = pConfigFile.getFinalname();
+    private void installConfigFile(Downloader downloader, ConfigFile configFile) throws Exception {
+        String path = configFile.getFinalname();
 
         if (path.startsWith("/")) {
             path = path.substring(1);
@@ -1261,7 +1261,7 @@ public class Builder {
         Path configFileTarget = homeDirectory.resolve(substFinalName(path));
         LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFileTarget));
 
-        String location = DownloadManagerHelper.stripUrl(pConfigFile.getLocation().trim());
+        String location = DownloadManagerHelper.stripUrl(configFile.getLocation().trim());
         if (location.startsWith("mvn:")) {
             if (location.endsWith("/")) {
                 // for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
@@ -1291,6 +1291,7 @@ public class Builder {
         if (startsWithVariable) {
             String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd));
             switch (marker) {
+                case "karaf.home":
                 case "karaf.base":
                     return this.homeDirectory + finalname.substring(finalname.indexOf(markerVarEnd) + markerVarEnd.length());
                 case "karaf.etc":
