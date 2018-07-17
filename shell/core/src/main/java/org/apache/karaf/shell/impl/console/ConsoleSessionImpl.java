@@ -67,6 +67,7 @@ import org.apache.karaf.shell.support.completers.UriCompleter;
 import org.apache.karaf.util.filesstream.FilesStream;
 import org.jline.builtins.Completers;
 import org.jline.reader.*;
+import org.jline.terminal.Size;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.osgi.service.event.EventAdmin;
@@ -144,6 +145,10 @@ public class ConsoleSessionImpl implements Session {
             } catch (IOException e) {
                 throw new RuntimeException("Unable to create terminal", e);
             }
+        }
+
+        if (jlineTerminal.getSize().getColumns() == 0) {
+            jlineTerminal.setSize(new Size(80, 24));
         }
 
         brandingProps = Branding.loadBrandingProperties(terminal.getClass().getName().endsWith("SshTerminal"));
