@@ -290,7 +290,7 @@ public class KarafTestSupport {
      * @param principals The principals (e.g. RolePrincipal objects) to run the command under
      * @return
      */
-    protected String executeCommand(final String command, Principal ... principals) {
+    public String executeCommand(final String command, Principal ... principals) {
         return executeCommand(command, COMMAND_TIMEOUT, false, principals);
     }
 
@@ -304,7 +304,7 @@ public class KarafTestSupport {
      * @param principals The principals (e.g. RolePrincipal objects) to run the command under
      * @return
      */
-    protected String executeCommand(final String command, final Long timeout, final Boolean silent, final Principal ... principals) {
+    public String executeCommand(final String command, final Long timeout, final Boolean silent, final Principal ... principals) {
         waitForCommandService(command);
 
         String response;
@@ -356,17 +356,28 @@ public class KarafTestSupport {
         return response;
     }
 
+    public void assertServiceAvailable(Class type) {
+        Assert.assertNotNull(getOsgiService(type));
+    }
 
-    protected <T> T getOsgiService(Class<T> type, long timeout) {
+    public void assertServiceAvailable(Class type, long timeout) {
+        Assert.assertNotNull(getOsgiService(type, timeout));
+    }
+
+    public void assertServiceAvailable(Class type, String filter, long timeout) {
+        Assert.assertNotNull(getOsgiService(type, filter, timeout));
+    }
+
+    public <T> T getOsgiService(Class<T> type, long timeout) {
         return getOsgiService(type, null, timeout);
     }
 
-    protected <T> T getOsgiService(Class<T> type) {
+    public <T> T getOsgiService(Class<T> type) {
         return getOsgiService(type, null, SERVICE_TIMEOUT);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected <T> T getOsgiService(Class<T> type, String filter, long timeout) {
+    public <T> T getOsgiService(Class<T> type, String filter, long timeout) {
         ServiceTracker tracker = null;
         try {
             String flt;
@@ -438,7 +449,7 @@ public class KarafTestSupport {
         }
     }
 
-    protected void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
+    public void waitForService(String filter, long timeout) throws InvalidSyntaxException, InterruptedException {
         ServiceTracker<Object, Object> st = new ServiceTracker<>(bundleContext, bundleContext.createFilter(filter), null);
         try {
             st.open();
@@ -448,7 +459,7 @@ public class KarafTestSupport {
         }
     }
 
-    protected Bundle waitBundleState(String symbolicName, int state) {
+    public Bundle waitBundleState(String symbolicName, int state) {
         long endTime = System.currentTimeMillis() + BUNDLE_TIMEOUT;
         while (System.currentTimeMillis() < endTime) {
             Bundle bundle = findBundleByName(symbolicName);
@@ -586,15 +597,15 @@ public class KarafTestSupport {
         Assert.assertFalse("Should not contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
     }
 
-    protected void assertBundleInstalled(String name) {
+    public void assertBundleInstalled(String name) {
         Assert.assertNotNull("Bundle " + name + " should be installed", findBundleByName(name));
     }
 
-    protected void assertBundleNotInstalled(String name) {
+    public void assertBundleNotInstalled(String name) {
         Assert.assertNull("Bundle " + name + " should not be installed", findBundleByName(name));
     }
 
-    protected Bundle findBundleByName(String symbolicName) {
+    public Bundle findBundleByName(String symbolicName) {
         for (Bundle bundle : bundleContext.getBundles()) {
             if (bundle.getSymbolicName().equals(symbolicName)) {
                 return bundle;
@@ -603,16 +614,16 @@ public class KarafTestSupport {
         return null;
     }
 
-    protected void installAndAssertFeature(String feature) throws Exception {
+    public void installAndAssertFeature(String feature) throws Exception {
         featureService.installFeature(feature, NO_AUTO_REFRESH);
         assertFeatureInstalled(feature);
     }
 
-    protected void installAssertAndUninstallFeature(String feature, String version) throws Exception {
+    public void installAssertAndUninstallFeature(String feature, String version) throws Exception {
         installAssertAndUninstallFeatures(feature + "/" + version);
     }
 
-    protected void installAssertAndUninstallFeatures(String... feature) throws Exception {
+    public void installAssertAndUninstallFeatures(String... feature) throws Exception {
         boolean success = false;
         Set<String> features = new HashSet<>(Arrays.asList(feature));
         try {
@@ -641,7 +652,7 @@ public class KarafTestSupport {
      * @param featuresBefore
      * @throws Exception
      */
-    protected void uninstallNewFeatures(Set<Feature> featuresBefore) throws Exception {
+    public void uninstallNewFeatures(Set<Feature> featuresBefore) throws Exception {
         Feature[] features = featureService.listInstalledFeatures();
         Set<String> uninstall = new HashSet<>();
         for (Feature curFeature : features) {
@@ -657,7 +668,7 @@ public class KarafTestSupport {
         }
     }
 
-    protected void close(Closeable closeAble) {
+    public void close(Closeable closeAble) {
         if (closeAble != null) {
             try {
                 closeAble.close();
