@@ -17,6 +17,7 @@
 package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
 
 import java.io.IOException;
@@ -56,7 +57,7 @@ public class ConfigManagedServiceFactoryTest extends KarafTestSupport {
 	public void updateProperties() throws IOException, InvalidSyntaxException {
 		checkInitialValuesFromFelixConfigAdmin();
 		checkEditByFactoryPid();
-		CheckEditByArbitraryAttribute();
+		checkEditByArbitraryAttribute();
 	}
 	
 	@Test
@@ -71,6 +72,7 @@ public class ConfigManagedServiceFactoryTest extends KarafTestSupport {
 	private void checkInitialValuesFromFelixConfigAdmin() throws IOException,
 			InvalidSyntaxException {
 		Configuration config = readConfig();
+		assertNotNull("The configuration is null", config);
 		assertEquals("data1", config.getProperties().get("test1"));
 		assertEquals("data2", config.getProperties().get("test2"));
 	}
@@ -85,7 +87,7 @@ public class ConfigManagedServiceFactoryTest extends KarafTestSupport {
 		assertEquals("data2", config.getProperties().get("test2"));
 	}
 
-	private void CheckEditByArbitraryAttribute() throws IOException,
+	private void checkEditByArbitraryAttribute() throws IOException,
 			InvalidSyntaxException {
 		executeCommand("config:edit '(test2=data2)'\n"
 				+ "config:property-set test1 data1new2\n" + "config:update",
