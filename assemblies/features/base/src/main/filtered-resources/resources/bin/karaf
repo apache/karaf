@@ -284,6 +284,9 @@ run() {
         if [ "${ROOT_INSTANCE_RUNNING}" = "false" ] || [ "${CHECK_ROOT_INSTANCE_RUNNING}" = "false" ] ; then
             if [ "${VERSION}" -gt "8" ]; then
                 ${KARAF_EXEC} "${JAVA}" ${JAVA_OPTS} \
+                    --add-reads=java.xml=java.logging \
+                    --patch-module java.base=lib/endorsed/org.apache.karaf.specs.locator-@@project.version@@.jar \
+                    --patch-module java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-@@project.version@@.jar \
                     --add-opens java.base/java.security=ALL-UNNAMED \
                     --add-opens java.base/java.net=ALL-UNNAMED \
                     --add-opens java.base/java.lang=ALL-UNNAMED \
