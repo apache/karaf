@@ -609,15 +609,6 @@ public class Builder {
             Files.write(configFile, config.getValue());
         }
 
-        // 'improve' configuration files.
-        if (propertyEdits != null) {
-            KarafPropertiesEditor editor = new KarafPropertiesEditor();
-            editor.setInputEtc(etcDirectory.toFile())
-                    .setOutputEtc(etcDirectory.toFile())
-                    .setEdits(propertyEdits);
-            editor.run();
-        }
-
         //
         // Handle overrides
         //
@@ -669,6 +660,13 @@ public class Builder {
         // Installed stage
         //
         installStage(installedProfile, allBootFeatures);
+
+        // 'improve' configuration files.
+        if (propertyEdits != null) {
+          KarafPropertiesEditor editor = new KarafPropertiesEditor();
+          editor.setInputEtc(etcDirectory.toFile()).setOutputEtc(etcDirectory.toFile()).setEdits(propertyEdits);
+          editor.run();
+        }
     }
 
     private void reformatClauses(Properties config, String key) {
