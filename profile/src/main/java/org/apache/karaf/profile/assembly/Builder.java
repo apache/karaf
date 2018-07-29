@@ -1076,15 +1076,6 @@ public class Builder {
             }
         }
 
-        // 'improve' configuration files.
-        if (propertyEdits != null) {
-            KarafPropertiesEditor editor = new KarafPropertiesEditor();
-            editor.setInputEtc(etcDirectory.toFile())
-                    .setOutputEtc(etcDirectory.toFile())
-                    .setEdits(propertyEdits);
-            editor.run();
-        }
-
         if (processor.hasInstructions()) {
             Path featuresProcessingXml = etcDirectory.resolve("org.apache.karaf.features.xml");
             if (hasOwnInstructions() || overrides.size() > 0) {
@@ -1114,6 +1105,15 @@ public class Builder {
         // Installed stage
         //
         installStage(installedProfile, allBootFeatures, processor);
+
+        // 'improve' configuration files.
+        if (propertyEdits != null) {
+            KarafPropertiesEditor editor = new KarafPropertiesEditor();
+            editor.setInputEtc(etcDirectory.toFile())
+            .setOutputEtc(etcDirectory.toFile())
+            .setEdits(propertyEdits);
+            editor.run();
+        }
     }
 
     /**
@@ -1518,7 +1518,7 @@ public class Builder {
         for (Features repo : installedRepositories.values()) {
             allInstalledFeatures.addAll(repo.getFeature());
         }
-        
+
         // Add boot features for search
         allInstalledFeatures.addAll(allBootFeatures);
         FeatureSelector selector = new FeatureSelector(allInstalledFeatures);
