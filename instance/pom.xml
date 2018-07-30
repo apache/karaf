@@ -111,6 +111,25 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>regex-property</id>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>karaf.osgi.version</name>
+                            <value>${project.version}</value>
+                            <regex>\.*</regex>
+                            <replacement></replacement>
+                            <failIfNoMatch>false</failIfNoMatch>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
@@ -122,6 +141,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/generated-resources/org/apache/karaf/instance</outputDirectory>
+                            <addDefaultExcludes>false</addDefaultExcludes>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/../assemblies/features/base/src/main/resources</directory>
@@ -133,6 +153,7 @@
                                     <directory>${project.basedir}/../assemblies/features/base/src/main/filtered-resources</directory>
                                     <filtering>true</filtering>
                                     <excludes>
+                                        <exclude>**/etc/config.properties</exclude>
                                         <exclude>**/bin/karaf</exclude>
                                         <exclude>**/bin/karaf.bat</exclude>
                                         <exclude>**/bin/start</exclude>
@@ -140,6 +161,13 @@
                                         <exclude>**/bin/stop</exclude>
                                         <exclude>**/bin/stop.bat</exclude>
                                     </excludes>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/src/main/resources/org/apache/karaf/instance</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                    <filtering>true</filtering>
                                 </resource>
                             </resources>
                         </configuration>
