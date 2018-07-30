@@ -178,7 +178,7 @@
         <bundle dependency="true">mvn:org.apache.xbean/xbean-asm5-shaded/4.3</bundle>
         <bundle>mvn:org.apache.openjpa/openjpa/2.4.2</bundle>
         <capability>
-            osgi.service;effective:=active;objectClass=javax.persistence.spi.PersistenceProvider
+            osgi.service;objectClass=javax.persistence.spi.PersistenceProvider;effective:=active;javax.persistence.provider=org.apache.openjpa.persistence.PersistenceProviderImpl
         </capability>
     </feature>
 
@@ -187,7 +187,7 @@
         <feature version="${hibernate.version}">hibernate-orm</feature>
         <bundle dependency="true">mvn:net.bytebuddy/byte-buddy/1.6.6</bundle>
         <capability>
-            osgi.service;effective:=active;objectClass=javax.persistence.spi.PersistenceProvider
+            osgi.service;objectClass=javax.persistence.spi.PersistenceProvider;effective:=active;javax.persistence.provider=org.hibernate.jpa.HibernatePersistenceProvider
         </capability>
     </feature>
 
@@ -203,7 +203,7 @@
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa.jpql/${eclipselink.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.eclipselink.adapter/${aries.jpa.version}</bundle>
         <capability>
-            osgi.service;effective:=active;objectClass=javax.persistence.spi.PersistenceProvider
+            osgi.service;objectClass=javax.persistence.spi.PersistenceProvider;effective:=active;javax.persistence.provider=org.eclipse.persistence.jpa.PersistenceProvider
         </capability>
     </feature>
 
