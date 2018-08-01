@@ -37,31 +37,31 @@
     <feature name="transaction-manager-geronimo" description="Geronimo Transaction Manager" version="${aries.transaction.manager.version}">
         <details>JTA implementation provided by Apache Aries Transaction</details>
         <config name="org.apache.aries.transaction">
-            ################################################################################
-            #
-            #    Licensed to the Apache Software Foundation (ASF) under one or more
-            #    contributor license agreements.  See the NOTICE file distributed with
-            #    this work for additional information regarding copyright ownership.
-            #    The ASF licenses this file to You under the Apache License, Version 2.0
-            #    (the "License"); you may not use this file except in compliance with
-            #    the License.  You may obtain a copy of the License at
-            #
-            #       http://www.apache.org/licenses/LICENSE-2.0
-            #
-            #    Unless required by applicable law or agreed to in writing, software
-            #    distributed under the License is distributed on an "AS IS" BASIS,
-            #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-            #    See the License for the specific language governing permissions and
-            #    limitations under the License.
-            #
-            ################################################################################
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
 
-            aries.transaction.recoverable = true
-            aries.transaction.timeout = 600
-            aries.transaction.howl.logFileDir = ${karaf.data}/txlog
-            aries.transaction.howl.maxLogFiles = 2
-            aries.transaction.howl.maxBlocksPerFile = 512
-            aries.transaction.howl.bufferSize = 4
+aries.transaction.recoverable = true
+aries.transaction.timeout = 600
+aries.transaction.howl.logFileDir = ${karaf.data}/txlog
+aries.transaction.howl.maxLogFiles = 2
+aries.transaction.howl.maxBlocksPerFile = 512
+aries.transaction.howl.bufferSize = 4
         </config>
         <feature version="[1.1,2)">transaction-api</feature>
         <bundle dependency="true">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
@@ -74,28 +74,28 @@
     <feature name="transaction-manager-narayana" description="Narayana Transaction Manager" version="${narayana.version}">
         <details>JTA implementation provided by Narayana</details>
         <config name="org.jboss.narayana">
-            ################################################################################
-            #
-            #    Licensed to the Apache Software Foundation (ASF) under one or more
-            #    contributor license agreements.  See the NOTICE file distributed with
-            #    this work for additional information regarding copyright ownership.
-            #    The ASF licenses this file to You under the Apache License, Version 2.0
-            #    (the "License"); you may not use this file except in compliance with
-            #    the License.  You may obtain a copy of the License at
-            #
-            #       http://www.apache.org/licenses/LICENSE-2.0
-            #
-            #    Unless required by applicable law or agreed to in writing, software
-            #    distributed under the License is distributed on an "AS IS" BASIS,
-            #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-            #    See the License for the specific language governing permissions and
-            #    limitations under the License.
-            #
-            ################################################################################
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
 
-            ObjectStoreEnvironmentBean.objectStoreDir=${karaf.data}/narayana
-            ObjectStoreEnvironmentBean.communicationStore.objectStoreDir=${karaf.data}/narayana
-            HornetqJournalEnvironmentBean.storeDir=${karaf.data}/narayana/hornetq
+ObjectStoreEnvironmentBean.objectStoreDir=${karaf.data}/narayana
+ObjectStoreEnvironmentBean.communicationStore.objectStoreDir=${karaf.data}/narayana
+HornetqJournalEnvironmentBean.storeDir=${karaf.data}/narayana/hornetq
         </config>
         <bundle>mvn:org.jboss.narayana.osgi/narayana-osgi-jta/${narayana.version}</bundle>
         <capability>
