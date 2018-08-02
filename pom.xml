@@ -303,7 +303,7 @@
         <directory-version>2.0.0-M24</directory-version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
         <xbean.version>4.9</xbean.version>
-        <xerces.version>2.12.0_1</xerces.version>
+        <xerces.bundle.version>2.12.0_1</xerces.bundle.version>
         <xalan.bundle.version>2.7.2_3</xalan.bundle.version>
         <xalan-serializer.bundle.version>2.7.2_1</xalan-serializer.bundle.version>
         <javax.mail.version>1.4.7</javax.mail.version>
@@ -1100,9 +1100,9 @@
                 <version>${maven.wagon.version}</version>
             </dependency>
             <dependency>
-                <groupId>xerces</groupId>
-                <artifactId>xercesImpl</artifactId>
-                <version>${xerces.version}</version>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.xercesImpl</artifactId>
+                <version>${xerces.bundle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
