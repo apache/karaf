@@ -68,10 +68,16 @@ public class LocalConsoleManager {
         this.session = JaasHelper.doAs(subject, new PrivilegedAction<Session>() {
             public Session run() {
                 String encoding = getEncoding();
+	            PrintStream pout = new PrintStream(terminal.output()) {
+	                @Override
+	                public void close() {
+	                    // do nothing
+	                }
+	            };
                 session = sessionFactory.create(
                                       terminal.input(),
-                                      new PrintStream(terminal.output()),
-                                      new PrintStream(terminal.output()),
+                                      pout,
+                                      pout,
                                       new JLineTerminal(terminal),
                                       encoding, 
                                       LocalConsoleManager.this::close);

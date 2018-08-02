@@ -135,9 +135,7 @@ public class ConsoleSessionImpl implements Session {
         }
 
         // Create session
-        session = processor.createSession(jlineTerminal.input(),
-                jlineTerminal.output(),
-                jlineTerminal.output());
+        session = processor.createSession(in, out, err);
 
         // Completers
         Completers.CompletionEnvironment env = new Completers.CompletionEnvironment() {
