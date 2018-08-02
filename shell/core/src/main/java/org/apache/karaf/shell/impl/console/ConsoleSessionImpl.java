@@ -154,9 +154,7 @@ public class ConsoleSessionImpl implements Session {
         brandingProps = Branding.loadBrandingProperties(terminal.getClass().getName().endsWith("SshTerminal"));
 
         // Create session
-        session = processor.createSession(jlineTerminal.input(),
-                jlineTerminal.output(),
-                jlineTerminal.output());
+        session = processor.createSession(in, out, err);
 
         // Completers
         Completer builtinCompleter = createBuiltinCompleter();
