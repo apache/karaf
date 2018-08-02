@@ -1006,8 +1006,8 @@
                 <version>${maven.version}</version>
             </dependency>
             <dependency>
-                <groupId>xerces</groupId>
-                <artifactId>xercesImpl</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.xercesImpl</artifactId>
                 <version>${xerces.version}</version>
             </dependency>
             <dependency>
