@@ -15,6 +15,54 @@
  * limitations under the License.
  */
 
+		    Apache Karaf 4.1.6
+		    ==================
+ Apache Karaf 4.1.6 is a maintenance release on the 4.1.x series, bringing bug fixes, updates and some improvements.
+
+ ChangeLog:
+ ----------
+** Bug
+    * [KARAF-4996] - Missing packages in created instances 
+    * [KARAF-5422] - Feature Repository with Spaces in Path
+    * [KARAF-5642] - karaf:deploy goal broken
+    * [KARAF-5645] - Karaf crashes when using the character ']' in the console
+    * [KARAF-5646] - Support env:XXX subtitution missing for system.properties
+    * [KARAF-5647] - start, stop, shell, status and client fail on Solaris Sparc 11
+    * [KARAF-5657] - client.bat doesn't work on Windows
+    * [KARAF-5671] - Demo profiles still use "old style" pax-logging configuration
+    * [KARAF-5683] - Completion is "weird" on Windows 8
+    * [KARAF-5689] - Console is broken after Ctrl+C
+    * [KARAF-5694] - strip url to ensure it's a valid one which could download
+    * [KARAF-5699] - Upgrade to jolokia 1.5.0
+    * [KARAF-5781] - Properties edit doesn't conserve the existing ones
+    * [KARAF-5798] - Karaf slave instance does not write pid or port file until it becomes master
+    * [KARAF-5851] - Remove heading spaces in the cfg files
+
+** New Feature
+    * [KARAF-5665] - Sometimes the command description does not show when listing commands with "TAB"
+
+** Improvement
+    * [KARAF-5363] - Add --no-start option to kar:install, kar cfg and kar MBean
+    * [KARAF-5677] - deploy goal throws NPE with artifactLocations is not provided
+    * [KARAF-5742] - Possibility to configure colors for karaf shell
+    * [KARAF-5759] - Add an option to config:list to list only the PIDs
+    * [KARAF-5787] - Improve scheduler whiteboard to avoid ClassCastException
+    * [KARAF-5796] - Heap dump needs to end in .hprof w/ newer JDK
+
+** Dependency upgrade
+    * [KARAF-5602] - Upgrade to Spring Security 4.2.4.RELEASE
+    * [KARAF-5616] - Upgrade to SCR 2.0.14
+    * [KARAF-5618] - Upgrade to Aries JMX Blueprint 1.2.0
+    * [KARAF-5619] - Upgrade to Aries JMX Core 1.1.8 & JMX Whiteboard 1.2.0
+    * [KARAF-5623] - Upgrade to maven-bundle-plugin 3.5.0
+    * [KARAF-5624] - Upgrade to jline 3.6.1
+    * [KARAF-5668] - Upgrade to JLine 3.6.2
+    * [KARAF-5710] - Upgrade to Felix Resolver 1.16.0
+    * [KARAF-5717] - Upgrade to easymock 3.6
+    * [KARAF-5718] - Upgrade to Equinox 3.12.100
+    * [KARAF-5719] - Upgrade to Jansi 1.17.1
+    * [KARAF-5829] - Upgrade to Xerces 2.12.0
+
 		    Apache Karaf 4.1.5
 		    ==================
  Apache Karaf 4.1.5 is a maintenance release on the 4.1.x series, bringing bug fixes, updates and some improvements.
