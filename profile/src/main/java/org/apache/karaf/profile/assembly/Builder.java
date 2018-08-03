@@ -1655,7 +1655,7 @@ public class Builder {
                 }
             }
 
-            new ConfigInstaller(etcDirectory, pidsToExtract)
+            new ConfigInstaller(homeDirectory, etcDirectory, pidsToExtract)
                 .installConfigs(feature, downloader, installer);
             // Install libraries
             List<String> libraries = new ArrayList<>();
