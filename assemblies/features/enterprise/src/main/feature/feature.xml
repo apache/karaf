@@ -229,7 +229,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
     </feature>
 
     <feature name="jms" description="JMS service and commands" version="${project.version}">
-        <details>JMS support provinding service, commands, and MBean.</details>
+        <details>JMS support providing service, commands, and MBean.</details>
         <feature>pax-jms-pool</feature>
         <feature>pax-jms-config</feature>
         <feature>pax-jms-pool-transx</feature>
@@ -271,6 +271,14 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
             <condition>shell</condition>
             <bundle start-level="30">mvn:org.apache.karaf.subsystem/org.apache.karaf.subsystem.core/${project.version}</bundle>
         </conditional>
+    </feature>
+
+    <feature name="docker" description="Docker service and commands" version="${project.version}">
+        <details>Docker support providing service, commands, and MBean.</details>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.6</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.6</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.6</bundle>
+        <bundle>mvn:org.apache.karaf.docker/org.apache.karaf.docker.core/${project.version}</bundle>
     </feature>
 
 </features>

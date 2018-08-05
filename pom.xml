@@ -60,6 +60,7 @@
         <module>scr</module>
         <module>diagnostic</module>
         <module>obr</module>
+        <module>docker</module>
         <module>jndi</module>
         <module>jdbc</module>
         <module>jms</module>

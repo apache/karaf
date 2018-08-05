@@ -1,0 +1,381 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== Docker
+
+Apache Karaf provides Docker resources allowing you to easily create your own image and container.
+
+Official Karaf docker image are also available on Docker Hub.
+
+But, Apache Karaf also provides a docker feature allows you to:
+
+- manipulate Docker containers directly from Apache Karaf
+- create a Docker container based on the current running Apache Karaf instance (named provisioning)
+
+==== Docker images
+
+You can find the docker resource at http://github.com/apache/karaf/assemblies/docker.
+
+As prerequisites, you have:
+
+* to install the most recent stable version of docker (https://docs.docker.com/installation/)
+* to install the most recent stable version of docker-compose (https://docs.docker.com/compose/install/)
+
+===== Official images
+
+Apache Karaf official docker images are available on Docker HUB: https://hub.docker.com/_/karaf/
+
+You can directly pull the official image:
+
+----
+docker pull karaf
+----
+
+===== Build your own
+
+You can create your own docker image. The images are based on the official Java Alpine (OpenJDK 8) image. If you
+want to build the Karaf image run:
+
+----
+sh build.sh
+----
+
+or
+
+----
+docker build -t karaf .
+----
+
+If you want to build the container for a specific version of Karaf you can configure it with the KARAF_VERSION arg:
+
+----
+docker build --build-arg KARAF_VERSION=4.2.0 -t "karaf:4.2.0" karaf
+----
+
+===== Run
+
+* Run Karaf in interactive mode
+
+----
+docker-compose run karaf
+----
+
+* Run Karaf as a daemon (without interaction)
+
+----
+docker-compose up
+----
+
+* Kill Karaf
+
+----
+docker-compose kill
+----
+
+====== Ports
+
+* The Karaf SSH server is on 8101
+* The Karaf WebContainer is on 8888
+* The Karaf JMX MBean server is on 1099 (default, not exposed to host) and 44444 (default, not exposed to host)
+
+Edit the `docker-compose.yml` file to edit port settings.
+
+==== Docker feature
+
+Docker is an optional feature from the Karaf Enterprise features repository.
+
+It means that you have to install the `docker` feature first:
+
+----
+karaf@root()> feature:install docker
+----
+
+The Karaf Docker feature uses the Docker HTTP layer to communicate with the Docker backend. It could be on the same local
+machine where Apache Karaf instance is running or a remote Docker machine.
+
+The location of the Docker backend (URL) can be specified as an option to the `docker:*` commands. By default, Karaf Docker
+feature uses `http://localhost:2375`. Please, take a look on the Docker documentation how to enable remote API using HTTP
+for Docker daemon. As short notice, you just have to enable `tcp` transport connector enabled for the docker daemon.
+You have to do it using the `-H` option on `dockerd`:
+
+----
+/usr/bin/dockerd -H fd:// -H tcp://localhost:2375
+----
+
+Apache Karaf Docker feature exposes `DockerService` OSGi service that you can use programmatically (the `dockerClient:*` commands
+and the `DockerMBean` use the `DockerService` service).
+
+==== System-wide information
+
+The `docker:info` command provides some details about the docker backend:
+
+----
+karaf@root()> docker:info
+Containers: 0
+Debug: false
+Driver: overlay2
+ExecutionDriver: null
+IPv4Forwarding: true
+Images: 1
+IndexServerAddress: https://index.docker.io/v1/
+InitPath: null
+InitSha1: null
+KernelVersion: 4.15.0-29-generic
+MemoryLimit: true
+NEventsListener: false
+NFd: 20
+NGoroutines: 34
+SwapLimit: false
+----
+
+==== Show the Docker version information
+
+The `docker:version` command provides details about the docker version:
+
+----
+karaf@root()> docker:version
+Version: 17.12.1-ce
+Os: linux
+Kernel version: 4.15.0-29-generic
+Go version: go1.10.1
+Git commit: 7390fc6
+Arch: amd64
+API version: 1.35
+Build time: 2018-02-28T17:46:05.000000000+00:00
+Experimental: null
+----
+
+==== Search image
+
+The `docker:search` command (or `search()` operation on the `DockerMBean`) searches for a image on Docker HUB:
+
+----
+karaf@root()> docker:search java
+Name                                       │ Description                                                                                          │ Automated │ Official │ Star Count
+───────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────┼──────────┼───────────
+java                                       │ Java is a concurrent, class-based, and object-oriented programming language.                         │ false     │ true     │ 1774
+anapsix/alpine-java                        │ Oracle Java 8 (and 7) with GLIBC 2.23 over AlpineLinux                                               │ true      │ false    │ 332
+node                                       │ Node.js is a JavaScript-based platform for server-side and networking applications.                  │ false     │ true     │ 5893
+tomcat                                     │ Apache Tomcat is an open source implementation of the Java Servlet and JavaServer Pages technologies │ false     │ true     │ 1950
+openjdk                                    │ OpenJDK is an open-source implementation of the Java Platform, Standard Edition                      │ false     │ true     │ 1097
+frekele/java                               │ docker run --rm --name java frekele/java                                                             │ true      │ false    │ 10
+ghost                                      │ Ghost is a free and open source blogging platform written in JavaScript                              │ false     │ true     │ 799
+appuio/s2i-maven-java                      │ S2I Builder with Maven and Java                                                                      │ true      │ false    │ 1
+zabbix/zabbix-java-gateway                 │ Zabbix Java Gateway                                                                                  │ true      │ false    │ 13
+jetty                                      │ Jetty provides a Web server and javax.servlet container.                                             │ false     │ true     │ 260
+fabric8/s2i-java                           │ S2I Builder Image for plain Java applications                                                        │ false     │ false    │ 5
+appuio/s2i-gradle-java                     │ S2I Builder with Gradle and Java                                                                     │ true      │ false    │ 1
+cloudbees/jnlp-slave-with-java-build-tools │ Extends cloudbees/java-build-tools docker image to make it a JNLP slave                              │ true      │ false    │ 18
+blacklabelops/java                         │ Java Base Images.                                                                                    │ true      │ false    │ 8
+groovy                                     │ Apache Groovy is a multi-faceted language for the Java platform.                                     │ false     │ true     │ 47
+lwieske/java-8                             │ Oracle Java 8 Container - Full + Slim - Based off Alpine + CentOS (8u00 - 8u172)                     │ true      │ false    │ 39
+davidcaste/alpine-java-unlimited-jce       │ Oracle Java 8 (and 7) with GLIBC 2.21 over AlpineLinux with unlimited JCE patch applied              │ true      │ false    │ 11
+cfje/java-test-applications                │ Java Test Applications CI Image                                                                      │ false     │ false    │ 0
+thingswise/java-docker                     │ Java + dcd                                                                                           │ true      │ false    │ 0
+rightctrl/java                             │ Oracle Java                                                                                          │ true      │ false    │ 2
+cfje/java-resource                         │ Java Concourse Resource                                                                              │ false     │ false    │ 0
+cfje/java-buildpack                        │ Java Buildpack CI Image                                                                              │ false     │ false    │ 0
+tomee                                      │ Apache TomEE is an all-Apache Java EE certified stack where Apache Tomcat is top dog.                │ false     │ true     │ 53
+couchdb                                    │ CouchDB is a database that uses JSON for documents, an HTTP API, & JavaScript/declarative indexing.  │ false     │ true     │ 218
+dwolla/java                                │ Dwolla’s custom Java image                                                                           │ true      │ false    │ 1
+----
+
+==== Pull image
+
+The `docker:pull` command (or `pull()` operation on the `DockerMBean`) pull a image from Docker HUB:
+
+----
+karaf@root()> docker:pull -v java:8-jre-alpine
+{"status":"Pulling from library/java","id":"latest"}
+{"status":"Pulling fs layer","progressDetail":{},"id":"5040bd298390"}
+{"status":"Pulling fs layer","progressDetail":{},"id":"fce5728aad85"}
+{"status":"Pulling fs layer","progressDetail":{},"id":"76610ec20bf5"}
+{"status":"Pulling fs layer","progressDetail":{},"id":"60170fec2151"}
+{"status":"Pulling fs layer","progressDetail":{},"id":"e98f73de8f0d"}
+{"status":"Pulling fs layer","progressDetail":{},"id":"11f7af24ed9c"}
+{"status":"Pulling fs layer","progressDetail":{},"id":"49e2d6393f32"}
+{"status":"Pulling fs layer","progressDetail":{},"id":"bb9cdec9c7f3"}
+{"status":"Waiting","progressDetail":{},"id":"11f7af24ed9c"}
+{"status":"Waiting","progressDetail":{},"id":"49e2d6393f32"}
+{"status":"Waiting","progressDetail":{},"id":"bb9cdec9c7f3"}
+{"status":"Waiting","progressDetail":{},"id":"60170fec2151"}
+{"status":"Waiting","progressDetail":{},"id":"e98f73de8f0d"}
+----
+
+==== Listing images
+
+The `docker:images` command (or `images()` operation on the `DockerMBean`) lists the available images on docker:
+
+----
+karaf@root()> docker:images
+Id                                                                      │ RepoTags            │ Created    │ Labels │ Size      │ Virtual Size
+────────────────────────────────────────────────────────────────────────┼─────────────────────┼────────────┼────────┼───────────┼─────────────
+sha256:fdc893b19a147681ee764b2edab6c494d60fe99d83b14b8794bbcbc040ec7aa7 │ [java:8-jre-alpine] │ 1488578492 │ {}     │ 107854045 │ 107854045
+sha256:d23bdf5b1b1b1afce5f1d0fd33e7ed8afbc084b594b9ccf742a5b27080d8a4a8 │ [java:latest]       │ 1484614374 │ {}     │ 643195347 │ 643195347
+----
+
+==== Remove image
+
+The `docker:rmi` command (or `rmi()` operation on the `DockerMBean`) removes an image from docker:
+
+----
+karaf@root()> docker:rmi --force sha256:d23bdf5b1b1b1afce5f1d0fd33e7ed8afbc084b594b9ccf742a5b27080d8a4a8
+----
+
+==== Image history
+
+The `docker:history` command displays the complete history for a given image:
+
+----
+karaf@root()> docker:history sha256:fdc893b19a147681ee764b2edab6c494d60fe99d83b14b8794bbcbc040ec7aa7
+ID                                                                      │ Created    │ Created By                                                                                                                                                                                                                 │ Tags │ Size
+────────────────────────────────────────────────────────────────────────┼────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────┼────────────────────
+sha256:fdc893b19a147681ee764b2edab6c494d60fe99d83b14b8794bbcbc040ec7aa7 │ 1488578492 │ /bin/sh -c set -x        && apk add --no-cache           openjdk8-jre="$JAVA_ALPINE_VERSION"     && [ "$JAVA_HOME" = "$(docker-java-home)" ]                                                                                                │      │ [java:8-jre-alpine]
+<missing>                                                               │ 1488578488 │ /bin/sh -c #(nop)  ENV JAVA_ALPINE_VERSION=8.111.14-r0                                                                                                                                                                     │      │
+<missing>                                                               │ 1488578488 │ /bin/sh -c #(nop)  ENV JAVA_VERSION=8u111                                                                                                                                                                                  │      │
+<missing>                                                               │ 1488578487 │ /bin/sh -c #(nop)  ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin                                                           │      │
+<missing>                                                               │ 1488578487 │ /bin/sh -c #(nop)  ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk/jre                                                                                                                                                         │      │
+<missing>                                                               │ 1488578458 │ /bin/sh -c {             echo '#!/bin/sh';               echo 'set -e';          echo;           echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"';    } > /usr/local/bin/docker-java-home       && chmod +x /usr/local/bin/docker-java-home │      │
+<missing>                                                               │ 1488578457 │ /bin/sh -c #(nop)  ENV LANG=C.UTF-8                                                                                                                                                                                        │      │
+<missing>                                                               │ 1488573141 │ /bin/sh -c #(nop) ADD file:3df55c321c1c8d73f22bc69240c0764290d6cb293da46ba8f94ed25473fb5853 in /                                                                                                                           │      │
+----
+
+==== Pushing and tagging image
+
+The `docker:push` command allows you to push an image on a given repository.
+
+The `docker:tag` command create a new tag for a given image.
+
+==== Create container
+
+The Karaf Docker feature can create a Docker container based on a given image.
+
+You can use either the `docker:create` shell command or the `create()` operation on the JMX `DockerMBean`.
+
+For instance, here's an example of the `docker:bootstrap` to create a Docker container based on `elasticsearch` instance:
+
+----
+karaf@root()> docker:create --image fdc893b19a147681ee764b2edab6c494d60fe99d83b14b8794bbcbc040ec7aa7 --cmd /bin/bash test
+----
+
+==== Listing containers
+
+You can list the containers:
+
+----
+karaf@root()> docker:ps -a
+Id                                                               │ Names   │ Command   │ Created    │ Image                                                            │ Image ID                                                                │ Status  │ State   │ Ports │ Size │ Size Root
+─────────────────────────────────────────────────────────────────┼─────────┼───────────┼────────────┼──────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┼─────────┼─────────┼───────┼──────┼──────────
+92f8b280a7fa69c9ff673ed9678b7040a56c16c9c4aa403498a538cf0f501e9e │ [/test] │ /bin/bash │ 1532809485 │ fdc893b19a147681ee764b2edab6c494d60fe99d83b14b8794bbcbc040ec7aa7 │ sha256:fdc893b19a147681ee764b2edab6c494d60fe99d83b14b8794bbcbc040ec7aa7 │ Created │ created │       │ 0    │ 0
+----
+
+You can also use the containers attribute on the `DockerMBean` JMX MBean or the `containers()` method on the `DockerService` service.
+
+==== Provision Docker container
+
+Provisioning is a specific way of creating container based on the current running Karaf instance: it creates a Docker container using the current running Apache Karaf instance `karaf.base`.
+
+You can then reuse this container to create a Docker image and to duplicate the container on another Docker backend via dockerhub.
+
+----
+karaf@root()> docker:provision my-karaf
+----
+
+You can also use the `provision()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== Start container
+
+You can start a container using the `docker:start` command:
+
+----
+karaf@root()> docker:start my-container
+----
+
+You can also use the `start()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== Stop container
+
+You can stop a container using the `docker:stop` command:
+
+----
+karaf@root()> docker:stop my-container
+----
+
+You can also use the `stop()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== Restart container
+
+You can restart a container using the `docker:restart` command:
+
+----
+karaf@root()> docker:restart my-container
+----
+
+==== Delete container
+
+You can delete an existing Docker container using the `docker:rm` commmand:
+
+----
+karaf@root()> docker:rm my-container
+----
+
+You can also use the `rm()` method on the `DockerMBean` JMX MBean or the `DockerService` service.
+
+==== Pause container
+
+The `docker:pause` command pauses all processes within one or more containers:
+
+----
+karaf@root()> docker:pause my-container
+----
+
+==== Unpause container
+
+The `docker:unpause` command unpauses all processes within one or more containers:
+
+----
+karaf@root()> docker:unpause my-container
+----
+
+==== Kill container
+
+The `docker:kill` command kills a running container:
+
+----
+karaf@root()> docker:kill my-container
+----
+
+==== Rename container
+
+The `docker:rename` command renames an existing container:
+
+----
+karaf@root()> docker:rename my-container new-container
+----
+
+==== Logs
+
+The `docker:logs` command displays the log on an existing container:
+
+----
+karaf@root()> docker:logs --timestamps --details --stdout --stderr my-container
+----
+
+==== Top
+
+The `docker:top` command displays the current running processes in an existing container:
+
+----
+karaf@root()> docker:top my-container
+----

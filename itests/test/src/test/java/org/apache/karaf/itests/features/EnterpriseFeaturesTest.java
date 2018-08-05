@@ -147,4 +147,9 @@ public class EnterpriseFeaturesTest extends KarafTestSupport {
         installAssertAndUninstallFeatures("subsystems");
     }
 
+    @Test
+    public void installDocker() throws Exception {
+        installAssertAndUninstallFeatures("docker");
+    }
+
 }
