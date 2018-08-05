@@ -190,7 +190,7 @@
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
 
         <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
-        <felix.configadmin.version>1.9.2</felix.configadmin.version>
+        <felix.configadmin.version>1.9.4</felix.configadmin.version>
         <felix.connect.version>0.2.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.fileinstall.version>3.6.4</felix.fileinstall.version>
