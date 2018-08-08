@@ -46,12 +46,12 @@ public abstract class DatatypeFactory {
     }
 
     public static DatatypeFactory newInstance() throws DatatypeConfigurationException {
-        return FactoryFinder.find(DatatypeFactory.class, DATATYPEFACTORY_IMPLEMENTATION_CLASS);
+        return $FactoryFinder.find(DatatypeFactory.class, DATATYPEFACTORY_IMPLEMENTATION_CLASS);
     }
 
 
     public static DatatypeFactory newInstance(String factoryClassName, ClassLoader classLoader) throws DatatypeConfigurationException {
-        return FactoryFinder.newInstance(DatatypeFactory.class, factoryClassName, classLoader, false);
+        return $FactoryFinder.newInstance(DatatypeFactory.class, factoryClassName, classLoader, false);
     }
 
     public abstract Duration newDuration(final String lexicalRepresentation);
