@@ -58,7 +58,7 @@
                     <name>operation</name>
                     <type>String</type>
                     <description>
-                        'extend' to extend the existing value, 'put' to replace.
+                        'extend' to extend the existing value, 'put' to replace, 'remove' to remove a property.
                     </description>
                     <required>true</required>
                 </field>
@@ -85,7 +85,7 @@
                         <multiplicity>1</multiplicity>
                     </association>
                     <description>
-                        The operation to perform: 'put' or 'extend'.
+                        The operation to perform: 'put' or 'extend' or 'remove'
                     </description>
                     <required>true</required>
                 </field>

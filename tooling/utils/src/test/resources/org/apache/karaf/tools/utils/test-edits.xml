@@ -48,5 +48,16 @@
             <key>karaf.name</key>
             <value>prepended</value>
         </edit>
+        <edit>
+            <file>config.properties</file>
+            <operation>put</operation>
+            <key>test-add-three</key>
+            <value>This is a new add to be removed</value>
+        </edit>
+        <edit>
+            <file>config.properties</file>
+            <operation>remove</operation>
+            <key>test-add-three</key>
+        </edit>
     </edits>
 </property-edits>

@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test the property editing system.
@@ -74,5 +75,6 @@ public class KarafPropertiesEditorTest {
 
         assertEquals("This is the cereal: shot from guns", properties.getProperty("test-add-one"));
         assertEquals("This is the gun that shoots cereal", properties.getProperty("test-add-two"));
+        assertNull(properties.getProperty("test-add-three"));
     }
 }
