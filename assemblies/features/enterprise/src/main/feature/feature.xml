@@ -28,6 +28,7 @@
     <repository>mvn:org.ops4j.pax.transx/pax-transx-features/${pax.transx.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
     <repository>mvn:org.apache.aries.jpa/jpa-features/${aries.jpa.version}/xml/features</repository>
+    <repository>mvn:org.apache.openjpa/openjpa-features/${openjpa.version}/xml/features</repository>
 
     <feature name="transaction-api" version="1.2.0">
         <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2</bundle>
@@ -160,23 +161,9 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.1</bundle>
     </feature>
 
-    <feature name="openjpa" description="Apache OpenJPA 2.4.x persistence engine support" version="2.4.2">
-        <details>Enable Apache OpenJPA as persistence engine.</details>
-        <feature>jndi</feature>
-        <feature version="[1.2,1.3)">transaction-api</feature>
-	    <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/1.1.1</bundle>
-        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/1.2</bundle>
-        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-el_1.0_spec/1.0.1</bundle>
-        <bundle dependency="true">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
-        <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
-        <bundle dependency="true">mvn:commons-pool/commons-pool/${commons-pool.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-dbcp/${commons-dbcp.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/1.7.0_6</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.bundle.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.xbean/xbean-asm5-shaded/4.3</bundle>
-        <bundle>mvn:org.apache.openjpa/openjpa/2.4.2</bundle>
+    <feature name="openjpa3" description="OpenJPA engine support" version="${openjpa.version}">
+        <bundle dependency="true">mvn:org.apache.xbean/xbean-asm6-shaded/4.9</bundle>
+        <feature version="${openjpa.version}">openjpa</feature>
         <capability>
             osgi.service;objectClass=javax.persistence.spi.PersistenceProvider;effective:=active;javax.persistence.provider=org.apache.openjpa.persistence.PersistenceProviderImpl
         </capability>
