@@ -148,7 +148,7 @@
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
         <asm.version>6.2</asm.version>
         <javax.annotation.version>1.2</javax.annotation.version>
-        <awaitility.version>3.1.1</awaitility.version>
+        <awaitility.version>3.1.2</awaitility.version>
         <cglib.bundle.version>3.2.4_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
         
