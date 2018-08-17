@@ -1,0 +1,83 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package org.apache.karaf.examples.mbean.scr;
+
+import org.apache.karaf.examples.mbean.api.Booking;
+import org.apache.karaf.examples.mbean.api.BookingService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import javax.management.openmbean.*;
+
+@Component(
+        property = "jmx.objectname=org.apache.karaf.examples:type=booking,name=default"
+)
+public class BookingMBeanImpl extends StandardMBean implements BookingMBean {
+
+    @Reference
+    private BookingService bookingService;
+
+    public BookingMBeanImpl() throws NotCompliantMBeanException {
+        super(BookingMBean.class);
+    }
+
+    @Override
+    public TabularData getBookings() throws MBeanException {
+        try {
+            CompositeType bookingType = new CompositeType("booking", "Booking",
+                    new String[]{"id", "flight", "customer"},
+                    new String[]{"ID", "Flight", "Customer"},
+                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING});
+            TabularType tabularType = new TabularType("bookings", "Bookings", bookingType, new String[]{"id"});
+            TabularData tabularData = new TabularDataSupport(tabularType);
+            for (Booking booking : bookingService.list()) {
+                CompositeData compositeData = new CompositeDataSupport(bookingType,
+                        new String[]{ "id", "flight", "customer" },
+                        new Object[]{ booking.getId(), booking.getFlight(), booking.getCustomer() });
+                tabularData.put(compositeData);
+            }
+            return tabularData;
+        } catch (Exception e) {
+            throw new MBeanException(e);
+        }
+    }
+
+    @Override
+    public void add(long id, String flight, String customer) throws MBeanException {
+        Booking booking = new Booking();
+        booking.setId(id);
+        booking.setFlight(flight);
+        booking.setCustomer(customer);
+        bookingService.add(booking);
+    }
+
+    @Override
+    public void remove(long id) throws MBeanException {
+        bookingService.remove(id);
+    }
+
+    public BookingService getBookingService() {
+        return bookingService;
+    }
+
+    public void setBookingService(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
+}

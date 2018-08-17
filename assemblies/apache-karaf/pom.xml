@@ -70,12 +70,6 @@
             <type>xml</type>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>demos</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -89,42 +83,15 @@
                     <include>RELEASE*</include>
                     <include>LICENSE</include>
                     <include>NOTICE</include>
+                    <include>examples/**/*</include>
                 </includes>
-            </resource>
-            <resource>
-                <directory>${project.build.directory}/demos</directory>
-                <filtering>false</filtering>
                 <excludes>
-                    <exclude>**/*.i??</exclude>
-                    <exclude>**/.target</exclude>
-                    <exclude>**/.classpath</exclude>
+                    <exclude>examples/**/target/**/*</exclude>
+                    <exclude>**/*.iml</exclude>
                 </excludes>
             </resource>
         </resources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <artifactItems>
-                        <artifactItem>
-                            <groupId>org.apache.karaf</groupId>
-                            <artifactId>demos</artifactId>
-                            <version>${project.version}</version>
-                        </artifactItem>
-                    </artifactItems>
-                    <outputDirectory>${project.build.directory}/demos/demos</outputDirectory>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>

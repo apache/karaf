@@ -12,52 +12,13 @@
 // limitations under the License.
 //
 
-=== Basic bundle creation using the Felix maven-bundle-plugin
+=== Creating Bundles
 
-Create a bundle instead of a normal jar by using a Maven POM file like this:
+The examples provides different kind of bundles and services definition:
 
-----
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>my.groupId</groupId>
-    <artifactId>my.bundle</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <name>My Bundle</name>
-    <description>My bundle short description</description>
-
-    <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.4.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        ...
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-</project>
-----
+* https://github.com/apache/karaf/examples/karaf-bundle-example/README.md
+* https://github.com/apache/karaf/examples/karaf-blueprint-example/README.md
+* https://github.com/apache/karaf/examples/karaf-scr-example/README.md
 
 ==== Add extended information to bundles
 

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<features name="karaf-jms-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+
+    <repository>mvn:org.apache.karaf.features/spring-legacy/${project.version}/xml/features</repository>
+    <repository>mvn:org.apache.activemq/activemq-karaf/[5.14,6)/xml/features</repository>
+
+    <feature name="karaf-jms-example-activemq" version="${project.version}">
+        <feature version="[4,5)">spring</feature>
+        <feature>aries-blueprint</feature>
+        <feature>shell-compat</feature>
+        <feature>activemq-broker</feature>
+    </feature>
+
+    <feature name="karaf-jms-example-connectionfactory" version="${project.version}">
+        <feature>activemq-client</feature>
+        <feature>jms</feature>
+        <feature>pax-jms-activemq</feature>
+        <config name="org.ops4j.connectionfactory-test">
+            name=test
+            osgi.jndi.service.name=jms/test
+            password=karaf
+            pool=transx
+            type=activemq
+            url=tcp://localhost:61616
+            user=karaf
+        </config>
+    </feature>
+
+    <feature name="karaf-jms-example-command" version="${project.version}">
+        <feature>karaf-jms-example-activemq</feature>
+        <feature>karaf-jms-example-connectionfactory</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jms-example-command/${project.version}</bundle>
+    </feature>
+
+</features>

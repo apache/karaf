@@ -20,6 +20,8 @@ The Karaf Maven plugin allows you:
 * to create Karaf commands help: it generates help from Karaf commands
 * to modify Karaf instances and create distributions
 
+See [examples/karaf-maven-example] for details.
+
 ==== Packaging
 
 The most generally useful features of the karaf-maven-plugin are exposed as packagings.  To use the packagings the pom or an ancestor must configure the karaf-maven-plugin with extensions:

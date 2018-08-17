@@ -390,7 +390,7 @@ lftp karaf@localhost:~> ls
 -rw-r--r--   1 jbonofre jbonofre   101041 Dec  3 05:34 RELEASE-NOTES.md
 drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 12:51 bin
 drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 18:57 data
-drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 12:51 demos
+drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 12:51 examples
 drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 13:02 deploy
 drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 17:59 etc
 drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 13:02 instances

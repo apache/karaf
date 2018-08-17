@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<features name="karaf-jpa-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+
+    <feature name="karaf-jpa-example-datasource" version="${project.version}">
+        <config name="org.ops4j.datasource-booking">
+            osgi.jdbc.driver.class=org.h2.Driver
+            databaseName=booking;create=true
+            dataSourceName=booking
+        </config>
+        <capability>
+            osgi.service;objectClass=javax.sql.DataSource;effective:=active;osgi.jndi.service.name=booking
+        </capability>
+    </feature>
+
+    <feature name="karaf-jpa-example-common" version="${project.version}">
+        <feature>transaction</feature>
+        <feature>jndi</feature>
+        <feature>pax-jdbc-config</feature>
+        <feature>pax-jdbc-h2</feature>
+        <feature>pax-jdbc-pool-dbcp2</feature>
+        <feature>jdbc</feature>
+        <feature dependency="true">aries-blueprint</feature>
+        <feature version="[2,3)">jpa</feature>
+        <feature version="[2,3)">eclipselink</feature>
+        <feature version="[5,6)">hibernate</feature>
+        <!--<feature version="[3,4)">openjpa3</feature>-->
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-api/${project.version}</bundle>
+    </feature>
+
+    <!-- Blueprint Providers -->
+    <feature name="karaf-jpa-example-provider-blueprint-hibernate" version="${project.version}">
+        <feature version="${project.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-hibernate/${project.version}</bundle>
+    </feature>
+    <feature name="karaf-jpa-example-provider-blueprint-eclipselink" version="${project.version}">
+        <feature version="${project.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-eclipselink/${project.version}</bundle>
+    </feature>
+    <!-- Waiting for javax.persistence 2.2 compatibility
+    <feature name="karaf-jpa-example-provider-blueprint-openjpa" version="${project.version}">
+        <feature version="${project.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-openjpa/${project.version}</bundle>
+    </feature>-->
+
+    <!-- Declarative Service Providers -->
+    <feature name="karaf-jpa-example-provider-ds-hibernate" version="${project.version}">
+        <feature>scr</feature>
+        <feature version="${project.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-hibernate/${project.version}</bundle>
+    </feature>
+    <feature name="karaf-jpa-example-provider-ds-eclipselink" version="${project.version}">
+        <feature>scr</feature>
+        <feature version="${project.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-eclipselink/${project.version}</bundle>
+    </feature>
+    <!-- Waiting for javax.persistence 2.2 compatibility
+    <feature name="karaf-jpa-example-provider-ds-openjpa" version="${project.version}">
+        <feature>scr</feature>
+        <feature version="${project.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-openjpa/${project.version}</bundle>
+    </feature>-->
+
+    <feature name="karaf-jpa-example-command" version="${project.version}">
+        <feature version="${project.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-command/${project.version}</bundle>
+    </feature>
+
+</features>

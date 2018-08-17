@@ -25,9 +25,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class StandardFeaturesTest extends KarafTestSupport {
-    
-   
-    
+
     @Test
     public void checkInstalledFeaturesBoot() throws Exception {
         System.out.println("===>checkInstalledFeaturesBoot");

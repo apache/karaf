@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ServerSocket;
+import java.net.URI;
 import java.net.URL;
 import java.security.Principal;
 import java.security.PrivilegedExceptionAction;
@@ -356,6 +357,10 @@ public class KarafTestSupport {
         return response;
     }
 
+    public void assertServiceAvailable(String type) {
+        Assert.assertNotNull(getOsgiService(type));
+    }
+
     public void assertServiceAvailable(Class type) {
         Assert.assertNotNull(getOsgiService(type));
     }
@@ -374,6 +379,52 @@ public class KarafTestSupport {
 
     public <T> T getOsgiService(Class<T> type) {
         return getOsgiService(type, null, SERVICE_TIMEOUT);
+    }
+
+    public Object getOsgiService(String type) {
+        return getOsgiService(type, null, SERVICE_TIMEOUT);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public Object getOsgiService(String type, String filter, long timeout) {
+        ServiceTracker tracker = null;
+        try {
+            String flt;
+            if (filter != null) {
+                if (filter.startsWith("(")) {
+                    flt = "(&(" + Constants.OBJECTCLASS + "=" + type + ")" + filter + ")";
+                } else {
+                    flt = "(&(" + Constants.OBJECTCLASS + "=" + type + ")(" + filter + "))";
+                }
+            } else {
+                flt = "(" + Constants.OBJECTCLASS + "=" + type + ")";
+            }
+            Filter osgiFilter = FrameworkUtil.createFilter(flt);
+            tracker = new ServiceTracker(bundleContext, osgiFilter, null);
+            tracker.open(true);
+            // Note that the tracker is not closed to keep the reference
+            // This is buggy, as the service reference may change i think
+            Object svc = tracker.waitForService(timeout);
+            if (svc == null) {
+                Dictionary dic = bundleContext.getBundle().getHeaders();
+                System.err.println("Test bundle headers: " + explode(dic));
+
+                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, null))) {
+                    System.err.println("ServiceReference: " + ref);
+                }
+
+                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, flt))) {
+                    System.err.println("Filtered ServiceReference: " + ref);
+                }
+
+                throw new RuntimeException("Gave up waiting for service " + flt);
+            }
+            return svc;
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalArgumentException("Invalid filter", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -530,6 +581,14 @@ public class KarafTestSupport {
         return "8101";
     }
 
+    public String getHttpPort() throws Exception {
+        org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.web", null);
+        if (configuration != null) {
+            return configuration.getProperties().get("org.osgi.service.http.port").toString();
+        }
+        return "8181";
+    }
+
     public void assertFeatureInstalled(String featureName) throws Exception {
         String name;
         String version;
@@ -605,6 +664,13 @@ public class KarafTestSupport {
         Assert.assertNull("Bundle " + name + " should not be installed", findBundleByName(name));
     }
 
+    public void installBundle(String bundleLocation, boolean start) throws Exception {
+        Bundle bundle = bundleContext.installBundle(bundleLocation);
+        if (start) {
+            bundle.start();
+        }
+    }
+
     public Bundle findBundleByName(String symbolicName) {
         for (Bundle bundle : bundleContext.getBundles()) {
             if (bundle.getSymbolicName().equals(symbolicName)) {
@@ -612,6 +678,10 @@ public class KarafTestSupport {
             }
         }
         return null;
+    }
+
+    public void addFeaturesRepository(String featuresRepository) throws Exception {
+        featureService.addRepository(new URI(featuresRepository));
     }
 
     public void installAndAssertFeature(String feature) throws Exception {
