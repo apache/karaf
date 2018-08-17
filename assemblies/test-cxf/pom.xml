@@ -77,7 +77,8 @@
                 <directory>${project.basedir}/../..</directory>
                 <filtering>false</filtering>
                 <includes>
-                    <include>README</include>
+                    <include>README.md</include>
+                    <include>BUILDING.md</include>
                     <include>RELEASE*</include>
                     <include>LICENSE</include>
                     <include>NOTICE</include>

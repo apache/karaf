@@ -386,8 +386,8 @@ Password:
 lftp karaf@localhost:~> ls
 -rw-r--r--   1 jbonofre jbonofre    27754 Oct 26 10:50 LICENSE
 -rw-r--r--   1 jbonofre jbonofre     1919 Dec  3 05:34 NOTICE
--rw-r--r--   1 jbonofre jbonofre     3933 Aug 18  2012 README
--rw-r--r--   1 jbonofre jbonofre   101041 Dec  3 05:34 RELEASE-NOTES
+-rw-r--r--   1 jbonofre jbonofre     3933 Aug 18  2012 README.md
+-rw-r--r--   1 jbonofre jbonofre   101041 Dec  3 05:34 RELEASE-NOTES.md
 drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 12:51 bin
 drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 18:57 data
 drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 12:51 demos

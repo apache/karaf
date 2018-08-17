@@ -557,8 +557,8 @@ assembly descriptor, configured in POM above to be `src/main/descriptors/bin.xml
                 <exclude>etc/org.ops4j.pax.logging.cfg</exclude>
                 <exclude>LICENSE</exclude>
                 <exclude>NOTICE</exclude>
-                <exclude>README</exclude>
-                <exclude>RELEASE-NOTES</exclude>
+                <exclude>README.md</exclude>
+                <exclude>RELEASE-NOTES.md</exclude>
                 <exclude>karaf-manual*.html</exclude>
                 <exclude>karaf-manual*.pdf</exclude>
             </excludes>
