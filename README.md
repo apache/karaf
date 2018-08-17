@@ -51,9 +51,9 @@ It's a lightweight, powered, and enterprise ready container powered by OSGi.
 
 ## Getting Started
 
-For an Apache Karaf source distribution, please read [BUILDING.md](https://github.com/apache/karaf/BUILDING.md] for instructions on building Apache Karaf.
+For an Apache Karaf source distribution, please read [BUILDING.md](https://github.com/apache/karaf/BUILDING.md) for instructions on building Apache Karaf.
 
-For an Apache Karaf binary distribution, please read [RELEASE-NOTES.md](https://github.com/apache/karaf/RELEASE-NOTES.md] for installation instructions and list of supported
+For an Apache Karaf binary distribution, please read [RELEASE-NOTES.md](https://github.com/apache/karaf/RELEASE-NOTES.md) for installation instructions and list of supported
 and unsupported features.
 
 The PDF manual is the right place to find any information about Karaf.
