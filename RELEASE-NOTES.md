@@ -17,6 +17,147 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.1
+
+Apache Karaf 4.2.1 is a major update on the 4.2.x series. It brings bunch of fixes, dependencies updates
+and new features, especially:
+
+* new assembly tooling to create Karaf Docker images
+* new Docker feature allowing you to manipulate Docker directly from a Karaf instance
+* Better Java 9/10/11 support
+* new examples directly as part of the Karaf distribution
+* improved KarafTestSupport allowing you to easily implement your itests
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-4996] - Missing packages in created instances 
+    * [KARAF-5422] - Feature Repository with Spaces in Path
+    * [KARAF-5683] - Completion is "weird" on Windows 8
+    * [KARAF-5689] - Console is broken after Ctrl+C
+    * [KARAF-5690] - Add missing jaxb endorsed / osgi classes
+    * [KARAF-5692] - Alias not honoured in config:edit --factory --alias
+    * [KARAF-5694] - strip url to ensure it's a valid one which could download
+    * [KARAF-5695] - Starting Karaf Container 4.2.0 in Ubuntu 17.10 with OpenJDK 9 fails
+    * [KARAF-5696] - Java detection is broken on windows
+    * [KARAF-5697] - feature:start and feature:stop should be able to select multiple features
+    * [KARAF-5699] - Upgrade to jolokia 1.5.0
+    * [KARAF-5701] - feature installation: Crash and ResolutionException
+    * [KARAF-5705] - Java 10 issues with jetty
+    * [KARAF-5729] - Karaf won't start on Solaris 11 and AIX 7.2
+    * [KARAF-5748] - Command results are not printed anymore unless they are strings
+    * [KARAF-5749] - Possible shell crash when executing malformed script
+    * [KARAF-5750] - Karaf console not calling Converter for custom gogo commands
+    * [KARAF-5753] - Karaf won't start correctly on HP-UX
+    * [KARAF-5760] - VerifyMojo should allow blacklisting feature repositories
+    * [KARAF-5765] - karaf-service script not working on HP-UX
+    * [KARAF-5768] - karaf-service script not working on AIX platforms
+    * [KARAF-5781] - Properties edit doesn't conserve the existing ones
+    * [KARAF-5791] - need to check the blacklist when we add feature repo through JMX
+    * [KARAF-5798] - Karaf slave instance does not write pid or port file until it becomes master
+    * [KARAF-5809] - 'simple' host.key files no longer work
+    * [KARAF-5840] - Karaf specs activator is missing when used with wrapper
+    * [KARAF-5842] - Console unusable in docker
+    * [KARAF-5850] - JPA features should provide the engine capability
+    * [KARAF-5851] - Remove heading spaces in the cfg files
+    * [KARAF-5862] - org.apache.karaf.specs.java.xml doesn't work with IBM JDK
+
+#### New Feature
+    * [KARAF-5761] - Print better usage of commands in karaf shell
+    * [KARAF-5867] - Provide openjpa 3.0.0 support
+    * [KARAF-5870] - Upgrade to Hibernate Validator 6.0.12.Final
+    * [KARAF-5871] - Upgrade to ASM 6.2.1
+    * [KARAF-5872] - Upgrade to Spring 5.0.8.RELEASE
+
+#### Improvement
+    * [KARAF-3235] - Provide karaf itest common bundle
+    * [KARAF-5363] - Add --no-start option to kar:install, kar cfg and kar MBean
+    * [KARAF-5644] - Add docker feature
+    * [KARAF-5685] - Add ProfileMBean
+    * [KARAF-5700] - handle \* scope specifically for ACL match
+    * [KARAF-5706] - Upgrade to Felix Utils 1.11.0
+    * [KARAF-5742] - Possibility to configure colors for karaf shell
+    * [KARAF-5752] - Add bundle ID in bundle:classes output
+    * [KARAF-5759] - Add an option to config:list to list only the PIDs
+    * [KARAF-5778] - NPE in the ssh client if TERM is null
+    * [KARAF-5787] - Improve scheduler whiteboard to avoid ClassCastException
+    * [KARAF-5796] - Heap dump needs to end in .hprof w/ newer JDK
+    * [KARAF-5804] - FastDateFormatTest fails on EDT (jdk 1.8.0_151) 
+    * [KARAF-5805] - Add feature required item field to JmxFeature CompositeData
+    * [KARAF-5839] - Add assertServiceAvailable() in KarafTestSupport
+    * [KARAF-5847] - org.apache.felix.coordinator could be installed with configadmin, to prevent its refreshes
+    * [KARAF-5868] - be able to remove properties during distribution assembly
+
+#### Test
+    * [KARAF-5845] - JMXSecurityTest.testJMXSecurityAsManager is flaky
+    * [KARAF-5846] - ConfigManagedServiceFactoryTest.updateProperties is flacky
+
+#### Task
+    * [KARAF-2511] - Review and update documentation
+    * [KARAF-5764] - ensure we can build and run Karaf master with JDK11
+
+#### Dependency upgrade
+    * [KARAF-5698] - Upgrade to Felix Gogo Runtime / JLine 1.0.12
+    * [KARAF-5710] - Upgrade to Felix Resolver 1.16.0
+    * [KARAF-5713] - Upgrade to Maven API 3.5.3
+    * [KARAF-5714] - Upgrade to ServiceMix Spec Locator 2.10
+    * [KARAF-5715] - Upgrade to XBean 4.8
+    * [KARAF-5716] - Upgrade to awaitability 3.1.0
+    * [KARAF-5717] - Upgrade to easymock 3.6
+    * [KARAF-5718] - Upgrade to Equinox 3.12.100
+    * [KARAF-5719] - Upgrade to Jansi 1.17.1
+    * [KARAF-5720] - Upgrade to JLine 3.7.1
+    * [KARAF-5721] - Upgrade to Pax JMS 1.0.1
+    * [KARAF-5722] - Upgrade to ASM 6.2 & Aries Proxy Impl 1.1.2
+    * [KARAF-5723] - Upgrade to Pax JDBC 1.3.0
+    * [KARAF-5726] - Upgrade to Aries Proxy version Java 10 compliant
+    * [KARAF-5728] - Upgrade to Pax Web 7.1.1 & Jetty 9.4.10.v20180503
+    * [KARAF-5732] - Upgrade to Felix ConfigAdmin 1.9.0
+    * [KARAF-5733] - Upgrade to Felix EventAdmin 1.5.0
+    * [KARAF-5734] - Upgrade to Felix Metatype 1.2.0
+    * [KARAF-5735] - Upgrade to Felix SCR 2.1.0
+    * [KARAF-5736] - Upgrade to Narayana 5.8.1.Final
+    * [KARAF-5737] - Upgrade to Aries JPA 2.7.0
+    * [KARAF-5738] - Upgrade to maven-resources-plugin 3.1.0
+    * [KARAF-5745] - Upgrade to Spring 5.0.5.RELEASE
+    * [KARAF-5758] - Update to Hibernate Validator 6.0.10.Final
+    * [KARAF-5766] - Upgrade to Felix Connect 0.2.0
+    * [KARAF-5771] - Upgrade to Pax Transx 0.3.0
+    * [KARAF-5779] - Upgrade to Spring 4.3.17.RELEASE and 5.0.6.RELEASE
+    * [KARAF-5800] - Upgrade to Felix Gogo 1.1.0
+    * [KARAF-5807] - Upgrade to Pax Exam 4.12.0
+    * [KARAF-5812] - Upgrade to Spring 4.3.18.RELEASE
+    * [KARAF-5813] - Upgrade to Spring 5.0.7.RELEASE
+    * [KARAF-5815] - Upgrade to commons-compress 1.17
+    * [KARAF-5816] - Upgrade to Aries Transaction Blueprint 2.2.0
+    * [KARAF-5817] - Upgrade to maven-bundle-plugin 3.5.1
+    * [KARAF-5818] - Upgrade to Felix ConfigAdmin 1.9.2
+    * [KARAF-5821] - Upgrade to Maven API 3.5.4
+    * [KARAF-5822] - Upgrade to Maven Wagon 3.1.0
+    * [KARAF-5824] - Upgrade to awaitility 3.1.1
+    * [KARAF-5826] - Upgrade to narayana 5.9.0.Final
+    * [KARAF-5827] - Upgrade to jline 3.9.0
+    * [KARAF-5829] - Upgrade to Xerces 2.12.0
+    * [KARAF-5830] - Upgrade to tagsoup 1.2.1
+    * [KARAF-5831] - Upgrade to maven-enforcer-plugin 3.0.0-M2
+    * [KARAF-5832] - Upgrade to maven-jar-plugin 3.1.0
+    * [KARAF-5833] - Upgrade to maven-project-info-reports-plugin 3.0.0
+    * [KARAF-5834] - Upgrade to maven-site-plugin 3.7.1
+    * [KARAF-5835] - Upgrade to maven-surefire-plugin 2.22.0
+    * [KARAF-5836] - Upgrade to maven-war-plugin 3.2.2
+    * [KARAF-5837] - Upgrade to maven-jacoco-plugin 0.8.1
+    * [KARAF-5838] - Upgrade to eclipselink 2.7.2
+    * [KARAF-5841] - Upgrade to Pax Web 7.2.1
+    * [KARAF-5849] - Upgrade to Pax Transx 0.4.0
+    * [KARAF-5856] - Upgrade to Pax Web 7.2.2
+    * [KARAF-5857] - Upgrade to maven-compiler-plugin 3.8.0
+    * [KARAF-5858] - Upgrade to Felix ConfigAdmin 1.9.4
+    * [KARAF-5859] - Upgrade to Hibernate Validator 6.0.11.Final
+    * [KARAF-5861] - Upgrade to Pax Web 7.2.3 / Jetty 9.4.11.v20180605
+    * [KARAF-5865] - Upgrade to eclipselink 2.7.3
+    * [KARAF-5866] - Upgrade to Felix SCR 2.1.2
+    * [KARAF-5869] - Upgrade to awaitility 3.1.2
+
 ## Apache Karaf 4.2.0
 
 Apache Karaf 4.2.0 is the first GA release on the 4.2.x series. We encourage all users to upgrade to this
