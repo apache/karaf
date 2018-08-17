@@ -368,6 +368,12 @@ public class JMXSecurityTest extends KarafTestSupport {
         newProps.put("d.e.f", "def");
         assertJmxInvoke(shouldSucceed, connection, mbean, "update", new Object [] {pid, newProps}, new String [] {String.class.getName(), Map.class.getName()});
         assertJmxInvoke(shouldSucceed, connection, mbean, "deleteProperty", new Object [] {pid, "d.e.f"}, new String [] {String.class.getName(), String.class.getName()});
+        // just put some delay to avoid KARAF-5845
+        try {
+            Thread.sleep(3000);
+        } catch (Throwable t) {
+            // nothing to do
+        }
         Map<?, ?> m3 = (Map<?, ?>) connection.invoke(mbean, "listProperties", new Object [] {pid}, new String [] {String.class.getName()});
         if (shouldSucceed) {
             assertEquals("abc", m3.get("a.b.c"));
