@@ -106,17 +106,17 @@
                 </executions>
                 <configuration>
                     <profilesUris>
-                        <uri>jar:mvn:org.apache.karaf.demos.profiles/registry/${project.version}!/</uri>
+                        <uri>jar:mvn:org.apache.karaf.examples/karaf-profile-example-registry/${project.version}!/</uri>
                     </profilesUris>
                     <bootFeatures>
                         <feature>deployer</feature>
                     </bootFeatures>
                     <bootProfiles>
                         <profile>karaf</profile>
-                        <profile>example-loanbroker-bank1</profile>
-                        <profile>example-loanbroker-bank2</profile>
-                        <profile>example-loanbroker-bank3</profile>
-                        <profile>example-loanbroker-broker</profile>
+                        <profile>loanbroker-bank1</profile>
+                        <profile>loanbroker-bank2</profile>
+                        <profile>loanbroker-bank3</profile>
+                        <profile>loanbroker-broker</profile>
                         <profile>activemq-broker</profile>
                     </bootProfiles>
                 </configuration>

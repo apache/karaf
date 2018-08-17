@@ -54,10 +54,10 @@ mvn clean install
 The `karaf-profile-example-dynamic` module uses the profile registry (using `<profileUri/>`) to create an assembly applying profiles as boot profiles:
 
 * `karaf`
-* `example-loanbroker-bank1`
-* `example-loanbroker-bank2`
-* `example-loanbroker-bank3`
-* `example-loanbroker-broker`
+* `loanbroker-bank1`
+* `loanbroker-bank2`
+* `loanbroker-bank3`
+* `loanbroker-broker`
 * `activemq-broker`
 
 To build the distribution, simply do:
