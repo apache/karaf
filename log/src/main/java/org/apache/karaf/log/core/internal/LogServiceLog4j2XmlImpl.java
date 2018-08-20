@@ -136,8 +136,7 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
      * indenting it as needed.
      */
     static void insertIndented(Element loggers, Element element, boolean atBeginning) {
-        NodeList loggerElements = loggers.getElementsByTagName("*");
-        if (atBeginning && loggerElements.getLength() > 0) {
+        if (atBeginning && loggers.hasChildNodes()) {
             Node insertBefore = loggers.getFirstChild();
             if (insertBefore != null) {
                 if (insertBefore.getNodeType() == Node.TEXT_NODE) {
@@ -150,7 +149,7 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
                 loggers.appendChild(element);
             }
         } else {
-            Node insertAfter = loggerElements.getLength() > 0 ? loggerElements.item(loggerElements.getLength() - 1) : null;
+            Node insertAfter = loggers.getLastChild().getPreviousSibling();
             if (insertAfter != null) {
                 if (insertAfter.getPreviousSibling() != null && insertAfter.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
                     String indent = insertAfter.getPreviousSibling().getTextContent();
