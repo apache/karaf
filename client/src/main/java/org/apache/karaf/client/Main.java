@@ -197,6 +197,9 @@ public class Main {
                     channel.setErr(output);
                     channel.open().verify();
                     channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
+                    if (channel.getExitStatus() != null) {
+                        exitStatus = channel.getExitStatus();
+                    }
                 } else {
                     ChannelShell channel = session.createShellChannel();
                     Attributes attributes = terminal.enterRawMode();
