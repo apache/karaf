@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
-            <version>4.2.0</version>
+            <version>${project.version}</version>
             <scope>test</scope>
             <type>tar.gz</type>
         </dependency>
