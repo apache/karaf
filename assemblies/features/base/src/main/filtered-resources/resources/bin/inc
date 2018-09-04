@@ -131,7 +131,11 @@ locateEtc() {
 
 setupNativePath() {
     # Support for loading native libraries
-    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${KARAF_BASE}/lib:${KARAF_HOME}/lib"
+    if [ "x${LD_LIBRARY_PATH}" != "x" ]; then
+        LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${KARAF_BASE}/lib:${KARAF_HOME}/lib"
+    else
+        LD_LIBRARY_PATH="${KARAF_BASE}/lib:${KARAF_HOME}/lib"
+    fi
 
     # For Cygwin, set PATH from LD_LIBRARY_PATH
     if ${cygwin}; then
