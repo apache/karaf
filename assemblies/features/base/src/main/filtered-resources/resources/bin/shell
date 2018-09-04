@@ -99,7 +99,7 @@ unlimitFD() {
     # Increase the maximum file descriptors if we can
     if [ "$os400" = "false" ] && [ "$cygwin" = "false" ]; then
         MAX_FD_LIMIT=`ulimit -H -n`
-        if [ "$MAX_FD_LIMIT" != 'unlimited' ]; then 
+        if [ "$MAX_FD_LIMIT" != 'unlimited' ]; then
             if [ $? -eq 0 ]; then
                 if [ "$MAX_FD" = "maximum" -o "$MAX_FD" = "max" ]; then
                     # use the system max
@@ -164,7 +164,11 @@ locateEtc() {
 
 setupNativePath() {
     # Support for loading native libraries
-    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$KARAF_BASE/lib:$KARAF_HOME/lib"
+    if [ "x${LD_LIBRARY_PATH}" != "x" ]; then
+        LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${KARAF_BASE}/lib:${KARAF_HOME}/lib"
+    else
+        LD_LIBRARY_PATH="${KARAF_BASE}/lib:${KARAF_HOME}/lib"
+    fi
 
     # For Cygwin, set PATH from LD_LIBRARY_PATH
     if $cygwin; then
