@@ -140,7 +140,11 @@ locateEtc() {
 
 setupNativePath() {
     # Support for loading native libraries
-    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${KARAF_BASE}/lib:${KARAF_HOME}/lib"
+    if [ "x${LD_LIBRARY_PATH}" != "x" ]; then
+        LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${KARAF_BASE}/lib:${KARAF_HOME}/lib"
+    else
+        LD_LIBRARY_PATH="${KARAF_BASE}/lib:${KARAF_HOME}/lib"
+    fi
 
     # For Cygwin, set PATH from LD_LIBRARY_PATH
     if ${cygwin}; then
@@ -217,7 +221,7 @@ detectJVM() {
 }
 
 checkJvmVersion() {
-    # Use in priority xpg4 awk or nawk on SunOS as standard awk is outdated 
+    # Use in priority xpg4 awk or nawk on SunOS as standard awk is outdated
     AWK=awk
     if ${solaris}; then
         if [ -x /usr/xpg4/bin/awk ]; then
@@ -226,10 +230,10 @@ checkJvmVersion() {
             AWK=/usr/bin/nawk
         fi
     fi
-    
+
     VERSION=$("${JAVA}" -version 2>&1 | ${AWK} -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
-    
-    # java must be at least version 8 
+
+    # java must be at least version 8
     if [ "${VERSION}" -lt "8" ]; then
         die "JVM must be greater than 1.8"
     fi
