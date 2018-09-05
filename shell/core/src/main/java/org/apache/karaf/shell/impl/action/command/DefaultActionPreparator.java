@@ -90,8 +90,9 @@ public class DefaultActionPreparator {
 
         String commandErrorSt = COLOR_RED + "Error executing command " + command.scope() + ":" + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL + COLOR_DEFAULT + ": ";
         for (Object param : params) {
-            if (HelpOption.HELP.name().equals(param)) {
+            if (HelpOption.HELP.name().equals(param.toString())) {
                 int termWidth = session.getTerminal() != null ? session.getTerminal().getWidth() : 80;
+                termWidth = termWidth == 0 ? 80 : termWidth;
                 boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
                 printUsage(action, options, arguments, System.out, globalScope, termWidth);
                 return false;
