@@ -348,6 +348,7 @@
                             <systemPropertyVariables>
                                 <org.ops4j.pax.url.mvn.localRepository>${maven.repo.local}</org.ops4j.pax.url.mvn.localRepository>
                                 <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
+                                <karaf.version>${project.version}</karaf.version>
                                 <spring31.version>${spring31.version}</spring31.version>
                                 <spring32.version>${spring32.version}</spring32.version>
                                 <spring40.version>${spring40.version}</spring40.version>
