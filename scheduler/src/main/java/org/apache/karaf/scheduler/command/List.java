@@ -38,9 +38,9 @@ public class List implements Action {
         ShellTable table = new ShellTable();
         table.column("Name");
         table.column("Schedule");
-        Map<Object, ScheduleOptions> jobs = scheduler.getJobs();
-        for (Map.Entry<Object, ScheduleOptions> entry : jobs.entrySet()) {
-            table.addRow().addContent(entry.getValue().name(), entry.getValue().schedule());
+        Map<String, ScheduleOptions> jobs = scheduler.getJobs();
+        for (Map.Entry<String, ScheduleOptions> entry : jobs.entrySet()) {
+            table.addRow().addContent(entry.getKey(), entry.getValue().schedule());
         }
         table.print(System.out);
         return null;
