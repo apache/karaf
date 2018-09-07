@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @since 2.3
  */
-public interface ScheduleOptions {
+public interface ScheduleOptions extends Serializable {
 
     /**
      * Add optional configuration for the job.

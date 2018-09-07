@@ -37,77 +37,43 @@ import org.quartz.TriggerBuilder;
  */
 public class InternalScheduleOptions implements ScheduleOptions {
 
+    private static final long serialVersionUID = -2632689849349264449L;
+
     public String name;
 
     public boolean canRunConcurrently = false;
 
     public Map<String, Serializable> configuration;
 
-    public final String schedule;
+    public String schedule;
 
-    public final TriggerBuilder<? extends Trigger> trigger;
-
-    public final IllegalArgumentException argumentException;
+    private Date date;
+    private int times;
+    private long period;
+    private String expression;
 
     public InternalScheduleOptions(Date date) {
-        if ( date == null ) {
-            this.trigger = null;
-            this.argumentException = new IllegalArgumentException("Date can't be null");
-        } else {
-            this.trigger = TriggerBuilder.newTrigger().startAt(date);
-            this.argumentException = null;
-        }
-        this.schedule = "at(" + formatDate(date) + ")";
+        this.date = date;
+        this.times = 0;
+        this.period = 0;
+        this.schedule =  null;
+        this.expression = null;
     }
 
     public InternalScheduleOptions(Date date, int times, long period) {
-        TriggerBuilder<? extends Trigger> trigger = null;
-        IllegalArgumentException argumentException = null;
-        try {
-            if (date == null) {
-                throw new IllegalArgumentException("Date can't be null");
-            }
-            if (times < 2 && times != -1) {
-                throw new IllegalArgumentException("Times argument must be higher than 1 or -1");
-            }
-            if (period < 1) {
-                throw new IllegalArgumentException("Period argument must be higher than 0");
-            }
-            final SimpleScheduleBuilder sb;
-            if (times == -1) {
-                sb = SimpleScheduleBuilder.simpleSchedule().repeatForever();
-            } else {
-                sb = SimpleScheduleBuilder.simpleSchedule().withRepeatCount(times - 1);
-            }
-            trigger = TriggerBuilder.newTrigger()
-                        .startAt(date)
-                        .withSchedule(sb.withIntervalInMilliseconds(period * 1000));
-        } catch (IllegalArgumentException e) {
-            argumentException = e;
-        }
-        this.trigger = trigger;
-        this.argumentException = argumentException;
-        this.schedule = "at(" + formatDate(date) + ", " + times + ", " + period + ")";
+        this.date = date;
+        this.times = times;
+        this.period = period;
+        this.schedule =  null;
+        this.expression = null;
     }
 
     public InternalScheduleOptions(String expression) {
-        TriggerBuilder<? extends Trigger> trigger = null;
-        IllegalArgumentException argumentException = null;
-        try {
-            if ( expression == null ) {
-                throw new IllegalArgumentException("Expression can't be null");
-            }
-            if ( !CronExpression.isValidExpression(expression) ) {
-                throw new IllegalArgumentException("Expression is invalid : " + expression);
-            }
-            trigger = TriggerBuilder.newTrigger()
-                            .withSchedule(CronScheduleBuilder.cronSchedule(expression));
-        } catch (IllegalArgumentException e) {
-            argumentException = e;
-        }
-        this.trigger = trigger;
-        this.argumentException = argumentException;
-        this.schedule = "cron(" + expression + ")";
+        this.date = null;
+        this.times = 0;
+        this.period = 0;
+        this.schedule =  null;
+        this.expression = expression;
     }
 
     /**
@@ -156,5 +122,52 @@ public class InternalScheduleOptions implements ScheduleOptions {
         Calendar c = GregorianCalendar.getInstance();
         c.setTime(date);
         return DatatypeConverter.printDateTime(c);
+    }
+
+    public TriggerBuilder<? extends Trigger> compile() {
+        TriggerBuilder<? extends Trigger> result = null;
+        try {
+            if (null == expression) {
+                if (date == null) {
+                    throw new IllegalArgumentException("Date can't be null");
+                } else {
+                    boolean dateOnly = false;
+                    if (times < 2 && times != -1) {
+                        dateOnly = true;
+                    }
+                    if (period < 1) {
+                        dateOnly = true;
+                    }
+                    if (dateOnly) {
+                        result = TriggerBuilder.newTrigger().startAt(date);
+                        this.schedule = "at(" + formatDate(date) + ")";
+                    } else {
+                        final SimpleScheduleBuilder sb;
+                        if (times == -1) {
+                            sb = SimpleScheduleBuilder.simpleSchedule().repeatForever();
+                        } else {
+                            sb = SimpleScheduleBuilder.simpleSchedule().withRepeatCount(times - 1);
+                        }
+                        result = TriggerBuilder.newTrigger()
+                                .startAt(date)
+                                .withSchedule(sb.withIntervalInMilliseconds(period * 1000));
+                        this.schedule = "at(" + formatDate(date) + ", " + times + ", " + period + ")";
+                    }
+                }
+            } else {
+                TriggerBuilder<? extends Trigger> trigger = null;
+                if (!CronExpression.isValidExpression(expression)) {
+                    throw new IllegalArgumentException("Expression is invalid : " + expression);
+                }
+                trigger = TriggerBuilder.newTrigger()
+                        .withSchedule(CronScheduleBuilder.cronSchedule(expression));
+                result = trigger;
+                this.schedule = "cron(" + expression + ")";
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        }
+
+        return result;
     }
 }
