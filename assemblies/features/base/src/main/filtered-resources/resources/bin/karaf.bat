@@ -405,6 +405,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         if %JAVA_VERSION% GTR 8 (
             "%JAVA%" %JAVA_OPTS% %OPTS% ^
                 --add-reads=java.xml=java.logging ^
+                --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED ^
                 --patch-module java.base=lib/endorsed/org.apache.karaf.specs.locator-@@project.version@@.jar ^
                 --patch-module java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-@@project.version@@.jar ^
                 --add-opens java.base/java.security=ALL-UNNAMED ^

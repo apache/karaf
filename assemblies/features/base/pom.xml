@@ -198,6 +198,11 @@
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.apache.karaf.specs</groupId>
+                                    <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>javax.xml.bind</groupId>
                                     <artifactId>jaxb-api</artifactId>
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
@@ -226,6 +231,11 @@
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>org.osgi.core</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf.specs</groupId>
+                                    <artifactId>org.apache.karaf.specs.activator</artifactId>
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
