@@ -25,16 +25,14 @@
     </feature>
     
     <feature name="karaf-soap-example-provider" version="${project.version}">
-        <feature dependency="true">karaf-soap-example-common</feature>
-        <feature dependency="true">http</feature>
-        <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
-        <feature dependency="true">aries-blueprint</feature>
-        <feature version="${cxf.version}" dependency="true">cxf-jaxws</feature>
+        <feature>karaf-soap-example-common</feature>
+        <feature>aries-blueprint</feature>
+        <feature version="${cxf.version}">cxf</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-provider/${project.version}</bundle>
     </feature>
 
     <feature name="karaf-soap-example-client" version="${project.version}">
-        <feature version="${cxf.version}" dependency="true">cxf-jaxws</feature>
+        <feature version="${cxf.version}">cxf</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-client/${project.version}</bundle>
     </feature>
 
