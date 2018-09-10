@@ -45,11 +45,11 @@ public class SchedulerMBeanImpl extends StandardMBean implements SchedulerMBean 
             TabularType tableType = new TabularType("Jobs", "Tables of all jobs", jobType, new String[]{ "Job" });
             TabularData table = new TabularDataSupport(tableType);
 
-            Map<Object, ScheduleOptions> jobs = scheduler.getJobs();
-            for (Map.Entry<Object, ScheduleOptions> entry : jobs.entrySet()) {
+            Map<String, ScheduleOptions> jobs = scheduler.getJobs();
+            for (Map.Entry<String, ScheduleOptions> entry : jobs.entrySet()) {
                 CompositeData data = new CompositeDataSupport(jobType,
                         new String[]{ "Job", "Schedule" },
-                        new Object[]{ entry.getValue().name(), entry.getValue().schedule()});
+                        new Object[]{ entry.getKey(), entry.getValue().schedule()});
                 table.put(data);
             }
             return table;

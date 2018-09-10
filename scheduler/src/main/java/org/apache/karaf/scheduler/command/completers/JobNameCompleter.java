@@ -38,8 +38,8 @@ public class JobNameCompleter implements Completer {
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
-            Map<Object, ScheduleOptions> jobs = scheduler.getJobs();
-            for (Map.Entry<Object, ScheduleOptions> job : jobs.entrySet()) {
+            Map<String, ScheduleOptions> jobs = scheduler.getJobs();
+            for (Map.Entry<String, ScheduleOptions> job : jobs.entrySet()) {
                 String name = job.getValue().name();
                 delegate.getStrings().add(name);
             }
