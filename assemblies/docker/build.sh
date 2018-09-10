@@ -21,7 +21,7 @@
 usage() {
   cat <<HERE
 Usage:
-  build.sh --from-local-dist [--image-name <image>]
+  build.sh --from-local-dist [--archive <archive>] [--image-name <image>]
   build.sh --from-release --karaf-version <x.x.x> [--image-name <image>]
   build.sh --help
 
@@ -42,6 +42,10 @@ key="$1"
     ;;
     --image-name)
     IMAGE_NAME="$2"
+    shift
+    ;;
+    --archive)
+    ARCHIVE="$2"
     shift
     ;;
     --karaf-version)
@@ -86,7 +90,11 @@ if [ -n "${FROM_RELEASE}" ]; then
 
 elif [ -n "${FROM_LOCAL}" ]; then
 
-  DIST_DIR=../apache-karaf/target/apache-karaf-*.tar.gz
+  if [ -n "${ARCHIVE}" ]; then
+     DIST_DIR=${ARCHIVE}
+  else 
+     DIST_DIR=../apache-karaf/target/apache-karaf-*.tar.gz
+  fi
   KARAF_DIST=${TMPDIR}/apache-karaf.tar.gz
   echo "Using karaf dist: ${DIST_DIR}"
   cp ${DIST_DIR} ${KARAF_DIST}
