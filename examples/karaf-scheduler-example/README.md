@@ -46,7 +46,7 @@ mvn clean install
 On a running Karaf instance, register the features repository using:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-scheduler-example-features/4.2.1-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-scheduler-example-features/4.2.2-SNAPSHOT/xml
 ```
 
 Then, you can install the runnable service feature:
