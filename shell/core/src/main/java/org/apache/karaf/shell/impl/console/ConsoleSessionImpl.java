@@ -135,7 +135,7 @@ public class ConsoleSessionImpl implements Session {
         }
 
         // Create session
-        if (in == null) {
+        if (in == null || out == null || err == null) {
             session = processor.createSession(
                 jlineTerminal.input(),
                 jlineTerminal.output(),
