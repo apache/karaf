@@ -44,6 +44,13 @@ public interface Scheduler {
     String PROPERTY_SCHEDULER_PERIOD = "scheduler.period";
 
     /**
+     * Name of the configuration property to defined the number of iterations for a job.
+     * The times is expressed in iterations.
+     * This property needs to be of numeric type.
+     */
+    String PROPERTY_SCHEDULER_TIMES = "scheduler.times";
+
+    /**
      * Name of the configuration property to define if a periodically job should be scheduled immediate.
      * Default is to not startup immediate, the job is started the first time after the period has expired.
      * This property needs to be of type Boolean.

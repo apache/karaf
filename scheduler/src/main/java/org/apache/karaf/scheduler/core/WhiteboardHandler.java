@@ -115,6 +115,22 @@ public class WhiteboardHandler {
                         .name(name)
                         .canRunConcurrently(concurrent));
             } else {
+                Integer times = -1;
+                {
+                    final Object v = ref.getProperty(Scheduler.PROPERTY_SCHEDULER_TIMES);
+                    if (null != v) {
+                        if (v instanceof Integer) {
+                            times = (Integer) v;
+                        } else if (v instanceof Long) {
+                            times = ((Long) v).intValue();
+                        } else if (v instanceof Number) {
+                            times = ((Number) v).intValue();
+                        } else {
+                            times = new Integer(v.toString());
+                        }
+                    }
+                }
+
                 Long period = null;
                 if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD) != null) {
                     if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD) instanceof Long) {
@@ -124,6 +140,8 @@ public class WhiteboardHandler {
                     }
                     if (period < 1) {
                         this.logger.debug("Ignoring service {} : scheduler period is less than 1.", ref);
+                    } else if (times < -1) {
+                        this.logger.debug("Ignoring service {} : scheduler times is defined but is less than -1.", ref);
                     } else {
                         boolean immediate = false;
                         if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE) != null) {
@@ -137,7 +155,7 @@ public class WhiteboardHandler {
                         if (!immediate) {
                             date.setTime(System.currentTimeMillis() + period * 1000);
                         }
-                        this.scheduler.schedule(job, this.scheduler.AT(date, -1, period)
+                        this.scheduler.schedule(job, this.scheduler.AT(date, times, period)
                                 .name(name)
                                 .canRunConcurrently((concurrent != null ? concurrent : true)));
                     }
