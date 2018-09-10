@@ -41,10 +41,11 @@
             <scope>test</scope>
         </dependency>
         <!-- Define the Apache Karaf version to download and use for the test -->
+        <!-- We use a released version here to avoid SNAPSHOT resolution -->
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
-            <version>${project.version}</version>
+            <version>4.2.1</version>
             <scope>test</scope>
             <type>tar.gz</type>
         </dependency>
