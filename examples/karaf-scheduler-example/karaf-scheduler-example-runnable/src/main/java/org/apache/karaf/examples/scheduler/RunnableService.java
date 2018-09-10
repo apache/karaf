@@ -28,6 +28,10 @@ import org.osgi.service.component.annotations.Component;
 )
 public class RunnableService implements Runnable {
 
+    public RunnableService() {
+        super();
+    }
+
     @Override
     public void run() {
         System.out.print("Hello Karaf user !");

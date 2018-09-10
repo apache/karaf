@@ -53,6 +53,9 @@ public class QuartzScheduler implements Scheduler {
     /** Map key for the scheduling options. */
     static final String DATA_MAP_OPTIONS = "QuartzJobScheduler.Options";
 
+    /** Map key  for non-serializable context. **/
+    static final String DATA_MAP_CONTEXT = "QuartzJobScheduler.Context";
+
     /** Map key for the logger. */
     static final String DATA_MAP_LOGGER = "QuartzJobScheduler.Logger";
 
@@ -65,7 +68,7 @@ public class QuartzScheduler implements Scheduler {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(QuartzScheduler.class.getClassLoader());
-            StdSchedulerFactory factory = new StdSchedulerFactory(configuration);
+            StdOsgiSchedulerFactory factory = new StdOsgiSchedulerFactory(configuration);
             scheduler = factory.getScheduler();
             scheduler.start();
         } catch (Throwable t) {
@@ -110,11 +113,18 @@ public class QuartzScheduler implements Scheduler {
                                    final InternalScheduleOptions options) {
         final JobDataMap jobDataMap = new JobDataMap();
 
-        jobDataMap.put(DATA_MAP_OBJECT, job);
-
+        // Serializable data
         jobDataMap.put(DATA_MAP_NAME, jobName);
-        jobDataMap.put(DATA_MAP_LOGGER, this.logger);
         jobDataMap.put(DATA_MAP_OPTIONS, options);
+
+        final JobDataMap jobContextMap = new JobDataMap();
+
+        // Non-serializable data
+        jobContextMap.put(DATA_MAP_OBJECT, job);
+        jobContextMap.put(DATA_MAP_LOGGER, this.logger);
+
+        // Temporary storage
+        jobDataMap.put(DATA_MAP_CONTEXT, jobContextMap);
 
         return jobDataMap;
     }
@@ -195,10 +205,6 @@ public class QuartzScheduler implements Scheduler {
         }
         final InternalScheduleOptions opts = (InternalScheduleOptions)options;
 
-        if ( opts.argumentException != null ) {
-            throw opts.argumentException;
-        }
-
         // as this method might be called from unbind and during
         // unbind a deactivate could happen, we check the scheduler first
         final org.quartz.Scheduler s = this.scheduler;
@@ -225,7 +231,7 @@ public class QuartzScheduler implements Scheduler {
             opts.name = name;
         }
 
-        final Trigger trigger = opts.trigger.withIdentity(name).build();
+        final Trigger trigger = opts.compile().withIdentity(name).build();
 
         // create the data map
         final JobDataMap jobDataMap = this.initDataMap(name, job, opts);
@@ -258,7 +264,7 @@ public class QuartzScheduler implements Scheduler {
             s.deleteJob(key);
 
             final InternalScheduleOptions opts = (InternalScheduleOptions)options;
-            Trigger trigger = opts.trigger.withIdentity(name).build();
+            Trigger trigger = opts.compile().withIdentity(name).build();
             JobDataMap jobDataMap = this.initDataMap(name, job, opts);
             detail = createJobDetail(name, jobDataMap, opts.canRunConcurrently);
 
@@ -291,17 +297,16 @@ public class QuartzScheduler implements Scheduler {
     }
 
     @Override
-    public Map<Object, ScheduleOptions> getJobs() throws SchedulerError {
+    public Map<String, ScheduleOptions> getJobs() throws SchedulerError {
         try {
-            Map<Object, ScheduleOptions> jobs = new HashMap<>();
+            Map<String, ScheduleOptions> jobs = new HashMap<>();
             org.quartz.Scheduler s = this.scheduler;
             if (s != null) {
                 for (String group : s.getJobGroupNames()) {
                     for (JobKey key : s.getJobKeys(GroupMatcher.jobGroupEquals(group))) {
                         JobDetail detail = s.getJobDetail(key);
                         ScheduleOptions options = (ScheduleOptions) detail.getJobDataMap().get(DATA_MAP_OPTIONS);
-                        Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
-                        jobs.put(job, options);
+                        jobs.put(key.getName(), options);
                     }
                 }
             }

@@ -15,9 +15,10 @@
  */
 package org.apache.karaf.scheduler;
 
-public class SchedulerError extends Exception {
+public class SchedulerError extends RuntimeException {
 
     public SchedulerError() {
+        super();
     }
 
     public SchedulerError(String msg) {

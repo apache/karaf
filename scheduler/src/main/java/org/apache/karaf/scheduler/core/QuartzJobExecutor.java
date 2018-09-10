@@ -25,6 +25,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This component is responsible to launch a {@link org.apache.karaf.scheduler.Job}
@@ -33,14 +34,21 @@ import org.slf4j.Logger;
  */
 public class QuartzJobExecutor implements Job {
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     /**
      * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
      */
     public void execute(final JobExecutionContext context) throws JobExecutionException {
 
+        final StdOsgiScheduler scheduler = (StdOsgiScheduler) context.getScheduler();
+
         final JobDataMap data = context.getJobDetail().getJobDataMap();
-        final Object job = data.get(QuartzScheduler.DATA_MAP_OBJECT);
-        final Logger logger = (Logger)data.get(QuartzScheduler.DATA_MAP_LOGGER);
+        final String contextKey = context.getJobDetail().getKey().toString();
+        final JobDataMap osgiContext = (null == contextKey) ? null : scheduler.getStorage().get(contextKey);
+
+        final Object job = (null == osgiContext) ? context.getJobInstance() : osgiContext.get(QuartzScheduler.DATA_MAP_OBJECT);
+        final Logger logger = (null == osgiContext) ? log : (Logger)osgiContext.get(QuartzScheduler.DATA_MAP_LOGGER);
 
         try {
             logger.debug("Executing job {} with name {}", job, data.get(QuartzScheduler.DATA_MAP_NAME));
