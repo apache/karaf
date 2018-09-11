@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -105,6 +106,11 @@ public class XmlUtils {
         if (spf == null) {
             spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(true);
+            spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            spf.setXIncludeAware(false);
             SAX_PARSER_FACTORY.set(spf);
         }
         return spf.newSAXParser().getXMLReader();
@@ -115,6 +121,12 @@ public class XmlUtils {
         if (dbf == null) {
             dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            dbf.setXIncludeAware(false);
+            dbf.setExpandEntityReferences(false);
             DOCUMENT_BUILDER_FACTORY.set(dbf);
         }
         return dbf.newDocumentBuilder();
@@ -124,6 +136,8 @@ public class XmlUtils {
         TransformerFactory tf = TRANSFORMER_FACTORY.get();
         if (tf == null) {
             tf = TransformerFactory.newInstance();
+            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             TRANSFORMER_FACTORY.set(tf);
         }
         return tf.newTransformer();
@@ -133,6 +147,8 @@ public class XmlUtils {
         TransformerFactory tf = TRANSFORMER_FACTORY.get();
         if (tf == null) {
             tf = TransformerFactory.newInstance();
+            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             TRANSFORMER_FACTORY.set(tf);
         }
         return tf.newTransformer(xsltSource);
