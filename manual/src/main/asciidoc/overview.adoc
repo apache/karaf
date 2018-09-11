@@ -17,7 +17,7 @@
 Apache Karaf is a modern and polymorphic container.
 
 Karaf can be used standalone as a container, supporting a wide range of applications and technologies.
-It also supports the "run anywhere" (on any machine with Java, cloud, dockerClient images, ...) using the embedded mode.
+It also supports the "run anywhere" (on any machine with Java, cloud, docker images, ...) using the embedded mode.
 
 It's a lightweight, powerful, and enterprise ready platform.
 

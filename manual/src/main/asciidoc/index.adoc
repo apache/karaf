@@ -58,7 +58,7 @@ include::user-guide/instances.adoc[]
 
 include::user-guide/security.adoc[]
 
-include::user-guide/dockerClient.adoc[]
+include::user-guide/docker.adoc[]
 
 include::user-guide/obr.adoc[]
 

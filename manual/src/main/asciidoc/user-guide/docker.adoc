@@ -113,7 +113,7 @@ You have to do it using the `-H` option on `dockerd`:
 /usr/bin/dockerd -H fd:// -H tcp://localhost:2375
 ----
 
-Apache Karaf Docker feature exposes `DockerService` OSGi service that you can use programmatically (the `dockerClient:*` commands
+Apache Karaf Docker feature exposes `DockerService` OSGi service that you can use programmatically (the `docker:*` commands
 and the `DockerMBean` use the `DockerService` service).
 
 ==== System-wide information
