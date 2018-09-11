@@ -43,13 +43,29 @@ public abstract class XMLInputFactory {
 
     protected XMLInputFactory(){}
 
+    private static void setProperties(XMLInputFactory factory) {
+        factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
+        factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        factory.setXMLResolver(new XMLResolver() {
+            @Override
+            public Object resolveEntity(String publicID, String systemID, String baseURI, String namespace) throws XMLStreamException {
+                throw new XMLStreamException("Reading external entities is disabled");
+            }
+        });
+    }
     
     public static XMLInputFactory newDefaultFactory() {
-        return $FactoryFinder.newInstance(XMLInputFactory.class, DEFAULT_IMPL, null, false, true);
+        XMLInputFactory factory = $FactoryFinder.newInstance(XMLInputFactory.class, DEFAULT_IMPL, null, false, true);
+        setProperties(factory);
+        return factory;
     }
     
     public static XMLInputFactory newInstance() throws FactoryConfigurationError {
-        return $FactoryFinder.find(XMLInputFactory.class, DEFAULT_IMPL);
+        XMLInputFactory factory = $FactoryFinder.find(XMLInputFactory.class, DEFAULT_IMPL);
+        setProperties(factory);
+        return factory;
     }
 
     @Deprecated
@@ -58,7 +74,9 @@ public abstract class XMLInputFactory {
     }
 
     public static XMLInputFactory newFactory(String factoryId, ClassLoader classLoader) throws FactoryConfigurationError {
-        return $FactoryFinder.find(XMLInputFactory.class, factoryId, classLoader, null);
+        XMLInputFactory factory = $FactoryFinder.find(XMLInputFactory.class, factoryId, classLoader, null);
+        setProperties(factory);
+        return factory;
     }
 
     @Deprecated
