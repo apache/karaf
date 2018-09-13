@@ -91,6 +91,16 @@ setupClassPath() {
             CLASSPATH="${CLASSPATH}:${file}"
         fi
     done
+    if [ "${VERSION}" -gt "8" ] ; then
+        for file in "${KARAF_HOME}"/lib/jdk9plus/*.jar
+        do
+            if [ -z "${CLASSPATH}" ]; then
+                CLASSPATH="${file}"
+            else
+                CLASSPATH="${CLASSPATH}:${file}"
+            fi
+        done
+    fi
 }
 
 checkRootInstance() {

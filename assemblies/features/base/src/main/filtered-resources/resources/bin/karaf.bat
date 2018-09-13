@@ -291,6 +291,12 @@ set suffix=%filename:~-4%
 if %suffix% equ .jar set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\lib\boot\%filename%
 goto :EOF
 
+: APPEND_TO_JDK9PLUS_CLASSPATH
+set filename=%~1
+set suffix=%filename:~-4%
+if %suffix% equ .jar set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\lib\jdk9plus\%filename%
+goto :EOF
+
 :CLASSPATH_END
 
 if "%CHECK_ROOT_INSTANCE_RUNNING%" == "" (
@@ -403,6 +409,9 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         rem If major version is greater than 1 (meaning Java 9 or 10), we don't use endorsed lib but module
         rem If major version is 1 (meaning Java 1.6, 1.7, 1.8), we use endorsed lib
         if %JAVA_VERSION% GTR 8 (
+            pushd "%KARAF_HOME%\lib\jdk9plus"
+                for %%G in (*.jar) do call:APPEND_TO_JDK9PLUS_CLASSPATH %%G
+            popd
             "%JAVA%" %JAVA_OPTS% %OPTS% ^
                 --add-reads=java.xml=java.logging ^
                 --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED ^
