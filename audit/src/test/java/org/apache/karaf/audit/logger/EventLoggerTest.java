@@ -35,6 +35,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -216,9 +218,10 @@ public class EventLoggerTest {
         Path path = Files.createTempDirectory("file-logger");
         String file = path.resolve("file.log").toString();
         EventLogger logger = new FileEventLogger(file, "UTF-8", "size(10)", 2, false, Executors.defaultThreadFactory(), layout);
-
         for (int i = 0; i < 10; i++) {
-            logger.write(new MapEvent(map, 1510902000000L + TimeUnit.HOURS.toMillis(i)));
+            logger.write(new MapEvent(map, Timestamp.valueOf(
+                                           LocalDateTime.of(2017, 11, 17, 7, 0)).getTime() 
+                                           + TimeUnit.HOURS.toMillis(i)));
         }
         logger.close();
 
@@ -243,7 +246,9 @@ public class EventLoggerTest {
         EventLogger logger = new FileEventLogger(file, "UTF-8", "size(10)", 2, true, Executors.defaultThreadFactory(), layout);
 
         for (int i = 0; i < 10; i++) {
-            logger.write(new MapEvent(map, 1510902000000L + TimeUnit.HOURS.toMillis(i)));
+            logger.write(new MapEvent(map, Timestamp.valueOf(
+                                           LocalDateTime.of(2017, 11, 17, 7, 0)).getTime() 
+                                           + TimeUnit.HOURS.toMillis(i)));
         }
         logger.close();
 
