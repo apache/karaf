@@ -100,7 +100,10 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
         url = DownloadManagerHelper.removeInlinedMavenRepositoryUrl(url);
         int unixPos = url.lastIndexOf('/');
         int windowsPos = url.lastIndexOf('\\');
-        return url.substring(Math.max(unixPos, windowsPos) + 1);
+        url = url.substring(Math.max(unixPos, windowsPos) + 1);
+        url = Integer.toHexString(url.hashCode()) + "-" + url;
+        return url;
+
     }
 
     protected File downloadBlueprintOrSpring() throws Exception {
