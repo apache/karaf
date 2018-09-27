@@ -31,8 +31,10 @@ import java.io.File;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import org.ops4j.pax.exam.options.extra.VMOption;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -52,7 +54,52 @@ public class ExampleITest extends KarafTestSupport {
             localRepository = "";
         }
 
-        return new Option[]{
+        if (JavaVersionUtil.getMajorVersion() >= 9) {
+            return new Option[]{
+                //KarafDistributionOption.debugConfiguration("8889", true),
+                karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+                // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
+                configureSecurity().disableKarafMBeanServerBuilder(),
+                // configureConsole().ignoreLocalConsole(),
+                keepRuntimeFolder(),
+                logLevel(LogLevelOption.LogLevel.INFO),
+                mavenBundle().groupId("org.awaitility").artifactId("awaitility").versionAsInProject(),
+                mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").versionAsInProject(),
+                mavenBundle().groupId("org.apache.karaf.itests").artifactId("common").versionAsInProject(),
+                editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", httpPort),
+                editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
+                editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
+                editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
+                editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.localRepository", localRepository),
+                new VMOption("--add-reads=java.xml=java.logging"),
+                new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
+                new VMOption("--patch-module"),
+                new VMOption("java.base=lib/endorsed/org.apache.karaf.specs.locator-" 
+                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT") + ".jar"),
+                new VMOption("--patch-module"),
+                new VMOption("java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" 
+                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT") + ".jar"),
+                new VMOption("--add-opens"),
+                new VMOption("java.base/java.security=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.base/java.net=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.base/java.lang=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.base/java.util=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.naming/javax.naming.spi=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
+                new VMOption("java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED"),
+                new VMOption("--add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED"),
+                new VMOption("-classpath"),
+                new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*")
+            };
+        } else {
+            return new Option[]{
                 //KarafDistributionOption.debugConfiguration("8889", true),
                 karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
@@ -68,7 +115,8 @@ public class ExampleITest extends KarafTestSupport {
                 editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "sshPort", sshPort),
                 editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.localRepository", localRepository)
-        };
+            };
+        }
     }
 
     @Test

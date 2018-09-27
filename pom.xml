@@ -2374,7 +2374,7 @@
                                   --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED
                 </surefire.argLine>
                 <!--need pax.exam 4.13.0 to run with java11-->
-                <!--pax.exam.version>4.13.0-SNAPSHOT</pax.exam.version-->
+                <pax.exam.version>4.13.0-SNAPSHOT</pax.exam.version>
             </properties>
             <activation>
                 <jdk>[9,)</jdk>
