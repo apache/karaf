@@ -71,6 +71,7 @@
                             !javax.transaction,
                             javax.servlet*;resolution:=optional,
                             org.jboss.*;resolution:=optional,
+                            javax.xml.bind*;version="[2.2,3)",
                             *
                         </Import-Package>
                         <Private-Package>

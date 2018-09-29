@@ -161,6 +161,7 @@
                             !net.sf.ehcache*,
                             !net.spy.memcached*,
                             com.sun.security.auth.module;resolution:=optional,
+                            javax.xml.bind*;version="[2.2,3)",
                             *
                         </Import-Package>
                         <Private-Package>

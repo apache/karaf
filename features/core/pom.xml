@@ -156,6 +156,7 @@
                         </Export-Package>
                         <Import-Package>
                             !org.eclipse.osgi.service.resolver,
+                            javax.xml.bind*;version="[2.2,3)",
                             *
                         </Import-Package>
                         <Private-Package>

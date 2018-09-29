@@ -44,8 +44,8 @@
                     </dependency>
                     <dependency>
                         <groupId>javax.activation</groupId>
-                        <artifactId>activation</artifactId>
-                        <version>1.1.1</version>
+                        <artifactId>javax.activation-api</artifactId>
+                        <version>1.2.0</version>
                     </dependency>
                     <dependency>
                         <groupId>com.sun.xml.bind</groupId>
@@ -209,7 +209,7 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>javax.activation</groupId>
-                                    <artifactId>activation</artifactId>
+                                    <artifactId>javax.activation-api</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
