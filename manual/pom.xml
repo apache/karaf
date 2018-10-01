@@ -203,7 +203,7 @@
 			<plugin>
 				<groupId>org.asciidoctor</groupId>
 				<artifactId>asciidoctor-maven-plugin</artifactId>
-				<version>1.5.2</version>
+				<version>1.5.6</version>
 				<executions>
 					<execution>
 						<id>output-html</id>
@@ -231,7 +231,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-scm-publish-plugin</artifactId>
-				<version>1.0-beta-2</version>
+				<version>3.0.0</version>
 				<configuration>
 					<checkinComment>[scm-publish] Updating main site with Karaf documentation</checkinComment>
 					<pubScmUrl>scm:svn:https://svn.apache.org/repos/asf/karaf/site/production/manual/latest</pubScmUrl>
