@@ -341,7 +341,8 @@ public class VerifyMojo extends MojoSupport {
                 getLog().info("Verification of feature " + id + " succeeded");
             } catch (Exception e) {
                 if (e.getCause() instanceof ResolutionException || !getLog().isDebugEnabled()) {
-                    getLog().warn(e.getMessage());
+                    getLog().warn(e.getMessage() + ": " + id);
+                    getLog().warn(e.getCause().getMessage());
                 } else {
                     getLog().warn(e);
                 }
