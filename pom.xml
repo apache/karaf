@@ -144,7 +144,7 @@
         <activemq.version>5.15.0</activemq.version>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <aspectj.bundle.version>1.7.4_1</aspectj.bundle.version>
-        <ant.bundle.version>1.9.7_1</ant.bundle.version>
+        <ant.bundle.version>1.10.3_1</ant.bundle.version>
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
         <asm.version>6.2.1</asm.version>
         <javax.annotation.version>1.2</javax.annotation.version>
