@@ -84,6 +84,11 @@
     display: none;
 }
 
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active, a.ui-button:active, .ui-button:active, .ui-button.ui-state-active:hover {
+	border: 0px !important;
+	background: transparent !important;
+}
+
 /* CENTRAL CONTENT AREA STYLING */
 #content, .ui-widget, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-size: 8pt }
 
