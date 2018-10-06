@@ -80,7 +80,7 @@ The `karaf-rest-example-client-cxf` feature provides `booking:*` commands you ca
 Once you have install a client feature, you can use `booking:add` and `booking:list` commands to interact with the REST
 service.
 
-----
+```
 karaf@root()> booking:add 1 "John Doe" AF520
 karaf@root()> booking:list
-----
+```
