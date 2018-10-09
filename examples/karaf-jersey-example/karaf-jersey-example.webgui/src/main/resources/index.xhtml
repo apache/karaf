@@ -1,0 +1,26 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Demo of main GUI with REST API</title>
+        <script type="">
+        function incrementCounter() {
+        	var xhttp = new XMLHttpRequest();
+        	xhttp.open("POST", "/karaf-jersey-example/api/counter", false);
+            xhttp.send(null);
+            var response = JSON.parse(xhttp.responseText);
+            console.log("response.value: " + JSON.stringify(response));
+            document.getElementById('counter').value = response.count;
+            return false;
+        }
+        </script>
+    </head>
+    <body>
+        <h1>Demo of main GUI with REST API</h1>
+
+        <form action="">
+            <p>
+                <strong>Count:</strong> <input type="text" id="counter" value="0"/><br/>
+                <button type="button" onclick="incrementCounter()">Increment</button><br/>
+            </p>
+        </form>
+    </body>
+</html>

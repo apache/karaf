@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features>
+    <repository>mvn:no.priv.bang.osgi.service.adapters/service-adapters-karaf/${osgi-service-adaptors.version}/xml/features</repository>
+    <feature name="${karaf-feature-name}">
+        <feature>adapter-for-osgi-logservice</feature>
+        <feature>pax-http-whiteboard</feature>
+    </feature>
+</features>

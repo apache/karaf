@@ -51,6 +51,7 @@
         <module>karaf-war-example</module>
         <!-- <module>karaf-jndi-example</module> -->
         <module>karaf-jdbc-example</module>
+        <module>karaf-jersey-example</module>
         <module>karaf-jms-example</module>
         <module>karaf-jpa-example</module>
         <!-- <module>karaf-cdi-example</module> -->
