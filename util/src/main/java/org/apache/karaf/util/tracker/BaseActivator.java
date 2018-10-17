@@ -239,6 +239,23 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         return def;
     }
 
+    protected Class<?>[] getClassesArray(String key, String def) {
+        final String[] stringArray = getStringArray(key, def);
+        if (stringArray == null) {
+            return null;
+        }
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return Stream.of(stringArray)
+                .map(it -> {
+                    try {
+                        return loader.loadClass(it.trim());
+                    } catch (final ClassNotFoundException e) {
+                        throw new IllegalArgumentException(e);
+                    }
+                })
+                .toArray(Class[]::new);
+    }
+
     protected String[] getStringArray(String key, String def) {
         Object val = null;
         if (configuration != null) {
