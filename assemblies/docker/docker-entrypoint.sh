@@ -18,7 +18,12 @@
 # limitations under the License.
 ################################################################################
 
-echo "Starting Apache Karaf"
-exec $KARAF_HOME/bin/karaf
+if [ "$1" = "server" ]; then
+  echo "Starting Apache Karaf (server mode)"
+  exec $KARAF_HOME/bin/karaf server
+else
+  echo "Starting Apache Karaf"
+  exec $KARAF_HOME/bin/karaf
+fi
 
 exec "$@"
