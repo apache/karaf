@@ -34,7 +34,7 @@ As prerequisites, you have:
 
 ===== Official images
 
-Apache Karaf official docker images are available on Docker HUB: https://hub.docker.com/_/karaf/
+Apache Karaf official docker images should be available soon on Docker HUB: https://hub.docker.com/_/karaf/
 
 You can directly pull the official image:
 
@@ -68,19 +68,20 @@ docker build --build-arg KARAF_VERSION=4.2.0 -t "karaf:4.2.0" karaf
 * Run Karaf in interactive mode
 
 ----
-docker-compose run karaf
+docker run -i -t --name karaf karaf:latest karaf
 ----
 
-* Run Karaf as a daemon (without interaction)
+
+* Run Karaf without interaction but log displayed
 
 ----
-docker-compose up
+docker run --name karaf karaf:latest
 ----
 
 * Kill Karaf
 
 ----
-docker-compose kill
+docker kill karaf
 ----
 
 ====== Ports

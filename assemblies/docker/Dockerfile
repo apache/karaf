@@ -16,12 +16,13 @@
 # limitations under the License.
 ################################################################################
 
-FROM java:8-jre-alpine
+FROM openjdk:8-jre
 
 # Karaf environment variables
-ENV KARAF_INSTALL_PATH=/opt
+ENV KARAF_INSTALL_PATH /opt
 ENV KARAF_HOME $KARAF_INSTALL_PATH/apache-karaf
 ENV PATH $PATH:$KARAF_HOME/bin
+#WORKDIR $KARAF_HOME
 
 # karaf_dist can point to a directory or a tarball on the local system
 ARG karaf_dist=NOT_SET
@@ -31,7 +32,5 @@ ADD $karaf_dist $KARAF_INSTALL_PATH
 RUN set -x && \
   ln -s $KARAF_INSTALL_PATH/apache-karaf* $KARAF_HOME
 
-COPY docker-entrypoint.sh /
-
 EXPOSE 8101 1099 44444 8181
-ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["karaf", "run"]
