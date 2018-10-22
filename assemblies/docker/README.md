@@ -53,19 +53,37 @@ docker build --build-arg KARAF_VERSION=4.2.0 -t "karaf:4.2.0" karaf
 * Run Karaf with interactive mode
 
 ```
-docker-compose run karaf
+docker-compose run karaf karaf
+```
+
+or 
+
+```
+docker run --name karaf karaf karaf
 ```
 
 * Run Karaf as a daemon (without interaction)
 
 ```
-    docker-compose up
+docker-compose up
+```
+
+or 
+
+```
+docker run --name karaf
 ```
 
 * Kill Karaf
 
 ```
 docker-compose kill
+```
+
+or
+
+```
+docker kill karaf
 ```
 
 ### Ports
