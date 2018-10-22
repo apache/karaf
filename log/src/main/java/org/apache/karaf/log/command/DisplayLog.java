@@ -125,5 +125,6 @@ public class DisplayLog implements Action {
         } else if ((event != null) && (logger == null)) {
             out.append(formatter.format(event, overridenPattern, noColor));
         }
+        out.flush();
     }
 }
