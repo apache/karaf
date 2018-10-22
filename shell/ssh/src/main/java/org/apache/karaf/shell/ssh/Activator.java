@@ -141,7 +141,7 @@ public class Activator extends BaseActivator implements ManagedService {
     }
 
     protected SshServer createSshServer(SessionFactory sessionFactory) {
-        int sshPort            = getInt("sshPort", 8181);
+        int sshPort            = getInt("sshPort", 8101);
         String sshHost         = getString("sshHost", "0.0.0.0");
         long sshIdleTimeout    = getLong("sshIdleTimeout", 1800000);
         int nioWorkers         = getInt("nio-workers", 2);
