@@ -35,7 +35,7 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.felix.utils.properties.Properties;
-import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngine;
+import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
@@ -121,9 +121,9 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         principals = new HashSet<>();
         principals.add(new UserPrincipal(user));
         for (int i = 1; i < infos.length; i++) {
-            if (infos[i].trim().startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
+            if (infos[i].trim().startsWith(BackingEngine.GROUP_PREFIX)) {
                 // it's a group reference
-                principals.add(new GroupPrincipal(infos[i].trim().substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
+                principals.add(new GroupPrincipal(infos[i].trim().substring(BackingEngine.GROUP_PREFIX.length())));
                 String groupInfo = users.get(infos[i].trim());
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
