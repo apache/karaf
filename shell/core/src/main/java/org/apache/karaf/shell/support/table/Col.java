@@ -18,6 +18,7 @@ package org.apache.karaf.shell.support.table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +28,12 @@ import org.apache.karaf.shell.support.ansi.SimpleAnsi;
  * Column definition.
  */
 public class Col {
+	// This is kept here only for backwards compatibility
+	// and is used in cyan(boolean) method
+	private static final Function<String, String> COLOR_CYAN =
+			(cellContent) -> SimpleAnsi.COLOR_CYAN;
+
+	Function<String, String> colorProvider;
 
     /**
      * Column header.
@@ -102,14 +109,26 @@ public class Col {
         return cyan(true);
     }
 
-    public Col cyan(boolean cyan) {
-        this.cyan = cyan;
-        return this;
-    }
+	public Col cyan(boolean cyan) {
+		if(cyan)
+			colorProvider(COLOR_CYAN);
+		
+		// Only remove colorProvider if argument is false and 
+		// member equals COLOR_CYAN
+		else if(this.colorProvider == COLOR_CYAN)
+			colorProvider(null);
+		
+		return this;
+	}
 
     public int getSize() {
         return size;
     }
+	
+	public Col colorProvider(Function<String, String> colorProvider) {
+		this.colorProvider = colorProvider;
+		return this;
+	}
     
     protected void updateSize(int cellSize) {
         if (this.size <= cellSize) {
@@ -148,6 +167,12 @@ public class Col {
             }
             lines = wrapped;
         }
+
+        String color = null;
+        if(colorProvider != null) {
+        	color = colorProvider.apply(content);
+        }
+
         StringBuilder sb = new StringBuilder();
         for (String line : lines) {
             if (sb.length() > 0) {
@@ -157,10 +182,14 @@ public class Col {
             if (bold) {
                 line = SimpleAnsi.INTENSITY_BOLD + line + SimpleAnsi.INTENSITY_NORMAL;
             }
-            if (cyan) {
-                line = SimpleAnsi.COLOR_CYAN + line + SimpleAnsi.COLOR_DEFAULT;
-            }
+
+            if(color != null)
+            	sb.append(color);
+            
             sb.append(line);
+            
+            if(color != null)
+            	sb.append(SimpleAnsi.COLOR_DEFAULT);
         }
         return sb.toString();
     }
