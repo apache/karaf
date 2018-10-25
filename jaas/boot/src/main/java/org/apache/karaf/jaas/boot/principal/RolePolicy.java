@@ -15,7 +15,6 @@
 package org.apache.karaf.jaas.boot.principal;
 
 import java.security.Principal;
-import java.security.acl.Group;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
