@@ -31,12 +31,15 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
@@ -404,9 +407,9 @@ public class InstanceServiceImpl implements InstanceService {
             copyFilteredResourcesToDir(filteredResources, karafBase, textResources, props, printOutput);
 
             try {
-                chmod(new File(karafBase, "bin/karaf"), "a+x");
-                chmod(new File(karafBase, "bin/start"), "a+x");
-                chmod(new File(karafBase, "bin/stop"), "a+x");
+                makeFileExecutable(new File(karafBase, "bin/karaf"));
+                makeFileExecutable(new File(karafBase, "bin/start"));
+                makeFileExecutable(new File(karafBase, "bin/stop"));
             } catch (IOException e) {
                 LOGGER.debug("Could not set file mode on scripts.", e);
             }
@@ -1199,24 +1202,16 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private int chmod(File serviceFile, String mode) throws IOException {
-        java.lang.ProcessBuilder builder = new java.lang.ProcessBuilder();
-        builder.command("chmod", mode, serviceFile.getCanonicalPath());
-        java.lang.Process p = builder.start();
+    private void makeFileExecutable(File serviceFile) throws IOException {
+        Set<PosixFilePermission> permissions = new HashSet<>();
+        permissions.add(PosixFilePermission.OWNER_EXECUTE);
+        permissions.add(PosixFilePermission.GROUP_EXECUTE);
+        permissions.add(PosixFilePermission.OTHERS_EXECUTE);
 
-        // gnodet: Fix SMX4KNL-46: cpu goes to 100% after running the 'admin create' command
-        // Not sure exactly what happens, but commenting the process io redirection seems
-        // to work around the problem.
-        //
-        //PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream);
-        //handler.attach(p);
-        //handler.start();
-        try {
-            return p.waitFor();
-        } catch (InterruptedException e) {
-            throw (IOException) new InterruptedIOException().initCause(e);
-        }
-        //handler.stop();
+        // Get the existing permissions and add the executable permissions to them
+        Set<PosixFilePermission> filePermissions = Files.getPosixFilePermissions(serviceFile.toPath());
+        filePermissions.addAll(permissions);
+        Files.setPosixFilePermissions(serviceFile.toPath(), filePermissions);
     }
 
     private void copy(File source, File destination) throws IOException {
