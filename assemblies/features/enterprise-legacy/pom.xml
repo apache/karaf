@@ -208,30 +208,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>karaf-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>verify</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>mvn:org.apache.karaf.features/framework/${project.version}/xml/features</descriptor>
-                                <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
-                            </descriptors>
-                            <distribution>org.apache.karaf.features:framework</distribution>
-                            <javase>1.8</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
