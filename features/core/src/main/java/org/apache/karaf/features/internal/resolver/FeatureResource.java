@@ -104,7 +104,7 @@ public final class FeatureResource extends ResourceImpl {
             }
         }
         for (Dependency dep : feature.getDependencies()) {
-            if (!dep.isDependency()) {
+            if (!dep.isDependency() && !dep.isBlacklisted()) {
                 addDependency(resource, dep, featureRange);
             }
         }

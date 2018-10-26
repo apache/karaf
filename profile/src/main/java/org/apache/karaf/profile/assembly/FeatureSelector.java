@@ -109,7 +109,9 @@ public class FeatureSelector {
         for (Feature f : set) {
             if (features.add(f)) {
                 for (Dependency dep : f.getFeature()) {
-                    addFeatures(dep.toString(), features, isMandatory(dep));
+                    if (!dep.isBlacklisted()) {
+                        addFeatures(dep.toString(), features, isMandatory(dep));
+                    }
                 }
             }
         }
