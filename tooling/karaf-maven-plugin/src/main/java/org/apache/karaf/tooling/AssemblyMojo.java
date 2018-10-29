@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -431,7 +432,9 @@ public class AssemblyMojo extends MojoSupport {
                .defaultAddAll(installAllFeaturesByDefault)
                .ignoreDependencyFlag(ignoreDependencyFlag);
         if (profilesUri != null) {
-            builder.profilesUris(profilesUri);
+            Arrays.stream(profilesUri.split(","))
+                .map(String::trim)
+                .forEach(builder::profilesUris);
         }
         if (libraries != null) {
             builder.libraries(libraries.toArray(new String[libraries.size()]));
