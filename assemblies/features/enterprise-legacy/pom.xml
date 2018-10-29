@@ -223,7 +223,7 @@
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
-                            <javase>1.8</javase>
+                            <javase>9</javase>
                             <framework>
                                 <feature>framework</feature>
                             </framework>
