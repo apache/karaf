@@ -191,6 +191,22 @@ public class Main {
                 if (config.getCommand().length() > 0) {
                     ChannelExec channel = session.createExecChannel(config.getCommand() + "\n");
                     channel.setIn(new ByteArrayInputStream(new byte[0]));
+                    new Thread() {
+                        public void run() {
+                            while (true) {
+                                try {
+                                    int a = System.in.read();
+                                    if (a == -1) {
+                                        channel.close(true);
+                                        break;
+                                    }
+                                    Thread.sleep(1000);
+                                } catch (Exception e) {
+                                    //ignore
+                                }
+                            }
+                        }
+                    }.start();
                     channel.setAgentForwarding(true);
                     NoCloseOutputStream output = new NoCloseOutputStream(terminal.output());
                     channel.setOut(output);
@@ -200,6 +216,7 @@ public class Main {
                     if (channel.getExitStatus() != null) {
                         exitStatus = channel.getExitStatus();
                     }
+                    
                 } else {
                     ChannelShell channel = session.createShellChannel();
                     Attributes attributes = terminal.enterRawMode();
