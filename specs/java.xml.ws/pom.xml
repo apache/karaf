@@ -63,4 +63,20 @@
             <artifactId>org.apache.karaf.specs.locator</artifactId>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+	        <id>java9-plus</id>
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                         <version>${jaxb.version}</version>
+                    </dependency>
+                </dependencies>
+	        <activation>
+        	    <jdk>[9,)</jdk>
+            </activation>
+	</profile>
+    </profiles>
+
 </project>
