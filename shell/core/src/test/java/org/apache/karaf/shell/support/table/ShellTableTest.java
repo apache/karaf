@@ -18,6 +18,8 @@
  */
 package org.apache.karaf.shell.support.table;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -25,9 +27,8 @@ import java.io.PrintStream;
 
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.threadio.ThreadIO;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class ShellTableTest {
 
@@ -106,6 +107,31 @@ public class ShellTableTest {
                 "                      | quite long\n",
                 getString(baos));
 
+    }
+    
+    @Test
+    public void testColoredTable() {
+        ShellTable table = new ShellTable().forceAscii();
+        table.separator("|");
+        table.column("State").colorProvider(cellContent -> {
+			if(cellContent.contains("Active"))
+				return SimpleAnsi.COLOR_GREEN;
+			
+			if(cellContent.contains("Resolved"))
+				return SimpleAnsi.COLOR_YELLOW;
+			return null;
+		});
+
+        table.column("Description").maxSize(-1);
+        table.addRow().addContent("Normal", "This should have default color");
+        table.addRow().addContent("Active", "Green color");
+        table.addRow().addContent("This is Resolved", "Yellow color");
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        table.print(new PrintStream(baos), false);
+        assertEquals("Normal           | This should have default color\n" + 
+        		"[32mActive          [39m | Green color\n" + 
+        		"[33mThis is Resolved[39m | Yellow color\n", baos.toString());
     }
 
     private String getString(ByteArrayOutputStream stream) {

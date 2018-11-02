@@ -22,6 +22,9 @@ public class SimpleAnsi {
     public static String COLOR_RED = "\u001b[31m";
     public static String COLOR_CYAN = "\u001b[36m";
     public static String COLOR_YELLOW = "\u001b[33m";
+    public static String COLOR_GREEN = "\u001b[32m";
+    public static String COLOR_BLUE = "\u001b[34m";
+    public static String COLOR_MAGENTA = "\u001b[35m";
     public static String COLOR_DEFAULT = "\u001b[39m";
     
     public static String INTENSITY_BOLD = "\u001b[1m";
