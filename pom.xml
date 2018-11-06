@@ -261,7 +261,7 @@
         <hibernate.validator.version>6.0.13.Final</hibernate.validator.version>
         <jansi.version>1.17.1</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jetty.version>9.4.11.v20180605</jetty.version>
+        <jetty.version>9.4.12.v20180830</jetty.version>
         <jline.version>3.9.0</jline.version>
         <junit.version>4.12</junit.version>
         <jsw.version>3.2.3</jsw.version>
@@ -280,7 +280,7 @@
         <pax.base.version>1.5.0</pax.base.version>
         <pax.swissbox.version>1.8.3</pax.swissbox.version>
         <pax.url.version>2.5.4</pax.url.version>
-        <pax.web.version>7.2.3</pax.web.version>
+        <pax.web.version>7.2.4</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.3.0</pax.jdbc.version>
         <pax.jms.version>1.0.1</pax.jms.version>
