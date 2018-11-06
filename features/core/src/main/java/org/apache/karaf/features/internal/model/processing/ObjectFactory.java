@@ -26,5 +26,4 @@ public class ObjectFactory {
     public FeaturesProcessing createFeaturesProcessing() {
         return new FeaturesProcessing();
     }
-
 }

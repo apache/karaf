@@ -28,5 +28,4 @@ public @interface Services {
     ProvideService[] provides() default {};
 
     RequireService[] requires() default {};
-
 }

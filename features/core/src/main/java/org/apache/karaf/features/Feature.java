@@ -18,9 +18,7 @@ package org.apache.karaf.features;
 
 import java.util.List;
 
-/**
- * A feature is a list of bundles associated identified by its name.
- */
+/** A feature is a list of bundles associated identified by its name. */
 public interface Feature extends Blacklisting {
 
     String DEFAULT_INSTALL_MODE = "auto";
@@ -47,7 +45,7 @@ public interface Feature extends Blacklisting {
 
     List<BundleInfo> getBundles();
 
-//    Map<String, Map<String, String>> getConfigurations();
+    //    Map<String, Map<String, String>> getConfigurations();
     List<ConfigInfo> getConfigurations();
 
     List<ConfigFileInfo> getConfigurationFiles();
@@ -69,5 +67,4 @@ public interface Feature extends Blacklisting {
     List<String> getResourceRepositories();
 
     String getRepositoryUrl();
-
 }

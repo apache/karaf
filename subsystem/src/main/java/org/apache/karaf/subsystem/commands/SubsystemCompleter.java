@@ -15,7 +15,6 @@ package org.apache.karaf.subsystem.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;

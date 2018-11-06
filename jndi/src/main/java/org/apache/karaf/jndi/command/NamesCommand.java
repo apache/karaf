@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.jndi.command;
 
+import java.util.Map;
 import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.jndi.command.completers.ContextsCompleter;
 import org.apache.karaf.shell.api.action.Action;
@@ -26,18 +27,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-import java.util.Map;
-
 @Command(scope = "jndi", name = "names", description = "List the JNDI names.")
 @Service
 public class NamesCommand implements Action {
 
-    @Argument(index = 0, name = "context", description = "The JNDI context to display the names", required = false, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "context",
+            description = "The JNDI context to display the names",
+            required = false,
+            multiValued = false)
     @Completion(ContextsCompleter.class)
     String context;
 
-    @Reference
-    JndiService jndiService;
+    @Reference JndiService jndiService;
 
     @Override
     public Object execute() throws Exception {
@@ -61,5 +64,4 @@ public class NamesCommand implements Action {
 
         return null;
     }
-
 }

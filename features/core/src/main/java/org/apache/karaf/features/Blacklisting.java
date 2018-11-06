@@ -19,16 +19,17 @@
 package org.apache.karaf.features;
 
 /**
- * <p>Indication that given object may be <em>blacklisted</em>.</p>
- * <p>Blacklisted item is available for query, but can't be used to alter system (e.g., blacklisted feature
- * can't be installed)</p>
+ * Indication that given object may be <em>blacklisted</em>.
+ *
+ * <p>Blacklisted item is available for query, but can't be used to alter system (e.g., blacklisted
+ * feature can't be installed)
  */
 public interface Blacklisting {
 
     /**
      * Returns <code>true</code> if this item is <em>blacklisted</em>.
+     *
      * @return
      */
     boolean isBlacklisted();
-
 }

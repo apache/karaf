@@ -29,8 +29,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 @Services(
         provides = @ProvideService(JmsService.class),
-        requires = @RequireService(ConfigurationAdmin.class)
-)
+        requires = @RequireService(ConfigurationAdmin.class))
 public class Activator extends BaseActivator {
     @Override
     protected void doStart() throws Exception {
@@ -49,6 +48,5 @@ public class Activator extends BaseActivator {
         filter.addRegEx("create +.*?--password ([^ ]+)", 2);
         filter.addRegEx("create +.*?-p ([^ ]+)", 2);
         register(CommandLoggingFilter.class, filter);
-
     }
 }

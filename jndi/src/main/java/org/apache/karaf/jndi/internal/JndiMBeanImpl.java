@@ -16,16 +16,13 @@
  */
 package org.apache.karaf.jndi.internal;
 
-import org.apache.karaf.jndi.JndiService;
-import org.apache.karaf.jndi.JndiMBean;
-
-import javax.management.MBeanException;
 import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
+import org.apache.karaf.jndi.JndiMBean;
+import org.apache.karaf.jndi.JndiService;
 
-/**
- * Implementation of the JndiMBean
- */
+/** Implementation of the JndiMBean */
 public class JndiMBeanImpl implements JndiMBean {
 
     private JndiService jndiService;
@@ -118,5 +115,4 @@ public class JndiMBeanImpl implements JndiMBean {
     public void setJndiService(JndiService jndiService) {
         this.jndiService = jndiService;
     }
-
 }

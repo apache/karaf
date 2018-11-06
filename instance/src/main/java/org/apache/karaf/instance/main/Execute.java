@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.karaf.instance.command.ChangeOptsCommand;
 import org.apache.karaf.instance.command.ChangeRmiRegistryPortCommand;
 import org.apache.karaf.instance.command.ChangeRmiServerPortCommand;
@@ -44,20 +43,22 @@ import org.apache.karaf.shell.impl.action.command.DefaultActionPreparator;
 
 public class Execute {
     static Class<? extends Action> x = CreateCommand.class;
-    private static final Class<?>[] COMMAND_CLASSES = new Class[]{
-            ChangeOptsCommand.class,
-            ChangeRmiRegistryPortCommand.class,
-            ChangeRmiServerPortCommand.class,
-            ChangeSshPortCommand.class,
-            CloneCommand.class,
-            CreateCommand.class,
-            DestroyCommand.class,
-            ListCommand.class,
-            RenameCommand.class,
-            RestartCommand.class,
-            StartCommand.class,
-            StatusCommand.class,
-            StopCommand.class};
+    private static final Class<?>[] COMMAND_CLASSES =
+            new Class[] {
+                ChangeOptsCommand.class,
+                ChangeRmiRegistryPortCommand.class,
+                ChangeRmiServerPortCommand.class,
+                ChangeSshPortCommand.class,
+                CloneCommand.class,
+                CreateCommand.class,
+                DestroyCommand.class,
+                ListCommand.class,
+                RenameCommand.class,
+                RestartCommand.class,
+                StartCommand.class,
+                StatusCommand.class,
+                StopCommand.class
+            };
     private static final Map<String, Class<?>> COMMANDS = new TreeMap<>();
 
     static {
@@ -74,14 +75,14 @@ public class Execute {
     static boolean exitAllowed = true;
 
     /**
-     * Environment variable for specifying extra options to the Karaf instance
-     * process kicked off from this Java process.
+     * Environment variable for specifying extra options to the Karaf instance process kicked off
+     * from this Java process.
      */
     private static final String ENV_KARAF_OPTS = "KARAF_OPTS";
 
     /**
-     * System property for specifying extra options to the Karaf instance
-     * process kicked off from this Java process.
+     * System property for specifying extra options to the Karaf instance process kicked off from
+     * this Java process.
      */
     private static final String PROP_KARAF_OPTS = "karaf.opts";
 
@@ -99,12 +100,14 @@ public class Execute {
 
         String storage = System.getProperty("karaf.instances");
         if (storage == null) {
-            System.err.println("System property 'karaf.instances' is not set. \n" +
-                    "This property needs to be set to the full path of the instance.properties file.");
+            System.err.println(
+                    "System property 'karaf.instances' is not set. \n"
+                            + "This property needs to be set to the full path of the instance.properties file.");
             exit(-2);
         }
         File storageFile = new File(storage);
-        System.setProperty("user.dir", storageFile.getParentFile().getParentFile().getCanonicalPath());
+        System.setProperty(
+                "user.dir", storageFile.getParentFile().getParentFile().getCanonicalPath());
 
         try {
             String karafOpts = System.getenv(ENV_KARAF_OPTS);
@@ -123,7 +126,8 @@ public class Execute {
             try {
                 execute((InstanceCommandSupport) command, storageFile, args);
             } catch (Exception e) {
-                System.err.println("Error execution command '" + commandName + "': " + e.getMessage());
+                System.err.println(
+                        "Error execution command '" + commandName + "': " + e.getMessage());
                 if (System.getProperty("karaf.showStackTrace") != null) {
                     throw e;
                 }
@@ -134,7 +138,8 @@ public class Execute {
         }
     }
 
-    static void execute(InstanceCommandSupport command, File storageFile, String[] args) throws Exception {
+    static void execute(InstanceCommandSupport command, File storageFile, String[] args)
+            throws Exception {
         DefaultActionPreparator dap = new DefaultActionPreparator();
         List<Object> params = new ArrayList<>(Arrays.asList(args));
         params.remove(0); // this is the actual command name
@@ -166,5 +171,4 @@ public class Execute {
             throw new RuntimeException(Integer.toString(rc));
         }
     }
-
 }

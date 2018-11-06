@@ -20,7 +20,6 @@ import static org.apache.karaf.event.service.TopicPredicate.matchTopic;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
 import org.apache.karaf.event.service.EventCollector;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -32,21 +31,20 @@ import org.apache.karaf.shell.api.console.Session;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 
-@Command(scope = "event", name = "tail", description = "Shows events and listens for incoming events")
+@Command(
+        scope = "event",
+        name = "tail",
+        description = "Shows events and listens for incoming events")
 @Service
 public class EventTailCommand implements Action {
 
-    @Reference
-    Session session;
+    @Reference Session session;
 
-    @Reference
-    BundleContext context;
+    @Reference BundleContext context;
 
-    @Reference
-    EventCollector collector;
+    @Reference EventCollector collector;
 
-    @Argument
-    String topicFilter = "*";
+    @Argument String topicFilter = "*";
 
     @Option(name = "-v")
     boolean verbose = false;
@@ -63,9 +61,11 @@ public class EventTailCommand implements Action {
         }
         return null;
     }
-    
+
     private <T> Consumer<T> executeIf(Predicate<T> pred, Consumer<T> consumer) {
-        return t -> {if (pred.test(t)) consumer.accept(t);};
+        return t -> {
+            if (pred.test(t)) consumer.accept(t);
+        };
     }
 
     private void waitTillInterrupted() throws InterruptedException {

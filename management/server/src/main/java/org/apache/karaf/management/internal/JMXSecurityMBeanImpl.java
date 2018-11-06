@@ -16,11 +16,9 @@
  */
 package org.apache.karaf.management.internal;
 
-import org.apache.karaf.management.JMXSecurityMBean;
-import org.apache.karaf.management.KarafMBeanServerGuard;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -30,9 +28,10 @@ import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.KeyAlreadyExistsException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import org.apache.karaf.management.JMXSecurityMBean;
+import org.apache.karaf.management.KarafMBeanServerGuard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMBean {
 
@@ -53,29 +52,33 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
         return canInvoke(null, objectName, methodName);
     }
 
-    public boolean canInvoke(String objectName, String methodName, String[] argumentTypes) throws Exception {
+    public boolean canInvoke(String objectName, String methodName, String[] argumentTypes)
+            throws Exception {
         return canInvoke(null, objectName, methodName, argumentTypes);
     }
 
     private boolean canInvoke(BulkRequestContext context, String objectName) throws Exception {
-        if (guard == null)
-            return true;
+        if (guard == null) return true;
 
         return guard.canInvoke(context, mbeanServer, new ObjectName(objectName));
     }
 
-    private boolean canInvoke(BulkRequestContext context, String objectName, String methodName) throws Exception {
-        if (guard == null)
-            return true;
+    private boolean canInvoke(BulkRequestContext context, String objectName, String methodName)
+            throws Exception {
+        if (guard == null) return true;
 
         return guard.canInvoke(context, mbeanServer, new ObjectName(objectName), methodName);
     }
 
-    private boolean canInvoke(BulkRequestContext context, String objectName, String methodName, String[] argumentTypes) throws Exception {
+    private boolean canInvoke(
+            BulkRequestContext context,
+            String objectName,
+            String methodName,
+            String[] argumentTypes)
+            throws Exception {
         ObjectName on = new ObjectName(objectName);
 
-        if (guard == null)
-            return true;
+        if (guard == null) return true;
 
         return guard.canInvoke(context, mbeanServer, on, methodName, argumentTypes);
     }
@@ -90,7 +93,11 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
             List<String> methods = entry.getValue();
             if (methods.size() == 0) {
                 boolean res = canInvoke(context, objectName);
-                CompositeData data = new CompositeDataSupport(CAN_INVOKE_RESULT_ROW_TYPE, CAN_INVOKE_RESULT_COLUMNS, new Object[]{ objectName, "", res });
+                CompositeData data =
+                        new CompositeDataSupport(
+                                CAN_INVOKE_RESULT_ROW_TYPE,
+                                CAN_INVOKE_RESULT_COLUMNS,
+                                new Object[] {objectName, "", res});
                 table.put(data);
             } else {
                 for (String method : methods) {
@@ -101,14 +108,24 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
                     if (name.equals(method)) {
                         res = canInvoke(context, objectName, name);
                     } else {
-                        res = canInvoke(context, objectName, name, argTypes.toArray(new String[]{}));
+                        res =
+                                canInvoke(
+                                        context,
+                                        objectName,
+                                        name,
+                                        argTypes.toArray(new String[] {}));
                     }
-                    CompositeData data = new CompositeDataSupport(CAN_INVOKE_RESULT_ROW_TYPE, CAN_INVOKE_RESULT_COLUMNS, new Object[]{ objectName, method, res });
+                    CompositeData data =
+                            new CompositeDataSupport(
+                                    CAN_INVOKE_RESULT_ROW_TYPE,
+                                    CAN_INVOKE_RESULT_COLUMNS,
+                                    new Object[] {objectName, method, res});
                     try {
                         table.put(data);
                     } catch (KeyAlreadyExistsException e) {
                         // KeyAlreadyExistsException can happen only when methods are not empty
-                        LOG.warn("{} (objectName = \"{}\", method = \"{}\")", e, objectName, method);
+                        LOG.warn(
+                                "{} (objectName = \"{}\", method = \"{}\")", e, objectName, method);
                     }
                 }
             }
@@ -120,8 +137,7 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
     private String parseMethodName(String method, List<String> argTypes) {
         method = method.trim();
         int index = method.indexOf('(');
-        if (index < 0)
-            return method;
+        if (index < 0) return method;
 
         String args = method.substring(index + 1, method.length() - 1);
         for (String arg : args.split(",")) {
@@ -146,5 +162,4 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
     public void setGuard(KarafMBeanServerGuard guard) {
         this.guard = guard;
     }
-
 }

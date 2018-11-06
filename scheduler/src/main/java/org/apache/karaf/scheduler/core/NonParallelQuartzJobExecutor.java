@@ -18,11 +18,9 @@ package org.apache.karaf.scheduler.core;
 
 import org.quartz.DisallowConcurrentExecution;
 
-
 /**
- * This component is responsible to launch a {@link org.apache.karaf.scheduler.Job}
- * or {@link Runnable} in a Quartz Scheduler but non concurrently.
- *
+ * This component is responsible to launch a {@link org.apache.karaf.scheduler.Job} or {@link
+ * Runnable} in a Quartz Scheduler but non concurrently.
  */
 @DisallowConcurrentExecution
 public class NonParallelQuartzJobExecutor extends QuartzJobExecutor {

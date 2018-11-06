@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-
 import org.apache.karaf.maven.core.MavenRepositoryURL;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -69,8 +68,10 @@ import org.sonatype.plexus.components.sec.dispatcher.model.SettingsSecurity;
 
 /**
  * Base class for <code>maven:</code> commands.
- * <p>Important: even if it duplicates some code from pax-url-aether, this should be treated as verification code of
- * how pax-url-aether should interact with <code>org.ops4j.pax.url.mvn</code> PID configuration.
+ *
+ * <p>Important: even if it duplicates some code from pax-url-aether, this should be treated as
+ * verification code of how pax-url-aether should interact with <code>org.ops4j.pax.url.mvn</code>
+ * PID configuration.
  */
 public abstract class MavenConfigurationSupport implements Action {
 
@@ -80,7 +81,8 @@ public abstract class MavenConfigurationSupport implements Action {
     protected static final String PATTERN_PID_PROPERTY = "Explicit %s PID configuration (%s)";
 
     protected static final String PATTERN_SECURITY_SETTINGS = "maven-security-settings-%d.xml";
-    protected static final Pattern RE_SECURITY_SETTINGS = Pattern.compile("maven-security-settings-(\\d+)\\.xml");
+    protected static final Pattern RE_SECURITY_SETTINGS =
+            Pattern.compile("maven-security-settings-(\\d+)\\.xml");
     protected static final String PATTERN_SETTINGS = "maven-settings-%d.xml";
     protected static final Pattern RE_SETTINGS = Pattern.compile("maven-settings-(\\d+)\\.xml");
     private static final int MAX_SEQUENCE_SIZE = 10;
@@ -122,37 +124,43 @@ public abstract class MavenConfigurationSupport implements Action {
 
     protected List<String> warnings = new LinkedList<>();
 
-    private static final String masterMasterPassword = DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION;
+    private static final String masterMasterPassword =
+            DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION;
     protected String masterPassword;
     protected DefaultPlexusCipher cipher;
 
-    @Reference
-    protected ConfigurationAdmin cm;
+    @Reference protected ConfigurationAdmin cm;
 
-    @Reference
-    protected BundleContext context;
+    @Reference protected BundleContext context;
 
-    @Reference
-    protected Session session;
+    @Reference protected Session session;
 
     @Override
-    final public Object execute() throws Exception {
+    public final Object execute() throws Exception {
         Configuration c = cm.getConfiguration(PID);
 
         if (c != null && c.getProperties() != null) {
             try {
                 cipher = new DefaultPlexusCipher();
-                securitySettings = securitySettings((String) c.getProperties().get(PID + "." + PROPERTY_SECURITY_FILE));
+                securitySettings =
+                        securitySettings(
+                                (String) c.getProperties().get(PID + "." + PROPERTY_SECURITY_FILE));
                 if (securitySettings != null && securitySettings.value != null) {
                     mavenSecuritySettings = readSecuritySettings(securitySettings.value);
                 }
 
-                settings = settings((String) c.getProperties().get(PID + "." + PROPERTY_SETTINGS_FILE));
+                settings =
+                        settings(
+                                (String) c.getProperties().get(PID + "." + PROPERTY_SETTINGS_FILE));
                 if (settings != null && settings.value != null) {
                     mavenSettings = readSettings(settings.value);
                 }
 
-                localRepository = localRepository((String) c.getProperties().get(PID + "." + PROPERTY_LOCAL_REPOSITORY));
+                localRepository =
+                        localRepository(
+                                (String)
+                                        c.getProperties()
+                                                .get(PID + "." + PROPERTY_LOCAL_REPOSITORY));
 
                 if (showPasswords()) {
                     decryptSettings();
@@ -171,15 +179,19 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * Performs command action on <strong>existing</strong> <code>org.ops4j.pax.url.mvn</code>
-     * PID configuration
+     * Performs command action on <strong>existing</strong> <code>org.ops4j.pax.url.mvn</code> PID
+     * configuration
+     *
      * @param prefix prefix for properties inside <code>org.ops4j.pax.url.mvn</code> PID
-     * @param config <code>org.ops4j.pax.url.mvn</code> PID configuration taken from {@link ConfigurationAdmin}
+     * @param config <code>org.ops4j.pax.url.mvn</code> PID configuration taken from {@link
+     *     ConfigurationAdmin}
      */
-    abstract protected void doAction(String prefix, Dictionary<String, Object> config) throws Exception;
+    protected abstract void doAction(String prefix, Dictionary<String, Object> config)
+            throws Exception;
 
     /**
      * Gets effective location of <code>settings.xml</code> file - according to pax-url-aether rules
+     *
      * @param cmProperty property obtained from Config Admin
      * @return
      */
@@ -190,11 +202,14 @@ public abstract class MavenConfigurationSupport implements Action {
 
         // 1. PID + ".settings"
         if (cmProperty != null && !"".equals(cmProperty.trim())) {
-            result.source = String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_SETTINGS_FILE);
+            result.source =
+                    String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_SETTINGS_FILE);
             try {
                 locationUrl = new URL(cmProperty);
-                probableErrorMessage = String.format("%s configured in %s.%s is not accessible",
-                        locationUrl, PID, PROPERTY_SETTINGS_FILE);
+                probableErrorMessage =
+                        String.format(
+                                "%s configured in %s.%s is not accessible",
+                                locationUrl, PID, PROPERTY_SETTINGS_FILE);
             } catch (MalformedURLException e) {
                 File file = new File(cmProperty);
                 if (file.isFile()) {
@@ -244,7 +259,9 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * Gets effective location of <code>settings-security.xml</code> file - according to pax-url-aether rules
+     * Gets effective location of <code>settings-security.xml</code> file - according to
+     * pax-url-aether rules
+     *
      * @param cmProperty property obtained from Config Admin
      * @return
      */
@@ -255,11 +272,14 @@ public abstract class MavenConfigurationSupport implements Action {
 
         // 1. PID + ".security"
         if (cmProperty != null && !"".equals(cmProperty.trim())) {
-            result.source = String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_SECURITY_FILE);
+            result.source =
+                    String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_SECURITY_FILE);
             try {
                 locationUrl = new URL(cmProperty);
-                probableErrorMessage = String.format("%s configured in %s.%s is not accessible",
-                        locationUrl, PID, PROPERTY_SECURITY_FILE);
+                probableErrorMessage =
+                        String.format(
+                                "%s configured in %s.%s is not accessible",
+                                locationUrl, PID, PROPERTY_SECURITY_FILE);
             } catch (MalformedURLException e) {
                 File file = new File(cmProperty);
                 if (file.isFile()) {
@@ -292,6 +312,7 @@ public abstract class MavenConfigurationSupport implements Action {
 
     /**
      * Gets effective location of <em>local repository</em> - according to pax-url-aether rules
+     *
      * @param cmProperty property obtained from Config Admin
      * @return
      */
@@ -302,11 +323,14 @@ public abstract class MavenConfigurationSupport implements Action {
 
         // 1. PID + ".localRepository"
         if (cmProperty != null && !"".equals(cmProperty.trim())) {
-            result.source = String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_LOCAL_REPOSITORY);
+            result.source =
+                    String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_LOCAL_REPOSITORY);
             try {
                 locationUrl = new URL(cmProperty);
-                probableErrorMessage = String.format("%s configured in %s.%s is not accessible",
-                        locationUrl, PID, PROPERTY_LOCAL_REPOSITORY);
+                probableErrorMessage =
+                        String.format(
+                                "%s configured in %s.%s is not accessible",
+                                locationUrl, PID, PROPERTY_LOCAL_REPOSITORY);
             } catch (MalformedURLException e) {
                 File file = new File(cmProperty);
                 if (file.isDirectory()) {
@@ -317,12 +341,16 @@ public abstract class MavenConfigurationSupport implements Action {
         }
 
         // 2. from settings.xml
-        if (locationUrl == null && mavenSettings != null && mavenSettings.getLocalRepository() != null) {
+        if (locationUrl == null
+                && mavenSettings != null
+                && mavenSettings.getLocalRepository() != null) {
             result.source = String.format("Explicit <localRepository> in %s", settings.value);
             try {
                 locationUrl = new URL(mavenSettings.getLocalRepository());
-                probableErrorMessage = String.format("%s configured in %s is not accessible",
-                        mavenSettings.getLocalRepository(), settings.value);
+                probableErrorMessage =
+                        String.format(
+                                "%s configured in %s is not accessible",
+                                mavenSettings.getLocalRepository(), settings.value);
             } catch (MalformedURLException e) {
                 File file = new File(mavenSettings.getLocalRepository());
                 if (file.isDirectory()) {
@@ -353,11 +381,13 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * Reads on demand <code>settings.xml</code> file - without password decryption. Also
-     * collects declared servers by ID.
+     * Reads on demand <code>settings.xml</code> file - without password decryption. Also collects
+     * declared servers by ID.
+     *
      * @param settingsFile
      */
-    protected synchronized Settings readSettings(File settingsFile) throws SettingsBuildingException {
+    protected synchronized Settings readSettings(File settingsFile)
+            throws SettingsBuildingException {
         if (!settingsFile.isFile() || !settingsFile.canRead()) {
             return null;
         }
@@ -392,9 +422,11 @@ public abstract class MavenConfigurationSupport implements Action {
 
     /**
      * Re-reads on demand <code>settings-security.xml</code> file
+     *
      * @param securitySettingsFile
      */
-    protected synchronized SettingsSecurity readSecuritySettings(File securitySettingsFile) throws Exception {
+    protected synchronized SettingsSecurity readSecuritySettings(File securitySettingsFile)
+            throws Exception {
         if (!securitySettingsFile.isFile() || !securitySettingsFile.canRead()) {
             return null;
         }
@@ -409,12 +441,16 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * <p>Decrypts passwords inside correctly read <code>settings.xml</code>. Also tries to decrypt master password.</p>
-     * <p>Not called implicitly for each action invocation.</p>
+     * Decrypts passwords inside correctly read <code>settings.xml</code>. Also tries to decrypt
+     * master password.
+     *
+     * <p>Not called implicitly for each action invocation.
      */
     private void decryptSettings() throws Exception {
         if (mavenSecuritySettings != null && mavenSettings != null) {
-            masterPassword = cipher.decryptDecorated(mavenSecuritySettings.getMaster(), masterMasterPassword);
+            masterPassword =
+                    cipher.decryptDecorated(
+                            mavenSecuritySettings.getMaster(), masterMasterPassword);
             DefaultSecDispatcher dispatcher = new DefaultSecDispatcher();
             DefaultSettingsDecrypter decrypter = new DefaultSettingsDecrypter();
             try {
@@ -427,7 +463,8 @@ public abstract class MavenConfigurationSupport implements Action {
                 f.setAccessible(true);
                 f.set(decrypter, dispatcher);
 
-                DefaultSettingsDecryptionRequest req = new DefaultSettingsDecryptionRequest(mavenSettings);
+                DefaultSettingsDecryptionRequest req =
+                        new DefaultSettingsDecryptionRequest(mavenSettings);
                 SettingsDecryptionResult res = decrypter.decrypt(req);
                 if (res.getProblems() != null && res.getProblems().size() > 0) {
                     for (SettingsProblem sp : res.getProblems()) {
@@ -452,13 +489,18 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * Returns list of configured remote (<code>remote=true</code>) or default (<code>remote=false</code>)
-     * repositories.
+     * Returns list of configured remote (<code>remote=true</code>) or default (<code>remote=false
+     * </code>) repositories.
+     *
      * @param remote
      * @return
      */
-    protected MavenRepositoryURL[] repositories(Dictionary<String, Object> config, boolean remote) throws Exception {
-        String property = remote ? PID + "." + PROPERTY_REPOSITORIES : PID + "." + PROPERTY_DEFAULT_REPOSITORIES;
+    protected MavenRepositoryURL[] repositories(Dictionary<String, Object> config, boolean remote)
+            throws Exception {
+        String property =
+                remote
+                        ? PID + "." + PROPERTY_REPOSITORIES
+                        : PID + "." + PROPERTY_DEFAULT_REPOSITORIES;
         String[] repositories = listOfValues((String) config.get(property));
 
         if (remote) {
@@ -472,11 +514,18 @@ public abstract class MavenConfigurationSupport implements Action {
 
                 // append all repositories from all active profiles from available settings.xml
                 if (mavenSettings != null) {
-                    // see org.ops4j.pax.url.mvn.internal.config.MavenConfigurationImpl.getRepositories()
-                    Set<String> activeProfiles = new LinkedHashSet<>(mavenSettings.getActiveProfiles());
-                    Map<String, Profile> profiles = (Map<String, Profile>)mavenSettings.getProfilesAsMap();
-                    profiles.values().stream()
-                            .filter((profile) -> profile.getActivation() != null && profile.getActivation().isActiveByDefault())
+                    // see
+                    // org.ops4j.pax.url.mvn.internal.config.MavenConfigurationImpl.getRepositories()
+                    Set<String> activeProfiles =
+                            new LinkedHashSet<>(mavenSettings.getActiveProfiles());
+                    Map<String, Profile> profiles =
+                            (Map<String, Profile>) mavenSettings.getProfilesAsMap();
+                    profiles.values()
+                            .stream()
+                            .filter(
+                                    (profile) ->
+                                            profile.getActivation() != null
+                                                    && profile.getActivation().isActiveByDefault())
                             .map(Profile::getId)
                             .forEach(activeProfiles::add);
 
@@ -493,21 +542,35 @@ public abstract class MavenConfigurationSupport implements Action {
 
                             if (repo.getReleases() != null) {
                                 if (!repo.getReleases().isEnabled()) {
-                                    builder.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_DISALLOW_RELEASES);
+                                    builder.append(
+                                            ServiceConstants.SEPARATOR_OPTIONS
+                                                    + ServiceConstants.OPTION_DISALLOW_RELEASES);
                                 }
-                                SourceAnd<String> up = updatePolicy(repo.getReleases().getUpdatePolicy());
-                                addPolicy(builder, "".equals(up.val()) ? "never" : up.val(), ServiceConstants.OPTION_RELEASES_UPDATE);
+                                SourceAnd<String> up =
+                                        updatePolicy(repo.getReleases().getUpdatePolicy());
+                                addPolicy(
+                                        builder,
+                                        "".equals(up.val()) ? "never" : up.val(),
+                                        ServiceConstants.OPTION_RELEASES_UPDATE);
                                 // not used in pax-url-aether
-                                //addPolicy(builder, repo.getReleases().getChecksumPolicy(), "releasesChecksum");
+                                // addPolicy(builder, repo.getReleases().getChecksumPolicy(),
+                                // "releasesChecksum");
                             }
                             if (repo.getSnapshots() != null) {
                                 if (repo.getSnapshots().isEnabled()) {
-                                    builder.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
+                                    builder.append(
+                                            ServiceConstants.SEPARATOR_OPTIONS
+                                                    + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
                                 }
-                                SourceAnd<String> up = updatePolicy(repo.getSnapshots().getUpdatePolicy());
-                                addPolicy(builder, "".equals(up.val()) ? "never" : up.val(), ServiceConstants.OPTION_SNAPSHOTS_UPDATE);
+                                SourceAnd<String> up =
+                                        updatePolicy(repo.getSnapshots().getUpdatePolicy());
+                                addPolicy(
+                                        builder,
+                                        "".equals(up.val()) ? "never" : up.val(),
+                                        ServiceConstants.OPTION_SNAPSHOTS_UPDATE);
                                 // not used in pax-url-aether
-                                //addPolicy(builder, repo.getSnapshots().getChecksumPolicy(), "snapshotsChecksum");
+                                // addPolicy(builder, repo.getSnapshots().getChecksumPolicy(),
+                                // "snapshotsChecksum");
                             }
                             newRepositories.add(builder.toString());
                         }
@@ -536,6 +599,7 @@ public abstract class MavenConfigurationSupport implements Action {
 
     /**
      * Splits comma separated list of values into String array
+     *
      * @param list
      * @return
      */
@@ -552,12 +616,15 @@ public abstract class MavenConfigurationSupport implements Action {
 
     /**
      * Adds information used by proxy/server
-     * @param row {@link org.apache.karaf.shell.support.table.ShellTable}'s row to add information to
+     *
+     * @param row {@link org.apache.karaf.shell.support.table.ShellTable}'s row to add information
+     *     to
      * @param id2Password mapping of ids (servers/proxies to decrypted passwords)
      * @param id ID of proxy or server from <code>settings.xml</code>
      * @param password password to use if decryption failed
      */
-    protected void addPasswordInfo(Row row, Map<String, String> id2Password, String id, String password) {
+    protected void addPasswordInfo(
+            Row row, Map<String, String> id2Password, String id, String password) {
         if (id2Password.containsKey(id)) {
             row.addContent(id2Password.get(id));
         } else {
@@ -571,6 +638,7 @@ public abstract class MavenConfigurationSupport implements Action {
 
     /**
      * Asks for confirmation (user has to press <code>y</code>) after presenting a prompt
+     *
      * @param prompt
      * @return
      */
@@ -581,6 +649,7 @@ public abstract class MavenConfigurationSupport implements Action {
 
     /**
      * Returns new {@link File} that's part of fixed-size sequence. Keeps the sequence bounded.
+     *
      * @param dataDir
      * @param pattern
      * @param fileNameFormat
@@ -590,8 +659,11 @@ public abstract class MavenConfigurationSupport implements Action {
         File[] files = dataDir.listFiles((dir, name) -> pattern.matcher(name).matches());
         File result = null;
         if (files != null && files.length > 0) {
-            List<String> names = new ArrayList<>(Arrays.stream(files).map(File::getName)
-                    .collect(TreeSet<String>::new, TreeSet::add, TreeSet::addAll));
+            List<String> names =
+                    new ArrayList<>(
+                            Arrays.stream(files)
+                                    .map(File::getName)
+                                    .collect(TreeSet<String>::new, TreeSet::add, TreeSet::addAll));
 
             names.add(String.format(fileNameFormat, new Date().getTime()));
 
@@ -610,6 +682,7 @@ public abstract class MavenConfigurationSupport implements Action {
 
     /**
      * This method controls whether passwords are tried to be decrypted.
+     *
      * @return
      */
     protected boolean showPasswords() {
@@ -617,7 +690,9 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * Parses update policy value and returns {@link SourceAnd}<code>&lt;String&gt;</code> about the value
+     * Parses update policy value and returns {@link SourceAnd}<code>&lt;String&gt;</code> about the
+     * value
+     *
      * @param policy
      * @return
      */
@@ -632,7 +707,8 @@ public abstract class MavenConfigurationSupport implements Action {
             return result;
         }
 
-        result.source = String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_GLOBAL_UPDATE_POLICY);
+        result.source =
+                String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_GLOBAL_UPDATE_POLICY);
         if ("always".equals(policy) || "never".equals(policy) || "daily".equals(policy)) {
             // ok
             result.valid = true;
@@ -657,7 +733,9 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * Parses checksum policy value and returns {@link SourceAnd}<code>&lt;String&gt;</code> about the value
+     * Parses checksum policy value and returns {@link SourceAnd}<code>&lt;String&gt;</code> about
+     * the value
+     *
      * @param policy
      * @return
      */
@@ -672,7 +750,9 @@ public abstract class MavenConfigurationSupport implements Action {
             return result;
         }
 
-        result.source = String.format(PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_GLOBAL_CHECKSUM_POLICY);
+        result.source =
+                String.format(
+                        PATTERN_PID_PROPERTY, PID, PID + "." + PROPERTY_GLOBAL_CHECKSUM_POLICY);
         if ("ignore".equals(policy) || "warn".equals(policy) || "fail".equals(policy)) {
             // ok
             result.valid = true;
@@ -686,14 +766,18 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * Stores changed {@link org.apache.maven.settings.Settings} in new settings.xml file and updates
-     * <code>org.ops4j.pax.url.mvn.settings</code> property. Does not update
-     * {@link org.osgi.service.cm.ConfigurationAdmin} config.
+     * Stores changed {@link org.apache.maven.settings.Settings} in new settings.xml file and
+     * updates <code>org.ops4j.pax.url.mvn.settings</code> property. Does not update {@link
+     * org.osgi.service.cm.ConfigurationAdmin} config.
      */
-    protected void updateSettings(String prefix, Dictionary<String, Object> config) throws IOException {
+    protected void updateSettings(String prefix, Dictionary<String, Object> config)
+            throws IOException {
         File dataDir = context.getDataFile(".");
         if (!dataDir.isDirectory()) {
-            throw new RuntimeException("Can't access data directory for " + context.getBundle().getSymbolicName() + " bundle");
+            throw new RuntimeException(
+                    "Can't access data directory for "
+                            + context.getBundle().getSymbolicName()
+                            + " bundle");
         }
         File newSettingsFile = nextSequenceFile(dataDir, RE_SETTINGS, PATTERN_SETTINGS);
         config.put(prefix + PROPERTY_SETTINGS_FILE, newSettingsFile.getCanonicalPath());
@@ -705,8 +789,11 @@ public abstract class MavenConfigurationSupport implements Action {
     }
 
     /**
-     * Handy class containing value and information about its origin. <code>valid</code> may be used to indicate
-     * if the value is correct. It may be implicit, but the interpretation of <code>valid </code> is not defined.
+     * Handy class containing value and information about its origin. <code>valid</code> may be used
+     * to indicate if the value is correct. It may be implicit, but the interpretation of <code>
+     * valid
+     * </code> is not defined.
+     *
      * @param <T>
      */
     protected static class SourceAnd<T> {
@@ -714,8 +801,7 @@ public abstract class MavenConfigurationSupport implements Action {
         T value;
         boolean valid;
 
-        public SourceAnd() {
-        }
+        public SourceAnd() {}
 
         public SourceAnd(String source, T value) {
             this.source = source;
@@ -726,5 +812,4 @@ public abstract class MavenConfigurationSupport implements Action {
             return value == null ? "" : value.toString();
         }
     }
-
 }

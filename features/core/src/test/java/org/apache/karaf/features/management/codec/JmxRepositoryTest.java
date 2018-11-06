@@ -26,10 +26,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
-
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
-
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;

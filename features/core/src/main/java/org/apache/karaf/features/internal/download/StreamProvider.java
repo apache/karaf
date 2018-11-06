@@ -27,5 +27,4 @@ public interface StreamProvider {
     File getFile() throws IOException;
 
     InputStream open() throws IOException;
-
 }

@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.instance.core.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,7 +31,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceSettings;
 import org.junit.BeforeClass;
@@ -36,22 +39,18 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 public class InstanceServiceImplTest {
 
-    @Rule
-    public TestName name = new TestName();
+    @Rule public TestName name = new TestName();
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        String buildDirectory = ClassLoader.getSystemResource("etc/startup.properties").getFile()
-                .replace("startup.properties", "");
+        String buildDirectory =
+                ClassLoader.getSystemResource("etc/startup.properties")
+                        .getFile()
+                        .replace("startup.properties", "");
         System.setProperty("karaf.etc", buildDirectory);
     }
 
@@ -67,7 +66,8 @@ public class InstanceServiceImplTest {
             p.store(os, "Test comment");
         }
 
-        InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null, Arrays.asList("test"));
+        InstanceSettings s =
+                new InstanceSettings(8122, 1122, 44444, null, null, null, Arrays.asList("test"));
         as.addFeaturesFromSettings(f, s);
 
         Properties p2 = new Properties();
@@ -84,7 +84,8 @@ public class InstanceServiceImplTest {
         InstanceServiceImpl service = new InstanceServiceImpl();
         service.setStorageLocation(tempFolder.newFolder("instances"));
 
-        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+        InstanceSettings settings =
+                new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         Instance instance = service.createInstance(getName(), settings, true);
 
         assertFileExists(instance.getLocation(), "etc/config.properties");
@@ -105,55 +106,60 @@ public class InstanceServiceImplTest {
         Map<String, URL> textResources = new HashMap<>();
         textResources.put("etc/myresource", getClass().getClassLoader().getResource("myresource"));
 
-        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null, null, textResources, new HashMap<>());
+        InstanceSettings settings =
+                new InstanceSettings(
+                        8122,
+                        1122,
+                        44444,
+                        getName(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        textResources,
+                        new HashMap<>());
         Instance instance = service.createInstance(getName(), settings, false);
 
         assertFileExists(instance.getLocation(), "etc/myresource");
     }
 
-    /**
-     * <p>
-     * Test the renaming of an existing instance.
-     * </p>
-     */
+    /** Test the renaming of an existing instance. */
     @Test
     public void testRenameInstance() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
         service.setStorageLocation(tempFolder.newFolder("instances"));
 
-        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+        InstanceSettings settings =
+                new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         service.createInstance(getName(), settings, true);
 
         service.renameInstance(getName(), getName() + "b", true);
         assertNotNull(service.getInstance(getName() + "b"));
     }
 
-    /**
-     * <p>
-     * Test the renaming of an existing instance.
-     * </p>
-     */
+    /** Test the renaming of an existing instance. */
     @Test
     public void testToSimulateRenameInstanceByExternalProcess() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
         File storageLocation = tempFolder.newFolder("instances");
         service.setStorageLocation(storageLocation);
 
-        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+        InstanceSettings settings =
+                new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         service.createInstance(getName(), settings, true);
-        
-        //to simulate the scenario that the instance name get changed by 
-        //external process, likely the admin command CLI tool, which cause
-        //the instance storage file get updated, the AdminService should be 
-        //able to reload the storage file before check any status for the 
-        //instance
-        
+
+        // to simulate the scenario that the instance name get changed by
+        // external process, likely the admin command CLI tool, which cause
+        // the instance storage file get updated, the AdminService should be
+        // able to reload the storage file before check any status for the
+        // instance
+
         File storageFile = new File(storageLocation, InstanceServiceImpl.STORAGE_FILE);
         assertTrue(storageFile.isFile());
         Properties storage = loadStorage(storageFile);
         storage.setProperty("item.0.name", getName() + "b");
         saveStorage(storage, storageFile, "testToSimulateRenameInstanceByExternalProcess");
-        
+
         assertNotNull(service.getInstance(getName() + "b"));
     }
 
@@ -172,7 +178,7 @@ public class InstanceServiceImplTest {
             }
         }
     }
-    
+
     private Properties loadStorage(File location) throws IOException {
         InputStream is = null;
         try {
@@ -189,7 +195,6 @@ public class InstanceServiceImplTest {
 
     private void assertFileExists(String path, String name) throws IOException {
         File file = new File(path, name);
-        assertTrue("Expected " + file.getCanonicalPath() + " to exist",
-                   file.exists());
-    }   
+        assertTrue("Expected " + file.getCanonicalPath() + " to exist", file.exists());
+    }
 }

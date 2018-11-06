@@ -31,11 +31,16 @@ public class DumpExampleTest extends KarafTestSupport {
         installAndAssertFeature("scr");
 
         // install the dump example bundle
-        installBundle("mvn:org.apache.karaf.examples/karaf-dump-example/" + System.getProperty("karaf.version"), true);
-        assertServiceAvailable(DumpProvider.class, "(component.name=org.apache.karaf.examples.dump.ScreenshotDumpProvider)", 10);
+        installBundle(
+                "mvn:org.apache.karaf.examples/karaf-dump-example/"
+                        + System.getProperty("karaf.version"),
+                true);
+        assertServiceAvailable(
+                DumpProvider.class,
+                "(component.name=org.apache.karaf.examples.dump.ScreenshotDumpProvider)",
+                10);
 
         // create a dump
         System.out.println(executeCommand("dev:dump-create"));
     }
-
 }

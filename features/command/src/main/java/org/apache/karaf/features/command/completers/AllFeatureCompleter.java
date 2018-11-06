@@ -19,9 +19,7 @@ package org.apache.karaf.features.command.completers;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-/**
- * {@link FeatureCompleterSupport} for all available features.
- */
+/** {@link FeatureCompleterSupport} for all available features. */
 @Service
 public class AllFeatureCompleter extends FeatureCompleterSupport {
 
@@ -29,5 +27,4 @@ public class AllFeatureCompleter extends FeatureCompleterSupport {
     protected boolean acceptsFeature(Feature feature) {
         return true;
     }
-
 }

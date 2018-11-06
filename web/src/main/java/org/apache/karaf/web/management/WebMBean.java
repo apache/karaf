@@ -16,18 +16,16 @@
  */
 package org.apache.karaf.web.management;
 
+import java.util.List;
 import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
-import java.util.List;
 
-/**
- * Describe the Web MBean.
- */
+/** Describe the Web MBean. */
 public interface WebMBean {
 
     /**
      * Return the list of web bundles.
-     * 
+     *
      * @return a tabular data of web bundles.
      * @throws MBeanException in case of lookup failure.
      */
@@ -43,9 +41,8 @@ public interface WebMBean {
 
     /**
      * Start web context of the given web bundles (identified by ID).
-     * 
-     * @param bundleIds the list of bundle IDs.
-     *                  TODO use a BundleSelector service
+     *
+     * @param bundleIds the list of bundle IDs. TODO use a BundleSelector service
      * @throws MBeanException in case of start failure.
      */
     void start(List<Long> bundleIds) throws MBeanException;
@@ -61,10 +58,8 @@ public interface WebMBean {
     /**
      * Stop web context of the given web bundles (identified by ID).
      *
-     * @param bundleIds the list of bundle IDs.
-     *                  TODO use a BundleSelector service
+     * @param bundleIds the list of bundle IDs. TODO use a BundleSelector service
      * @throws MBeanException in case of stop failure
      */
     void stop(List<Long> bundleIds) throws MBeanException;
-    
 }

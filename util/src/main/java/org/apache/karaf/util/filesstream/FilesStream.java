@@ -18,9 +18,6 @@
  */
 package org.apache.karaf.util.filesstream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -35,23 +32,24 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class FilesStream {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FilesStream.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilesStream.class);
 
-    private FilesStream() {
-	}
+    private FilesStream() {}
 
     /**
-     * Returns a stream of Paths for the given fileNames.
-     * The given names can be delimited by ",". A name can also contain
-     * {@link java.nio.file.FileSystem#getPathMatcher} syntax to refer to matching files.  
-     * 
-     * @param fileNames list of names 
-     * @return Paths to the scripts 
+     * Returns a stream of Paths for the given fileNames. The given names can be delimited by ",". A
+     * name can also contain {@link java.nio.file.FileSystem#getPathMatcher} syntax to refer to
+     * matching files.
+     *
+     * @param fileNames list of names
+     * @return Paths to the scripts
      */
-	public static Stream<Path> stream(String fileNames) {
+    public static Stream<Path> stream(String fileNames) {
         if (fileNames == null) {
             return Stream.empty();
         }
@@ -91,8 +89,7 @@ public final class FilesStream {
         }
         Path cur = Paths.get(System.getProperty("karaf.etc"));
         return Stream.concat(
-                files.stream().map(cur::resolve),
-                generators.stream().flatMap(s -> files(cur, s)));
+                files.stream().map(cur::resolve), generators.stream().flatMap(s -> files(cur, s)));
     }
 
     private static Stream<Path> files(Path cur, String glob) {
@@ -110,12 +107,14 @@ public final class FilesStream {
         final PathMatcher matcher = dir.getFileSystem().getPathMatcher("glob:" + rem);
         Stream.Builder<Path> stream = Stream.builder();
         try {
-            Files.walkFileTree(dir,
+            Files.walkFileTree(
+                    dir,
                     EnumSet.of(FileVisitOption.FOLLOW_LINKS),
                     Integer.MAX_VALUE,
                     new FileVisitor<Path>() {
                         @Override
-                        public FileVisitResult preVisitDirectory(Path file, BasicFileAttributes attrs) throws IOException {
+                        public FileVisitResult preVisitDirectory(
+                                Path file, BasicFileAttributes attrs) throws IOException {
                             if (file.equals(dir)) {
                                 return FileVisitResult.CONTINUE;
                             }
@@ -130,7 +129,8 @@ public final class FilesStream {
                         }
 
                         @Override
-                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                                throws IOException {
                             if (!Files.isHidden(file)) {
                                 Path r = dir.relativize(file);
                                 if (matcher.matches(r)) {
@@ -141,12 +141,14 @@ public final class FilesStream {
                         }
 
                         @Override
-                        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                        public FileVisitResult visitFileFailed(Path file, IOException exc)
+                                throws IOException {
                             return FileVisitResult.CONTINUE;
                         }
 
                         @Override
-                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                                throws IOException {
                             return FileVisitResult.CONTINUE;
                         }
                     });

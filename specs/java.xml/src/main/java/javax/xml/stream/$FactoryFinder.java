@@ -31,16 +31,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class $FactoryFinder {
-    
+
     private static final String DEFAULT_PACKAGE = "com.sun.xml.internal.";
-    
+
     private static final Logger LOGGER = Logger.getLogger("javax.xml.stream");
-    
-    final private static Properties cacheProps = new Properties();
-    
+
+    private static final Properties cacheProps = new Properties();
+
     private static volatile boolean firstTime = true;
-    
-    static private Class getProviderClass(String className, ClassLoader cl, boolean doFallback, boolean useBSClsLoader) throws ClassNotFoundException {
+
+    private static Class getProviderClass(
+            String className, ClassLoader cl, boolean doFallback, boolean useBSClsLoader)
+            throws ClassNotFoundException {
         try {
             if (cl == null) {
                 if (useBSClsLoader) {
@@ -49,33 +51,34 @@ class $FactoryFinder {
                     cl = getContextClassLoader();
                     if (cl == null) {
                         throw new ClassNotFoundException();
-                    }
-                    else {
+                    } else {
                         return Class.forName(className, false, cl);
                     }
                 }
-            }
-            else {
+            } else {
                 return Class.forName(className, false, cl);
             }
-        }
-        catch (ClassNotFoundException e1) {
+        } catch (ClassNotFoundException e1) {
             if (doFallback) {
                 return Class.forName(className, false, $FactoryFinder.class.getClassLoader());
-            }
-            else {
+            } else {
                 throw e1;
             }
         }
     }
 
-
-    static <T> T newInstance(Class<T> type, String className, ClassLoader cl, boolean doFallback) throws FactoryConfigurationError {
+    static <T> T newInstance(Class<T> type, String className, ClassLoader cl, boolean doFallback)
+            throws FactoryConfigurationError {
         return newInstance(type, className, cl, doFallback, false);
     }
 
-
-    static <T> T newInstance(Class<T> type, String className, ClassLoader cl, boolean doFallback, boolean useBSClsLoader) throws FactoryConfigurationError {
+    static <T> T newInstance(
+            Class<T> type,
+            String className,
+            ClassLoader cl,
+            boolean doFallback,
+            boolean useBSClsLoader)
+            throws FactoryConfigurationError {
         assert type != null;
         if (System.getSecurityManager() != null) {
             if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
@@ -90,27 +93,31 @@ class $FactoryFinder {
             }
             Object instance = providerClass.getConstructor().newInstance();
             final ClassLoader clD = cl;
-            LOGGER.fine(() -> "created new instance of " + providerClass + " using ClassLoader: " + clD);
+            LOGGER.fine(
+                    () ->
+                            "created new instance of "
+                                    + providerClass
+                                    + " using ClassLoader: "
+                                    + clD);
             return type.cast(instance);
-        }
-        catch (ClassNotFoundException x) {
+        } catch (ClassNotFoundException x) {
             throw new FactoryConfigurationError("Provider " + className + " not found", x);
-        }
-        catch (Exception x) {
-            throw new FactoryConfigurationError("Provider " + className + " could not be instantiated: " + x, x);
+        } catch (Exception x) {
+            throw new FactoryConfigurationError(
+                    "Provider " + className + " could not be instantiated: " + x, x);
         }
     }
-
 
     static <T> T find(Class<T> type, String fallbackClassName) throws FactoryConfigurationError {
         return find(type, type.getName(), null, fallbackClassName);
     }
 
-    static <T> T find(Class<T> type, String factoryId, ClassLoader cl, String fallbackClassName) throws FactoryConfigurationError
-    {
+    static <T> T find(Class<T> type, String factoryId, ClassLoader cl, String fallbackClassName)
+            throws FactoryConfigurationError {
         try {
             // If we are deployed into an OSGi environment, leverage it
-            Class<? extends T> spiClass = org.apache.karaf.specs.locator.OsgiLocator.locate(type, factoryId);
+            Class<? extends T> spiClass =
+                    org.apache.karaf.specs.locator.OsgiLocator.locate(type, factoryId);
             if (spiClass != null) {
                 return spiClass.getConstructor().newInstance();
             }
@@ -128,8 +135,7 @@ class $FactoryFinder {
                 LOGGER.fine(() -> "found system property, value=" + systemProp);
                 return newInstance(type, systemProp, cl, true);
             }
-        }
-        catch (SecurityException se) {
+        } catch (SecurityException se) {
             throw new FactoryConfigurationError("Failed to read factoryId '" + factoryId + "'", se);
         }
         try {
@@ -139,12 +145,22 @@ class $FactoryFinder {
                         firstTime = false;
                         String javaHome = getSystemProperty("java.home");
                         String configFile;
-                        configFile = javaHome + File.separator + "conf" + File.separator + "jaxp.properties";
+                        configFile =
+                                javaHome
+                                        + File.separator
+                                        + "conf"
+                                        + File.separator
+                                        + "jaxp.properties";
                         File jaxp = new File(configFile);
                         if (doesFileExist(jaxp)) {
                             cacheProps.load(getFileInputStream(jaxp));
                         }
-                        configFile = javaHome + File.separator + "conf" + File.separator + "stax.properties";
+                        configFile =
+                                javaHome
+                                        + File.separator
+                                        + "conf"
+                                        + File.separator
+                                        + "stax.properties";
                         File stax = new File(configFile);
                         if (doesFileExist(stax)) {
                             cacheProps.load(getFileInputStream(stax));
@@ -156,8 +172,7 @@ class $FactoryFinder {
             if (factoryClassName != null) {
                 return newInstance(type, factoryClassName, cl, true);
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.FINE, "Error loading JDK properties file", ex);
         }
         if (type.getName().equals(factoryId)) {
@@ -169,50 +184,64 @@ class $FactoryFinder {
             assert fallbackClassName == null;
         }
         if (fallbackClassName == null) {
-            throw new FactoryConfigurationError("Provider for " + factoryId + " cannot be found", null);
+            throw new FactoryConfigurationError(
+                    "Provider for " + factoryId + " cannot be found", null);
         }
         LOGGER.fine(() -> "loaded from fallback value: " + fallbackClassName);
         return newInstance(type, fallbackClassName, cl, true);
     }
 
-    
     private static <T> T findServiceProvider(final Class<T> type, final ClassLoader cl) {
         try {
-            return AccessController.doPrivileged((PrivilegedAction<T>) () -> {
-                final ServiceLoader<T> serviceLoader;
-                serviceLoader = ServiceLoader.load(type, cl != null ? cl : Thread.currentThread().getContextClassLoader());
-                final Iterator<T> iterator = serviceLoader.iterator();
-                if (iterator.hasNext()) {
-                    return iterator.next();
-                } else {
-                    return null;
-                }
-            });
-        } catch(ServiceConfigurationError e) {
-            final RuntimeException x = new RuntimeException("Provider for " + type + " cannot be created", e);
+            return AccessController.doPrivileged(
+                    (PrivilegedAction<T>)
+                            () -> {
+                                final ServiceLoader<T> serviceLoader;
+                                serviceLoader =
+                                        ServiceLoader.load(
+                                                type,
+                                                cl != null
+                                                        ? cl
+                                                        : Thread.currentThread()
+                                                                .getContextClassLoader());
+                                final Iterator<T> iterator = serviceLoader.iterator();
+                                if (iterator.hasNext()) {
+                                    return iterator.next();
+                                } else {
+                                    return null;
+                                }
+                            });
+        } catch (ServiceConfigurationError e) {
+            final RuntimeException x =
+                    new RuntimeException("Provider for " + type + " cannot be created", e);
             throw new FactoryConfigurationError(x, x.getMessage());
-          }
-      }
+        }
+    }
 
-    private static ClassLoader getContextClassLoader() throws SecurityException{
-        return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            if (cl == null) {
-                cl = ClassLoader.getSystemClassLoader();
-            }
-            return cl;
-        });
+    private static ClassLoader getContextClassLoader() throws SecurityException {
+        return AccessController.doPrivileged(
+                (PrivilegedAction<ClassLoader>)
+                        () -> {
+                            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                            if (cl == null) {
+                                cl = ClassLoader.getSystemClassLoader();
+                            }
+                            return cl;
+                        });
     }
 
     private static String getSystemProperty(final String propName) {
-        return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(propName));
+        return AccessController.doPrivileged(
+                (PrivilegedAction<String>) () -> System.getProperty(propName));
     }
 
-    private static FileInputStream getFileInputStream(final File file) throws FileNotFoundException {
+    private static FileInputStream getFileInputStream(final File file)
+            throws FileNotFoundException {
         try {
-            return AccessController.doPrivileged((PrivilegedExceptionAction<FileInputStream>) () -> new FileInputStream(file));
+            return AccessController.doPrivileged(
+                    (PrivilegedExceptionAction<FileInputStream>) () -> new FileInputStream(file));
         } catch (PrivilegedActionException e) {
-            throw (FileNotFoundException)e.getException();
+            throw (FileNotFoundException) e.getException();
         }
     }
 

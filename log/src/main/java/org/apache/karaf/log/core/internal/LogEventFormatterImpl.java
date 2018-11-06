@@ -18,7 +18,6 @@ package org.apache.karaf.log.core.internal;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.karaf.log.core.LogEventFormatter;
 import org.apache.karaf.log.core.internal.layout.PatternConverter;
 import org.apache.karaf.log.core.internal.layout.PatternParser;
@@ -46,7 +45,8 @@ public class LogEventFormatterImpl implements LogEventFormatter {
      */
     @Override
     public String format(PaxLoggingEvent event, String overridenPattern, boolean noColor) {
-        final PatternConverter cnv = new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
+        final PatternConverter cnv =
+                new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
         String color = getColor(event, noColor);
         StringBuffer sb = new StringBuffer();
         color(sb, color);
@@ -64,7 +64,7 @@ public class LogEventFormatterImpl implements LogEventFormatter {
 
     private void color(StringBuffer sb, String color) {
         if (color != null) {
-            sb.append((char)27);
+            sb.append((char) 27);
             sb.append('[');
             sb.append(color);
             sb.append('m');
@@ -72,11 +72,13 @@ public class LogEventFormatterImpl implements LogEventFormatter {
     }
 
     private String getColor(PaxLoggingEvent event, boolean noColor) {
-        if (!noColor && event != null && event.getLevel() != null && event.getLevel().toString() != null) {
+        if (!noColor
+                && event != null
+                && event.getLevel() != null
+                && event.getLevel().toString() != null) {
             return level2Color.get(event.getLevel().toInt());
         } else {
             return null;
         }
     }
-
 }

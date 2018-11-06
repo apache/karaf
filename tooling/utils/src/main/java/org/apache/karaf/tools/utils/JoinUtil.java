@@ -16,17 +16,13 @@
  */
 package org.apache.karaf.tools.utils;
 
-/**
- * Join strings with commas. This has some reflection to be usable with
- * the pax-exam
- */
+/** Join strings with commas. This has some reflection to be usable with the pax-exam */
 public class JoinUtil {
 
-    private JoinUtil() {
-    }
-    
+    private JoinUtil() {}
+
     public static String join(String... options) {
-        return join((Object[])options);
+        return join((Object[]) options);
     }
 
     public static String join(Object[] options) {
@@ -45,14 +41,11 @@ public class JoinUtil {
     private static String getStringValue(Object option) {
         if (option == null) {
             return "";
-        }
-        else if (option instanceof String) {
-            return (String)option;
-        }
-        else if (option instanceof JoinableValue) {
-            return ((JoinableValue<String>)option).getValue();
-        }
-        else {
+        } else if (option instanceof String) {
+            return (String) option;
+        } else if (option instanceof JoinableValue) {
+            return ((JoinableValue<String>) option).getValue();
+        } else {
             return "";
         }
     }

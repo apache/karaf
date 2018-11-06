@@ -24,7 +24,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
@@ -32,11 +31,14 @@ public class FileAuditLoginModule extends AbstractAuditLoginModule {
 
     public static final String LOG_FILE_OPTION = "file";
 
-    private final static DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     private String logFile;
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler,
-                           Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         super.initialize(subject, callbackHandler, sharedState, options);
         logFile = (String) options.get(LOG_FILE_OPTION);
     }
@@ -52,11 +54,21 @@ public class FileAuditLoginModule extends AbstractAuditLoginModule {
             PrintWriter writer = new PrintWriter(out, false);
             String actionStr;
             switch (action) {
-            case ATTEMPT: actionStr = "Authentication attempt"; break;
-            case SUCCESS: actionStr = "Authentication succeeded"; break;
-            case FAILURE: actionStr = "Authentication failed"; break;
-            case LOGOUT: actionStr = "Explicit logout"; break;
-            default: actionStr = action.toString(); break;
+                case ATTEMPT:
+                    actionStr = "Authentication attempt";
+                    break;
+                case SUCCESS:
+                    actionStr = "Authentication succeeded";
+                    break;
+                case FAILURE:
+                    actionStr = "Authentication failed";
+                    break;
+                case LOGOUT:
+                    actionStr = "Explicit logout";
+                    break;
+                default:
+                    actionStr = action.toString();
+                    break;
             }
             writer.println(DATE_FORMAT.format(date) + " - " + actionStr + " - " + username);
             writer.flush();
@@ -68,5 +80,4 @@ public class FileAuditLoginModule extends AbstractAuditLoginModule {
             throw new RuntimeException("Unable to write to authentication log file", e);
         }
     }
-
 }

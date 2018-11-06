@@ -26,20 +26,20 @@ import java.util.stream.Collectors;
 
 public class LdapPropsUpdater {
 
-    private LdapPropsUpdater() {
-    }
+    private LdapPropsUpdater() {}
 
-    public static void ldapProps(String propsPath, Function<String, String> mapFunction) throws IOException {
+    public static void ldapProps(String propsPath, Function<String, String> mapFunction)
+            throws IOException {
         String basedir = System.getProperty("basedir");
         if (basedir == null) {
             basedir = new File(".").getCanonicalPath();
         }
         Path inPath = new File(basedir + "/src/test/resources/" + propsPath).toPath();
-        List<String> lines = Files.lines(inPath, Charset.forName("UTF-8"))
-            .map(mapFunction)
-            .collect(Collectors.toList());
+        List<String> lines =
+                Files.lines(inPath, Charset.forName("UTF-8"))
+                        .map(mapFunction)
+                        .collect(Collectors.toList());
         Path outPath = new File(basedir + "/target/test-classes/" + propsPath).toPath();
         Files.write(outPath, lines, Charset.forName("UTF-8"));
     }
-
 }

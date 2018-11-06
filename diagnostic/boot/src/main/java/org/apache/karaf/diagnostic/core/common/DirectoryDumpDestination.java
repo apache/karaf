@@ -18,39 +18,34 @@ package org.apache.karaf.diagnostic.core.common;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-
 import org.apache.karaf.diagnostic.core.DumpDestination;
 
-/**
- * Class which packages dumps to given directory.
- */
+/** Class which packages dumps to given directory. */
 public class DirectoryDumpDestination implements DumpDestination {
 
-	/**
-	 * Directory where dump files will be created.
-	 */
-	private File directory;
+    /** Directory where dump files will be created. */
+    private File directory;
 
-	public DirectoryDumpDestination(File file) {
-		this.directory = file;
+    public DirectoryDumpDestination(File file) {
+        this.directory = file;
 
-		if (!file.exists()) {
-			file.mkdirs();
-		} 
-	}
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+    }
 
-	public OutputStream add(String name) throws Exception {
-		File destination = new File(directory, name);
-		if (name.contains("/") || name.contains("\\")) {
-			// if name contains slashes we need to create sub directory
-			destination.getParentFile().mkdirs();
-		}
-		return new FileOutputStream(destination);
-	}
+    public OutputStream add(String name) throws Exception {
+        File destination = new File(directory, name);
+        if (name.contains("/") || name.contains("\\")) {
+            // if name contains slashes we need to create sub directory
+            destination.getParentFile().mkdirs();
+        }
+        return new FileOutputStream(destination);
+    }
 
-	public void save() throws Exception {
-		// do nothing, all should be written to output streams
-	}
+    public void save() throws Exception {
+        // do nothing, all should be written to output streams
+    }
 
     @Override
     public String toString() {

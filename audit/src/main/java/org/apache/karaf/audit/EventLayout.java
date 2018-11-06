@@ -21,15 +21,12 @@ import java.nio.CharBuffer;
 
 public interface EventLayout {
 
-    /**
-     * Format the log event directly into the given <code>Appendable</code>.
-     */
+    /** Format the log event directly into the given <code>Appendable</code>. */
     void format(Event event, Appendable to) throws IOException;
 
     /**
-     * Format the log event and return a CharBuffer.  The buffer is only valid
-     * until the next call to {@link #format(Event)} or {@link #format(Event, Appendable)}.
+     * Format the log event and return a CharBuffer. The buffer is only valid until the next call to
+     * {@link #format(Event)} or {@link #format(Event, Appendable)}.
      */
     CharBuffer format(Event event) throws IOException;
-
 }

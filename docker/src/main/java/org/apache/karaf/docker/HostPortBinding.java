@@ -43,5 +43,4 @@ public class HostPortBinding {
     public void setHostPort(String hostPort) {
         this.hostPort = hostPort;
     }
-
 }

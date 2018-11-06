@@ -25,8 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- */
+/** */
 public final class JsonReader {
 
     //
@@ -65,32 +64,32 @@ public final class JsonReader {
 
     private Object readValue() throws IOException {
         switch (current) {
-        case 'n':
-            return readNull();
-        case 't':
-            return readTrue();
-        case 'f':
-            return readFalse();
-        case '"':
-            return readString();
-        case '[':
-            return readArray();
-        case '{':
-            return readObject();
-        case '-':
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            return readNumber();
-        default:
-            throw expected("value");
+            case 'n':
+                return readNull();
+            case 't':
+                return readTrue();
+            case 'f':
+                return readFalse();
+            case '"':
+                return readString();
+            case '[':
+                return readArray();
+            case '{':
+                return readObject();
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                return readNumber();
+            default:
+                throw expected("value");
         }
     }
 
@@ -187,39 +186,39 @@ public final class JsonReader {
     private void readEscape() throws IOException {
         read();
         switch (current) {
-        case '"':
-        case '/':
-        case '\\':
-            recorder.append((char) current);
-            break;
-        case 'b':
-            recorder.append('\b');
-            break;
-        case 'f':
-            recorder.append('\f');
-            break;
-        case 'n':
-            recorder.append('\n');
-            break;
-        case 'r':
-            recorder.append('\r');
-            break;
-        case 't':
-            recorder.append('\t');
-            break;
-        case 'u':
-            char[] hexChars = new char[4];
-            for (int i = 0; i < 4; i++) {
-                read();
-                if (!isHexDigit(current)) {
-                    throw expected("hexadecimal digit");
+            case '"':
+            case '/':
+            case '\\':
+                recorder.append((char) current);
+                break;
+            case 'b':
+                recorder.append('\b');
+                break;
+            case 'f':
+                recorder.append('\f');
+                break;
+            case 'n':
+                recorder.append('\n');
+                break;
+            case 'r':
+                recorder.append('\r');
+                break;
+            case 't':
+                recorder.append('\t');
+                break;
+            case 'u':
+                char[] hexChars = new char[4];
+                for (int i = 0; i < 4; i++) {
+                    read();
+                    if (!isHexDigit(current)) {
+                        throw expected("hexadecimal digit");
+                    }
+                    hexChars[i] = (char) current;
                 }
-                hexChars[i] = (char) current;
-            }
-            recorder.append((char) Integer.parseInt(String.valueOf(hexChars), 16));
-            break;
-        default:
-            throw expected("valid escape sequence");
+                recorder.append((char) Integer.parseInt(String.valueOf(hexChars), 16));
+                break;
+            default:
+                throw expected("valid escape sequence");
         }
         read();
     }
@@ -348,5 +347,4 @@ public final class JsonReader {
     private static boolean isHexDigit(int ch) {
         return ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'f' || ch >= 'A' && ch <= 'F';
     }
-
 }

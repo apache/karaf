@@ -26,7 +26,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.features.ConfigFileInfo;
@@ -75,9 +74,9 @@ public class FeatureConfigInstaller {
         return cid;
     }
 
-    private Configuration createConfiguration(ConfigurationAdmin configurationAdmin, String pid,
-                                              String factoryPid)
-        throws IOException, InvalidSyntaxException {
+    private Configuration createConfiguration(
+            ConfigurationAdmin configurationAdmin, String pid, String factoryPid)
+            throws IOException, InvalidSyntaxException {
         if (factoryPid != null) {
             return configurationAdmin.createFactoryConfiguration(pid, null);
         } else {
@@ -85,8 +84,9 @@ public class FeatureConfigInstaller {
         }
     }
 
-    private Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin, ConfigId cid)
-        throws IOException, InvalidSyntaxException {
+    private Configuration findExistingConfiguration(
+            ConfigurationAdmin configurationAdmin, ConfigId cid)
+            throws IOException, InvalidSyntaxException {
         String filter;
         if (cid.factoryPid == null) {
             filter = "(" + Constants.SERVICE_PID + "=" + cid.pid + ")";
@@ -116,7 +116,8 @@ public class FeatureConfigInstaller {
                 props.put(CONFIG_KEY, cid.fullPid);
                 if (storage != null && configCfgStore) {
                     File cfgFile = new File(storage, cid.fullPid + ".cfg");
-                    cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
+                    cfgProps.put(
+                            FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
                 }
                 cfg.update(cfgProps);
                 try {
@@ -144,8 +145,8 @@ public class FeatureConfigInstaller {
             }
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-            installConfigurationFile(configFile.getLocation(), configFile.getFinalname(),
-                                     configFile.isOverride());
+            installConfigurationFile(
+                    configFile.getLocation(), configFile.getFinalname(), configFile.isOverride());
         }
     }
 
@@ -161,33 +162,34 @@ public class FeatureConfigInstaller {
      * Substitute variables in the final name and append prefix if necessary.
      *
      * <ol>
-     * <li>If the final name does not start with '${' it is prefixed with
-     * karaf.base (+ file separator).</li>
-     * <li>It substitute also all variables (scheme ${...}) with the respective
-     * configuration values and system properties.</li>
-     * <li>All unknown variables kept unchanged.</li>
-     * <li>If the substituted string starts with an variable that could not be
-     * substituted, it will be prefixed with karaf.base (+ file separator), too.
-     * </li>
+     *   <li>If the final name does not start with '${' it is prefixed with karaf.base (+ file
+     *       separator).
+     *   <li>It substitute also all variables (scheme ${...}) with the respective configuration
+     *       values and system properties.
+     *   <li>All unknown variables kept unchanged.
+     *   <li>If the substituted string starts with an variable that could not be substituted, it
+     *       will be prefixed with karaf.base (+ file separator), too.
      * </ol>
-     * 
-     * @param finalname
-     *            The final name that should be processed.
+     *
+     * @param finalname The final name that should be processed.
      * @return the location in the file system that should be accesses.
      */
     protected static String substFinalName(String finalname) {
         final String markerVarBeg = "${";
         final String markerVarEnd = "}";
 
-        boolean startsWithVariable = finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
+        boolean startsWithVariable =
+                finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
 
         // Substitute all variables, but keep unknown ones.
         final String dummyKey = "";
         try {
-            finalname = InterpolationHelper.substVars(finalname, dummyKey, null, null, null, true, true,
-                                                      false);
+            finalname =
+                    InterpolationHelper.substVars(
+                            finalname, dummyKey, null, null, null, true, true, false);
         } catch (final IllegalArgumentException ex) {
-            LOGGER.info("Substitution failed. Skip substitution of variables of configuration final name ({}).",
+            LOGGER.info(
+                    "Substitution failed. Skip substitution of variables of configuration final name ({}).",
                     finalname);
         }
 
@@ -210,7 +212,7 @@ public class FeatureConfigInstaller {
     }
 
     private void installConfigurationFile(String fileLocation, String finalname, boolean override)
-        throws IOException {
+            throws IOException {
         finalname = substFinalName(finalname);
 
         File file = new File(finalname);
@@ -226,9 +228,7 @@ public class FeatureConfigInstaller {
         }
 
         // TODO: use download manager to download the configuration
-        try (
-                InputStream is = new BufferedInputStream(new URL(fileLocation).openStream())
-        ) {
+        try (InputStream is = new BufferedInputStream(new URL(fileLocation).openStream())) {
             if (!file.exists()) {
                 File parentFile = file.getParentFile();
                 if (parentFile != null) {
@@ -236,9 +236,7 @@ public class FeatureConfigInstaller {
                 }
                 file.createNewFile();
             }
-            try (
-                    FileOutputStream fop = new FileOutputStream(file)
-            ) {
+            try (FileOutputStream fop = new FileOutputStream(file)) {
                 StreamUtils.copy(is, fop);
             }
         } catch (RuntimeException | MalformedURLException e) {
@@ -248,7 +246,7 @@ public class FeatureConfigInstaller {
     }
 
     protected void updateStorage(ConfigId cid, TypedProperties props, boolean append)
-        throws Exception {
+            throws Exception {
         if (storage != null && configCfgStore) {
             File cfgFile = getConfigFile(cid);
             if (!cfgFile.exists()) {
@@ -267,13 +265,13 @@ public class FeatureConfigInstaller {
             Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
             try {
                 if (val instanceof URL) {
-                    cfgFile = new File(((URL)val).toURI());
+                    cfgFile = new File(((URL) val).toURI());
                 }
                 if (val instanceof URI) {
-                    cfgFile = new File((URI)val);
+                    cfgFile = new File((URI) val);
                 }
                 if (val instanceof String) {
-                    cfgFile = new File(new URL((String)val).toURI());
+                    cfgFile = new File(new URL((String) val).toURI());
                 }
             } catch (Exception e) {
                 throw new IOException(e.getMessage(), e);
@@ -284,7 +282,7 @@ public class FeatureConfigInstaller {
     }
 
     private void updateExistingConfig(TypedProperties props, boolean append, File cfgFile)
-        throws IOException {
+            throws IOException {
         TypedProperties properties = new TypedProperties();
         properties.load(cfgFile);
         for (String key : props.keySet()) {
@@ -319,8 +317,8 @@ public class FeatureConfigInstaller {
 
     private boolean isInternalKey(String key) {
         return Constants.SERVICE_PID.equals(key)
-            || ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-            || FILEINSTALL_FILE_NAME.equals(key);
+                || ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                || FILEINSTALL_FILE_NAME.equals(key);
     }
 
     class ConfigId {

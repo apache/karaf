@@ -21,7 +21,6 @@ package org.apache.karaf.shell.impl.console.osgi;
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.CommandSessionListener;
 import org.osgi.framework.BundleContext;
@@ -29,13 +28,11 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class EventAdminListener implements CommandSessionListener, Closeable
-{
+public class EventAdminListener implements CommandSessionListener, Closeable {
 
     private ServiceTracker<EventAdmin, EventAdmin> tracker;
 
-    public EventAdminListener(BundleContext bundleContext)
-    {
+    public EventAdminListener(BundleContext bundleContext) {
         tracker = new ServiceTracker<>(bundleContext, EventAdmin.class.getName(), null);
         tracker.open();
     }
@@ -44,8 +41,7 @@ public class EventAdminListener implements CommandSessionListener, Closeable
         tracker.close();
     }
 
-    public void beforeExecute(CommandSession session, CharSequence command) {
-    }
+    public void beforeExecute(CommandSession session, CharSequence command) {}
 
     public void afterExecute(CommandSession session, CharSequence command, Exception exception) {
         sendEvent(session, command, null, exception);
@@ -55,7 +51,8 @@ public class EventAdminListener implements CommandSessionListener, Closeable
         sendEvent(session, command, result, null);
     }
 
-    private void sendEvent(CommandSession session, CharSequence command, Object result, Exception exception) {
+    private void sendEvent(
+            CommandSession session, CharSequence command, Object result, Exception exception) {
         EventAdmin admin = tracker.getService();
         if (admin != null) {
             Map<String, Object> props = new HashMap<>();
@@ -75,5 +72,4 @@ public class EventAdminListener implements CommandSessionListener, Closeable
             admin.postEvent(event);
         }
     }
-
 }

@@ -16,13 +16,11 @@
  */
 package org.apache.karaf.jndi;
 
-import javax.management.MBeanException;
 import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
 
-/**
- * JNDI Service MBean
- */
+/** JNDI Service MBean */
 public interface JndiMBean {
 
     /**
@@ -87,7 +85,8 @@ public interface JndiMBean {
     /**
      * Bind an OSGi service with a JNDI name.
      *
-     * @param serviceId The OSGi service id (service.id property on the service, created by the framework).
+     * @param serviceId The OSGi service id (service.id property on the service, created by the
+     *     framework).
      * @param name The JNDI name.
      * @throws MBeanException If the MBean fails.
      */
@@ -100,5 +99,4 @@ public interface JndiMBean {
      * @throws MBeanException If the MBean fails.
      */
     void unbind(String name) throws MBeanException;
-
 }

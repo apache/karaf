@@ -22,9 +22,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 
-@Services(
-        requires = @RequireService(RepositoryAdmin.class)
-)
+@Services(requires = @RequireService(RepositoryAdmin.class))
 public class Activator extends BaseActivator {
 
     @Override

@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.kar.command;
 
+import java.net.URI;
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -24,24 +25,29 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.net.URI;
-
 @Command(scope = "kar", name = "install", description = "Installs a KAR file.")
 @Service
 public class InstallKarCommand implements Action {
 
-    @Argument(index = 0, name = "url", description = "The URL of the KAR file to install.", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "url",
+            description = "The URL of the KAR file to install.",
+            required = true,
+            multiValued = false)
     private String url;
 
-    @Option(name = "--no-start", description = "Do not start the bundles automatically", required = false, multiValued = false)
+    @Option(
+            name = "--no-start",
+            description = "Do not start the bundles automatically",
+            required = false,
+            multiValued = false)
     private boolean noAutoStartBundle = false;
 
-    @Reference
-    private KarService karService;
+    @Reference private KarService karService;
 
     public Object execute() throws Exception {
         karService.install(new URI(url), noAutoStartBundle);
         return null;
     }
-    
 }

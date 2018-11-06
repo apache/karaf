@@ -26,21 +26,20 @@ import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.io.PrintStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.felix.gogo.commands.CommandException;
-import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.CommandException;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.converter.DefaultConverter;
 import org.apache.felix.gogo.commands.converter.GenericType;
 import org.apache.felix.service.command.CommandSession;
@@ -49,37 +48,39 @@ import org.apache.karaf.shell.console.NameScoping;
 @Deprecated
 public class DefaultActionPreparator implements ActionPreparator {
 
-    public static final Option HELP = new Option() {
-        public String name() {
-            return "--help";
-        }
+    public static final Option HELP =
+            new Option() {
+                public String name() {
+                    return "--help";
+                }
 
-        public String[] aliases() {
-            return new String[]{};
-        }
+                public String[] aliases() {
+                    return new String[] {};
+                }
 
-        public String description() {
-            return "Display this help message";
-        }
+                public String description() {
+                    return "Display this help message";
+                }
 
-        public boolean required() {
-            return false;
-        }
+                public boolean required() {
+                    return false;
+                }
 
-        public boolean multiValued() {
-            return false;
-        }
+                public boolean multiValued() {
+                    return false;
+                }
 
-        public String valueToShowInHelp() {
-            return Option.DEFAULT_STRING;
-        }
+                public String valueToShowInHelp() {
+                    return Option.DEFAULT_STRING;
+                }
 
-        public Class<? extends Annotation> annotationType() {
-            return Option.class;
-        }
-    };
+                public Class<? extends Annotation> annotationType() {
+                    return Option.class;
+                }
+            };
 
-    public boolean prepare(Action action, CommandSession session, List<Object> params) throws Exception {
+    public boolean prepare(Action action, CommandSession session, List<Object> params)
+            throws Exception {
         Map<Option, Field> options = new HashMap<>();
         Map<Argument, Field> arguments = new HashMap<>();
         List<Argument> orderedArguments = new ArrayList<>();
@@ -95,35 +96,36 @@ public class DefaultActionPreparator implements ActionPreparator {
                     if (Argument.DEFAULT.equals(argument.name())) {
                         final Argument delegate = argument;
                         final String name = field.getName();
-                        argument = new Argument() {
-                            public String name() {
-                                return name;
-                            }
+                        argument =
+                                new Argument() {
+                                    public String name() {
+                                        return name;
+                                    }
 
-                            public String description() {
-                                return delegate.description();
-                            }
+                                    public String description() {
+                                        return delegate.description();
+                                    }
 
-                            public boolean required() {
-                                return delegate.required();
-                            }
+                                    public boolean required() {
+                                        return delegate.required();
+                                    }
 
-                            public int index() {
-                                return delegate.index();
-                            }
+                                    public int index() {
+                                        return delegate.index();
+                                    }
 
-                            public boolean multiValued() {
-                                return delegate.multiValued();
-                            }
+                                    public boolean multiValued() {
+                                        return delegate.multiValued();
+                                    }
 
-                            public String valueToShowInHelp() {
-                                return delegate.valueToShowInHelp();
-                            }
+                                    public String valueToShowInHelp() {
+                                        return delegate.valueToShowInHelp();
+                                    }
 
-                            public Class<? extends Annotation> annotationType() {
-                                return delegate.annotationType();
-                            }
-                        };
+                                    public Class<? extends Annotation> annotationType() {
+                                        return delegate.annotationType();
+                                    }
+                                };
                     }
                     arguments.put(argument, field);
                     int index = argument.index();
@@ -175,21 +177,27 @@ public class DefaultActionPreparator implements ActionPreparator {
                 if (option == null) {
                     Command command = action.getClass().getAnnotation(Command.class);
                     if (command != null) {
-                        throw new CommandException(COLOR_RED
-                                                   + "Error executing command "
-                                                   + command.scope() + ":" 
-                                                   + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
-                                                   + " undefined option "
-                                                   + INTENSITY_BOLD + param + INTENSITY_NORMAL
-                                                   + COLOR_DEFAULT,
-                                                   "Undefined option: " + param
-                        );
+                        throw new CommandException(
+                                COLOR_RED
+                                        + "Error executing command "
+                                        + command.scope()
+                                        + ":"
+                                        + INTENSITY_BOLD
+                                        + command.name()
+                                        + INTENSITY_NORMAL
+                                        + " undefined option "
+                                        + INTENSITY_BOLD
+                                        + param
+                                        + INTENSITY_NORMAL
+                                        + COLOR_DEFAULT,
+                                "Undefined option: " + param);
                     } else {
                         throw new CommandException("Undefined option: " + param);
                     }
                 }
                 Field field = options.get(option);
-                if (value == null && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
+                if (value == null
+                        && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
                     value = Boolean.TRUE;
                 }
                 if (value == null && it.hasNext()) {
@@ -198,15 +206,20 @@ public class DefaultActionPreparator implements ActionPreparator {
                 if (value == null) {
                     Command command = action.getClass().getAnnotation(Command.class);
                     if (command != null) {
-                        throw new CommandException(COLOR_RED
-                                                   + "Error executing command "
-                                                   + command.scope() + ":" 
-                                                   + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
-                                                   + " missing value for option "
-                                                   + INTENSITY_BOLD + param + INTENSITY_NORMAL
-                                                   + COLOR_DEFAULT,
-                                                   "Missing value for option: " + param
-                        );
+                        throw new CommandException(
+                                COLOR_RED
+                                        + "Error executing command "
+                                        + command.scope()
+                                        + ":"
+                                        + INTENSITY_BOLD
+                                        + command.name()
+                                        + INTENSITY_NORMAL
+                                        + " missing value for option "
+                                        + INTENSITY_BOLD
+                                        + param
+                                        + INTENSITY_NORMAL
+                                        + COLOR_DEFAULT,
+                                "Missing value for option: " + param);
                     } else {
                         throw new CommandException("Missing value for option: " + param);
                     }
@@ -226,15 +239,20 @@ public class DefaultActionPreparator implements ActionPreparator {
                 if (argIndex >= orderedArguments.size()) {
                     Command command = action.getClass().getAnnotation(Command.class);
                     if (command != null) {
-                        throw new CommandException(COLOR_RED
-                                                   + "Error executing command "
-                                                   + command.scope() + ":" 
-                                                   + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
-                                                   + ": too many arguments specified"
-                                                   + INTENSITY_BOLD + param + INTENSITY_NORMAL
-                                                   + COLOR_DEFAULT,
-                                                   "Too many arguments specified"
-                        );
+                        throw new CommandException(
+                                COLOR_RED
+                                        + "Error executing command "
+                                        + command.scope()
+                                        + ":"
+                                        + INTENSITY_BOLD
+                                        + command.name()
+                                        + INTENSITY_NORMAL
+                                        + ": too many arguments specified"
+                                        + INTENSITY_BOLD
+                                        + param
+                                        + INTENSITY_NORMAL
+                                        + COLOR_DEFAULT,
+                                "Too many arguments specified");
                     } else {
                         throw new CommandException("Too many arguments specified");
                     }
@@ -260,16 +278,21 @@ public class DefaultActionPreparator implements ActionPreparator {
             if (option.required() && optionValues.get(option) == null) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
-                    throw new CommandException(COLOR_RED
-                                               + "Error executing command "
-                                               + command.scope() + ":" 
-                                               + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
-                                               + ": option "
-                                               + INTENSITY_BOLD + option.name() + INTENSITY_NORMAL
-                                               + " is required"
-                                               + COLOR_DEFAULT,
-                            "Option " + option.name() + " is required"
-                    );
+                    throw new CommandException(
+                            COLOR_RED
+                                    + "Error executing command "
+                                    + command.scope()
+                                    + ":"
+                                    + INTENSITY_BOLD
+                                    + command.name()
+                                    + INTENSITY_NORMAL
+                                    + ": option "
+                                    + INTENSITY_BOLD
+                                    + option.name()
+                                    + INTENSITY_NORMAL
+                                    + " is required"
+                                    + COLOR_DEFAULT,
+                            "Option " + option.name() + " is required");
                 } else {
                     throw new CommandException("Option " + option.name() + " is required");
                 }
@@ -279,16 +302,21 @@ public class DefaultActionPreparator implements ActionPreparator {
             if (argument.required() && argumentValues.get(argument) == null) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
-                    throw new CommandException(COLOR_RED
-                                               + "Error executing command "
-                                               + command.scope() + ":" 
-                                               + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
-                                               + ": argument "
-                                               + INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL
-                                               + " is required"
-                                               + COLOR_DEFAULT,
-                                               "Argument " + argument.name() + " is required"
-                    );
+                    throw new CommandException(
+                            COLOR_RED
+                                    + "Error executing command "
+                                    + command.scope()
+                                    + ":"
+                                    + INTENSITY_BOLD
+                                    + command.name()
+                                    + INTENSITY_NORMAL
+                                    + ": argument "
+                                    + INTENSITY_BOLD
+                                    + argument.name()
+                                    + INTENSITY_NORMAL
+                                    + " is required"
+                                    + COLOR_DEFAULT,
+                            "Argument " + argument.name() + " is required");
                 } else {
                     throw new CommandException("Argument " + argument.name() + " is required");
                 }
@@ -303,22 +331,38 @@ public class DefaultActionPreparator implements ActionPreparator {
             } catch (Exception e) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
-                    throw new CommandException(COLOR_RED
-                                               + "Error executing command "
-                                               + command.scope() + ":" 
-                                               + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
-                                               + ": unable to convert option "
-                                               + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL
-                                               + " with value '" + entry.getValue() + "' to type "
-                                               + new GenericType(field.getGenericType()).toString()
-                                               + COLOR_DEFAULT,
-                            "Unable to convert option " + entry.getKey().name() + " with value '"
-                                    + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            e
-                    );
+                    throw new CommandException(
+                            COLOR_RED
+                                    + "Error executing command "
+                                    + command.scope()
+                                    + ":"
+                                    + INTENSITY_BOLD
+                                    + command.name()
+                                    + INTENSITY_NORMAL
+                                    + ": unable to convert option "
+                                    + INTENSITY_BOLD
+                                    + entry.getKey().name()
+                                    + INTENSITY_NORMAL
+                                    + " with value '"
+                                    + entry.getValue()
+                                    + "' to type "
+                                    + new GenericType(field.getGenericType()).toString()
+                                    + COLOR_DEFAULT,
+                            "Unable to convert option "
+                                    + entry.getKey().name()
+                                    + " with value '"
+                                    + entry.getValue()
+                                    + "' to type "
+                                    + new GenericType(field.getGenericType()).toString(),
+                            e);
                 } else {
-                    throw new CommandException("Unable to convert option " + entry.getKey().name() + " with value '"
-                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
+                    throw new CommandException(
+                            "Unable to convert option "
+                                    + entry.getKey().name()
+                                    + " with value '"
+                                    + entry.getValue()
+                                    + "' to type "
+                                    + new GenericType(field.getGenericType()).toString(),
                             e);
                 }
             }
@@ -333,22 +377,38 @@ public class DefaultActionPreparator implements ActionPreparator {
             } catch (Exception e) {
                 Command command = action.getClass().getAnnotation(Command.class);
                 if (command != null) {
-                    throw new CommandException(COLOR_RED
-                                               + "Error executing command "
-                                               + command.scope() + ":" 
-                                               + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL
-                                               + ": unable to convert argument "
-                                               + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL
-                                               + " with value '" + entry.getValue() + "' to type "
-                                               + new GenericType(field.getGenericType()).toString()
-                                               + COLOR_DEFAULT,
-                            "Unable to convert argument " + entry.getKey().name() + " with value '"
-                                    + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            e
-                    );
+                    throw new CommandException(
+                            COLOR_RED
+                                    + "Error executing command "
+                                    + command.scope()
+                                    + ":"
+                                    + INTENSITY_BOLD
+                                    + command.name()
+                                    + INTENSITY_NORMAL
+                                    + ": unable to convert argument "
+                                    + INTENSITY_BOLD
+                                    + entry.getKey().name()
+                                    + INTENSITY_NORMAL
+                                    + " with value '"
+                                    + entry.getValue()
+                                    + "' to type "
+                                    + new GenericType(field.getGenericType()).toString()
+                                    + COLOR_DEFAULT,
+                            "Unable to convert argument "
+                                    + entry.getKey().name()
+                                    + " with value '"
+                                    + entry.getValue()
+                                    + "' to type "
+                                    + new GenericType(field.getGenericType()).toString(),
+                            e);
                 } else {
-                    throw new CommandException("Unable to convert argument " + entry.getKey().name() + " with value '"
-                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
+                    throw new CommandException(
+                            "Unable to convert argument "
+                                    + entry.getKey().name()
+                                    + " with value '"
+                                    + entry.getValue()
+                                    + "' to type "
+                                    + new GenericType(field.getGenericType()).toString(),
                             e);
                 }
             }
@@ -358,10 +418,15 @@ public class DefaultActionPreparator implements ActionPreparator {
         return true;
     }
 
-    protected void printUsage(CommandSession session, Action action, Map<Option, Field> optionsMap, Map<Argument, Field> argsMap, PrintStream out) {
+    protected void printUsage(
+            CommandSession session,
+            Action action,
+            Map<Option, Field> optionsMap,
+            Map<Argument, Field> argsMap,
+            PrintStream out) {
         Command command = action.getClass().getAnnotation(Command.class);
         if (command != null) {
-            
+
             List<Argument> arguments = new ArrayList<>(argsMap.keySet());
             arguments.sort(Comparator.comparing(Argument::index));
             Set<Option> options = new HashSet<>(optionsMap.keySet());
@@ -374,7 +439,12 @@ public class DefaultActionPreparator implements ActionPreparator {
                     if (globalScope) {
                         out.println(INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
                     } else {
-                        out.println(command.scope() + ":" + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
+                        out.println(
+                                command.scope()
+                                        + ":"
+                                        + INTENSITY_BOLD
+                                        + command.name()
+                                        + INTENSITY_NORMAL);
                     }
                     out.println();
                 }
@@ -413,10 +483,11 @@ public class DefaultActionPreparator implements ActionPreparator {
                 for (Argument argument : arguments) {
                     out.print("        ");
                     out.println(INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL);
-                    
+
                     printFormatted("                ", argument.description(), width, out);
                     if (!argument.required()) {
-                        if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
+                        if (argument.valueToShowInHelp() != null
+                                && argument.valueToShowInHelp().length() != 0) {
                             try {
                                 if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
                                     argsMap.get(argument).setAccessible(true);
@@ -443,7 +514,8 @@ public class DefaultActionPreparator implements ActionPreparator {
                     out.print("        ");
                     out.println(INTENSITY_BOLD + opt + INTENSITY_NORMAL);
                     printFormatted("                ", option.description(), width, out);
-                    if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
+                    if (option.valueToShowInHelp() != null
+                            && option.valueToShowInHelp().length() != 0) {
                         try {
                             if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
                                 optionsMap.get(option).setAccessible(true);
@@ -485,7 +557,9 @@ public class DefaultActionPreparator implements ActionPreparator {
         if (desc.startsWith("classpath:")) {
             InputStream is = clazz.getResourceAsStream(desc.substring("classpath:".length()));
             if (is == null) {
-                is = clazz.getClassLoader().getResourceAsStream(desc.substring("classpath:".length()));
+                is =
+                        clazz.getClassLoader()
+                                .getResourceAsStream(desc.substring("classpath:".length()));
             }
             if (is == null) {
                 desc = "Unable to load description from " + desc;
@@ -517,7 +591,8 @@ public class DefaultActionPreparator implements ActionPreparator {
         printFormatted(prefix, str, termWidth, out, true);
     }
 
-    public static void printFormatted(String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
+    public static void printFormatted(
+            String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
         int pfxLen = length(prefix);
         int maxwidth = termWidth - pfxLen;
         Pattern wrap = Pattern.compile("(\\S\\S{" + maxwidth + ",}|.{1," + maxwidth + "})(\\s+|$)");
@@ -548,7 +623,8 @@ public class DefaultActionPreparator implements ActionPreparator {
         return str.length();
     }
 
-    protected Object convert(Action action, CommandSession session, Object value, Type toType) throws Exception {
+    protected Object convert(Action action, CommandSession session, Object value, Type toType)
+            throws Exception {
         if (toType == String.class) {
             return value != null ? value.toString() : null;
         }
@@ -557,6 +633,6 @@ public class DefaultActionPreparator implements ActionPreparator {
 
     private int getWidth(CommandSession session) {
         Object cols = session.get("COLUMNS");
-        return  (cols != null && cols instanceof Integer) ? (Integer)cols : 80;
+        return (cols != null && cols instanceof Integer) ? (Integer) cols : 80;
     }
 }

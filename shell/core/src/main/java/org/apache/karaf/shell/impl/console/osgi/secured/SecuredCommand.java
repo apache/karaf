@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.impl.console.osgi.secured;
 
 import java.util.List;
-
 import org.apache.felix.gogo.runtime.Closure;
 import org.apache.felix.gogo.runtime.Token;
 import org.apache.felix.service.command.CommandSession;
@@ -69,7 +68,8 @@ public class SecuredCommand implements Command, Function {
     }
 
     @Override
-    public Object execute(final CommandSession commandSession, List<Object> arguments) throws Exception {
+    public Object execute(final CommandSession commandSession, List<Object> arguments)
+            throws Exception {
         // TODO: remove the hack for .session
         Session session = (Session) commandSession.get(".session");
         // When need to translate closures to a compatible type for the command
@@ -86,15 +86,15 @@ public class SecuredCommand implements Command, Function {
         return execute(session, arguments);
     }
 
-    static class VersatileFunction implements org.apache.felix.service.command.Function,
-            org.apache.karaf.shell.api.console.Function {
+    static class VersatileFunction
+            implements org.apache.felix.service.command.Function,
+                    org.apache.karaf.shell.api.console.Function {
 
         private final Closure closure;
 
         VersatileFunction(Closure closure) {
             this.closure = closure;
         }
-
 
         @Override
         public Object execute(CommandSession commandSession, List<Object> list) throws Exception {
@@ -112,5 +112,4 @@ public class SecuredCommand implements Command, Function {
             return closure.toString();
         }
     }
-
 }

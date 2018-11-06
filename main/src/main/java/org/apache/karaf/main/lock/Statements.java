@@ -18,70 +18,82 @@
  */
 package org.apache.karaf.main.lock;
 
-
 public class Statements {
-    
+
     protected String tablePrefix = "";
     protected String tableName = "KARAF_LOCK";
     protected String nodeName = "karaf";
     protected String momentColumnDataType = "BIGINT";
     protected String nodeColumnDataType = "VARCHAR(20)";
-    
+
     private String[] lockCreateSchemaStatements;
     private String lockCreateStatement;
     private String lockUpdateStatement;
     private String lockVerifySelectionNotEmptyStatement;
-    
+
     public String[] getLockCreateSchemaStatements(long moment) {
         if (lockCreateSchemaStatements == null) {
-            lockCreateSchemaStatements = new String[] {
-                "CREATE TABLE " + getFullLockTableName() + " (MOMENT " + getMomentColumnDataType() + ", NODE " + getNodeColumnDataType() + ")",
-                "INSERT INTO " + getFullLockTableName() + " (MOMENT, NODE) VALUES (" + moment + ", '" + getNodeName() + "')", 
-            };
+            lockCreateSchemaStatements =
+                    new String[] {
+                        "CREATE TABLE "
+                                + getFullLockTableName()
+                                + " (MOMENT "
+                                + getMomentColumnDataType()
+                                + ", NODE "
+                                + getNodeColumnDataType()
+                                + ")",
+                        "INSERT INTO "
+                                + getFullLockTableName()
+                                + " (MOMENT, NODE) VALUES ("
+                                + moment
+                                + ", '"
+                                + getNodeName()
+                                + "')",
+                    };
         }
         return lockCreateSchemaStatements;
     }
-    
+
     public void setLockCreateSchemaStatements(String[] lockCreateSchemaStatements) {
         this.lockCreateSchemaStatements = lockCreateSchemaStatements;
     }
-    
+
     public String getLockCreateStatement() {
         if (lockCreateStatement == null) {
             lockCreateStatement = "SELECT * FROM " + getFullLockTableName() + " FOR UPDATE";
         }
         return lockCreateStatement;
     }
-    
+
     public void setLockCreateStatement(String lockCreateStatement) {
         this.lockCreateStatement = lockCreateStatement;
     }
-    
+
     public String getLockUpdateStatement(long moment) {
         if (lockUpdateStatement == null) {
             lockUpdateStatement = "UPDATE " + getFullLockTableName() + " SET MOMENT = " + moment;
         }
         return lockUpdateStatement;
     }
-    
+
     public void setLockUpdateStatement(String lockUpdateStatement) {
         this.lockUpdateStatement = lockUpdateStatement;
     }
 
-	public void setLockVerifySelectionNotEmptyStatement(String lockVerifySelectionNotEmptyStatement) {
-		this.lockVerifySelectionNotEmptyStatement = lockVerifySelectionNotEmptyStatement;
-	}
+    public void setLockVerifySelectionNotEmptyStatement(
+            String lockVerifySelectionNotEmptyStatement) {
+        this.lockVerifySelectionNotEmptyStatement = lockVerifySelectionNotEmptyStatement;
+    }
 
-	public String getLockVerifySelectionNotEmptyStatement() {
-		if (lockVerifySelectionNotEmptyStatement == null) {
-			 //The lock create and lock update are perfomed on the whole table instead of 
-			 //the cluster. So not taking the node into account for now.
-			lockVerifySelectionNotEmptyStatement = "SELECT COUNT(*) FROM " + getFullLockTableName();
-		}
-		return lockVerifySelectionNotEmptyStatement;
-	}
-    
-    
+    public String getLockVerifySelectionNotEmptyStatement() {
+        if (lockVerifySelectionNotEmptyStatement == null) {
+            // The lock create and lock update are perfomed on the whole table instead of
+            // the cluster. So not taking the node into account for now.
+            lockVerifySelectionNotEmptyStatement = "SELECT COUNT(*) FROM " + getFullLockTableName();
+        }
+        return lockVerifySelectionNotEmptyStatement;
+    }
+
     long getCurrentTimeMillis() {
         return System.currentTimeMillis();
     }
@@ -89,11 +101,11 @@ public class Statements {
     public String getFullLockTableName() {
         return getTablePrefix() + getTableName();
     }
-    
+
     public void setMomentColumnDataType(String momentColumnDataType) {
         this.momentColumnDataType = momentColumnDataType;
     }
-    
+
     public String getMomentColumnDataType() {
         return momentColumnDataType;
     }
@@ -121,7 +133,7 @@ public class Statements {
     public void setTablePrefix(String tablePrefix) {
         this.tablePrefix = tablePrefix;
     }
-    
+
     public String getTableName() {
         return tableName;
     }

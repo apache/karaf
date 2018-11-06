@@ -28,5 +28,4 @@ public interface CommandWithAction extends Function {
     Action createNewAction();
 
     void releaseAction(Action action) throws Exception;
-
 }

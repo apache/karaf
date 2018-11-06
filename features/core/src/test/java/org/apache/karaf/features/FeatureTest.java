@@ -26,7 +26,8 @@ public class FeatureTest extends TestCase {
         assertEquals(feature.getVersion(), "1.0.0");
         feature = org.apache.karaf.features.internal.model.Feature.valueOf("name");
         assertEquals(feature.getName(), "name");
-        assertEquals(feature.getVersion(), org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
+        assertEquals(
+                feature.getVersion(),
+                org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
     }
-
 }

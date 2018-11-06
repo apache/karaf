@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.tooling.utils;
 
+import java.util.List;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -28,32 +29,32 @@ import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
 
-import java.util.List;
-
 /**
  * Service-locator based factory for available Aether system.
  *
- * <p>Supports the Eclipse implementation for Maven 3.1.x+</p>
+ * <p>Supports the Eclipse implementation for Maven 3.1.x+
  */
 public class DependencyHelperFactory {
 
     /**
-     * Create a new {@link DependencyHelper} based on what has been found in
-     * {@link org.codehaus.plexus.PlexusContainer}.
+     * Create a new {@link DependencyHelper} based on what has been found in {@link
+     * org.codehaus.plexus.PlexusContainer}.
      *
-     * @param container    The Maven Plexus container to use.
+     * @param container The Maven Plexus container to use.
      * @param mavenProject The Maven project to use.
      * @param mavenSession The Maven session.
-     * @param cacheSize    Size of the artifact/file LRU cache
-     * @param log          The log to use for the messages.
-     *
+     * @param cacheSize Size of the artifact/file LRU cache
+     * @param log The log to use for the messages.
      * @return The {@link DependencyHelper} depending of the Maven version used.
-     *
      * @throws MojoExecutionException If the plugin execution fails.
      */
     public static DependencyHelper createDependencyHelper(
-            PlexusContainer container, MavenProject mavenProject, MavenSession mavenSession, int cacheSize, Log log
-            ) throws MojoExecutionException {
+            PlexusContainer container,
+            MavenProject mavenProject,
+            MavenSession mavenSession,
+            int cacheSize,
+            Log log)
+            throws MojoExecutionException {
         try {
             final RepositorySystem system = container.lookup(RepositorySystem.class);
             final RepositorySystemSession session = mavenSession.getRepositorySession();
@@ -63,5 +64,4 @@ public class DependencyHelperFactory {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }
-
 }

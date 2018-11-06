@@ -15,10 +15,7 @@
  */
 package org.apache.karaf.diagnostic.core;
 
-/**
- * Interface which represents instance of tool which can provide dump
- * information.
- */
+/** Interface which represents instance of tool which can provide dump information. */
 public interface DumpProvider {
 
     /**
@@ -28,5 +25,4 @@ public interface DumpProvider {
      * @throws Exception If the dump creation fails.
      */
     void createDump(DumpDestination destination) throws Exception;
-
 }

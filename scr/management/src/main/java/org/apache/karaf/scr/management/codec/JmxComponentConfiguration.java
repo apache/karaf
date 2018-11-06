@@ -16,9 +16,9 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
-import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
-
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Stream;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -28,22 +28,16 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Stream;
+import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
+import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
 
 public class JmxComponentConfiguration {
 
+    /** The CompositeType which represents a single component */
+    public static final CompositeType COMPONENT_CONFIGURATION = createComponentConfigurationType();
 
-    /**
-     * The CompositeType which represents a single component
-     */
-    public final static CompositeType COMPONENT_CONFIGURATION = createComponentConfigurationType();
-
-    /**
-     * The TabularType which represents a list of components
-     */
-    public final static TabularType COMPONENT_TABLE = createComponentTableType();
+    /** The TabularType which represents a list of components */
+    public static final TabularType COMPONENT_TABLE = createComponentTableType();
 
     private final CompositeData data;
 
@@ -95,10 +89,9 @@ public class JmxComponentConfiguration {
                 .map(JmxComponentConfiguration::new)
                 .map(JmxComponentConfiguration::asCompositeData)
                 .collect(
-                    () -> new TabularDataSupport(COMPONENT_TABLE),
-                    TabularDataSupport::put,
-                    TabularDataSupport::putAll
-                );
+                        () -> new TabularDataSupport(COMPONENT_TABLE),
+                        TabularDataSupport::put,
+                        TabularDataSupport::putAll);
     }
 
     private static CompositeType createComponentConfigurationType() {
@@ -123,8 +116,8 @@ public class JmxComponentConfiguration {
             itemDescriptions[5] = "The references of the component";
             itemDescriptions[6] = "The references of the component";
 
-            return new CompositeType("Component", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "Component", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build component type", e);
         }
@@ -132,12 +125,13 @@ public class JmxComponentConfiguration {
 
     private static TabularType createComponentTableType() {
         try {
-            return new TabularType("Configuration", "The table of component configurations",
-                    COMPONENT_CONFIGURATION, ServiceComponentRuntimeMBean.COMPONENT_CONFIGURATION);
+            return new TabularType(
+                    "Configuration",
+                    "The table of component configurations",
+                    COMPONENT_CONFIGURATION,
+                    ServiceComponentRuntimeMBean.COMPONENT_CONFIGURATION);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build components table type", e);
         }
     }
-
-
 }

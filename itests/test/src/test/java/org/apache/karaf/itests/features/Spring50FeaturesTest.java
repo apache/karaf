@@ -16,18 +16,9 @@ package org.apache.karaf.itests.features;
 import org.apache.karaf.itests.KarafTestSupport;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.MavenUtils;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -45,7 +36,8 @@ public class Spring50FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringInstrumentFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-instrument", System.getProperty("spring50.version"));
+        installAssertAndUninstallFeature(
+                "spring-instrument", System.getProperty("spring50.version"));
     }
 
     @Test
@@ -85,7 +77,7 @@ public class Spring50FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringWebSocketFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-websocket", System.getProperty("spring50.version"));
+        installAssertAndUninstallFeature(
+                "spring-websocket", System.getProperty("spring50.version"));
     }
-
 }

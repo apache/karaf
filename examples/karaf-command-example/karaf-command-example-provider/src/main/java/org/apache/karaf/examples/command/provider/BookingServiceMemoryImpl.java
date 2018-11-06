@@ -16,14 +16,13 @@
  */
 package org.apache.karaf.examples.command.provider;
 
+import java.util.*;
 import org.apache.karaf.examples.command.api.Booking;
 import org.apache.karaf.examples.command.api.BookingService;
 
-import java.util.*;
-
 /**
- * Simple implementation of the {@link BookingService} storing the {@link org.apache.karaf.examples.command.api.Booking}
- * instances in a list in memory.
+ * Simple implementation of the {@link BookingService} storing the {@link
+ * org.apache.karaf.examples.command.api.Booking} instances in a list in memory.
  */
 public class BookingServiceMemoryImpl implements BookingService {
 

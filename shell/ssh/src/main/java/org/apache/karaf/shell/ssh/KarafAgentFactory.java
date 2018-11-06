@@ -26,7 +26,6 @@ import java.security.KeyPair;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.SshAgentFactory;
 import org.apache.sshd.agent.SshAgentServer;
@@ -57,14 +56,16 @@ public class KarafAgentFactory implements SshAgentFactory {
     }
 
     @Override
-    public List<NamedFactory<Channel>> getChannelForwardingFactories(FactoryManager factoryManager) {
+    public List<NamedFactory<Channel>> getChannelForwardingFactories(
+            FactoryManager factoryManager) {
         return LocalAgentFactory.DEFAULT_FORWARDING_CHANNELS;
     }
 
     public SshAgent createClient(FactoryManager manager) throws IOException {
         String proxyId = (String) manager.getProperties().get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
         if (proxyId == null) {
-            throw new IllegalStateException("No " + SshAgent.SSH_AUTHSOCKET_ENV_NAME + " environment variable set");
+            throw new IllegalStateException(
+                    "No " + SshAgent.SSH_AUTHSOCKET_ENV_NAME + " environment variable set");
         }
         AgentServerProxy proxy = proxies.get(proxyId);
         if (proxy != null) {
@@ -80,7 +81,8 @@ public class KarafAgentFactory implements SshAgentFactory {
     public SshAgentServer createServer(ConnectionService service) throws IOException {
         Session session = service.getSession();
         if (!(session instanceof ServerSession)) {
-            throw new IllegalStateException("The session used to create an agent server proxy must be a server session");
+            throw new IllegalStateException(
+                    "The session used to create an agent server proxy must be a server session");
         }
         final AgentServerProxy proxy = new AgentServerProxy(service);
         proxies.put(proxy.getId(), proxy);
@@ -131,5 +133,4 @@ public class KarafAgentFactory implements SshAgentFactory {
             LOGGER.warn("Error stopping ssh agent for local console", e);
         }
     }
-
 }

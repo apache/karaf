@@ -16,9 +16,6 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
-import org.osgi.service.component.runtime.dto.ReferenceDTO;
-
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -28,18 +25,16 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
+import org.osgi.service.component.runtime.dto.ReferenceDTO;
 
 public class JmxReference {
 
-    /**
-     * The CompositeType which represents a single reference
-     */
-    public final static CompositeType REFERENCE = createReferenceType();
+    /** The CompositeType which represents a single reference */
+    public static final CompositeType REFERENCE = createReferenceType();
 
-    /**
-     * The TabularType which represents a list of references
-     */
-    public final static TabularType REFERENCE_TABLE = createReferenceTableType();
+    /** The TabularType which represents a list of references */
+    public static final TabularType REFERENCE_TABLE = createReferenceTableType();
 
     private final CompositeData data;
 
@@ -111,8 +106,8 @@ public class JmxReference {
             itemDescriptions[10] = "The field option";
             itemDescriptions[11] = "The scope";
 
-            return new CompositeType("Reference", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "Reference", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build reference type", e);
         }
@@ -120,12 +115,13 @@ public class JmxReference {
 
     private static TabularType createReferenceTableType() {
         try {
-            return new TabularType("References", "The table of all references",
-                    REFERENCE,  new String[] {ServiceComponentRuntimeMBean.REFERENCE_NAME});
+            return new TabularType(
+                    "References",
+                    "The table of all references",
+                    REFERENCE,
+                    new String[] {ServiceComponentRuntimeMBean.REFERENCE_NAME});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build references table type", e);
         }
     }
-
-
 }

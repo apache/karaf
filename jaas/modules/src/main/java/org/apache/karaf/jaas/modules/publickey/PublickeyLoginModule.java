@@ -15,6 +15,8 @@
  */
 package org.apache.karaf.jaas.modules.publickey;
 
+import static org.apache.karaf.jaas.modules.encryption.BasicEncryption.base64Encode;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -33,17 +35,14 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
-
 import org.apache.felix.utils.properties.Properties;
-import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.BackingEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.karaf.jaas.modules.encryption.BasicEncryption.base64Encode;
 
 public class PublickeyLoginModule extends AbstractKarafLoginModule {
 
@@ -53,7 +52,11 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
 
     private String usersFile;
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         usersFile = options.get(USERS_FILE) + "";
         if (debug) {
@@ -78,7 +81,8 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         } catch (IOException ioe) {
             throw new LoginException(ioe.getMessage());
         } catch (UnsupportedCallbackException uce) {
-            throw new LoginException(uce.getMessage() + " not available to obtain information from user");
+            throw new LoginException(
+                    uce.getMessage() + " not available to obtain information from user");
         }
         String user = ((NameCallback) callbacks[0]).getName();
         if (user == null) {
@@ -95,7 +99,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         try {
             userInfos = users.get(user);
         } catch (NullPointerException e) {
-            //error handled in the next statement
+            // error handled in the next statement
         }
         if (userInfos == null) {
             if (!this.detailedLoginExcepion) {
@@ -123,7 +127,9 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         for (int i = 1; i < infos.length; i++) {
             if (infos[i].trim().startsWith(BackingEngine.GROUP_PREFIX)) {
                 // it's a group reference
-                principals.add(new GroupPrincipal(infos[i].trim().substring(BackingEngine.GROUP_PREFIX.length())));
+                principals.add(
+                        new GroupPrincipal(
+                                infos[i].trim().substring(BackingEngine.GROUP_PREFIX.length())));
                 String groupInfo = users.get(infos[i].trim());
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
@@ -203,5 +209,4 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         }
         return true;
     }
-
 }

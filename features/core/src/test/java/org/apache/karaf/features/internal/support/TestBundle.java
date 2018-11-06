@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal.support;
 
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +28,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.utils.resource.ResourceBuilder;
 import org.apache.felix.utils.resource.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
@@ -41,8 +42,6 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
-
 public class TestBundle extends ResourceImpl implements BundleRevision, Bundle, BundleStartLevel {
 
     private final long bundleId;
@@ -50,7 +49,8 @@ public class TestBundle extends ResourceImpl implements BundleRevision, Bundle, 
     private final Hashtable<String, String> headers = new Hashtable<>();
     public int state;
 
-    public TestBundle(long bundleId, String location, int state, Hashtable<String, String> headers) throws BundleException {
+    public TestBundle(long bundleId, String location, int state, Hashtable<String, String> headers)
+            throws BundleException {
         this.bundleId = bundleId;
         this.location = location;
         this.state = state;
@@ -83,7 +83,7 @@ public class TestBundle extends ResourceImpl implements BundleRevision, Bundle, 
     @Override
     public void stop(int options) throws BundleException {
         throw new UnsupportedOperationException();
-   }
+    }
 
     @Override
     public void stop() throws BundleException {

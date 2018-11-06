@@ -17,7 +17,6 @@
 package org.apache.karaf.obr.command;
 
 import java.util.List;
-
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.shell.api.action.Argument;
@@ -26,14 +25,26 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "obr", name = "list", description = "Lists OBR bundles, optionally providing the given packages.")
+@Command(
+        scope = "obr",
+        name = "list",
+        description = "Lists OBR bundles, optionally providing the given packages.")
 @Service
 public class ListCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "packages", description = "A list of packages separated by whitespaces.", required = false, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "packages",
+            description = "A list of packages separated by whitespaces.",
+            required = false,
+            multiValued = true)
     List<String> packages;
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
     @Override
@@ -62,9 +73,11 @@ public class ListCommand extends ObrCommandSupport {
         table.emptyTableText("No matching bundles");
 
         for (Resource resource : resources) {
-            table.addRow().addContent(emptyIfNull(resource.getPresentationName()),
-                    emptyIfNull(resource.getSymbolicName()),
-                    emptyIfNull(resource.getVersion()));
+            table.addRow()
+                    .addContent(
+                            emptyIfNull(resource.getPresentationName()),
+                            emptyIfNull(resource.getSymbolicName()),
+                            emptyIfNull(resource.getVersion()));
         }
 
         table.print(System.out, !noFormat);
@@ -73,5 +86,4 @@ public class ListCommand extends ObrCommandSupport {
     private String emptyIfNull(Object st) {
         return st == null ? "" : st.toString();
     }
-
 }

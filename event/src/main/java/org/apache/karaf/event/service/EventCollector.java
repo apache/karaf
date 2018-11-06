@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -30,7 +29,7 @@ public class EventCollector implements EventHandler {
     private Deque<Event> events;
     private int maxSize;
     private Set<Consumer<Event>> consumers;
-    
+
     public EventCollector() {
         events = new ConcurrentLinkedDeque<>();
         maxSize = 100;
@@ -49,14 +48,13 @@ public class EventCollector implements EventHandler {
     public Stream<Event> getEvents() {
         return events.stream();
     }
-    
+
     public synchronized void addConsumer(Consumer<Event> eventConsumer) {
         events.forEach(eventConsumer);
         consumers.add(eventConsumer);
     }
-    
+
     public synchronized void removeConsumer(Consumer<Event> eventConsumer) {
         consumers.remove(eventConsumer);
     }
-
 }

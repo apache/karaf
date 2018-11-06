@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.features;
 
-/**
- * Constants for EventAdmin events
- */
+/** Constants for EventAdmin events */
 public final class EventConstants {
 
     public static final String TYPE = "type";
@@ -40,6 +38,4 @@ public final class EventConstants {
     private EventConstants() {
         // non-instantiable class
     }
-
-
 }

@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.itests.examples;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import org.apache.karaf.itests.KarafTestSupport;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,18 +27,16 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class WarExampleTest extends KarafTestSupport {
 
     @Test
     public void test() throws Exception {
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-war-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-war-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
         installAndAssertFeature("karaf-war-example");
 
         // give time to the webapp to deploy
@@ -49,7 +51,8 @@ public class WarExampleTest extends KarafTestSupport {
         connection.setRequestMethod("GET");
         connection.setDoInput(true);
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
         StringBuffer buffer = new StringBuffer();
         while ((line = reader.readLine()) != null) {
@@ -60,5 +63,4 @@ public class WarExampleTest extends KarafTestSupport {
         System.out.println(output);
         assertContains("Hello World", output);
     }
-
 }

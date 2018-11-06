@@ -19,7 +19,8 @@ package org.apache.karaf.examples.bundle.client;
 import org.apache.karaf.examples.bundle.common.Booking;
 
 /**
- * Simple class getting the booking service (thanks to Blueprint), adding a random booking and displaying periodically.
+ * Simple class getting the booking service (thanks to Blueprint), adding a random booking and
+ * displaying periodically.
  */
 public class Display {
 
@@ -28,24 +29,18 @@ public class Display {
     private BookingDisplayThread thread;
     private boolean bookingThreadStarted = false;
 
-    /**
-     * This setter is used by Blueprint to inject the client service.
-     */
+    /** This setter is used by Blueprint to inject the client service. */
     public void setClientService(ClientService clientService) {
         this.clientService = clientService;
     }
 
-    /**
-     * Init method used to start the thread.
-     */
+    /** Init method used to start the thread. */
     public void init() {
         BookingDisplayThread thread = new BookingDisplayThread(clientService);
         thread.start();
     }
 
-    /**
-     * Destroy method used to stop the thread.
-     */
+    /** Destroy method used to stop the thread. */
     public void destroy() {
         thread.terminate();
     }
@@ -82,7 +77,12 @@ public class Display {
         private String displayBookings() {
             StringBuilder builder = new StringBuilder();
             for (Booking booking : clientService.bookings()) {
-                builder.append(booking.getId()).append(" | ").append(booking.getCustomer()).append(" | ").append(booking.getFlight()).append("\n");
+                builder.append(booking.getId())
+                        .append(" | ")
+                        .append(booking.getCustomer())
+                        .append(" | ")
+                        .append(booking.getFlight())
+                        .append("\n");
             }
             return builder.toString();
         }
@@ -90,7 +90,5 @@ public class Display {
         public void terminate() {
             running = false;
         }
-
     }
-
 }

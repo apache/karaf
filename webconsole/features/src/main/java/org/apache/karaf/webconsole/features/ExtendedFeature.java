@@ -17,7 +17,6 @@
 package org.apache.karaf.webconsole.features;
 
 import java.util.List;
-
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Capability;
 import org.apache.karaf.features.Conditional;
@@ -32,11 +31,12 @@ import org.apache.karaf.features.Scoping;
 public class ExtendedFeature implements Feature {
 
     public enum State {
-        INSTALLED, UNINSTALLED;
+        INSTALLED,
+        UNINSTALLED;
 
         @Override
         public String toString() {
-            //only capitalize the first letter
+            // only capitalize the first letter
             String s = super.toString();
             return s.substring(0, 1) + s.substring(1).toLowerCase();
         }
@@ -174,5 +174,4 @@ public class ExtendedFeature implements Feature {
     public boolean isBlacklisted() {
         return feature.isBlacklisted();
     }
-
 }

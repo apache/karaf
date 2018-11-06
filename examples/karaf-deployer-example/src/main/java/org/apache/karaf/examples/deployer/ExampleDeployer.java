@@ -18,15 +18,13 @@
  */
 package org.apache.karaf.examples.deployer;
 
+import java.io.File;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.ArtifactListener;
 import org.osgi.service.component.annotations.Component;
 
-import java.io.File;
-
-@Component(service = { ArtifactInstaller.class, ArtifactListener.class })
+@Component(service = {ArtifactInstaller.class, ArtifactListener.class})
 public class ExampleDeployer implements ArtifactInstaller {
-
 
     @Override
     public void install(File file) throws Exception {

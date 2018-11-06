@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.impl.console.parsing;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Parser;
@@ -34,7 +33,8 @@ public class CommandLineParser {
         return buildCommandLine(session, command, cursor, begOfLine);
     }
 
-    public static CommandLine buildCommandLine(Session session, final String command, int cursor, AtomicInteger begOfLine) {
+    public static CommandLine buildCommandLine(
+            Session session, final String command, int cursor, AtomicInteger begOfLine) {
         int pos = 0;
         while (true) {
             String rem = command.substring(pos);
@@ -114,5 +114,4 @@ public class CommandLineParser {
 
         return parsed.toString();
     }
-
 }

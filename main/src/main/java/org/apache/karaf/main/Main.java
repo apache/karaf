@@ -37,7 +37,6 @@ import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.info.ServerInfo;
 import org.apache.karaf.main.internal.Systemd;
@@ -61,20 +60,14 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 /**
- * <p>
- * This class is the default way to instantiate and execute the framework. It is not
- * intended to be the only way to instantiate and execute the framework; rather, it is
- * one example of how to do so. When embedding the framework in a host application,
- * this class can serve as a simple guide of how to do so. It may even be
- * worthwhile to reuse some of its property handling capabilities. This class
- * is completely static and is only intended to start a single instance of
- * the framework.
- * </p>
+ * This class is the default way to instantiate and execute the framework. It is not intended to be
+ * the only way to instantiate and execute the framework; rather, it is one example of how to do so.
+ * When embedding the framework in a host application, this class can serve as a simple guide of how
+ * to do so. It may even be worthwhile to reuse some of its property handling capabilities. This
+ * class is completely static and is only intended to start a single instance of the framework.
  */
 public class Main {
-    /**
-     * The default name used for the startup properties file.
-     */
+    /** The default name used for the startup properties file. */
     public static final String STARTUP_PROPERTIES_FILE_NAME = "startup.properties";
 
     private static final Logger LOG = Logger.getLogger(Main.class.getName());
@@ -90,82 +83,62 @@ public class Main {
     private volatile boolean exiting;
     private AutoCloseable shutdownThread;
     private Thread monitorThread;
-    
+
     /**
-     * <p>
-     * This method performs the main task of constructing an framework instance
-     * and starting its execution. The following functions are performed
-     * when invoked:
-     * </p>
+     * This method performs the main task of constructing an framework instance and starting its
+     * execution. The following functions are performed when invoked:
+     *
      * <ol>
-     *   <li><i><b>Read the system properties file.</b></i> This is a file
-     *       containing properties to be pushed into <tt>System.setProperty()</tt>
-     *       before starting the framework. This mechanism is mainly shorthand
-     *       for people starting the framework from the command line to avoid having
-     *       to specify a bunch of <tt>-D</tt> system property definitions.
-     *       The only properties defined in this file that will impact the framework's
-     *       behavior are the those concerning setting HTTP proxies, such as
-     *       <tt>http.proxyHost</tt>, <tt>http.proxyPort</tt>, and
-     *       <tt>http.proxyAuth</tt>.
-     *   </li>
-     *   <li><i><b>Perform system property variable substitution on system
-     *       properties.</b></i> Any system properties in the system property
-     *       file whose value adheres to <tt>${&lt;system-prop-name&gt;}</tt>
-     *       syntax will have their value substituted with the appropriate
-     *       system property value.
-     *   </li>
-     *   <li><i><b>Read the framework's configuration property file.</b></i> This is
-     *       a file containing properties used to configure the framework
-     *       instance and to pass configuration information into
-     *       bundles installed into the framework instance. The configuration
-     *       property file is called <tt>config.properties</tt> by default
-     *       and is located in the <tt>conf/</tt> directory of the Felix
-     *       installation directory, which is the parent directory of the
-     *       directory containing the <tt>felix.jar</tt> file. It is possible
-     *       to use a different location for the property file by specifying
-     *       the desired URL using the <tt>felix.config.properties</tt>
-     *       system property; this should be set using the <tt>-D</tt> syntax
-     *       when executing the JVM. Refer to the
-     *       <tt>Felix</tt> constructor documentation for more
-     *       information on the framework configuration options.
-     *   </li>
+     *   <li><i><b>Read the system properties file.</b></i> This is a file containing properties to
+     *       be pushed into <tt>System.setProperty()</tt> before starting the framework. This
+     *       mechanism is mainly shorthand for people starting the framework from the command line
+     *       to avoid having to specify a bunch of <tt>-D</tt> system property definitions. The only
+     *       properties defined in this file that will impact the framework's behavior are the those
+     *       concerning setting HTTP proxies, such as <tt>http.proxyHost</tt>,
+     *       <tt>http.proxyPort</tt>, and <tt>http.proxyAuth</tt>.
+     *   <li><i><b>Perform system property variable substitution on system properties.</b></i> Any
+     *       system properties in the system property file whose value adheres to
+     *       <tt>${&lt;system-prop-name&gt;}</tt> syntax will have their value substituted with the
+     *       appropriate system property value.
+     *   <li><i><b>Read the framework's configuration property file.</b></i> This is a file
+     *       containing properties used to configure the framework instance and to pass
+     *       configuration information into bundles installed into the framework instance. The
+     *       configuration property file is called <tt>config.properties</tt> by default and is
+     *       located in the <tt>conf/</tt> directory of the Felix installation directory, which is
+     *       the parent directory of the directory containing the <tt>felix.jar</tt> file. It is
+     *       possible to use a different location for the property file by specifying the desired
+     *       URL using the <tt>felix.config.properties</tt> system property; this should be set
+     *       using the <tt>-D</tt> syntax when executing the JVM. Refer to the <tt>Felix</tt>
+     *       constructor documentation for more information on the framework configuration options.
      *   <li><i><b>Perform system property variable substitution on configuration
      *       properties.</b></i> Any configuration properties whose value adheres to
-     *       <tt>${&lt;system-prop-name&gt;}</tt> syntax will have their value
-     *       substituted with the appropriate system property value.
-     *   </li>
-     *   <li><i><b>Ensure the default bundle cache has sufficient information to
-     *       initialize.</b></i> The default implementation of the bundle cache
-     *       requires either a profile name or a profile directory in order to
-     *       start. The configuration properties are checked for at least one
-     *       of the <tt>felix.cache.profile</tt> or <tt>felix.cache.profiledir</tt>
-     *       properties. If neither is found, the user is asked to supply a profile
-     *       name that is added to the configuration property set. See the
-     *       <a href="cache/DefaultBundleCache.html"><tt>DefaultBundleCache</tt></a>
-     *       documentation for more details its configuration options.
-     *   </li>
-     *   <li><i><b>Creates and starts a framework instance.</b></i> A
-     *       case insensitive
-     *       <a href="util/StringMap.html"><tt>StringMap</tt></a>
-     *       is created for the configuration property file and is passed
-     *       into the framework.
-     *   </li>
+     *       <tt>${&lt;system-prop-name&gt;}</tt> syntax will have their value substituted with the
+     *       appropriate system property value.
+     *   <li><i><b>Ensure the default bundle cache has sufficient information to initialize.</b></i>
+     *       The default implementation of the bundle cache requires either a profile name or a
+     *       profile directory in order to start. The configuration properties are checked for at
+     *       least one of the <tt>felix.cache.profile</tt> or <tt>felix.cache.profiledir</tt>
+     *       properties. If neither is found, the user is asked to supply a profile name that is
+     *       added to the configuration property set. See the <a
+     *       href="cache/DefaultBundleCache.html"><tt>DefaultBundleCache</tt></a> documentation for
+     *       more details its configuration options.
+     *   <li><i><b>Creates and starts a framework instance.</b></i> A case insensitive <a
+     *       href="util/StringMap.html"><tt>StringMap</tt></a> is created for the configuration
+     *       property file and is passed into the framework.
      * </ol>
-     * <p>
-     * It should be noted that simply starting an instance of the framework is not enough
-     * to create an interactive session with it. It is necessary to install
-     * and start bundles that provide an interactive impl; this is generally
-     * done by specifying an "auto-start" property in the framework configuration
-     * property file. If no interactive impl bundles are installed or if
-     * the configuration property file cannot be found, the framework will appear to
-     * be hung or deadlocked. This is not the case, it is executing correctly,
-     * there is just no way to interact with it. Refer to the
-     * <tt>Felix</tt> constructor documentation for more information on
+     *
+     * <p>It should be noted that simply starting an instance of the framework is not enough to
+     * create an interactive session with it. It is necessary to install and start bundles that
+     * provide an interactive impl; this is generally done by specifying an "auto-start" property in
+     * the framework configuration property file. If no interactive impl bundles are installed or if
+     * the configuration property file cannot be found, the framework will appear to be hung or
+     * deadlocked. This is not the case, it is executing correctly, there is just no way to interact
+     * with it. Refer to the <tt>Felix</tt> constructor documentation for more information on
      * framework configuration options.
-     * </p>
+     *
      * @param args An array of arguments, all of which are ignored.
      * @throws Exception If an error occurs.
-     **/
+     */
     public static void main(String[] args) throws Exception {
         while (true) {
             boolean restart = false;
@@ -192,7 +165,8 @@ public class Main {
                 main.updateInstancePidAfterShutdown();
                 if (!stopped) {
                     if (restart) {
-                        System.err.println("Timeout waiting for framework to stop.  Restarting now.");
+                        System.err.println(
+                                "Timeout waiting for framework to stop.  Restarting now.");
                     } else {
                         System.err.println("Timeout waiting for framework to stop.  Exiting VM.");
                         main.setExitCode(-3);
@@ -221,7 +195,7 @@ public class Main {
     public void setShutdownCallback(ShutdownCallback shutdownCallback) {
         this.shutdownCallback = shutdownCallback;
     }
-    
+
     public void updateInstancePidAfterShutdown() throws Exception {
         if (config == null) {
             config = new ConfigProperties();
@@ -246,7 +220,7 @@ public class Main {
         for (String provider : config.securityProviders) {
             addSecurityProvider(provider);
         }
-        
+
         List<File> bundleDirs = getBundleRepos();
         ArtifactResolver resolver = new SimpleMavenResolver(bundleDirs);
 
@@ -269,7 +243,7 @@ public class Main {
 
             LOG.info("Installing and starting initial bundles");
             File startupPropsFile = new File(config.karafEtc, STARTUP_PROPERTIES_FILE_NAME);
-            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
+            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);
             installAndStartBundles(resolver, framework.getBundleContext(), bundles);
             LOG.info("All initial bundles installed and set to start");
         }
@@ -279,7 +253,7 @@ public class Main {
 
         activatorManager = new KarafActivatorManager(classLoader, framework);
         activatorManager.startKarafActivators();
-        
+
         setStartLevel(config.lockStartLevel);
         // Progress bar
         if (config.delayConsoleStart) {
@@ -303,29 +277,31 @@ public class Main {
                 Object logger = field.get(framework);
                 Method method = logger.getClass().getDeclaredMethod("setLogger", Object.class);
                 method.setAccessible(true);
-                method.invoke(logger, new Object() {
-                    public void log(int level, String message, Throwable exception) {
-                        Level lvl;
-                        switch (level) {
-                            case 1:
-                                lvl = Level.SEVERE;
-                                break;
-                            case 2:
-                                lvl = Level.WARNING;
-                                break;
-                            case 3:
-                                lvl = Level.INFO;
-                                break;
-                            case 4:
-                                lvl = Level.FINE;
-                                break;
-                            default:
-                                lvl = Level.FINEST;
-                                break;
-                        }
-                        Logger.getLogger("Felix").log(lvl, message, exception);
-                    }
-                });
+                method.invoke(
+                        logger,
+                        new Object() {
+                            public void log(int level, String message, Throwable exception) {
+                                Level lvl;
+                                switch (level) {
+                                    case 1:
+                                        lvl = Level.SEVERE;
+                                        break;
+                                    case 2:
+                                        lvl = Level.WARNING;
+                                        break;
+                                    case 3:
+                                        lvl = Level.INFO;
+                                        break;
+                                    case 4:
+                                        lvl = Level.FINE;
+                                        break;
+                                    default:
+                                        lvl = Level.FINEST;
+                                        break;
+                                }
+                                Logger.getLogger("Felix").log(lvl, message, exception);
+                            }
+                        });
             }
         } catch (Throwable t) {
             t.printStackTrace();
@@ -341,45 +317,46 @@ public class Main {
             final Class<?> signalClass = Class.forName("sun.misc.Signal");
             final Class<?> signalHandlerClass = Class.forName("sun.misc.SignalHandler");
 
-            Object signalHandler = Proxy.newProxyInstance(getClass().getClassLoader(),
-                new Class<?>[] {
-                    signalHandlerClass
-                },
-                    (proxy, method, args) -> {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    exiting = true;
-                                    framework.stop();
-                                } catch (BundleException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }.start();
-                        return null;
-                    }
-            );
+            Object signalHandler =
+                    Proxy.newProxyInstance(
+                            getClass().getClassLoader(),
+                            new Class<?>[] {signalHandlerClass},
+                            (proxy, method, args) -> {
+                                new Thread() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            exiting = true;
+                                            framework.stop();
+                                        } catch (BundleException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }.start();
+                                return null;
+                            });
 
-            signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(
-                null,
-                signalClass.getConstructor(String.class).newInstance("TERM"),
-                signalHandler
-            );
+            signalClass
+                    .getMethod("handle", signalClass, signalHandlerClass)
+                    .invoke(
+                            null,
+                            signalClass.getConstructor(String.class).newInstance("TERM"),
+                            signalHandler);
         } catch (Exception e) {
         }
     }
 
     private Thread monitor() {
-        Thread th = new Thread("Karaf Lock Monitor Thread") {
-            public void run() {
-                try {
-                    doMonitor();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
+        Thread th =
+                new Thread("Karaf Lock Monitor Thread") {
+                    public void run() {
+                        try {
+                            doMonitor();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
         th.start();
         return th;
     }
@@ -390,7 +367,7 @@ public class Main {
         while (!exiting) {
             if (lock.lock()) {
                 lockCallback.lockAcquired();
-                for (;;) {
+                for (; ; ) {
                     if (!dataDir.isDirectory()) {
                         LOG.info("Data directory does not exist anymore, halting");
                         framework.stop();
@@ -414,7 +391,8 @@ public class Main {
             } else {
                 if (config.lockSlaveBlock) {
                     LOG.log(Level.SEVERE, "Can't lock, and lock is exclusive");
-                    System.err.println("Can't lock (another instance is running), and lock is exclusive");
+                    System.err.println(
+                            "Can't lock (another instance is running), and lock is exclusive");
                     System.exit(5);
                 } else {
                     lockCallback.waitingForLock();
@@ -433,7 +411,7 @@ public class Main {
     }
 
     private void watchdog() {
-        if(Boolean.getBoolean("karaf.systemd.enabled")) {
+        if (Boolean.getBoolean("karaf.systemd.enabled")) {
             new Thread("Karaf Systemd Watchdog Thread") {
                 public void run() {
                     try {
@@ -453,7 +431,7 @@ public class Main {
         int code;
         while (!exiting && timeout > 0) {
             code = systemd.notifyWatchdog();
-            if(code < 0) {
+            if (code < 0) {
                 System.err.println("Systemd sd_notify failed with error code: " + code);
                 break;
             }
@@ -475,16 +453,19 @@ public class Main {
         }
         return new URLClassLoader(urls.toArray(new URL[urls.size()]), Main.class.getClassLoader());
     }
-    
+
     private FrameworkFactory loadFrameworkFactory(ClassLoader classLoader) throws Exception {
         String factoryClass = config.frameworkFactoryClass;
         if (factoryClass == null) {
-            InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
+            InputStream is =
+                    classLoader.getResourceAsStream(
+                            "META-INF/services/" + FrameworkFactory.class.getName());
             BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             factoryClass = br.readLine();
             br.close();
         }
-        FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
+        FrameworkFactory factory =
+                (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
         return factory;
     }
 
@@ -493,13 +474,23 @@ public class Main {
             return new NoLock();
         }
         try {
-            return (Lock) Lock.class.getClassLoader().loadClass(config.lockClass).getConstructor(Properties.class).newInstance(config.props);
+            return (Lock)
+                    Lock.class
+                            .getClassLoader()
+                            .loadClass(config.lockClass)
+                            .getConstructor(Properties.class)
+                            .newInstance(config.props);
         } catch (Exception e) {
-            if (e instanceof InvocationTargetException){
-                throw new RuntimeException("Exception instantiating lock class " + config.lockClass
-                                            + "\n" + ((InvocationTargetException)e).getTargetException().getMessage(), e);
-            }else{
-                throw new RuntimeException("Exception instantiating lock class " + config.lockClass, e);
+            if (e instanceof InvocationTargetException) {
+                throw new RuntimeException(
+                        "Exception instantiating lock class "
+                                + config.lockClass
+                                + "\n"
+                                + ((InvocationTargetException) e).getTargetException().getMessage(),
+                        e);
+            } else {
+                throw new RuntimeException(
+                        "Exception instantiating lock class " + config.lockClass, e);
             }
         }
     }
@@ -511,7 +502,7 @@ public class Main {
             System.err.println("Unable to register security provider: " + t);
         }
     }
-    
+
     public List<BundleInfo> readBundlesFromStartupProperties(File startupPropsFile) {
         Properties startupProps = PropertiesLoader.loadPropertiesOrFail(startupPropsFile);
         List<BundleInfo> bundeList = new ArrayList<>();
@@ -523,32 +514,51 @@ public class Main {
                 bi.startLevel = new Integer(startlevelSt);
                 bundeList.add(bi);
             } catch (Exception e) {
-                throw new RuntimeException("Error loading startup bundle list from " + startupPropsFile + " at " + key, e);
+                throw new RuntimeException(
+                        "Error loading startup bundle list from " + startupPropsFile + " at " + key,
+                        e);
             }
         }
-        return bundeList; 
+        return bundeList;
     }
 
-    private void installAndStartBundles(ArtifactResolver resolver, BundleContext context, List<BundleInfo> bundles) {
+    private void installAndStartBundles(
+            ArtifactResolver resolver, BundleContext context, List<BundleInfo> bundles) {
         for (BundleInfo bundleInfo : bundles) {
             try {
                 Bundle b;
                 if (bundleInfo.uri.toString().startsWith("reference:file:")) {
-                    URI temp = URI.create(bundleInfo.uri.toString().substring("reference:file:".length()));
+                    URI temp =
+                            URI.create(
+                                    bundleInfo
+                                            .uri
+                                            .toString()
+                                            .substring("reference:file:".length()));
                     URI resolvedURI = resolver.resolve(temp);
-                    URI finalUri = URI.create("reference:file:" + config.karafBase.toURI().relativize(resolvedURI));
+                    URI finalUri =
+                            URI.create(
+                                    "reference:file:"
+                                            + config.karafBase.toURI().relativize(resolvedURI));
                     b = context.installBundle(finalUri.toString());
                 } else {
                     URI resolvedURI = resolver.resolve(bundleInfo.uri);
-                    b = context.installBundle(bundleInfo.uri.toString(), resolvedURI.toURL().openStream());
+                    b =
+                            context.installBundle(
+                                    bundleInfo.uri.toString(), resolvedURI.toURL().openStream());
                 }
                 b.adapt(BundleStartLevel.class).setStartLevel(bundleInfo.startLevel);
                 if (isNotFragment(b)) {
                     b.start();
                 }
-            } catch (Exception  e) {
-                throw new RuntimeException("Error installing bundle listed in " + STARTUP_PROPERTIES_FILE_NAME
-                        + " with url: " + bundleInfo.uri + " and startlevel: " + bundleInfo.startLevel, e);
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Error installing bundle listed in "
+                                + STARTUP_PROPERTIES_FILE_NAME
+                                + " with url: "
+                                + bundleInfo.uri
+                                + " and startlevel: "
+                                + bundleInfo.startLevel,
+                        e);
             }
         }
     }
@@ -562,7 +572,8 @@ public class Main {
         List<File> bundleDirs = new ArrayList<>();
         File homeSystemRepo = new File(config.karafHome, config.defaultRepo);
         if (!homeSystemRepo.isDirectory()) {
-            throw new RuntimeException("system repo folder not found: " + homeSystemRepo.getAbsolutePath());
+            throw new RuntimeException(
+                    "system repo folder not found: " + homeSystemRepo.getAbsolutePath());
         }
         bundleDirs.add(homeSystemRepo);
 
@@ -588,13 +599,13 @@ public class Main {
                         if (f.exists() && f.isDirectory()) {
                             bundleDirs.add(f);
                         } else {
-                            System.err.println("Bundle location " + location
-                                    + " does not exist or is not a directory.");
+                            System.err.println(
+                                    "Bundle location "
+                                            + location
+                                            + " does not exist or is not a directory.");
                         }
                     }
-                }
-
-                while (location != null);
+                } while (location != null);
             }
         }
         return bundleDirs;
@@ -643,7 +654,8 @@ public class Main {
                 if (lock != null) {
                     lock.release();
                 }
-                while (framework.getState() != Bundle.STARTING && framework.getState() != Bundle.ACTIVE) {
+                while (framework.getState() != Bundle.STARTING
+                        && framework.getState() != Bundle.ACTIVE) {
                     Thread.sleep(10);
                 }
                 monitorThread = monitor();
@@ -662,7 +674,7 @@ public class Main {
             if (config.shutdownTimeout <= 0) {
                 timeout = Integer.MAX_VALUE;
             }
-            
+
             if (shutdownCallback != null) {
                 shutdownCallback.waitingForShutdown(timeout);
             }
@@ -670,16 +682,19 @@ public class Main {
             exiting = true;
 
             if (framework.getState() == Bundle.ACTIVE || framework.getState() == Bundle.STARTING) {
-                new Thread(() -> {
-                    try {
-                        framework.stop();
-                    } catch (BundleException e) {
-                        System.err.println("Error stopping karaf: " + e.getMessage());
-                    }
-                }).start();
+                new Thread(
+                                () -> {
+                                    try {
+                                        framework.stop();
+                                    } catch (BundleException e) {
+                                        System.err.println(
+                                                "Error stopping karaf: " + e.getMessage());
+                                    }
+                                })
+                        .start();
             }
 
-            int step = 5000;      
+            int step = 5000;
             while (timeout > 0) {
                 timeout -= step;
                 FrameworkEvent event = framework.waitForStop(step);
@@ -707,7 +722,7 @@ public class Main {
             }
         }
     }
-    
+
     private final class KarafLockCallback implements LockCallBack, FrameworkListener {
         private Object startLevelLock = new Object();
 
@@ -766,7 +781,6 @@ public class Main {
                     startLevelLock.notifyAll();
                 }
             }
-       }
+        }
     }
-
 }

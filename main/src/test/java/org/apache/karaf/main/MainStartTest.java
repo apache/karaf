@@ -19,7 +19,6 @@
 package org.apache.karaf.main;
 
 import java.io.File;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,36 +31,41 @@ public class MainStartTest {
 
     @After
     public void tearDown() throws Exception {
-        if(main != null){
+        if (main != null) {
             main.destroy();
         }
     }
 
     @Test
     public void testAutoStart() throws Exception {
-        File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
+        File basedir =
+                new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
-        // generate an unique folder name to avoid conflict with folder created by other unit tests (KARAF-2558)
+        // generate an unique folder name to avoid conflict with folder created by other unit tests
+        // (KARAF-2558)
         File data = new File(home, "data" + System.currentTimeMillis());
 
-		String[] args = new String[0];
-		System.setProperty("karaf.home", home.toString());
-		System.setProperty("karaf.data", data.toString());
+        String[] args = new String[0];
+        System.setProperty("karaf.home", home.toString());
+        System.setProperty("karaf.data", data.toString());
 
-		main = new Main(args);
-		main.launch();
-		Framework framework = main.getFramework();
-		Bundle[] bundles = framework.getBundleContext().getBundles();
-		Assert.assertEquals(3, bundles.length);
-		
-		// Give the framework some time to start the bundles
-		Thread.sleep(1000);
+        main = new Main(args);
+        main.launch();
+        Framework framework = main.getFramework();
+        Bundle[] bundles = framework.getBundleContext().getBundles();
+        Assert.assertEquals(3, bundles.length);
 
-		Bundle bundle1 = framework.getBundleContext().getBundle("mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/1.0.0");
-		Assert.assertEquals(Bundle.ACTIVE, bundle1.getState());
+        // Give the framework some time to start the bundles
+        Thread.sleep(1000);
 
-		Bundle bundle2 = framework.getBundleContext().getBundle("pax-url-mvn.jar");
-		Assert.assertEquals(Bundle.ACTIVE, bundle2.getState());
-	}
+        Bundle bundle1 =
+                framework
+                        .getBundleContext()
+                        .getBundle(
+                                "mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/1.0.0");
+        Assert.assertEquals(Bundle.ACTIVE, bundle1.getState());
 
+        Bundle bundle2 = framework.getBundleContext().getBundle("pax-url-mvn.jar");
+        Assert.assertEquals(Bundle.ACTIVE, bundle2.getState());
+    }
 }

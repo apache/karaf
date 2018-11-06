@@ -23,5 +23,4 @@ import java.lang.annotation.RetentionPolicy;
 public @interface ProvideService {
 
     Class value();
-
 }

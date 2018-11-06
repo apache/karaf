@@ -15,7 +15,6 @@
 package org.apache.karaf.jaas.modules.audit;
 
 import java.util.Map;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -37,8 +36,11 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
     private String username;
     private boolean enabled;
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler,
-                           Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         this.subject = subject;
         enabled = Boolean.parseBoolean((String) options.get("enabled"));
         handler = callbackHandler;
@@ -48,11 +50,13 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
 
     public boolean login() throws LoginException {
         NameCallback user = new NameCallback("User name:");
-        Callback[] callbacks = new Callback[]{user};
+        Callback[] callbacks = new Callback[] {user};
         try {
             handler.handle(callbacks);
         } catch (Exception e) {
-            throw (LoginException) new LoginException("Unable to process callback: " + e.getMessage()).initCause(e);
+            throw (LoginException)
+                    new LoginException("Unable to process callback: " + e.getMessage())
+                            .initCause(e);
         }
         if (callbacks.length != 1) {
             throw new IllegalStateException("Number of callbacks changed by server!");
@@ -73,7 +77,7 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
     }
 
     public boolean abort() throws LoginException {
-        if (enabled && username != null) { //work around initial "fake" login
+        if (enabled && username != null) { // work around initial "fake" login
             audit(Action.FAILURE, username);
             username = null;
         }
@@ -87,5 +91,4 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
         }
         return false;
     }
-
 }

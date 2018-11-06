@@ -23,14 +23,19 @@ import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.apache.maven.settings.Proxy;
 
-@Command(scope = "maven", name = "http-proxy-list", description = "Lists HTTP proxy configurations for Maven remote repositories")
+@Command(
+        scope = "maven",
+        name = "http-proxy-list",
+        description = "Lists HTTP proxy configurations for Maven remote repositories")
 @Service
 public class HttpProxyListCommand extends MavenSecuritySupport {
 
     @Override
     public void doAction(String prefix, Dictionary<String, Object> config) throws Exception {
         System.out.println();
-        if (mavenSettings != null && mavenSettings.getProxies() != null && mavenSettings.getProxies().size() > 0) {
+        if (mavenSettings != null
+                && mavenSettings.getProxies() != null
+                && mavenSettings.getProxies().size() > 0) {
             ShellTable table = new ShellTable();
             table.column("ID");
             table.column("Host");
@@ -59,5 +64,4 @@ public class HttpProxyListCommand extends MavenSecuritySupport {
 
         System.out.println();
     }
-
 }

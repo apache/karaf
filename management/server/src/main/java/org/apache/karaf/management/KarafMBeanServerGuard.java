@@ -16,16 +16,6 @@
  */
 package org.apache.karaf.management;
 
-import org.apache.karaf.management.internal.Activator;
-import org.apache.karaf.management.internal.BulkRequestContext;
-import org.apache.karaf.management.internal.EventAdminLogger;
-import org.apache.karaf.management.internal.EventAdminMBeanServerWrapper;
-import org.apache.karaf.management.internal.MBeanInvocationHandler;
-import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
-import org.apache.karaf.util.jaas.JaasHelper;
-import org.osgi.service.cm.ConfigurationAdmin;
-
-import javax.management.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -41,18 +31,25 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-
+import javax.management.*;
+import org.apache.karaf.management.internal.BulkRequestContext;
+import org.apache.karaf.management.internal.EventAdminLogger;
+import org.apache.karaf.management.internal.EventAdminMBeanServerWrapper;
+import org.apache.karaf.management.internal.MBeanInvocationHandler;
+import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
+import org.apache.karaf.util.jaas.JaasHelper;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KarafMBeanServerGuard implements InvocationHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KarafMBeanServerGuard.class);    
+    private static final Logger LOG = LoggerFactory.getLogger(KarafMBeanServerGuard.class);
 
     private static final String JMX_ACL_PID_PREFIX = "jmx.acl";
-    
+
     private static final String JMX_ACL_WHITELIST = "jmx.acl.whitelist";
-    
+
     private static final String JMX_ACL_DETAILED_MESSAGE = "jmx.acl.detailed.message";
 
     private static final String JMX_OBJECTNAME_PROPERTY_WILDCARD = "_";
@@ -61,7 +58,13 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
     private static final String INVOKE = "invoke";
 
-    private static final String[] INVOKE_SIG = new String[] {ObjectName.class.getName(), String.class.getName(), Object[].class.getName(), String[].class.getName()};
+    private static final String[] INVOKE_SIG =
+            new String[] {
+                ObjectName.class.getName(),
+                String.class.getName(),
+                Object[].class.getName(),
+                String[].class.getName()
+            };
 
     private ConfigurationAdmin configAdmin;
     private EventAdminLogger logger;
@@ -83,11 +86,9 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getParameterTypes().length == 0)
-            return null;
+        if (method.getParameterTypes().length == 0) return null;
 
-        if (!ObjectName.class.isAssignableFrom(method.getParameterTypes()[0]))
-            return null;
+        if (!ObjectName.class.isAssignableFrom(method.getParameterTypes()[0])) return null;
 
         MBeanServer mbs = (MBeanServer) proxy;
         if (mbs != null && Proxy.getInvocationHandler(mbs) instanceof MBeanInvocationHandler) {
@@ -118,25 +119,31 @@ public class KarafMBeanServerGuard implements InvocationHandler {
      *
      * @param mbeanServer The MBeanServer where the object is registered.
      * @param objectName The ObjectName to check.
-     * @return {@code True} if there is a method on the object that can be invoked, {@code false} else.
+     * @return {@code True} if there is a method on the object that can be invoked, {@code false}
+     *     else.
      * @throws JMException If the invocation fails.
      * @throws IOException If the invocation fails.
      */
-    public boolean canInvoke(MBeanServer mbeanServer, ObjectName objectName) throws JMException, IOException {
+    public boolean canInvoke(MBeanServer mbeanServer, ObjectName objectName)
+            throws JMException, IOException {
         return canInvoke(null, mbeanServer, objectName);
     }
 
     /**
      * Return whether there is any method that the current user can invoke.
      *
-     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>.
+     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null
+     *     </code>.
      * @param mbeanServer The MBeanServer where the object is registered.
      * @param objectName The ObjectName to check.
-     * @return {@code True} if there is a method on the object that can be invoked, {@code false} else.
+     * @return {@code True} if there is a method on the object that can be invoked, {@code false}
+     *     else.
      * @throws JMException If the invocation fails.
      * @throws IOException If the invocation fails.
      */
-    public boolean canInvoke(BulkRequestContext context, MBeanServer mbeanServer, ObjectName objectName) throws JMException, IOException {
+    public boolean canInvoke(
+            BulkRequestContext context, MBeanServer mbeanServer, ObjectName objectName)
+            throws JMException, IOException {
         MBeanInfo info = mbeanServer.getMBeanInfo(objectName);
 
         for (MBeanOperationInfo operation : info.getOperations()) {
@@ -151,11 +158,15 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
         for (MBeanAttributeInfo attr : info.getAttributes()) {
             if (attr.isReadable()) {
-                if (canInvoke(context, objectName, attr.isIs() ? "is" : "get" + attr.getName(), new String[] {}))
-                    return true;
+                if (canInvoke(
+                        context,
+                        objectName,
+                        attr.isIs() ? "is" : "get" + attr.getName(),
+                        new String[] {})) return true;
             }
             if (attr.isWritable()) {
-                if (canInvoke(context, objectName, "set" + attr.getName(), new String[]{attr.getType()}))
+                if (canInvoke(
+                        context, objectName, "set" + attr.getName(), new String[] {attr.getType()}))
                     return true;
             }
         }
@@ -164,31 +175,42 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     /**
-     * Return whether there is any overload of the specified method that can be invoked by the current user.
+     * Return whether there is any overload of the specified method that can be invoked by the
+     * current user.
      *
      * @param mbeanServer The MBeanServer where the object is registered.
      * @param objectName The MBean ObjectName.
      * @param methodName The name of the method.
-     * @return {@code True} if there is an overload of the method that can be invoked by the current user.
+     * @return {@code True} if there is an overload of the method that can be invoked by the current
+     *     user.
      * @throws JMException If the invocation fails.
      * @throws IOException If the invocation fails.
      */
-    public boolean canInvoke(MBeanServer mbeanServer, ObjectName objectName, String methodName) throws JMException, IOException {
+    public boolean canInvoke(MBeanServer mbeanServer, ObjectName objectName, String methodName)
+            throws JMException, IOException {
         return canInvoke(null, mbeanServer, objectName, methodName);
     }
 
     /**
-     * Return whether there is any overload of the specified method that can be invoked by the current user.
+     * Return whether there is any overload of the specified method that can be invoked by the
+     * current user.
      *
-     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>.
+     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null
+     *     </code>.
      * @param mbeanServer The MBeanServer where the object is registered.
      * @param objectName The MBean ObjectName.
      * @param methodName The name of the method.
-     * @return {@code True} if there is an overload of the method that can be invoked by the current user.
+     * @return {@code True} if there is an overload of the method that can be invoked by the current
+     *     user.
      * @throws JMException If the invocation fails.
      * @throws IOException If the invocation fails.
      */
-    public boolean canInvoke(BulkRequestContext context, MBeanServer mbeanServer, ObjectName objectName, String methodName) throws JMException, IOException {
+    public boolean canInvoke(
+            BulkRequestContext context,
+            MBeanServer mbeanServer,
+            ObjectName objectName,
+            String methodName)
+            throws JMException, IOException {
         methodName = methodName.trim();
         MBeanInfo info = mbeanServer.getMBeanInfo(objectName);
 
@@ -212,7 +234,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                 return canInvoke(context, objectName, methodName, new String[] {});
             }
             if (methodName.equals("set" + attrName)) {
-                return canInvoke(context, objectName, methodName, new String[] { attr.getType() });
+                return canInvoke(context, objectName, methodName, new String[] {attr.getType()});
             }
         }
 
@@ -226,36 +248,52 @@ public class KarafMBeanServerGuard implements InvocationHandler {
      * @param objectName The MBean ObjectName.
      * @param methodName The name of the method.
      * @param signature The signature of the method.
-     * @return {@code True} if the method can be invoked, {@code false} else. Note that if a method name or signature
-     *      is provided that does not exist on the MBean, the behaviour of this method is undefined. In other words,
-     *      if you ask whether a method that does not exist can be invoked, the method may return {@code true} but
-     *      actually invoking that method will obviously not work.
+     * @return {@code True} if the method can be invoked, {@code false} else. Note that if a method
+     *     name or signature is provided that does not exist on the MBean, the behaviour of this
+     *     method is undefined. In other words, if you ask whether a method that does not exist can
+     *     be invoked, the method may return {@code true} but actually invoking that method will
+     *     obviously not work.
      * @throws IOException If the invocation fails.
      */
-    public boolean canInvoke(MBeanServer mbeanServer, ObjectName objectName, String methodName, String[] signature) throws IOException {
+    public boolean canInvoke(
+            MBeanServer mbeanServer, ObjectName objectName, String methodName, String[] signature)
+            throws IOException {
         return canInvoke(null, mbeanServer, objectName, methodName, signature);
     }
 
     /**
      * Return true if the method on the MBean with the specified signature can be invoked.
      *
-     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null</code>.
+     * @param context {@link BulkRequestContext} for optimized ConfigAdmin access, may be <code>null
+     *     </code>.
      * @param mbeanServer The MBeanServer where the object is registered.
      * @param objectName The MBean ObjectName.
      * @param methodName The name of the method.
      * @param signature The signature of the method.
-     * @return {@code True} if the method can be invoked, {@code false} else. Note that if a method name or signature
-     *      is provided that does not exist on the MBean, the behaviour of this method is undefined. In other words,
-     *      if you ask whether a method that does not exist can be invoked, the method may return {@code true} but
-     *      actually invoking that method will obviously not work.
+     * @return {@code True} if the method can be invoked, {@code false} else. Note that if a method
+     *     name or signature is provided that does not exist on the MBean, the behaviour of this
+     *     method is undefined. In other words, if you ask whether a method that does not exist can
+     *     be invoked, the method may return {@code true} but actually invoking that method will
+     *     obviously not work.
      * @throws IOException If the invocation fails.
      */
-    public boolean canInvoke(BulkRequestContext context, MBeanServer mbeanServer, ObjectName objectName, String methodName, String[] signature) throws IOException {
+    public boolean canInvoke(
+            BulkRequestContext context,
+            MBeanServer mbeanServer,
+            ObjectName objectName,
+            String methodName,
+            String[] signature)
+            throws IOException {
         // no checking done on the MBeanServer of whether the method actually exists...
         return canInvoke(context, objectName, methodName, signature);
     }
 
-    private boolean canInvoke(BulkRequestContext context, ObjectName objectName, String methodName, String[] signature) throws IOException {
+    private boolean canInvoke(
+            BulkRequestContext context,
+            ObjectName objectName,
+            String methodName,
+            String[] signature)
+            throws IOException {
         if (context == null) {
             context = BulkRequestContext.newContext(configAdmin);
         }
@@ -263,14 +301,14 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             return true;
         }
         for (String role : getRequiredRoles(context, objectName, methodName, signature)) {
-            if (JaasHelper.currentUserHasRole(context.getPrincipals(), role))
-                return true;
+            if (JaasHelper.currentUserHasRole(context.getPrincipals(), role)) return true;
         }
 
         return false;
     }
 
-    private void handleGetAttribute(MBeanServer proxy, ObjectName objectName, String attributeName) throws JMException, IOException {
+    private void handleGetAttribute(MBeanServer proxy, ObjectName objectName, String attributeName)
+            throws JMException, IOException {
         MBeanInfo info = proxy.getMBeanInfo(objectName);
         String prefix = null;
         for (MBeanAttributeInfo attr : info.getAttributes()) {
@@ -279,19 +317,27 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             }
         }
         if (prefix == null) {
-            LOG.debug("Attribute " + attributeName + " can not be found for MBean " + objectName.toString());
+            LOG.debug(
+                    "Attribute "
+                            + attributeName
+                            + " can not be found for MBean "
+                            + objectName.toString());
         } else {
-            handleInvoke(null, objectName, prefix + attributeName, new Object[]{}, new String[]{});
+            handleInvoke(
+                    null, objectName, prefix + attributeName, new Object[] {}, new String[] {});
         }
     }
 
-    private void handleGetAttributes(MBeanServer proxy, ObjectName objectName, String[] attributeNames) throws JMException, IOException {
+    private void handleGetAttributes(
+            MBeanServer proxy, ObjectName objectName, String[] attributeNames)
+            throws JMException, IOException {
         for (String attr : attributeNames) {
             handleGetAttribute(proxy, objectName, attr);
         }
     }
 
-    private void handleSetAttribute(MBeanServer proxy, ObjectName objectName, Attribute attribute) throws JMException, IOException {
+    private void handleSetAttribute(MBeanServer proxy, ObjectName objectName, Attribute attribute)
+            throws JMException, IOException {
         String dataType = null;
         MBeanInfo info = proxy.getMBeanInfo(objectName);
         for (MBeanAttributeInfo attr : info.getAttributes()) {
@@ -304,16 +350,24 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         if (dataType == null)
             throw new IllegalStateException("Attribute data type can not be found");
 
-        handleInvoke(null, objectName, "set" + attribute.getName(), new Object[]{ attribute.getValue() }, new String[]{ dataType });
+        handleInvoke(
+                null,
+                objectName,
+                "set" + attribute.getName(),
+                new Object[] {attribute.getValue()},
+                new String[] {dataType});
     }
 
-    private void handleSetAttributes(MBeanServer proxy, ObjectName objectName, AttributeList attributes) throws JMException, IOException {
+    private void handleSetAttributes(
+            MBeanServer proxy, ObjectName objectName, AttributeList attributes)
+            throws JMException, IOException {
         for (Attribute attr : attributes.asList()) {
             handleSetAttribute(proxy, objectName, attr);
         }
     }
-    
-    private boolean canBypassRBAC(BulkRequestContext context, ObjectName objectName, String operationName) {
+
+    private boolean canBypassRBAC(
+            BulkRequestContext context, ObjectName objectName, String operationName) {
         List<String> allBypassObjectName = new ArrayList<>();
 
         List<Dictionary<String, Object>> configs = context.getWhitelistProperties();
@@ -326,13 +380,13 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
 
         for (String pid : iterateDownPids(getNameSegments(objectName))) {
-            if (!pid.equals("jmx.acl"))  {
+            if (!pid.equals("jmx.acl")) {
                 for (String bypassObjectName : allBypassObjectName) {
                     String objectNameAndMethod[] = bypassObjectName.split(";");
                     if (objectNameAndMethod.length > 1) {
-                        //check both the ObjectName and MethodName
-                        if (bypassObjectName.equals(pid.substring("jmx.acl.".length()) 
-                            + ";" + operationName)) {
+                        // check both the ObjectName and MethodName
+                        if (bypassObjectName.equals(
+                                pid.substring("jmx.acl.".length()) + ";" + operationName)) {
                             return true;
                         }
                     } else {
@@ -346,35 +400,50 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         return false;
     }
 
-    void handleInvoke(ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException {
+    void handleInvoke(
+            ObjectName objectName, String operationName, Object[] params, String[] signature)
+            throws IOException {
         handleInvoke(null, objectName, operationName, params, signature);
     }
 
-    void handleInvoke(BulkRequestContext context, ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException {
+    void handleInvoke(
+            BulkRequestContext context,
+            ObjectName objectName,
+            String operationName,
+            Object[] params,
+            String[] signature)
+            throws IOException {
         if (context == null) {
             context = BulkRequestContext.newContext(configAdmin);
         }
         if (canBypassRBAC(context, objectName, operationName)) {
             return;
         }
-        for (String role : getRequiredRoles(context, objectName, operationName, params, signature)) {
-            if (JaasHelper.currentUserHasRole(role))
-                return;
+        for (String role :
+                getRequiredRoles(context, objectName, operationName, params, signature)) {
+            if (JaasHelper.currentUserHasRole(role)) return;
         }
         if (Boolean.valueOf(System.getProperty(JMX_ACL_DETAILED_MESSAGE, "false"))) {
             printDetailedMessage(context, objectName, operationName, params, signature);
         }
-        SecurityException se = new SecurityException("Insufficient roles/credentials for operation");
+        SecurityException se =
+                new SecurityException("Insufficient roles/credentials for operation");
         if (logger != null) {
             logger.log(INVOKE, INVOKE_SIG, null, se, objectName, operationName, signature, params);
         }
         throw se;
     }
 
-    private void printDetailedMessage(BulkRequestContext context, ObjectName objectName,
-                                      String operationName, Object[] params, String[] signature) throws IOException {
+    private void printDetailedMessage(
+            BulkRequestContext context,
+            ObjectName objectName,
+            String operationName,
+            Object[] params,
+            String[] signature)
+            throws IOException {
         String expectedRoles = "";
-        for (String role : getRequiredRoles(context, objectName, operationName, params, signature)) {
+        for (String role :
+                getRequiredRoles(context, objectName, operationName, params, signature)) {
             if (expectedRoles.length() != 0) {
                 expectedRoles = expectedRoles + ", " + role;
             } else {
@@ -398,7 +467,9 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             if (generalPid.length() > 0) {
                 Dictionary<String, Object> config = context.getConfiguration(generalPid);
                 List<String> roles = new ArrayList<>();
-                ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(operationName, params, signature, config, roles);
+                ACLConfigurationParser.Specificity s =
+                        ACLConfigurationParser.getRolesForInvocation(
+                                operationName, params, signature, config, roles);
                 if (s != ACLConfigurationParser.Specificity.NO_MATCH) {
                     matchedPid = generalPid;
                     break;
@@ -406,37 +477,66 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             }
         }
         if (matchedPid == null) {
-            //can't find the matched PID, use the most specific one
+            // can't find the matched PID, use the most specific one
             matchedPid = iterateDownPids(getNameSegments(objectName)).get(0);
         }
-        LOG.debug("The current roles are \'" + currentRoles 
-                  + "\', however the expected roles are \'"
-                  + expectedRoles 
-                  + "\'. To make the call pass RBAC check, please add current role into entry \'"
-                  + operationName + "\' of file "
-                  + matchedPid + ".cfg"
-                  );
+        LOG.debug(
+                "The current roles are \'"
+                        + currentRoles
+                        + "\', however the expected roles are \'"
+                        + expectedRoles
+                        + "\'. To make the call pass RBAC check, please add current role into entry \'"
+                        + operationName
+                        + "\' of file "
+                        + matchedPid
+                        + ".cfg");
     }
 
-    List<String> getRequiredRoles(ObjectName objectName, String methodName, String[] signature) throws IOException {
-        return getRequiredRoles(BulkRequestContext.newContext(configAdmin), objectName, methodName, null, signature);
+    List<String> getRequiredRoles(ObjectName objectName, String methodName, String[] signature)
+            throws IOException {
+        return getRequiredRoles(
+                BulkRequestContext.newContext(configAdmin),
+                objectName,
+                methodName,
+                null,
+                signature);
     }
 
-    List<String> getRequiredRoles(BulkRequestContext context, ObjectName objectName, String methodName, String[] signature) throws IOException {
+    List<String> getRequiredRoles(
+            BulkRequestContext context,
+            ObjectName objectName,
+            String methodName,
+            String[] signature)
+            throws IOException {
         return getRequiredRoles(context, objectName, methodName, null, signature);
     }
 
-    List<String> getRequiredRoles(ObjectName objectName, String methodName, Object[] params, String[] signature) throws IOException {
-        return getRequiredRoles(BulkRequestContext.newContext(configAdmin), objectName, methodName, params, signature);
+    List<String> getRequiredRoles(
+            ObjectName objectName, String methodName, Object[] params, String[] signature)
+            throws IOException {
+        return getRequiredRoles(
+                BulkRequestContext.newContext(configAdmin),
+                objectName,
+                methodName,
+                params,
+                signature);
     }
 
-    List<String> getRequiredRoles(BulkRequestContext context, ObjectName objectName, String methodName, Object[] params, String[] signature) throws IOException {
+    List<String> getRequiredRoles(
+            BulkRequestContext context,
+            ObjectName objectName,
+            String methodName,
+            Object[] params,
+            String[] signature)
+            throws IOException {
         for (String pid : iterateDownPids(getNameSegments(objectName))) {
             String generalPid = getGeneralPid(context.getAllPids(), pid);
             if (generalPid.length() > 0) {
                 Dictionary<String, Object> config = context.getConfiguration(generalPid);
                 List<String> roles = new ArrayList<>();
-                ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(methodName, params, signature, config, roles);
+                ACLConfigurationParser.Specificity s =
+                        ACLConfigurationParser.getRolesForInvocation(
+                                methodName, params, signature, config, roles);
                 if (s != ACLConfigurationParser.Specificity.NO_MATCH) {
                     return roles;
                 }
@@ -453,8 +553,8 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             if (idStrArray.length == pidStrArray.length) {
                 boolean match = true;
                 for (int i = 0; i < idStrArray.length; i++) {
-                    if (idStrArray[i].equals(JMX_OBJECTNAME_PROPERTY_WILDCARD) 
-                        || idStrArray[i].equals(pidStrArray[i])) {
+                    if (idStrArray[i].equals(JMX_OBJECTNAME_PROPERTY_WILDCARD)
+                            || idStrArray[i].equals(pidStrArray[i])) {
                         continue;
                     } else {
                         match = false;
@@ -486,7 +586,8 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         List<String> segments = new ArrayList<>();
         segments.add(objectName.getDomain());
         // TODO can an ObjectName property contain a comma as key or value ?
-        // TODO support quoting as described in http://docs.oracle.com/javaee/1.4/api/javax/management/ObjectName.html
+        // TODO support quoting as described in
+        // http://docs.oracle.com/javaee/1.4/api/javax/management/ObjectName.html
         for (String s : objectName.getKeyPropertyListString().split("[,]")) {
             int index = s.indexOf('=');
             if (index < 0) {
@@ -499,19 +600,15 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                 segments.add(key);
             }
         }
-        
+
         return segments;
     }
 
     /**
-     * Given a list of segments, return a list of PIDs that are searched in this order.
-     * For example, given the following segments: org.foo, bar, test
-     * the following list of PIDs will be generated (in this order):
-     *      jmx.acl.org.foo.bar.test
-     *      jmx.acl.org.foo.bar
-     *      jmx.acl.org.foo
-     *      jmx.acl
-     * The order is used as a search order, in which the most specific PID is searched first.
+     * Given a list of segments, return a list of PIDs that are searched in this order. For example,
+     * given the following segments: org.foo, bar, test the following list of PIDs will be generated
+     * (in this order): jmx.acl.org.foo.bar.test jmx.acl.org.foo.bar jmx.acl.org.foo jmx.acl The
+     * order is used as a search order, in which the most specific PID is searched first.
      *
      * @param segments the ObjectName segments.
      * @return the PIDs corresponding with the ObjectName in the above order.
@@ -532,8 +629,9 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     /**
-     * <code>nulls</code>-last comparator of PIDs split to segments. {@link #JMX_OBJECTNAME_PROPERTY_WILDCARD}
-     * in a segment makes the PID more generic, thus - with lower priority.
+     * <code>nulls</code>-last comparator of PIDs split to segments. {@link
+     * #JMX_OBJECTNAME_PROPERTY_WILDCARD} in a segment makes the PID more generic, thus - with lower
+     * priority.
      */
     private static class WildcardPidComparator implements Comparator<String[]> {
         @Override
@@ -566,5 +664,4 @@ public class KarafMBeanServerGuard implements InvocationHandler {
             return 0;
         }
     }
-
 }

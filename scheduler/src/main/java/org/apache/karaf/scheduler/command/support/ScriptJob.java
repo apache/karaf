@@ -18,7 +18,6 @@ package org.apache.karaf.scheduler.command.support;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
-
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.JobContext;
 import org.apache.karaf.shell.api.console.Function;
@@ -43,11 +42,15 @@ public class ScriptJob implements Job {
 
     @Override
     public void execute(JobContext context) {
-        try (Session s = sessionFactory.create(new ByteArrayInputStream(new byte[0]), session.getConsole(), session.getConsole(), session)) {
+        try (Session s =
+                sessionFactory.create(
+                        new ByteArrayInputStream(new byte[0]),
+                        session.getConsole(),
+                        session.getConsole(),
+                        session)) {
             script.execute(s, Collections.singletonList(context));
         } catch (Exception e) {
             LOGGER.warn("Error executing script", e);
         }
     }
-
 }

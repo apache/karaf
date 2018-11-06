@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -30,42 +29,60 @@ import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
-@Command(scope = "bundle", name = "classes", description = "Displays a list of classes/resources contained in the bundle")
+@Command(
+        scope = "bundle",
+        name = "classes",
+        description = "Displays a list of classes/resources contained in the bundle")
 @Service
 public class Classes extends BundlesCommand {
 
-    @Option(name = "-a", aliases={"--display-all-files"}, description="List all classes and files in the bundle", required = false, multiValued = false)
+    @Option(
+            name = "-a",
+            aliases = {"--display-all-files"},
+            description = "List all classes and files in the bundle",
+            required = false,
+            multiValued = false)
     boolean displayAllFiles;
 
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        if (wiring != null){
+        if (wiring != null) {
             Collection<String> resources;
             List<String> exports = getExports(bundle);
-            if (displayAllFiles){
+            if (displayAllFiles) {
                 resources = wiring.listResources("/", null, BundleWiring.LISTRESOURCES_RECURSE);
             } else {
                 resources = wiring.listResources("/", "*class", BundleWiring.LISTRESOURCES_RECURSE);
             }
             Collection<String> localResources;
             if (displayAllFiles) {
-                localResources = wiring.listResources("/", null, BundleWiring.LISTRESOURCES_RECURSE | BundleWiring.LISTRESOURCES_LOCAL);
+                localResources =
+                        wiring.listResources(
+                                "/",
+                                null,
+                                BundleWiring.LISTRESOURCES_RECURSE
+                                        | BundleWiring.LISTRESOURCES_LOCAL);
             } else {
-                localResources = wiring.listResources("/", "/*.class", BundleWiring.LISTRESOURCES_RECURSE | BundleWiring.LISTRESOURCES_LOCAL);
+                localResources =
+                        wiring.listResources(
+                                "/",
+                                "/*.class",
+                                BundleWiring.LISTRESOURCES_RECURSE
+                                        | BundleWiring.LISTRESOURCES_LOCAL);
             }
-            for (String resource:resources){
+            for (String resource : resources) {
                 StringBuilder stringBuilder = new StringBuilder();
                 boolean localResource = localResources.contains(resource);
-                if(localResource) {
+                if (localResource) {
                     stringBuilder.append(SimpleAnsi.INTENSITY_BOLD);
                 }
-                if(ids == null || ids.size() != 1) {
+                if (ids == null || ids.size() != 1) {
                     stringBuilder.append(bundle.getBundleId() + " | ");
                 }
                 stringBuilder.append(resource + " | ");
                 stringBuilder.append("exported: " + isExported(resource, exports));
-                if(localResource) {
+                if (localResource) {
                     stringBuilder.append(SimpleAnsi.INTENSITY_NORMAL);
                 }
 
@@ -78,8 +95,9 @@ public class Classes extends BundlesCommand {
 
     private boolean isExported(String className, List<String> exports) throws Exception {
         boolean exported = false;
-        String packageName = className.substring(0, className.lastIndexOf("/")).replaceAll("/", ".");
-        if(exports.contains(packageName)) {
+        String packageName =
+                className.substring(0, className.lastIndexOf("/")).replaceAll("/", ".");
+        if (exports.contains(packageName)) {
             exported = true;
         }
         return exported;
@@ -91,11 +109,9 @@ public class Classes extends BundlesCommand {
         List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
         for (BundleCapability cap : caps) {
             Map<String, Object> attr = cap.getAttributes();
-            String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
+            String packageName = (String) attr.get(BundleRevision.PACKAGE_NAMESPACE);
             exports.add(packageName);
         }
         return exports;
     }
-
-
 }

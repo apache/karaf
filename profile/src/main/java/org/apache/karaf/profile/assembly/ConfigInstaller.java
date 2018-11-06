@@ -23,7 +23,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
@@ -32,21 +31,19 @@ import org.apache.karaf.features.internal.model.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Installs PID configuration to <code>${karaf.etc}</code> and <code>system/</code> directory.
- */
+/** Installs PID configuration to <code>${karaf.etc}</code> and <code>system/</code> directory. */
 public class ConfigInstaller {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigInstaller.class);
     private Path etcDirectory;
     private List<String> pidsToExtract;
-    
+
     public ConfigInstaller(Path etcDirectory, List<String> pidsToExtract) {
         this.etcDirectory = etcDirectory;
         this.pidsToExtract = pidsToExtract;
     }
 
     public void installConfigs(Feature feature, Downloader downloader, ArtifactInstaller installer)
-        throws Exception {
+            throws Exception {
         List<Content> contents = new ArrayList<>();
         contents.add(feature);
         contents.addAll(feature.getConditional());
@@ -66,28 +63,48 @@ public class ConfigInstaller {
                 if (pidMatching(config.getName())) {
                     Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
                     if (!config.isAppend() && Files.exists(configFile)) {
-                        LOGGER.info("      not changing existing config file: {}", homeDirectory.relativize(configFile));
+                        LOGGER.info(
+                                "      not changing existing config file: {}",
+                                homeDirectory.relativize(configFile));
                         continue;
                     }
                     if (config.isExternal()) {
-                        downloader.download(config.getValue().trim(), provider -> {
-                            synchronized (provider) {
-                                if (config.isAppend()) {
-                                    byte[] data = Files.readAllBytes(provider.getFile().toPath());
-                                    LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
-                                    Files.write(configFile, data, StandardOpenOption.APPEND);
-                                } else {
-                                    LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
-                                    Files.copy(provider.getFile().toPath(), configFile, StandardCopyOption.REPLACE_EXISTING);
-                                }
-                            }
-                        });
+                        downloader.download(
+                                config.getValue().trim(),
+                                provider -> {
+                                    synchronized (provider) {
+                                        if (config.isAppend()) {
+                                            byte[] data =
+                                                    Files.readAllBytes(provider.getFile().toPath());
+                                            LOGGER.info(
+                                                    "      appending to config file: {}",
+                                                    homeDirectory.relativize(configFile));
+                                            Files.write(
+                                                    configFile, data, StandardOpenOption.APPEND);
+                                        } else {
+                                            LOGGER.info(
+                                                    "      adding config file: {}",
+                                                    homeDirectory.relativize(configFile));
+                                            Files.copy(
+                                                    provider.getFile().toPath(),
+                                                    configFile,
+                                                    StandardCopyOption.REPLACE_EXISTING);
+                                        }
+                                    }
+                                });
                     } else {
                         if (config.isAppend()) {
-                            LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
-                            Files.write(configFile, config.getValue().getBytes(), StandardOpenOption.APPEND);
+                            LOGGER.info(
+                                    "      appending to config file: {}",
+                                    homeDirectory.relativize(configFile));
+                            Files.write(
+                                    configFile,
+                                    config.getValue().getBytes(),
+                                    StandardOpenOption.APPEND);
                         } else {
-                            LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                            LOGGER.info(
+                                    "      adding config file: {}",
+                                    homeDirectory.relativize(configFile));
                             Files.write(configFile, config.getValue().getBytes());
                         }
                     }
@@ -143,16 +160,12 @@ public class ConfigInstaller {
                     }
                     break;
                 case '*':
-                    if (inClass == 0)
-                        sb.append(".*");
-                    else
-                        sb.append('*');
+                    if (inClass == 0) sb.append(".*");
+                    else sb.append('*');
                     break;
                 case '?':
-                    if (inClass == 0)
-                        sb.append('.');
-                    else
-                        sb.append('?');
+                    if (inClass == 0) sb.append('.');
+                    else sb.append('?');
                     break;
                 case '[':
                     inClass++;
@@ -172,15 +185,12 @@ public class ConfigInstaller {
                 case '$':
                 case '@':
                 case '%':
-                    if (inClass == 0 || (firstIndexInClass == i && ch == '^'))
-                        sb.append('\\');
+                    if (inClass == 0 || (firstIndexInClass == i && ch == '^')) sb.append('\\');
                     sb.append(ch);
                     break;
                 case '!':
-                    if (firstIndexInClass == i)
-                        sb.append('^');
-                    else
-                        sb.append('!');
+                    if (firstIndexInClass == i) sb.append('^');
+                    else sb.append('!');
                     break;
                 case '{':
                     inGroup++;
@@ -191,10 +201,8 @@ public class ConfigInstaller {
                     sb.append(')');
                     break;
                 case ',':
-                    if (inGroup > 0)
-                        sb.append('|');
-                    else
-                        sb.append(',');
+                    if (inGroup > 0) sb.append('|');
+                    else sb.append(',');
                     break;
                 default:
                     sb.append(ch);

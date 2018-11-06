@@ -23,23 +23,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import org.apache.karaf.shell.console.Completer;
 
-/**
- * Completer for a set of strings.
- */
+/** Completer for a set of strings. */
 @Deprecated
-public class StringsCompleter
-    implements Completer
-{
+public class StringsCompleter implements Completer {
     private final SortedSet<String> strings = new TreeSet<>();
     private final boolean caseSensitive;
 
     public StringsCompleter() {
         this(true);
     }
-
 
     public StringsCompleter(final boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
@@ -69,7 +63,7 @@ public class StringsCompleter
         return strings;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public int complete(String buffer, final int cursor, final List candidates) {
         // buffer could be null
         assert candidates != null;

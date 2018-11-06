@@ -17,7 +17,6 @@
 package org.apache.karaf.instance.command;
 
 import java.util.List;
-
 import org.apache.karaf.instance.command.completers.StartedInstanceCompleter;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.shell.api.action.Argument;
@@ -30,7 +29,12 @@ import org.apache.karaf.shell.support.MultiException;
 @Service
 public class StopCommand extends InstanceCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The name of the container instance",
+            required = true,
+            multiValued = true)
     @Completion(StartedInstanceCompleter.class)
     private List<String> instances = null;
 
@@ -47,5 +51,4 @@ public class StopCommand extends InstanceCommandSupport {
         exception.throwIfExceptions();
         return null;
     }
-
 }

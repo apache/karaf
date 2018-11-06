@@ -14,14 +14,12 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import java.util.Map;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
-import org.apache.karaf.jaas.modules.ldap.LDAPLoginModule;
-import java.util.Map;
 
 /**
- * Karaf JAAS backing engine factory to support basic list funcitonality
- * for the LDAP login module.
+ * Karaf JAAS backing engine factory to support basic list funcitonality for the LDAP login module.
  */
 public class LDAPBackingEngineFactory implements BackingEngineFactory {
 
@@ -34,5 +32,4 @@ public class LDAPBackingEngineFactory implements BackingEngineFactory {
     public BackingEngine build(Map<String, ?> options) {
         return new LDAPBackingEngine(options);
     }
-
 }

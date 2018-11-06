@@ -14,7 +14,6 @@
 package org.apache.karaf.bundle.core;
 
 import java.util.List;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 
@@ -24,21 +23,21 @@ public interface BundleWatcher {
 
     /**
      * Add a Bundle URLs to the watch list.
-     * 
+     *
      * @param url the URL to watch.
      */
     void add(String url);
 
     /**
      * Remove a bundle URLs from the watch list.
-     * 
+     *
      * @param url the URL to stop to watch.
      */
     void remove(String url);
 
     /**
      * Return the bundles that match
-     * 
+     *
      * @param url the bundles URL.
      * @return the list of bundles.
      */
@@ -53,5 +52,4 @@ public interface BundleWatcher {
     void stop();
 
     void setInterval(long interval);
-
 }

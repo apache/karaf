@@ -28,5 +28,4 @@ public class Id extends BundleCommand {
     protected Object doExecute(Bundle bundle) throws Exception {
         return bundle.getBundleId();
     }
-
 }

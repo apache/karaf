@@ -29,16 +29,16 @@ public class Activator implements BundleActivator {
 
     public void start(BundleContext bundleContext) {
         BlueprintStateService service = new BlueprintStateService();
-	    String[] classes = new String[] {
-                BlueprintListener.class.getName(),
-				BundleStateService.class.getName(),
-                BundleListener.class.getName()
-			};
+        String[] classes =
+                new String[] {
+                    BlueprintListener.class.getName(),
+                    BundleStateService.class.getName(),
+                    BundleListener.class.getName()
+                };
         registration = bundleContext.registerService(classes, service, null);
-	}
+    }
 
     public void stop(BundleContext context) {
         registration.unregister();
     }
-
 }

@@ -17,7 +17,6 @@
 package org.apache.karaf.profile.command.completers;
 
 import java.util.List;
-
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -29,8 +28,7 @@ import org.apache.karaf.shell.support.completers.StringsCompleter;
 @Service
 public class ProfileCompleter implements Completer {
 
-    @Reference
-    private ProfileService profileService;
+    @Reference private ProfileService profileService;
 
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
@@ -41,5 +39,4 @@ public class ProfileCompleter implements Completer {
         }
         return delegate.complete(session, commandLine, candidates);
     }
-
 }

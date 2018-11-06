@@ -1,18 +1,15 @@
 /**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.apache.karaf.shell.impl.console.commands.help;
@@ -26,7 +23,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Session;
@@ -69,7 +65,8 @@ public class ShellHelpProvider implements HelpProvider {
             Bundle bundle = bundles.iterator().next();
             URL resource = bundle.getResource("OSGI-INF/shell-" + path + ".info");
             if (resource != null) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
+                try (BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(resource.openStream()))) {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     PrintStream ps = new PrintStream(baos);
                     int maxSize = 80;
@@ -82,7 +79,7 @@ public class ShellHelpProvider implements HelpProvider {
                     parser.parse(reader);
                     return baos.toString();
                 } catch (IOException e) {
-                     // ignore
+                    // ignore
                 }
             }
 
@@ -111,7 +108,8 @@ public class ShellHelpProvider implements HelpProvider {
                 continue;
             }
 
-            if (completionMode != null && completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_SUBSHELL)) {
+            if (completionMode != null
+                    && completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_SUBSHELL)) {
                 // filter the help only for "global" commands
                 if (subshell == null || subshell.trim().isEmpty()) {
                     if (!name.startsWith(Session.SCOPE_GLOBAL)) {
@@ -120,8 +118,9 @@ public class ShellHelpProvider implements HelpProvider {
                 }
             }
 
-            if (completionMode != null && (completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_SUBSHELL)
-                                                || completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_FIRST))) {
+            if (completionMode != null
+                    && (completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_SUBSHELL)
+                            || completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_FIRST))) {
                 // filter the help only for commands local to the subshell
                 if (!name.startsWith(subshell)) {
                     continue;
@@ -140,5 +139,4 @@ public class ShellHelpProvider implements HelpProvider {
         out.println(SimpleAnsi.INTENSITY_BOLD + "COMMANDS" + SimpleAnsi.INTENSITY_NORMAL);
         out.println("${command-list|" + path + "|indent}");
     }
-
 }

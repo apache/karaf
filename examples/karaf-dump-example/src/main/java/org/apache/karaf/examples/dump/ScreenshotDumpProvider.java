@@ -22,9 +22,7 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.OutputStream;
-
 import javax.imageio.ImageIO;
-
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 import org.osgi.service.component.annotations.Component;
@@ -39,7 +37,7 @@ public class ScreenshotDumpProvider implements DumpProvider {
         GraphicsDevice[] gs = ge.getScreenDevices();
 
         // create dump entry for each device
-        for (int i=0; i < gs.length; i++) {
+        for (int i = 0; i < gs.length; i++) {
             DisplayMode mode = gs[i].getDisplayMode();
             Rectangle bounds = new Rectangle(0, 0, mode.getWidth(), mode.getHeight());
             BufferedImage screenshot = new Robot(gs[i]).createScreenCapture(bounds);
@@ -50,7 +48,5 @@ public class ScreenshotDumpProvider implements DumpProvider {
 
             outputStream.close();
         }
-
     }
-
 }

@@ -35,9 +35,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.function.Function;
-
 import javax.inject.Inject;
-
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.karaf.itests.monitoring.Activator;
 import org.apache.karaf.itests.monitoring.ServiceMonitor;
@@ -46,8 +44,8 @@ import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption;
-import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
 import org.ops4j.store.intern.TemporaryStore;
@@ -61,9 +59,8 @@ public abstract class KarafMinimalMonitoredTestSupport {
 
     public static Logger LOG = LoggerFactory.getLogger(KarafMinimalMonitoredTestSupport.class);
 
-    @Inject
-    protected ServiceMonitor serviceMonitor;
-    
+    @Inject protected ServiceMonitor serviceMonitor;
+
     @ProbeBuilder
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
         probe.setHeader(Constants.IMPORT_PACKAGE, ServiceMonitor.class.getPackage().getName());
@@ -71,36 +68,68 @@ public abstract class KarafMinimalMonitoredTestSupport {
     }
 
     public Option[] baseConfig() throws Exception {
-        MavenArtifactUrlReference karafUrl = maven()
-                .groupId("org.apache.karaf").artifactId("apache-karaf-minimal")
-                .versionAsInProject().type("tar.gz");
+        MavenArtifactUrlReference karafUrl =
+                maven().groupId("org.apache.karaf")
+                        .artifactId("apache-karaf-minimal")
+                        .versionAsInProject()
+                        .type("tar.gz");
 
-        String rmiRegistryPort = Integer.toString(KarafTestSupport.getAvailablePort(Integer.parseInt(MIN_RMI_REG_PORT), Integer.parseInt(MAX_RMI_REG_PORT)));
-        String rmiServerPort = Integer.toString(KarafTestSupport.getAvailablePort(Integer.parseInt(MIN_RMI_SERVER_PORT), Integer.parseInt(MAX_RMI_SERVER_PORT)));
+        String rmiRegistryPort =
+                Integer.toString(
+                        KarafTestSupport.getAvailablePort(
+                                Integer.parseInt(MIN_RMI_REG_PORT),
+                                Integer.parseInt(MAX_RMI_REG_PORT)));
+        String rmiServerPort =
+                Integer.toString(
+                        KarafTestSupport.getAvailablePort(
+                                Integer.parseInt(MIN_RMI_SERVER_PORT),
+                                Integer.parseInt(MAX_RMI_SERVER_PORT)));
 
         Store<InputStream> store = new TemporaryStore(new File("target/exam"), false);
         Handle handle = store.store(createMonitorBundle());
         URL url = store.getLocation(handle).toURL();
         if (JavaVersionUtil.getMajorVersion() >= 9) {
             return new Option[] {
-                karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+                karafDistributionConfiguration()
+                        .frameworkUrl(karafUrl)
+                        .name("Apache Karaf")
+                        .unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
                 configureSecurity().disableKarafMBeanServerBuilder(),
                 logLevel(LogLevelOption.LogLevel.INFO),
-                mavenBundle().groupId("biz.aQute.bnd").artifactId("biz.aQute.bndlib").version("3.5.0"),
-                mavenBundle().groupId("org.ops4j.pax.tinybundles").artifactId("tinybundles").versionAsInProject(),
-                editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
-                editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
-                editConfigurationFilePut("etc/startup.properties", "file:../../" + new File(url.toURI()).getName(), "1"),
-                composite(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", new File("target/test-classes/etc/org.apache.karaf.features.cfg"))),
+                mavenBundle()
+                        .groupId("biz.aQute.bnd")
+                        .artifactId("biz.aQute.bndlib")
+                        .version("3.5.0"),
+                mavenBundle()
+                        .groupId("org.ops4j.pax.tinybundles")
+                        .artifactId("tinybundles")
+                        .versionAsInProject(),
+                editConfigurationFilePut(
+                        "etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
+                editConfigurationFilePut(
+                        "etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
+                editConfigurationFilePut(
+                        "etc/startup.properties",
+                        "file:../../" + new File(url.toURI()).getName(),
+                        "1"),
+                composite(
+                        editConfigurationFilePut(
+                                "etc/org.apache.karaf.features.cfg",
+                                new File("target/test-classes/etc/org.apache.karaf.features.cfg"))),
                 new VMOption("--add-reads=java.xml=java.logging"),
-                new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
+                new VMOption(
+                        "--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
                 new VMOption("--patch-module"),
-                new VMOption("java.base=lib/endorsed/org.apache.karaf.specs.locator-" 
-                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT") + ".jar"),
+                new VMOption(
+                        "java.base=lib/endorsed/org.apache.karaf.specs.locator-"
+                                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT")
+                                + ".jar"),
                 new VMOption("--patch-module"),
-                new VMOption("java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" 
-                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT") + ".jar"),
+                new VMOption(
+                        "java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-"
+                                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT")
+                                + ".jar"),
                 new VMOption("--add-opens"),
                 new VMOption("java.base/java.security=ALL-UNNAMED"),
                 new VMOption("--add-opens"),
@@ -122,23 +151,39 @@ public abstract class KarafMinimalMonitoredTestSupport {
             };
         } else {
             return new Option[] {
-                karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+                karafDistributionConfiguration()
+                        .frameworkUrl(karafUrl)
+                        .name("Apache Karaf")
+                        .unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
                 configureSecurity().disableKarafMBeanServerBuilder(),
                 logLevel(LogLevelOption.LogLevel.INFO),
-                mavenBundle().groupId("biz.aQute.bnd").artifactId("biz.aQute.bndlib").version("3.5.0"),
-                mavenBundle().groupId("org.ops4j.pax.tinybundles").artifactId("tinybundles").versionAsInProject(),
-                editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
-                editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
-                editConfigurationFilePut("etc/startup.properties", "file:../../" + new File(url.toURI()).getName(), "1"),
-                composite(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", new File("target/test-classes/etc/org.apache.karaf.features.cfg")))
+                mavenBundle()
+                        .groupId("biz.aQute.bnd")
+                        .artifactId("biz.aQute.bndlib")
+                        .version("3.5.0"),
+                mavenBundle()
+                        .groupId("org.ops4j.pax.tinybundles")
+                        .artifactId("tinybundles")
+                        .versionAsInProject(),
+                editConfigurationFilePut(
+                        "etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
+                editConfigurationFilePut(
+                        "etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
+                editConfigurationFilePut(
+                        "etc/startup.properties",
+                        "file:../../" + new File(url.toURI()).getName(),
+                        "1"),
+                composite(
+                        editConfigurationFilePut(
+                                "etc/org.apache.karaf.features.cfg",
+                                new File("target/test-classes/etc/org.apache.karaf.features.cfg")))
             };
         }
     }
 
     private InputStream createMonitorBundle() {
-        return bundle()
-                .set(Constants.BUNDLE_ACTIVATOR, Activator.class.getName())
+        return bundle().set(Constants.BUNDLE_ACTIVATOR, Activator.class.getName())
                 .set(Constants.EXPORT_PACKAGE, ServiceMonitor.class.getPackage().getName())
                 .add(Activator.class)
                 .add(ServiceMonitor.class)
@@ -146,8 +191,13 @@ public abstract class KarafMinimalMonitoredTestSupport {
     }
 
     protected long numberOfServiceEventsFor(String serviceName) {
-        Function<ServiceEvent, String> getObjectClass = event -> ((String[])event.getServiceReference().getProperty(OBJECTCLASS))[0];
-        return serviceMonitor.getEvents().stream().map(getObjectClass).filter(v -> v.equals(serviceName)).count();
+        Function<ServiceEvent, String> getObjectClass =
+                event -> ((String[]) event.getServiceReference().getProperty(OBJECTCLASS))[0];
+        return serviceMonitor
+                .getEvents()
+                .stream()
+                .map(getObjectClass)
+                .filter(v -> v.equals(serviceName))
+                .count();
     }
-
 }

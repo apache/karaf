@@ -41,5 +41,4 @@ public interface SubShell {
      * @return The detailed description of the command in the shell.
      */
     String getDetailedDescription();
-
 }

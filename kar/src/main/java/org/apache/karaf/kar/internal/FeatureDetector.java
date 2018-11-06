@@ -17,10 +17,8 @@
 package org.apache.karaf.kar.internal;
 
 import java.io.File;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -28,13 +26,11 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-/**
- * Simple helper to determine if a file is a feature repo
- */
+/** Simple helper to determine if a file is a feature repo */
 class FeatureDetector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureDetector.class);
-    
+
     private DocumentBuilderFactory dbf;
 
     FeatureDetector() {
@@ -49,11 +45,16 @@ class FeatureDetector {
      */
     boolean isFeaturesRepository(File artifact) {
         try {
-            if (artifact.isFile() && artifact.getName().endsWith(".xml") && !artifact.getName().startsWith("maven-metadata")) {
+            if (artifact.isFile()
+                    && artifact.getName().endsWith(".xml")
+                    && !artifact.getName().startsWith("maven-metadata")) {
                 Document doc = parse(artifact);
                 String name = doc.getDocumentElement().getLocalName();
-                String uri  = doc.getDocumentElement().getNamespaceURI();
-                if ("features".equals(name) && (uri == null || "".equals(uri) || uri.startsWith("http://karaf.apache.org/xmlns/features/v"))) {
+                String uri = doc.getDocumentElement().getNamespaceURI();
+                if ("features".equals(name)
+                        && (uri == null
+                                || "".equals(uri)
+                                || uri.startsWith("http://karaf.apache.org/xmlns/features/v"))) {
                     return true;
                 }
             }
@@ -62,7 +63,7 @@ class FeatureDetector {
         }
         return false;
     }
-    
+
     /**
      * Parse a features XML.
      *
@@ -72,16 +73,16 @@ class FeatureDetector {
      */
     private Document parse(File artifact) throws Exception {
         DocumentBuilder db = dbf.newDocumentBuilder();
-        db.setErrorHandler(new ErrorHandler() {
-            public void warning(SAXParseException exception) throws SAXException {
-            }
-            public void error(SAXParseException exception) throws SAXException {
-            }
-            public void fatalError(SAXParseException exception) throws SAXException {
-                throw exception;
-            }
-        });
+        db.setErrorHandler(
+                new ErrorHandler() {
+                    public void warning(SAXParseException exception) throws SAXException {}
+
+                    public void error(SAXParseException exception) throws SAXException {}
+
+                    public void fatalError(SAXParseException exception) throws SAXException {
+                        throw exception;
+                    }
+                });
         return db.parse(artifact);
     }
-
 }

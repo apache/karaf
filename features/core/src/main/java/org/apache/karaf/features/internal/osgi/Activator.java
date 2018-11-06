@@ -32,7 +32,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.repository.AggregateRepository;
@@ -45,13 +44,13 @@ import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
+import org.apache.karaf.features.internal.service.BundleInstallSupport;
+import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
 import org.apache.karaf.features.internal.service.EventAdminListener;
 import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.service.FeatureRepoFinder;
 import org.apache.karaf.features.internal.service.FeaturesServiceConfig;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
-import org.apache.karaf.features.internal.service.BundleInstallSupport;
-import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.tracker.BaseActivator;
@@ -78,16 +77,17 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.LoggerFactory;
 
 @Services(
-    requires = {
+        requires = {
             @RequireService(ConfigurationAdmin.class),
-            @RequireService(value = URLStreamHandlerService.class, filter = "(url.handler.protocol=mvn)")
-    },
-    provides = {
+            @RequireService(
+                    value = URLStreamHandlerService.class,
+                    filter = "(url.handler.protocol=mvn)")
+        },
+        provides = {
             @ProvideService(FeaturesService.class),
             @ProvideService(RegionDigraph.class),
             @ProvideService(RegionDigraphPersistence.class)
-    }
-)
+        })
 public class Activator extends BaseActivator {
 
     public static final String FEATURES_SERVICE_CONFIG_FILE = "org.apache.karaf.features.cfg";
@@ -132,11 +132,18 @@ public class Activator extends BaseActivator {
         BundleContext systemBundleContext = bundleContext.getBundle(0).getBundleContext();
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
         int resolverThreads = getInt("resolverThreads", Runtime.getRuntime().availableProcessors());
-        executorService = new ThreadPoolExecutor(0, resolverThreads,
-                1L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
-                ThreadUtils.namedThreadFactory("resolver"));
-        Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class)), executorService);
+        executorService =
+                new ThreadPoolExecutor(
+                        0,
+                        resolverThreads,
+                        1L,
+                        TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<>(),
+                        ThreadUtils.namedThreadFactory("resolver"));
+        Resolver resolver =
+                new ResolverImpl(
+                        new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class)),
+                        executorService);
         URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
 
         if (configurationAdmin == null || mvnUrlHandler == null) {
@@ -146,15 +153,18 @@ public class Activator extends BaseActivator {
         StandardRegionDigraph dg = DigraphHelper.loadDigraph(bundleContext);
         DigraphHelper.verifyUnmanagedBundles(bundleContext, dg);
         registerRegionDiGraph(dg);
-        boolean configCfgStore = getBoolean("configCfgStore", FeaturesService.DEFAULT_CONFIG_CFG_STORE);
-        FeatureConfigInstaller configInstaller = new FeatureConfigInstaller(configurationAdmin, configCfgStore);
-        installSupport = new BundleInstallSupportImpl(
-                    bundleContext.getBundle(),
-                    bundleContext,
-                    systemBundleContext,
-                    getTrackedServiceRef(ConfigurationAdmin.class).getBundle(),
-                    configInstaller,
-                    dg);
+        boolean configCfgStore =
+                getBoolean("configCfgStore", FeaturesService.DEFAULT_CONFIG_CFG_STORE);
+        FeatureConfigInstaller configInstaller =
+                new FeatureConfigInstaller(configurationAdmin, configCfgStore);
+        installSupport =
+                new BundleInstallSupportImpl(
+                        bundleContext.getBundle(),
+                        bundleContext,
+                        systemBundleContext,
+                        getTrackedServiceRef(ConfigurationAdmin.class).getBundle(),
+                        configInstaller,
+                        dg);
         register(RegionDigraphPersistence.class, () -> installSupport.saveDigraph());
 
         FeatureRepoFinder featureFinder = new FeatureRepoFinder();
@@ -163,19 +173,20 @@ public class Activator extends BaseActivator {
         Repository globalRepository = getGlobalRepository();
         FeaturesServiceConfig cfg = getConfig();
         StateStorage stateStorage = createStateStorage();
-        featuresService = new FeaturesServiceImpl(
-                stateStorage,
-                featureFinder,
-                configurationAdmin,
-                resolver,
-                installSupport,
-                globalRepository,
-                cfg);
+        featuresService =
+                new FeaturesServiceImpl(
+                        stateStorage,
+                        featureFinder,
+                        configurationAdmin,
+                        resolver,
+                        installSupport,
+                        globalRepository,
+                        cfg);
         try {
             EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
             featuresService.registerListener(eventAdminListener);
         } catch (Throwable t) {
-            // No EventAdmin support in this case 
+            // No EventAdmin support in this case
         }
         register(FeaturesService.class, featuresService);
 
@@ -190,24 +201,37 @@ public class Activator extends BaseActivator {
         String[] featuresRepositories = getStringArray("featuresRepositories", "");
         String featuresBoot = getString("featuresBoot", "");
         boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
-        BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(
-                bundleContext, featuresService,
-                featuresRepositories, featuresBoot, featuresBootAsynchronous);
+        BootFeaturesInstaller bootFeaturesInstaller =
+                new BootFeaturesInstaller(
+                        bundleContext,
+                        featuresService,
+                        featuresRepositories,
+                        featuresBoot,
+                        featuresBootAsynchronous);
         bootFeaturesInstaller.start();
     }
 
     private Repository getGlobalRepository() {
         List<Repository> repositories = new ArrayList<>();
         String[] resourceRepositories = getStringArray("resourceRepositories", "");
-        long repositoryExpiration = getLong("repositoryExpiration", FeaturesService.DEFAULT_REPOSITORY_EXPIRATION);
+        long repositoryExpiration =
+                getLong("repositoryExpiration", FeaturesService.DEFAULT_REPOSITORY_EXPIRATION);
         boolean repositoryIgnoreFailures = getBoolean("repositoryIgnoreFailures", true);
         for (String url : resourceRepositories) {
             url = url.trim();
             if (!url.isEmpty()) {
                 if (url.startsWith("json:")) {
-                    repositories.add(new JsonRepository(url.substring("json:".length()), repositoryExpiration, repositoryIgnoreFailures));
+                    repositories.add(
+                            new JsonRepository(
+                                    url.substring("json:".length()),
+                                    repositoryExpiration,
+                                    repositoryIgnoreFailures));
                 } else if (url.startsWith("xml:")) {
-                    repositories.add(new XmlRepository(url.substring("xml:".length()), repositoryExpiration, repositoryIgnoreFailures));
+                    repositories.add(
+                            new XmlRepository(
+                                    url.substring("xml:".length()),
+                                    repositoryExpiration,
+                                    repositoryIgnoreFailures));
                 } else {
                     logger.warn("Unrecognized resource repository: " + url);
                 }
@@ -215,15 +239,15 @@ public class Activator extends BaseActivator {
         }
         Repository globalRepository;
         switch (repositories.size()) {
-        case 0:
-            globalRepository = null;
-            break;
-        case 1:
-            globalRepository = repositories.get(0);
-            break;
-        default:
-            globalRepository = new AggregateRepository(repositories);
-            break;
+            case 0:
+                globalRepository = null;
+                break;
+            case 1:
+                globalRepository = repositories.get(0);
+                break;
+            default:
+                globalRepository = new AggregateRepository(repositories);
+                break;
         }
         return globalRepository;
     }
@@ -231,37 +255,50 @@ public class Activator extends BaseActivator {
     private FeaturesServiceConfig getConfig() {
         String karafEtc = System.getProperty("karaf.etc");
         return new FeaturesServiceConfig(
-            getString("overrides", new File(karafEtc, "overrides.properties").toURI().toString()),
-            getString("featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE),
-            getString("bundleUpdateRange", FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE),
-            getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS.getValue()),
-            getInt("downloadThreads", FeaturesService.DEFAULT_DOWNLOAD_THREADS),
-            getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY),
-            getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN),
-            getString("blacklisted", new File(karafEtc, "blacklisted.properties").toURI().toString()),
-            getString("featureProcessing", new File(karafEtc, FEATURES_SERVICE_PROCESSING_FILE).toURI().toString()),
-            getString("featureProcessingVersions", new File(karafEtc, FEATURES_SERVICE_PROCESSING_VERSIONS_FILE).toURI().toString()),
-            getString("serviceRequirements", FeaturesService.ServiceRequirementsBehavior.Default.getValue()));
+                getString(
+                        "overrides", new File(karafEtc, "overrides.properties").toURI().toString()),
+                getString(
+                        "featureResolutionRange", FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE),
+                getString("bundleUpdateRange", FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE),
+                getString("updateSnapshots", FeaturesService.DEFAULT_UPDATE_SNAPSHOTS.getValue()),
+                getInt("downloadThreads", FeaturesService.DEFAULT_DOWNLOAD_THREADS),
+                getLong("scheduleDelay", FeaturesService.DEFAULT_SCHEDULE_DELAY),
+                getInt("scheduleMaxRun", FeaturesService.DEFAULT_SCHEDULE_MAX_RUN),
+                getString(
+                        "blacklisted",
+                        new File(karafEtc, "blacklisted.properties").toURI().toString()),
+                getString(
+                        "featureProcessing",
+                        new File(karafEtc, FEATURES_SERVICE_PROCESSING_FILE).toURI().toString()),
+                getString(
+                        "featureProcessingVersions",
+                        new File(karafEtc, FEATURES_SERVICE_PROCESSING_VERSIONS_FILE)
+                                .toURI()
+                                .toString()),
+                getString(
+                        "serviceRequirements",
+                        FeaturesService.ServiceRequirementsBehavior.Default.getValue()));
     }
 
     private StateStorage createStateStorage() {
-        StateStorage stateStorage = new StateStorage() {
-            @Override
-            protected InputStream getInputStream() throws IOException {
-                File file = bundleContext.getDataFile(STATE_FILE);
-                if (file.exists()) {
-                    return new FileInputStream(file);
-                } else {
-                    return null;
-                }
-            }
-    
-            @Override
-            protected OutputStream getOutputStream() throws IOException {
-                File file = bundleContext.getDataFile(STATE_FILE);
-                return new FileOutputStream(file);
-            }
-        };
+        StateStorage stateStorage =
+                new StateStorage() {
+                    @Override
+                    protected InputStream getInputStream() throws IOException {
+                        File file = bundleContext.getDataFile(STATE_FILE);
+                        if (file.exists()) {
+                            return new FileInputStream(file);
+                        } else {
+                            return null;
+                        }
+                    }
+
+                    @Override
+                    protected OutputStream getOutputStream() throws IOException {
+                        File file = bundleContext.getDataFile(STATE_FILE);
+                        return new FileOutputStream(file);
+                    }
+                };
         return stateStorage;
     }
 
@@ -274,11 +311,17 @@ public class Activator extends BaseActivator {
         register(org.osgi.framework.hooks.bundle.FindHook.class, dg.getBundleFindHook(), ranking);
         register(org.osgi.framework.hooks.bundle.EventHook.class, dg.getBundleEventHook(), ranking);
         register(org.osgi.framework.hooks.service.FindHook.class, dg.getServiceFindHook(), ranking);
-        register(org.osgi.framework.hooks.service.EventHook.class, dg.getServiceEventHook(), ranking);
+        register(
+                org.osgi.framework.hooks.service.EventHook.class,
+                dg.getServiceEventHook(),
+                ranking);
         register(RegionDigraph.class, dg);
-        
+
         if (getBoolean("digraphMBean", FeaturesService.DEFAULT_DIGRAPH_MBEAN)) {
-            StandardManageableRegionDigraph dgmb = digraphMBean = new StandardManageableRegionDigraph(dg, "org.apache.karaf", bundleContext);
+            StandardManageableRegionDigraph dgmb =
+                    digraphMBean =
+                            new StandardManageableRegionDigraph(
+                                    dg, "org.apache.karaf", bundleContext);
             dgmb.registerMBean();
         }
 
@@ -291,23 +334,26 @@ public class Activator extends BaseActivator {
                 FeaturesListener.class,
                 new ServiceTrackerCustomizer<FeaturesListener, FeaturesListener>() {
                     @Override
-                    public FeaturesListener addingService(ServiceReference<FeaturesListener> reference) {
+                    public FeaturesListener addingService(
+                            ServiceReference<FeaturesListener> reference) {
                         FeaturesListener service = bundleContext.getService(reference);
                         featuresService.registerListener(service);
                         return service;
                     }
-    
+
                     @Override
-                    public void modifiedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
-                    }
-    
+                    public void modifiedService(
+                            ServiceReference<FeaturesListener> reference,
+                            FeaturesListener service) {}
+
                     @Override
-                    public void removedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
+                    public void removedService(
+                            ServiceReference<FeaturesListener> reference,
+                            FeaturesListener service) {
                         featuresService.unregisterListener(service);
                         bundleContext.ungetService(reference);
                     }
-                }
-        );
+                });
     }
 
     protected void doStop() {
@@ -330,5 +376,4 @@ public class Activator extends BaseActivator {
             installSupport = null;
         }
     }
-
 }

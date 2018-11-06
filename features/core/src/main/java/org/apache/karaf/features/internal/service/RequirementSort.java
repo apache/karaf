@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import org.apache.felix.utils.resource.CapabilitySet;
 import org.apache.felix.utils.resource.SimpleFilter;
 import org.osgi.framework.Constants;
@@ -31,8 +30,7 @@ import org.osgi.resource.Resource;
 
 public final class RequirementSort<T extends Resource> {
 
-    private RequirementSort() {
-    }
+    private RequirementSort() {}
 
     /**
      * Sort {@link Resource} based on their {@link Requirement}s and {@link Capability}s.
@@ -62,7 +60,8 @@ public final class RequirementSort<T extends Resource> {
         return sorted;
     }
 
-    private static <T extends Resource> void visit(T resource, Set<T> visited, Set<T> sorted, CapabilitySet capSet) {
+    private static <T extends Resource> void visit(
+            T resource, Set<T> visited, Set<T> sorted, CapabilitySet capSet) {
         if (!visited.add(resource)) {
             return;
         }
@@ -73,18 +72,17 @@ public final class RequirementSort<T extends Resource> {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Resource> Set<T> collectDependencies(T resource, CapabilitySet capSet) {
+    private static <T extends Resource> Set<T> collectDependencies(
+            T resource, CapabilitySet capSet) {
         Set<T> result = new LinkedHashSet<>();
         for (Requirement requirement : resource.getRequirements(null)) {
             String filter = requirement.getDirectives().get(Constants.FILTER_DIRECTIVE);
-            SimpleFilter sf = (filter != null)
-                    ? SimpleFilter.parse(filter)
-                    : SimpleFilter.MATCH_ALL_FILTER;
+            SimpleFilter sf =
+                    (filter != null) ? SimpleFilter.parse(filter) : SimpleFilter.MATCH_ALL_FILTER;
             for (Capability cap : capSet.match(sf, true)) {
                 result.add((T) cap.getResource());
             }
         }
         return result;
     }
-
 }

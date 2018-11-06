@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
 import org.osgi.framework.Bundle;
@@ -59,21 +58,18 @@ public class ServletEventHandler implements ServletListener, BundleListener {
         servletEvents.put(event.getServletName(), event);
     }
 
-    /**
-     * @return the servletEvents
-     */
+    /** @return the servletEvents */
     public synchronized Collection<ServletEvent> getServletEvents() {
         return new ArrayList<>(servletEvents.values());
     }
 
     public synchronized void removeEventsForBundle(Bundle bundle) {
-        Iterator<Map.Entry<String,ServletEvent>> iterator = servletEvents.entrySet().iterator();
+        Iterator<Map.Entry<String, ServletEvent>> iterator = servletEvents.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<String,ServletEvent> entry = iterator.next();
+            Map.Entry<String, ServletEvent> entry = iterator.next();
             if (entry.getValue().getBundle() == bundle) {
                 iterator.remove();
             }
         }
     }
-
 }

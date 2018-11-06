@@ -22,7 +22,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -30,11 +29,11 @@ import org.osgi.framework.Constants;
 public class BundleSelectorImpl {
 
     private final BundleContext bundleContext;
-    
+
     public BundleSelectorImpl(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
-    
+
     public List<Bundle> selectBundles(List<String> ids, boolean defaultAllBundles) {
         List<Bundle> bundles = new ArrayList<>();
         if (ids != null && !ids.isEmpty()) {
@@ -50,12 +49,12 @@ public class BundleSelectorImpl {
         List<Bundle> filteredBundleList = new ArrayList<>(new LinkedHashSet<>(bundles));
         return filteredBundleList;
     }
-    
+
     private void addMatchingBundles(String id, List<Bundle> bundles) {
         // id is a number
         Pattern pattern = Pattern.compile("^\\d+$");
         Matcher matcher = pattern.matcher(id);
-        
+
         if (matcher.matches()) {
             Bundle bundle = this.getBundleById(id);
             addBundle(bundle, id, bundles);
@@ -83,7 +82,8 @@ public class BundleSelectorImpl {
         List<Bundle> bundlesByName;
         if (index != -1) {
             // user has provided name and version
-            bundlesByName = getBundleByNameAndVersion(id.substring(0, index), id.substring(index + 1));
+            bundlesByName =
+                    getBundleByNameAndVersion(id.substring(0, index), id.substring(index + 1));
         } else {
             // user has provided only the name
             bundlesByName = getBundleByName(id);
@@ -136,9 +136,10 @@ public class BundleSelectorImpl {
     }
 
     /**
-     * Get a bundles list with the name or symbolic name matching the name pattern and version matching the version pattern.
+     * Get a bundles list with the name or symbolic name matching the name pattern and version
+     * matching the version pattern.
      *
-     * @param name    the bundle name or symbolic name regex to match.
+     * @param name the bundle name or symbolic name regex to match.
      * @param version the bundle version regex to match.
      * @return the bundles list.
      */
@@ -168,7 +169,9 @@ public class BundleSelectorImpl {
             if (version != null) {
                 String bundleVersion = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
                 if (bundleVersion != null) {
-                    boolean nameMatch = (nameMatcher != null && nameMatcher.matches()) || symbolicNameMatcher.matches();
+                    boolean nameMatch =
+                            (nameMatcher != null && nameMatcher.matches())
+                                    || symbolicNameMatcher.matches();
                     if (nameMatch) {
                         Pattern versionPattern = Pattern.compile(version);
                         Matcher versionMatcher = versionPattern.matcher(bundleVersion);
@@ -178,7 +181,9 @@ public class BundleSelectorImpl {
                     }
                 }
             } else {
-                boolean nameMatch = (nameMatcher != null && nameMatcher.matches()) || symbolicNameMatcher.matches();
+                boolean nameMatch =
+                        (nameMatcher != null && nameMatcher.matches())
+                                || symbolicNameMatcher.matches();
                 if (nameMatch) {
                     result.add(bundle);
                 }
@@ -186,7 +191,7 @@ public class BundleSelectorImpl {
         }
         return result;
     }
-    
+
     private List<Bundle> getBundlesByLocation(String url) {
         Bundle[] bundles = bundleContext.getBundles();
 
@@ -202,5 +207,4 @@ public class BundleSelectorImpl {
         }
         return result;
     }
-
 }

@@ -26,7 +26,6 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.karaf.maven.core.MavenRepositoryURL;
 import org.apache.karaf.shell.api.action.Option;
@@ -34,13 +33,27 @@ import org.apache.maven.settings.Server;
 
 public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport {
 
-    @Option(name = "-id", description = "Identifier of repository", required = true, multiValued = false)
+    @Option(
+            name = "-id",
+            description = "Identifier of repository",
+            required = true,
+            multiValued = false)
     String id;
 
-    @Option(name = "-d", aliases = { "--default" }, description = "Edit default repository instead of remote one", required = false, multiValued = false)
+    @Option(
+            name = "-d",
+            aliases = {"--default"},
+            description = "Edit default repository instead of remote one",
+            required = false,
+            multiValued = false)
     boolean defaultRepository = false;
 
-    @Option(name = "-f", aliases = { "--force" }, description = "Do not ask for confirmation", required = false, multiValued = false)
+    @Option(
+            name = "-f",
+            aliases = {"--force"},
+            description = "Do not ask for confirmation",
+            required = false,
+            multiValued = false)
     boolean force = false;
 
     boolean success = false;
@@ -54,13 +67,15 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
 
         MavenRepositoryURL[] repositories = repositories(config, !defaultRepository);
 
-        MavenRepositoryURL[] repositoriesFromPidProperty = Arrays.stream(repositories)
-                .filter((repo) -> repo.getFrom() == MavenRepositoryURL.FROM.PID)
-                .toArray(MavenRepositoryURL[]::new);
+        MavenRepositoryURL[] repositoriesFromPidProperty =
+                Arrays.stream(repositories)
+                        .filter((repo) -> repo.getFrom() == MavenRepositoryURL.FROM.PID)
+                        .toArray(MavenRepositoryURL[]::new);
 
-        MavenRepositoryURL[] repositoriesFromSettings = Arrays.stream(repositories)
-                .filter((repo) -> repo.getFrom() == MavenRepositoryURL.FROM.SETTINGS)
-                .toArray(MavenRepositoryURL[]::new);
+        MavenRepositoryURL[] repositoriesFromSettings =
+                Arrays.stream(repositories)
+                        .filter((repo) -> repo.getFrom() == MavenRepositoryURL.FROM.SETTINGS)
+                        .toArray(MavenRepositoryURL[]::new);
 
         edit(prefix, config, repositories, repositoriesFromPidProperty, repositoriesFromSettings);
 
@@ -75,6 +90,7 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
 
     /**
      * Peform action on repository (add, remove, change)
+     *
      * @param prefix property prefix for <code>org.ops4j.pax.url.mvn</code> PID
      * @param config
      * @param allRepos
@@ -82,21 +98,34 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
      * @param settingsRepos
      * @throws Exception
      */
-    protected abstract void edit(String prefix, Dictionary<String, Object> config,
-                                 MavenRepositoryURL[] allRepos, MavenRepositoryURL[] pidRepos, MavenRepositoryURL[] settingsRepos) throws Exception;
+    protected abstract void edit(
+            String prefix,
+            Dictionary<String, Object> config,
+            MavenRepositoryURL[] allRepos,
+            MavenRepositoryURL[] pidRepos,
+            MavenRepositoryURL[] settingsRepos)
+            throws Exception;
 
     /**
      * Stores new repository list in relevant <code>org.ops4j.pax.url.mvn</code> PID property
+     *
      * @param prefix
      * @param config
      * @param defaultRepository default (<code>true</code>) or remote repositories?
      * @param newRepos new list of repositories
-     * @param hasSettingsRepositories whether we have repositories stored in <code>settings.xml</code> as well
+     * @param hasSettingsRepositories whether we have repositories stored in <code>settings.xml
+     *     </code> as well
      */
-    protected void updatePidRepositories(String prefix, Dictionary<String, Object> config, boolean defaultRepository,
-                                         List<MavenRepositoryURL> newRepos, boolean hasSettingsRepositories) {
-        String newList = newRepos.stream().map(MavenRepositoryURL::asRepositorySpec)
-                .collect(Collectors.joining(","));
+    protected void updatePidRepositories(
+            String prefix,
+            Dictionary<String, Object> config,
+            boolean defaultRepository,
+            List<MavenRepositoryURL> newRepos,
+            boolean hasSettingsRepositories) {
+        String newList =
+                newRepos.stream()
+                        .map(MavenRepositoryURL::asRepositorySpec)
+                        .collect(Collectors.joining(","));
 
         if (defaultRepository) {
             config.put(prefix + PROPERTY_DEFAULT_REPOSITORIES, newList);
@@ -110,6 +139,7 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
 
     /**
      * Stores credential information in settings, without persisting them
+     *
      * @param force
      * @param id
      * @param username
@@ -117,14 +147,22 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
      * @param prefix
      * @param config
      */
-    protected boolean updateCredentials(boolean force, String id, String username, String password,
-                                      String prefix, Dictionary<String, Object> config) throws IOException {
-        if (!force && !confirm("Maven settings will be updated and org.ops4j.pax.url.mvn.settings property will change. Continue? (y/N) ")) {
+    protected boolean updateCredentials(
+            boolean force,
+            String id,
+            String username,
+            String password,
+            String prefix,
+            Dictionary<String, Object> config)
+            throws IOException {
+        if (!force
+                && !confirm(
+                        "Maven settings will be updated and org.ops4j.pax.url.mvn.settings property will change. Continue? (y/N) ")) {
             return false;
         }
 
-        Optional<Server> existingServer = mavenSettings.getServers().stream()
-                .filter((s) -> id.equals(s.getId())).findAny();
+        Optional<Server> existingServer =
+                mavenSettings.getServers().stream().filter((s) -> id.equals(s.getId())).findAny();
         Server server = null;
         if (existingServer.isPresent()) {
             server = existingServer.get();
@@ -141,11 +179,13 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
 
     /**
      * Takes passed-in repository URI and performs basic validation
+     *
      * @param uri
      * @param defaultRepository
      * @return
      */
-    protected SourceAnd<String> validateRepositoryURL(String uri, boolean defaultRepository) throws URISyntaxException, MalformedURLException {
+    protected SourceAnd<String> validateRepositoryURL(String uri, boolean defaultRepository)
+            throws URISyntaxException, MalformedURLException {
         SourceAnd<String> result = new SourceAnd<String>();
         result.valid = false;
 
@@ -176,7 +216,8 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
         }
 
         if (defaultRepository && !"file".equals(url.getProtocol())) {
-            System.err.println("Default repositories should be locally accessible (use file:// protocol or normal directory path)");
+            System.err.println(
+                    "Default repositories should be locally accessible (use file:// protocol or normal directory path)");
             return result;
         }
 
@@ -185,5 +226,4 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
 
         return result;
     }
-
 }

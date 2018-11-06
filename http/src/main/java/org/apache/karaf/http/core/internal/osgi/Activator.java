@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.http.core.internal.osgi;
 
+import java.util.Dictionary;
 import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.http.core.ServletService;
 import org.apache.karaf.http.core.internal.HttpMBeanImpl;
@@ -34,18 +35,9 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 
-import java.util.Dictionary;
-
 @Services(
-        requires = {
-                @RequireService(HttpService.class),
-                @RequireService(ConfigurationAdmin.class)
-        },
-        provides = {
-                @ProvideService(ServletService.class),
-                @ProvideService(ProxyService.class)
-        }
-)
+        requires = {@RequireService(HttpService.class), @RequireService(ConfigurationAdmin.class)},
+        provides = {@ProvideService(ServletService.class), @ProvideService(ProxyService.class)})
 @Managed("org.apache.karaf.http")
 public class Activator extends BaseActivator implements ManagedService {
 
@@ -71,13 +63,14 @@ public class Activator extends BaseActivator implements ManagedService {
         ServletServiceImpl servletService = new ServletServiceImpl(servletEventHandler);
         register(ServletService.class, servletService);
 
-        listener = event -> {
-            if (event.getType() == BundleEvent.UNINSTALLED
-                    || event.getType() == BundleEvent.UNRESOLVED
-                    || event.getType() == BundleEvent.STOPPED) {
-                servletEventHandler.removeEventsForBundle(event.getBundle());
-            }
-        };
+        listener =
+                event -> {
+                    if (event.getType() == BundleEvent.UNINSTALLED
+                            || event.getType() == BundleEvent.UNRESOLVED
+                            || event.getType() == BundleEvent.STOPPED) {
+                        servletEventHandler.removeEventsForBundle(event.getBundle());
+                    }
+                };
         bundleContext.addBundleListener(listener);
 
         proxyService = new ProxyServiceImpl(httpService, configurationAdmin);

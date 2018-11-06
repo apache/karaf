@@ -27,8 +27,7 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class ProxyListCommand implements Action {
 
-    @Reference
-    private ProxyService proxyService;
+    @Reference private ProxyService proxyService;
 
     @Override
     public Object execute() throws Exception {
@@ -36,10 +35,9 @@ public class ProxyListCommand implements Action {
         table.column("URL");
         table.column("ProxyTo");
         for (String url : proxyService.getProxies().keySet()) {
-             table.addRow().addContent(url, proxyService.getProxies().get(url));
+            table.addRow().addContent(url, proxyService.getProxies().get(url));
         }
         table.print(System.out);
         return null;
     }
-
 }

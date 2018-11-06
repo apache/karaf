@@ -17,6 +17,9 @@
 package org.apache.karaf.examples.rest.client.cxf;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import java.util.ArrayList;
+import java.util.List;
+import javax.ws.rs.core.MediaType;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.karaf.examples.rest.api.Booking;
 import org.apache.karaf.shell.api.action.Action;
@@ -25,29 +28,39 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import javax.ws.rs.core.MediaType;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @Command(scope = "booking", name = "add", description = "Add booking")
 public class AddBookingCommand implements Action {
 
-    @Argument(index = 0, name = "id", description = "Booking ID", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "id",
+            description = "Booking ID",
+            required = true,
+            multiValued = false)
     long id;
 
-    @Argument(index = 1, name = "customer", description = "Customer name", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "customer",
+            description = "Customer name",
+            required = true,
+            multiValued = false)
     String customer;
 
-    @Argument(index = 2, name = "flight", description = "Flight number", required = true, multiValued = false)
+    @Argument(
+            index = 2,
+            name = "flight",
+            description = "Flight number",
+            required = true,
+            multiValued = false)
     String flight;
 
-    @Option(name = "--url", description = "Location of the REST service", required = false, multiValued = false)
+    @Option(
+            name = "--url",
+            description = "Location of the REST service",
+            required = false,
+            multiValued = false)
     String restLocation = "http://localhost:8181/cxf/booking/";
 
     @Override
@@ -64,5 +77,4 @@ public class AddBookingCommand implements Action {
 
         return null;
     }
-
 }

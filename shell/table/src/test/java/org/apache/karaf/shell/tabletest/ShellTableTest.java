@@ -17,9 +17,7 @@ package org.apache.karaf.shell.tabletest;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
-
 import junit.framework.Assert;
-
 import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.karaf.shell.table.Col;
 import org.apache.karaf.shell.table.Row;
@@ -47,12 +45,12 @@ public class ShellTableTest {
         PrintStream out = new PrintStream(new WriterOutputStream(writer));
         table.print(out, true);
         out.flush();
-        String expected = 
-                "   id | Name                 |                Centered                \n" + 
-                "----------------------------------------------------------------------\n" + 
-                "    1 | Test                 |               Description              \n" + 
-                "   20 | My name              |               Description              \n" + 
-                "12345 | A very long text tha | A very long text that should not be cut\n";
+        String expected =
+                "   id | Name                 |                Centered                \n"
+                        + "----------------------------------------------------------------------\n"
+                        + "    1 | Test                 |               Description              \n"
+                        + "   20 | My name              |               Description              \n"
+                        + "12345 | A very long text tha | A very long text that should not be cut\n";
         Assert.assertEquals(expected, getString(writer));
     }
 
@@ -68,10 +66,7 @@ public class ShellTableTest {
         PrintStream out = new PrintStream(new WriterOutputStream(writer));
         table.print(out, true);
         out.flush();
-        String expected = 
-                "1      | 2\n" + 
-        		"----------\n" + 
-        		"1      | 2\n";
+        String expected = "1      | 2\n" + "----------\n" + "1      | 2\n";
         Assert.assertEquals(expected, getString(writer));
     }
 
@@ -88,9 +83,9 @@ public class ShellTableTest {
         table.print(out, true);
         out.flush();
         String expected = //
-                  "1     |  2\n" //
-                + "----------\n" //
-                + "quite |  a\n";
+                "1     |  2\n" //
+                        + "----------\n" //
+                        + "quite |  a\n";
         Assert.assertEquals(expected, getString(writer));
     }
 
@@ -107,9 +102,11 @@ public class ShellTableTest {
         table.print(out, true);
         out.flush();
         String expected = //
-                  "1     | \n" + // 
-                  "--------\n" + //
-                  "quite | \n";
+                "1     | \n"
+                        + //
+                        "--------\n"
+                        + //
+                        "quite | \n";
         Assert.assertEquals(expected, getString(writer));
     }
 
@@ -145,9 +142,8 @@ public class ShellTableTest {
         String expected = "first column;second column\n";
         Assert.assertEquals(expected, getString(writer));
     }
-    
+
     private String getString(StringWriter writer) {
         return writer.getBuffer().toString().replace("\r\n", "\n");
     }
-
 }

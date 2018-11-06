@@ -14,6 +14,11 @@
  */
 package org.apache.karaf.jaas.modules.syncope;
 
+import java.io.IOException;
+import java.util.*;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.*;
+import javax.security.auth.login.LoginException;
 import org.apache.felix.utils.json.JSONParser;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
@@ -29,35 +34,32 @@ import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.auth.Subject;
-import javax.security.auth.callback.*;
-import javax.security.auth.login.LoginException;
-import java.io.IOException;
-import java.util.*;
-
-/**
- * Karaf login module which uses Apache Syncope backend.
- */
+/** Karaf login module which uses Apache Syncope backend. */
 public class SyncopeLoginModule extends AbstractKarafLoginModule {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SyncopeLoginModule.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyncopeLoginModule.class);
 
-    public final static String ADDRESS = "address";
-    public final static String VERSION = "version";
-    public final static String USE_ROLES_FOR_SYNCOPE2 = "useRolesForSyncope2";
-    public final static String ADMIN_USER = "admin.user"; // for the backing engine
-    public final static String ADMIN_PASSWORD = "admin.password"; // for the backing engine
+    public static final String ADDRESS = "address";
+    public static final String VERSION = "version";
+    public static final String USE_ROLES_FOR_SYNCOPE2 = "useRolesForSyncope2";
+    public static final String ADMIN_USER = "admin.user"; // for the backing engine
+    public static final String ADMIN_PASSWORD = "admin.password"; // for the backing engine
 
     private String address;
     private String version;
     private boolean useRolesForSyncope2;
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         address = (String) options.get(ADDRESS);
         version = (String) options.get(VERSION);
         if (options.containsKey(USE_ROLES_FOR_SYNCOPE2)) {
-            useRolesForSyncope2 = Boolean.parseBoolean((String) options.get(USE_ROLES_FOR_SYNCOPE2));
+            useRolesForSyncope2 =
+                    Boolean.parseBoolean((String) options.get(USE_ROLES_FOR_SYNCOPE2));
         }
     }
 
@@ -71,7 +73,9 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
         } catch (IOException ioException) {
             throw new LoginException(ioException.getMessage());
         } catch (UnsupportedCallbackException unsupportedCallbackException) {
-            throw new LoginException(unsupportedCallbackException.getMessage() + " not available to obtain information from user.");
+            throw new LoginException(
+                    unsupportedCallbackException.getMessage()
+                            + " not available to obtain information from user.");
         }
 
         user = ((NameCallback) callbacks[0]).getName();
@@ -99,7 +103,9 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
         List<String> roles = new ArrayList<>();
         try {
             CloseableHttpResponse response = client.execute(get);
-            LOGGER.debug("Syncope HTTP response status code: {}", response.getStatusLine().getStatusCode());
+            LOGGER.debug(
+                    "Syncope HTTP response status code: {}",
+                    response.getStatusLine().getStatusCode());
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                 LOGGER.warn("User {} not authenticated", user);
                 return false;
@@ -158,7 +164,6 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
                     index = response.indexOf("<roleName>");
                 }
             }
-
         }
         return roles;
     }
@@ -180,7 +185,7 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
             } else {
                 // extract the <memberships> element if it exists
                 List<Map<String, String>> memberships =
-                    (List<Map<String, String>>) parser.getParsed().get("memberships");
+                        (List<Map<String, String>>) parser.getParsed().get("memberships");
                 if (memberships != null) {
                     for (Map<String, String> membership : memberships) {
                         if (membership.containsKey("groupName")) {
@@ -202,5 +207,4 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
         principals.clear();
         return true;
     }
-
 }

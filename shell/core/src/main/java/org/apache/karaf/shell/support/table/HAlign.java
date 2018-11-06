@@ -18,14 +18,10 @@ package org.apache.karaf.shell.support.table;
 import static org.apache.karaf.shell.support.table.StringUtil.length;
 import static org.apache.karaf.shell.support.table.StringUtil.repeat;
 
-/**
- * Enumeration type which contains all possible horizontal alignments.
- */
+/** Enumeration type which contains all possible horizontal alignments. */
 public enum HAlign {
 
-    /**
-     * Center align.
-     */
+    /** Center align. */
     center {
         @Override
         public String position(String text, int colWidth) {
@@ -39,9 +35,7 @@ public enum HAlign {
         }
     },
 
-    /**
-     * Left align.
-     */
+    /** Left align. */
     left {
         @Override
         public String position(String text, int colWidth) {
@@ -49,9 +43,7 @@ public enum HAlign {
         }
     },
 
-    /**
-     * Right align.
-     */
+    /** Right align. */
     right {
         @Override
         public String position(String text, int colWidth) {
@@ -61,11 +53,10 @@ public enum HAlign {
 
     /**
      * Calculate text position.
-     * 
-     * @param text  the text to align.
+     *
+     * @param text the text to align.
      * @param colWidth the column width.
      * @return the string at the given position.
      */
     public abstract String position(String text, int colWidth);
-
 }

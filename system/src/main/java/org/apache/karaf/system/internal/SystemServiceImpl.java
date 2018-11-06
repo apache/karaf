@@ -1,19 +1,19 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.karaf.system.internal;
 
 import java.io.File;
@@ -22,7 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.system.FrameworkType;
 import org.apache.karaf.system.SystemService;
@@ -31,9 +30,7 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Implementation of the system service.
- */
+/** Implementation of the system service. */
 public class SystemServiceImpl implements SystemService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemServiceImpl.class);
@@ -65,35 +62,40 @@ public class SystemServiceImpl implements SystemService {
     }
 
     private void shutdown(final long sleep) {
-        new Thread(() -> {
-            try {
-                sleepWithMsg(sleep, "Shutdown in " + sleep / 1000 / 60 + " minute(s)");
-                getBundleContext().getBundle(0).stop();
-            } catch (Exception e) {
-                LOGGER.error("Halt error", e);
-            }
-        }).start();
+        new Thread(
+                        () -> {
+                            try {
+                                sleepWithMsg(
+                                        sleep, "Shutdown in " + sleep / 1000 / 60 + " minute(s)");
+                                getBundleContext().getBundle(0).stop();
+                            } catch (Exception e) {
+                                LOGGER.error("Halt error", e);
+                            }
+                        })
+                .start();
     }
 
     private void reboot(final long sleep, final Swipe clean) {
-        new Thread(() -> {
-            try {
-                sleepWithMsg(sleep, "Reboot in " + sleep / 1000 / 60 + " minute(s)");
-                System.setProperty("karaf.restart", "true");
-                if (clean.equals(Swipe.ALL)) {
-                    System.setProperty("karaf.clean.all", "true");
-                } else if (clean.equals(Swipe.CACHE)) {
-                    System.setProperty("karaf.clean.cache", "true");
-                }
-                bundleContext.getBundle(0).stop();
-            } catch (Exception e) {
-                LOGGER.error("Reboot error", e);
-            }
-        }).start();
+        new Thread(
+                        () -> {
+                            try {
+                                sleepWithMsg(
+                                        sleep, "Reboot in " + sleep / 1000 / 60 + " minute(s)");
+                                System.setProperty("karaf.restart", "true");
+                                if (clean.equals(Swipe.ALL)) {
+                                    System.setProperty("karaf.clean.all", "true");
+                                } else if (clean.equals(Swipe.CACHE)) {
+                                    System.setProperty("karaf.clean.cache", "true");
+                                }
+                                bundleContext.getBundle(0).stop();
+                            } catch (Exception e) {
+                                LOGGER.error("Reboot error", e);
+                            }
+                        })
+                .start();
     }
-    
-    private void sleepWithMsg(final long sleep, String msg)
-            throws InterruptedException {
+
+    private void sleepWithMsg(final long sleep, String msg) throws InterruptedException {
         if (sleep > 0) {
             LOGGER.info(msg);
             System.err.println(msg);
@@ -123,18 +125,35 @@ public class SystemServiceImpl implements SystemService {
                     // try to parse the date in hh:mm
                     String[] strings = time.split(":");
                     if (strings.length != 2) {
-                        throw new IllegalArgumentException("Time " + time + " is not valid (not in hour:minute format)");
+                        throw new IllegalArgumentException(
+                                "Time " + time + " is not valid (not in hour:minute format)");
                     }
                     int hour = Integer.parseInt(strings[0]);
                     int minute = Integer.parseInt(strings[1]);
                     if (hour < 0 || hour > 23) {
-                        throw new IllegalArgumentException("Time " + time + " is not valid (hour " + hour + " is not between 0 and 23)");
+                        throw new IllegalArgumentException(
+                                "Time "
+                                        + time
+                                        + " is not valid (hour "
+                                        + hour
+                                        + " is not between 0 and 23)");
                     }
                     if (minute < 0 || minute > 59) {
-                        throw new IllegalArgumentException("Time " + time + " is not valid (minute " + minute + " is not between 0 and 59)");
+                        throw new IllegalArgumentException(
+                                "Time "
+                                        + time
+                                        + " is not valid (minute "
+                                        + minute
+                                        + " is not between 0 and 59)");
                     }
                     GregorianCalendar currentDate = new GregorianCalendar();
-                    GregorianCalendar shutdownDate = new GregorianCalendar(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH), Integer.parseInt(strings[0]), Integer.parseInt(strings[1]));
+                    GregorianCalendar shutdownDate =
+                            new GregorianCalendar(
+                                    currentDate.get(Calendar.YEAR),
+                                    currentDate.get(Calendar.MONTH),
+                                    currentDate.get(Calendar.DAY_OF_MONTH),
+                                    Integer.parseInt(strings[0]),
+                                    Integer.parseInt(strings[1]));
                     if (shutdownDate.before(currentDate)) {
                         shutdownDate.set(Calendar.DATE, shutdownDate.get(Calendar.DATE) + 1);
                     }
@@ -182,7 +201,7 @@ public class SystemServiceImpl implements SystemService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
-    
+
     public FrameworkType getFramework() {
         if (bundleContext.getBundle(0).getSymbolicName().contains("felix")) {
             return FrameworkType.felix;
@@ -218,7 +237,8 @@ public class SystemServiceImpl implements SystemService {
                 properties.remove("felix.log.level");
                 properties.remove("osgi.debug");
             }
-            // TODO populate the equinox-debug.properties file with the one provided in shell/dev module
+            // TODO populate the equinox-debug.properties file with the one provided in shell/dev
+            // module
             properties.save();
         } catch (IOException e) {
             throw new RuntimeException("Error setting framework debugging: " + e.getMessage(), e);
@@ -239,5 +259,4 @@ public class SystemServiceImpl implements SystemService {
         }
         return System.setProperty(key, value);
     }
-
 }

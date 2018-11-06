@@ -21,23 +21,19 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import org.apache.karaf.diagnostic.core.DumpDestination;
 
-/**
- * Class which packages dumps to ZIP archive.
- */
+/** Class which packages dumps to ZIP archive. */
 public class ZipDumpDestination implements DumpDestination {
 
-    /**
-     * Destination streem.
-     */
+    /** Destination streem. */
     private ZipOutputStream outputStream;
+
     private File file;
 
     /**
      * Creates new dump in given directory.
-     * 
+     *
      * @param directory Target directory.
      * @param name Name of the archive.
      */
@@ -46,34 +42,29 @@ public class ZipDumpDestination implements DumpDestination {
     }
 
     /**
-     * Creates new dump in given file (zip archive). 
-     * 
+     * Creates new dump in given file (zip archive).
+     *
      * @param file Destination file.
      */
     public ZipDumpDestination(File file) {
         try {
             this.file = file;
-            outputStream = new ZipOutputStream(new FileOutputStream(
-                file));
+            outputStream = new ZipOutputStream(new FileOutputStream(file));
         } catch (FileNotFoundException e) {
-            // sometimes this can occur, but we simply re throw and let 
+            // sometimes this can occur, but we simply re throw and let
             // caller handle exception
             throw new RuntimeException("Unable to create dump destination", e);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public OutputStream add(String name) throws Exception {
         ZipEntry zipEntry = new ZipEntry(name);
         outputStream.putNextEntry(zipEntry);
         return new ClosingEntryOutputStreamWrapper(outputStream);
     }
 
-    /**
-     * Closes archive handle.
-     */
+    /** Closes archive handle. */
     public void save() throws Exception {
         outputStream.close();
     }

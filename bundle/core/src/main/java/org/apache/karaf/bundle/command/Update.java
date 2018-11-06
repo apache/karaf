@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
@@ -37,13 +36,25 @@ import org.osgi.framework.wiring.FrameworkWiring;
 @Service
 public class Update extends BundleCommand {
 
-    @Argument(index = 1, name = "location", description = "The bundles update location", required = false, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "location",
+            description = "The bundles update location",
+            required = false,
+            multiValued = false)
     URI location;
 
-    @Option(name = "--raw", description = "Do not update the bundles's Bundle-UpdateLocation manifest header")
+    @Option(
+            name = "--raw",
+            description = "Do not update the bundles's Bundle-UpdateLocation manifest header")
     boolean raw;
 
-    @Option(name = "-r", aliases = { "--refresh" }, description = "Perform a refresh after the bundle update", required = false, multiValued = false)
+    @Option(
+            name = "-r",
+            aliases = {"--refresh"},
+            description = "Perform a refresh after the bundle update",
+            required = false,
+            multiValued = false)
     boolean refresh;
 
     protected Object doExecute(Bundle bundle) throws Exception {
@@ -77,5 +88,4 @@ public class Update extends BundleCommand {
             }
         }
     }
-
 }

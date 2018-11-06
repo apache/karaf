@@ -24,7 +24,8 @@ import org.osgi.framework.hooks.service.FindHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// This bundle is quite low-level and benefits from starting early in the process. Therefore it does not depend
+// This bundle is quite low-level and benefits from starting early in the process. Therefore it does
+// not depend
 // on Blueprint but rather uses direct OSGi framework APIs and Service Trackers ...
 public class Activator implements BundleActivator {
 
@@ -40,7 +41,9 @@ public class Activator implements BundleActivator {
         Filter securedServicesFilter;
         if (f == null) {
             // no services need to be secured
-            logger.info("No role-based security for services as its system property is not set: {}", GuardProxyCatalog.KARAF_SECURED_SERVICES_SYSPROP);
+            logger.info(
+                    "No role-based security for services as its system property is not set: {}",
+                    GuardProxyCatalog.KARAF_SECURED_SERVICES_SYSPROP);
             return;
         } else {
             securedServicesFilter = bundleContext.createFilter(f);
@@ -49,12 +52,13 @@ public class Activator implements BundleActivator {
 
         guardProxyCatalog = new GuardProxyCatalog(bundleContext);
 
-        guardingEventHook = new GuardingEventHook(bundleContext, guardProxyCatalog, securedServicesFilter);
+        guardingEventHook =
+                new GuardingEventHook(bundleContext, guardProxyCatalog, securedServicesFilter);
         bundleContext.registerService(EventListenerHook.class, guardingEventHook, null);
 
-        guardingFindHook = new GuardingFindHook(bundleContext, guardProxyCatalog, securedServicesFilter);
+        guardingFindHook =
+                new GuardingFindHook(bundleContext, guardProxyCatalog, securedServicesFilter);
         bundleContext.registerService(FindHook.class, guardingFindHook, null);
-
     }
 
     @Override
@@ -63,5 +67,4 @@ public class Activator implements BundleActivator {
             guardProxyCatalog.close();
         }
     }
-
 }

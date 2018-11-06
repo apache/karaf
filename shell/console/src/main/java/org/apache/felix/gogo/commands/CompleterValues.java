@@ -24,10 +24,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Represents a method which can return a List or Array of values used for a
- * {@link org.apache.karaf.shell.console.Completer}
- * which is associated with the index of an
- * {@link org.apache.karaf.shell.commands.Argument}
+ * Represents a method which can return a List or Array of values used for a {@link
+ * org.apache.karaf.shell.console.Completer} which is associated with the index of an {@link
+ * org.apache.karaf.shell.commands.Argument}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})

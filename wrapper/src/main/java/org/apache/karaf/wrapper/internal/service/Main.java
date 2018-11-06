@@ -20,9 +20,7 @@ import org.apache.karaf.main.ShutdownCallback;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 
-/**
- * Java Service Wrapper Main class
- */
+/** Java Service Wrapper Main class */
 public class Main extends Thread implements WrapperListener, ShutdownCallback {
 
     private org.apache.karaf.main.Main main;
@@ -31,23 +29,20 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
     /*---------------------------------------------------------------
      * Constructors
      *-------------------------------------------------------------*/
-    private Main() {
-    }
+    private Main() {}
 
     /*---------------------------------------------------------------
      * WrapperListener Methods
      *-------------------------------------------------------------*/
 
     /**
-     * The start method is called when the WrapperManager is signaled by the
-     * native Wrapper code that it can start its application.  This
-     * method call is expected to return, so a new thread should be launched
-     * if necessary.
+     * The start method is called when the WrapperManager is signaled by the native Wrapper code
+     * that it can start its application. This method call is expected to return, so a new thread
+     * should be launched if necessary.
      *
      * @param args List of arguments used to initialize the application.
-     * @return Any error code if the application should exit on completion
-     *         of the start method.  If there were no problems then this
-     *         method should return null.
+     * @return Any error code if the application should exit on completion of the start method. If
+     *     there were no problems then this method should return null.
      */
     public Integer start(String[] args) {
         main = new org.apache.karaf.main.Main(args);
@@ -75,19 +70,16 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
     }
 
     /**
-     * Called when the application is shutting down.  The Wrapper assumes that
-     * this method will return fairly quickly.  If the shutdown code code
-     * could potentially take a long time, then WrapperManager.signalStopping()
-     * should be called to extend the timeout period.  If for some reason,
-     * the stop method can not return, then it must call
-     * WrapperManager.stopped() to avoid warning messages from the Wrapper.
+     * Called when the application is shutting down. The Wrapper assumes that this method will
+     * return fairly quickly. If the shutdown code code could potentially take a long time, then
+     * WrapperManager.signalStopping() should be called to extend the timeout period. If for some
+     * reason, the stop method can not return, then it must call WrapperManager.stopped() to avoid
+     * warning messages from the Wrapper.
      *
-     * @param exitCode The suggested exit code that will be returned to the OS
-     *                 when the JVM exits.
-     * @return The exit code to actually return to the OS.  In most cases, this
-     *         should just be the value of exitCode, however the user code has
-     *         the option of changing the exit code if there are any problems
-     *         during shutdown.
+     * @param exitCode The suggested exit code that will be returned to the OS when the JVM exits.
+     * @return The exit code to actually return to the OS. In most cases, this should just be the
+     *     value of exitCode, however the user code has the option of changing the exit code if
+     *     there are any problems during shutdown.
      */
     public int stop(int exitCode) {
         try {
@@ -106,18 +98,17 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
     }
 
     /**
-     * Call-back method is called by the @{link org.apache.karaf.main.Main} for Signaling
-     * that the stopping process is in progress and the wrapper doesn't kill the JVM.
+     * Call-back method is called by the @{link org.apache.karaf.main.Main} for Signaling that the
+     * stopping process is in progress and the wrapper doesn't kill the JVM.
      */
     public void waitingForShutdown(int delay) {
         WrapperManager.signalStopping(delay);
     }
 
     /**
-     * Called whenever the native Wrapper code traps a system control signal
-     * against the Java process.  It is up to the callback to take any actions
-     * necessary.  Possible values are: WrapperManager.WRAPPER_CTRL_C_EVENT,
-     * WRAPPER_CTRL_CLOSE_EVENT, WRAPPER_CTRL_LOGOFF_EVENT, or
+     * Called whenever the native Wrapper code traps a system control signal against the Java
+     * process. It is up to the callback to take any actions necessary. Possible values are:
+     * WrapperManager.WRAPPER_CTRL_C_EVENT, WRAPPER_CTRL_CLOSE_EVENT, WRAPPER_CTRL_LOGOFF_EVENT, or
      * WRAPPER_CTRL_SHUTDOWN_EVENT
      *
      * @param event The system control signal.
@@ -142,5 +133,4 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
         //  will be called immediately.
         WrapperManager.start(new Main(), args);
     }
-
 }

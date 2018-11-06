@@ -36,7 +36,14 @@ public class Candidate implements Comparable<Candidate> {
         this(value, value, null, null, null, null, complete);
     }
 
-    public Candidate(String value, String displ, String group, String descr, String suffix, String key, boolean complete) {
+    public Candidate(
+            String value,
+            String displ,
+            String group,
+            String descr,
+            String suffix,
+            String key,
+            boolean complete) {
         Objects.requireNonNull(value);
         this.value = value;
         this.displ = displ;

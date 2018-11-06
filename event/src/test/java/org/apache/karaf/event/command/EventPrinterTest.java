@@ -27,8 +27,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-
-import org.apache.karaf.event.command.EventPrinter;
 import org.junit.Test;
 import org.osgi.service.event.Event;
 
@@ -43,29 +41,27 @@ public class EventPrinterTest {
         String result = baos.toString("utf-8");
         assertThat(result, equalTo("2016-01-01 12:00:00 - myTopic\n"));
     }
-    
+
     @Test
     public void testPrintVerbose() throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(baos);
         new EventPrinter(out, true).accept(event());
         String result = baos.toString("utf-8");
-        assertThat(result, equalTo("2016-01-01 12:00:00 - myTopic\n" 
-            + "a: b\n"
-            + "c: [d, e]\n\n"));
+        assertThat(result, equalTo("2016-01-01 12:00:00 - myTopic\n" + "a: b\n" + "c: [d, e]\n\n"));
     }
 
     private Event event() {
         HashMap<String, Object> props = new HashMap<>();
         props.put("a", "b");
-        props.put("c", new String[]{"d", "e"});
+        props.put("c", new String[] {"d", "e"});
         Date date;
         try {
             date = df.parse("2016-01-01 12:00:00");
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-        props.put("timestamp",  date.getTime());
+        props.put("timestamp", date.getTime());
         return new Event("myTopic", props);
     }
 }

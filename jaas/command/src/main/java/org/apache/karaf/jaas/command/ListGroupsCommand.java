@@ -16,7 +16,6 @@
 package org.apache.karaf.jaas.command;
 
 import javax.security.auth.login.AppConfigurationEntry;
-
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
@@ -29,7 +28,6 @@ public class ListGroupsCommand extends JaasCommandSupport {
 
     private static final String GROUP_LIST_FORMAT = "%-10s  %-80s";
 
-        
     @Override
     public Object execute() throws Exception {
         JaasRealm realm = (JaasRealm) session.get(JAAS_REALM);
@@ -43,7 +41,8 @@ public class ListGroupsCommand extends JaasCommandSupport {
         BackingEngine engine = getBackingEngine(entry);
 
         if (engine == null) {
-            System.err.println("Can't get the list of users (no backing engine service registered)");
+            System.err.println(
+                    "Can't get the list of users (no backing engine service registered)");
             return null;
         }
 
@@ -55,10 +54,11 @@ public class ListGroupsCommand extends JaasCommandSupport {
         System.out.println(String.format(GROUP_LIST_FORMAT, "Group", "Roles"));
 
         for (GroupPrincipal group : engine.listGroups().keySet()) {
-            
-            System.out.println(String.format(GROUP_LIST_FORMAT, group.getName(), engine.listGroups().get(group)));
+
+            System.out.println(
+                    String.format(
+                            GROUP_LIST_FORMAT, group.getName(), engine.listGroups().get(group)));
         }
         return null;
     }
 }
-    

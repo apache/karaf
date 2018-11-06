@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@XmlSchema(namespace = "http://karaf.apache.org/xmlns/features-processing/v1.0.0",
-        elementFormDefault = XmlNsForm.QUALIFIED, attributeFormDefault = XmlNsForm.UNQUALIFIED,
+@XmlSchema(
+        namespace = "http://karaf.apache.org/xmlns/features-processing/v1.0.0",
+        elementFormDefault = XmlNsForm.QUALIFIED,
+        attributeFormDefault = XmlNsForm.UNQUALIFIED,
         xmlns = {
-                @XmlNs(prefix = "", namespaceURI = FEATURES_PROCESSING_NS),
-                @XmlNs(prefix = "f", namespaceURI = FeaturesNamespaces.URI_CURRENT)
-        }
-)
+            @XmlNs(prefix = "", namespaceURI = FEATURES_PROCESSING_NS),
+            @XmlNs(prefix = "f", namespaceURI = FeaturesNamespaces.URI_CURRENT)
+        })
 package org.apache.karaf.features.internal.model.processing;
+
+import static org.apache.karaf.features.internal.model.processing.FeaturesProcessing.FEATURES_PROCESSING_NS;
 
 import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSchema;
-
 import org.apache.karaf.features.FeaturesNamespaces;
-
-import static org.apache.karaf.features.internal.model.processing.FeaturesProcessing.FEATURES_PROCESSING_NS;

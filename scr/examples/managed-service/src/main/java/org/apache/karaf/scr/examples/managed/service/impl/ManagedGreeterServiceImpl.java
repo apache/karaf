@@ -16,23 +16,24 @@
  */
 package org.apache.karaf.scr.examples.managed.service.impl;
 
-import org.apache.karaf.scr.examples.managed.service.ManagedGreeterService;
-import org.osgi.service.component.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.apache.karaf.scr.examples.managed.service.ManagedGreeterService;
+import org.osgi.service.component.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * An implementation of the ManagedGreeterService interface. Component configuration includes setting
- * the name attribute and setting the configuration policy to required. The default is optional and when the
- * component attempts to activate it will throw a RuntimeException.
+ * An implementation of the ManagedGreeterService interface. Component configuration includes
+ * setting the name attribute and setting the configuration policy to required. The default is
+ * optional and when the component attempts to activate it will throw a RuntimeException.
  */
-@Component(name = ManagedGreeterServiceImpl.COMPONENT_NAME, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(
+        name = ManagedGreeterServiceImpl.COMPONENT_NAME,
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class ManagedGreeterServiceImpl implements ManagedGreeterService {
 
     public static final String COMPONENT_NAME = "ManagedGreeterService";
@@ -53,7 +54,9 @@ public class ManagedGreeterServiceImpl implements ManagedGreeterService {
     public void activate(final Map<String, ?> properties) {
         LOG.info("Activating the {}", COMPONENT_LABEL);
 
-        // just because our component has a policy of required doesn't help to ensure our properties are set
+        // just because our component has a policy of required doesn't help to ensure our properties
+        // are
+        // set
         // first check that salutation is set
         if (properties.containsKey("salutation")) {
             try {
@@ -63,7 +66,9 @@ public class ManagedGreeterServiceImpl implements ManagedGreeterService {
                 lock.writeLock().unlock();
             }
         } else {
-            throw new IllegalArgumentException("The salutation property may not be null or empty: " + properties.get("salutation"));
+            throw new IllegalArgumentException(
+                    "The salutation property may not be null or empty: "
+                            + properties.get("salutation"));
         }
 
         // now verify that name is set
@@ -75,13 +80,12 @@ public class ManagedGreeterServiceImpl implements ManagedGreeterService {
                 lock.writeLock().unlock();
             }
         } else {
-            throw new IllegalArgumentException("The name property may not be null or empty: " + properties.get("name"));
+            throw new IllegalArgumentException(
+                    "The name property may not be null or empty: " + properties.get("name"));
         }
     }
 
-    /**
-     * Called when any of the SCR Components required dependencies become unsatisfied.
-     */
+    /** Called when any of the SCR Components required dependencies become unsatisfied. */
     @Deactivate
     public void deactivate() {
         LOG.info("Deactivating the {}", COMPONENT_LABEL);
@@ -137,9 +141,7 @@ public class ManagedGreeterServiceImpl implements ManagedGreeterService {
         }
     }
 
-    /**
-     * Thread worker that continuously prints a message.
-     */
+    /** Thread worker that continuously prints a message. */
     private class Worker implements Runnable {
 
         private String name;
@@ -167,5 +169,4 @@ public class ManagedGreeterServiceImpl implements ManagedGreeterService {
             this.salutation = salutation;
         }
     }
-
 }

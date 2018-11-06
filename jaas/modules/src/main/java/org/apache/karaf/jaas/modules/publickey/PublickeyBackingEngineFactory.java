@@ -15,15 +15,14 @@
  */
 package org.apache.karaf.jaas.modules.publickey;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
 
 public class PublickeyBackingEngineFactory implements BackingEngineFactory {
 
@@ -49,5 +48,4 @@ public class PublickeyBackingEngineFactory implements BackingEngineFactory {
     public String getModuleClass() {
         return PublickeyLoginModule.class.getName();
     }
-
 }

@@ -24,14 +24,12 @@ import static org.junit.Assert.*;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.List;
-
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-
 import org.apache.karaf.features.FeaturesNamespaces;
-import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -39,7 +37,8 @@ import org.xml.sax.SAXException;
 public class GenerateDescriptorMojoTest {
 
     @Test
-    public void testReadXml100() throws JAXBException, SAXException, ParserConfigurationException, XMLStreamException {
+    public void testReadXml100()
+            throws JAXBException, SAXException, ParserConfigurationException, XMLStreamException {
 
         URL url = getClass().getClassLoader().getResource("input-features-1.0.0.xml");
 
@@ -73,5 +72,4 @@ public class GenerateDescriptorMojoTest {
 
         assertEquals(feature.getInstall(), "auto");
     }
-
 }

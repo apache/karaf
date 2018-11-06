@@ -24,19 +24,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Represents a positional argument on a command line (as opposed to an optional named {@link Option}
+ * Represents a positional argument on a command line (as opposed to an optional named {@link
+ * Option}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-public @interface Argument
-{
-    String DEFAULT_STRING= "DEFAULT";
+public @interface Argument {
+    String DEFAULT_STRING = "DEFAULT";
 
     String DEFAULT = "##default";
 
     /**
-     * Name of the argument.
-     * By default, the field name will be used.
+     * Name of the argument. By default, the field name will be used.
      *
      * @return the argument name.
      */
@@ -57,27 +56,24 @@ public @interface Argument
     boolean required() default false;
 
     /**
-     * Position of the argument in the command line.
-     * When using multiple arguments, the indices must be
-     * starting from 0 and incrementing without any holes.
+     * Position of the argument in the command line. When using multiple arguments, the indices must
+     * be starting from 0 and incrementing without any holes.
      *
      * @return the argument index.
      */
     int index() default 0;
 
     /**
-     * The last argument can be multi-valued in which case
-     * the field type must be a List.
+     * The last argument can be multi-valued in which case the field type must be a List.
      *
      * @return true if the argument has multiple values, false else.
      */
     boolean multiValued() default false;
 
     /**
-     * The generated help displays default values for arguments.
-     * In case the value displayed in the help to the user should
-     * be different that the default value of the field, one
-     * can use this property to specify the value to display.
+     * The generated help displays default values for arguments. In case the value displayed in the
+     * help to the user should be different that the default value of the field, one can use this
+     * property to specify the value to display.
      *
      * @return the argument help string representation.
      */

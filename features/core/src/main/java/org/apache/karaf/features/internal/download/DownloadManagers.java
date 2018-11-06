@@ -17,20 +17,23 @@
 package org.apache.karaf.features.internal.download;
 
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;
 import org.ops4j.pax.url.mvn.MavenResolver;
 
 public final class DownloadManagers {
 
-    private DownloadManagers() { }
+    private DownloadManagers() {}
 
-    public static DownloadManager createDownloadManager(MavenResolver resolver, ScheduledExecutorService executorService) {
+    public static DownloadManager createDownloadManager(
+            MavenResolver resolver, ScheduledExecutorService executorService) {
         return createDownloadManager(resolver, executorService, 0, 0);
     }
 
-    public static DownloadManager createDownloadManager(MavenResolver resolver, ScheduledExecutorService executorService,
-                                                        long scheduleDelay, int scheduleMaxRun) {
+    public static DownloadManager createDownloadManager(
+            MavenResolver resolver,
+            ScheduledExecutorService executorService,
+            long scheduleDelay,
+            int scheduleMaxRun) {
         return new MavenDownloadManager(resolver, executorService, scheduleDelay, scheduleMaxRun);
     }
 }

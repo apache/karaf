@@ -25,5 +25,4 @@ class BundleInfo {
     URI uri;
 
     Integer startLevel;
-
 }

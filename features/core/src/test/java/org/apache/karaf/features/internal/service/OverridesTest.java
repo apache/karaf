@@ -16,12 +16,15 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.resource.ResourceBuilder;
@@ -29,10 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.resource.Resource;
-
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class OverridesTest {
 
@@ -47,43 +46,50 @@ public class OverridesTest {
 
     @Before
     public void setUp() throws BundleException {
-        b100 = resource("karaf-100.jar")
-                .set("Bundle-SymbolicName", bsn)
-                .set("Bundle-Version", "1.0.0")
-                .build();
+        b100 =
+                resource("karaf-100.jar")
+                        .set("Bundle-SymbolicName", bsn)
+                        .set("Bundle-Version", "1.0.0")
+                        .build();
 
-        b101 = resource("karaf-101.jar")
-                .set("Bundle-SymbolicName", bsn)
-                .set("Bundle-Version", "1.0.1")
-                .build();
+        b101 =
+                resource("karaf-101.jar")
+                        .set("Bundle-SymbolicName", bsn)
+                        .set("Bundle-Version", "1.0.1")
+                        .build();
 
-        b102 = resource("karaf-102.jar")
-                .set("Bundle-SymbolicName", bsn)
-                .set("Bundle-Version", "1.0.2")
-                .build();
+        b102 =
+                resource("karaf-102.jar")
+                        .set("Bundle-SymbolicName", bsn)
+                        .set("Bundle-Version", "1.0.2")
+                        .build();
 
-        b110 = resource("karaf-110.jar")
-                .set("Bundle-SymbolicName", bsn)
-                .set("Bundle-Version", "1.1.0")
-                .build();
+        b110 =
+                resource("karaf-110.jar")
+                        .set("Bundle-SymbolicName", bsn)
+                        .set("Bundle-Version", "1.1.0")
+                        .build();
 
-        c100 = resource("karafc-100.jar")
-                .set("Bundle-SymbolicName", bsn)
-                .set("Bundle-Version", "1.0.0")
-                .set("Bundle-Vendor", "Apache")
-                .build();
+        c100 =
+                resource("karafc-100.jar")
+                        .set("Bundle-SymbolicName", bsn)
+                        .set("Bundle-Version", "1.0.0")
+                        .set("Bundle-Vendor", "Apache")
+                        .build();
 
-        c101 = resource("karafc-101.jar")
-                .set("Bundle-SymbolicName", bsn)
-                .set("Bundle-Version", "1.0.1")
-                .set("Bundle-Vendor", "NotApache")
-                .build();
+        c101 =
+                resource("karafc-101.jar")
+                        .set("Bundle-SymbolicName", bsn)
+                        .set("Bundle-Version", "1.0.1")
+                        .set("Bundle-Vendor", "NotApache")
+                        .build();
 
-        c110 = resource("karafc-110.jar")
-                .set("Bundle-SymbolicName", bsn)
-                .set("Bundle-Version", "1.1.0")
-                .set("Bundle-Vendor", "NotApache")
-                .build();
+        c110 =
+                resource("karafc-110.jar")
+                        .set("Bundle-SymbolicName", bsn)
+                        .set("Bundle-Version", "1.1.0")
+                        .set("Bundle-Vendor", "NotApache")
+                        .build();
     }
 
     @Test
@@ -114,7 +120,8 @@ public class OverridesTest {
     public void testMatchingRange() throws IOException {
         Map<String, Resource> map = asResourceMap(b100, b101, b110);
         assertEquals(b100, map.get(getUri(b100)));
-        Overrides.override(map, Arrays.asList(getUri(b101), getUri(b110) + ";range=\"[1.0, 2.0)\""));
+        Overrides.override(
+                map, Arrays.asList(getUri(b101), getUri(b110) + ";range=\"[1.0, 2.0)\""));
         assertEquals(b110, map.get(getUri(b100)));
     }
 
@@ -128,22 +135,30 @@ public class OverridesTest {
 
     @Test
     public void testLoadOverrides() {
-        Set<String> overrides = Overrides.loadOverrides(getClass().getResource("overrides.properties").toExternalForm());
+        Set<String> overrides =
+                Overrides.loadOverrides(
+                        getClass().getResource("overrides.properties").toExternalForm());
         assertEquals(2, overrides.size());
 
         Clause karafAdminCommand = null;
         Clause karafAdminCore = null;
         for (Clause clause : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
-            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/2.3.0.61033X")) {
+            if (clause.getName()
+                    .equals(
+                            "mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/2.3.0.61033X")) {
                 karafAdminCommand = clause;
             }
-            if (clause.getName().equals("mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/2.3.0.61033X")) {
+            if (clause.getName()
+                    .equals(
+                            "mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/2.3.0.61033X")) {
                 karafAdminCore = clause;
             }
         }
         assertNotNull("Missing admin.command bundle override", karafAdminCommand);
         assertNotNull("Missing admin.core bundle override", karafAdminCore);
-        assertNotNull("Missing range on admin.core override", karafAdminCore.getAttribute(Overrides.OVERRIDE_RANGE));
+        assertNotNull(
+                "Missing range on admin.core override",
+                karafAdminCore.getAttribute(Overrides.OVERRIDE_RANGE));
     }
 
     static Builder resource(String uri) {
@@ -160,18 +175,20 @@ public class OverridesTest {
 
     static class Builder {
         String uri;
-        Map<String,String> headers = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
+
         Builder(String uri) {
             this.uri = uri;
             this.headers.put("Bundle-ManifestVersion", "2");
         }
+
         Builder set(String key, String value) {
             this.headers.put(key, value);
             return this;
         }
+
         Resource build() throws BundleException {
             return ResourceBuilder.build(uri, headers);
         }
     }
-
 }

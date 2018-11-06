@@ -28,7 +28,6 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -37,20 +36,22 @@ import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * JAAS Login module for user / password, based on two properties files.
- */
+/** JAAS Login module for user / password, based on two properties files. */
 public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesLoginModule.class);
+    private static final transient Logger LOGGER =
+            LoggerFactory.getLogger(PropertiesLoginModule.class);
 
     static final String USER_FILE = "users";
 
     private String usersFile;
-    
 
-    public void initialize(Subject sub, CallbackHandler handler, Map<String, ?> sharedState, Map<String, ?> options) {
-        super.initialize(sub,handler,options);
+    public void initialize(
+            Subject sub,
+            CallbackHandler handler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
+        super.initialize(sub, handler, options);
         usersFile = (String) options.get(USER_FILE);
         if (debug) {
             LOGGER.debug("Initialized debug={} usersFile={}", debug, usersFile);
@@ -83,7 +84,8 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             } catch (IOException ioe) {
                 throw new LoginException(ioe.getMessage());
             } catch (UnsupportedCallbackException uce) {
-                throw new LoginException(uce.getMessage() + " not available to obtain information from user");
+                throw new LoginException(
+                        uce.getMessage() + " not available to obtain information from user");
             }
         }
         // user callback get value
@@ -108,27 +110,27 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         try {
             userInfos = users.get(user);
         } catch (NullPointerException e) {
-            //error handled in the next statement
+            // error handled in the next statement
         }
         if (userInfos == null) {
-        	if (!this.detailedLoginExcepion) {
-        		throw new FailedLoginException("login failed");
-        	} else {
-        		throw new FailedLoginException("User " + user + " does not exist");
-        	}
+            if (!this.detailedLoginExcepion) {
+                throw new FailedLoginException("login failed");
+            } else {
+                throw new FailedLoginException("User " + user + " does not exist");
+            }
         }
-        
+
         // the password is in the first position
         String[] infos = userInfos.split(",");
         String storedPassword = infos[0];
-        
+
         // check the provided password
         if (!checkPassword(password, storedPassword)) {
-        	if (!this.detailedLoginExcepion) {
-        		throw new FailedLoginException("login failed");
-        	} else {
-        		throw new FailedLoginException("Password for " + user + " does not match");
-        	}
+            if (!this.detailedLoginExcepion) {
+                throw new FailedLoginException("login failed");
+            } else {
+                throw new FailedLoginException("Password for " + user + " does not match");
+            }
         }
 
         principals = new HashSet<>();
@@ -136,7 +138,10 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         for (int i = 1; i < infos.length; i++) {
             if (infos[i].trim().startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
                 // it's a group reference
-                principals.add(new GroupPrincipal(infos[i].trim().substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
+                principals.add(
+                        new GroupPrincipal(
+                                infos[i].trim()
+                                        .substring(PropertiesBackingEngine.GROUP_PREFIX.length())));
                 String groupInfo = users.get(infos[i].trim());
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
@@ -174,5 +179,4 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         }
         return true;
     }
-
 }

@@ -29,5 +29,4 @@ public class PublickeyCallback implements Callback {
     public void setPublicKey(PublicKey publicKey) {
         this.publicKey = publicKey;
     }
-
 }

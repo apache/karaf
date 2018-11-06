@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.docker.command;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.karaf.docker.ContainerConfig;
 import org.apache.karaf.docker.HostConfig;
 import org.apache.karaf.docker.HostPortBinding;
@@ -26,65 +30,129 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Command(scope = "docker", name = "create", description = "Create a new container")
 @Service
 public class CreateCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The container of the Docker container", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The container of the Docker container",
+            required = true,
+            multiValued = false)
     String name;
 
-    @Option(name = "--hostname", description = "Hostname of the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--hostname",
+            description = "Hostname of the Docker container",
+            required = false,
+            multiValued = false)
     String hostname = "docker";
 
-    @Option(name = "--user", description = "User of the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--user",
+            description = "User of the Docker container",
+            required = false,
+            multiValued = false)
     String user = "";
 
-    @Option(name = "--tty", description = "Enable TTY for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--tty",
+            description = "Enable TTY for the Docker container",
+            required = false,
+            multiValued = false)
     boolean tty = true;
 
-    @Option(name = "--attachStdout", description = "Attach stdout for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--attachStdout",
+            description = "Attach stdout for the Docker container",
+            required = false,
+            multiValued = false)
     boolean attachStdout = true;
 
-    @Option(name = "--attachStderr", description = "Attach stderr for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--attachStderr",
+            description = "Attach stderr for the Docker container",
+            required = false,
+            multiValued = false)
     boolean attachStderr = true;
 
-    @Option(name = "--attachStdin", description = "Attach stdin for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--attachStdin",
+            description = "Attach stdin for the Docker container",
+            required = false,
+            multiValued = false)
     boolean attachStdin = true;
 
-    @Option(name = "--image", description = "Image to use for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--image",
+            description = "Image to use for the Docker container",
+            required = false,
+            multiValued = false)
     @Completion(ImagesRepoTagsCompleter.class)
     String image = "karaf:4.2.0";
 
-    @Option(name = "--cmd", description = "Command to execute when starting the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--cmd",
+            description = "Command to execute when starting the Docker container",
+            required = false,
+            multiValued = false)
     String cmd = "/bin/karaf";
 
-    @Option(name = "--workingDir", description = "Working directory of the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--workingDir",
+            description = "Working directory of the Docker container",
+            required = false,
+            multiValued = false)
     String workingDir = "";
 
-    @Option(name = "--openStdin", description = "Enable and open stdin for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--openStdin",
+            description = "Enable and open stdin for the Docker container",
+            required = false,
+            multiValued = false)
     boolean openStdin = true;
 
-    @Option(name = "--stdinOnce", description = "Enable single use of std in the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--stdinOnce",
+            description = "Enable single use of std in the Docker container",
+            required = false,
+            multiValued = false)
     boolean stdinOnce = true;
 
-    @Option(name = "--exposedPort", description = "Port to expose from the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--exposedPort",
+            description = "Port to expose from the Docker container",
+            required = false,
+            multiValued = false)
     String exposedPort = "8101/tcp";
 
-    @Option(name = "--hostPrivileged", description = "Set host config privileges for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--hostPrivileged",
+            description = "Set host config privileges for the Docker container",
+            required = false,
+            multiValued = false)
     boolean hostPrivileged = false;
 
-    @Option(name = "--hostPublishAllPorts", description = "Expose all ports for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--hostPublishAllPorts",
+            description = "Expose all ports for the Docker container",
+            required = false,
+            multiValued = false)
     boolean hostPublishAllPorts = false;
 
-    @Option(name = "--hostNetworkMode", description = "Define the network mode for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--hostNetworkMode",
+            description = "Define the network mode for the Docker container",
+            required = false,
+            multiValued = false)
     String hostNetworkMode = "bridge";
 
-    @Option(name = "--hostPortBinding", description = "Define the port binding for the Docker container", required = false, multiValued = false)
+    @Option(
+            name = "--hostPortBinding",
+            description = "Define the port binding for the Docker container",
+            required = false,
+            multiValued = false)
     String hostPortBinding = "8101";
 
     @Override
@@ -97,7 +165,7 @@ public class CreateCommand extends DockerCommandSupport {
         containerConfig.setImage(image);
         containerConfig.setHostname(hostname);
         containerConfig.setUser(user);
-        containerConfig.setCmd(new String[]{ cmd });
+        containerConfig.setCmd(new String[] {cmd});
         containerConfig.setWorkingDir(workingDir);
         containerConfig.setOpenStdin(openStdin);
         containerConfig.setStdinOnce(stdinOnce);
@@ -108,7 +176,7 @@ public class CreateCommand extends DockerCommandSupport {
         hostConfig.setPrivileged(hostPrivileged);
         hostConfig.setPublishAllPorts(hostPublishAllPorts);
         hostConfig.setNetworkMode(hostNetworkMode);
-        hostConfig.setLxcConf(new String[]{});
+        hostConfig.setLxcConf(new String[] {});
 
         Map<String, List<HostPortBinding>> portBindings = new HashMap<>();
         List<HostPortBinding> hostPortBindings = new ArrayList<>();
@@ -121,5 +189,4 @@ public class CreateCommand extends DockerCommandSupport {
         getDockerService().create(name, url, containerConfig);
         return null;
     }
-
 }

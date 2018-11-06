@@ -16,10 +16,10 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.management.ManagementFactory;
 import javax.management.Attribute;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -27,8 +27,6 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -61,11 +59,10 @@ public class LogTest extends KarafTestSupport {
         String displayOutput = executeCommand("log:display").trim();
         assertTrue("Should be empty but was: " + displayOutput, displayOutput.trim().isEmpty());
     }
-    
+
     public void assertSetLevel(String level) throws InterruptedException {
         System.out.println(executeCommand("log:set " + level));
         assertContains(level, executeCommand("log:get"));
         Thread.sleep(100);
     }
-
 }

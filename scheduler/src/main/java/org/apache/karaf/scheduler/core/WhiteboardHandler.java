@@ -17,10 +17,8 @@
 package org.apache.karaf.scheduler.core;
 
 import java.util.Date;
-
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.Scheduler;
-import org.apache.karaf.scheduler.command.Schedule;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -30,10 +28,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The quartz based implementation of the scheduler.
- *
- */
+/** The quartz based implementation of the scheduler. */
 public class WhiteboardHandler {
 
     /** Default logger. */
@@ -41,52 +36,62 @@ public class WhiteboardHandler {
 
     private Scheduler scheduler;
 
-    private ServiceTracker<?,?> serviceTracker;
+    private ServiceTracker<?, ?> serviceTracker;
 
-    public WhiteboardHandler(final BundleContext context, Scheduler scheduler) throws InvalidSyntaxException {
+    public WhiteboardHandler(final BundleContext context, Scheduler scheduler)
+            throws InvalidSyntaxException {
         this.scheduler = scheduler;
-        this.serviceTracker = new ServiceTracker<>(context,
-                context.createFilter("(|(" + Constants.OBJECTCLASS + "=" + Runnable.class.getName() + ")" +
-                        "(" + Constants.OBJECTCLASS + "=" + Job.class.getName() + "))"),
-                new ServiceTrackerCustomizer<Object,Object>() {
+        this.serviceTracker =
+                new ServiceTracker<>(
+                        context,
+                        context.createFilter(
+                                "(|("
+                                        + Constants.OBJECTCLASS
+                                        + "="
+                                        + Runnable.class.getName()
+                                        + ")"
+                                        + "("
+                                        + Constants.OBJECTCLASS
+                                        + "="
+                                        + Job.class.getName()
+                                        + "))"),
+                        new ServiceTrackerCustomizer<Object, Object>() {
 
-                    public synchronized void  removedService(final ServiceReference reference, final Object service) {
-                        context.ungetService(reference);
-                        unregister(reference, service);
-                    }
+                            public synchronized void removedService(
+                                    final ServiceReference reference, final Object service) {
+                                context.ungetService(reference);
+                                unregister(reference, service);
+                            }
 
-                    public synchronized void modifiedService(final ServiceReference reference, final Object service) {
-                        unregister(reference, service);
-                        register(reference, service);
-                    }
+                            public synchronized void modifiedService(
+                                    final ServiceReference reference, final Object service) {
+                                unregister(reference, service);
+                                register(reference, service);
+                            }
 
-                    public synchronized Object addingService(final ServiceReference reference) {
-                        final Object obj = context.getService(reference);
-                        if ( obj != null ) {
-                            register(reference, obj);
-                        }
-                        return obj;
-                    }
-                });
+                            public synchronized Object addingService(
+                                    final ServiceReference reference) {
+                                final Object obj = context.getService(reference);
+                                if (obj != null) {
+                                    register(reference, obj);
+                                }
+                                return obj;
+                            }
+                        });
         this.serviceTracker.open();
     }
 
-    /**
-     * Deactivate this component.
-     */
+    /** Deactivate this component. */
     public void deactivate() {
         this.serviceTracker.close();
     }
 
-
-    /**
-     * Create unique identifier
-     */
+    /** Create unique identifier */
     private String getServiceIdentifier(final ServiceReference ref) {
         String name = (String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_NAME);
-        if ( name == null ) {
+        if (name == null) {
             name = (String) ref.getProperty(Constants.SERVICE_PID);
-            if ( name == null ) {
+            if (name == null) {
                 name = "Registered Service";
             }
         }
@@ -95,9 +100,7 @@ public class WhiteboardHandler {
         return name;
     }
 
-    /**
-     * Register a job or task
-     */
+    /** Register a job or task */
     private void register(final ServiceReference ref, final Object job) {
         final String name = getServiceIdentifier(ref);
         Boolean concurrent = true;
@@ -105,41 +108,61 @@ public class WhiteboardHandler {
             if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT) instanceof Boolean) {
                 concurrent = (Boolean) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT);
             } else {
-                concurrent = new Boolean((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT));
+                concurrent =
+                        new Boolean(
+                                (String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT));
             }
         }
         final String expression = (String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_EXPRESSION);
         try {
             if (expression != null) {
-                this.scheduler.schedule(job, this.scheduler.EXPR(expression)
-                        .name(name)
-                        .canRunConcurrently(concurrent));
+                this.scheduler.schedule(
+                        job,
+                        this.scheduler.EXPR(expression).name(name).canRunConcurrently(concurrent));
             } else {
                 Long period = null;
                 if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD) != null) {
                     if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD) instanceof Long) {
                         period = (Long) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD);
                     } else {
-                        period = new Long((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD));
+                        period =
+                                new Long(
+                                        (String)
+                                                ref.getProperty(
+                                                        Scheduler.PROPERTY_SCHEDULER_PERIOD));
                     }
                     if (period < 1) {
-                        this.logger.debug("Ignoring service {} : scheduler period is less than 1.", ref);
+                        this.logger.debug(
+                                "Ignoring service {} : scheduler period is less than 1.", ref);
                     } else {
                         boolean immediate = false;
                         if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE) != null) {
-                            if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE) instanceof Boolean) {
-                                immediate = (Boolean) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE);
+                            if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE)
+                                    instanceof Boolean) {
+                                immediate =
+                                        (Boolean)
+                                                ref.getProperty(
+                                                        Scheduler.PROPERTY_SCHEDULER_IMMEDIATE);
                             } else {
-                                immediate = new Boolean((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE));
+                                immediate =
+                                        new Boolean(
+                                                (String)
+                                                        ref.getProperty(
+                                                                Scheduler
+                                                                        .PROPERTY_SCHEDULER_IMMEDIATE));
                             }
                         }
                         final Date date = new Date();
                         if (!immediate) {
                             date.setTime(System.currentTimeMillis() + period * 1000);
                         }
-                        this.scheduler.schedule(job, this.scheduler.AT(date, -1, period)
-                                .name(name)
-                                .canRunConcurrently((concurrent != null ? concurrent : true)));
+                        this.scheduler.schedule(
+                                job,
+                                this.scheduler
+                                        .AT(date, -1, period)
+                                        .name(name)
+                                        .canRunConcurrently(
+                                                (concurrent != null ? concurrent : true)));
                     }
                 } else {
                     this.logger.debug("Ignoring service {} : no scheduling property found.", ref);
@@ -150,9 +173,7 @@ public class WhiteboardHandler {
         }
     }
 
-    /**
-     * Unregister a service.
-     */
+    /** Unregister a service. */
     private void unregister(final ServiceReference reference, final Object service) {
         final String name = getServiceIdentifier(reference);
         this.scheduler.unschedule(name);

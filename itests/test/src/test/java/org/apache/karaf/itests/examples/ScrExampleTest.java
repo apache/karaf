@@ -29,7 +29,10 @@ public class ScrExampleTest extends KarafTestSupport {
 
     @Test
     public void test() throws Exception {
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-scr-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-scr-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         installAndAssertFeature("karaf-scr-example-client");
 
@@ -41,5 +44,4 @@ public class ScrExampleTest extends KarafTestSupport {
         System.out.println(output);
         assertContains("\"state\":32", output);
     }
-
 }

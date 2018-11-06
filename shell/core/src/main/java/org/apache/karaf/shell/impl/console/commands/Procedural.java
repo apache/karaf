@@ -18,18 +18,19 @@
  */
 package org.apache.karaf.shell.impl.console.commands;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.*;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.command.Process;
 import org.jline.builtins.Options;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.*;
-
 public class Procedural {
 
-    static final String[] functions = {"each", "if", "not", "throw", "try", "until", "while", "break", "continue"};
+    static final String[] functions = {
+        "each", "if", "not", "throw", "try", "until", "while", "break", "continue"
+    };
 
     public Object _main(CommandSession session, Object[] argv) throws Throwable {
         if (argv == null || argv.length < 1) {
@@ -69,13 +70,12 @@ public class Procedural {
         }
     }
 
-    protected static class BreakException extends Exception {
-    }
+    protected static class BreakException extends Exception {}
 
-    protected static class ContinueException extends Exception {
-    }
+    protected static class ContinueException extends Exception {}
 
-    protected Options parseOptions(CommandSession session, String[] usage, Object[] argv) throws HelpException, OptionException {
+    protected Options parseOptions(CommandSession session, String[] usage, Object[] argv)
+            throws HelpException, OptionException {
         try {
             Options opt = Options.compile(usage, s -> get(session, s)).parse(argv, true);
             if (opt.isSet("help")) {
@@ -119,16 +119,15 @@ public class Procedural {
         }
     }
 
-    protected List<Object> doEach(CommandSession session,
-                                  Process process,
-                                  Object[] argv) throws Exception {
+    protected List<Object> doEach(CommandSession session, Process process, Object[] argv)
+            throws Exception {
         String[] usage = {
-                "each -  loop over the elements",
-                "Usage: each [-r] elements [do] { closure }",
-                "         elements              an array to iterate on",
-                "         closure               a closure to call",
-                "  -? --help                    Show help",
-                "  -r --result                  Return a list containing each iteration result",
+            "each -  loop over the elements",
+            "Usage: each [-r] elements [do] { closure }",
+            "         elements              an array to iterate on",
+            "         closure               a closure to call",
+            "  -? --help                    Show help",
+            "  -r --result                  Return a list containing each iteration result",
         };
         Options opt = parseOptions(session, usage, argv);
 
@@ -137,7 +136,6 @@ public class Procedural {
             opt.argObjects().remove(0);
         }
         List<Function> functions = getFunctions(opt);
-
 
         if (elements == null || functions == null || functions.size() != 1) {
             process.err().println("usage: each elements [do] { closure }");
@@ -168,9 +166,9 @@ public class Procedural {
 
     protected Object doIf(CommandSession session, Process process, Object[] argv) throws Exception {
         String[] usage = {
-                "if -  if / then / else construct",
-                "Usage: if {condition} [then] {if-action} [elif {cond} [then] {elif-action}]... [else] {else-action}",
-                "  -? --help                    Show help",
+            "if -  if / then / else construct",
+            "Usage: if {condition} [then] {if-action} [elif {cond} [then] {elif-action}]... [else] {else-action}",
+            "  -? --help                    Show help",
         };
         Options opt = parseOptions(session, usage, argv);
 
@@ -255,7 +253,9 @@ public class Procedural {
         error |= conditions.size() != actions.size();
 
         if (error) {
-            process.err().println("usage: if {condition} [then] {if-action} [elif {elif-action}]... [else] {else-action}");
+            process.err()
+                    .println(
+                            "usage: if {condition} [then] {if-action} [elif {elif-action}]... [else] {else-action}");
             process.error(2);
             return null;
         }
@@ -270,11 +270,12 @@ public class Procedural {
         return null;
     }
 
-    protected Boolean doNot(CommandSession session, Process process, Object[] argv) throws Exception {
+    protected Boolean doNot(CommandSession session, Process process, Object[] argv)
+            throws Exception {
         String[] usage = {
-                "not -  return the opposite condition",
-                "Usage: not { condition }",
-                "  -? --help                    Show help",
+            "not -  return the opposite condition",
+            "Usage: not { condition }",
+            "  -? --help                    Show help",
         };
         Options opt = parseOptions(session, usage, argv);
         List<Function> functions = getFunctions(opt);
@@ -284,29 +285,25 @@ public class Procedural {
             return null;
         }
         return !isTrue(session, functions.get(0));
-
     }
 
-    protected Object doThrow(CommandSession session, Process process, Object[] argv) throws ThrownException, HelpException, OptionException {
+    protected Object doThrow(CommandSession session, Process process, Object[] argv)
+            throws ThrownException, HelpException, OptionException {
         String[] usage = {
-                "throw -  throw an exception",
-                "Usage: throw [ message [ cause ] ]",
-                "       throw exception",
-                "       throw",
-                "  -? --help                    Show help",
+            "throw -  throw an exception",
+            "Usage: throw [ message [ cause ] ]",
+            "       throw exception",
+            "       throw",
+            "  -? --help                    Show help",
         };
         Options opt = parseOptions(session, usage, argv);
         if (opt.argObjects().size() == 0) {
             Object exception = session.get("exception");
-            if (exception instanceof Throwable)
-                throw new ThrownException((Throwable) exception);
-            else
-                throw new ThrownException(new Exception());
-        }
-        else if (opt.argObjects().size() == 1 && opt.argObjects().get(0) instanceof Throwable) {
+            if (exception instanceof Throwable) throw new ThrownException((Throwable) exception);
+            else throw new ThrownException(new Exception());
+        } else if (opt.argObjects().size() == 1 && opt.argObjects().get(0) instanceof Throwable) {
             throw new ThrownException((Throwable) opt.argObjects().get(0));
-        }
-        else {
+        } else {
             String message = opt.argObjects().get(0).toString();
             Throwable cause = null;
             if (opt.argObjects().size() > 1) {
@@ -318,11 +315,12 @@ public class Procedural {
         }
     }
 
-    protected Object doTry(CommandSession session, Process process, Object[] argv) throws Exception {
+    protected Object doTry(CommandSession session, Process process, Object[] argv)
+            throws Exception {
         String[] usage = {
-                "try -  try / catch / finally construct",
-                "Usage: try { try-action } [ [catch] { catch-action } [ [finally] { finally-action } ]  ]",
-                "  -? --help                    Show help",
+            "try -  try / catch / finally construct",
+            "Usage: try { try-action } [ [catch] { catch-action } [ [finally] { finally-action } ]  ]",
+            "  -? --help                    Show help",
         };
         Options opt = parseOptions(session, usage, argv);
         Function tryAction = null;
@@ -376,7 +374,9 @@ public class Procedural {
         error |= catchFunction == null && finallyFunction == null;
 
         if (error) {
-            process.err().println("usage: try { try-action } [ [catch] { catch-action } [ [finally] { finally-action } ] ]");
+            process.err()
+                    .println(
+                            "usage: try { try-action } [ [catch] { catch-action } [ [finally] { finally-action } ] ]");
             process.error(2);
             return null;
         }
@@ -397,11 +397,12 @@ public class Procedural {
         }
     }
 
-    protected Object doWhile(CommandSession session, Process process, Object[] argv) throws Exception {
+    protected Object doWhile(CommandSession session, Process process, Object[] argv)
+            throws Exception {
         String[] usage = {
-                "while -  while loop",
-                "Usage: while { condition } [do] { action }",
-                "  -? --help                    Show help",
+            "while -  while loop",
+            "Usage: while { condition } [do] { action }",
+            "  -? --help                    Show help",
         };
         Options opt = parseOptions(session, usage, argv);
         Function condition = null;
@@ -456,11 +457,12 @@ public class Procedural {
         return null;
     }
 
-    protected Object doUntil(CommandSession session, Process process, Object[] argv) throws Exception {
+    protected Object doUntil(CommandSession session, Process process, Object[] argv)
+            throws Exception {
         String[] usage = {
-                "until -  until loop",
-                "Usage: until { condition } [do] { action }",
-                "  -? --help                    Show help",
+            "until -  until loop",
+            "Usage: until { condition } [do] { action }",
+            "  -? --help                    Show help",
         };
         Options opt = parseOptions(session, usage, argv);
         Function condition = null;
@@ -515,21 +517,21 @@ public class Procedural {
         return null;
     }
 
-    protected Object doBreak(CommandSession session, Process process, Object[] argv) throws Exception {
+    protected Object doBreak(CommandSession session, Process process, Object[] argv)
+            throws Exception {
         String[] usage = {
-                "break -  break from loop",
-                "Usage: break",
-                "  -? --help                    Show help",
+            "break -  break from loop", "Usage: break", "  -? --help                    Show help",
         };
         parseOptions(session, usage, argv);
         throw new BreakException();
     }
 
-    protected Object doContinue(CommandSession session, Process process, Object[] argv) throws Exception {
+    protected Object doContinue(CommandSession session, Process process, Object[] argv)
+            throws Exception {
         String[] usage = {
-                "continue -  continue loop",
-                "Usage: continue",
-                "  -? --help                    Show help",
+            "continue -  continue loop",
+            "Usage: continue",
+            "  -? --help                    Show help",
         };
         parseOptions(session, usage, argv);
         throw new ContinueException();
@@ -543,29 +545,23 @@ public class Procedural {
     private boolean isTrue(Object result) throws InterruptedException {
         checkInterrupt();
 
-        if (result == null)
-            return false;
+        if (result == null) return false;
 
-        if (result instanceof Boolean)
-            return (Boolean) result;
+        if (result instanceof Boolean) return (Boolean) result;
 
         if (result instanceof Number) {
-            if (0 == ((Number) result).intValue())
-                return false;
+            if (0 == ((Number) result).intValue()) return false;
         }
 
-        if ("".equals(result))
-            return false;
+        if ("".equals(result)) return false;
 
-        if ("0".equals(result))
-            return false;
+        if ("0".equals(result)) return false;
 
         return true;
     }
 
     private void checkInterrupt() throws InterruptedException {
-        if (Thread.currentThread().isInterrupted())
-            throw new InterruptedException("interrupted");
+        if (Thread.currentThread().isInterrupted()) throw new InterruptedException("interrupted");
     }
 
     @SuppressWarnings("unchecked")
@@ -587,13 +583,11 @@ public class Procedural {
         for (Object o : opt.argObjects()) {
             if (o instanceof Function) {
                 functions.add((Function) o);
-            }
-            else {
+            } else {
                 functions = null;
                 break;
             }
         }
         return functions;
     }
-
 }

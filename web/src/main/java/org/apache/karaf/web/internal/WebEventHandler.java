@@ -16,15 +16,12 @@
  */
 package org.apache.karaf.web.internal;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 
-import java.util.HashMap;
-import java.util.Map;
-
-/**
- * Class implementing {@link WebListener} service to retrieve {@link WebEvent}.
- */
+/** Class implementing {@link WebListener} service to retrieve {@link WebEvent}. */
 public class WebEventHandler implements WebListener {
 
     private final Map<Long, WebEvent> bundleEvents = new HashMap<>();
@@ -36,5 +33,4 @@ public class WebEventHandler implements WebListener {
     public void webEvent(WebEvent event) {
         getBundleEvents().put(event.getBundle().getBundleId(), event);
     }
-
 }

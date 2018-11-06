@@ -17,7 +17,6 @@
 package org.apache.karaf.jaas.modules.properties;
 
 import java.io.IOException;
-
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -28,7 +27,7 @@ class NamePasswordHandler implements CallbackHandler {
 
     private String name;
     private String password;
-    
+
     public NamePasswordHandler(String name, String password) {
         this.name = name;
         this.password = password;
@@ -46,5 +45,4 @@ class NamePasswordHandler implements CallbackHandler {
             }
         }
     }
-    
 }

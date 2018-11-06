@@ -35,5 +35,4 @@ public class Activator extends BaseActivator {
         wrapperMBean.setWrapperService(wrapperService);
         registerMBean(wrapperMBean, "type=wrapper");
     }
-
 }

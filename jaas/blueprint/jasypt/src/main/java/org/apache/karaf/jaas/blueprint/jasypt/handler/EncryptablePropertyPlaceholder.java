@@ -14,8 +14,8 @@
  */
 package org.apache.karaf.jaas.blueprint.jasypt.handler;
 
-import org.jasypt.encryption.StringEncryptor;
 import org.apache.aries.blueprint.ext.AbstractPropertyPlaceholder;
+import org.jasypt.encryption.StringEncryptor;
 
 public class EncryptablePropertyPlaceholder extends AbstractPropertyPlaceholder {
 
@@ -29,13 +29,10 @@ public class EncryptablePropertyPlaceholder extends AbstractPropertyPlaceholder 
         this.encryptor = encryptor;
     }
 
-    public void init() {
-
-    }
+    public void init() {}
 
     @Override
     protected String getProperty(String val) {
         return encryptor.decrypt(val);
     }
-
 }

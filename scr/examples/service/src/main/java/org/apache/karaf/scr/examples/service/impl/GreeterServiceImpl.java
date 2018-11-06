@@ -22,13 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>
- *     The service implementation for our {@link GreeterService}
- * </p>
- * <p>
- *     With the {@link Component} annotation, any declared interface on this class will automatically be
- *     exported as a service. The DS annotations are build time only though and do not inherit.
- * </p>
+ * The service implementation for our {@link GreeterService}
+ *
+ * <p>With the {@link Component} annotation, any declared interface on this class will automatically
+ * be exported as a service. The DS annotations are build time only though and do not inherit.
  */
 @Component
 public class GreeterServiceImpl implements GreeterService {
@@ -42,5 +39,4 @@ public class GreeterServiceImpl implements GreeterService {
     public void printGreetings() {
         LOG.info("{} {}", salutation, name);
     }
-
 }

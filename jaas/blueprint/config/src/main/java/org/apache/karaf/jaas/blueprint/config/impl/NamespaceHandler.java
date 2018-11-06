@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.aries.blueprint.ParserContext;
 import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
 import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
@@ -50,23 +49,25 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     public URL getSchemaLocation(String namespace) {
         switch (namespace) {
             case "http://karaf.apache.org/xmlns/jaas/v1.0.0":
-                return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.0.0.xsd");
+                return getClass()
+                        .getResource(
+                                "/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.0.0.xsd");
             case "http://karaf.apache.org/xmlns/jaas/v1.1.0":
-                return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.1.0.xsd");
+                return getClass()
+                        .getResource(
+                                "/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.1.0.xsd");
             default:
                 return null;
         }
     }
 
     public Set<Class> getManagedClasses() {
-        return new HashSet<>(Arrays.asList(
-                Config.class,
-                ResourceKeystoreInstance.class
-        ));
+        return new HashSet<>(Arrays.asList(Config.class, ResourceKeystoreInstance.class));
     }
 
     public Metadata parse(Element element, ParserContext context) {
-        String name = element.getLocalName() != null ? element.getLocalName() : element.getNodeName();
+        String name =
+                element.getLocalName() != null ? element.getLocalName() : element.getNodeName();
         if ("config".equals(name)) {
             return parseConfig(element, context);
         } else if ("keystore".equals(name)) {
@@ -75,7 +76,8 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         throw new ComponentDefinitionException("Bad xml syntax: unknown element '" + name + "'");
     }
 
-    public ComponentMetadata decorate(Node node, ComponentMetadata component, ParserContext context) {
+    public ComponentMetadata decorate(
+            Node node, ComponentMetadata component, ParserContext context) {
         throw new ComponentDefinitionException("Bad xml syntax: node decoration is not supported");
     }
 
@@ -89,19 +91,23 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         if (rank != null && rank.length() > 0) {
             bean.addProperty("rank", createValue(context, rank));
         }
-        NodeList childElements = element.getElementsByTagNameNS(element.getNamespaceURI(), "module");
+        NodeList childElements =
+                element.getElementsByTagNameNS(element.getNamespaceURI(), "module");
         if (childElements != null && childElements.getLength() > 0) {
-            MutableCollectionMetadata children = context.createMetadata(MutableCollectionMetadata.class);
+            MutableCollectionMetadata children =
+                    context.createMetadata(MutableCollectionMetadata.class);
             for (int i = 0; i < childElements.getLength(); ++i) {
                 Element childElement = (Element) childElements.item(i);
                 MutableBeanMetadata md = context.createMetadata(MutableBeanMetadata.class);
                 md.setRuntimeClass(Module.class);
-                md.addProperty("className", createValue(context, childElement.getAttribute("className")));
+                md.addProperty(
+                        "className", createValue(context, childElement.getAttribute("className")));
                 if (childElement.getAttribute("name") != null) {
                     md.addProperty("name", createValue(context, childElement.getAttribute("name")));
                 }
                 if (childElement.getAttribute("flags") != null) {
-                    md.addProperty("flags", createValue(context, childElement.getAttribute("flags")));
+                    md.addProperty(
+                            "flags", createValue(context, childElement.getAttribute("flags")));
                 }
                 String options = getTextValue(childElement);
                 if (options != null && options.length() > 0) {
@@ -116,7 +122,8 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         service.setId(name);
         service.setServiceComponent(bean);
         service.addInterface(JaasRealm.class.getName());
-        service.addServiceProperty(createValue(context, ProxyLoginModule.PROPERTY_MODULE), createValue(context, name));
+        service.addServiceProperty(
+                createValue(context, ProxyLoginModule.PROPERTY_MODULE), createValue(context, name));
         return service;
     }
 
@@ -171,7 +178,8 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         NodeList nl = element.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
             Node item = nl.item(i);
-            if ((item instanceof CharacterData && !(item instanceof Comment)) || item instanceof EntityReference) {
+            if ((item instanceof CharacterData && !(item instanceof Comment))
+                    || item instanceof EntityReference) {
                 value.append(item.getNodeValue());
             }
         }

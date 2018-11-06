@@ -18,9 +18,7 @@
  */
 package org.apache.karaf.main.internal;
 
-
 import java.util.concurrent.TimeUnit;
-
 
 public class Systemd {
     public static final String ENV_WATCHDOG_USEC = "WATCHDOG_USEC";
@@ -43,10 +41,13 @@ public class Systemd {
         //            This does not seem to work reliably so used only if system
         //            property karaf.systemd.main.pid or env variable SYSTEMD_MAIN_PID
         //            are set (system property takes the precedence)
-        if(SystemdDaemon.INSTANCE != null) {
-            rc = SystemdDaemon.INSTANCE.sd_notify(
-                0,
-                (mainPid == null) ? "WATCHDOG=1" : ("MAINPID=" + mainPid + "\nWATCHDOG=1"));
+        if (SystemdDaemon.INSTANCE != null) {
+            rc =
+                    SystemdDaemon.INSTANCE.sd_notify(
+                            0,
+                            (mainPid == null)
+                                    ? "WATCHDOG=1"
+                                    : ("MAINPID=" + mainPid + "\nWATCHDOG=1"));
         }
 
         return rc;
@@ -54,7 +55,7 @@ public class Systemd {
 
     public long getWatchdogTimeout(TimeUnit timeUnit) {
         String timeouts = System.getenv(ENV_WATCHDOG_USEC);
-        if(timeouts != null) {
+        if (timeouts != null) {
             long micros = Long.parseLong(timeouts);
             return timeUnit.convert(micros, TimeUnit.MICROSECONDS);
         }

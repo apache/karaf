@@ -16,15 +16,13 @@
  */
 package org.apache.karaf.management.internal;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
-
-import java.io.Closeable;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
 public class EventAdminLoggerImpl implements EventAdminLogger {
 
@@ -39,7 +37,12 @@ public class EventAdminLoggerImpl implements EventAdminLogger {
         this.tracker.close();
     }
 
-    public void log(String methodName, String[] signature, Object result, Throwable error, Object... params) {
+    public void log(
+            String methodName,
+            String[] signature,
+            Object result,
+            Throwable error,
+            Object... params) {
         EventAdmin admin = tracker.getService();
         if (admin != null) {
             Map<String, Object> props = new HashMap<>();
@@ -52,9 +55,12 @@ public class EventAdminLoggerImpl implements EventAdminLogger {
             if (error != null) {
                 props.put("error", error);
             }
-            Event event = new Event("javax/management/MBeanServer/" + methodName.toUpperCase(Locale.ENGLISH), props);
+            Event event =
+                    new Event(
+                            "javax/management/MBeanServer/"
+                                    + methodName.toUpperCase(Locale.ENGLISH),
+                            props);
             admin.postEvent(event);
         }
     }
-
 }

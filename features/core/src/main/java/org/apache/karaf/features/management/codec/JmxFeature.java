@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
@@ -33,7 +32,6 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.ConfigInfo;
@@ -44,14 +42,10 @@ import org.apache.karaf.features.management.FeaturesServiceMBean;
 @SuppressWarnings("rawtypes")
 public class JmxFeature {
 
-    /**
-     * The CompositeType which represents a single feature
-     */
+    /** The CompositeType which represents a single feature */
     public static final CompositeType FEATURE;
 
-    /**
-     * The TabularType which represents a list of features
-     */
+    /** The TabularType which represents a list of features */
     public static final TabularType FEATURE_TABLE;
 
     public static final CompositeType FEATURE_IDENTIFIER;
@@ -103,7 +97,8 @@ public class JmxFeature {
         return table;
     }
 
-    private static TabularData getDependencyIdentifierTable(List<Dependency> features) throws OpenDataException {
+    private static TabularData getDependencyIdentifierTable(List<Dependency> features)
+            throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(FEATURE_IDENTIFIER_TABLE);
         Set<String> featureSet = new HashSet<>();
         for (Dependency feature : features) {
@@ -112,9 +107,13 @@ public class JmxFeature {
             } else {
                 featureSet.add(feature.getName() + feature.getVersion());
             }
-            String[] itemNames = new String[]{FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION};
-            Object[] itemValues = new Object[]{feature.getName(), feature.getVersion()};
-            CompositeData ident = new CompositeDataSupport(FEATURE_IDENTIFIER, itemNames, itemValues);
+            String[] itemNames =
+                    new String[] {
+                        FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION
+                    };
+            Object[] itemValues = new Object[] {feature.getName(), feature.getVersion()};
+            CompositeData ident =
+                    new CompositeDataSupport(FEATURE_IDENTIFIER, itemNames, itemValues);
             table.put(ident);
         }
         return table;
@@ -128,24 +127,30 @@ public class JmxFeature {
         return array;
     }
 
-	static TabularData getConfigList(List<ConfigInfo> config) throws OpenDataException {
+    static TabularData getConfigList(List<ConfigInfo> config) throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(FEATURE_CONFIG_TABLE);
         for (ConfigInfo configInfo : config) {
-        	String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG;
-        	Object[] itemValues = { configInfo.getName(), getConfigElementTable(configInfo.getProperties()), new Boolean(configInfo.isAppend()) };
-			CompositeData configComposite = new CompositeDataSupport(
-					FEATURE_CONFIG, itemNames, itemValues);
-			table.put(configComposite);
-		}
+            String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG;
+            Object[] itemValues = {
+                configInfo.getName(),
+                getConfigElementTable(configInfo.getProperties()),
+                new Boolean(configInfo.isAppend())
+            };
+            CompositeData configComposite =
+                    new CompositeDataSupport(FEATURE_CONFIG, itemNames, itemValues);
+            table.put(configComposite);
+        }
         return table;
     }
 
-    static TabularData getConfigFileList(List<ConfigFileInfo> configFiles) throws OpenDataException {
+    static TabularData getConfigFileList(List<ConfigFileInfo> configFiles)
+            throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(FEATURE_CONFIG_FILES_TABLE);
         for (ConfigFileInfo configFile : configFiles) {
             String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG_FILES;
             Object[] itemValues = {configFile.getFinalname()};
-            CompositeData config = new CompositeDataSupport(FEATURE_CONFIG_FILES, itemNames, itemValues);
+            CompositeData config =
+                    new CompositeDataSupport(FEATURE_CONFIG_FILES, itemNames, itemValues);
             table.put(config);
         }
         return table;
@@ -156,27 +161,24 @@ public class JmxFeature {
         for (Map.Entry<String, String> entry : config.entrySet()) {
             String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG_ELEMENT;
             Object[] itemValues = {entry.getKey(), entry.getValue()};
-            CompositeData element = new CompositeDataSupport(FEATURE_CONFIG_ELEMENT, itemNames, itemValues);
+            CompositeData element =
+                    new CompositeDataSupport(FEATURE_CONFIG_ELEMENT, itemNames, itemValues);
             table.put(element);
         }
         return table;
     }
 
-	static TabularData getConfigElementTable(Properties props)
-			throws OpenDataException {
-		TabularDataSupport table = new TabularDataSupport(
-				FEATURE_CONFIG_ELEMENT_TABLE);
-		for (Object key : props.keySet()) {
-			String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG_ELEMENT;
-			Object[] itemValues = {key,
-					props.getProperty((String) key) };
-			CompositeData element = new CompositeDataSupport(
-					FEATURE_CONFIG_ELEMENT, itemNames, itemValues);
-			table.put(element);
-		}
-		return table;
-	}
-
+    static TabularData getConfigElementTable(Properties props) throws OpenDataException {
+        TabularDataSupport table = new TabularDataSupport(FEATURE_CONFIG_ELEMENT_TABLE);
+        for (Object key : props.keySet()) {
+            String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG_ELEMENT;
+            Object[] itemValues = {key, props.getProperty((String) key)};
+            CompositeData element =
+                    new CompositeDataSupport(FEATURE_CONFIG_ELEMENT, itemNames, itemValues);
+            table.put(element);
+        }
+        return table;
+    }
 
     static {
         FEATURE_IDENTIFIER = createFeatureIdentifierType();
@@ -203,8 +205,8 @@ public class JmxFeature {
             itemDescriptions[0] = "The id of the feature";
             itemDescriptions[1] = "The version of the feature";
 
-            return new CompositeType("FeatureIdentifier", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "FeatureIdentifier", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build featureIdentifier type", e);
         }
@@ -212,8 +214,13 @@ public class JmxFeature {
 
     private static TabularType createFeatureIdentifierTableType() {
         try {
-            return new TabularType("Features", "The table of featureIdentifiers",
-                    FEATURE_IDENTIFIER, new String[]{FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION});
+            return new TabularType(
+                    "Features",
+                    "The table of featureIdentifiers",
+                    FEATURE_IDENTIFIER,
+                    new String[] {
+                        FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION
+                    });
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build featureIdentifier table type", e);
         }
@@ -231,8 +238,8 @@ public class JmxFeature {
             itemDescriptions[0] = "The key";
             itemDescriptions[1] = "The value";
 
-            return new CompositeType("ConfigElement", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "ConfigElement", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build configElement type", e);
         }
@@ -240,8 +247,11 @@ public class JmxFeature {
 
     private static TabularType createFeatureConfigElementTableType() {
         try {
-            return new TabularType("ConfigElement", "The table of configurations elements",
-                    FEATURE_CONFIG_ELEMENT, new String[]{FeaturesServiceMBean.FEATURE_CONFIG_ELEMENT_KEY});
+            return new TabularType(
+                    "ConfigElement",
+                    "The table of configurations elements",
+                    FEATURE_CONFIG_ELEMENT,
+                    new String[] {FeaturesServiceMBean.FEATURE_CONFIG_ELEMENT_KEY});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build feature table type", e);
         }
@@ -261,8 +271,7 @@ public class JmxFeature {
             itemDescriptions[1] = "The configuration elements";
             itemDescriptions[2] = "The Append flag";
 
-            return new CompositeType("Config", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType("Config", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build configElement type", e);
         }
@@ -278,8 +287,7 @@ public class JmxFeature {
 
             itemDescriptions[0] = "The configuration file";
 
-            return new CompositeType("Config", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType("Config", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build configElement type", e);
         }
@@ -287,8 +295,11 @@ public class JmxFeature {
 
     private static TabularType createFeatureConfigTableType() {
         try {
-            return new TabularType("Features", "The table of configurations",
-                    FEATURE_CONFIG, new String[]{FeaturesServiceMBean.FEATURE_CONFIG_PID});
+            return new TabularType(
+                    "Features",
+                    "The table of configurations",
+                    FEATURE_CONFIG,
+                    new String[] {FeaturesServiceMBean.FEATURE_CONFIG_PID});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build feature table type", e);
         }
@@ -296,8 +307,11 @@ public class JmxFeature {
 
     private static TabularType createFeatureConfigFilesTableType() {
         try {
-            return new TabularType("Features", "The table of configuration files",
-                    FEATURE_CONFIG_FILES, new String[]{FeaturesServiceMBean.FEATURE_CONFIG_FILES_ELEMENTS});
+            return new TabularType(
+                    "Features",
+                    "The table of configuration files",
+                    FEATURE_CONFIG_FILES,
+                    new String[] {FeaturesServiceMBean.FEATURE_CONFIG_FILES_ELEMENTS});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build feature table type", e);
         }
@@ -329,8 +343,8 @@ public class JmxFeature {
             itemDescriptions[7] = "Whether the feature is blacklisted";
             itemDescriptions[8] = "Whether the feature is required";
 
-            return new CompositeType("Feature", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "Feature", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build feature type", e);
         }
@@ -338,11 +352,15 @@ public class JmxFeature {
 
     private static TabularType createFeatureTableType() {
         try {
-            return new TabularType("Features", "The table of all features",
-                    FEATURE, new String[]{FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION});
+            return new TabularType(
+                    "Features",
+                    "The table of all features",
+                    FEATURE,
+                    new String[] {
+                        FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION
+                    });
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build feature table type", e);
         }
     }
-
 }

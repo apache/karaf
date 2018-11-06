@@ -29,8 +29,7 @@ import org.ops4j.pax.web.service.spi.WebListener;
 
 @Services(
         requires = @RequireService(WarManager.class),
-        provides = @ProvideService(WebContainerService.class)
-)
+        provides = @ProvideService(WebContainerService.class))
 public class Activator extends BaseActivator {
 
     private WebContainerServiceImpl webContainerService;
@@ -65,5 +64,4 @@ public class Activator extends BaseActivator {
         }
         super.doStop();
     }
-
 }

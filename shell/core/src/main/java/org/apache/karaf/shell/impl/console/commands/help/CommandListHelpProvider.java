@@ -1,18 +1,15 @@
 /**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.apache.karaf.shell.impl.console.commands.help;
@@ -27,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.Terminal;
@@ -55,7 +51,7 @@ public class CommandListHelpProvider implements HelpProvider {
 
         // Retrieve matching commands
         Set<Command> commands = getCommands(session, path);
-        SortedMap<String,String> descriptions = new TreeMap<>();
+        SortedMap<String, String> descriptions = new TreeMap<>();
         for (Command command : commands) {
             String subshell = (String) session.get(Session.SUBSHELL);
             String name = command.getScope() + ":" + command.getName();
@@ -75,7 +71,8 @@ public class CommandListHelpProvider implements HelpProvider {
         } else if (descriptions.size() == 1 && descriptions.containsKey(path)) {
             return null;
         } else {
-            printMethodList(session, new PrintStream(baos), descriptions, Arrays.asList(mode.split(",")));
+            printMethodList(
+                    session, new PrintStream(baos), descriptions, Arrays.asList(mode.split(",")));
             return baos.toString();
         }
     }
@@ -97,7 +94,8 @@ public class CommandListHelpProvider implements HelpProvider {
                 continue;
             }
 
-            if (completionMode != null && completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_SUBSHELL)) {
+            if (completionMode != null
+                    && completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_SUBSHELL)) {
                 // filter the help only for "global" commands
                 if (subshell == null || subshell.trim().isEmpty()) {
                     if (!name.startsWith(Session.SCOPE_GLOBAL)) {
@@ -106,8 +104,9 @@ public class CommandListHelpProvider implements HelpProvider {
                 }
             }
 
-            if (completionMode != null && (completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_SUBSHELL)
-                                                || completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_FIRST))) {
+            if (completionMode != null
+                    && (completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_SUBSHELL)
+                            || completionMode.equalsIgnoreCase(Session.COMPLETION_MODE_FIRST))) {
                 // filter the help only for commands local to the subshell
                 if (!name.startsWith(subshell)) {
                     continue;
@@ -119,7 +118,11 @@ public class CommandListHelpProvider implements HelpProvider {
         return matchingCommands;
     }
 
-    protected void printMethodList(Session session, PrintStream out, SortedMap<String, String> commands, Collection<String> modes) {
+    protected void printMethodList(
+            Session session,
+            PrintStream out,
+            SortedMap<String, String> commands,
+            Collection<String> modes) {
         boolean list = false;
         boolean cyan = false;
         int indent = 0;
@@ -149,7 +152,7 @@ public class CommandListHelpProvider implements HelpProvider {
         }
         table.column(col);
         table.column(new Col("Description").wrap());
-        for (Map.Entry<String,String> entry : commands.entrySet()) {
+        for (Map.Entry<String, String> entry : commands.entrySet()) {
             String key = NameScoping.getCommandNameWithoutGlobalPrefix(session, entry.getKey());
             String prefix = "";
             for (int i = 0; i < indent; i++) {
@@ -166,5 +169,4 @@ public class CommandListHelpProvider implements HelpProvider {
         }
         table.print(out, true);
     }
-    
 }

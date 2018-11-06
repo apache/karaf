@@ -15,22 +15,21 @@
  */
 package org.apache.karaf.jaas.command;
 
-import java.util.Arrays;
-import java.util.Properties;
-
-import org.apache.karaf.jaas.config.impl.Config;
-import org.apache.karaf.jaas.config.impl.Module;
-import org.apache.karaf.shell.api.console.Session;
-import org.junit.Test;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+
+import java.util.Arrays;
+import java.util.Properties;
+import org.apache.karaf.jaas.config.impl.Config;
+import org.apache.karaf.jaas.config.impl.Module;
+import org.apache.karaf.shell.api.console.Session;
+import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 public class ManageRealmCommandTest {
 
@@ -41,12 +40,12 @@ public class ManageRealmCommandTest {
         // set up two realms, each containing 1 module
 
         Config realm1 = newConfigNamed("realm1");
-        realm1.setModules(new Module[] { newModuleNamed("module1") });
+        realm1.setModules(new Module[] {newModuleNamed("module1")});
 
         Config realm2 = newConfigNamed("realm2");
-        realm2.setModules(new Module[] { newModuleNamed("module2") });
+        realm2.setModules(new Module[] {newModuleNamed("module2")});
 
-        Config[] realms = { realm1, realm2 };
+        Config[] realms = {realm1, realm2};
 
         doVerifyIndex(cmd, 1, realms);
         doVerifyIndex(cmd, 2, realms);
@@ -60,7 +59,8 @@ public class ManageRealmCommandTest {
      * @param realms the array of realms.
      * @throws Exception in case of failure.
      */
-    private void doVerifyIndex(ManageRealmCommand cmd, int index, Config[] realms) throws Exception {
+    private void doVerifyIndex(ManageRealmCommand cmd, int index, Config[] realms)
+            throws Exception {
 
         // prepare mocks
         Session session = createMock(Session.class);
@@ -72,10 +72,9 @@ public class ManageRealmCommandTest {
         cmd.setRealms(Arrays.asList(realms));
         cmd.setSession(session);
 
-        for (Config realm : realms)
-            realm.setBundleContext(bundleContext);
+        for (Config realm : realms) realm.setBundleContext(bundleContext);
 
-        Object[] mocks = { session, bundleContext, bundle };
+        Object[] mocks = {session, bundleContext, bundle};
 
         expect(session.get(ManageRealmCommand.JAAS_REALM)).andReturn(null).anyTimes();
         expect(session.get(ManageRealmCommand.JAAS_ENTRY)).andReturn(null).anyTimes();
@@ -107,5 +106,4 @@ public class ManageRealmCommandTest {
         res.setFlags("required");
         return res;
     }
-
 }

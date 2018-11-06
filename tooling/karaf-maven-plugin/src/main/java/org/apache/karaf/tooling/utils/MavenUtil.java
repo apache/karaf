@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.repository.metadata.Metadata;
@@ -37,22 +36,24 @@ import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.repository.RemoteRepository;
 
-/**
- * Util method for Maven manipulation (URL convert, metadata generation, etc).
- */
+/** Util method for Maven manipulation (URL convert, metadata generation, etc). */
 public class MavenUtil {
 
     static final DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
-    private static final Pattern aetherPattern = Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
-    private static final Pattern mvnPattern = Pattern.compile("(?:(?:wrap:)|(?:blueprint:))?mvn:([^/ ]+)/([^/ ]+)/([^/$ ]*)(/([^/$ ]+)(/([^/$ ]+))?)?(/\\$.+)?");
+    private static final Pattern aetherPattern =
+            Pattern.compile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?:([^: ]+)");
+    private static final Pattern mvnPattern =
+            Pattern.compile(
+                    "(?:(?:wrap:)|(?:blueprint:))?mvn:([^/ ]+)/([^/ ]+)/([^/$ ]*)(/([^/$ ]+)(/([^/$ ]+))?)?(/\\$.+)?");
 
     /**
-     * Convert PAX URL mvn format to aether coordinate format.
-     * N.B. we do not handle repository-url in mvn urls.
-     * N.B. version is required in mvn urls.
+     * Convert PAX URL mvn format to aether coordinate format. N.B. we do not handle repository-url
+     * in mvn urls. N.B. version is required in mvn urls.
      *
-     * @param name PAX URL mvn format: mvn-uri := [ 'wrap:' ] 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
-     * @return aether coordinate format: &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
+     * @param name PAX URL mvn format: mvn-uri := [ 'wrap:' ] 'mvn:' [ repository-url '!' ] group-id
+     *     '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
+     * @return aether coordinate format:
+     *     &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
      */
     public static String mvnToAether(String name) {
         Matcher m = mvnPattern.matcher(name);
@@ -60,8 +61,8 @@ public class MavenUtil {
             return name;
         }
         StringBuilder b = new StringBuilder();
-        b.append(m.group(1)).append(":");//groupId
-        b.append(m.group(2)).append(":");//artifactId
+        b.append(m.group(1)).append(":"); // groupId
+        b.append(m.group(2)).append(":"); // artifactId
         String extension = m.group(5);
         String classifier = m.group(7);
         if (present(classifier)) {
@@ -81,11 +82,11 @@ public class MavenUtil {
     }
 
     /**
-     * Convert PAX URL mvn format to an aether Artifact.
-     * N.B. we do not handle repository-url in mvn urls.
-     * N.B. version is required in mvn urls.
+     * Convert PAX URL mvn format to an aether Artifact. N.B. we do not handle repository-url in mvn
+     * urls. N.B. version is required in mvn urls.
      *
-     * @param name PAX URL mvn format: mvn-uri := [ 'wrap:' ] 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
+     * @param name PAX URL mvn format: mvn-uri := [ 'wrap:' ] 'mvn:' [ repository-url '!' ] group-id
+     *     '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
      * @return aether Artifact
      */
     public static DefaultArtifact mvnToArtifact(String name) {
@@ -103,15 +104,16 @@ public class MavenUtil {
         }
         String classifier = m.group(7);
 
-        return new DefaultArtifact(groupId, artifactId, present(classifier) ? classifier : "", extension, version);
+        return new DefaultArtifact(
+                groupId, artifactId, present(classifier) ? classifier : "", extension, version);
     }
 
     /**
-     * Convert Aether coordinate format to an aether Artifact.
-     * N.B. we do not handle repository-url in mvn urls.
-     * N.B. version is required in mvn urls.
+     * Convert Aether coordinate format to an aether Artifact. N.B. we do not handle repository-url
+     * in mvn urls. N.B. version is required in mvn urls.
      *
-     * @param name aether coordinate format: &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
+     * @param name aether coordinate format:
+     *     &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
      * @return aether Artifact
      */
     public static DefaultArtifact aetherToArtifact(String name) {
@@ -129,7 +131,8 @@ public class MavenUtil {
         }
         String classifier = m.group(6);
 
-        return new DefaultArtifact(groupId, artifactId, present(classifier) ? classifier : "", extension, version);
+        return new DefaultArtifact(
+                groupId, artifactId, present(classifier) ? classifier : "", extension, version);
     }
 
     private static boolean present(String part) {
@@ -137,12 +140,13 @@ public class MavenUtil {
     }
 
     /**
-     * Convert Aether coordinate format to PAX mvn format.
-     * N.B. we do not handle repository-url in mvn urls.
-     * N.B. version is required in mvn urls.
+     * Convert Aether coordinate format to PAX mvn format. N.B. we do not handle repository-url in
+     * mvn urls. N.B. version is required in mvn urls.
      *
-     * @param name aether coordinate format: &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
-     * @return PAX URL mvn format: mvn-uri := 'mvn:' [ repository-url '!' ] group-id '/' artifact-id [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
+     * @param name aether coordinate format:
+     *     &lt;groupId&gt;:&lt;artifactId&gt;[:&lt;extension&gt;[:&lt;classifier&gt;]]:&lt;version&gt;
+     * @return PAX URL mvn format: mvn-uri := 'mvn:' [ repository-url '!' ] group-id '/' artifact-id
+     *     [ '/' [version] [ '/' [type] [ '/' classifier ] ] ] ]
      */
     public static String aetherToMvn(String name) {
         Matcher m = aetherPattern.matcher(name);
@@ -150,9 +154,9 @@ public class MavenUtil {
             return name;
         }
         StringBuilder b = new StringBuilder("mvn:");
-        b.append(m.group(1)).append("/");//groupId
-        b.append(m.group(2)).append("/");//artifactId
-        b.append(m.group(7));//version
+        b.append(m.group(1)).append("/"); // groupId
+        b.append(m.group(2)).append("/"); // artifactId
+        b.append(m.group(7)); // version
         String extension = m.group(4);
         String classifier = m.group(6);
         if (present(classifier)) {
@@ -177,7 +181,7 @@ public class MavenUtil {
      * Generate the maven-metadata-local.xml for the given Maven <code>Artifact</code>.
      *
      * @param artifact the Maven <code>Artifact</code>.
-     * @param target   the target maven-metadata-local.xml file to generate.
+     * @param target the target maven-metadata-local.xml file to generate.
      * @throws IOException if the maven-metadata-local.xml can't be generated.
      */
     public static void generateMavenMetadata(Artifact artifact, File target) throws IOException {
@@ -206,18 +210,29 @@ public class MavenUtil {
         Writer writer = new FileWriter(target);
         metadataWriter.write(writer, metadata);
     }
-    
+
     public static String getFileName(Artifact artifact) {
-        return artifact.getArtifactId() + "-" + artifact.getBaseVersion()
-            + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
+        return artifact.getArtifactId()
+                + "-"
+                + artifact.getBaseVersion()
+                + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "")
+                + "."
+                + artifact.getType();
     }
 
     public static String getDir(Artifact artifact) {
-        return artifact.getGroupId().replace('.', '/') + "/" + artifact.getArtifactId() + "/" + artifact.getBaseVersion() + "/";
+        return artifact.getGroupId().replace('.', '/')
+                + "/"
+                + artifact.getArtifactId()
+                + "/"
+                + artifact.getBaseVersion()
+                + "/";
     }
 
     /**
-     * Changes maven configuration of remote repositories to a list of repositories for pax-url-aether
+     * Changes maven configuration of remote repositories to a list of repositories for
+     * pax-url-aether
+     *
      * @param remoteRepositories
      * @return
      */
@@ -238,5 +253,4 @@ public class MavenUtil {
         }
         return remotes.toString();
     }
-
 }

@@ -18,15 +18,14 @@ package org.apache.karaf.log.core;
 
 import java.util.Map;
 
-/**
- * Log MBean.
- */
+/** Log MBean. */
 public interface LogMBean {
 
     String getLevel();
+
     Map<String, String> getLevel(String logger);
 
     void setLevel(String level);
-    void setLevel(String logger, String level);
 
+    void setLevel(String logger, String level);
 }

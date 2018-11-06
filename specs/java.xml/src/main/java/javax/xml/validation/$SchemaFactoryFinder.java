@@ -62,7 +62,8 @@ class $SchemaFactoryFinder {
     private void debugDisplayClassLoader() {
         try {
             if (classLoader == getContextClassLoader()) {
-                debugPrintln(() -> "using thread context class loader (" + classLoader + ") for search");
+                debugPrintln(
+                        () -> "using thread context class loader (" + classLoader + ") for search");
                 return;
             }
         } catch (Throwable unused) {
@@ -82,7 +83,12 @@ class $SchemaFactoryFinder {
         }
         SchemaFactory f = _newFactory(schemaLanguage);
         if (f != null) {
-            debugPrintln(() -> "factory '" + f.getClass().getName() + "' was found for " + schemaLanguage);
+            debugPrintln(
+                    () ->
+                            "factory '"
+                                    + f.getClass().getName()
+                                    + "' was found for "
+                                    + schemaLanguage);
         } else {
             debugPrintln(() -> "unable to find a factory for " + schemaLanguage);
         }
@@ -101,8 +107,7 @@ class $SchemaFactoryFinder {
                 debugPrintln(() -> "The value is '" + r + "'");
                 sf = createInstance(r, true);
                 if (sf != null) return sf;
-            } else
-                debugPrintln(() -> "The property is undefined.");
+            } else debugPrintln(() -> "The property is undefined.");
         } catch (Throwable t) {
             if (debug) {
                 debugPrintln(() -> "failed to look up system property '" + propertyName + "'");
@@ -111,9 +116,7 @@ class $SchemaFactoryFinder {
         }
 
         String javah = getSystemProperty("java.home");
-        String configFile = javah + File.separator +
-                "conf" + File.separator + "jaxp.properties";
-
+        String configFile = javah + File.separator + "conf" + File.separator + "jaxp.properties";
 
         try {
             if (firstTime) {
@@ -145,14 +148,14 @@ class $SchemaFactoryFinder {
 
         final SchemaFactory factoryImpl = findServiceProvider(schemaLanguage);
 
-
         if (factoryImpl != null) {
             return factoryImpl;
         }
 
         if (schemaLanguage.equals("http://www.w3.org/2001/XMLSchema")) {
             debugPrintln(() -> "attempting to use the platform default XML Schema validator");
-            return createInstance("com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory", true);
+            return createInstance(
+                    "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory", true);
         }
 
         debugPrintln(() -> "all things were tried, but none was found. bailing out.");
@@ -202,8 +205,8 @@ class $SchemaFactoryFinder {
 
         try {
             if (!SchemaFactory.class.isAssignableFrom(clazz)) {
-                throw new ClassCastException(clazz.getName()
-                        + " cannot be cast to " + SchemaFactory.class);
+                throw new ClassCastException(
+                        clazz.getName() + " cannot be cast to " + SchemaFactory.class);
             }
             if (!useServicesMechanism) {
                 schemaFactory = newInstanceNoServiceLoader(clazz);
@@ -234,17 +237,13 @@ class $SchemaFactoryFinder {
         return schemaFactory;
     }
 
-    private static SchemaFactory newInstanceNoServiceLoader(
-            Class<?> providerClass
-    ) {
+    private static SchemaFactory newInstanceNoServiceLoader(Class<?> providerClass) {
         if (System.getSecurityManager() == null) {
             return null;
         }
         try {
             final Method creationMethod =
-                    providerClass.getDeclaredMethod(
-                            "newXMLSchemaFactoryNoServiceLoader"
-                    );
+                    providerClass.getDeclaredMethod("newXMLSchemaFactoryNoServiceLoader");
             final int modifiers = creationMethod.getModifiers();
 
             if (!Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers)) {
@@ -256,8 +255,7 @@ class $SchemaFactoryFinder {
             if (SERVICE_CLASS.isAssignableFrom(returnType)) {
                 return SERVICE_CLASS.cast(creationMethod.invoke(null, (Object[]) null));
             } else {
-                throw new ClassCastException(returnType
-                        + " cannot be cast to " + SERVICE_CLASS);
+                throw new ClassCastException(returnType + " cannot be cast to " + SERVICE_CLASS);
             }
         } catch (ClassCastException e) {
             throw new SchemaFactoryConfigurationError(e.getMessage(), e);
@@ -268,32 +266,34 @@ class $SchemaFactoryFinder {
         }
     }
 
-    private boolean isSchemaLanguageSupportedBy(final SchemaFactory factory,
-                                                final String schemaLanguage,
-                                                AccessControlContext acc) {
-        return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-            public Boolean run() {
-                return factory.isSchemaLanguageSupported(schemaLanguage);
-            }
-        }, acc);
+    private boolean isSchemaLanguageSupportedBy(
+            final SchemaFactory factory, final String schemaLanguage, AccessControlContext acc) {
+        return AccessController.doPrivileged(
+                new PrivilegedAction<Boolean>() {
+                    public Boolean run() {
+                        return factory.isSchemaLanguageSupported(schemaLanguage);
+                    }
+                },
+                acc);
     }
 
     private SchemaFactory findServiceProvider(final String schemaLanguage) {
         assert schemaLanguage != null;
         final AccessControlContext acc = AccessController.getContext();
         try {
-            return AccessController.doPrivileged(new PrivilegedAction<SchemaFactory>() {
-                public SchemaFactory run() {
-                    final ServiceLoader<SchemaFactory> loader =
-                            ServiceLoader.load(SERVICE_CLASS);
-                    for (SchemaFactory factory : loader) {
-                        if (isSchemaLanguageSupportedBy(factory, schemaLanguage, acc)) {
-                            return factory;
+            return AccessController.doPrivileged(
+                    new PrivilegedAction<SchemaFactory>() {
+                        public SchemaFactory run() {
+                            final ServiceLoader<SchemaFactory> loader =
+                                    ServiceLoader.load(SERVICE_CLASS);
+                            for (SchemaFactory factory : loader) {
+                                if (isSchemaLanguageSupportedBy(factory, schemaLanguage, acc)) {
+                                    return factory;
+                                }
+                            }
+                            return null;
                         }
-                    }
-                    return null;
-                }
-            });
+                    });
         } catch (ServiceConfigurationError error) {
             throw new SchemaFactoryConfigurationError(
                     "Provider for " + SERVICE_CLASS + " cannot be created", error);
@@ -302,43 +302,49 @@ class $SchemaFactoryFinder {
 
     private static final Class<SchemaFactory> SERVICE_CLASS = SchemaFactory.class;
 
-
     private static String which(Class<?> clazz) {
         return getClassSource(clazz);
     }
 
     static ClassLoader getContextClassLoader() throws SecurityException {
-        return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            if (cl == null) {
-                cl = ClassLoader.getSystemClassLoader();
-            }
-            return cl;
-        });
+        return AccessController.doPrivileged(
+                (PrivilegedAction<ClassLoader>)
+                        () -> {
+                            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                            if (cl == null) {
+                                cl = ClassLoader.getSystemClassLoader();
+                            }
+                            return cl;
+                        });
     }
 
     private static String getSystemProperty(final String propName) {
-        return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(propName));
+        return AccessController.doPrivileged(
+                (PrivilegedAction<String>) () -> System.getProperty(propName));
     }
 
-    private static FileInputStream getFileInputStream(final File file) throws FileNotFoundException {
+    private static FileInputStream getFileInputStream(final File file)
+            throws FileNotFoundException {
         try {
-            return AccessController.doPrivileged((PrivilegedExceptionAction<FileInputStream>) () -> new FileInputStream(file));
+            return AccessController.doPrivileged(
+                    (PrivilegedExceptionAction<FileInputStream>) () -> new FileInputStream(file));
         } catch (PrivilegedActionException e) {
-            throw (FileNotFoundException)e.getException();
+            throw (FileNotFoundException) e.getException();
         }
     }
 
     private static String getClassSource(Class<?> cls) {
-        return AccessController.doPrivileged((PrivilegedAction<String>) () -> {
-            CodeSource cs = cls.getProtectionDomain().getCodeSource();
-            if (cs != null) {
-                URL loc = cs.getLocation();
-                return loc != null ? loc.toString() : "(no location)";
-            } else {
-                return "(no code source)";
-            }
-        });
+        return AccessController.doPrivileged(
+                (PrivilegedAction<String>)
+                        () -> {
+                            CodeSource cs = cls.getProtectionDomain().getCodeSource();
+                            if (cs != null) {
+                                URL loc = cs.getLocation();
+                                return loc != null ? loc.toString() : "(no location)";
+                            } else {
+                                return "(no code source)";
+                            }
+                        });
     }
 
     private static boolean doesFileExist(final File f) {

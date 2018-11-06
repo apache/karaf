@@ -27,29 +27,51 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class LogsCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "container", description = "Name or ID of the container", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "container",
+            description = "Name or ID of the container",
+            required = true,
+            multiValued = false)
     @Completion(ContainersNameCompleter.class)
     String container;
 
-    @Option(name = "--stdout", description = "Display stdout", required = false, multiValued = false)
+    @Option(
+            name = "--stdout",
+            description = "Display stdout",
+            required = false,
+            multiValued = false)
     boolean stdout = true;
 
-    @Option(name = "--stderr", description = "Display stderr", required = false, multiValued = false)
+    @Option(
+            name = "--stderr",
+            description = "Display stderr",
+            required = false,
+            multiValued = false)
     boolean stderr;
 
-    @Option(name = "--timestamps", description = "Show timestamps", required = false, multiValued = false)
+    @Option(
+            name = "--timestamps",
+            description = "Show timestamps",
+            required = false,
+            multiValued = false)
     boolean timestamps;
 
-    @Option(name = "--details", description = "Show extra details provided to logs", required = false, multiValued = false)
+    @Option(
+            name = "--details",
+            description = "Show extra details provided to logs",
+            required = false,
+            multiValued = false)
     boolean details;
 
     @Override
     public Object execute() throws Exception {
         if (!stdout && !stderr) {
-            System.err.println("You have at least to choose one stream: stdout or stderr using the corresponding command options");
+            System.err.println(
+                    "You have at least to choose one stream: stdout or stderr using the corresponding command options");
         }
-        System.out.println(getDockerService().logs(container, stdout, stderr, timestamps, details, url));
+        System.out.println(
+                getDockerService().logs(container, stdout, stderr, timestamps, details, url));
         return null;
     }
-
 }

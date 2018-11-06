@@ -17,16 +17,18 @@
 package org.apache.karaf.jpm;
 
 import java.io.File;
-
 import junit.framework.TestCase;
-
 import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 import org.apache.karaf.jpm.impl.ScriptUtils;
 
 public class ProcessTest extends TestCase {
 
     public void testCreate() throws Exception {
-        String javaPath = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath();
+        String javaPath =
+                new File(
+                                System.getProperty("java.home"),
+                                ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java")
+                        .getCanonicalPath();
         System.err.println(javaPath);
         StringBuilder command = new StringBuilder();
         command.append("\"").append(javaPath).append("\"");
@@ -59,7 +61,7 @@ public class ProcessTest extends TestCase {
 
     /*
      * When the process creation fails, no error is reported by the script
-     * 
+     *
     public void testFailure() throws Exception {
         ProcessBuilder builder = ProcessBuilderFactory.newInstance().newBuilder();
         Process p = builder.command("ec").start();

@@ -23,12 +23,10 @@ import java.io.File;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
-
 import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.kerberos.KerberosTicket;
 import javax.security.auth.login.LoginException;
-
 import org.apache.directory.api.ldap.model.constants.SupportedSaslMechanisms;
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.entry.Entry;
@@ -65,67 +63,69 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(FrameworkRunner.class)
-@CreateDS(name = "GSSAPILdapLoginModuleTest-class",
-        partitions =
-                {
-                        @CreatePartition(
-                                name = "example",
-                                suffix = "dc=example,dc=com",
-                                contextEntry = @ContextEntry(
-                                        entryLdif =
-                                                "dn: dc=example,dc=com\n" +
-                                                        "dc: example\n" +
-                                                        "objectClass: top\n" +
-                                                        "objectClass: domain\n\n"),
-                                indexes =
-                                        {
-                                                @CreateIndex(attribute = "objectClass"),
-                                                @CreateIndex(attribute = "dc"),
-                                                @CreateIndex(attribute = "ou")
-                                        })
-                },
-        additionalInterceptors =
-                {
-                        KeyDerivationInterceptor.class
-                })
+@CreateDS(
+        name = "GSSAPILdapLoginModuleTest-class",
+        partitions = {
+            @CreatePartition(
+                    name = "example",
+                    suffix = "dc=example,dc=com",
+                    contextEntry =
+                            @ContextEntry(
+                                    entryLdif =
+                                            "dn: dc=example,dc=com\n"
+                                                    + "dc: example\n"
+                                                    + "objectClass: top\n"
+                                                    + "objectClass: domain\n\n"),
+                    indexes = {
+                        @CreateIndex(attribute = "objectClass"),
+                        @CreateIndex(attribute = "dc"),
+                        @CreateIndex(attribute = "ou")
+                    })
+        },
+        additionalInterceptors = {KeyDerivationInterceptor.class})
 @CreateLdapServer(
-        transports =
-                {
-                        @CreateTransport(protocol = "LDAP")
-                },
+        transports = {@CreateTransport(protocol = "LDAP")},
         saslHost = "localhost",
         saslPrincipal = "ldap/localhost@EXAMPLE.COM",
-        saslMechanisms =
-                {
-                        @SaslMechanism(name = SupportedSaslMechanisms.PLAIN, implClass = PlainMechanismHandler.class),
-                        @SaslMechanism(name = SupportedSaslMechanisms.CRAM_MD5, implClass = CramMd5MechanismHandler.class),
-                        @SaslMechanism(name = SupportedSaslMechanisms.DIGEST_MD5, implClass = DigestMd5MechanismHandler.class),
-                        @SaslMechanism(name = SupportedSaslMechanisms.GSSAPI, implClass = GssapiMechanismHandler.class),
-                        @SaslMechanism(name = SupportedSaslMechanisms.NTLM, implClass = NtlmMechanismHandler.class),
-                        @SaslMechanism(name = SupportedSaslMechanisms.GSS_SPNEGO, implClass = NtlmMechanismHandler.class)
-                })
+        saslMechanisms = {
+            @SaslMechanism(
+                    name = SupportedSaslMechanisms.PLAIN,
+                    implClass = PlainMechanismHandler.class),
+            @SaslMechanism(
+                    name = SupportedSaslMechanisms.CRAM_MD5,
+                    implClass = CramMd5MechanismHandler.class),
+            @SaslMechanism(
+                    name = SupportedSaslMechanisms.DIGEST_MD5,
+                    implClass = DigestMd5MechanismHandler.class),
+            @SaslMechanism(
+                    name = SupportedSaslMechanisms.GSSAPI,
+                    implClass = GssapiMechanismHandler.class),
+            @SaslMechanism(
+                    name = SupportedSaslMechanisms.NTLM,
+                    implClass = NtlmMechanismHandler.class),
+            @SaslMechanism(
+                    name = SupportedSaslMechanisms.GSS_SPNEGO,
+                    implClass = NtlmMechanismHandler.class)
+        })
 @CreateKdcServer(
-        transports =
-                {
-                        @CreateTransport(protocol = "UDP", port = 6088),
-                        @CreateTransport(protocol = "TCP", port = 6088)
-                })
+        transports = {
+            @CreateTransport(protocol = "UDP", port = 6088),
+            @CreateTransport(protocol = "TCP", port = 6088)
+        })
 @ApplyLdifs({
-        "dn: ou=users,dc=example,dc=com",
-        "objectClass: top",
-        "objectClass: organizationalUnit",
-        "ou: users",
-
-        "dn: ou=groups,dc=example,dc=com",
-        "objectClass: top",
-        "objectClass: organizationalUnit",
-        "ou: groups",
-
-        "dn: cn=admin,ou=groups,dc=example,dc=com",
-        "objectClass: top",
-        "objectClass: groupOfNames",
-        "cn: admin",
-        "member: uid=hnelson,ou=users,dc=example,dc=com"
+    "dn: ou=users,dc=example,dc=com",
+    "objectClass: top",
+    "objectClass: organizationalUnit",
+    "ou: users",
+    "dn: ou=groups,dc=example,dc=com",
+    "objectClass: top",
+    "objectClass: organizationalUnit",
+    "ou: groups",
+    "dn: cn=admin,ou=groups,dc=example,dc=com",
+    "objectClass: top",
+    "objectClass: groupOfNames",
+    "cn: admin",
+    "member: uid=hnelson,ou=users,dc=example,dc=com"
 })
 public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
 
@@ -133,11 +133,15 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
     public void setUp() throws Exception {
         super.setUp();
 
-        // Set up a partition for EXAMPLE.COM and add user and service principals to test authentication with.
+        // Set up a partition for EXAMPLE.COM and add user and service principals to test
+        // authentication
+        // with.
         KerberosTestUtils.fixServicePrincipalName(
                 "ldap/" + KerberosTestUtils.getHostName() + "@EXAMPLE.COM", null, getLdapServer());
-        setupEnv(TcpTransport.class,
-                EncryptionType.AES128_CTS_HMAC_SHA1_96, ChecksumType.HMAC_SHA1_96_AES128);
+        setupEnv(
+                TcpTransport.class,
+                EncryptionType.AES128_CTS_HMAC_SHA1_96,
+                ChecksumType.HMAC_SHA1_96_AES128);
 
         kdcServer.getConfig().setPaEncTimestampRequired(false);
 
@@ -145,17 +149,21 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
         if (basedir == null) {
             basedir = new File(".").getCanonicalPath();
         }
-        File config = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.login.config");
+        File config =
+                new File(
+                        basedir
+                                + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.login.config");
 
         System.setProperty("java.security.auth.login.config", config.toString());
 
-        ldapProps("org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties",
-                  GSSAPILdapLoginModuleTest::replacePortAndAddress);
+        ldapProps(
+                "org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties",
+                GSSAPILdapLoginModuleTest::replacePortAndAddress);
     }
 
     public static String replacePortAndAddress(String line) {
         return line.replaceAll("portno", "" + getLdapServer().getPort())
-            .replaceAll("address", KerberosTestUtils.getHostName());
+                .replaceAll("address", KerberosTestUtils.getHostName());
     }
 
     @After
@@ -171,7 +179,8 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
         Subject subject = new Subject();
-        module.initialize(subject, new NamePasswordCallbackHandler("hnelson", "secret"), null, options);
+        module.initialize(
+                subject, new NamePasswordCallbackHandler("hnelson", "secret"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login());
@@ -199,7 +208,9 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
         for (Object crd : subject.getPrivateCredentials()) {
             if (crd instanceof KerberosTicket) {
                 assertEquals("hnelson@EXAMPLE.COM", ((KerberosTicket) crd).getClient().getName());
-                assertEquals("krbtgt/EXAMPLE.COM@EXAMPLE.COM", ((KerberosTicket) crd).getServer().getName());
+                assertEquals(
+                        "krbtgt/EXAMPLE.COM@EXAMPLE.COM",
+                        ((KerberosTicket) crd).getServer().getName());
                 foundTicket = true;
                 break;
             }
@@ -211,7 +222,10 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
         assertTrue("PricatePrincipals should contains kerberos ticket", foundTicket);
 
         assertTrue(module.logout());
-        assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
+        assertEquals(
+                "Principals should be gone as the user has logged out",
+                0,
+                subject.getPrincipals().size());
     }
 
     @Test(expected = LoginException.class)
@@ -221,7 +235,8 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
         Subject subject = new Subject();
-        module.initialize(subject, new NamePasswordCallbackHandler("hnelson0", "secret"), null, options);
+        module.initialize(
+                subject, new NamePasswordCallbackHandler("hnelson0", "secret"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login()); // should throw LoginException
@@ -234,7 +249,8 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
         Subject subject = new Subject();
-        module.initialize(subject, new NamePasswordCallbackHandler("hnelson", "secret0"), null, options);
+        module.initialize(
+                subject, new NamePasswordCallbackHandler("hnelson", "secret0"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login());
@@ -261,36 +277,50 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
         GSSAPILdapLoginModule module = new GSSAPILdapLoginModule();
 
         Subject subject = new Subject();
-        module.initialize(subject, new NamePasswordCallbackHandler("hnelson0", "secret"), null, options);
+        module.initialize(
+                subject, new NamePasswordCallbackHandler("hnelson0", "secret"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login()); // should throw LoginException
     }
 
-    protected void setupEnv(Class<? extends Transport> transport, EncryptionType encryptionType,
-                            ChecksumType checksumType)
+    protected void setupEnv(
+            Class<? extends Transport> transport,
+            EncryptionType encryptionType,
+            ChecksumType checksumType)
             throws Exception {
         // create krb5.conf with proper encryption type
-        String krb5confPath = createKrb5Conf(checksumType, encryptionType, transport == TcpTransport.class);
+        String krb5confPath =
+                createKrb5Conf(checksumType, encryptionType, transport == TcpTransport.class);
         System.setProperty("java.security.krb5.conf", krb5confPath);
 
         // change encryption type in KDC
         kdcServer.getConfig().setEncryptionTypes(Collections.singleton(encryptionType));
 
         // create principals
-        createPrincipal("uid=" + USER_UID, "Last", "admin",
-                USER_UID, USER_PASSWORD, USER_UID + "@" + REALM);
+        createPrincipal(
+                "uid=" + USER_UID,
+                "Last",
+                "admin",
+                USER_UID,
+                USER_PASSWORD,
+                USER_UID + "@" + REALM);
 
-        createPrincipal("uid=krbtgt", "KDC Service", "KDC Service",
-                "krbtgt", "secret", "krbtgt/" + REALM + "@" + REALM);
+        createPrincipal(
+                "uid=krbtgt",
+                "KDC Service",
+                "KDC Service",
+                "krbtgt",
+                "secret",
+                "krbtgt/" + REALM + "@" + REALM);
 
         String servicePrincipal = LDAP_SERVICE_NAME + "/" + HOSTNAME + "@" + REALM;
-        createPrincipal("uid=ldap", "Service", "LDAP Service",
-                "ldap", "randall", servicePrincipal);
+        createPrincipal("uid=ldap", "Service", "LDAP Service", "ldap", "randall", servicePrincipal);
     }
 
-    private void createPrincipal(String rdn, String sn, String cn,
-                                 String uid, String userPassword, String principalName) throws LdapException {
+    private void createPrincipal(
+            String rdn, String sn, String cn, String uid, String userPassword, String principalName)
+            throws LdapException {
         Entry entry = new DefaultEntry();
         entry.setDn(rdn + "," + USERS_DN);
         entry.add("objectClass", "top", "person", "inetOrgPerson", "krb5principal", "krb5kdcentry");
@@ -308,7 +338,10 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
         if (basedir == null) {
             basedir = new File(".").getCanonicalPath();
         }
-        File file = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
+        File file =
+                new File(
+                        basedir
+                                + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/gssapi.ldap.properties");
         return new Properties(file);
     }
 }

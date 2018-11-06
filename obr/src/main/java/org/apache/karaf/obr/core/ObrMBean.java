@@ -16,22 +16,24 @@
  */
 package org.apache.karaf.obr.core;
 
+import java.util.List;
 import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
-import java.util.List;
 
-/**
- * OBR MBean.
- */
+/** OBR MBean. */
 public interface ObrMBean {
 
     List<String> getUrls();
+
     TabularData getBundles() throws MBeanException;
 
     void addUrl(String url) throws MBeanException;
+
     void removeUrl(String url);
+
     void refreshUrl(String url) throws MBeanException;
 
     void deployBundle(String bundle) throws MBeanException;
+
     void deployBundle(String bundle, boolean start, boolean deployOptional) throws MBeanException;
 }

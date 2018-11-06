@@ -16,13 +16,12 @@
  */
 package org.apache.karaf.audit.layout;
 
-import org.apache.karaf.audit.Event;
-import org.apache.karaf.audit.util.Buffer;
-import org.apache.karaf.audit.util.FastDateFormat;
-
 import java.io.IOException;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.apache.karaf.audit.Event;
+import org.apache.karaf.audit.util.Buffer;
+import org.apache.karaf.audit.util.FastDateFormat;
 
 public class Rfc3164Layout extends AbstractLayout {
 
@@ -37,7 +36,8 @@ public class Rfc3164Layout extends AbstractLayout {
     protected String hdr2;
     protected String hdr3;
 
-    public Rfc3164Layout(int facility, int priority, int enterpriseNumber, TimeZone timeZone, Locale locale) {
+    public Rfc3164Layout(
+            int facility, int priority, int enterpriseNumber, TimeZone timeZone, Locale locale) {
         super(new Buffer(Buffer.Format.Syslog));
         this.facility = facility;
         this.priority = priority;
@@ -69,12 +69,7 @@ public class Rfc3164Layout extends AbstractLayout {
     @Override
     protected void append(String key, Object val) throws IOException {
         if (val != null) {
-            buffer.append(' ')
-                    .append(key)
-                    .append('=')
-                    .append('"')
-                    .format(val)
-                    .append('"');
+            buffer.append(' ').append(key).append('=').append('"').format(val).append('"');
         }
     }
 
@@ -83,5 +78,4 @@ public class Rfc3164Layout extends AbstractLayout {
         buffer.append(' ');
         fastDateFormat.writeTime(millis, false, buffer);
     }
-
 }

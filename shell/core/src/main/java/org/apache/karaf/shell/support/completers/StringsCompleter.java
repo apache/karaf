@@ -23,18 +23,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 
-
-/**
- * Completer for a set of strings.
- */
-public class StringsCompleter
-    implements Completer
-{
+/** Completer for a set of strings. */
+public class StringsCompleter implements Completer {
     private final SortedSet<String> strings;
     private final boolean caseSensitive;
 
@@ -43,7 +37,8 @@ public class StringsCompleter
     }
 
     public StringsCompleter(final boolean caseSensitive) {
-        this.strings = new TreeSet<>(caseSensitive ? String::compareTo : String::compareToIgnoreCase);
+        this.strings =
+                new TreeSet<>(caseSensitive ? String::compareTo : String::compareToIgnoreCase);
         this.caseSensitive = caseSensitive;
     }
 
@@ -71,7 +66,8 @@ public class StringsCompleter
         return strings;
     }
 
-    public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
+    public int complete(
+            final Session session, final CommandLine commandLine, final List<String> candidates) {
         // buffer could be null
         assert candidates != null;
 
@@ -98,6 +94,8 @@ public class StringsCompleter
             candidates.add(match + " ");
         }
 
-        return candidates.isEmpty() ? -1 : commandLine.getBufferPosition() - commandLine.getArgumentPosition();
+        return candidates.isEmpty()
+                ? -1
+                : commandLine.getBufferPosition() - commandLine.getArgumentPosition();
     }
 }

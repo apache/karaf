@@ -5,9 +5,9 @@
  * licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -32,52 +32,45 @@ import java.util.RandomAccess;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Implements a {@link java.util.ArrayList} variant that is thread-safe. All
- * write operation result in a new copy of the underlying data being created.
- * Iterators reflect the state of the CopyOnWriteArrayIdentityList at the time they were
- * created. They are not updated to reflect subsequent changes to the list. In
- * addition, these iterators cannot be used for modifying the underlying
- * CopyOnWriteArrayIdentityList.
+ * Implements a {@link java.util.ArrayList} variant that is thread-safe. All write operation result
+ * in a new copy of the underlying data being created. Iterators reflect the state of the
+ * CopyOnWriteArrayIdentityList at the time they were created. They are not updated to reflect
+ * subsequent changes to the list. In addition, these iterators cannot be used for modifying the
+ * underlying CopyOnWriteArrayIdentityList.
  *
- * In addition, elements are compared based on reference equality instead of
- * object equality when comparing values.
+ * <p>In addition, elements are compared based on reference equality instead of object equality when
+ * comparing values.
  *
  * @param <E> the element type
  */
-public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, Cloneable, Serializable {
+public class CopyOnWriteArrayIdentityList<E>
+        implements List<E>, RandomAccess, Cloneable, Serializable {
 
     private static final long serialVersionUID = 8673264195747942595L;
 
     private transient volatile E[] arr;
 
-    /**
-     * Lock for the queue write methods
-     */
+    /** Lock for the queue write methods */
     private final transient ReentrantLock lock = new ReentrantLock();
 
-    /**
-     * Creates a new, empty instance of CopyOnWriteArrayList.
-     */
-    public CopyOnWriteArrayIdentityList() {
-    }
+    /** Creates a new, empty instance of CopyOnWriteArrayList. */
+    public CopyOnWriteArrayIdentityList() {}
 
     /**
-     * Creates a new instance of CopyOnWriteArrayList and fills it with the
-     * contents of a given Collection.
+     * Creates a new instance of CopyOnWriteArrayList and fills it with the contents of a given
+     * Collection.
      *
-     * @param c     the collection the elements of which are to be copied into
-     *              the new instance.
+     * @param c the collection the elements of which are to be copied into the new instance.
      */
     public CopyOnWriteArrayIdentityList(Collection<? extends E> c) {
         this((E[]) c.toArray());
     }
 
     /**
-     * Creates a new instance of CopyOnWriteArrayList and fills it with the
-     * contents of a given array.
+     * Creates a new instance of CopyOnWriteArrayList and fills it with the contents of a given
+     * array.
      *
-     * @param array the array the elements of which are to be copied into the
-     *              new instance.
+     * @param array the array the elements of which are to be copied into the new instance.
      */
     public CopyOnWriteArrayIdentityList(E[] array) {
         int size = array.length;
@@ -111,7 +104,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             E[] old = getData();
             int size = old.length;
             checkIndexInclusive(index, size);
-            data = newElementArray(size+1);
+            data = newElementArray(size + 1);
             System.arraycopy(old, 0, data, 0, index);
             data[index] = e;
             if (size > index) {
@@ -171,12 +164,10 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Adds to this CopyOnWriteArrayList all those elements from a given
-     * collection that are not yet part of the list.
+     * Adds to this CopyOnWriteArrayList all those elements from a given collection that are not yet
+     * part of the list.
      *
-     * @param c     the collection from which the potential new elements are
-     *              taken.
-     *
+     * @param c the collection from which the potential new elements are taken.
      * @return the number of elements actually added to this list.
      */
     public int addAllAbsent(Collection<? extends E> c) {
@@ -205,11 +196,10 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Adds to this CopyOnWriteArrayList another element, given that this
-     * element is not yet part of the list.
+     * Adds to this CopyOnWriteArrayList another element, given that this element is not yet part of
+     * the list.
      *
-     * @param e     the potential new element.
-     *
+     * @param e the potential new element.
      * @return true if the element was added, or false otherwise.
      */
     public boolean addIfAbsent(E e) {
@@ -299,14 +289,12 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Returns the index of a given element, starting the search from a given
-     * position in the list.
+     * Returns the index of a given element, starting the search from a given position in the list.
      *
-     * @param e     the element to search.
+     * @param e the element to search.
      * @param index the index at which to start the search.
-     *
-     * @return the index of the element or null, if the element has not been
-     * found at or beyond the given start index.
+     * @return the index of the element or null, if the element has not been found at or beyond the
+     *     given start index.
      */
     public int indexOf(E e, int index) {
         E[] data = getData();
@@ -327,14 +315,13 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Returns the last index of a given element, starting the search from
-     * a given position in the list and going backwards.
+     * Returns the last index of a given element, starting the search from a given position in the
+     * list and going backwards.
      *
-     * @param e     the element to search.
+     * @param e the element to search.
      * @param index the index at which to start the search.
-     *
-     * @return the index of the element or null, if the element has not been
-     * found at or before the given start index.
+     * @return the index of the element or null, if the element has not been found at or before the
+     *     given start index.
      */
     public int lastIndexOf(E e, int index) {
         E[] data = getData();
@@ -450,7 +437,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
 
     @SuppressWarnings("unchecked")
     private final E[] newElementArray(int size) {
-        return (E[])new Object[size];
+        return (E[]) new Object[size];
     }
 
     /**
@@ -475,10 +462,10 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Removes from the specified range of this list
-     * all the elements that are contained in the specified collection
-     * <p/>
-     * !should be called under lock
+     * Removes from the specified range of this list all the elements that are contained in the
+     * specified collection
+     *
+     * <p>!should be called under lock
      *
      * @return Returns the number of removed elements
      */
@@ -503,8 +490,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             E[] result = newElementArray(arrsize - (size - j));
             System.arraycopy(old, 0, result, 0, start);
             System.arraycopy(data, 0, result, start, j);
-            System.arraycopy(old, start + size, result, start + j, arrsize
-                    - (start + size));
+            System.arraycopy(old, start + size, result, start + j, arrsize - (start + size));
             setData(result);
             return (size - j);
         }
@@ -512,8 +498,8 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Retains only the elements in the specified range of this list
-     * that are contained in the specified collection
+     * Retains only the elements in the specified range of this list that are contained in the
+     * specified collection
      *
      * @return Returns the number of removed elements
      */
@@ -530,8 +516,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             } else {
                 data = newElementArray(old.length - size);
                 System.arraycopy(old, 0, data, 0, start);
-                System.arraycopy(old, start + size, data, start, old.length
-                        - start - size);
+                System.arraycopy(old, start + size, data, start, old.length - start - size);
             }
             setData(data);
             return size;
@@ -549,15 +534,12 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         E[] data = newElementArray(pos + old.length - size);
         System.arraycopy(old, 0, data, 0, start);
         System.arraycopy(temp, 0, data, start, pos);
-        System.arraycopy(old, start + size, data, start + pos, old.length
-                - start - size);
+        System.arraycopy(old, start + size, data, start + pos, old.length - start - size);
         setData(data);
         return (size - pos);
     }
 
-    /**
-     * Removes specified range from this list
-     */
+    /** Removes specified range from this list */
     E removeRange(int start, int size) {
         lock.lock();
         try {
@@ -570,8 +552,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             System.arraycopy(oldArr, 0, data, 0, start);
             E old = oldArr[start];
             if (sizeArr > (start + size)) {
-                System.arraycopy(oldArr, start + size, data, start, sizeArr
-                        - (start + size));
+                System.arraycopy(oldArr, start + size, data, start, sizeArr - (start + size));
             }
             setData(data);
             return old;
@@ -582,8 +563,8 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
 
     // some util static functions to use by iterators and methods
     /**
-     * Returns an array containing all of the elements
-     * in the specified range of the array in proper sequence
+     * Returns an array containing all of the elements in the specified range of the array in proper
+     * sequence
      */
     static Object[] toArray(Object[] data, int start, int size) {
         Object[] result = new Object[size];
@@ -592,16 +573,14 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Returns an array containing all of the elements
-     * in the specified range of the array in proper sequence,
-     * stores the result in the array, specified by first parameter
-     * (as for public instance method toArray(Object[] to)
+     * Returns an array containing all of the elements in the specified range of the array in proper
+     * sequence, stores the result in the array, specified by first parameter (as for public
+     * instance method toArray(Object[] to)
      */
     static Object[] toArray(Object[] to, Object[] data, int start, int size) {
         int l = data.length;
         if (to.length < l) {
-            to = (Object[]) Array.newInstance(to.getClass().getComponentType(),
-                    l);
+            to = (Object[]) Array.newInstance(to.getClass().getComponentType(), l);
         } else {
             if (to.length > l) {
                 to[l] = null;
@@ -612,16 +591,14 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Checks if the specified range of the
-     * array contains all of the elements in the collection
+     * Checks if the specified range of the array contains all of the elements in the collection
      *
-     * @param c     collection with elements
-     * @param data  array where to search the elements
+     * @param c collection with elements
+     * @param data array where to search the elements
      * @param start start index
-     * @param size  size of the range
+     * @param size size of the range
      */
-    static final boolean containsAll(Collection c, Object[] data, int start,
-                                     int size) {
+    static final boolean containsAll(Collection c, Object[] data, int start, int size) {
         if (size == 0) {
             return false;
         }
@@ -634,13 +611,13 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Returns the index in the specified range of the data array
-     * of the last occurrence of the specified element
+     * Returns the index in the specified range of the data array of the last occurrence of the
+     * specified element
      *
-     * @param o     element to search
-     * @param data  array where to search
+     * @param o element to search
+     * @param data array where to search
      * @param start start index
-     * @param size  size of the range
+     * @param size size of the range
      * @return
      */
     static final int lastIndexOf(Object o, Object[] data, int start, int size) {
@@ -656,13 +633,13 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Returns the index in the specified range of the data array
-     * of the first occurrence of the specified element
+     * Returns the index in the specified range of the data array of the first occurrence of the
+     * specified element
      *
-     * @param o     element to search
-     * @param data  array where to search
+     * @param o element to search
+     * @param data array where to search
      * @param start start index
-     * @param size  end index
+     * @param size end index
      * @return
      */
     static final int indexOf(Object o, Object[] data, int start, int size) {
@@ -678,8 +655,8 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Throws <code>IndexOutOfBoundsException</code> if <code>index</code>
-     * is out of the list bounds.
+     * Throws <code>IndexOutOfBoundsException</code> if <code>index</code> is out of the list
+     * bounds.
      *
      * @param index element index to check.
      */
@@ -690,8 +667,8 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * Throws <code>IndexOutOfBoundsException</code> if <code>index</code>
-     * is out of the list bounds. Excluding the last element.
+     * Throws <code>IndexOutOfBoundsException</code> if <code>index</code> is out of the list
+     * bounds. Excluding the last element.
      *
      * @param index element index to check.
      */
@@ -711,9 +688,8 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
     }
 
     /**
-     * list iterator implementation,
-     * when created gets snapshot of the list,
-     * so never throws ConcurrentModificationException
+     * list iterator implementation, when created gets snapshot of the list, so never throws
+     * ConcurrentModificationException
      */
     private static class ListIteratorImpl implements ListIterator {
         private final Object[] arr;
@@ -759,7 +735,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             if (hasPrevious()) {
                 return arr[--current];
             }
-            throw new NoSuchElementException("pos is " + (current-1) + ", size is " + size);
+            throw new NoSuchElementException("pos is " + (current - 1) + ", size is " + size);
         }
 
         public int previousIndex() {
@@ -773,13 +749,11 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         public void set(Object o) {
             throw new UnsupportedOperationException("Unsupported operation set");
         }
-
     }
 
     /**
-     * Keeps a state of sublist implementation,
-     * size and array declared as final,
-     * so we'll never get the unconsistent state
+     * Keeps a state of sublist implementation, size and array declared as final, so we'll never get
+     * the unconsistent state
      */
     static final class SubListReadData {
         final int size;
@@ -792,9 +766,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         }
     }
 
-    /**
-     * Represents a list returned by <code>sublist()</code>.
-     */
+    /** Represents a list returned by <code>sublist()</code>. */
     static class SubList implements List {
         private final CopyOnWriteArrayIdentityList list;
 
@@ -805,9 +777,9 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         /**
          * Sublist constructor.
          *
-         * @param list    backing list.
+         * @param list backing list.
          * @param fromIdx startingIndex, inclusive
-         * @param toIdx   endIndex, exclusive
+         * @param toIdx endIndex, exclusive
          */
         public SubList(CopyOnWriteArrayIdentityList list, int fromIdx, int toIdx) {
             this.list = list;
@@ -820,10 +792,10 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         }
 
         /**
-         * throws ConcurrentModificationException when the list
-         * is structurally modified in the other way other than via this subList
-         * <p/>
-         * Should be called under lock!
+         * throws ConcurrentModificationException when the list is structurally modified in the
+         * other way other than via this subList
+         *
+         * <p>Should be called under lock!
          */
         private void checkModifications() {
             if (read.data != list.getData()) {
@@ -831,16 +803,12 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             }
         }
 
-        /**
-         * @see java.util.List#listIterator(int)
-         */
+        /** @see java.util.List#listIterator(int) */
         public ListIterator listIterator(int startIdx) {
             return new SubListIterator(startIdx, read);
         }
 
-        /**
-         * @see java.util.List#set(int, java.lang.Object)
-         */
+        /** @see java.util.List#set(int, java.lang.Object) */
         public Object set(int index, Object obj) {
             list.lock.lock();
             try {
@@ -854,9 +822,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             }
         }
 
-        /**
-         * @see java.util.List#get(int)
-         */
+        /** @see java.util.List#get(int) */
         public Object get(int index) {
             SubListReadData data = read;
             if (data.data != list.getData()) {
@@ -874,16 +840,12 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             return data.data[index + start];
         }
 
-        /**
-         * @see java.util.Collection#size()
-         */
+        /** @see java.util.Collection#size() */
         public int size() {
             return read.size;
         }
 
-        /**
-         * @see java.util.List#remove(int)
-         */
+        /** @see java.util.List#remove(int) */
         public Object remove(int index) {
             list.lock.lock();
             try {
@@ -897,9 +859,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             }
         }
 
-        /**
-         * @see java.util.List#add(int, java.lang.Object)
-         */
+        /** @see java.util.List#add(int, java.lang.Object) */
         public void add(int index, Object object) {
             list.lock.lock();
             try {
@@ -930,8 +890,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
                 checkModifications();
                 int d = list.size();
                 list.addAll(start + read.size, c);
-                read = new SubListReadData(read.size + (list.size() - d), list
-                        .getData());
+                read = new SubListReadData(read.size + (list.size() - d), list.getData());
                 return true;
             } finally {
                 list.lock.unlock();
@@ -960,8 +919,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
 
         public int indexOf(Object o) {
             SubListReadData b = read;
-            int ind = CopyOnWriteArrayIdentityList.indexOf(o, b.data, start, b.size)
-                    - start;
+            int ind = CopyOnWriteArrayIdentityList.indexOf(o, b.data, start, b.size) - start;
             return ind < 0 ? -1 : ind;
         }
 
@@ -975,9 +933,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
 
         public int lastIndexOf(Object o) {
             SubListReadData b = read;
-            int ind = CopyOnWriteArrayIdentityList
-                    .lastIndexOf(o, b.data, start, b.size)
-                    - start;
+            int ind = CopyOnWriteArrayIdentityList.lastIndexOf(o, b.data, start, b.size) - start;
             return ind < 0 ? -1 : ind;
         }
 
@@ -1009,8 +965,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
                 checkModifications();
                 int removed = list.removeAll(c, start, read.size);
                 if (removed > 0) {
-                    read = new SubListReadData(read.size - removed, list
-                            .getData());
+                    read = new SubListReadData(read.size - removed, list.getData());
                     return true;
                 }
             } finally {
@@ -1025,8 +980,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
                 checkModifications();
                 int removed = list.retainAll(c, start, read.size);
                 if (removed > 0) {
-                    read = new SubListReadData(read.size - removed, list
-                            .getData());
+                    read = new SubListReadData(read.size - removed, list.getData());
                     return true;
                 }
                 return false;
@@ -1049,9 +1003,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             return CopyOnWriteArrayIdentityList.toArray(a, r.data, start, r.size);
         }
 
-        /**
-         * @see java.util.List#addAll(int, java.util.Collection)
-         */
+        /** @see java.util.List#addAll(int, java.util.Collection) */
         public boolean addAll(int index, Collection collection) {
             list.lock.lock();
             try {
@@ -1059,8 +1011,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
                 checkModifications();
                 int d = list.size();
                 boolean rt = list.addAll(index + start, collection);
-                read = new SubListReadData(read.size + list.size() - d, list
-                        .getData());
+                read = new SubListReadData(read.size + list.size() - d, list.getData());
                 return rt;
             } finally {
                 list.lock.unlock();
@@ -1068,10 +1019,8 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         }
 
         /**
-         * Implementation of <code>ListIterator</code> for the
-         * <code>SubList</code>
-         * gets a snapshot of the sublist,
-         * never throws ConcurrentModificationException
+         * Implementation of <code>ListIterator</code> for the <code>SubList</code> gets a snapshot
+         * of the sublist, never throws ConcurrentModificationException
          */
         private class SubListIterator extends ListIteratorImpl {
             private final SubListReadData dataR;
@@ -1086,38 +1035,29 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
                 this.dataR = d;
             }
 
-            /**
-             * @see java.util.ListIterator#nextIndex()
-             */
+            /** @see java.util.ListIterator#nextIndex() */
             public int nextIndex() {
                 return super.nextIndex() - start;
             }
 
-            /**
-             * @see java.util.ListIterator#previousIndex()
-             */
+            /** @see java.util.ListIterator#previousIndex() */
             public int previousIndex() {
                 return super.previousIndex() - start;
             }
 
-            /**
-             * @see java.util.Iterator#hasNext()
-             */
+            /** @see java.util.Iterator#hasNext() */
             public boolean hasNext() {
                 return nextIndex() < dataR.size;
             }
 
-            /**
-             * @see java.util.ListIterator#hasPrevious()
-             */
+            /** @see java.util.ListIterator#hasPrevious() */
             public boolean hasPrevious() {
                 return previousIndex() > -1;
             }
         }
-
     }
 
-    //serialization support
+    // serialization support
     /**
      * Writes the object state to the ObjectOutputStream.
      *
@@ -1141,8 +1081,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
      * @throws IOException if an I/O error occur.
      * @throws ClassNotFoundException If the object class is not found.
      */
-    private void readObject(ObjectInputStream ois) throws IOException,
-            ClassNotFoundException {
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
         int length = ois.readInt();
         if (length == 0) {
@@ -1155,5 +1094,4 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
             setData(back);
         }
     }
-
 }

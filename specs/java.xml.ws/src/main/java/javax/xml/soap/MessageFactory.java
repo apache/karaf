@@ -21,19 +21,21 @@ import java.io.InputStream;
 
 public abstract class MessageFactory {
 
-    private static final String DEFAULT_MESSAGE_FACTORY = "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl";
+    private static final String DEFAULT_MESSAGE_FACTORY =
+            "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl";
 
     public static MessageFactory newInstance() throws SOAPException {
         try {
-            MessageFactory factory = $FactoryFinder.find(MessageFactory.class, DEFAULT_MESSAGE_FACTORY, false);
+            MessageFactory factory =
+                    $FactoryFinder.find(MessageFactory.class, DEFAULT_MESSAGE_FACTORY, false);
             if (factory != null) {
                 return factory;
             }
             return newInstance(SOAPConstants.SOAP_1_1_PROTOCOL);
         } catch (Exception ex) {
-            throw new SOAPException("Unable to create message factory for SOAP: " + ex.getMessage(), ex);
+            throw new SOAPException(
+                    "Unable to create message factory for SOAP: " + ex.getMessage(), ex);
         }
-
     }
 
     public static MessageFactory newInstance(String protocol) throws SOAPException {
@@ -42,5 +44,6 @@ public abstract class MessageFactory {
 
     public abstract SOAPMessage createMessage() throws SOAPException;
 
-    public abstract SOAPMessage createMessage(MimeHeaders headers, InputStream in) throws IOException, SOAPException;
+    public abstract SOAPMessage createMessage(MimeHeaders headers, InputStream in)
+            throws IOException, SOAPException;
 }

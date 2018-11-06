@@ -16,23 +16,22 @@
  */
 package javax.xml.validation;
 
+import java.io.File;
+import java.net.URL;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.net.URL;
-
 public abstract class SchemaFactory {
 
-    private static final String DEFAULT_IMPL = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
+    private static final String DEFAULT_IMPL =
+            "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
 
-    protected SchemaFactory() {
-    }
+    protected SchemaFactory() {}
 
     public static SchemaFactory newDefaultInstance() {
         return new $SchemaFactoryFinder(null).createInstance(DEFAULT_IMPL, true);
@@ -47,13 +46,15 @@ public abstract class SchemaFactory {
         if (f == null) {
             throw new IllegalArgumentException(
                     "No SchemaFactory"
-                            + " that implements the schema language specified by: " + schemaLanguage
+                            + " that implements the schema language specified by: "
+                            + schemaLanguage
                             + " could be loaded");
         }
         return f;
     }
 
-    public static SchemaFactory newInstance(String schemaLanguage, String factoryClassName, ClassLoader classLoader) {
+    public static SchemaFactory newInstance(
+            String schemaLanguage, String factoryClassName, ClassLoader classLoader) {
         ClassLoader cl = classLoader;
         if (cl == null) {
             cl = $SchemaFactoryFinder.getContextClassLoader();
@@ -61,17 +62,20 @@ public abstract class SchemaFactory {
         SchemaFactory f = new $SchemaFactoryFinder(cl).createInstance(factoryClassName);
         if (f == null) {
             throw new IllegalArgumentException(
-                    "Factory " + factoryClassName
-                            + " could not be loaded to implement the schema language specified by: " + schemaLanguage);
+                    "Factory "
+                            + factoryClassName
+                            + " could not be loaded to implement the schema language specified by: "
+                            + schemaLanguage);
         }
         if (f.isSchemaLanguageSupported(schemaLanguage)) {
             return f;
         } else {
             throw new IllegalArgumentException(
-                    "Factory " + f.getClass().getName()
-                            + " does not implement the schema language specified by: " + schemaLanguage);
+                    "Factory "
+                            + f.getClass().getName()
+                            + " does not implement the schema language specified by: "
+                            + schemaLanguage);
         }
-
     }
 
     public abstract boolean isSchemaLanguageSupported(String schemaLanguage);
@@ -121,7 +125,7 @@ public abstract class SchemaFactory {
     public abstract LSResourceResolver getResourceResolver();
 
     public Schema newSchema(Source schema) throws SAXException {
-        return newSchema(new Source[]{schema});
+        return newSchema(new Source[] {schema});
     }
 
     public Schema newSchema(File schema) throws SAXException {

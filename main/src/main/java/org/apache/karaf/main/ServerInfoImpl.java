@@ -20,7 +20,6 @@ package org.apache.karaf.main;
 
 import java.io.File;
 import java.net.URI;
-
 import org.apache.karaf.info.ServerInfo;
 
 public class ServerInfoImpl implements ServerInfo {
@@ -95,5 +94,4 @@ public class ServerInfoImpl implements ServerInfo {
         }
         return new File(baseDir, filename);
     }
-
 }

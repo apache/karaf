@@ -37,5 +37,4 @@ public class Activator extends BaseActivator {
         mbean.setSystemService(systemService);
         registerMBean(mbean, "type=system");
     }
-
 }

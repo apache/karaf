@@ -16,18 +16,15 @@
  */
 package org.apache.karaf.jms.internal;
 
+import java.util.List;
+import java.util.Map;
+import javax.management.MBeanException;
+import javax.management.openmbean.*;
 import org.apache.karaf.jms.JmsMBean;
 import org.apache.karaf.jms.JmsMessage;
 import org.apache.karaf.jms.JmsService;
 
-import javax.management.MBeanException;
-import javax.management.openmbean.*;
-import java.util.List;
-import java.util.Map;
-
-/**
- * Default implementation of the JMS MBean.
- */
+/** Default implementation of the JMS MBean. */
 public class JmsMBeanImpl implements JmsMBean {
 
     private JmsService jmsService;
@@ -51,7 +48,9 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public void create(String name, String type, String url, String username, String password, String pool) throws MBeanException {
+    public void create(
+            String name, String type, String url, String username, String password, String pool)
+            throws MBeanException {
         try {
             jmsService.create(name, type, url, username, password, pool);
         } catch (Throwable t) {
@@ -69,7 +68,8 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public Map<String, String> info(String connectionFactory, String username, String password) throws MBeanException {
+    public Map<String, String> info(String connectionFactory, String username, String password)
+            throws MBeanException {
         try {
             return jmsService.info(connectionFactory, username, password);
         } catch (Throwable t) {
@@ -78,7 +78,8 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public int count(String connectionFactory, String queue, String username, String password) throws MBeanException {
+    public int count(String connectionFactory, String queue, String username, String password)
+            throws MBeanException {
         try {
             return jmsService.count(connectionFactory, queue, username, password);
         } catch (Throwable t) {
@@ -87,7 +88,8 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public List<String> queues(String connectionFactory, String username, String password) throws MBeanException {
+    public List<String> queues(String connectionFactory, String username, String password)
+            throws MBeanException {
         try {
             return jmsService.queues(connectionFactory, username, password);
         } catch (Throwable t) {
@@ -96,7 +98,8 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public List<String> topics(String connectionFactory, String username, String password) throws MBeanException {
+    public List<String> topics(String connectionFactory, String username, String password)
+            throws MBeanException {
         try {
             return jmsService.topics(connectionFactory, username, password);
         } catch (Throwable t) {
@@ -105,7 +108,14 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public void send(String connectionFactory, String queue, String content, String replyTo, String username, String password) throws MBeanException {
+    public void send(
+            String connectionFactory,
+            String queue,
+            String content,
+            String replyTo,
+            String username,
+            String password)
+            throws MBeanException {
         try {
             jmsService.send(connectionFactory, queue, content, replyTo, username, password);
         } catch (Throwable t) {
@@ -114,7 +124,13 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public int consume(String connectionFactory, String queue, String selector, String username, String password) throws MBeanException {
+    public int consume(
+            String connectionFactory,
+            String queue,
+            String selector,
+            String username,
+            String password)
+            throws MBeanException {
         try {
             return jmsService.consume(connectionFactory, queue, selector, username, password);
         } catch (Throwable t) {
@@ -123,28 +139,114 @@ public class JmsMBeanImpl implements JmsMBean {
     }
 
     @Override
-    public int move(String connectionFactory, String source, String destination, String selector, String username, String password) throws MBeanException {
+    public int move(
+            String connectionFactory,
+            String source,
+            String destination,
+            String selector,
+            String username,
+            String password)
+            throws MBeanException {
         try {
-            return jmsService.move(connectionFactory, source, destination, selector, username, password);
+            return jmsService.move(
+                    connectionFactory, source, destination, selector, username, password);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public TabularData browse(String connectionFactory, String queue, String selector, String username, String password) throws MBeanException {
+    public TabularData browse(
+            String connectionFactory,
+            String queue,
+            String selector,
+            String username,
+            String password)
+            throws MBeanException {
         try {
-            CompositeType type = new CompositeType("message", "JMS Message",
-                    new String[]{ "id", "content", "charset", "type", "correlation", "delivery", "destination", "expiration", "priority", "redelivered", "replyto", "timestamp" },
-                    new String[]{ "Message ID", "Content", "Charset", "Type", "Correlation ID", "Delivery Mode", "Destination", "Expiration Date", "Priority", "Redelivered", "Reply-To", "Timestamp" },
-                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.BOOLEAN, SimpleType.STRING, SimpleType.STRING });
-            TabularType tableType = new TabularType("messages", "JMS Messages", type, new String[]{ "id" });
+            CompositeType type =
+                    new CompositeType(
+                            "message",
+                            "JMS Message",
+                            new String[] {
+                                "id",
+                                "content",
+                                "charset",
+                                "type",
+                                "correlation",
+                                "delivery",
+                                "destination",
+                                "expiration",
+                                "priority",
+                                "redelivered",
+                                "replyto",
+                                "timestamp"
+                            },
+                            new String[] {
+                                "Message ID",
+                                "Content",
+                                "Charset",
+                                "Type",
+                                "Correlation ID",
+                                "Delivery Mode",
+                                "Destination",
+                                "Expiration Date",
+                                "Priority",
+                                "Redelivered",
+                                "Reply-To",
+                                "Timestamp"
+                            },
+                            new OpenType[] {
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.INTEGER,
+                                SimpleType.BOOLEAN,
+                                SimpleType.STRING,
+                                SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType("messages", "JMS Messages", type, new String[] {"id"});
             TabularData table = new TabularDataSupport(tableType);
-            for (JmsMessage message : getJmsService().browse(connectionFactory, queue, selector, username, password)) {
-                CompositeData data = new CompositeDataSupport(type,
-                        new String[]{ "id", "content", "charset", "type", "correlation", "delivery", "destination", "expiration", "priority", "redelivered", "replyto", "timestamp" },
-                        new Object[]{ message.getMessageId(), message.getContent(), message.getCharset(), message.getType(), message.getCorrelationID(), message.getDeliveryMode(), message.getDestination(), message.getExpiration(), message.getPriority(), message.isRedelivered(), message.getReplyTo(), message.getTimestamp() }
-                        );
+            for (JmsMessage message :
+                    getJmsService()
+                            .browse(connectionFactory, queue, selector, username, password)) {
+                CompositeData data =
+                        new CompositeDataSupport(
+                                type,
+                                new String[] {
+                                    "id",
+                                    "content",
+                                    "charset",
+                                    "type",
+                                    "correlation",
+                                    "delivery",
+                                    "destination",
+                                    "expiration",
+                                    "priority",
+                                    "redelivered",
+                                    "replyto",
+                                    "timestamp"
+                                },
+                                new Object[] {
+                                    message.getMessageId(),
+                                    message.getContent(),
+                                    message.getCharset(),
+                                    message.getType(),
+                                    message.getCorrelationID(),
+                                    message.getDeliveryMode(),
+                                    message.getDestination(),
+                                    message.getExpiration(),
+                                    message.getPriority(),
+                                    message.isRedelivered(),
+                                    message.getReplyTo(),
+                                    message.getTimestamp()
+                                });
                 table.put(data);
             }
             return table;
@@ -160,5 +262,4 @@ public class JmsMBeanImpl implements JmsMBean {
     public void setJmsService(JmsService jmsService) {
         this.jmsService = jmsService;
     }
-
 }

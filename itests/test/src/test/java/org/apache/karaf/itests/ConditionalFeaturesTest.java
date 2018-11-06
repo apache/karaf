@@ -17,12 +17,9 @@
 package org.apache.karaf.itests;
 
 import java.util.EnumSet;
-
 import org.apache.karaf.features.FeaturesService;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -31,28 +28,34 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @ExamReactorStrategy(PerClass.class)
 public class ConditionalFeaturesTest extends KarafTestSupport {
 
-     
     @Test
     public void testScr() throws Exception {
-        featureService.installFeature("management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-        //Remove management and install scr
-        featureService.uninstallFeature("management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-        featureService.installFeature("scr", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.installFeature(
+                "management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        // Remove management and install scr
+        featureService.uninstallFeature(
+                "management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.installFeature(
+                "scr", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertBundleNotInstalled("org.apache.karaf.scr.management");
 
-        //Add management back
-        featureService.installFeature("management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        // Add management back
+        featureService.installFeature(
+                "management", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertBundleInstalled("org.apache.karaf.scr.management");
     }
 
     @Test
     public void testWebconsole() throws Exception {
         try {
-            featureService.uninstallFeature("scr", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+            featureService.uninstallFeature(
+                    "scr", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         } catch (Exception e) {
         }
-        featureService.installFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
-        featureService.installFeature("webconsole", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.installFeature(
+                "eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.installFeature(
+                "webconsole", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 
         assertBundleInstalled("org.apache.karaf.webconsole.features");
         assertBundleInstalled("org.apache.karaf.webconsole.instance");
@@ -61,7 +64,8 @@ public class ConditionalFeaturesTest extends KarafTestSupport {
         assertBundleInstalled("org.apache.felix.webconsole.plugins.event");
 
         // add eventadmin
-        featureService.uninstallFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.uninstallFeature(
+                "eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         assertBundleNotInstalled("org.apache.felix.webconsole.plugins.event");
     }
 }

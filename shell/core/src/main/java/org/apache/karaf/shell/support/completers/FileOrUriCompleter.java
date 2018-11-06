@@ -23,5 +23,4 @@ public class FileOrUriCompleter extends AggregateCompleter {
     public FileOrUriCompleter() {
         super(Arrays.asList(new FileCompleter(), new UriCompleter()));
     }
-
 }

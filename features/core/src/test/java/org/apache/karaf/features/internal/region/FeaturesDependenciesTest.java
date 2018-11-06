@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -41,9 +43,6 @@ import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
-import static org.junit.Assert.assertEquals;
-
 public class FeaturesDependenciesTest {
 
     Logger logger = LoggerFactory.getLogger(FeaturesDependenciesTest.class);
@@ -51,86 +50,63 @@ public class FeaturesDependenciesTest {
 
     @Test
     public void testFeatureDependency1() throws Exception {
-        doTestFeatureDependency(
-                new String[] { "f1" },
-                new String[] { "a1/1.0.0", "b/2.0.0" }
-        );
+        doTestFeatureDependency(new String[] {"f1"}, new String[] {"a1/1.0.0", "b/2.0.0"});
     }
 
     @Test
     public void testFeatureDependency1b() throws Exception {
         doTestFeatureDependency(
-                new String[] { "f1", "dep/[1.0,2.0)"},
-                new String[] { "a1/1.0.0", "b/1.0.0" }
-        );
+                new String[] {"f1", "dep/[1.0,2.0)"}, new String[] {"a1/1.0.0", "b/1.0.0"});
     }
 
     @Test
     public void testFeatureDependency2() throws Exception {
-        doTestFeatureDependency(
-                new String[] { "f2" },
-                new String[] { "a1/1.0.0", "b/2.0.0" }
-        );
+        doTestFeatureDependency(new String[] {"f2"}, new String[] {"a1/1.0.0", "b/2.0.0"});
     }
 
     @Test
     public void testFeatureDependency2b() throws Exception {
         doTestFeatureDependency(
-                new String[] { "f2", "dep/[1.0,2.0)"},
-                new String[] { "a1/1.0.0", "b/1.0.0" }
-        );
+                new String[] {"f2", "dep/[1.0,2.0)"}, new String[] {"a1/1.0.0", "b/1.0.0"});
     }
 
     @Test
     public void testFeatureDependency3() throws Exception {
-        doTestFeatureDependency(
-                new String[] { "f3" },
-                new String[] { "a2/1.0.0" }
-        );
+        doTestFeatureDependency(new String[] {"f3"}, new String[] {"a2/1.0.0"});
     }
 
     @Test
     public void testFeatureDependency3b() throws Exception {
         doTestFeatureDependency(
-                new String[] { "f3", "dep/[1.0,2.0)"},
-                new String[] { "a2/1.0.0", "b/1.0.0" }
-        );
+                new String[] {"f3", "dep/[1.0,2.0)"}, new String[] {"a2/1.0.0", "b/1.0.0"});
     }
 
     @Test
     public void testFeatureDependency4() throws Exception {
-        doTestFeatureDependency(
-                new String[] { "f4" },
-                new String[] { "a2/1.0.0", "b/2.0.0" }
-        );
+        doTestFeatureDependency(new String[] {"f4"}, new String[] {"a2/1.0.0", "b/2.0.0"});
     }
 
     @Test
     public void testFeatureDependency4b() throws Exception {
         doTestFeatureDependency(
-                new String[] { "f4", "dep/[1.0,2.0)"},
-                new String[] { "a2/1.0.0", "b/1.0.0" }
-        );
+                new String[] {"f4", "dep/[1.0,2.0)"}, new String[] {"a2/1.0.0", "b/1.0.0"});
     }
 
     @Test
     public void testSpring() throws Exception {
         doTestFeatureDependency(
-                new String[] { "spring-dm-web"},
-                new String[] { "spring-osgi-core/1.2.1", "spring-core/3.2.14" }
-        );
+                new String[] {"spring-dm-web"},
+                new String[] {"spring-osgi-core/1.2.1", "spring-core/3.2.14"});
     }
 
     @Test
     public void testFeatureDependencyLevel() throws Exception {
-        doTestFeatureDependency(
-                new String[] { "tf1" },
-                new String[] { "a2/1.0.0" }
-        );
+        doTestFeatureDependency(new String[] {"tf1"}, new String[] {"a2/1.0.0"});
     }
 
     private void doTestFeatureDependency(String[] features, String[] bundles) throws Exception {
-        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data8/features.xml").toURI());
+        RepositoryImpl repo =
+                new RepositoryImpl(getClass().getResource("data8/features.xml").toURI());
 
         Map<String, Set<String>> requirements = new HashMap<>();
         for (String feature : features) {
@@ -142,12 +118,10 @@ public class FeaturesDependenciesTest {
             addToMapSet(expected, "root", bundle);
         }
 
-        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data8"));
-        resolver.prepare(partitionByName(repo.getFeatures()),
-                requirements,
-                Collections.emptyMap());
-        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
-                null, null, null);
+        SubsystemResolver resolver =
+                new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data8"));
+        resolver.prepare(partitionByName(repo.getFeatures()), requirements, Collections.emptyMap());
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, null, null, null);
 
         verify(resolver, expected);
     }
@@ -175,14 +149,13 @@ public class FeaturesDependenciesTest {
     private Map<String, Set<String>> getBundleNamesPerRegions(SubsystemResolver resolver) {
         Map<String, Set<String>> mapping = new HashMap<>();
         Map<String, Set<Resource>> bundles = resolver.getBundlesPerRegions();
-        for (Map.Entry<String,Set<Resource>> entry : bundles.entrySet()) {
+        for (Map.Entry<String, Set<Resource>> entry : bundles.entrySet()) {
             for (Resource r : entry.getValue()) {
                 addToMapSet(mapping, entry.getKey(), r.toString());
             }
         }
         return mapping;
     }
-
 
     private void dumpWiring(SubsystemResolver resolver) {
         System.out.println("Wiring");
@@ -199,8 +172,10 @@ public class FeaturesDependenciesTest {
 
     private String getName(Resource resource) {
         Capability cap = resource.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).get(0);
-        return cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE) + ": "
-                + cap.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE) + "/"
+        return cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE)
+                + ": "
+                + cap.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE)
+                + "/"
                 + cap.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
     }
 
@@ -209,5 +184,4 @@ public class FeaturesDependenciesTest {
         ds.partitionFeatures(Arrays.asList(features));
         return ds.featuresByName();
     }
-
 }

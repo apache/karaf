@@ -20,7 +20,6 @@ package org.apache.karaf.shell.commands.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -42,7 +40,6 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
-import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.commands.impl.WatchAction.WatchParser;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.shell.support.completers.CommandsCompleter;
@@ -52,26 +49,42 @@ import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
-@Command(scope = "shell", name = "watch", description = "Watches & refreshes the output of a command")
+@Command(
+        scope = "shell",
+        name = "watch",
+        description = "Watches & refreshes the output of a command")
 @Parsing(WatchParser.class)
 @Service
 public class WatchAction implements Action {
 
-    @Option(name = "-n", aliases = {"--interval"}, description = "The interval between executions of the command in seconds", required = false, multiValued = false)
+    @Option(
+            name = "-n",
+            aliases = {"--interval"},
+            description = "The interval between executions of the command in seconds",
+            required = false,
+            multiValued = false)
     private long interval = 1;
-    
-    @Option(name = "-a", aliases = {"--append"}, description = "The output should be appended but not clear the console", required = false, multiValued = false)
+
+    @Option(
+            name = "-a",
+            aliases = {"--append"},
+            description = "The output should be appended but not clear the console",
+            required = false,
+            multiValued = false)
     private boolean append = false;
 
-    @Argument(index = 0, name = "command", description = "The command to watch / refresh", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "command",
+            description = "The command to watch / refresh",
+            required = true,
+            multiValued = false)
     @Completion(SubCommandCompleter.class)
     private String arguments;
 
-    @Reference
-    Session session;
+    @Reference Session session;
 
-    @Reference
-    SessionFactory sessionFactory;
+    @Reference SessionFactory sessionFactory;
 
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -92,7 +105,7 @@ public class WatchAction implements Action {
                 Attributes attr = terminal.enterRawMode();
                 try {
                     reading = Thread.currentThread();
-                    while (terminal.reader().read(1) == NonBlockingReader.READ_EXPIRED);
+                    while (terminal.reader().read(1) == NonBlockingReader.READ_EXPIRED) ;
                 } finally {
                     reading = null;
                     terminal.setAttributes(attr);
@@ -124,7 +137,12 @@ public class WatchAction implements Action {
             try {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 PrintStream printStream = new PrintStream(byteArrayOutputStream);
-                try (Session session = sessionFactory.create(new ByteArrayInputStream(new byte[0]), printStream, printStream, WatchAction.this.session)) {
+                try (Session session =
+                        sessionFactory.create(
+                                new ByteArrayInputStream(new byte[0]),
+                                printStream,
+                                printStream,
+                                WatchAction.this.session)) {
                     executing = Thread.currentThread();
                     session.execute(arguments.trim());
                 } catch (InterruptedException e) {
@@ -144,10 +162,9 @@ public class WatchAction implements Action {
                     System.out.flush();
                 }
             } catch (Exception e) {
-                //Ingore
+                // Ingore
             }
         }
-
     }
 
     @Service
@@ -166,12 +183,7 @@ public class WatchAction implements Action {
                 n2++;
                 if (n2 == command.length()) {
                     return new CommandLineImpl(
-                            new String[]{command.substring(n1)},
-                            0,
-                            cursor - n1,
-                            cursor,
-                            command
-                    );
+                            new String[] {command.substring(n1)}, 0, cursor - n1, cursor, command);
                 }
             }
             int n3 = n2 + 1;
@@ -179,21 +191,19 @@ public class WatchAction implements Action {
                 n3++;
                 if (n3 == command.length()) {
                     return new CommandLineImpl(
-                            new String[]{command.substring(n1, n2), ""},
+                            new String[] {command.substring(n1, n2), ""},
                             cursor >= n2 ? 1 : 0,
                             cursor >= n2 ? 0 : cursor - n1,
                             cursor,
-                            command
-                    );
+                            command);
                 }
             }
             return new CommandLineImpl(
-                    new String[]{command.substring(n1, n2), command.substring(n3)},
+                    new String[] {command.substring(n1, n2), command.substring(n3)},
                     cursor >= n3 ? 1 : 0,
                     cursor >= n3 ? cursor - n3 : cursor - n1,
                     cursor,
-                    command
-            );
+                    command);
         }
 
         @Override
@@ -225,14 +235,16 @@ public class WatchAction implements Action {
             List<String> cands = new ArrayList<>();
             int res = completer.complete(session, cmdLine, cands);
             for (String cand : cands) {
-                candidates.add(arg.substring(0, cmdLine.getBufferPosition() - cmdLine.getArgumentPosition()) + cand);
+                candidates.add(
+                        arg.substring(
+                                        0,
+                                        cmdLine.getBufferPosition() - cmdLine.getArgumentPosition())
+                                + cand);
             }
             if (res >= 0) {
                 res += commandLine.getBufferPosition() - commandLine.getArgumentPosition();
             }
             return res;
         }
-
     }
-
 }

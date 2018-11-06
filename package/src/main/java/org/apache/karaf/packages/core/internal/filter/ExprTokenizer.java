@@ -33,20 +33,20 @@ public class ExprTokenizer {
             operatorMap.put(operator.charAt(0), operator);
         }
     }
-    
+
     public String peekNextToken() {
         int oldPos = currentPos;
         String token = nextToken();
         currentPos = oldPos;
         return token;
     }
-    
+
     public String nextToken() {
         if (currentPos >= expr.length()) {
             return null;
         }
         while (isWhiteSpace()) {
-            currentPos ++;
+            currentPos++;
         }
         Character first = expr.charAt(currentPos);
         String operator = operatorMap.get(first);
@@ -55,16 +55,18 @@ public class ExprTokenizer {
             return operator;
         }
         int firstPos = currentPos;
-        while (currentPos < expr.length() && !operatorMap.containsKey(expr.charAt(currentPos)) && !isWhiteSpace()) {
-            currentPos ++;
+        while (currentPos < expr.length()
+                && !operatorMap.containsKey(expr.charAt(currentPos))
+                && !isWhiteSpace()) {
+            currentPos++;
         }
-        return expr.substring(firstPos, currentPos); 
+        return expr.substring(firstPos, currentPos);
     }
 
     private boolean isWhiteSpace() {
         return expr.charAt(currentPos) == ' ';
     }
-    
+
     public String toString() {
         return expr.substring(currentPos);
     }

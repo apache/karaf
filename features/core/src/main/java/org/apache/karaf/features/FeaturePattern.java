@@ -19,7 +19,6 @@
 package org.apache.karaf.features;
 
 import java.util.regex.Pattern;
-
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
@@ -28,12 +27,14 @@ import org.osgi.framework.Version;
 /**
  * Helper class to compare feature identifiers that may use globs and version ranges.
  *
- * Following feature identifiers are supported:<ul>
- *     <li>name (simple name)</li>
- *     <li>name/version (Karaf feature ID syntax)</li>
- *     <li>name/version-range (Karaf feature ID syntax using version-range)</li>
- *     <li>name;range=version (OSGi manifest header with <code>range</code> <em>attribute</em>)</li>
- *     <li>name;range=version-range (OSGi manifest header with <code>range</code> <em>attribute</em>)</li>
+ * <p>Following feature identifiers are supported:
+ *
+ * <ul>
+ *   <li>name (simple name)
+ *   <li>name/version (Karaf feature ID syntax)
+ *   <li>name/version-range (Karaf feature ID syntax using version-range)
+ *   <li>name;range=version (OSGi manifest header with <code>range</code> <em>attribute</em>)
+ *   <li>name;range=version-range (OSGi manifest header with <code>range</code> <em>attribute</em>)
  * </ul>
  */
 public class FeaturePattern {
@@ -57,7 +58,8 @@ public class FeaturePattern {
             nameString = originalId.substring(0, originalId.indexOf("/"));
             versionString = originalId.substring(originalId.indexOf("/") + 1);
         } else if (originalId.contains(";")) {
-            Clause[] c = org.apache.felix.utils.manifest.Parser.parseClauses(new String[] { originalId });
+            Clause[] c =
+                    org.apache.felix.utils.manifest.Parser.parseClauses(new String[] {originalId});
             nameString = c[0].getName();
             versionString = c[0].getAttribute(RANGE);
         }
@@ -73,7 +75,8 @@ public class FeaturePattern {
                     version = new Version(VersionCleaner.clean(versionString));
                 }
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Can't parse version \"" + versionString + "\" as OSGi version object.", e);
+                throw new IllegalArgumentException(
+                        "Can't parse version \"" + versionString + "\" as OSGi version object.", e);
             }
         } else {
             versionRange = new VersionRange(Version.emptyVersion);
@@ -94,6 +97,7 @@ public class FeaturePattern {
 
     /**
      * Returns <code>true</code> if this feature pattern matches given feature/version
+     *
      * @param featureName
      * @param featureVersion
      * @return
@@ -122,5 +126,4 @@ public class FeaturePattern {
     public String toString() {
         return originalId;
     }
-
 }

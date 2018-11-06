@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.config.command;
 
+import java.util.List;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter;
 import org.apache.karaf.shell.api.action.Argument;
@@ -24,16 +25,22 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.util.List;
-
-@Command(scope = "config", name = "property-get", description = "Gets the value of a property in the currently edited configuration.")
+@Command(
+        scope = "config",
+        name = "property-get",
+        description = "Gets the value of a property in the currently edited configuration.")
 @Service
 public class PropGetCommand extends ConfigPropertyCommandSupport {
 
     @Option(name = "--raw")
     boolean raw;
 
-    @Argument(index = 0, name = "property", description = "The name of the property to get value for", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "property",
+            description = "The name of the property to get value for",
+            required = true,
+            multiValued = false)
     @Completion(ConfigurationPropertyCompleter.class)
     String prop;
 
@@ -48,6 +55,4 @@ public class PropGetCommand extends ConfigPropertyCommandSupport {
             System.out.println(displayValue(props.get(prop)));
         }
     }
-
-
 }

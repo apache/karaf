@@ -25,26 +25,23 @@ import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.karaf.jpm.Process;
 
 public class ProcessImpl implements Process {
 
-    /**
-     * 
-     */
+    /** */
     private static final long serialVersionUID = -8140632422386086507L;
 
     private int pid;
-    //private File input;
-    //private File output;
-    //private File error;
+    // private File input;
+    // private File output;
+    // private File error;
 
-    public ProcessImpl(int pid/*, File input, File output, File error*/) {
+    public ProcessImpl(int pid /*, File input, File output, File error*/) {
         this.pid = pid;
-        //this.input = input;
-        //this.output = output;
-        //this.error = error;
+        // this.input = input;
+        // this.output = output;
+        // this.error = error;
     }
 
     public int getPid() {
@@ -59,8 +56,10 @@ public class ProcessImpl implements Process {
             return ret == 0;
         } else {
             try {
-                java.lang.Process process = new java.lang.ProcessBuilder("ps", "-p", Integer.toString(pid)).start();
-                BufferedReader r = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                java.lang.Process process =
+                        new java.lang.ProcessBuilder("ps", "-p", Integer.toString(pid)).start();
+                BufferedReader r =
+                        new BufferedReader(new InputStreamReader(process.getInputStream()));
                 r.readLine(); // skip headers
                 String s = r.readLine();
                 boolean running = s != null && s.length() > 0;
@@ -79,7 +78,9 @@ public class ProcessImpl implements Process {
             props.put("${pid}", Integer.toString(pid));
             ret = ScriptUtils.execute("destroy", props);
         } else {
-            ret = ScriptUtils.executeProcess(new java.lang.ProcessBuilder("kill", "-9", Integer.toString(pid)));
+            ret =
+                    ScriptUtils.executeProcess(
+                            new java.lang.ProcessBuilder("kill", "-9", Integer.toString(pid)));
         }
         if (ret != 0) {
             throw new IOException("Unable to destroy process, it may already be terminated");
@@ -109,15 +110,15 @@ public class ProcessImpl implements Process {
     }
 
     public static Process create(File dir, String command) throws IOException {
-        //File input = File.createTempFile("jpm.", ".input");
-        //File output = File.createTempFile("jpm.", ".output");
-        //File error = File.createTempFile("jpm.", ".error");
+        // File input = File.createTempFile("jpm.", ".input");
+        // File output = File.createTempFile("jpm.", ".output");
+        // File error = File.createTempFile("jpm.", ".error");
         File pidFile = File.createTempFile("jpm.", ".pid");
         try {
             Map<String, String> props = new HashMap<>();
-            //props.put("${in.file}", input.getCanonicalPath());
-            //props.put("${out.file}", output.getCanonicalPath());
-            //props.put("${err.file}", error.getCanonicalPath());
+            // props.put("${in.file}", input.getCanonicalPath());
+            // props.put("${out.file}", output.getCanonicalPath());
+            // props.put("${err.file}", error.getCanonicalPath());
             props.put("${pid.file}", pidFile.getCanonicalPath());
             props.put("${dir}", dir != null ? dir.getCanonicalPath() : "");
             if (ScriptUtils.isWindows()) {
@@ -129,7 +130,7 @@ public class ProcessImpl implements Process {
                 throw new IOException("Unable to create process (error code: " + ret + ")");
             }
             int pid = readPid(pidFile);
-            return new ProcessImpl(pid/*, input, output, error*/);
+            return new ProcessImpl(pid /*, input, output, error*/);
         } finally {
             pidFile.delete();
         }
@@ -148,8 +149,8 @@ public class ProcessImpl implements Process {
         } finally {
             try {
                 is.close();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
         }
     }
-
 }

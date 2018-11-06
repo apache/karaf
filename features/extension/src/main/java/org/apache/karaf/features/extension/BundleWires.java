@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.HostNamespace;
@@ -71,7 +70,8 @@ class BundleWires {
             Files.createDirectories(path);
             Path file = path.resolve(Long.toString(this.bundleId));
             Files.createDirectories(file.getParent());
-            try (BufferedWriter fw = Files.newBufferedWriter(file, TRUNCATE_EXISTING, WRITE, CREATE)) {
+            try (BufferedWriter fw =
+                    Files.newBufferedWriter(file, TRUNCATE_EXISTING, WRITE, CREATE)) {
                 for (Map.Entry<String, String> wire : wiring.entrySet()) {
                     fw.append(wire.getKey()).append('\n');
                     fw.append(wire.getValue()).append('\n');
@@ -93,14 +93,15 @@ class BundleWires {
     }
 
     long getFragmentHost() {
-        return wiring.entrySet().stream() //
-            .filter(e -> e.getKey().startsWith(HostNamespace.HOST_NAMESPACE)) //
-            .map(Map.Entry::getValue) //
-            .mapToLong(this::getBundleId) //
-            .findFirst() //
-            .orElse(-1);
+        return wiring.entrySet()
+                .stream() //
+                .filter(e -> e.getKey().startsWith(HostNamespace.HOST_NAMESPACE)) //
+                .map(Map.Entry::getValue) //
+                .mapToLong(this::getBundleId) //
+                .findFirst() //
+                .orElse(-1);
     }
-    
+
     private long getBundleId(String value) {
         int idx = value.indexOf(';');
         if (idx > 0) {
@@ -116,7 +117,7 @@ class BundleWires {
 
     private boolean checkRemove(String cap, BundleCapability cand) {
         return cap != null && !cap.equals(getCapabilityId(cand))
-            || cap == null && cand.getRevision().getBundle().getBundleId() != this.bundleId;
+                || cap == null && cand.getRevision().getBundle().getBundleId() != this.bundleId;
     }
 
     private String getRequirementId(Requirement requirement) {

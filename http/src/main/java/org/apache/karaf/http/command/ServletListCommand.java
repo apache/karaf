@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,7 +17,6 @@
 package org.apache.karaf.http.command;
 
 import java.util.Arrays;
-
 import org.apache.karaf.http.core.ServletInfo;
 import org.apache.karaf.http.core.ServletService;
 import org.apache.karaf.shell.api.action.Action;
@@ -32,12 +31,15 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class ServletListCommand implements Action {
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
-    @Reference
-    private ServletService servletService;
-    
+    @Reference private ServletService servletService;
+
     @Override
     public Object execute() throws Exception {
         ShellTable table = new ShellTable();
@@ -49,8 +51,14 @@ public class ServletListCommand implements Action {
         table.column(new Col("Url"));
 
         for (ServletInfo info : servletService.getServlets()) {
-            table.addRow().addContent(info.getBundleId(), info.getClassName(), info.getName(),
-                                      info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls()));
+            table.addRow()
+                    .addContent(
+                            info.getBundleId(),
+                            info.getClassName(),
+                            info.getName(),
+                            info.getStateString(),
+                            info.getAlias(),
+                            Arrays.toString(info.getUrls()));
         }
         table.print(System.out, !noFormat);
         return null;

@@ -20,15 +20,13 @@ package org.apache.karaf.features.internal.region;
 
 import org.apache.karaf.features.BundleInfo;
 
-/**
- * Additional callback methods that may be invoked from {@link SubsystemResolver}
- */
+/** Additional callback methods that may be invoked from {@link SubsystemResolver} */
 public interface SubsystemResolverCallback {
 
     /**
      * Notification about {@link BundleInfo bundle} being blacklisted
+     *
      * @param bundleInfo
      */
     void bundleBlacklisted(BundleInfo bundleInfo);
-
 }

@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum Signal {
-
     HUP(1),
     INT(2),
     QUIT(3),
@@ -77,5 +76,4 @@ public enum Signal {
     public int getNumeric() {
         return numeric;
     }
-
 }

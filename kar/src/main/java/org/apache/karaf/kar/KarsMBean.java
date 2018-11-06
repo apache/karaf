@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.kar;
 
-import javax.management.MBeanException;
 import java.util.List;
+import javax.management.MBeanException;
 
 public interface KarsMBean {
 
@@ -56,10 +56,9 @@ public interface KarsMBean {
 
     /**
      * Uninstall a KAR file.
-     * 
+     *
      * @param name the name of the KAR file.
      * @throws MBeanException in case of uninstall failure.
      */
     void uninstall(String name) throws MBeanException;
-
 }

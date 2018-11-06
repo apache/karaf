@@ -28,14 +28,13 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @ExamReactorStrategy(PerClass.class)
 public class SystemCommandSecurityTest extends SshCommandTestBase {
     private static int counter = 0;
-          
+
     @Test
     public void testSystemCommandSecurityViaSsh() throws Exception {
         String manageruser = "man" + System.nanoTime() + "_" + counter++;
         String vieweruser = "view" + System.nanoTime() + "_" + counter++;
 
         addUsers(manageruser, vieweruser);
-
 
         assertCommand(vieweruser, "system:name", Result.OK);
         assertCommand(vieweruser, "system:start-level", Result.OK);
@@ -58,7 +57,9 @@ public class SystemCommandSecurityTest extends SshCommandTestBase {
         Assert.assertTrue(assertCommand("karaf", "system:start-level", Result.OK).contains("99"));
         assertCommand("karaf", "system:start-level 100", Result.OK);
         assertCommand("karaf", "system:property vieweruser " + vieweruser, Result.OK);
-        Assert.assertTrue(assertCommand("karaf", "system:property vieweruser", Result.OK).contains(vieweruser));
+        Assert.assertTrue(
+                assertCommand("karaf", "system:property vieweruser", Result.OK)
+                        .contains(vieweruser));
         assertCommand("karaf", "system:shutdown --help", Result.OK);
     }
 }

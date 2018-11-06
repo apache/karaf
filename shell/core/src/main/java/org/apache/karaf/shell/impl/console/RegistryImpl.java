@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
@@ -44,7 +43,7 @@ public class RegistryImpl implements Registry {
         this.parent = parent;
         this.session = session;
     }
-    
+
     @Override
     public List<Command> getCommands() {
         return getServices(Command.class);
@@ -195,7 +194,5 @@ public class RegistryImpl implements Registry {
             this.clazz = clazz;
             this.callable = callable;
         }
-
     }
-
 }

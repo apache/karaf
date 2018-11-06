@@ -19,10 +19,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
@@ -43,27 +41,29 @@ public class ImportServiceTest extends KarafTestSupport {
     @Configuration
     public Option[] config() {
         List<Option> options = new ArrayList<>(Arrays.asList(super.config()));
-        InputStream testBundleImportService = bundle()
-            .set(Constants.IMPORT_SERVICE, "FooService")
-            .set(Constants.BUNDLE_SYMBOLICNAME, BUNDLE1_NAME)
-            .set(Constants.BUNDLE_VERSION, "1.0.0")
-            .set(Constants.BUNDLE_MANIFESTVERSION, "2")
-            .build();
+        InputStream testBundleImportService =
+                bundle().set(Constants.IMPORT_SERVICE, "FooService")
+                        .set(Constants.BUNDLE_SYMBOLICNAME, BUNDLE1_NAME)
+                        .set(Constants.BUNDLE_VERSION, "1.0.0")
+                        .set(Constants.BUNDLE_MANIFESTVERSION, "2")
+                        .build();
         options.add(CoreOptions.streamBundle(testBundleImportService));
-        InputStream testBundleRequireService = bundle()
-            .set(Constants.REQUIRE_CAPABILITY, "osgi.service;effective:=active;filter:=\"(objectClass=FooService)\"")
-            .set(Constants.BUNDLE_SYMBOLICNAME, BUNDLE2_NAME)
-            .set(Constants.BUNDLE_VERSION, "1.0.0")
-            .set(Constants.BUNDLE_MANIFESTVERSION, "2")
-            .build();
+        InputStream testBundleRequireService =
+                bundle().set(
+                                Constants.REQUIRE_CAPABILITY,
+                                "osgi.service;effective:=active;filter:=\"(objectClass=FooService)\"")
+                        .set(Constants.BUNDLE_SYMBOLICNAME, BUNDLE2_NAME)
+                        .set(Constants.BUNDLE_VERSION, "1.0.0")
+                        .set(Constants.BUNDLE_MANIFESTVERSION, "2")
+                        .build();
         options.add(CoreOptions.streamBundle(testBundleRequireService));
         return options.toArray(new Option[] {});
     }
-    
-  
+
     /**
-     * Checks that the resolver does not mandate specified required services to be present.
-     * This is done for backwards compatibility as not all bundles define capabilities for services they start.
+     * Checks that the resolver does not mandate specified required services to be present. This is
+     * done for backwards compatibility as not all bundles define capabilities for services they
+     * start.
      */
     @Test
     public void checkBundleStarted() throws InterruptedException {

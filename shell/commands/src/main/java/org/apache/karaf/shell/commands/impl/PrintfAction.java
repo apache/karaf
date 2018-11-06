@@ -17,7 +17,6 @@
 package org.apache.karaf.shell.commands.impl;
 
 import java.util.Collection;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -27,10 +26,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class PrintfAction implements Action {
 
-    @Argument(index = 0, name = "format", description = "The format pattern to use", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "format",
+            description = "The format pattern to use",
+            required = true,
+            multiValued = false)
     private String format;
 
-    @Argument(index = 1, name = "arguments", description = "The arguments for the given format pattern", required = true, multiValued = true)
+    @Argument(
+            index = 1,
+            name = "arguments",
+            description = "The arguments for the given format pattern",
+            required = true,
+            multiValued = true)
     private Collection<Object> arguments = null;
 
     @Override
@@ -38,5 +47,4 @@ public class PrintfAction implements Action {
         System.out.printf(format, arguments.toArray());
         return null;
     }
-
 }

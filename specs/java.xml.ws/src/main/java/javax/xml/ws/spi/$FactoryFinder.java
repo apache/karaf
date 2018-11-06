@@ -16,7 +16,6 @@
  */
 package javax.xml.ws.spi;
 
-import javax.xml.ws.WebServiceException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +24,7 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.ws.WebServiceException;
 
 class $FactoryFinder {
 
@@ -66,7 +66,8 @@ class $FactoryFinder {
         return (T) newInstance(fallbackClassName, fallbackClassName, classLoader);
     }
 
-    private static Object fromSystemProperty(String factoryId, String fallbackClassName, ClassLoader classLoader) {
+    private static Object fromSystemProperty(
+            String factoryId, String fallbackClassName, ClassLoader classLoader) {
         try {
             String systemProp = System.getProperty(factoryId);
             if (systemProp != null) {
@@ -77,7 +78,8 @@ class $FactoryFinder {
         return null;
     }
 
-    private static Object fromJDKProperties(String factoryId, String fallbackClassName, ClassLoader classLoader) {
+    private static Object fromJDKProperties(
+            String factoryId, String fallbackClassName, ClassLoader classLoader) {
         Path path = null;
         try {
             String JAVA_HOME = System.getProperty("java.home");
@@ -94,8 +96,12 @@ class $FactoryFinder {
                 return newInstance(factoryClassName, fallbackClassName, classLoader);
             }
         } catch (Exception ignored) {
-            LOGGER.log(Level.SEVERE, "Error reading JAX-WS configuration from ["  + path +
-                    "] file. Check it is accessible and has correct format.", ignored);
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error reading JAX-WS configuration from ["
+                            + path
+                            + "] file. Check it is accessible and has correct format.",
+                    ignored);
         }
         return null;
     }
@@ -105,11 +111,15 @@ class $FactoryFinder {
         try {
             ServiceLoader<T> serviceLoader = ServiceLoader.load(spiClass);
             for (T impl : serviceLoader) {
-                LOGGER.fine("ServiceProvider loading Facility used; returning object [" + impl.getClass().getName() + "]");
+                LOGGER.fine(
+                        "ServiceProvider loading Facility used; returning object ["
+                                + impl.getClass().getName()
+                                + "]");
                 return impl;
             }
         } catch (Throwable t) {
-            throw new WebServiceException("Error while searching for service [" + spiClass.getName() + "]", t);
+            throw new WebServiceException(
+                    "Error while searching for service [" + spiClass.getName() + "]", t);
         }
         return null;
     }
@@ -124,7 +134,8 @@ class $FactoryFinder {
         }
     }
 
-    private static Class nullSafeLoadClass(String className, ClassLoader classLoader) throws ClassNotFoundException {
+    private static Class nullSafeLoadClass(String className, ClassLoader classLoader)
+            throws ClassNotFoundException {
         if (classLoader == null) {
             return Class.forName(className);
         } else {
@@ -132,17 +143,24 @@ class $FactoryFinder {
         }
     }
 
-    private static Object newInstance(String className, String defaultImplClassName, ClassLoader classLoader) throws WebServiceException {
+    private static Object newInstance(
+            String className, String defaultImplClassName, ClassLoader classLoader)
+            throws WebServiceException {
         try {
-            return safeLoadClass(className, defaultImplClassName, classLoader).getConstructor().newInstance();
+            return safeLoadClass(className, defaultImplClassName, classLoader)
+                    .getConstructor()
+                    .newInstance();
         } catch (ClassNotFoundException x) {
             throw new WebServiceException("Provider " + className + " not found", x);
         } catch (Exception x) {
-            throw new WebServiceException("Provider " + className + " could not be instantiated: " + x, x);
+            throw new WebServiceException(
+                    "Provider " + className + " could not be instantiated: " + x, x);
         }
     }
 
-    private static Class<?> safeLoadClass(String className, String defaultImplClassName, ClassLoader classLoader) throws ClassNotFoundException {
+    private static Class<?> safeLoadClass(
+            String className, String defaultImplClassName, ClassLoader classLoader)
+            throws ClassNotFoundException {
         try {
             checkPackageAccess(className);
         } catch (SecurityException se) {
@@ -161,5 +179,4 @@ class $FactoryFinder {
             throw new WebServiceException(x.toString(), x);
         }
     }
-
 }

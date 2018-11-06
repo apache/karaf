@@ -17,7 +17,6 @@
 package org.apache.karaf.profile.command;
 
 import java.util.List;
-
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.ProfileService;
@@ -28,24 +27,31 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(name = "create", scope = "profile", description = "Create a new profile with the specified name and parents", detailedDescription = "classpath:profileCreate.txt")
+@Command(
+        name = "create",
+        scope = "profile",
+        description = "Create a new profile with the specified name and parents",
+        detailedDescription = "classpath:profileCreate.txt")
 @Service
 public class ProfileCreate implements Action {
 
-    @Option(name = "--parents", multiValued = true, required = false, description = "Optionally specifies one or multiple parent profiles. To specify multiple parent profiles, specify this flag multiple times on the command line. For example, --parents foo --parents bar.")
+    @Option(
+            name = "--parents",
+            multiValued = true,
+            required = false,
+            description =
+                    "Optionally specifies one or multiple parent profiles. To specify multiple parent profiles, specify this flag multiple times on the command line. For example, --parents foo --parents bar.")
     private List<String> parents;
+
     @Argument(index = 0)
     private String profileId;
-    @Reference
-    private ProfileService profileService;
+
+    @Reference private ProfileService profileService;
 
     @Override
     public Object execute() throws Exception {
-        Profile profile = ProfileBuilder.Factory.create(profileId)
-                .setParents(parents)
-                .getProfile();
-		profileService.createProfile(profile);
+        Profile profile = ProfileBuilder.Factory.create(profileId).setParents(parents).getProfile();
+        profileService.createProfile(profile);
         return null;
     }
-
 }

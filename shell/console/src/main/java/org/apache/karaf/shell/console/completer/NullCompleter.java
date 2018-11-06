@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.console.completer;
 
 import java.util.List;
-
 import org.apache.karaf.shell.console.Completer;
 
 @Deprecated

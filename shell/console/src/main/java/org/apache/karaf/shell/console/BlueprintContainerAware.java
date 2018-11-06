@@ -24,5 +24,4 @@ import org.osgi.service.blueprint.container.BlueprintContainer;
 public interface BlueprintContainerAware {
 
     void setBlueprintContainer(BlueprintContainer blueprintContainer);
-
 }

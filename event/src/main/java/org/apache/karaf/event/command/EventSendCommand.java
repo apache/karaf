@@ -19,7 +19,6 @@ package org.apache.karaf.event.command;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -32,16 +31,17 @@ import org.osgi.service.event.EventAdmin;
 @Command(scope = "event", name = "send", description = "Send a simple event to a topic")
 @Service
 public class EventSendCommand implements Action {
-    @Reference
-    Session session;
-    
-    @Reference
-    EventAdmin eventAdmin;
+    @Reference Session session;
 
-    @Argument(index=0, required=true)
+    @Reference EventAdmin eventAdmin;
+
+    @Argument(index = 0, required = true)
     String topic;
 
-    @Argument(index=1, multiValued=true, description="Event properties in format key=value key2=value2 ...")
+    @Argument(
+            index = 1,
+            multiValued = true,
+            description = "Event properties in format key=value key2=value2 ...")
     List<String> properties;
 
     @Override
@@ -66,5 +66,4 @@ public class EventSendCommand implements Action {
         }
         return properties;
     }
-
 }

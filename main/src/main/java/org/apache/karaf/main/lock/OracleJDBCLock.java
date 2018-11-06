@@ -23,9 +23,8 @@ import java.sql.ResultSet;
 import org.apache.felix.utils.properties.Properties;
 
 /**
- * Represents an exclusive lock on a database,
- * used to avoid multiple Karaf instances attempting
- * to become master.
+ * Represents an exclusive lock on a database, used to avoid multiple Karaf instances attempting to
+ * become master.
  */
 public class OracleJDBCLock extends DefaultJDBCLock {
 
@@ -45,11 +44,10 @@ public class OracleJDBCLock extends DefaultJDBCLock {
     }
 
     /**
-     * When we perform an update on a long lived locked table, Oracle will save
-     * a copy of the transaction in it's UNDO table space. Eventually this can
-     * cause the UNDO table to become full, disrupting all locks in the DB instance.
-     * A select query just touches the table, ensuring we can still read the DB but
-     * doesn't add to the UNDO.
+     * When we perform an update on a long lived locked table, Oracle will save a copy of the
+     * transaction in it's UNDO table space. Eventually this can cause the UNDO table to become
+     * full, disrupting all locks in the DB instance. A select query just touches the table,
+     * ensuring we can still read the DB but doesn't add to the UNDO.
      */
     @Override
     public boolean lock() {
@@ -57,11 +55,10 @@ public class OracleJDBCLock extends DefaultJDBCLock {
     }
 
     /**
-     * When we perform an update on a long lived locked table, Oracle will save
-     * a copy of the transaction in it's UNDO table space. Eventually this can
-     * cause the UNDO table to become full, disrupting all locks in the DB instance.
-     * A select query just touches the table, ensuring we can still read the DB but
-     * doesn't add to the UNDO.
+     * When we perform an update on a long lived locked table, Oracle will save a copy of the
+     * transaction in it's UNDO table space. Eventually this can cause the UNDO table to become
+     * full, disrupting all locks in the DB instance. A select query just touches the table,
+     * ensuring we can still read the DB but doesn't add to the UNDO.
      */
     @Override
     boolean updateLock() {
@@ -70,17 +67,18 @@ public class OracleJDBCLock extends DefaultJDBCLock {
 
     /**
      * A SELECT FOR UPDATE does not create a database lock when the SELECT FOR UPDATE is performed
-     * on an empty selection. So a succesfull call to {@link DefaultJDBCLock#acquireLock()} is not sufficient to
-     * ensure that we are the only one who have acquired the lock.
+     * on an empty selection. So a succesfull call to {@link DefaultJDBCLock#acquireLock()} is not
+     * sufficient to ensure that we are the only one who have acquired the lock.
      */
     @Override
     boolean acquireLock() {
         return super.acquireLock() && lockAcquiredOnNonEmptySelection();
     }
 
-    //Verify that we have a non empty record set.
+    // Verify that we have a non empty record set.
     private boolean lockAcquiredOnNonEmptySelection() {
-        String verifySelectionNotEmpytStatement = statements.getLockVerifySelectionNotEmptyStatement();
+        String verifySelectionNotEmpytStatement =
+                statements.getLockVerifySelectionNotEmptyStatement();
         PreparedStatement preparedStatement = null;
         boolean lockAcquired = false;
 

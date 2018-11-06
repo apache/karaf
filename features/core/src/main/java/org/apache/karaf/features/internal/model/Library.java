@@ -23,17 +23,15 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "library", propOrder = { "location" })
+@XmlType(
+        name = "library",
+        propOrder = {"location"})
 public class Library implements org.apache.karaf.features.Library {
 
-    @XmlValue
-    private String location;
-    @XmlAttribute
-    private String type;
-    @XmlAttribute
-    private boolean export;
-    @XmlAttribute
-    private boolean delegate;
+    @XmlValue private String location;
+    @XmlAttribute private String type;
+    @XmlAttribute private boolean export;
+    @XmlAttribute private boolean delegate;
 
     @Override
     public String getLocation() {

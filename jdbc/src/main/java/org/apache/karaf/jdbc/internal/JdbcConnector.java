@@ -22,12 +22,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Deque;
 import java.util.LinkedList;
-
 import javax.sql.CommonDataSource;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -38,25 +36,27 @@ public class JdbcConnector implements Closeable {
     private Deque<AutoCloseable> resources;
 
     public JdbcConnector(final BundleContext bundleContext, final ServiceReference<?> reference) {
-        this.datasource = (CommonDataSource)bundleContext.getService(reference);
+        this.datasource = (CommonDataSource) bundleContext.getService(reference);
         this.resources = new LinkedList<>();
         this.resources.addFirst(() -> bundleContext.ungetService(reference));
     }
-    
+
     public Connection connect() throws SQLException {
         if (connection == null) {
             if (datasource instanceof DataSource) {
                 connection = ((DataSource) datasource).getConnection();
             } else if (datasource instanceof XADataSource) {
-                connection = register(((XADataSource) datasource).getXAConnection()).getConnection();
+                connection =
+                        register(((XADataSource) datasource).getXAConnection()).getConnection();
             } else {
-                throw new IllegalStateException("Datasource is not an instance of DataSource nor XADataSource");
+                throw new IllegalStateException(
+                        "Datasource is not an instance of DataSource nor XADataSource");
             }
             register(connection);
         }
         return connection;
     }
-    
+
     public Statement createStatement() throws SQLException {
         return register(connect().createStatement());
     }
@@ -81,5 +81,4 @@ public class JdbcConnector implements Closeable {
             }
         }
     }
-
 }

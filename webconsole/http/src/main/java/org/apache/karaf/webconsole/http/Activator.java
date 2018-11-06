@@ -16,10 +16,9 @@
  */
 package org.apache.karaf.webconsole.http;
 
-import javax.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
+import javax.servlet.Servlet;
 import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -79,5 +78,4 @@ public class Activator extends BaseActivator {
             webEaHandler = null;
         }
     }
-
 }

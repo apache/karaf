@@ -18,9 +18,5 @@ package org.apache.karaf.jpa.hibernate;
 
 import org.hibernate.stat.Statistics;
 
-/**
- * MXBean compliant variant of hibernate Statistics 
- */
-public interface StatisticsMXBean extends Statistics {
-
-}
+/** MXBean compliant variant of hibernate Statistics */
+public interface StatisticsMXBean extends Statistics {}

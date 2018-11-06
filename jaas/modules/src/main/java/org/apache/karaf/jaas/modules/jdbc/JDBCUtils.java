@@ -21,12 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public final class JDBCUtils {
 
@@ -34,10 +32,11 @@ public final class JDBCUtils {
     public static final String JNDI = "jndi:";
     public static final String OSGI = "osgi:";
 
-    private JDBCUtils() { }
+    private JDBCUtils() {}
 
     /**
-     * Look up a datasource from the url. The datasource can be passed either as jndi name or bundles ldap filter.
+     * Look up a datasource from the url. The datasource can be passed either as jndi name or
+     * bundles ldap filter.
      *
      * @param bc the bundle context.
      * @param url the datasource URL.
@@ -55,7 +54,8 @@ public final class JDBCUtils {
     protected static Object doCreateDatasource(BundleContext bc, String url) throws Exception {
         url = (url != null) ? url.trim() : null;
         if (url == null || url.isEmpty()) {
-            throw new Exception("Illegal datasource url format. Datasource URL cannot be null or empty.");
+            throw new Exception(
+                    "Illegal datasource url format. Datasource URL cannot be null or empty.");
         } else if (url.startsWith(JNDI)) {
             String jndiName = url.substring(JNDI.length());
             InitialContext ic = new InitialContext();
@@ -82,14 +82,16 @@ public final class JDBCUtils {
                 bc.ungetService(ref);
                 return ds;
             } else {
-                throw new Exception("Unable to find service reference for datasource: " + clazz + "/" + filter);
+                throw new Exception(
+                        "Unable to find service reference for datasource: " + clazz + "/" + filter);
             }
         } else {
             throw new Exception("Illegal datasource url format " + url);
         }
     }
 
-    protected static int rawUpdate(DataSource dataSource, String query, String... params) throws SQLException {
+    protected static int rawUpdate(DataSource dataSource, String query, String... params)
+            throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 for (int i = 0; i < params.length; i++) {
@@ -104,7 +106,8 @@ public final class JDBCUtils {
         }
     }
 
-    protected static int rawUpdate(Connection connection, String query, String... params) throws SQLException {
+    protected static int rawUpdate(Connection connection, String query, String... params)
+            throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (int i = 0; i < params.length; i++) {
                 statement.setString(i + 1, params[i]);
@@ -113,13 +116,15 @@ public final class JDBCUtils {
         }
     }
 
-    protected static List<String> rawSelect(DataSource dataSource, String query, String... params) throws SQLException {
+    protected static List<String> rawSelect(DataSource dataSource, String query, String... params)
+            throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             return rawSelect(connection, query, params);
         }
     }
 
-    protected static List<String> rawSelect(Connection connection, String query, String... params) throws SQLException {
+    protected static List<String> rawSelect(Connection connection, String query, String... params)
+            throws SQLException {
         List<String> results = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (int i = 0; i < params.length; i++) {
@@ -133,5 +138,4 @@ public final class JDBCUtils {
         }
         return results;
     }
-
 }

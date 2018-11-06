@@ -16,10 +16,9 @@
 
 package org.apache.karaf.jaas.modules;
 
-import org.apache.karaf.jaas.boot.ProxyLoginModule;
-
-import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
+import javax.security.auth.login.AppConfigurationEntry;
+import org.apache.karaf.jaas.boot.ProxyLoginModule;
 
 public class BackingEngineService {
 
@@ -29,7 +28,8 @@ public class BackingEngineService {
 
         if (engineFactories != null) {
             for (BackingEngineFactory factory : engineFactories) {
-                String loginModuleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                String loginModuleClass =
+                        (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
                 if (factory.getModuleClass().equals(loginModuleClass)) {
                     return factory.build(entry.getOptions());
                 }
@@ -45,5 +45,4 @@ public class BackingEngineService {
     public void setEngineFactories(List<BackingEngineFactory> engineFactories) {
         this.engineFactories = engineFactories;
     }
-
 }

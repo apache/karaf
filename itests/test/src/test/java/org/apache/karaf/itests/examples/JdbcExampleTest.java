@@ -28,7 +28,10 @@ public class JdbcExampleTest extends KarafTestSupport {
     @Test
     public void test() throws Exception {
         // adding jdbc example features repository
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-jdbc-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-jdbc-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         // install the karaf-jdbc-example-provider feature
         installAndAssertFeature("karaf-jdbc-example-provider");
@@ -53,5 +56,4 @@ public class JdbcExampleTest extends KarafTestSupport {
         System.out.println(bookings);
         assertContainsNot("AF520", bookings);
     }
-
 }

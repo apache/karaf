@@ -17,7 +17,6 @@ package org.apache.karaf.jaas.modules;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
@@ -25,7 +24,7 @@ import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 public interface BackingEngine {
 
     String GROUP_PREFIX = "_g_:";
-    
+
     /**
      * Create a new user.
      *
@@ -49,7 +48,8 @@ public interface BackingEngine {
     List<UserPrincipal> listUsers();
 
     /**
-     * Retrieve the {@link UserPrincipal} corresponding to an username, or {@code null} if user doesn't exist.
+     * Retrieve the {@link UserPrincipal} corresponding to an username, or {@code null} if user
+     * doesn't exist.
      *
      * @param username The username.
      * @return The {@link UserPrincipal} or {@code null}.
@@ -63,7 +63,7 @@ public interface BackingEngine {
      * @return the list of {@link GroupPrincipal}.
      */
     List<GroupPrincipal> listGroups(UserPrincipal user);
-    
+
     /**
      * List all groups.
      *
@@ -78,7 +78,7 @@ public interface BackingEngine {
      * @param group the group.
      */
     void addGroup(String username, String group);
-    
+
     /**
      * Create a group
      *
@@ -95,8 +95,8 @@ public interface BackingEngine {
     void deleteGroup(String username, String group);
 
     /**
-     * List Roles for <code>principal</code>. This could either be a
-     * {@link UserPrincipal} or a {@link GroupPrincipal}.
+     * List Roles for <code>principal</code>. This could either be a {@link UserPrincipal} or a
+     * {@link GroupPrincipal}.
      *
      * @param principal the principal.
      * @return the list of roles.
@@ -134,5 +134,4 @@ public interface BackingEngine {
      * @param role the role.
      */
     void deleteGroupRole(String group, String role);
-
 }

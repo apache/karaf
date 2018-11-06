@@ -1,4 +1,4 @@
- /*
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,20 +16,19 @@
  */
 package org.apache.karaf.system;
 
-/**
- * Describe a system service
- */
+/** Describe a system service */
 public interface SystemService {
 
-    /**
-     * Types defining what to remove on a restart of Karaf
-     */
+    /** Types defining what to remove on a restart of Karaf */
     enum Swipe {
         /** Delete nothing; simple restart */
         NONE,
         /** Delete only the cache; everything else remains */
         CACHE,
-        /** Forces a clean restart by removing the working directory; this option is compatible to the former clean method. */
+        /**
+         * Forces a clean restart by removing the working directory; this option is compatible to
+         * the former clean method.
+         */
         ALL
     }
 
@@ -43,10 +42,10 @@ public interface SystemService {
     /**
      * Halt the Karaf container.
      *
-     * @param time Shutdown delay. The time argument can have different formats.
-     *  First, it can be an absolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm
-     *  is the minute of the hour (in two digits). Second, it can be in the format +m, in which m is the number of minutes
-     *  to wait. The word now is an alias for +0.
+     * @param time Shutdown delay. The time argument can have different formats. First, it can be an
+     *     absolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm is the
+     *     minute of the hour (in two digits). Second, it can be in the format +m, in which m is the
+     *     number of minutes to wait. The word now is an alias for +0.
      * @throws Exception If the halt fails.
      */
     void halt(String time) throws Exception;
@@ -61,10 +60,10 @@ public interface SystemService {
     /**
      * Reboot the Karaf container.
      *
-     * @param time The reboot delay. The time argument can have different formats.
-     *  First, it can be an absolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm
-     *  is the minute of the hour (in two digits). Second, it can be in the format +m, in which m is the number of minutes
-     *  to wait. The word now is an alias for +0.
+     * @param time The reboot delay. The time argument can have different formats. First, it can be
+     *     an absolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm is
+     *     the minute of the hour (in two digits). Second, it can be in the format +m, in which m is
+     *     the number of minutes to wait. The word now is an alias for +0.
      * @param clean Force a clean restart by deleting the working directory.
      * @throws Exception If the reboot fails.
      */
@@ -99,28 +98,28 @@ public interface SystemService {
      * @return The instance name.
      */
     String getName();
-    
+
     /**
      * Set the name of the Karaf instance.
      *
      * @param name The new instance name.
      */
     void setName(String name);
-    
+
     /**
      * Get the current OSGi framework in use.
      *
      * @return The {@link FrameworkType} representing the OSGi framework in use.
      */
     FrameworkType getFramework();
-    
+
     /**
      * Change OSGi framework to use.
      *
      * @param framework The new OSGi framework to use.
      */
     void setFramework(FrameworkType framework);
-    
+
     /**
      * Enable or disable debugging.
      *

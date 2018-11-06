@@ -30,41 +30,43 @@ import org.apache.karaf.web.WebContainerService;
 @Service
 public class List implements Action {
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
-    @Reference
-    private WebContainerService webContainerService;
-    
+    @Reference private WebContainerService webContainerService;
+
     public void setWebContainerService(WebContainerService webContainerService) {
         this.webContainerService = webContainerService;
     }
 
     @Override
     public Object execute() throws Exception {
-    	ShellTable table = new ShellTable();
+        ShellTable table = new ShellTable();
         table.column(new Col("ID"));
         table.column(new Col("State"));
         table.column(new Col("Web-State"));
         table.column(new Col("Level"));
         table.column(new Col("Web-ContextPath"));
         table.column(new Col("Name"));
-        
+
         java.util.List<WebBundle> webBundles = webContainerService.list();
         if (webBundles != null && !webBundles.isEmpty()) {
             for (WebBundle webBundle : webBundles) {
-            	table.addRow().addContent(
-                        webBundle.getBundleId(),
-                        webBundle.getState(),
-                        webBundle.getWebState(),
-                        webBundle.getLevel(),
-                        webBundle.getContextPath(),
-                        webBundle.getName());
+                table.addRow()
+                        .addContent(
+                                webBundle.getBundleId(),
+                                webBundle.getState(),
+                                webBundle.getWebState(),
+                                webBundle.getLevel(),
+                                webBundle.getContextPath(),
+                                webBundle.getName());
             }
-            
         }
         table.print(System.out, !noFormat);
         return null;
     }
-    
 }

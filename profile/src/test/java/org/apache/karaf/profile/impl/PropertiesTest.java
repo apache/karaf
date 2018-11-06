@@ -20,7 +20,6 @@ package org.apache.karaf.profile.impl;
 
 import java.io.IOException;
 import java.util.Arrays;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.junit.Test;
 
@@ -37,5 +36,4 @@ public class PropertiesTest {
         tp.setFooter(Arrays.asList("#", "# bye!", "#"));
         tp.save(System.out);
     }
-
 }

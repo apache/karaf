@@ -14,7 +14,6 @@
 package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.examples.jpa.BookingService;
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
@@ -28,15 +27,18 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 public class JpaExampleTest extends KarafTestSupport {
 
     private static final RolePrincipal[] ADMIN_ROLES = {
-            new RolePrincipal(BundleService.SYSTEM_BUNDLES_ROLE),
-            new RolePrincipal("admin"),
-            new RolePrincipal("manager")
+        new RolePrincipal(BundleService.SYSTEM_BUNDLES_ROLE),
+        new RolePrincipal("admin"),
+        new RolePrincipal("manager")
     };
 
     @Test
     public void test() throws Exception {
         // adding jpa example features repository
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-jpa-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-jpa-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         // install the karaf-jpa-example-datasource & karaf-jpa-example-common
         executeCommand("feature:install karaf-jpa-example-datasource", ADMIN_ROLES);
@@ -55,14 +57,18 @@ public class JpaExampleTest extends KarafTestSupport {
         executeCommand("feature:uninstall karaf-jpa-example-provider-ds-hibernate", ADMIN_ROLES);
 
         // blueprint EclipseLink
-        executeCommand("feature:install karaf-jpa-example-provider-blueprint-eclipselink", ADMIN_ROLES);
+        executeCommand(
+                "feature:install karaf-jpa-example-provider-blueprint-eclipselink", ADMIN_ROLES);
         testCommand();
-        executeCommand("feature:uninstall karaf-jpa-example-provider-blueprint-eclipselink", ADMIN_ROLES);
+        executeCommand(
+                "feature:uninstall karaf-jpa-example-provider-blueprint-eclipselink", ADMIN_ROLES);
 
         // blueprint Hibernate
-        executeCommand("feature:install karaf-jpa-example-provider-blueprint-hibernate", ADMIN_ROLES);
+        executeCommand(
+                "feature:install karaf-jpa-example-provider-blueprint-hibernate", ADMIN_ROLES);
         testCommand();
-        executeCommand("feature:uninstall karaf-jpa-example-provider-blueprint-hibernate", ADMIN_ROLES);
+        executeCommand(
+                "feature:uninstall karaf-jpa-example-provider-blueprint-hibernate", ADMIN_ROLES);
     }
 
     private void testCommand() {
@@ -82,5 +88,4 @@ public class JpaExampleTest extends KarafTestSupport {
         System.out.println(bookings);
         assertContainsNot("AF520", bookings);
     }
-
 }

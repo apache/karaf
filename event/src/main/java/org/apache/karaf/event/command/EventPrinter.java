@@ -22,10 +22,9 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Consumer;
-
 import org.osgi.service.event.Event;
 
-public class EventPrinter implements Consumer<Event>{
+public class EventPrinter implements Consumer<Event> {
     private PrintStream out;
     private boolean verbose;
 
@@ -33,7 +32,6 @@ public class EventPrinter implements Consumer<Event>{
         this.out = out;
         this.verbose = verbose;
     }
-    
 
     @Override
     public void accept(Event event) {
@@ -50,7 +48,7 @@ public class EventPrinter implements Consumer<Event>{
     }
 
     private String getTimeStamp(Event event) {
-        Long ts = (Long)event.getProperty("timestamp");
+        Long ts = (Long) event.getProperty("timestamp");
         if (ts == null) {
             return "0000-00-00 00:00:00";
         }
@@ -61,9 +59,8 @@ public class EventPrinter implements Consumer<Event>{
     private Object getPrintValue(Event event, String key) {
         Object value = event.getProperty(key);
         if (value.getClass().isArray()) {
-            return Arrays.toString((Object[])value);
+            return Arrays.toString((Object[]) value);
         }
         return value.toString();
     }
-
 }

@@ -19,57 +19,43 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.ZipOutputStream;
 
-/**
- * Output stream which closes entry instead closing whole stream.
- */
+/** Output stream which closes entry instead closing whole stream. */
 public class ClosingEntryOutputStreamWrapper extends OutputStream {
 
-    /**
-     * Wrapped ZIP output stream. 
-     */
+    /** Wrapped ZIP output stream. */
     private ZipOutputStream outputStream;
 
     /**
      * Creates new OutputStream.
-     * 
+     *
      * @param outputStream Wrapped output stream.
      */
     public ClosingEntryOutputStreamWrapper(ZipOutputStream outputStream) {
         this.outputStream = outputStream;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void write(int b) throws IOException {
         outputStream.write(b);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void write(byte[] b) throws IOException {
         outputStream.write(b);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
-    public void write(byte[] b, int off, int len)
-        throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
         outputStream.write(b, off, len);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void close() throws IOException {
         // close entry instead of closing zip stream.
         outputStream.closeEntry();
     }
-
 }

@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -24,10 +26,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class StateStorageTest {
 
@@ -75,6 +74,4 @@ public class StateStorageTest {
             return baos;
         }
     }
-
-
 }

@@ -43,7 +43,7 @@ public class FilterParser {
         }
         return parseItem(tokenizer);
     }
-    
+
     private Expression[] parseFilterList(ExprTokenizer tokenizer) {
         List<Expression> exprList = new ArrayList<>();
         while ("(".equals(tokenizer.peekNextToken())) {
@@ -51,7 +51,7 @@ public class FilterParser {
             exprList.add(parseFilterComp(tokenizer));
             tokenizer.nextToken();
         }
-        return exprList.toArray(new Expression[]{});
+        return exprList.toArray(new Expression[] {});
     }
 
     private Expression parseItem(ExprTokenizer tokenizer) {
@@ -60,5 +60,4 @@ public class FilterParser {
         String value = tokenizer.nextToken();
         return new SimpleItem(attr, filterType, value);
     }
-
 }

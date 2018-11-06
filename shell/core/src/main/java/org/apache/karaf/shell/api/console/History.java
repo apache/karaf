@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.shell.api.console;
 
-/**
- * Session history.
- */
+/** Session history. */
 public interface History {
 
     /**
@@ -36,17 +34,14 @@ public interface History {
     int last();
 
     /**
-     * Command at the given index.
-     * Indices can range from <code>first()</code> to <code>last()</code>.
+     * Command at the given index. Indices can range from <code>first()</code> to <code>last()
+     * </code>.
      *
      * @param index the index in the history.
      * @return the command in the history at the given index.
      */
     CharSequence get(int index);
 
-    /**
-     * Clear the history.
-     */
+    /** Clear the history. */
     void clear();
-
 }

@@ -20,17 +20,15 @@ package org.apache.karaf.shell.ssh;
 
 import java.io.IOException;
 import java.util.List;
+import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.cipher.Cipher;
 import org.apache.sshd.common.kex.KeyExchange;
 import org.apache.sshd.common.mac.Mac;
-import org.apache.sshd.common.NamedFactory;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 public class SshUtilsTest {
 
-   
     @Test
     public void testCiphersDefault() throws IOException {
         // verify our default configuration...
@@ -80,9 +78,11 @@ public class SshUtilsTest {
     @Test
     public void testKexAlgorithmsDefault() throws IOException {
         // verify our default configuration...
-        String kexAlgorithms = "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1";
+        String kexAlgorithms =
+                "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1";
 
-        List<NamedFactory<KeyExchange>> list = SshUtils.buildKexAlgorithms(kexAlgorithms.split(","));
+        List<NamedFactory<KeyExchange>> list =
+                SshUtils.buildKexAlgorithms(kexAlgorithms.split(","));
 
         // verify that all configured key exchange algorithms are actually resolved...
         for (String kex : kexAlgorithms.split(",")) {
@@ -95,9 +95,11 @@ public class SshUtilsTest {
             }
 
             if (!found) {
-                Assert.fail("Configured default key exchange algorithm '" + kex + "' cannot be resolved");
+                Assert.fail(
+                        "Configured default key exchange algorithm '"
+                                + kex
+                                + "' cannot be resolved");
             }
         }
     }
 }
-

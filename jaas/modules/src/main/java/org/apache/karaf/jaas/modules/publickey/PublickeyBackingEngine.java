@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -31,7 +30,8 @@ import org.slf4j.LoggerFactory;
 
 public class PublickeyBackingEngine implements BackingEngine {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(PublickeyBackingEngine.class);
+    private static final transient Logger LOGGER =
+            LoggerFactory.getLogger(PublickeyBackingEngine.class);
 
     private Properties users;
 
@@ -55,7 +55,7 @@ public class PublickeyBackingEngine implements BackingEngine {
 
         String userInfos = users.get(username);
 
-        //If user already exists, update publickey
+        // If user already exists, update publickey
         if (userInfos != null && userInfos.length() > 0) {
             infos = userInfos.split(",");
             userInfoBuffer.append(newPublickey);
@@ -99,8 +99,7 @@ public class PublickeyBackingEngine implements BackingEngine {
 
         for (Object user : users.keySet()) {
             String userName = (String) user;
-            if (userName.startsWith(GROUP_PREFIX))
-                continue;
+            if (userName.startsWith(GROUP_PREFIX)) continue;
 
             UserPrincipal userPrincipal = new UserPrincipal(userName);
             result.add(userPrincipal);
@@ -121,7 +120,7 @@ public class PublickeyBackingEngine implements BackingEngine {
     @Override
     public List<RolePrincipal> listRoles(Principal principal) {
         String userName = principal.getName();
-        if (principal instanceof  GroupPrincipal) {
+        if (principal instanceof GroupPrincipal) {
             userName = GROUP_PREFIX + userName;
         }
         return listRoles(userName);
@@ -156,7 +155,7 @@ public class PublickeyBackingEngine implements BackingEngine {
         if (userInfos != null) {
             for (RolePrincipal rp : listRoles(username)) {
                 if (role.equals(rp.getName())) {
-                    return; 
+                    return;
                 }
             }
             String newUserInfos = userInfos + "," + role;
@@ -176,7 +175,7 @@ public class PublickeyBackingEngine implements BackingEngine {
 
         String userInfos = users.get(username);
 
-        //If user already exists, remove the role
+        // If user already exists, remove the role
         if (userInfos != null && userInfos.length() > 0) {
             infos = userInfos.split(",");
             String password = infos[0];
@@ -261,7 +260,8 @@ public class PublickeyBackingEngine implements BackingEngine {
         Map<GroupPrincipal, String> result = new HashMap<>();
         for (String name : users.keySet()) {
             if (name.startsWith(GROUP_PREFIX)) {
-                result.put(new GroupPrincipal(name.substring(GROUP_PREFIX.length())), users.get(name));
+                result.put(
+                        new GroupPrincipal(name.substring(GROUP_PREFIX.length())), users.get(name));
             }
         }
         return result;
@@ -275,5 +275,4 @@ public class PublickeyBackingEngine implements BackingEngine {
             throw new IllegalArgumentException("Group: " + group + " already exist");
         }
     }
-
 }

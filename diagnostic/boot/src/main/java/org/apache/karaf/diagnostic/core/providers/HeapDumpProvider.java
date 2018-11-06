@@ -16,19 +16,16 @@
  */
 package org.apache.karaf.diagnostic.core.providers;
 
-import org.apache.karaf.diagnostic.core.DumpDestination;
-import org.apache.karaf.diagnostic.core.DumpProvider;
-
-import javax.management.MBeanServer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
+import javax.management.MBeanServer;
+import org.apache.karaf.diagnostic.core.DumpDestination;
+import org.apache.karaf.diagnostic.core.DumpProvider;
 
-/**
- * Create a heap dump.
- */
+/** Create a heap dump. */
 public class HeapDumpProvider implements DumpProvider {
 
     public void createDump(DumpDestination destination) throws Exception {
@@ -37,14 +34,19 @@ public class HeapDumpProvider implements DumpProvider {
         OutputStream out = null;
         try {
             MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-            Class<?> diagnosticMXBeanClass = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
-            Object diagnosticMXBean = ManagementFactory.newPlatformMXBeanProxy(mBeanServer,
-                "com.sun.management:type=HotSpotDiagnostic", diagnosticMXBeanClass);
+            Class<?> diagnosticMXBeanClass =
+                    Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+            Object diagnosticMXBean =
+                    ManagementFactory.newPlatformMXBeanProxy(
+                            mBeanServer,
+                            "com.sun.management:type=HotSpotDiagnostic",
+                            diagnosticMXBeanClass);
 
             heapDumpFile = File.createTempFile("heapdump", ".hprof");
             heapDumpFile.delete();
-            
-            Method method = diagnosticMXBeanClass.getMethod("dumpHeap", String.class, boolean.class);
+
+            Method method =
+                    diagnosticMXBeanClass.getMethod("dumpHeap", String.class, boolean.class);
             method.invoke(diagnosticMXBean, heapDumpFile.getAbsolutePath(), false);
 
             // copy the dump in the destination
@@ -69,5 +71,4 @@ public class HeapDumpProvider implements DumpProvider {
             }
         }
     }
-
 }

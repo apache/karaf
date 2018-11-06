@@ -25,7 +25,12 @@ import org.osgi.framework.Bundle;
 @Service
 public class Start extends BundlesCommand {
 
-    @Option(name = "-t", aliases={"--transient"}, description="Keep the bundle as auto-start", required = false, multiValued = false)
+    @Option(
+            name = "-t",
+            aliases = {"--transient"},
+            description = "Keep the bundle as auto-start",
+            required = false,
+            multiValued = false)
     boolean transientStart;
 
     public Start() {
@@ -37,5 +42,4 @@ public class Start extends BundlesCommand {
     protected void executeOnBundle(Bundle bundle) throws Exception {
         bundle.start(transientStart ? Bundle.START_TRANSIENT : 0);
     }
-
 }

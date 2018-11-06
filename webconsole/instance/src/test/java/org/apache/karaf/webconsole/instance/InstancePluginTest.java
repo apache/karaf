@@ -24,12 +24,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import junit.framework.TestCase;
-
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
@@ -42,7 +39,7 @@ public class InstancePluginTest extends TestCase {
         assertEquals(Arrays.asList("hello"), testParseStringList("hello"));
         assertEquals(Arrays.asList("b"), testParseStringList(",b,"));
     }
-    
+
     @SuppressWarnings("unchecked")
     private List<String> testParseStringList(String s) throws Exception {
         InstancePlugin ap = new InstancePlugin();
@@ -50,15 +47,23 @@ public class InstancePluginTest extends TestCase {
         m.setAccessible(true);
         return (List<String>) m.invoke(ap, s);
     }
-    
+
     public void testDoPostCreate() throws Exception {
         InstanceSettings instanceSettings =
-            new InstanceSettings(123, 456, 789,  null, null, Collections.singletonList("http://someURL"), Arrays.asList("abc", "def"));
+                new InstanceSettings(
+                        123,
+                        456,
+                        789,
+                        null,
+                        null,
+                        Collections.singletonList("http://someURL"),
+                        Arrays.asList("abc", "def"));
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
-        EasyMock.expect(instanceService.createInstance("instance1", instanceSettings, false)).andReturn(null);
-        EasyMock.expect(instanceService.getInstances()).andReturn(new Instance[]{}).anyTimes();
+        EasyMock.expect(instanceService.createInstance("instance1", instanceSettings, false))
+                .andReturn(null);
+        EasyMock.expect(instanceService.getInstances()).andReturn(new Instance[] {}).anyTimes();
         EasyMock.replay(instanceService);
-        
+
         InstancePlugin ap = new InstancePlugin();
         ap.setInstanceService(instanceService);
 
@@ -71,20 +76,21 @@ public class InstancePluginTest extends TestCase {
         params.put("featureURLs", "http://someURL");
         params.put("features", "abc,def");
         HttpServletRequest req = EasyMock.createMock(HttpServletRequest.class);
-        EasyMock.expect(req.getParameter(EasyMock.anyObject())).andAnswer(
-                () -> params.get(EasyMock.getCurrentArguments()[0])).anyTimes();
+        EasyMock.expect(req.getParameter(EasyMock.anyObject()))
+                .andAnswer(() -> params.get(EasyMock.getCurrentArguments()[0]))
+                .anyTimes();
 
         HttpServletResponse res = EasyMock.createNiceMock(HttpServletResponse.class);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter pw = new PrintWriter(baos);
         EasyMock.expect(res.getWriter()).andReturn(pw);
-        
+
         EasyMock.replay(req);
         EasyMock.replay(res);
-        ap.doPost(req, res);        
+        ap.doPost(req, res);
         EasyMock.verify(instanceService);
-        
-        // Check that the operation has succeeded. This will cause some information to be written to 
+
+        // Check that the operation has succeeded. This will cause some information to be written to
         // the outputstream...
         pw.flush();
         String s = new String(baos.toByteArray());

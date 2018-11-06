@@ -17,11 +17,17 @@
  * under the License.
  */
 
-
 package org.apache.karaf.itests.ssh;
+
+import static org.ops4j.pax.exam.CoreOptions.*;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
+import java.io.File;
+import java.net.URL;
+import java.util.EnumSet;
+import java.util.Set;
 import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.future.ConnectFuture;
@@ -32,31 +38,22 @@ import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
-import java.io.File;
-import java.net.URL;
-import java.util.EnumSet;
-import java.util.Set;
-
-import static org.ops4j.pax.exam.CoreOptions.*;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-
-/**
- * Test use of PEM keys.
- */
+/** Test use of PEM keys. */
 public class SshKeyFormatTest extends SshCommandTestBase {
 
     @Configuration
     public Option[] config() {
         File keyFile = new File("src/test/resources/org/apache/karaf/itests/ssh/test.pem");
-        return options(composite(super.config()),
-                editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
+        return options(
+                composite(super.config()),
+                editConfigurationFilePut(
+                        "etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM"),
-                bundle("mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.not-yet-commons-ssl/0.3.11_1"),
-                bundle("mvn:com.google.guava/guava/16.0.1")
-                );
+                bundle(
+                        "mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.not-yet-commons-ssl/0.3.11_1"),
+                bundle("mvn:com.google.guava/guava/16.0.1"));
     }
 
-        
     @Test
     public void usePemKey() throws Exception {
         SshClient client = SshClient.setUpDefaultClient();
@@ -76,7 +73,13 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         while (ret.contains(ClientSessionEvent.WAIT_AUTH)) {
             session.addPasswordIdentity("karaf");
             session.auth().verify();
-            ret = session.waitFor(EnumSet.of(ClientSessionEvent.WAIT_AUTH, ClientSessionEvent.CLOSED, ClientSessionEvent.AUTHED), 0);
+            ret =
+                    session.waitFor(
+                            EnumSet.of(
+                                    ClientSessionEvent.WAIT_AUTH,
+                                    ClientSessionEvent.CLOSED,
+                                    ClientSessionEvent.AUTHED),
+                            0);
         }
         if (ret.contains(ClientSessionEvent.CLOSED)) {
             throw new Exception("Could not open SSH channel");

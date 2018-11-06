@@ -18,19 +18,16 @@
  */
 package org.apache.karaf.main.lock;
 
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.felix.utils.properties.Properties;
-
 import org.junit.Before;
 import org.junit.Ignore;
 
-
 @Ignore
 public class OracleJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
-    
+
     @Before
     @Override
     public void setUp() throws Exception {
@@ -38,19 +35,19 @@ public class OracleJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
         driver = "oracle.jdbc.driver.OracleDriver";
         url = "jdbc:oracle:thin:@172.16.16.133:1521:XE";
         momentDatatype = "NUMBER(20)";
-        
+
         super.setUp();
     }
 
     OracleJDBCLock createLock(Properties props) {
         return new OracleJDBCLock(props);
     }
-    
+
     @Override
     Connection lock(String table, String node) throws ClassNotFoundException, SQLException {
         Connection connection = null;
         Statement statement = null;
-        
+
         try {
             connection = getConnection(url, user, password);
             statement = connection.createStatement();
@@ -59,7 +56,7 @@ public class OracleJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
             close(statement);
             // connection must not be closed!
         }
-        
+
         return connection;
     }
 }

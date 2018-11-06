@@ -17,7 +17,6 @@ package org.apache.karaf.jaas.modules.impl;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.apache.karaf.jaas.modules.EncryptionService;
@@ -35,10 +34,8 @@ import org.osgi.framework.Constants;
 import org.osgi.service.cm.ManagedService;
 
 @Managed("org.apache.karaf.jaas")
-@Services(provides = {
-        @ProvideService(JaasRealm.class),
-        @ProvideService(BackingEngineFactory.class)
-})
+@Services(
+        provides = {@ProvideService(JaasRealm.class), @ProvideService(BackingEngineFactory.class)})
 public class Activator extends BaseActivator implements ManagedService {
 
     private static final String ENCRYPTION_NAME = "encryption.name";
@@ -64,20 +61,19 @@ public class Activator extends BaseActivator implements ManagedService {
         props.put("name", "basic");
         register(EncryptionService.class, new BasicEncryptionService(), props);
 
-
         Map<String, Object> config = getConfig();
 
         karafRealm = new KarafRealm(bundleContext, config);
         register(JaasRealm.class, karafRealm);
         if (Boolean.parseBoolean((String) config.get(ENCRYPTION_ENABLED))) {
-          autoEncryptionSupport = new AutoEncryptionSupport(config);
+            autoEncryptionSupport = new AutoEncryptionSupport(config);
         }
     }
 
     @Override
     protected void doStop() {
         if (autoEncryptionSupport != null) {
-          autoEncryptionSupport.close();
+            autoEncryptionSupport.close();
         }
         super.doStop();
         LDAPCache.clear();
@@ -94,7 +90,7 @@ public class Activator extends BaseActivator implements ManagedService {
             autoEncryptionSupport = null;
         }
         if (Boolean.parseBoolean((String) config.get(ENCRYPTION_ENABLED))) {
-          autoEncryptionSupport = new AutoEncryptionSupport(config);
+            autoEncryptionSupport = new AutoEncryptionSupport(config);
         }
     }
 
@@ -109,9 +105,15 @@ public class Activator extends BaseActivator implements ManagedService {
         populate(config, ENCRYPTION_ENCODING, "hexadecimal");
         populate(config, EVENTADMIN_ENABLED, "true");
         populate(config, "audit.file.enabled", "false");
-        populate(config, "audit.file.file", System.getProperty("karaf.data") + "/security/audit.log");
+        populate(
+                config,
+                "audit.file.file",
+                System.getProperty("karaf.data") + "/security/audit.log");
         populate(config, "audit.log.enabled", "false");
-        populate(config, "audit.log.logger", "org.apache.karaf.jaas.modules.audit.LogAuditLoginModule");
+        populate(
+                config,
+                "audit.log.logger",
+                "org.apache.karaf.jaas.modules.audit.LogAuditLoginModule");
         populate(config, "audit.log.level", "info");
         populate(config, "audit.eventadmin.enabled", "true");
         populate(config, "audit.eventadmin.topic", "org/apache/karaf/login");
@@ -122,5 +124,4 @@ public class Activator extends BaseActivator implements ManagedService {
     private void populate(Map<String, Object> map, String key, String def) {
         map.put(key, getString(key, def));
     }
-
 }

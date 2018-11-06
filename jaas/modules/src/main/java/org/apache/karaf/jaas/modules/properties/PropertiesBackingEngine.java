@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -32,7 +31,8 @@ import org.slf4j.LoggerFactory;
 
 public class PropertiesBackingEngine implements BackingEngine {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesBackingEngine.class);
+    private static final transient Logger LOGGER =
+            LoggerFactory.getLogger(PropertiesBackingEngine.class);
 
     private Properties users;
     private EncryptionSupport encryptionSupport;
@@ -62,7 +62,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         String encPassword = encryptionSupport.encrypt(password);
         String userInfos = users.get(username);
 
-        //If user already exists, update password
+        // If user already exists, update password
         if (userInfos != null && userInfos.length() > 0) {
             infos = userInfos.split(",");
             userInfoBuffer.append(encPassword);
@@ -106,8 +106,7 @@ public class PropertiesBackingEngine implements BackingEngine {
 
         for (Object user : users.keySet()) {
             String userName = (String) user;
-            if (userName.startsWith(GROUP_PREFIX))
-                continue;
+            if (userName.startsWith(GROUP_PREFIX)) continue;
 
             UserPrincipal userPrincipal = new UserPrincipal(userName);
             result.add(userPrincipal);
@@ -128,7 +127,7 @@ public class PropertiesBackingEngine implements BackingEngine {
     @Override
     public List<RolePrincipal> listRoles(Principal principal) {
         String userName = principal.getName();
-        if (principal instanceof  GroupPrincipal) {
+        if (principal instanceof GroupPrincipal) {
             userName = GROUP_PREFIX + userName;
         }
         return listRoles(userName);
@@ -163,12 +162,12 @@ public class PropertiesBackingEngine implements BackingEngine {
         if (userInfos != null) {
             for (RolePrincipal rp : listRoles(username)) {
                 if (role.equals(rp.getName())) {
-                    return; 
+                    return;
                 }
             }
             for (GroupPrincipal gp : listGroups(username)) {
                 if (role.equals(GROUP_PREFIX + gp.getName())) {
-                    return; 
+                    return;
                 }
             }
             String newUserInfos = userInfos + "," + role;
@@ -188,7 +187,7 @@ public class PropertiesBackingEngine implements BackingEngine {
 
         String userInfos = users.get(username);
 
-        //If user already exists, remove the role
+        // If user already exists, remove the role
         if (userInfos != null && userInfos.length() > 0) {
             infos = userInfos.split(",");
             String password = infos[0];
@@ -273,7 +272,8 @@ public class PropertiesBackingEngine implements BackingEngine {
         Map<GroupPrincipal, String> result = new HashMap<>();
         for (String name : users.keySet()) {
             if (name.startsWith(GROUP_PREFIX)) {
-                result.put(new GroupPrincipal(name.substring(GROUP_PREFIX.length())), users.get(name));
+                result.put(
+                        new GroupPrincipal(name.substring(GROUP_PREFIX.length())), users.get(name));
             }
         }
         return result;
@@ -287,5 +287,4 @@ public class PropertiesBackingEngine implements BackingEngine {
             throw new IllegalArgumentException("Group: " + group + " already exist");
         }
     }
-
 }

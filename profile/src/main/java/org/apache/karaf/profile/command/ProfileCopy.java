@@ -32,26 +32,36 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ProfileCopy implements Action {
 
-    @Option(name = "-f", aliases = "--force", description = "Flag to allow overwriting the target profile (if exists).")
+    @Option(
+            name = "-f",
+            aliases = "--force",
+            description = "Flag to allow overwriting the target profile (if exists).")
     private boolean force;
 
-    @Argument(index = 0, required = true, name = "source profile", description = "Name of the source profile.")
+    @Argument(
+            index = 0,
+            required = true,
+            name = "source profile",
+            description = "Name of the source profile.")
     @Completion(ProfileCompleter.class)
     private String source;
 
-    @Argument(index = 1, required = true, name = "target profile", description = "Name of the target profile.")
+    @Argument(
+            index = 1,
+            required = true,
+            name = "target profile",
+            description = "Name of the target profile.")
     private String target;
 
-    @Reference
-    private ProfileService profileService;
+    @Reference private ProfileService profileService;
 
     @Override
     public Object execute() throws Exception {
-        Profile profile = ProfileBuilder.Factory.createFrom(profileService.getProfile(source))
-                .identity(target)
-                .getProfile();
+        Profile profile =
+                ProfileBuilder.Factory.createFrom(profileService.getProfile(source))
+                        .identity(target)
+                        .getProfile();
         profileService.createProfile(profile);
         return null;
     }
-
 }

@@ -16,15 +16,14 @@
  */
 package org.apache.karaf.examples.jpa.provider.blueprint.openjpa;
 
-import org.apache.karaf.examples.jpa.Booking;
-import org.apache.karaf.examples.jpa.BookingService;
-
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
-import java.util.List;
+import org.apache.karaf.examples.jpa.Booking;
+import org.apache.karaf.examples.jpa.BookingService;
 
 /**
  * Implementation of the booking service using the JPA entity manager service (provided by Karaf).
@@ -57,14 +56,16 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(Transactional.TxType.SUPPORTS)
     @Override
     public List<Booking> list() {
-        TypedQuery<Booking> query = entityManager.createQuery("SELECT b FROM Booking b", Booking.class);
+        TypedQuery<Booking> query =
+                entityManager.createQuery("SELECT b FROM Booking b", Booking.class);
         return query.getResultList();
     }
 
     @Transactional(Transactional.TxType.SUPPORTS)
     @Override
     public Booking get(Long id) {
-        TypedQuery<Booking> query = entityManager.createQuery("SELECT b FROM Booking b WHERE b.id=:id", Booking.class);
+        TypedQuery<Booking> query =
+                entityManager.createQuery("SELECT b FROM Booking b WHERE b.id=:id", Booking.class);
         query.setParameter("id", id);
         Booking booking = null;
         try {

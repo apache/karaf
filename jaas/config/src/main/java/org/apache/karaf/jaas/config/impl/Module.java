@@ -18,10 +18,7 @@ package org.apache.karaf.jaas.config.impl;
 
 import java.util.Properties;
 
-/**
- * POJO for a login module.
- * It contains the class name, flags and a map of options.
- */
+/** POJO for a login module. It contains the class name, flags and a map of options. */
 public class Module {
 
     private String name;
@@ -60,5 +57,4 @@ public class Module {
     public void setOptions(Properties options) {
         this.options = options;
     }
-
 }

@@ -29,9 +29,7 @@ public class Status extends BundleCommand {
         return getState(bundle);
     }
 
-    /**
-     * Return a String representation of a bundle state
-     */
+    /** Return a String representation of a bundle state */
     private String getState(Bundle bundle) {
         switch (bundle.getState()) {
             case Bundle.UNINSTALLED:
@@ -50,5 +48,4 @@ public class Status extends BundleCommand {
                 return "Unknown";
         }
     }
-
 }

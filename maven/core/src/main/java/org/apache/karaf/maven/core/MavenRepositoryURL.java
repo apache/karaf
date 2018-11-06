@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Objects;
-
 import org.ops4j.pax.url.mvn.ServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +33,9 @@ import org.slf4j.LoggerFactory;
  * @author Alin Dreghiciu
  * @author Guillaume Nodet
  * @since 0.2.1, February 07, 2008
- *
  * @see org.ops4j.pax.url.mvn.internal.config.MavenRepositoryURL
  */
-public class MavenRepositoryURL
-{
+public class MavenRepositoryURL {
     /*
      * String OPTION_ALLOW_SNAPSHOTS = "snapshots";
      * String OPTION_DISALLOW_RELEASES = "noreleases";
@@ -52,63 +49,40 @@ public class MavenRepositoryURL
      * String OPTION_SNAPSHOTS_CHECKSUM = "snapshotsChecksum";
      */
 
-    private static final Logger LOG = LoggerFactory.getLogger( MavenRepositoryURL.class );
+    private static final Logger LOG = LoggerFactory.getLogger(MavenRepositoryURL.class);
 
-    /**
-     * Repository Id.
-     */
+    /** Repository Id. */
     private final String m_id;
-    /**
-     * Repository URL.
-     */
+    /** Repository URL. */
     private URL m_repositoryURL;
-    /**
-     * Repository file (only if URL is a file URL).
-     */
+    /** Repository file (only if URL is a file URL). */
     private final File m_file;
-    /**
-     * True if the repository contains snapshots.
-     */
+    /** True if the repository contains snapshots. */
     private boolean m_snapshotsEnabled;
-    /**
-     * True if the repository contains releases.
-     */
+    /** True if the repository contains releases. */
     private boolean m_releasesEnabled;
-    /**
-     * Repository update policy
-     */
+    /** Repository update policy */
     private String m_releasesUpdatePolicy;
-    /**
-     * Repository update policy
-     */
+    /** Repository update policy */
     private String m_snapshotsUpdatePolicy;
-    /**
-     * Repository checksum policy
-     */
+    /** Repository checksum policy */
     private String m_releasesChecksumPolicy;
-    /**
-     * Repository checksum policy
-     */
+    /** Repository checksum policy */
     private String m_snapshotsChecksumPolicy;
 
     private final boolean m_multi;
-    /**
-     * Where the repository was defined (PID or settings.xml)
-     */
+    /** Where the repository was defined (PID or settings.xml) */
     private final FROM m_from;
 
     /**
-     * Creates a maven repository URL bases on a string spec. The path can be marked with @snapshots and/or @noreleases
-     * (not case sensitive).
+     * Creates a maven repository URL bases on a string spec. The path can be marked with @snapshots
+     * and/or @noreleases (not case sensitive).
      *
      * @param repositorySpec url spec of repository
-     *
      * @throws MalformedURLException if spec contains a malformed maven repository url
      */
-    public MavenRepositoryURL( final String repositorySpec )
-        throws MalformedURLException
-    {
-        final String[] segments = repositorySpec.split( ServiceConstants.SEPARATOR_OPTIONS );
+    public MavenRepositoryURL(final String repositorySpec) throws MalformedURLException {
+        final String[] segments = repositorySpec.split(ServiceConstants.SEPARATOR_OPTIONS);
         final StringBuilder urlBuilder = new StringBuilder();
         boolean snapshotEnabled = false;
         boolean releasesEnabled = true;
@@ -123,101 +97,79 @@ public class MavenRepositoryURL
         String checksumSnapshots = null;
         FROM from = null;
 
-        for( int i = 0; i < segments.length; i++ )
-        {
+        for (int i = 0; i < segments.length; i++) {
             String segment = segments[i].trim();
-            if( segment.equalsIgnoreCase( ServiceConstants.OPTION_ALLOW_SNAPSHOTS ) )
-            {
+            if (segment.equalsIgnoreCase(ServiceConstants.OPTION_ALLOW_SNAPSHOTS)) {
                 snapshotEnabled = true;
-            }
-            else if( segment.equalsIgnoreCase( ServiceConstants.OPTION_DISALLOW_RELEASES ) )
-            {
+            } else if (segment.equalsIgnoreCase(ServiceConstants.OPTION_DISALLOW_RELEASES)) {
                 releasesEnabled = false;
-            }
-            else if( segment.equalsIgnoreCase( ServiceConstants.OPTION_MULTI ) )
-            {
+            } else if (segment.equalsIgnoreCase(ServiceConstants.OPTION_MULTI)) {
                 multi = true;
-            }
-            else if( segment.startsWith( ServiceConstants.OPTION_ID + "=" ) )
-            {
+            } else if (segment.startsWith(ServiceConstants.OPTION_ID + "=")) {
                 try {
-                    name = segments[ i ].split( "=" )[1].trim();
+                    name = segments[i].split("=")[1].trim();
                 } catch (Exception e) {
-                    LOG.warn( "Problem with segment " + segments[i] + " in " + repositorySpec );
+                    LOG.warn("Problem with segment " + segments[i] + " in " + repositorySpec);
                 }
-            }
-            else if( segment.startsWith( ServiceConstants.OPTION_RELEASES_UPDATE + "=" ) )
-            {
+            } else if (segment.startsWith(ServiceConstants.OPTION_RELEASES_UPDATE + "=")) {
                 try {
-                    updateReleases = segments[ i ].split( "=" )[1].trim();
+                    updateReleases = segments[i].split("=")[1].trim();
                 } catch (Exception e) {
-                    LOG.warn( "Problem with segment " + segments[i] + " in " + repositorySpec );
+                    LOG.warn("Problem with segment " + segments[i] + " in " + repositorySpec);
                 }
-            }
-            else if( segment.startsWith( ServiceConstants.OPTION_SNAPSHOTS_UPDATE + "=" ) )
-            {
+            } else if (segment.startsWith(ServiceConstants.OPTION_SNAPSHOTS_UPDATE + "=")) {
                 try {
-                    updateSnapshots = segments[ i ].split( "=" )[1].trim();
+                    updateSnapshots = segments[i].split("=")[1].trim();
                 } catch (Exception e) {
-                    LOG.warn( "Problem with segment " + segments[i] + " in " + repositorySpec );
+                    LOG.warn("Problem with segment " + segments[i] + " in " + repositorySpec);
                 }
-            }
-            else if( segment.startsWith( ServiceConstants.OPTION_UPDATE + "=" ) )
-            {
+            } else if (segment.startsWith(ServiceConstants.OPTION_UPDATE + "=")) {
                 try {
-                    update = segments[ i ].split( "=" )[1].trim();
+                    update = segments[i].split("=")[1].trim();
                 } catch (Exception e) {
-                    LOG.warn( "Problem with segment " + segments[i] + " in " + repositorySpec );
+                    LOG.warn("Problem with segment " + segments[i] + " in " + repositorySpec);
                 }
-            }
-            else if( segment.startsWith( ServiceConstants.OPTION_RELEASES_CHECKSUM + "=" ) )
-            {
+            } else if (segment.startsWith(ServiceConstants.OPTION_RELEASES_CHECKSUM + "=")) {
                 try {
-                    checksumReleases = segments[ i ].split( "=" )[1].trim();
+                    checksumReleases = segments[i].split("=")[1].trim();
                 } catch (Exception e) {
-                    LOG.warn( "Problem with segment " + segments[i] + " in " + repositorySpec );
+                    LOG.warn("Problem with segment " + segments[i] + " in " + repositorySpec);
                 }
-            }
-            else if( segment.startsWith( ServiceConstants.OPTION_SNAPSHOTS_CHECKSUM + "=" ) )
-            {
+            } else if (segment.startsWith(ServiceConstants.OPTION_SNAPSHOTS_CHECKSUM + "=")) {
                 try {
-                    checksumSnapshots = segments[ i ].split( "=" )[1].trim();
+                    checksumSnapshots = segments[i].split("=")[1].trim();
                 } catch (Exception e) {
-                    LOG.warn( "Problem with segment " + segments[i] + " in " + repositorySpec );
+                    LOG.warn("Problem with segment " + segments[i] + " in " + repositorySpec);
                 }
-            }
-            else if( segment.startsWith( ServiceConstants.OPTION_CHECKSUM + "=" ) )
-            {
+            } else if (segment.startsWith(ServiceConstants.OPTION_CHECKSUM + "=")) {
                 try {
-                    checksum = segments[ i ].split( "=" )[1].trim();
+                    checksum = segments[i].split("=")[1].trim();
                 } catch (Exception e) {
-                    LOG.warn( "Problem with segment " + segments[i] + " in " + repositorySpec );
+                    LOG.warn("Problem with segment " + segments[i] + " in " + repositorySpec);
                 }
-            }
-            else if( segment.startsWith( "_from=" ) )
-            {
+            } else if (segment.startsWith("_from=")) {
                 try {
-                    from = FROM.valueOf( segments[ i ].split( "=" )[1].trim() );
+                    from = FROM.valueOf(segments[i].split("=")[1].trim());
                 } catch (Exception ignored) {
                 }
-            }
-            else
-            {
-                if( i > 0 )
-                {
-                    urlBuilder.append( ServiceConstants.SEPARATOR_OPTIONS );
+            } else {
+                if (i > 0) {
+                    urlBuilder.append(ServiceConstants.SEPARATOR_OPTIONS);
                 }
-                urlBuilder.append( segments[ i ] );
+                urlBuilder.append(segments[i]);
             }
         }
-        String spec = buildSpec( urlBuilder );
-        m_repositoryURL = new URL( spec );
+        String spec = buildSpec(urlBuilder);
+        m_repositoryURL = new URL(spec);
         m_snapshotsEnabled = snapshotEnabled;
         m_releasesEnabled = releasesEnabled;
         m_multi = multi;
         if (name == null) {
-            String warn = "Repository spec " + spec + " does not contain an identifier. This is deprecated & discouraged & just evil.";
-            LOG.warn( warn );
+            String warn =
+                    "Repository spec "
+                            + spec
+                            + " does not contain an identifier. This is deprecated & discouraged & just evil.";
+            LOG.warn(warn);
             name = "repo_" + spec.hashCode();
         }
         m_id = name;
@@ -228,41 +180,32 @@ public class MavenRepositoryURL
 
         m_from = from != null ? from : FROM.PID;
 
-        if( m_repositoryURL.getProtocol().equals( "file" ) )
-        {
-            try
-            {
+        if (m_repositoryURL.getProtocol().equals("file")) {
+            try {
                 // You must transform to URI to decode the path (manage a path with a space or non
                 // us character)
                 // like D:/documents%20and%20Settings/SESA170017/.m2/repository
                 // the path can be store in path part or in scheme specific part (if is relatif
                 // path)
                 // the anti-slash character is not a valid character for uri.
-                spec = spec.replaceAll( "\\\\", "/" );
-                spec = spec.replaceAll( " ", "%20" );
-                URI uri = new URI( spec );
+                spec = spec.replaceAll("\\\\", "/");
+                spec = spec.replaceAll(" ", "%20");
+                URI uri = new URI(spec);
                 String path = uri.getPath();
-                if( path == null )
-                    path = uri.getSchemeSpecificPart();
-                m_file = new File( path );
+                if (path == null) path = uri.getSchemeSpecificPart();
+                m_file = new File(path);
 
+            } catch (URISyntaxException e) {
+                throw new MalformedURLException(e.getMessage());
             }
-            catch ( URISyntaxException e )
-            {
-                throw new MalformedURLException( e.getMessage() );
-            }
-        }
-        else
-        {
+        } else {
             m_file = null;
         }
     }
 
-    private String buildSpec( StringBuilder urlBuilder )
-    {
+    private String buildSpec(StringBuilder urlBuilder) {
         String spec = urlBuilder.toString().trim();
-        if( !spec.endsWith( "\\" ) && !spec.endsWith( "/" ) )
-        {
+        if (!spec.endsWith("\\") && !spec.endsWith("/")) {
             spec = spec + "/";
         }
         return spec;
@@ -273,8 +216,7 @@ public class MavenRepositoryURL
      *
      * @return repository id
      */
-    public String getId()
-    {
+    public String getId() {
         return m_id;
     }
 
@@ -283,8 +225,7 @@ public class MavenRepositoryURL
      *
      * @return repository URL
      */
-    public URL getURL()
-    {
+    public URL getURL() {
         return m_repositoryURL;
     }
 
@@ -297,8 +238,7 @@ public class MavenRepositoryURL
      *
      * @return repository file
      */
-    public File getFile()
-    {
+    public File getFile() {
         return m_file;
     }
 
@@ -307,13 +247,11 @@ public class MavenRepositoryURL
      *
      * @return true if the repository contains releases
      */
-    public boolean isReleasesEnabled()
-    {
+    public boolean isReleasesEnabled() {
         return m_releasesEnabled;
     }
 
-    public void setReleasesEnabled(boolean enabled)
-    {
+    public void setReleasesEnabled(boolean enabled) {
         m_releasesEnabled = enabled;
     }
 
@@ -322,13 +260,11 @@ public class MavenRepositoryURL
      *
      * @return true if the repository contains snapshots
      */
-    public boolean isSnapshotsEnabled()
-    {
+    public boolean isSnapshotsEnabled() {
         return m_snapshotsEnabled;
     }
 
-    public void setSnapshotsEnabled(boolean enabled)
-    {
+    public void setSnapshotsEnabled(boolean enabled) {
         m_snapshotsEnabled = enabled;
     }
 
@@ -373,8 +309,7 @@ public class MavenRepositoryURL
      *
      * @return true if the repository is a parent path of repos
      */
-    public boolean isMulti()
-    {
+    public boolean isMulti() {
         return m_multi;
     }
 
@@ -383,19 +318,19 @@ public class MavenRepositoryURL
      *
      * @return if the repository is a file based repository.
      */
-    public boolean isFileRepository()
-    {
+    public boolean isFileRepository() {
         return m_file != null;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return new StringBuilder()
-            .append( m_repositoryURL.toString() )
-            .append( ",releases=" ).append( m_releasesEnabled )
-            .append( ",snapshots=" ).append( m_snapshotsEnabled )
-            .toString();
+                .append(m_repositoryURL.toString())
+                .append(",releases=")
+                .append(m_releasesEnabled)
+                .append(",snapshots=")
+                .append(m_snapshotsEnabled)
+                .toString();
     }
 
     public String asRepositorySpec() {
@@ -406,7 +341,8 @@ public class MavenRepositoryURL
             sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ID + "=" + m_id);
         }
         if (!m_releasesEnabled) {
-            sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_DISALLOW_RELEASES);
+            sb.append(
+                    ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_DISALLOW_RELEASES);
         }
         if (m_snapshotsEnabled) {
             sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
@@ -414,30 +350,56 @@ public class MavenRepositoryURL
         if (m_releasesEnabled) {
             if (!m_snapshotsEnabled) {
                 if (m_releasesUpdatePolicy != null) {
-                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_RELEASES_UPDATE + "=" + m_releasesUpdatePolicy);
+                    sb.append(
+                            ServiceConstants.SEPARATOR_OPTIONS
+                                    + ServiceConstants.OPTION_RELEASES_UPDATE
+                                    + "="
+                                    + m_releasesUpdatePolicy);
                 }
                 if (m_releasesChecksumPolicy != null) {
-                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_RELEASES_CHECKSUM + "=" + m_releasesChecksumPolicy);
+                    sb.append(
+                            ServiceConstants.SEPARATOR_OPTIONS
+                                    + ServiceConstants.OPTION_RELEASES_CHECKSUM
+                                    + "="
+                                    + m_releasesChecksumPolicy);
                 }
             }
         }
         if (m_snapshotsEnabled) {
             if (!m_releasesEnabled) {
                 if (m_snapshotsUpdatePolicy != null) {
-                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_SNAPSHOTS_UPDATE + "=" + m_snapshotsUpdatePolicy);
+                    sb.append(
+                            ServiceConstants.SEPARATOR_OPTIONS
+                                    + ServiceConstants.OPTION_SNAPSHOTS_UPDATE
+                                    + "="
+                                    + m_snapshotsUpdatePolicy);
                 }
                 if (m_snapshotsChecksumPolicy != null) {
-                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_SNAPSHOTS_CHECKSUM + "=" + m_snapshotsChecksumPolicy);
+                    sb.append(
+                            ServiceConstants.SEPARATOR_OPTIONS
+                                    + ServiceConstants.OPTION_SNAPSHOTS_CHECKSUM
+                                    + "="
+                                    + m_snapshotsChecksumPolicy);
                 }
             }
         }
         if (m_snapshotsEnabled && m_releasesEnabled) {
             // compact snapshots & release update & checksum policies
-            if (m_releasesUpdatePolicy != null && Objects.equals(m_releasesUpdatePolicy, m_snapshotsUpdatePolicy)) {
-                sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_UPDATE + "=" + m_releasesUpdatePolicy);
+            if (m_releasesUpdatePolicy != null
+                    && Objects.equals(m_releasesUpdatePolicy, m_snapshotsUpdatePolicy)) {
+                sb.append(
+                        ServiceConstants.SEPARATOR_OPTIONS
+                                + ServiceConstants.OPTION_UPDATE
+                                + "="
+                                + m_releasesUpdatePolicy);
             }
-            if (m_releasesChecksumPolicy != null && Objects.equals(m_releasesChecksumPolicy, m_snapshotsChecksumPolicy)) {
-                sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_CHECKSUM + "=" + m_releasesChecksumPolicy);
+            if (m_releasesChecksumPolicy != null
+                    && Objects.equals(m_releasesChecksumPolicy, m_snapshotsChecksumPolicy)) {
+                sb.append(
+                        ServiceConstants.SEPARATOR_OPTIONS
+                                + ServiceConstants.OPTION_CHECKSUM
+                                + "="
+                                + m_releasesChecksumPolicy);
             }
         }
 
@@ -459,5 +421,4 @@ public class MavenRepositoryURL
             return source;
         }
     }
-
 }

@@ -22,8 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The @Parsing annotation can be used on a {@link org.apache.karaf.shell.api.action.Command}
- * to specify a custom {@link org.apache.karaf.shell.api.console.Parser} to use for the command.
+ * The @Parsing annotation can be used on a {@link org.apache.karaf.shell.api.action.Command} to
+ * specify a custom {@link org.apache.karaf.shell.api.console.Parser} to use for the command.
  *
  * @see org.apache.karaf.shell.api.console.Parser
  */
@@ -37,5 +37,4 @@ public @interface Parsing {
      * @return the parsing value.
      */
     Class<?> value();
-
 }

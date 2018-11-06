@@ -18,15 +18,14 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.net.URI;
+import static org.junit.Assert.assertNotNull;
 
+import java.net.URI;
 import org.apache.karaf.features.Repository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
 
 public class RepositoryCacheTest {
 
@@ -55,16 +54,22 @@ public class RepositoryCacheTest {
     @Ignore("Ignoring to check if it's real problem")
     public void refCountForIncludedRepositories() throws Exception {
         RepositoryCacheImpl cache = new RepositoryCacheImpl(null);
-        Repository repo1 = cache.create(getClass().getResource("/org/apache/karaf/features/repo1.xml").toURI(), false);
-        Repository repo2 = cache.create(getClass().getResource("/org/apache/karaf/features/repo2.xml").toURI(), false);
+        Repository repo1 =
+                cache.create(
+                        getClass().getResource("/org/apache/karaf/features/repo1.xml").toURI(),
+                        false);
+        Repository repo2 =
+                cache.create(
+                        getClass().getResource("/org/apache/karaf/features/repo2.xml").toURI(),
+                        false);
         cache.addRepository(repo1);
         cache.addRepository(repo2);
         cache.addRepository(new RepositoryImpl(URI.create("urn:r1"), false));
         assertNotNull(cache.getRepository("urn:r1"));
 
         cache.removeRepository(repo2.getURI());
-        assertNotNull("Repository referenced from two different repositories should not be cascade-removed",
+        assertNotNull(
+                "Repository referenced from two different repositories should not be cascade-removed",
                 cache.getRepository("urn:r1"));
     }
-
 }

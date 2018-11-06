@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
-
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 import org.apache.karaf.shell.api.console.Session;
@@ -45,12 +44,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Activate this bundle
- */
-@Services(
-        requires = @RequireService(SessionFactory.class)
-)
+/** Activate this bundle */
+@Services(requires = @RequireService(SessionFactory.class))
 @Managed("org.apache.karaf.shell")
 public class Activator extends BaseActivator implements ManagedService {
 
@@ -64,19 +59,22 @@ public class Activator extends BaseActivator implements ManagedService {
     protected void doOpen() throws Exception {
         super.doOpen();
 
-        sessionTracker = new ServiceTracker<Session, Session>(bundleContext, Session.class, null) {
-            @Override
-            public Session addingService(ServiceReference<Session> reference) {
-                Session session = super.addingService(reference);
-                KarafAgentFactory.getInstance().registerSession(session);
-                return session;
-            }
-            @Override
-            public void removedService(ServiceReference<Session> reference, Session session) {
-                KarafAgentFactory.getInstance().unregisterSession(session);
-                super.removedService(reference, session);
-            }
-        };
+        sessionTracker =
+                new ServiceTracker<Session, Session>(bundleContext, Session.class, null) {
+                    @Override
+                    public Session addingService(ServiceReference<Session> reference) {
+                        Session session = super.addingService(reference);
+                        KarafAgentFactory.getInstance().registerSession(session);
+                        return session;
+                    }
+
+                    @Override
+                    public void removedService(
+                            ServiceReference<Session> reference, Session session) {
+                        KarafAgentFactory.getInstance().unregisterSession(session);
+                        super.removedService(reference, session);
+                    }
+                };
         sessionTracker.open();
     }
 
@@ -141,27 +139,36 @@ public class Activator extends BaseActivator implements ManagedService {
     }
 
     protected SshServer createSshServer(SessionFactory sessionFactory) {
-        int sshPort            = getInt("sshPort", 8101);
-        String sshHost         = getString("sshHost", "0.0.0.0");
-        long sshIdleTimeout    = getLong("sshIdleTimeout", 1800000);
-        int nioWorkers         = getInt("nio-workers", 2);
-        String sshRealm        = getString("sshRealm", "karaf");
-        Class<?>[] roleClasses = getClassesArray("sshRoleTypes", "org.apache.karaf.jaas.boot.principal.RolePrincipal");
-        String sshRole         = getString("sshRole", null);
-        String hostKey         = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
-        String[] authMethods   = getStringArray("authMethods", "keyboard-interactive,password,publickey");
-        int keySize            = getInt("keySize", 2048);
-        String algorithm       = getString("algorithm", "RSA");
-        String[] macs          = getStringArray("macs", "hmac-sha2-512,hmac-sha2-256,hmac-sha1");
-        String[] ciphers       = getStringArray("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
-        String[] kexAlgorithms = getStringArray("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
-        String welcomeBanner   = getString("welcomeBanner", null);
-        String moduliUrl       = getString("moduli-url", null);
-        boolean sftpEnabled     = getBoolean("sftpEnabled", true);
-        
+        int sshPort = getInt("sshPort", 8101);
+        String sshHost = getString("sshHost", "0.0.0.0");
+        long sshIdleTimeout = getLong("sshIdleTimeout", 1800000);
+        int nioWorkers = getInt("nio-workers", 2);
+        String sshRealm = getString("sshRealm", "karaf");
+        Class<?>[] roleClasses =
+                getClassesArray(
+                        "sshRoleTypes", "org.apache.karaf.jaas.boot.principal.RolePrincipal");
+        String sshRole = getString("sshRole", null);
+        String hostKey = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
+        String[] authMethods =
+                getStringArray("authMethods", "keyboard-interactive,password,publickey");
+        int keySize = getInt("keySize", 2048);
+        String algorithm = getString("algorithm", "RSA");
+        String[] macs = getStringArray("macs", "hmac-sha2-512,hmac-sha2-256,hmac-sha1");
+        String[] ciphers =
+                getStringArray("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
+        String[] kexAlgorithms =
+                getStringArray(
+                        "kexAlgorithms",
+                        "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
+        String welcomeBanner = getString("welcomeBanner", null);
+        String moduliUrl = getString("moduli-url", null);
+        boolean sftpEnabled = getBoolean("sftpEnabled", true);
+
         Path serverKeyPath = Paths.get(hostKey);
-        KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverKeyPath.toFile(), algorithm, keySize);
-        KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator(sshRealm, sshRole, roleClasses);
+        KeyPairProvider keyPairProvider =
+                new OpenSSHKeyPairProvider(serverKeyPath.toFile(), algorithm, keySize);
+        KarafJaasAuthenticator authenticator =
+                new KarafJaasAuthenticator(sshRealm, sshRole, roleClasses);
         UserAuthFactoriesFactory authFactoriesFactory = new UserAuthFactoriesFactory();
         authFactoriesFactory.setAuthMethods(authMethods);
 
@@ -173,9 +180,13 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setKeyExchangeFactories(SshUtils.buildKexAlgorithms(kexAlgorithms));
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
         if (sftpEnabled) {
-            server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(cmd -> new ShellCommand(sessionFactory, cmd)).build());
+            server.setCommandFactory(
+                    new ScpCommandFactory.Builder()
+                            .withDelegate(cmd -> new ShellCommand(sessionFactory, cmd))
+                            .build());
             server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
-            server.setFileSystemFactory(new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))));
+            server.setFileSystemFactory(
+                    new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))));
         } else {
             server.setCommandFactory(cmd -> new ShellCommand(sessionFactory, cmd));
         }
@@ -192,10 +203,7 @@ public class Activator extends BaseActivator implements ManagedService {
         }
         if (welcomeBanner != null) {
             server.getProperties().put(SshServer.WELCOME_BANNER, welcomeBanner);
-        } 
+        }
         return server;
     }
-
-
-
 }

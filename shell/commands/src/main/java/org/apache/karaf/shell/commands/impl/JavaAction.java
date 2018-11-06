@@ -18,7 +18,6 @@ package org.apache.karaf.shell.commands.impl;
 
 import java.lang.reflect.Method;
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -30,9 +29,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Execute a Java standard application.
  *
- * <p>By default looks for static main(String[]) to execute, but
- * you can specify a different static method that takes a String[]
- * to execute instead.
+ * <p>By default looks for static main(String[]) to execute, but you can specify a different static
+ * method that takes a String[] to execute instead.
  */
 @Command(scope = "shell", name = "java", description = "Executes a Java standard application.")
 @Service
@@ -40,13 +38,28 @@ public class JavaAction implements Action {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(name = "-m", aliases = {"--method"}, description = "Invoke a named method", required = false, multiValued = false)
+    @Option(
+            name = "-m",
+            aliases = {"--method"},
+            description = "Invoke a named method",
+            required = false,
+            multiValued = false)
     private String methodName = "main";
 
-    @Argument(index = 0, name = "className", description="The name of the class to invoke", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "className",
+            description = "The name of the class to invoke",
+            required = true,
+            multiValued = false)
     private String className;
 
-    @Argument(index = 1, name = "arguments", description="Arguments to pass to the method of the given class", required = false, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "arguments",
+            description = "Arguments to pass to the method of the given class",
+            required = false,
+            multiValued = false)
     private List<String> args;
 
     @Override
@@ -75,5 +88,4 @@ public class JavaAction implements Action {
 
         return null;
     }
-
 }

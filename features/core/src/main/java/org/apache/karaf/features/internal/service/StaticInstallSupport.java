@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -33,12 +32,10 @@ import org.osgi.resource.Wire;
 public abstract class StaticInstallSupport implements BundleInstallSupport {
 
     @Override
-    public void print(String message, boolean verbose) {
-    }
+    public void print(String message, boolean verbose) {}
 
     @Override
-    public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
-    }
+    public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {}
 
     @Override
     public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
@@ -51,31 +48,28 @@ public abstract class StaticInstallSupport implements BundleInstallSupport {
     }
 
     @Override
-    public void startBundle(Bundle bundle) throws BundleException {
-    }
+    public void startBundle(Bundle bundle) throws BundleException {}
 
     @Override
-    public void stopBundle(Bundle bundle, int options) throws BundleException {
-    }
+    public void stopBundle(Bundle bundle, int options) throws BundleException {}
 
     @Override
-    public void setBundleStartLevel(Bundle bundle, int startLevel) {
-    }
+    public void setBundleStartLevel(Bundle bundle, int startLevel) {}
 
     @Override
-    public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring,
-                               Map<Resource, Bundle> resToBnd) {
-    }
+    public void resolveBundles(
+            Set<Bundle> bundles,
+            Map<Resource, List<Wire>> wiring,
+            Map<Resource, Bundle> resToBnd) {}
 
     @Override
-    public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies,
-                               Map<String, Set<Long>> bundles)
-        throws BundleException, InvalidSyntaxException {
-    }
+    public void replaceDigraph(
+            Map<String, Map<String, Map<String, Set<String>>>> policies,
+            Map<String, Set<Long>> bundles)
+            throws BundleException, InvalidSyntaxException {}
 
     @Override
-    public void saveDigraph() {
-    }
+    public void saveDigraph() {}
 
     @Override
     public RegionDigraph getDiGraphCopy() throws BundleException {
@@ -93,7 +87,5 @@ public abstract class StaticInstallSupport implements BundleInstallSupport {
     }
 
     @Override
-    public void unregister() {
-    }
-
+    public void unregister() {}
 }

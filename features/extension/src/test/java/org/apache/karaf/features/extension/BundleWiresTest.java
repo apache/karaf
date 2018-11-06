@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.Assert;
@@ -53,7 +52,8 @@ public class BundleWiresTest {
     private static final Path BASE_PATH = new File("target/bundles").toPath();
     private static final String targetBundleVersion = "1.0.1";
     private static final int targetBundleId = 2;
-    private static final String packageFilter = "(&(osgi.wiring.package=org.osgi.framework)(version>=1.6.0)(!(version>=2.0.0)))";
+    private static final String packageFilter =
+            "(&(osgi.wiring.package=org.osgi.framework)(version>=1.6.0)(!(version>=2.0.0)))";
     private IMocksControl c;
 
     @Before
@@ -63,18 +63,20 @@ public class BundleWiresTest {
 
     @Test
     public void testFromBundle() throws IOException {
-        BundleWire wire = packageWire(packageFilter, bundleCap(targetBundleId, targetBundleVersion));
+        BundleWire wire =
+                packageWire(packageFilter, bundleCap(targetBundleId, targetBundleVersion));
         Bundle bundle = wiredBundle(Arrays.asList(wire));
         c.replay();
         BundleWires bwires = new BundleWires(bundle);
         bwires.save(BASE_PATH);
         c.verify();
         Iterator<String> lines = Files.lines(new File("target/bundles/1").toPath()).iterator();
-        Assert.assertEquals(PackageNamespace.PACKAGE_NAMESPACE + "; " + packageFilter, lines.next());
+        Assert.assertEquals(
+                PackageNamespace.PACKAGE_NAMESPACE + "; " + packageFilter, lines.next());
         Assert.assertEquals(targetBundleId + "; version=" + targetBundleVersion, lines.next());
         bwires.delete(BASE_PATH);
     }
-    
+
     @Test
     public void testFromFile() throws IOException {
         BundleWires wires = readFromFile();
@@ -83,7 +85,7 @@ public class BundleWiresTest {
         assertEquals(PackageNamespace.PACKAGE_NAMESPACE + "; " + packageFilter, wire.getKey());
         assertEquals(targetBundleId + "; version=" + targetBundleVersion, wire.getValue());
     }
-    
+
     @Test
     public void testFilterMatches() throws IOException {
         BundleWires wires = readFromFile();
@@ -94,7 +96,7 @@ public class BundleWiresTest {
         BundleCapability matchingCandidate = bundleCap(targetBundleId, "1.1.0");
         candidates.add(matchingCandidate);
         c.replay();
-        
+
         wires.filterMatches(req, candidates);
         assertEquals(1, candidates.size());
         assertEquals(candidate1, candidates.iterator().next());
@@ -103,7 +105,7 @@ public class BundleWiresTest {
 
     private BundleWires readFromFile() throws IOException {
         File wiringsFile = new File("src/test/resources/wirings/1");
-        BufferedReader reader = new BufferedReader(new FileReader(wiringsFile)); 
+        BufferedReader reader = new BufferedReader(new FileReader(wiringsFile));
         BundleWires wires = new BundleWires(1, reader);
         return wires;
     }
@@ -146,5 +148,4 @@ public class BundleWiresTest {
         expect(bundle.adapt(BundleWiring.class)).andReturn(wiring);
         return bundle;
     }
-
 }

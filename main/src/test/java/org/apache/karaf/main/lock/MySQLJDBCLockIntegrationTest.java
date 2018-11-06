@@ -18,16 +18,13 @@
  */
 package org.apache.karaf.main.lock;
 
-
 import static org.junit.Assert.assertFalse;
 
 import java.sql.Connection;
 import org.apache.felix.utils.properties.Properties;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 
 @Ignore
 public class MySQLJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
@@ -36,34 +33,34 @@ public class MySQLJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
     public void setUp() throws Exception {
         driver = "com.mysql.jdbc.Driver";
         url = "jdbc:mysql://127.0.0.1:3306/test";
-        
+
         super.setUp();
     }
-    
+
     @Override
     MySQLJDBCLock createLock(Properties props) {
         return new MySQLJDBCLock(props);
     }
-    
+
     @Test
     public void initShouldCreateTheDatabaseIfItNotExists() throws Exception {
         String database = "test" + System.currentTimeMillis();
-        
+
         try {
             executeStatement("DROP DATABASE " + database);
         } catch (Exception e) {
             // expected if table dosn't exist
         }
-        
+
         url = "jdbc:mysql://127.0.0.1:3306/" + database;
         props.put("karaf.lock.jdbc.url", url);
         lock = createLock(props);
-        
-        
+
         // should throw an exeption, if the database doesn't exists
-        Connection connection = getConnection("jdbc:mysql://127.0.0.1:3306/" + database, user, password);
+        Connection connection =
+                getConnection("jdbc:mysql://127.0.0.1:3306/" + database, user, password);
         assertFalse(connection.isClosed());
-        
+
         executeStatement("DROP DATABASE " + database);
         close(connection);
     }

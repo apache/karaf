@@ -16,14 +16,11 @@
  */
 package org.apache.karaf.examples.blueprint.client;
 
+import java.util.List;
 import org.apache.karaf.examples.blueprint.common.Booking;
 import org.apache.karaf.examples.blueprint.common.BookingService;
 
-import java.util.List;
-
-/**
- * Just an indirection service basically for the itest.
- */
+/** Just an indirection service basically for the itest. */
 public class ClientServiceImpl implements ClientService {
 
     private BookingService bookingService;

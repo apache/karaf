@@ -28,7 +28,6 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
 import org.osgi.framework.BundleContext;
 
 @RunWith(PaxExam.class)
@@ -43,40 +42,42 @@ public class JaasTest extends KarafTestSupport {
     }
 
     @Ignore
-    //ignore it as this is too time consuming
+    // ignore it as this is too time consuming
     public void testLoginNoLeak() throws Exception {
-        for (int i = 0; i<200000; i++) {
+        for (int i = 0; i < 200000; i++) {
             doLogin();
         }
     }
 
-    @Inject
-    protected BundleContext bundleContext;
+    @Inject protected BundleContext bundleContext;
 
-    @Test  // shows the leak afaics
+    @Test // shows the leak afaics
     public void testLoginSingleReg() throws Exception {
-        for (int i=0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             doLogin();
         }
-        assertEquals(2, bundleContext.getServiceReferences(ArtifactInstaller.class.getName(), null).length);
+        assertEquals(
+                2,
+                bundleContext.getServiceReferences(ArtifactInstaller.class.getName(), null).length);
     }
 
     private void doLogin() throws Exception {
         final String userPassRealm = "karaf";
-        LoginContext lc = new LoginContext(userPassRealm, callbacks -> {
-            for (Callback callback : callbacks) {
-                if (callback instanceof PasswordCallback) {
-                    PasswordCallback passwordCallback = (PasswordCallback) callback;
-                    passwordCallback.setPassword(userPassRealm.toCharArray());
-                } else if (callback instanceof NameCallback) {
-                    NameCallback nameCallback = (NameCallback) callback;
-                    nameCallback.setName(userPassRealm);
-                }
-            }
-        });
+        LoginContext lc =
+                new LoginContext(
+                        userPassRealm,
+                        callbacks -> {
+                            for (Callback callback : callbacks) {
+                                if (callback instanceof PasswordCallback) {
+                                    PasswordCallback passwordCallback = (PasswordCallback) callback;
+                                    passwordCallback.setPassword(userPassRealm.toCharArray());
+                                } else if (callback instanceof NameCallback) {
+                                    NameCallback nameCallback = (NameCallback) callback;
+                                    nameCallback.setName(userPassRealm);
+                                }
+                            }
+                        });
         lc.login();
         assertNotNull(lc.getSubject());
     }
-
-
 }

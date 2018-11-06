@@ -20,8 +20,5 @@ package org.apache.karaf.shell.support.completers;
 
 import org.apache.karaf.shell.api.console.Completer;
 
-/**
- * Marker class.  An instance of this class is published by the console.
- */
-public abstract class CommandNamesCompleter implements Completer {
-}
+/** Marker class. An instance of this class is published by the console. */
+public abstract class CommandNamesCompleter implements Completer {}

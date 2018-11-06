@@ -18,6 +18,11 @@
  */
 package org.apache.karaf.shell.impl.action.command;
 
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_NORMAL;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.felix.gogo.runtime.Token;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -49,11 +53,6 @@ import org.apache.karaf.shell.support.CommandException;
 import org.apache.karaf.shell.support.NameScoping;
 import org.apache.karaf.shell.support.converter.DefaultConverter;
 import org.apache.karaf.shell.support.converter.GenericType;
-
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_RED;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_BOLD;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
 public class DefaultActionPreparator {
 
@@ -80,7 +79,11 @@ public class DefaultActionPreparator {
                         orderedArguments.add(null);
                     }
                     if (orderedArguments.get(index) != null) {
-                        throw new IllegalArgumentException("Duplicate argument index: " + index + " on Action " + action.getClass().getName());
+                        throw new IllegalArgumentException(
+                                "Duplicate argument index: "
+                                        + index
+                                        + " on Action "
+                                        + action.getClass().getName());
                     }
                     orderedArguments.set(index, argument);
                 }
@@ -88,17 +91,27 @@ public class DefaultActionPreparator {
         }
         assertIndexesAreCorrect(action.getClass(), orderedArguments);
 
-        String commandErrorSt = COLOR_RED + "Error executing command " + command.scope() + ":" + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL + COLOR_DEFAULT + ": ";
+        String commandErrorSt =
+                COLOR_RED
+                        + "Error executing command "
+                        + command.scope()
+                        + ":"
+                        + INTENSITY_BOLD
+                        + command.name()
+                        + INTENSITY_NORMAL
+                        + COLOR_DEFAULT
+                        + ": ";
         for (Object param : params) {
             if (HelpOption.HELP.name().equals(param.toString())) {
-                int termWidth = session.getTerminal() != null ? session.getTerminal().getWidth() : 80;
+                int termWidth =
+                        session.getTerminal() != null ? session.getTerminal().getWidth() : 80;
                 termWidth = termWidth == 0 ? 80 : termWidth;
                 boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
                 printUsage(action, options, arguments, System.out, globalScope, termWidth);
                 return false;
             }
         }
-        
+
         // Populate
         Map<Option, Object> optionValues = new HashMap<Option, Object>();
         Map<Argument, Object> argumentValues = new HashMap<Argument, Object>();
@@ -109,15 +122,13 @@ public class DefaultActionPreparator {
 
             String paramValue = null;
             if (param instanceof String) {
-                paramValue = (String)param;
+                paramValue = (String) param;
             }
             if (param instanceof Token) {
                 paramValue = param.toString();
             }
 
-            if (processOptions
-                    && paramValue != null
-                    && paramValue.startsWith("-")) {
+            if (processOptions && paramValue != null && paramValue.startsWith("-")) {
                 boolean isKeyValuePair = paramValue.indexOf('=') != -1;
                 String name;
                 Object value = null;
@@ -135,23 +146,32 @@ public class DefaultActionPreparator {
                     }
                 }
                 if (option == null) {
-                    throw new CommandException(commandErrorSt
-                                + "undefined option " + INTENSITY_BOLD + paramValue + INTENSITY_NORMAL + "\n"
-                                + "Try <command> --help' for more information.",
-                                        "Undefined option: " + paramValue);
+                    throw new CommandException(
+                            commandErrorSt
+                                    + "undefined option "
+                                    + INTENSITY_BOLD
+                                    + paramValue
+                                    + INTENSITY_NORMAL
+                                    + "\n"
+                                    + "Try <command> --help' for more information.",
+                            "Undefined option: " + paramValue);
                 }
                 Field field = options.get(option);
-                if (value == null && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
+                if (value == null
+                        && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
                     value = Boolean.TRUE;
                 }
                 if (value == null && it.hasNext()) {
                     value = it.next();
                 }
                 if (value == null) {
-                        throw new CommandException(commandErrorSt
-                                + "missing value for option " + INTENSITY_BOLD + paramValue + INTENSITY_NORMAL,
-                                "Missing value for option: " + paramValue
-                        );
+                    throw new CommandException(
+                            commandErrorSt
+                                    + "missing value for option "
+                                    + INTENSITY_BOLD
+                                    + paramValue
+                                    + INTENSITY_NORMAL,
+                            "Missing value for option: " + paramValue);
                 }
                 if (option.multiValued()) {
                     @SuppressWarnings("unchecked")
@@ -167,10 +187,9 @@ public class DefaultActionPreparator {
             } else {
                 processOptions = false;
                 if (argIndex >= orderedArguments.size()) {
-                        throw new CommandException(commandErrorSt +
-                                "too many arguments specified",
-                                "Too many arguments specified"
-                        );
+                    throw new CommandException(
+                            commandErrorSt + "too many arguments specified",
+                            "Too many arguments specified");
                 }
                 Argument argument = orderedArguments.get(argIndex);
                 if (!argument.multiValued()) {
@@ -192,21 +211,29 @@ public class DefaultActionPreparator {
         // Check required arguments / options
         for (Option option : options.keySet()) {
             if (option.required() && optionValues.get(option) == null) {
-                    throw new CommandException(commandErrorSt +
-                            "option " + INTENSITY_BOLD + option.name() + INTENSITY_NORMAL + " is required",
-                            "Option " + option.name() + " is required"
-                    );
+                throw new CommandException(
+                        commandErrorSt
+                                + "option "
+                                + INTENSITY_BOLD
+                                + option.name()
+                                + INTENSITY_NORMAL
+                                + " is required",
+                        "Option " + option.name() + " is required");
             }
         }
         for (Argument argument : orderedArguments) {
             if (argument.required() && argumentValues.get(argument) == null) {
-                    throw new CommandException(commandErrorSt +
-                            "argument " + INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL + " is required",
-                            "Argument " + argument.name() + " is required"
-                    );
+                throw new CommandException(
+                        commandErrorSt
+                                + "argument "
+                                + INTENSITY_BOLD
+                                + argument.name()
+                                + INTENSITY_NORMAL
+                                + " is required",
+                        "Argument " + argument.name() + " is required");
             }
         }
-            
+
         // Convert and inject values
         for (Map.Entry<Option, Object> entry : optionValues.entrySet()) {
             Field field = options.get(entry.getKey());
@@ -214,13 +241,23 @@ public class DefaultActionPreparator {
             try {
                 value = convert(action, entry.getValue(), field.getGenericType());
             } catch (Exception e) {
-                    throw new CommandException(commandErrorSt +
-                            "unable to convert option " + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL + " with value '"
-                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            "Unable to convert option " + entry.getKey().name() + " with value '"
-                                    + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            e
-                    );
+                throw new CommandException(
+                        commandErrorSt
+                                + "unable to convert option "
+                                + INTENSITY_BOLD
+                                + entry.getKey().name()
+                                + INTENSITY_NORMAL
+                                + " with value '"
+                                + entry.getValue()
+                                + "' to type "
+                                + new GenericType(field.getGenericType()).toString(),
+                        "Unable to convert option "
+                                + entry.getKey().name()
+                                + " with value '"
+                                + entry.getValue()
+                                + "' to type "
+                                + new GenericType(field.getGenericType()).toString(),
+                        e);
             }
             field.setAccessible(true);
             field.set(action, value);
@@ -231,13 +268,23 @@ public class DefaultActionPreparator {
             try {
                 value = convert(action, entry.getValue(), field.getGenericType());
             } catch (Exception e) {
-                    throw new CommandException(commandErrorSt +
-                            "unable to convert argument " + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL + " with value '"
-                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            "Unable to convert argument " + entry.getKey().name() + " with value '"
-                                    + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            e
-                    );
+                throw new CommandException(
+                        commandErrorSt
+                                + "unable to convert argument "
+                                + INTENSITY_BOLD
+                                + entry.getKey().name()
+                                + INTENSITY_NORMAL
+                                + " with value '"
+                                + entry.getValue()
+                                + "' to type "
+                                + new GenericType(field.getGenericType()).toString(),
+                        "Unable to convert argument "
+                                + entry.getKey().name()
+                                + " with value '"
+                                + entry.getValue()
+                                + "' to type "
+                                + new GenericType(field.getGenericType()).toString(),
+                        e);
             }
             field.setAccessible(true);
             field.set(action, value);
@@ -256,58 +303,67 @@ public class DefaultActionPreparator {
         if (Argument.DEFAULT.equals(argument.name())) {
             final Argument delegate = argument;
             final String name = field.getName();
-            argument = new Argument() {
-                public String name() {
-                    return name;
-                }
+            argument =
+                    new Argument() {
+                        public String name() {
+                            return name;
+                        }
 
-                public String description() {
-                    return delegate.description();
-                }
+                        public String description() {
+                            return delegate.description();
+                        }
 
-                public boolean required() {
-                    return delegate.required();
-                }
+                        public boolean required() {
+                            return delegate.required();
+                        }
 
-                public int index() {
-                    return delegate.index();
-                }
+                        public int index() {
+                            return delegate.index();
+                        }
 
-                public boolean multiValued() {
-                    return delegate.multiValued();
-                }
+                        public boolean multiValued() {
+                            return delegate.multiValued();
+                        }
 
-                public String valueToShowInHelp() {
-                    return delegate.valueToShowInHelp();
-                }
+                        public String valueToShowInHelp() {
+                            return delegate.valueToShowInHelp();
+                        }
 
-                public Class<? extends Annotation> annotationType() {
-                    return delegate.annotationType();
-                }
+                        public Class<? extends Annotation> annotationType() {
+                            return delegate.annotationType();
+                        }
 
-                @Override
-                public boolean censor() {
-                    return delegate.censor();
-                }
+                        @Override
+                        public boolean censor() {
+                            return delegate.censor();
+                        }
 
-                @Override
-                public char mask() {
-                    return delegate.mask();
-                }
-            };
+                        @Override
+                        public char mask() {
+                            return delegate.mask();
+                        }
+                    };
         }
         return argument;
     }
 
-    private void assertIndexesAreCorrect(Class<? extends Action> actionClass, List<Argument> orderedArguments) {
+    private void assertIndexesAreCorrect(
+            Class<? extends Action> actionClass, List<Argument> orderedArguments) {
         for (int i = 0; i < orderedArguments.size(); i++) {
             if (orderedArguments.get(i) == null) {
-                throw new IllegalArgumentException("Missing argument for index: " + i + " on Action " + actionClass.getName());
+                throw new IllegalArgumentException(
+                        "Missing argument for index: " + i + " on Action " + actionClass.getName());
             }
         }
     }
 
-    public void printUsage(Action action, Map<Option, Field> options, Map<Argument, Field> arguments, PrintStream out, boolean globalScope, int termWidth) {
+    public void printUsage(
+            Action action,
+            Map<Option, Field> options,
+            Map<Argument, Field> arguments,
+            PrintStream out,
+            boolean globalScope,
+            int termWidth) {
         Command command = action.getClass().getAnnotation(Command.class);
         if (command != null) {
             List<Argument> argumentsSet = new ArrayList<Argument>(arguments.keySet());
@@ -321,7 +377,12 @@ public class DefaultActionPreparator {
                     if (globalScope) {
                         out.println(INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
                     } else {
-                        out.println(command.scope() + ":" + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
+                        out.println(
+                                command.scope()
+                                        + ":"
+                                        + INTENSITY_BOLD
+                                        + command.name()
+                                        + INTENSITY_NORMAL);
                     }
                     out.println();
                 }
@@ -360,9 +421,11 @@ public class DefaultActionPreparator {
                 for (Argument argument : argumentsSet) {
                     out.print("        ");
                     out.println(INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL);
-                    printFormatted("                ", argument.description(), termWidth, out, true);
+                    printFormatted(
+                            "                ", argument.description(), termWidth, out, true);
                     if (!argument.required()) {
-                        if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
+                        if (argument.valueToShowInHelp() != null
+                                && argument.valueToShowInHelp().length() != 0) {
                             if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
                                 Object o = getDefaultValue(action, arguments.get(argument));
                                 String defaultValue = getDefaultValueString(o);
@@ -389,14 +452,15 @@ public class DefaultActionPreparator {
                     out.print("        ");
                     out.println(INTENSITY_BOLD + opt + INTENSITY_NORMAL);
                     printFormatted("                ", option.description(), termWidth, out, true);
-                    if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
+                    if (option.valueToShowInHelp() != null
+                            && option.valueToShowInHelp().length() != 0) {
                         if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
                             Object o = getDefaultValue(action, options.get(option));
                             String defaultValue = getDefaultValueString(o);
                             if (defaultValue != null) {
                                 printDefaultsTo(out, defaultValue);
                             } else {
-                              printMeta(out, option.required(), option.multiValued());
+                                printMeta(out, option.required(), option.multiValued());
                             }
                         } else {
                             printDefaultsTo(out, option.valueToShowInHelp());
@@ -466,7 +530,8 @@ public class DefaultActionPreparator {
         }
     }
 
-    static void printFormatted(String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
+    static void printFormatted(
+            String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
         int pfxLen = prefix.length();
         int maxwidth = termWidth - pfxLen;
         Pattern wrap = Pattern.compile("(\\S\\S{" + maxwidth + ",}|.{1," + maxwidth + "})(\\s+|$)");
@@ -520,5 +585,4 @@ public class DefaultActionPreparator {
             }
         }
     }
-
 }

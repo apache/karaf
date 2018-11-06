@@ -18,9 +18,7 @@ package org.apache.karaf.examples.jpa;
 
 import java.util.List;
 
-/**
- * Simple interface describing the booking service.
- */
+/** Simple interface describing the booking service. */
 public interface BookingService {
 
     List<Booking> list();
@@ -32,5 +30,4 @@ public interface BookingService {
     void add(String flight, String customer);
 
     void remove(Long id);
-
 }

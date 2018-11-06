@@ -26,9 +26,7 @@ import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.Arrays;
-
 import javax.security.auth.Subject;
-
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.commands.CommandException;
@@ -137,31 +135,43 @@ public class ShellUtil {
 
     public static void logException(CommandSession session, Throwable t) {
         try {
-            boolean isCommandNotFound = "org.apache.felix.gogo.runtime.CommandNotFoundException".equals(t.getClass().getName());
+            boolean isCommandNotFound =
+                    "org.apache.felix.gogo.runtime.CommandNotFoundException"
+                            .equals(t.getClass().getName());
             if (isCommandNotFound) {
                 LOGGER.debug("Unknown command entered", t);
             } else if (t instanceof CommandException) {
                 LOGGER.debug("Command exception (Undefined option, ...)", t);
-            } else if (!(t instanceof CloseShellException)) {    
+            } else if (!(t instanceof CloseShellException)) {
                 LOGGER.error("Exception caught while executing command", t);
             }
             session.put(SessionProperties.LAST_EXCEPTION, t);
             if (t instanceof CommandException) {
                 session.getConsole().println(((CommandException) t).getNiceHelp());
             } else if (isCommandNotFound) {
-                String str = COLOR_RED + "Command not found: " 
-                         + INTENSITY_BOLD + t.getClass().getMethod("getCommand").invoke(t) + INTENSITY_NORMAL
-                         + COLOR_DEFAULT;
+                String str =
+                        COLOR_RED
+                                + "Command not found: "
+                                + INTENSITY_BOLD
+                                + t.getClass().getMethod("getCommand").invoke(t)
+                                + INTENSITY_NORMAL
+                                + COLOR_DEFAULT;
                 session.getConsole().println(str);
             }
             if (getBoolean(session, SessionProperties.PRINT_STACK_TRACES)) {
                 session.getConsole().print(COLOR_RED);
                 t.printStackTrace(session.getConsole());
                 session.getConsole().print(COLOR_DEFAULT);
-            } else if (!(t instanceof CloseShellException) && !(t instanceof CommandException) && !isCommandNotFound) {    
+            } else if (!(t instanceof CloseShellException)
+                    && !(t instanceof CommandException)
+                    && !isCommandNotFound) {
                 session.getConsole().print(COLOR_RED);
-                session.getConsole().println("Error executing command: "
-                        + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
+                session.getConsole()
+                        .println(
+                                "Error executing command: "
+                                        + (t.getMessage() != null
+                                                ? t.getMessage()
+                                                : t.getClass().getName()));
                 session.getConsole().print(COLOR_DEFAULT);
             }
         } catch (Exception ignore) {
@@ -178,5 +188,4 @@ public class ShellUtil {
             return null;
         }
     }
-    
 }

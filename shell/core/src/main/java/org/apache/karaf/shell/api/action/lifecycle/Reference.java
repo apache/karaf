@@ -24,19 +24,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A class annotated with {@link Service} can have fields
- * annotated with <code>@Service</code> in which case matching
- * services will be retrieved from the
- * {@link org.apache.karaf.shell.api.console.Registry} and
- * injected.
+ * A class annotated with {@link Service} can have fields annotated with <code>@Service</code> in
+ * which case matching services will be retrieved from the {@link
+ * org.apache.karaf.shell.api.console.Registry} and injected.
  *
- * If a field has a {@link java.util.List} type, it will be injected
- * with a list containing all matching services.
+ * <p>If a field has a {@link java.util.List} type, it will be injected with a list containing all
+ * matching services.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 public @interface Reference {
 
     boolean optional() default false;
-
 }

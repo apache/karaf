@@ -18,16 +18,13 @@ package org.apache.karaf.shell.impl.console.osgi;
 
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 
-/**
- * Delay the start of the console until the desired start level is reached or enter is pressed
- */
+/** Delay the start of the console until the desired start level is reached or enter is pressed */
 class DelayedStarted extends Thread implements FrameworkListener {
     private static final String SYSTEM_PROP_KARAF_CONSOLE_STARTED = "karaf.console.started";
 
@@ -42,13 +39,17 @@ class DelayedStarted extends Thread implements FrameworkListener {
         this.console = console;
         this.bundleContext = bundleContext;
         this.in = in;
-        int defaultStartLevel = Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-        int startLevel = bundleContext.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
+        int defaultStartLevel =
+                Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+        int startLevel =
+                bundleContext.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
         if (startLevel >= defaultStartLevel) {
             started.set(true);
         } else {
             bundleContext.addFrameworkListener(this);
-            frameworkEvent(new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, bundleContext.getBundle(), null));
+            frameworkEvent(
+                    new FrameworkEvent(
+                            FrameworkEvent.STARTLEVEL_CHANGED, bundleContext.getBundle(), null));
         }
     }
 
@@ -70,7 +71,6 @@ class DelayedStarted extends Thread implements FrameworkListener {
             // Ignore
         }
 
-
         if (!stopped.get()) {
             // Signal to the main module that it can stop displaying the startup progress
             System.setProperty(SYSTEM_PROP_KARAF_CONSOLE_STARTED, "true");
@@ -85,8 +85,13 @@ class DelayedStarted extends Thread implements FrameworkListener {
 
     public void frameworkEvent(FrameworkEvent event) {
         if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
-            int defaultStartLevel = Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-            int startLevel = this.bundleContext.getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
+            int defaultStartLevel =
+                    Integer.parseInt(System.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+            int startLevel =
+                    this.bundleContext
+                            .getBundle(0)
+                            .adapt(FrameworkStartLevel.class)
+                            .getStartLevel();
             if (startLevel >= defaultStartLevel) {
                 started.set(true);
             }

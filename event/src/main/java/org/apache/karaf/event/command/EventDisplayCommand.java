@@ -32,17 +32,13 @@ import org.osgi.framework.BundleContext;
 @Service
 public class EventDisplayCommand implements Action {
 
-    @Reference
-    Session session;
+    @Reference Session session;
 
-    @Reference
-    BundleContext context;
+    @Reference BundleContext context;
 
-    @Reference
-    EventCollector collector;
+    @Reference EventCollector collector;
 
-    @Argument
-    String topicFilter = "*";
+    @Argument String topicFilter = "*";
 
     @Option(name = "-v")
     boolean verbose = false;
@@ -53,5 +49,4 @@ public class EventDisplayCommand implements Action {
         collector.getEvents().filter(matchTopic(topicFilter)).forEach(printer);
         return null;
     }
-
 }

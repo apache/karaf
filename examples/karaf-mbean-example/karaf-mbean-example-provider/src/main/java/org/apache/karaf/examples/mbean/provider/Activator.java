@@ -21,11 +21,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
 
-@Services(
-        provides = {
-                @ProvideService(BookingService.class)
-        }
-)
+@Services(provides = {@ProvideService(BookingService.class)})
 public class Activator extends BaseActivator {
 
     @Override
@@ -33,5 +29,4 @@ public class Activator extends BaseActivator {
         BookingServiceMemoryImpl bookingService = new BookingServiceMemoryImpl();
         register(BookingService.class, bookingService);
     }
-
 }

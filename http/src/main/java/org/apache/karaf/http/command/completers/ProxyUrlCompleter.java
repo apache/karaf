@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.http.command.completers;
 
+import java.util.List;
+import java.util.Set;
 import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -24,14 +26,10 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-import java.util.List;
-import java.util.Set;
-
 @Service
 public class ProxyUrlCompleter implements Completer {
 
-    @Reference
-    private ProxyService proxyService;
+    @Reference private ProxyService proxyService;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -46,5 +44,4 @@ public class ProxyUrlCompleter implements Completer {
         }
         return delegate.complete(session, commandLine, candidates);
     }
-
 }

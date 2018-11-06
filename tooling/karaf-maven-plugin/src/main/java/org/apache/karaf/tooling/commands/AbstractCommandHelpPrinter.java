@@ -1,26 +1,21 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.karaf.tooling.commands;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 
@@ -30,43 +25,44 @@ public abstract class AbstractCommandHelpPrinter implements CommandHelpPrinter {
         if (Argument.DEFAULT.equals(argument.name())) {
             final Argument delegate = argument;
             final String name = field.getName();
-            argument = new Argument() {
-                public String name() {
-                    return name;
-                }
+            argument =
+                    new Argument() {
+                        public String name() {
+                            return name;
+                        }
 
-                public String description() {
-                    return delegate.description();
-                }
+                        public String description() {
+                            return delegate.description();
+                        }
 
-                public boolean required() {
-                    return delegate.required();
-                }
+                        public boolean required() {
+                            return delegate.required();
+                        }
 
-                public int index() {
-                    return delegate.index();
-                }
+                        public int index() {
+                            return delegate.index();
+                        }
 
-                public boolean multiValued() {
-                    return delegate.multiValued();
-                }
+                        public boolean multiValued() {
+                            return delegate.multiValued();
+                        }
 
-                public String valueToShowInHelp() {
-                    return delegate.valueToShowInHelp();
-                }
+                        public String valueToShowInHelp() {
+                            return delegate.valueToShowInHelp();
+                        }
 
-                public Class<? extends Annotation> annotationType() {
-                    return delegate.annotationType();
-                }
+                        public Class<? extends Annotation> annotationType() {
+                            return delegate.annotationType();
+                        }
 
-                public boolean censor() {
-                    return delegate.censor();
-                }
+                        public boolean censor() {
+                            return delegate.censor();
+                        }
 
-                public char mask() {
-                    return delegate.mask();
-                }
-            };
+                        public char mask() {
+                            return delegate.mask();
+                        }
+                    };
         }
         return argument;
     }
@@ -89,5 +85,4 @@ public abstract class AbstractCommandHelpPrinter implements CommandHelpPrinter {
             return null;
         }
     }
-
 }

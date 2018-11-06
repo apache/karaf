@@ -17,12 +17,12 @@
 package org.apache.karaf.examples.soap.provider;
 
 import java.util.*;
-
+import javax.jws.WebService;
 import org.apache.karaf.examples.soap.api.Booking;
 
-import javax.jws.WebService;
-
-@WebService(endpointInterface="org.apache.karaf.examples.soap.provider.BookingServiceSoap", serviceName="Booking")
+@WebService(
+        endpointInterface = "org.apache.karaf.examples.soap.provider.BookingServiceSoap",
+        serviceName = "Booking")
 public class BookingServiceSoapImpl implements BookingServiceSoap {
 
     private Map<Long, Booking> bookings = new HashMap<>();

@@ -21,9 +21,8 @@ package org.apache.karaf.main.lock;
 import org.apache.felix.utils.properties.Properties;
 
 /**
- * Represents an exclusive lock on a database,
- * used to avoid multiple Karaf instances attempting
- * to become master.
+ * Represents an exclusive lock on a database, used to avoid multiple Karaf instances attempting to
+ * become master.
  */
 public class PostgreSQLJDBCLock extends DefaultJDBCLock {
 

@@ -31,7 +31,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
-
 import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.jline.terminal.Attributes;
@@ -48,7 +47,7 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
     private final org.jline.terminal.Terminal terminal;
     private final ConcurrentMap<Signal, Set<SignalListener>> listeners = new ConcurrentHashMap<>();
     private final ConcurrentMap<Signal, SignalHandler> handlers = new ConcurrentHashMap<>();
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JLineTerminal.class);
 
     public JLineTerminal(org.jline.terminal.Terminal terminal) {
@@ -202,21 +201,26 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
     }
 
     @Override
-    public void addSignalListener(SignalListener listener, org.apache.karaf.shell.api.console.Signal... signals) {
+    public void addSignalListener(
+            SignalListener listener, org.apache.karaf.shell.api.console.Signal... signals) {
         for (org.apache.karaf.shell.api.console.Signal sig : signals) {
             addSignalListener(listener, sig);
         }
     }
 
     @Override
-    public void addSignalListener(SignalListener listener, EnumSet<org.apache.karaf.shell.api.console.Signal> signals) {
+    public void addSignalListener(
+            SignalListener listener, EnumSet<org.apache.karaf.shell.api.console.Signal> signals) {
         for (org.apache.karaf.shell.api.console.Signal sig : signals) {
             addSignalListener(listener, sig);
         }
     }
 
-    private void addSignalListener(SignalListener listener, org.apache.karaf.shell.api.console.Signal signal) {
-        Set<SignalListener> ls = listeners.compute(signal(signal), (s, l) -> l != null ? l : new CopyOnWriteArraySet<>());
+    private void addSignalListener(
+            SignalListener listener, org.apache.karaf.shell.api.console.Signal signal) {
+        Set<SignalListener> ls =
+                listeners.compute(
+                        signal(signal), (s, l) -> l != null ? l : new CopyOnWriteArraySet<>());
         ls.add(listener);
     }
 

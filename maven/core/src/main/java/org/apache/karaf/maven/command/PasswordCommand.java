@@ -19,7 +19,6 @@ package org.apache.karaf.maven.command;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Dictionary;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -28,28 +27,50 @@ import org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher;
 import org.sonatype.plexus.components.sec.dispatcher.model.SettingsSecurity;
 import org.sonatype.plexus.components.sec.dispatcher.model.io.xpp3.SecurityConfigurationXpp3Writer;
 
-@Command(scope = "maven", name = "password", description = "Manage passwords for remote repositories and proxies")
+@Command(
+        scope = "maven",
+        name = "password",
+        description = "Manage passwords for remote repositories and proxies")
 @Service
 public class PasswordCommand extends MavenConfigurationSupport {
 
-    @Option(name = "-ep", aliases = { "--encrypt-password" }, description = "Encrypts passwords to use for remote repositories and proxies, see \"mvn -ep\"", required = false, multiValued = false)
+    @Option(
+            name = "-ep",
+            aliases = {"--encrypt-password"},
+            description =
+                    "Encrypts passwords to use for remote repositories and proxies, see \"mvn -ep\"",
+            required = false,
+            multiValued = false)
     boolean ep;
 
-    @Option(name = "-emp", aliases = { "--encrypt-master-password" }, description = "Encrypts master password used to encrypt/decrypt other passwords, see \"mvn -emp\"", required = false, multiValued = false)
+    @Option(
+            name = "-emp",
+            aliases = {"--encrypt-master-password"},
+            description =
+                    "Encrypts master password used to encrypt/decrypt other passwords, see \"mvn -emp\"",
+            required = false,
+            multiValued = false)
     boolean emp;
 
-    @Option(name = "-p", aliases = { "--persist" }, description = "", required = false, multiValued = false)
+    @Option(
+            name = "-p",
+            aliases = {"--persist"},
+            description = "",
+            required = false,
+            multiValued = false)
     boolean persist;
 
     @Override
     public void doAction(String prefix, Dictionary<String, Object> config) throws Exception {
         if (ep && emp) {
-            System.err.println("Please specify only one of --encrypt-password and --encrypt-master-password");
+            System.err.println(
+                    "Please specify only one of --encrypt-password and --encrypt-master-password");
             return;
         }
 
         if (ep && persist) {
-            System.err.println("Ordinary passwords are not persisted - use the encrypted password in either <proxy> or <server>");
+            System.err.println(
+                    "Ordinary passwords are not persisted - use the encrypted password in either <proxy> or <server>");
             return;
         }
 
@@ -60,37 +81,52 @@ public class PasswordCommand extends MavenConfigurationSupport {
                 return;
             }
             String password = session.readLine("Password to encrypt: ", '*');
-            System.out.println("Encrypted password: " + cipher.encryptAndDecorate(password, masterPassword));
-            System.out.println("You can use this encrypted password when defining repositories and proxies");
+            System.out.println(
+                    "Encrypted password: " + cipher.encryptAndDecorate(password, masterPassword));
+            System.out.println(
+                    "You can use this encrypted password when defining repositories and proxies");
             return;
         }
 
         if (emp) {
-            if (persist && !confirm("Maven security settings will be stored in new file. This file will be used in org.ops4j.pax.url.mvn.security property. Continue? (y/N) ")) {
+            if (persist
+                    && !confirm(
+                            "Maven security settings will be stored in new file. This file will be used in org.ops4j.pax.url.mvn.security property. Continue? (y/N) ")) {
                 return;
             }
 
             // encrypt master password using DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION
             String password = session.readLine("Master password to encrypt: ", '*');
-            String encryptedPassword = cipher.encryptAndDecorate(password, DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION);
+            String encryptedPassword =
+                    cipher.encryptAndDecorate(
+                            password, DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION);
             System.out.println("Encrypted master password: " + encryptedPassword);
             if (persist) {
                 SettingsSecurity settingsSecurity = new SettingsSecurity();
                 settingsSecurity.setMaster(encryptedPassword);
                 File dataDir = context.getDataFile(".");
                 if (!dataDir.isDirectory()) {
-                    System.err.println("Can't access data directory for " + context.getBundle().getSymbolicName() + " bundle");
+                    System.err.println(
+                            "Can't access data directory for "
+                                    + context.getBundle().getSymbolicName()
+                                    + " bundle");
                     return;
                 }
-                File newSecuritySettingsFile = nextSequenceFile(dataDir, RE_SECURITY_SETTINGS, PATTERN_SECURITY_SETTINGS);
+                File newSecuritySettingsFile =
+                        nextSequenceFile(dataDir, RE_SECURITY_SETTINGS, PATTERN_SECURITY_SETTINGS);
                 try (FileWriter fw = new FileWriter(newSecuritySettingsFile)) {
                     new SecurityConfigurationXpp3Writer().write(fw, settingsSecurity);
                 }
 
-                System.out.println("New security settings stored in \"" + newSecuritySettingsFile.getCanonicalPath() + "\"");
+                System.out.println(
+                        "New security settings stored in \""
+                                + newSecuritySettingsFile.getCanonicalPath()
+                                + "\"");
 
                 Configuration cmConfig = cm.getConfiguration(PID);
-                config.put(prefix + PROPERTY_SECURITY_FILE, newSecuritySettingsFile.getCanonicalPath());
+                config.put(
+                        prefix + PROPERTY_SECURITY_FILE,
+                        newSecuritySettingsFile.getCanonicalPath());
                 cmConfig.update(config);
             }
         }
@@ -100,5 +136,4 @@ public class PasswordCommand extends MavenConfigurationSupport {
     protected boolean showPasswords() {
         return true;
     }
-
 }

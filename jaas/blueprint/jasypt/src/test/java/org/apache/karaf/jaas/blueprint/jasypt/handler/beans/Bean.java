@@ -18,8 +18,7 @@ public class Bean {
 
     private String string;
 
-    public Bean() {
-    }
+    public Bean() {}
 
     public Bean(String string) {
         this.string = string;

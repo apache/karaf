@@ -17,9 +17,8 @@
 package org.apache.karaf.shell.api.console;
 
 /**
- * A <code>Command</code> is a named
- * {@link org.apache.karaf.shell.api.console.Function}
- * which also provides completion.
+ * A <code>Command</code> is a named {@link org.apache.karaf.shell.api.console.Function} which also
+ * provides completion.
  */
 public interface Command extends Function {
 
@@ -38,9 +37,8 @@ public interface Command extends Function {
     String getName();
 
     /**
-     * Retrieve the description of this command.
-     * This short command description will be printed
-     * when using the <code>help</code> command.
+     * Retrieve the description of this command. This short command description will be printed when
+     * using the <code>help</code> command.
      *
      * @return the command description.
      */
@@ -60,5 +58,4 @@ public interface Command extends Function {
      * @return the command parser.
      */
     Parser getParser();
-
 }

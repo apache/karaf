@@ -24,13 +24,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
 import org.apache.karaf.util.json.JsonReader;
 import org.apache.karaf.util.json.JsonWriter;
 
-@SuppressWarnings({
-    "rawtypes"
-   })
+@SuppressWarnings({"rawtypes"})
 public abstract class StateStorage {
 
     public void load(State state) throws IOException {
@@ -38,9 +35,7 @@ public abstract class StateStorage {
         state.requirements.clear();
         state.installedFeatures.clear();
         state.managedBundles.clear();
-        try (
-                InputStream is = getInputStream()
-        ) {
+        try (InputStream is = getInputStream()) {
             if (is != null) {
                 Map json = (Map) JsonReader.read(is);
                 state.bootDone.set((Boolean) json.get("bootDone"));
@@ -55,9 +50,7 @@ public abstract class StateStorage {
     }
 
     public void save(State state) throws IOException {
-        try (
-                OutputStream os = getOutputStream()
-        ) {
+        try (OutputStream os = getOutputStream()) {
             if (os != null) {
                 Map<String, Object> json = new HashMap<>();
                 json.put("bootDone", state.bootDone.get());
@@ -147,5 +140,4 @@ public abstract class StateStorage {
             return Long.parseLong(o.toString());
         }
     }
-
 }

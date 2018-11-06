@@ -23,5 +23,4 @@ public interface ConfigFileInfo {
     String getFinalname();
 
     boolean isOverride();
-
 }

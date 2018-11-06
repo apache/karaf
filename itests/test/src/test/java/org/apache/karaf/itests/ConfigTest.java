@@ -21,10 +21,8 @@ import static org.junit.Assert.assertThat;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Map;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -40,7 +38,8 @@ public class ConfigTest extends KarafTestSupport {
         String configListOutput = executeCommand("config:list");
         System.out.println(configListOutput);
         assertFalse(configListOutput.isEmpty());
-        configListOutput = executeCommand("config:list \"(service.pid=org.apache.karaf.features)\"");
+        configListOutput =
+                executeCommand("config:list \"(service.pid=org.apache.karaf.features)\"");
         System.out.println(configListOutput);
         assertFalse(configListOutput.isEmpty());
     }
@@ -60,9 +59,13 @@ public class ConfigTest extends KarafTestSupport {
         ObjectName name = new ObjectName("org.apache.karaf:type=config,name=root");
         List<String> configs = (List<String>) mbeanServer.getAttribute(name, "Configs");
         assertThat(configs, hasItem("org.apache.karaf.features"));
-        Map<String, String> properties = (Map<String, String>) mbeanServer
-            .invoke(name, "listProperties", new Object[]{"org.apache.karaf.features"}, new String[]{"java.lang.String"});
+        Map<String, String> properties =
+                (Map<String, String>)
+                        mbeanServer.invoke(
+                                name,
+                                "listProperties",
+                                new Object[] {"org.apache.karaf.features"},
+                                new String[] {"java.lang.String"});
         assertThat(properties, hasKey("featuresRepositories"));
     }
-
 }

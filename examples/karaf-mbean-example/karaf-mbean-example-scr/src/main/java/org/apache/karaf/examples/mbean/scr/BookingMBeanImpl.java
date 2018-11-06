@@ -16,23 +16,19 @@
  */
 package org.apache.karaf.examples.mbean.scr;
 
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import javax.management.openmbean.*;
 import org.apache.karaf.examples.mbean.api.Booking;
 import org.apache.karaf.examples.mbean.api.BookingService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import javax.management.openmbean.*;
-
-@Component(
-        property = "jmx.objectname=org.apache.karaf.examples:type=booking,name=default"
-)
+@Component(property = "jmx.objectname=org.apache.karaf.examples:type=booking,name=default")
 public class BookingMBeanImpl extends StandardMBean implements BookingMBean {
 
-    @Reference
-    private BookingService bookingService;
+    @Reference private BookingService bookingService;
 
     public BookingMBeanImpl() throws NotCompliantMBeanException {
         super(BookingMBean.class);
@@ -41,16 +37,24 @@ public class BookingMBeanImpl extends StandardMBean implements BookingMBean {
     @Override
     public TabularData getBookings() throws MBeanException {
         try {
-            CompositeType bookingType = new CompositeType("booking", "Booking",
-                    new String[]{"id", "flight", "customer"},
-                    new String[]{"ID", "Flight", "Customer"},
-                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING});
-            TabularType tabularType = new TabularType("bookings", "Bookings", bookingType, new String[]{"id"});
+            CompositeType bookingType =
+                    new CompositeType(
+                            "booking",
+                            "Booking",
+                            new String[] {"id", "flight", "customer"},
+                            new String[] {"ID", "Flight", "Customer"},
+                            new OpenType[] {SimpleType.LONG, SimpleType.STRING, SimpleType.STRING});
+            TabularType tabularType =
+                    new TabularType("bookings", "Bookings", bookingType, new String[] {"id"});
             TabularData tabularData = new TabularDataSupport(tabularType);
             for (Booking booking : bookingService.list()) {
-                CompositeData compositeData = new CompositeDataSupport(bookingType,
-                        new String[]{ "id", "flight", "customer" },
-                        new Object[]{ booking.getId(), booking.getFlight(), booking.getCustomer() });
+                CompositeData compositeData =
+                        new CompositeDataSupport(
+                                bookingType,
+                                new String[] {"id", "flight", "customer"},
+                                new Object[] {
+                                    booking.getId(), booking.getFlight(), booking.getCustomer()
+                                });
                 tabularData.put(compositeData);
             }
             return tabularData;

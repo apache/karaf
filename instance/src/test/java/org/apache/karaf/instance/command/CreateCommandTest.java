@@ -20,9 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
 import junit.framework.TestCase;
-
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
 import org.easymock.EasyMock;
@@ -32,7 +30,7 @@ public class CreateCommandTest extends TestCase {
     public void testCreateCommandExecute() throws Exception {
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
         EasyMock.replay(instanceService);
-        
+
         CreateCommand cc = new CreateCommand();
         cc.setInstanceService(instanceService);
         cc.sshPort = 9941;
@@ -51,16 +49,22 @@ public class CreateCommandTest extends TestCase {
         cfgFile.getParentFile().mkdirs();
         cfgFile.createNewFile();
 
-        
         EasyMock.verify(instanceService); // check precondition
         EasyMock.reset(instanceService);
         InstanceSettings expectedIS =
-            new InstanceSettings(9941, 1122, 44444, "top", "foo", Collections.singletonList("http://something"), Arrays.asList("abc", "def"));
-        EasyMock.expect(instanceService.createInstance("myInstance", expectedIS, true)).andReturn(null);
+                new InstanceSettings(
+                        9941,
+                        1122,
+                        44444,
+                        "top",
+                        "foo",
+                        Collections.singletonList("http://something"),
+                        Arrays.asList("abc", "def"));
+        EasyMock.expect(instanceService.createInstance("myInstance", expectedIS, true))
+                .andReturn(null);
         EasyMock.replay(instanceService);
-        
+
         cc.doExecute();
         EasyMock.verify(instanceService);
     }
-
 }

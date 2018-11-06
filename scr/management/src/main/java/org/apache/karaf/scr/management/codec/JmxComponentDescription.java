@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
-import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
-
+import java.util.Arrays;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
@@ -29,23 +27,19 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import java.util.Arrays;
+import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
 public class JmxComponentDescription {
 
+    /** The CompositeType which represents a single component */
+    public static final CompositeType COMPONENT = createComponentType();
 
-    /**
-     * The CompositeType which represents a single component
-     */
-    public final static CompositeType COMPONENT = createComponentType();
-
-    /**
-     * The TabularType which represents a list of components
-     */
-    public final static TabularType COMPONENT_TABLE = createComponentTableType();
+    /** The TabularType which represents a list of components */
+    public static final TabularType COMPONENT_TABLE = createComponentTableType();
 
     private final CompositeData data;
-    
+
     public JmxComponentDescription(ComponentDescriptionDTO component) {
         try {
             String[] itemNames = ServiceComponentRuntimeMBean.COMPONENT_DESCRIPTION;
@@ -125,8 +119,8 @@ public class JmxComponentDescription {
             itemDescriptions[13] = "configurationPolicy";
             itemDescriptions[14] = "configurationPid";
 
-            return new CompositeType("Component", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "Component", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build component type", e);
         }
@@ -134,12 +128,13 @@ public class JmxComponentDescription {
 
     private static TabularType createComponentTableType() {
         try {
-            return new TabularType("ComponentDescription", "The table of all components",
-                    COMPONENT, ServiceComponentRuntimeMBean.COMPONENT_DESCRIPTION);
+            return new TabularType(
+                    "ComponentDescription",
+                    "The table of all components",
+                    COMPONENT,
+                    ServiceComponentRuntimeMBean.COMPONENT_DESCRIPTION);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build components table type", e);
         }
     }
-
-
 }

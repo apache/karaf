@@ -16,13 +16,12 @@
  */
 package org.apache.karaf.docker.internal;
 
-import org.apache.karaf.docker.*;
-
-import javax.management.MBeanException;
-import javax.management.openmbean.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
+import javax.management.openmbean.*;
+import org.apache.karaf.docker.*;
 
 public class DockerMBeanImpl implements DockerMBean {
 
@@ -35,16 +34,46 @@ public class DockerMBeanImpl implements DockerMBean {
     @Override
     public TabularData ps(boolean showAll, String url) throws MBeanException {
         try {
-            CompositeType containerType = new CompositeType("container", "Docker Container",
-                    new String[]{"Id", "Names", "Command", "Created", "Image", "Status"},
-                    new String[]{"Container ID", "Container Names", "Command run in the container", "Container creation time", "Image used by the container", "Current container status"},
-                    new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.LONG, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("containers", "Docker containers", containerType, new String[]{ "Id" });
+            CompositeType containerType =
+                    new CompositeType(
+                            "container",
+                            "Docker Container",
+                            new String[] {"Id", "Names", "Command", "Created", "Image", "Status"},
+                            new String[] {
+                                "Container ID",
+                                "Container Names",
+                                "Command run in the container",
+                                "Container creation time",
+                                "Image used by the container",
+                                "Current container status"
+                            },
+                            new OpenType[] {
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.LONG,
+                                SimpleType.STRING,
+                                SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType(
+                            "containers", "Docker containers", containerType, new String[] {"Id"});
             TabularData table = new TabularDataSupport(tableType);
             for (Container container : dockerService.ps(showAll, url)) {
-                CompositeData data = new CompositeDataSupport(containerType,
-                        new String[]{"Id", "Names", "Command", "Created", "Image", "Status"},
-                        new Object[]{container.getId(), container.getNames(), container.getCommand(), container.getCreated(), container.getImage(), container.getStatus()});
+                CompositeData data =
+                        new CompositeDataSupport(
+                                containerType,
+                                new String[] {
+                                    "Id", "Names", "Command", "Created", "Image", "Status"
+                                },
+                                new Object[] {
+                                    container.getId(),
+                                    container.getNames(),
+                                    container.getCommand(),
+                                    container.getCreated(),
+                                    container.getImage(),
+                                    container.getStatus()
+                                });
                 table.put(data);
             }
             return table;
@@ -80,16 +109,26 @@ public class DockerMBeanImpl implements DockerMBean {
     }
 
     @Override
-    public void provision(String name, String sshPort, String jmxRmiPort, String jmxRmiRegistryPort, String httpPort, boolean copy, String url) throws MBeanException {
+    public void provision(
+            String name,
+            String sshPort,
+            String jmxRmiPort,
+            String jmxRmiRegistryPort,
+            String httpPort,
+            boolean copy,
+            String url)
+            throws MBeanException {
         try {
-            dockerService.provision(name, sshPort, jmxRmiPort, jmxRmiRegistryPort, httpPort, copy, url);
+            dockerService.provision(
+                    name, sshPort, jmxRmiPort, jmxRmiRegistryPort, httpPort, copy, url);
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
     }
 
     @Override
-    public void rm(String name, boolean removeVolumes, boolean force, String url) throws MBeanException {
+    public void rm(String name, boolean removeVolumes, boolean force, String url)
+            throws MBeanException {
         try {
             dockerService.rm(name, removeVolumes, force, url);
         } catch (Throwable t) {
@@ -116,10 +155,18 @@ public class DockerMBeanImpl implements DockerMBean {
     }
 
     @Override
-    public String logs(String name, boolean stdout, boolean stderr, boolean timestamps, boolean details, String url) throws MBeanException {
+    public String logs(
+            String name,
+            boolean stdout,
+            boolean stderr,
+            boolean timestamps,
+            boolean details,
+            String url)
+            throws MBeanException {
         try {
             if (!stdout && !stderr) {
-                throw new MBeanException(null, "You have to choose at least one stream: stdout or stderr");
+                throw new MBeanException(
+                        null, "You have to choose at least one stream: stdout or stderr");
             }
             return dockerService.logs(name, stdout, stderr, timestamps, details, url);
         } catch (Throwable t) {
@@ -128,7 +175,8 @@ public class DockerMBeanImpl implements DockerMBean {
     }
 
     @Override
-    public void commit(String name, String repo, String tag, String message, String url) throws MBeanException {
+    public void commit(String name, String repo, String tag, String message, String url)
+            throws MBeanException {
         try {
             dockerService.commit(name, repo, url, tag, message);
         } catch (Throwable t) {
@@ -139,16 +187,37 @@ public class DockerMBeanImpl implements DockerMBean {
     @Override
     public TabularData images(String url) throws MBeanException {
         try {
-            CompositeType type = new CompositeType("Image", "Docker Image",
-                    new String[]{ "Id", "Created", "RepoTags", "Size"},
-                    new String[]{ "Image Id", "Image Creation Date", "Image repository and tag", "Image size"},
-                    new OpenType[]{ SimpleType.STRING, SimpleType.LONG, SimpleType.STRING, SimpleType.LONG});
-            TabularType tableType = new TabularType("Images", "List of Docker Image", type, new String[]{ "Id" });
+            CompositeType type =
+                    new CompositeType(
+                            "Image",
+                            "Docker Image",
+                            new String[] {"Id", "Created", "RepoTags", "Size"},
+                            new String[] {
+                                "Image Id",
+                                "Image Creation Date",
+                                "Image repository and tag",
+                                "Image size"
+                            },
+                            new OpenType[] {
+                                SimpleType.STRING,
+                                SimpleType.LONG,
+                                SimpleType.STRING,
+                                SimpleType.LONG
+                            });
+            TabularType tableType =
+                    new TabularType("Images", "List of Docker Image", type, new String[] {"Id"});
             TabularData table = new TabularDataSupport(tableType);
             for (Image image : dockerService.images(url)) {
-                CompositeData data = new CompositeDataSupport(type,
-                        new String[]{ "Id", "Created", "RepoTags", "Size"},
-                        new Object[]{ image.getId(), image.getCreated(), image.getRepoTags(), image.getSize() });
+                CompositeData data =
+                        new CompositeDataSupport(
+                                type,
+                                new String[] {"Id", "Created", "RepoTags", "Size"},
+                                new Object[] {
+                                    image.getId(),
+                                    image.getCreated(),
+                                    image.getRepoTags(),
+                                    image.getSize()
+                                });
                 table.put(data);
             }
             return table;
@@ -180,7 +249,7 @@ public class DockerMBeanImpl implements DockerMBean {
             versionMap.put("KernelVersion", version.getKernelVersion());
             versionMap.put("OS", version.getOs());
             versionMap.put("Version", version.getVersion());
-            return  versionMap;
+            return versionMap;
         } catch (Throwable t) {
             throw new MBeanException(null, t.getMessage());
         }
@@ -237,17 +306,41 @@ public class DockerMBeanImpl implements DockerMBean {
     @Override
     public TabularData search(String term, String url) throws MBeanException {
         try {
-            CompositeType imageType = new CompositeType("image", "Image",
-                    new String[]{"Name", "StarCount", "Official", "Automated", "Description"},
-                    new String[]{"Name", "StarCount", "Official", "Automated", "Description"},
-                    new OpenType[]{SimpleType.STRING, SimpleType.INTEGER, SimpleType.BOOLEAN, SimpleType.BOOLEAN, SimpleType.STRING});
-            TabularType tableType = new TabularType("images", "Images", imageType, new String[]{"Name"});
+            CompositeType imageType =
+                    new CompositeType(
+                            "image",
+                            "Image",
+                            new String[] {
+                                "Name", "StarCount", "Official", "Automated", "Description"
+                            },
+                            new String[] {
+                                "Name", "StarCount", "Official", "Automated", "Description"
+                            },
+                            new OpenType[] {
+                                SimpleType.STRING,
+                                SimpleType.INTEGER,
+                                SimpleType.BOOLEAN,
+                                SimpleType.BOOLEAN,
+                                SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType("images", "Images", imageType, new String[] {"Name"});
             TabularData table = new TabularDataSupport(tableType);
             List<ImageSearch> images = dockerService.search(term, url);
             for (ImageSearch image : images) {
-                CompositeData data = new CompositeDataSupport(imageType,
-                        new String[]{"Name", "StarCount", "Official", "Automated", "Description"},
-                        new Object[]{image.getName(), image.getStarCount(), image.isOfficial(), image.isAutomated(), image.getDescription()});
+                CompositeData data =
+                        new CompositeDataSupport(
+                                imageType,
+                                new String[] {
+                                    "Name", "StarCount", "Official", "Automated", "Description"
+                                },
+                                new Object[] {
+                                    image.getName(),
+                                    image.getStarCount(),
+                                    image.isOfficial(),
+                                    image.isAutomated(),
+                                    image.getDescription()
+                                });
                 table.put(data);
             }
             return table;
@@ -266,7 +359,8 @@ public class DockerMBeanImpl implements DockerMBean {
     }
 
     @Override
-    public void rmi(String image, boolean force, boolean noprune, String url) throws MBeanException {
+    public void rmi(String image, boolean force, boolean noprune, String url)
+            throws MBeanException {
         try {
             dockerService.rmi(image, force, noprune, url);
         } catch (Throwable t) {

@@ -23,8 +23,7 @@ import org.junit.Test;
  * /framework/src/main/resources/resources/etc/org.apache.karaf.command.acl.jaas.cfg
  */
 public class JaasSshCommandSecurityTest extends SshCommandTestBase {
-    
-        
+
     @Test
     public void testJaasCommandSecurityViaSsh() throws Exception {
         String vieweruser = "viewer" + System.nanoTime() + "_jaas";
@@ -32,20 +31,37 @@ public class JaasSshCommandSecurityTest extends SshCommandTestBase {
         addViewer(vieweruser);
 
         String userName = "XXX" + System.nanoTime();
-        assertCommand(vieweruser, "jaas:realm-manage --realm karaf;" +
-        		"jaas:user-add " + userName + " pwd;" +
-				"jaas:update", Result.NOT_FOUND);
-        String r = assertCommand(vieweruser, "jaas:realm-manage --realm karaf;" +
-				"jaas:user-list", Result.OK);
-        assertFalse("The viewer should not have the credentials to add the new user",
+        assertCommand(
+                vieweruser,
+                "jaas:realm-manage --realm karaf;"
+                        + "jaas:user-add "
+                        + userName
+                        + " pwd;"
+                        + "jaas:update",
+                Result.NOT_FOUND);
+        String r =
+                assertCommand(
+                        vieweruser,
+                        "jaas:realm-manage --realm karaf;" + "jaas:user-list",
+                        Result.OK);
+        assertFalse(
+                "The viewer should not have the credentials to add the new user",
                 r.contains(userName));
 
-        assertCommand("karaf", "jaas:realm-manage --realm karaf;" +
-                "jaas:user-add " + userName + " pwd;" +
-                "jaas:update", Result.OK);
-        String r2 = assertCommand(vieweruser, "jaas:realm-manage --realm karaf;" +
-                "jaas:user-list", Result.OK);
-        assertTrue("The admin user should have the rights to add the new user",
-                r2.contains(userName));
+        assertCommand(
+                "karaf",
+                "jaas:realm-manage --realm karaf;"
+                        + "jaas:user-add "
+                        + userName
+                        + " pwd;"
+                        + "jaas:update",
+                Result.OK);
+        String r2 =
+                assertCommand(
+                        vieweruser,
+                        "jaas:realm-manage --realm karaf;" + "jaas:user-list",
+                        Result.OK);
+        assertTrue(
+                "The admin user should have the rights to add the new user", r2.contains(userName));
     }
 }

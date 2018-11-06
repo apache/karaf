@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.apache.karaf.util.StreamUtils;
@@ -80,7 +79,7 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
                     }
                     for (WatchEvent<?> event : key.pollEvents()) {
                         @SuppressWarnings("unchecked")
-                        WatchEvent<Path> ev = (WatchEvent<Path>)event;
+                        WatchEvent<Path> ev = (WatchEvent<Path>) event;
 
                         // Context for directory entry event is the file name of entry
                         Path name = dir.resolve(ev.context());
@@ -141,5 +140,4 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
             users.save();
         }
     }
-
 }

@@ -22,9 +22,8 @@ import java.sql.Connection;
 import org.apache.felix.utils.properties.Properties;
 
 /**
- * Represents an exclusive lock on a database,
- * used to avoid multiple Karaf instances attempting
- * to become master.
+ * Represents an exclusive lock on a database, used to avoid multiple Karaf instances attempting to
+ * become master.
  */
 public class MySQLJDBCLock extends DefaultJDBCLock {
 
@@ -36,23 +35,27 @@ public class MySQLJDBCLock extends DefaultJDBCLock {
         Statements statements = new Statements();
         statements.setTableName(table);
         statements.setNodeName(clusterName);
-        String[] lockCreateSchemaStatements = statements.getLockCreateSchemaStatements(getCurrentTimeMillis());
+        String[] lockCreateSchemaStatements =
+                statements.getLockCreateSchemaStatements(getCurrentTimeMillis());
         for (int index = 0; index < lockCreateSchemaStatements.length; index++) {
             if (lockCreateSchemaStatements[index].toUpperCase().startsWith("CREATE TABLE")) {
-                lockCreateSchemaStatements[index] = lockCreateSchemaStatements[index] + " ENGINE=INNODB";
+                lockCreateSchemaStatements[index] =
+                        lockCreateSchemaStatements[index] + " ENGINE=INNODB";
             }
         }
         return statements;
     }
-    
+
     @Override
-    Connection createConnection(String driver, String url, String username, String password) throws Exception {
-        url = (url.toLowerCase().contains("createDatabaseIfNotExist=true")) ? 
-            url : 
-            ((url.contains("?")) ? 
-                url + "&createDatabaseIfNotExist=true" : 
-                url + "?createDatabaseIfNotExist=true");
-        
+    Connection createConnection(String driver, String url, String username, String password)
+            throws Exception {
+        url =
+                (url.toLowerCase().contains("createDatabaseIfNotExist=true"))
+                        ? url
+                        : ((url.contains("?"))
+                                ? url + "&createDatabaseIfNotExist=true"
+                                : url + "?createDatabaseIfNotExist=true");
+
         return super.createConnection(driver, url, username, password);
     }
 }

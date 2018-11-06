@@ -18,7 +18,6 @@
  */
 package org.apache.karaf.main.lock;
 
-import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -32,6 +31,7 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 
 public class GenericDataSource implements DataSource {
 
@@ -48,7 +48,13 @@ public class GenericDataSource implements DataSource {
     private volatile Driver driver;
     private volatile boolean driverClassLoaded;
 
-    public GenericDataSource(String driverClass, String url, String user, String password, boolean cache, int validTimeoutMs) {
+    public GenericDataSource(
+            String driverClass,
+            String url,
+            String user,
+            String password,
+            boolean cache,
+            int validTimeoutMs) {
         this.driverClass = driverClass;
         this.url = url;
         this.properties = new Properties();
@@ -112,26 +118,34 @@ public class GenericDataSource implements DataSource {
     }
 
     private Connection wrap(Connection con) {
-        return (Connection) Proxy.newProxyInstance(con.getClass().getClassLoader(), new Class[] { Connection.class }, new InvocationHandler() {
-            private boolean closed = false;
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (method.getName().equals("close") && method.getParameterCount() == 0) {
-                    closed = true;
-                    if (!cache.offer(con)) {
-                        con.close();
-                    }
-                    return null;
-                } else if (method.getName().equals("isClosed") && method.getParameterCount() == 0) {
-                    return closed;
-                } else {
-                    if (closed) {
-                        throw new SQLException("Connection closed");
-                    }
-                    return method.invoke(con, args);
-                }
-            }
-        });
+        return (Connection)
+                Proxy.newProxyInstance(
+                        con.getClass().getClassLoader(),
+                        new Class[] {Connection.class},
+                        new InvocationHandler() {
+                            private boolean closed = false;
+
+                            @Override
+                            public Object invoke(Object proxy, Method method, Object[] args)
+                                    throws Throwable {
+                                if (method.getName().equals("close")
+                                        && method.getParameterCount() == 0) {
+                                    closed = true;
+                                    if (!cache.offer(con)) {
+                                        con.close();
+                                    }
+                                    return null;
+                                } else if (method.getName().equals("isClosed")
+                                        && method.getParameterCount() == 0) {
+                                    return closed;
+                                } else {
+                                    if (closed) {
+                                        throw new SQLException("Connection closed");
+                                    }
+                                    return method.invoke(con, args);
+                                }
+                            }
+                        });
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
@@ -142,15 +156,13 @@ public class GenericDataSource implements DataSource {
         return null;
     }
 
-    public void setLogWriter(PrintWriter out) throws SQLException {
-    }
+    public void setLogWriter(PrintWriter out) throws SQLException {}
 
     public int getLoginTimeout() throws SQLException {
         return 0;
     }
 
-    public void setLoginTimeout(int seconds) throws SQLException {
-    }
+    public void setLoginTimeout(int seconds) throws SQLException {}
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
@@ -166,5 +178,4 @@ public class GenericDataSource implements DataSource {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
-
 }

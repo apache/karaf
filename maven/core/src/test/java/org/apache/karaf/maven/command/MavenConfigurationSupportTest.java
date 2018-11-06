@@ -16,16 +16,15 @@
  */
 package org.apache.karaf.maven.command;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.regex.Pattern;
-
 import org.junit.Test;
 import shaded.org.apache.commons.io.FileUtils;
-
-import static org.junit.Assert.assertTrue;
 
 public class MavenConfigurationSupportTest {
 
@@ -35,25 +34,32 @@ public class MavenConfigurationSupportTest {
         FileUtils.deleteDirectory(dataDir);
         dataDir.mkdirs();
 
-        MavenConfigurationSupport support = new MavenConfigurationSupport() {
-            @Override
-            protected void doAction(String prefix, Dictionary<String, Object> config) throws Exception { }
-        };
+        MavenConfigurationSupport support =
+                new MavenConfigurationSupport() {
+                    @Override
+                    protected void doAction(String prefix, Dictionary<String, Object> config)
+                            throws Exception {}
+                };
 
-        File newFile = support.nextSequenceFile(dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
+        File newFile =
+                support.nextSequenceFile(
+                        dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
         assertTrue(Pattern.compile("^file-\\d+\\.txt$").matcher(newFile.getName()).matches());
 
         try (FileWriter fw = new FileWriter(new File(dataDir, "file-abcd.txt"))) {
             fw.write("~");
         }
-        newFile = support.nextSequenceFile(dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
+        newFile =
+                support.nextSequenceFile(
+                        dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
         assertTrue(Pattern.compile("^file-\\d+\\.txt$").matcher(newFile.getName()).matches());
 
         try (FileWriter fw = new FileWriter(new File(dataDir, "file-0004.txt"))) {
             fw.write("~");
         }
-        newFile = support.nextSequenceFile(dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
+        newFile =
+                support.nextSequenceFile(
+                        dataDir, Pattern.compile("file-(\\d+).txt"), "file-%04d.txt");
         assertTrue(Pattern.compile("^file-\\d+\\.txt$").matcher(newFile.getName()).matches());
     }
-
 }

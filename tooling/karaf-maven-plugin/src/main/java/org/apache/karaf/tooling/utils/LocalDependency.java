@@ -19,40 +19,40 @@ package org.apache.karaf.tooling.utils;
 import java.util.Objects;
 
 public class LocalDependency {
-	private String scope;
-	private Object artifact;
-	private Object parent;
-	
-	LocalDependency(final String scope, final Object artifact, Object parent) {
-		this.scope = scope;
-		this.artifact = artifact;
-		this.parent = parent;
-	}
+    private String scope;
+    private Object artifact;
+    private Object parent;
 
-	public String getScope() {
-		return scope;
-	}
+    LocalDependency(final String scope, final Object artifact, Object parent) {
+        this.scope = scope;
+        this.artifact = artifact;
+        this.parent = parent;
+    }
 
-	public Object getArtifact() {
-		return artifact;
-	}
+    public String getScope() {
+        return scope;
+    }
 
-	public Object getParent() {
-		return parent;
-	}
+    public Object getArtifact() {
+        return artifact;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		LocalDependency that = (LocalDependency) o;
-		return Objects.equals(scope, that.scope) &&
-				Objects.equals(artifact, that.artifact) &&
-				Objects.equals(parent, that.parent);
-	}
+    public Object getParent() {
+        return parent;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(scope, artifact, parent);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LocalDependency that = (LocalDependency) o;
+        return Objects.equals(scope, that.scope)
+                && Objects.equals(artifact, that.artifact)
+                && Objects.equals(parent, that.parent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(scope, artifact, parent);
+    }
 }

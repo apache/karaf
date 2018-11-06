@@ -16,9 +16,7 @@
 package org.apache.karaf.jaas.command;
 
 import java.util.List;
-
 import javax.security.auth.login.AppConfigurationEntry;
-
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
@@ -31,10 +29,19 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class ListRealmsCommand extends JaasCommandSupport {
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
-    @Option(name = "-h", aliases = {"--hidden"}, description = "Show hidden realms", required = false, multiValued = false)
+    @Option(
+            name = "-h",
+            aliases = {"--hidden"},
+            description = "Show hidden realms",
+            required = false,
+            multiValued = false)
     boolean hidden;
 
     @Override
@@ -58,7 +65,8 @@ public class ListRealmsCommand extends JaasCommandSupport {
 
                 if (entries != null && entries.length > 0) {
                     for (AppConfigurationEntry entry : entries) {
-                        String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                        String moduleClass =
+                                (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
                         table.addRow().addContent(index++, realmName, moduleClass);
                     }
                 }
@@ -69,5 +77,4 @@ public class ListRealmsCommand extends JaasCommandSupport {
 
         return null;
     }
-
 }

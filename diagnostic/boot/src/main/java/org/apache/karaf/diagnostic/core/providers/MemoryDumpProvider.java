@@ -19,12 +19,9 @@ package org.apache.karaf.diagnostic.core.providers;
 import java.io.OutputStreamWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-
 import org.apache.karaf.diagnostic.core.common.TextDumpProvider;
 
-/**
- * Provider which dump the memory information in the memory.txt file.
- */
+/** Provider which dump the memory information in the memory.txt file. */
 public class MemoryDumpProvider extends TextDumpProvider {
 
     public MemoryDumpProvider() {
@@ -35,20 +32,23 @@ public class MemoryDumpProvider extends TextDumpProvider {
     protected void writeDump(OutputStreamWriter outputStream) throws Exception {
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
 
-        outputStream.write("Number of objects waiting finalization: " + memoryMXBean.getObjectPendingFinalizationCount() + "\n\n");
+        outputStream.write(
+                "Number of objects waiting finalization: "
+                        + memoryMXBean.getObjectPendingFinalizationCount()
+                        + "\n\n");
 
         outputStream.write("Heap:\n");
         outputStream.write("\tInit:      " + memoryMXBean.getHeapMemoryUsage().getInit() + "\n");
         outputStream.write("\tUser:      " + memoryMXBean.getHeapMemoryUsage().getUsed() + "\n");
-        outputStream.write("\tCommitted: " + memoryMXBean.getHeapMemoryUsage().getCommitted() + "\n");
+        outputStream.write(
+                "\tCommitted: " + memoryMXBean.getHeapMemoryUsage().getCommitted() + "\n");
         outputStream.write("\tMax:       " + memoryMXBean.getHeapMemoryUsage().getMax() + "\n");
 
         outputStream.write("Non-Heap: \n");
         outputStream.write("\tInit:      " + memoryMXBean.getNonHeapMemoryUsage().getInit() + "\n");
         outputStream.write("\tUser:      " + memoryMXBean.getNonHeapMemoryUsage().getUsed() + "\n");
-        outputStream.write("\tCommitted: " + memoryMXBean.getNonHeapMemoryUsage().getCommitted() + "\n");
+        outputStream.write(
+                "\tCommitted: " + memoryMXBean.getNonHeapMemoryUsage().getCommitted() + "\n");
         outputStream.write("\tMax:       " + memoryMXBean.getNonHeapMemoryUsage().getMax() + "\n");
-
     }
-
 }

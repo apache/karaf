@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.packages.core.internal.filter;
 
-import org.apache.karaf.packages.core.internal.filter.ExprTokenizer;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -13,16 +13,14 @@
  */
 package org.apache.karaf.itests;
 
+import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
-import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -32,27 +30,29 @@ public class DiagnosticTest extends KarafTestSupport {
     public void dumpCreateCommand() throws Exception {
         assertContains("Created dump zip", executeCommand("dev:dump-create"));
     }
-  
+
     @Test
     public void dumpCreateCommandNoHeapDump() throws Exception {
         assertContains("Created dump zip", executeCommand("dev:dump-create --no-heap-dump"));
     }
-    
+
     @Test
     public void dumpCreateCommandNoThreadDump() throws Exception {
         assertContains("Created dump zip", executeCommand("dev:dump-create --no-thread-dump"));
     }
-   
+
     @Test
     public void dumpCreateCommandNoHeapAndThreadDump() throws Exception {
-        assertContains("Created dump zip", executeCommand("dev:dump-create --no-heap-dump --no-thread-dump"));
+        assertContains(
+                "Created dump zip",
+                executeCommand("dev:dump-create --no-heap-dump --no-thread-dump"));
     }
-    
+
     @Test
     public void createDumpViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=diagnostic,name=root");
-        mbeanServer.invoke(name, "createDump", new Object[]{ "itest" }, new String[]{ "java.lang.String" });
+        mbeanServer.invoke(
+                name, "createDump", new Object[] {"itest"}, new String[] {"java.lang.String"});
     }
-
 }

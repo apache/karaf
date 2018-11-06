@@ -22,15 +22,12 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.URI;
 import java.util.Objects;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 
-/**
- * The repository implementation.
- */
+/** The repository implementation. */
 public class RepositoryImpl implements Repository {
 
     /** {@link URI original URI} of the resource where feature declarations were loaded from */
@@ -52,6 +49,7 @@ public class RepositoryImpl implements Repository {
 
     /**
      * Constructs a repository without any downloading
+     *
      * @param uri
      * @param features
      * @param blacklisted
@@ -74,7 +72,8 @@ public class RepositoryImpl implements Repository {
 
     @Override
     public URI[] getRepositories() {
-        return features.getRepository().stream()
+        return features.getRepository()
+                .stream()
                 .map(String::trim)
                 .map(URI::create)
                 .toArray(URI[]::new);
@@ -82,7 +81,8 @@ public class RepositoryImpl implements Repository {
 
     @Override
     public URI[] getResourceRepositories() {
-        return features.getResourceRepository().stream()
+        return features.getResourceRepository()
+                .stream()
                 .map(String::trim)
                 .map(URI::create)
                 .toArray(URI[]::new);
@@ -90,8 +90,7 @@ public class RepositoryImpl implements Repository {
 
     @Override
     public Feature[] getFeatures() {
-        return features.getFeature()
-                .toArray(new Feature[features.getFeature().size()]);
+        return features.getFeature().toArray(new Feature[features.getFeature().size()]);
     }
 
     public Features getFeaturesInternal() {
@@ -120,6 +119,7 @@ public class RepositoryImpl implements Repository {
 
     /**
      * An extension point to alter {@link Features JAXB model of features}
+     *
      * @param processor
      */
     public void processFeatures(FeaturesProcessor processor) {
@@ -163,5 +163,4 @@ public class RepositoryImpl implements Repository {
     public String toString() {
         return getURI().toString();
     }
-
 }

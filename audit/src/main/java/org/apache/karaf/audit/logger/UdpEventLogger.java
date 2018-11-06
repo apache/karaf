@@ -16,10 +16,6 @@
  */
 package org.apache.karaf.audit.logger;
 
-import org.apache.karaf.audit.Event;
-import org.apache.karaf.audit.EventLayout;
-import org.apache.karaf.audit.EventLogger;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -30,6 +26,9 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import org.apache.karaf.audit.Event;
+import org.apache.karaf.audit.EventLayout;
+import org.apache.karaf.audit.EventLogger;
 
 public class UdpEventLogger implements EventLogger {
 
@@ -41,7 +40,8 @@ public class UdpEventLogger implements EventLogger {
 
     private ByteBuffer bb = ByteBuffer.allocate(1024);
 
-    public UdpEventLogger(String host, int port, String encoding, EventLayout layout) throws SocketException, UnknownHostException {
+    public UdpEventLogger(String host, int port, String encoding, EventLayout layout)
+            throws SocketException, UnknownHostException {
         this.layout = layout;
         this.host = InetAddress.getByName(host);
         this.port = port;
@@ -73,12 +73,10 @@ public class UdpEventLogger implements EventLogger {
     }
 
     @Override
-    public void flush() throws IOException {
-    }
+    public void flush() throws IOException {}
 
     @Override
     public void close() throws IOException {
         dgram.close();
     }
-
 }

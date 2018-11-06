@@ -17,7 +17,6 @@
 package org.apache.karaf.jms.command;
 
 import java.util.List;
-
 import org.apache.karaf.jms.JmsMessage;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -29,13 +28,28 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class BrowseCommand extends JmsConnectionCommandSupport {
 
-    @Argument(index = 1, name = "queue", description = "The JMS queue to browse", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "queue",
+            description = "The JMS queue to browse",
+            required = true,
+            multiValued = false)
     String queue;
 
-    @Option(name = "-s", aliases = { "--selector" }, description = "The selector to select the messages to browse", required = false, multiValued = false)
+    @Option(
+            name = "-s",
+            aliases = {"--selector"},
+            description = "The selector to select the messages to browse",
+            required = false,
+            multiValued = false)
     String selector;
 
-    @Option(name = "-v", aliases = { "--verbose" }, description = "Display JMS properties", required = false, multiValued = false)
+    @Option(
+            name = "-v",
+            aliases = {"--verbose"},
+            description = "Display JMS properties",
+            required = false,
+            multiValued = false)
     boolean verbose = false;
 
     @Override
@@ -58,41 +72,48 @@ public class BrowseCommand extends JmsConnectionCommandSupport {
             table.column("Properties");
         }
 
-        List<JmsMessage> messages = getJmsService().browse(connectionFactory, queue, selector, username, password);
+        List<JmsMessage> messages =
+                getJmsService().browse(connectionFactory, queue, selector, username, password);
         for (JmsMessage message : messages) {
             if (verbose) {
                 StringBuilder properties = new StringBuilder();
                 for (String property : message.getProperties().keySet()) {
-                    properties.append(property).append("=").append(message.getProperties().get(property)).append("\n");
+                    properties
+                            .append(property)
+                            .append("=")
+                            .append(message.getProperties().get(property))
+                            .append("\n");
                 }
-                table.addRow().addContent(
-                        message.getMessageId(),
-                        message.getContent(),
-                        message.getCharset(),
-                        message.getType(),
-                        message.getCorrelationID(),
-                        message.getDeliveryMode(),
-                        message.getDestination(),
-                        message.getExpiration(),
-                        message.getPriority(),
-                        message.isRedelivered(),
-                        message.getReplyTo(),
-                        message.getTimestamp(),
-                        properties.toString());
+                table.addRow()
+                        .addContent(
+                                message.getMessageId(),
+                                message.getContent(),
+                                message.getCharset(),
+                                message.getType(),
+                                message.getCorrelationID(),
+                                message.getDeliveryMode(),
+                                message.getDestination(),
+                                message.getExpiration(),
+                                message.getPriority(),
+                                message.isRedelivered(),
+                                message.getReplyTo(),
+                                message.getTimestamp(),
+                                properties.toString());
             } else {
-                table.addRow().addContent(
-                        message.getMessageId(),
-                        message.getContent(),
-                        message.getCharset(),
-                        message.getType(),
-                        message.getCorrelationID(),
-                        message.getDeliveryMode(),
-                        message.getDestination(),
-                        message.getExpiration(),
-                        message.getPriority(),
-                        message.isRedelivered(),
-                        message.getReplyTo(),
-                        message.getTimestamp());
+                table.addRow()
+                        .addContent(
+                                message.getMessageId(),
+                                message.getContent(),
+                                message.getCharset(),
+                                message.getType(),
+                                message.getCorrelationID(),
+                                message.getDeliveryMode(),
+                                message.getDestination(),
+                                message.getExpiration(),
+                                message.getPriority(),
+                                message.isRedelivered(),
+                                message.getReplyTo(),
+                                message.getTimestamp());
             }
         }
 
@@ -100,5 +121,4 @@ public class BrowseCommand extends JmsConnectionCommandSupport {
 
         return null;
     }
-
 }

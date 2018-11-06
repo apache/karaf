@@ -29,12 +29,14 @@ public class SchedulerExampleTest extends KarafTestSupport {
 
     @Test
     public void test() throws Exception {
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-scheduler-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-scheduler-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
         installAndAssertFeature("karaf-scheduler-example");
 
         String output = executeCommand("scheduler:list");
         System.out.println(output);
         assertContains("example", output);
     }
-
 }

@@ -35,5 +35,4 @@ public class InstallAction extends SubsystemSupport implements Action {
         getSubsystem(id).install(location);
         return null;
     }
-
 }

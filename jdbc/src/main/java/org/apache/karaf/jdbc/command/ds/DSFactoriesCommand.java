@@ -17,7 +17,6 @@
 package org.apache.karaf.jdbc.command.ds;
 
 import java.util.Collection;
-
 import org.apache.karaf.jdbc.command.JdbcCommandSupport;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -31,24 +30,24 @@ import org.osgi.service.jdbc.DataSourceFactory;
 @Service
 public class DSFactoriesCommand extends JdbcCommandSupport {
 
-    @Reference
-    BundleContext context;
-    
+    @Reference BundleContext context;
+
     @Override
     public Object execute() throws Exception {
         ShellTable table = new ShellTable();
         table.column("Name");
         table.column("Class");
         table.column("Version");
-        Collection<ServiceReference<DataSourceFactory>> refs = context.getServiceReferences(DataSourceFactory.class, null);
+        Collection<ServiceReference<DataSourceFactory>> refs =
+                context.getServiceReferences(DataSourceFactory.class, null);
         for (ServiceReference<DataSourceFactory> ref : refs) {
-            String driverName = (String)ref.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_NAME);
-            String driverClass = (String)ref.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_CLASS);
-            String driverVersion = (String)ref.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_VERSION);
+            String driverName = (String) ref.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_NAME);
+            String driverClass = (String) ref.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_CLASS);
+            String driverVersion =
+                    (String) ref.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_VERSION);
             table.addRow().addContent(driverName, driverClass, driverVersion);
         }
         table.print(System.out);
         return null;
     }
-
 }

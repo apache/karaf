@@ -18,37 +18,33 @@ package org.slf4j.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
 import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
 
 /**
- * An implementation of {@link ILoggerFactory} which always returns
- * {@link SimpleLogger} instances.
+ * An implementation of {@link ILoggerFactory} which always returns {@link SimpleLogger} instances.
  */
 public class SimpleLoggerFactory implements ILoggerFactory {
 
-  final static SimpleLoggerFactory INSTANCE = new SimpleLoggerFactory();
+    static final SimpleLoggerFactory INSTANCE = new SimpleLoggerFactory();
 
-  Map<String, Logger> loggerMap;
+    Map<String, Logger> loggerMap;
 
-  public SimpleLoggerFactory() {
-    loggerMap = new HashMap<>();
-  }
-
-  /**
-   * Return an appropriate {@link SimpleLogger} instance by name.
-   */
-  public Logger getLogger(String name) {
-    Logger slogger = null;
-    // protect against concurrent access of the loggerMap
-    synchronized (this) {
-      slogger = loggerMap.get(name);
-      if (slogger == null) {
-        slogger = new SimpleLogger(name);
-        loggerMap.put(name, slogger);
-      }
+    public SimpleLoggerFactory() {
+        loggerMap = new HashMap<>();
     }
-    return slogger;
-  }
+
+    /** Return an appropriate {@link SimpleLogger} instance by name. */
+    public Logger getLogger(String name) {
+        Logger slogger = null;
+        // protect against concurrent access of the loggerMap
+        synchronized (this) {
+            slogger = loggerMap.get(name);
+            if (slogger == null) {
+                slogger = new SimpleLogger(name);
+                loggerMap.put(name, slogger);
+            }
+        }
+        return slogger;
+    }
 }

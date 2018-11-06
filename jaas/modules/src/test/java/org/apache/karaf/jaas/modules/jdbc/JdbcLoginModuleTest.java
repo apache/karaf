@@ -15,15 +15,19 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
+import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.security.auth.Subject;
 import javax.sql.DataSource;
-
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -34,12 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
-import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class JdbcLoginModuleTest {
 
@@ -60,7 +58,7 @@ public class JdbcLoginModuleTest {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             try (Statement statement = connection.createStatement()) {
-                    statement.execute("drop table USERS");
+                statement.execute("drop table USERS");
             } catch (SQLException e) {
                 // Ignore
             }
@@ -70,7 +68,8 @@ public class JdbcLoginModuleTest {
                 // Ignore
             }
             try (Statement statement = connection.createStatement()) {
-                statement.execute("create table USERS (USERNAME VARCHAR(32) PRIMARY KEY, PASSWORD VARCHAR(32))");
+                statement.execute(
+                        "create table USERS (USERNAME VARCHAR(32) PRIMARY KEY, PASSWORD VARCHAR(32))");
                 statement.execute("create table ROLES (USERNAME VARCHAR(32), ROLE VARCHAR(1024))");
             }
             connection.commit();
@@ -83,8 +82,9 @@ public class JdbcLoginModuleTest {
         options.put(JDBCUtils.DATASOURCE, "osgi:" + DataSource.class.getName());
         options.put(BundleContext.class.getName(), context);
 
-        expect(context.getServiceReferences(DataSource.class.getName(), null)).andReturn(new ServiceReference[] { reference });
-        expect((DataSource)context.getService(reference)).andReturn(dataSource);
+        expect(context.getServiceReferences(DataSource.class.getName(), null))
+                .andReturn(new ServiceReference[] {reference});
+        expect((DataSource) context.getService(reference)).andReturn(dataSource);
         expect(context.ungetService(reference)).andReturn(true);
 
         EasyMock.replay(context);
@@ -107,7 +107,8 @@ public class JdbcLoginModuleTest {
         assertFalse(subject.getPrincipals(UserPrincipal.class).isEmpty());
         assertEquals("abc", subject.getPrincipals(UserPrincipal.class).iterator().next().getName());
         assertFalse(subject.getPrincipals(RolePrincipal.class).isEmpty());
-        assertEquals("role1", subject.getPrincipals(RolePrincipal.class).iterator().next().getName());
+        assertEquals(
+                "role1", subject.getPrincipals(RolePrincipal.class).iterator().next().getName());
     }
 
     @Test

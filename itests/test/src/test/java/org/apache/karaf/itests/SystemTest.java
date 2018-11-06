@@ -15,17 +15,15 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
-import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -75,8 +73,13 @@ public class SystemTest extends KarafTestSupport {
 
     @Test
     public void startLevelCommand() throws Exception {
-        assertContains("100", executeCommand("system:start-level",
-                new RolePrincipal("admin"), new RolePrincipal("manager"), new RolePrincipal("viewer")));
+        assertContains(
+                "100",
+                executeCommand(
+                        "system:start-level",
+                        new RolePrincipal("admin"),
+                        new RolePrincipal("manager"),
+                        new RolePrincipal("viewer")));
     }
 
     @Test
@@ -86,5 +89,4 @@ public class SystemTest extends KarafTestSupport {
         int startLevel = (Integer) mbeanServer.getAttribute(name, "StartLevel");
         assertEquals(100, startLevel);
     }
-
 }

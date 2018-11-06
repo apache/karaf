@@ -18,14 +18,15 @@
  */
 package org.apache.karaf.main.lock;
 
+import static org.junit.Assert.*;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.felix.utils.properties.Properties;
 import java.util.logging.Logger;
-
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.junit.After;
 import org.junit.Before;
@@ -33,10 +34,8 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public abstract class BaseJDBCLockIntegrationTest {
-    
+
     private final Logger LOG = Logger.getLogger(this.getClass().getName());
 
     DefaultJDBCLock lock;
@@ -52,14 +51,14 @@ public abstract class BaseJDBCLockIntegrationTest {
     String nodeDatatype = "VARCHAR(20)";
 
     abstract DefaultJDBCLock createLock(Properties props);
-    
+
     @BeforeClass
     public static void setUpTestSuite() {
         Properties properties = new Properties();
         properties.put("karaf.bootstrap.log", "target/karaf.log");
         BootstrapLogManager.setProperties(properties);
     }
-    
+
     @Before
     public void setUp() throws Exception {
         props = new Properties();
@@ -70,66 +69,74 @@ public abstract class BaseJDBCLockIntegrationTest {
         props.put("karaf.lock.jdbc.table", tableName);
         props.put("karaf.lock.jdbc.clustername", clustername);
         props.put("karaf.lock.jdbc.timeout", String.valueOf(timeout));
-        
+
         try {
             executeStatement("DROP TABLE " + tableName);
         } catch (Exception e) {
             // expected if the table dosn't exist
         }
     }
-    
+
     @After
     public void tearDown() throws Exception {
         if (lock != null) {
             lock.release();
         }
     }
-    
+
     @Test
     @Ignore
     public void lockShouldRestoreTheLockAfterADbFailure() throws Exception {
         Lock lock1 = createLock(props);
         assertTrue(lock1.lock());
         assertTrue(lock1.isAlive());
-        
+
         // shut down the database
-        
+
         assertFalse(lock1.isAlive());
-        
+
         // start the database
-        
+
         assertTrue(lock1.lock());
         assertTrue(lock1.isAlive());
     }
-    
+
     @Test
     public void initShouldCreateTheSchemaIfItNotExists() throws Exception {
         long start = System.currentTimeMillis();
         lock = createLock(props);
         long end = System.currentTimeMillis();
-        
+
         long moment = queryDatabaseSingleResult("SELECT MOMENT FROM " + tableName);
-    
+
         assertTrue(moment >= start);
         assertTrue(moment <= end);
     }
 
     @Test
     public void initShouldNotCreateTheSchemaIfItAlreadyExists() throws Exception {
-        executeStatement("CREATE TABLE " + tableName + " (MOMENT " + momentDatatype + ", NODE " + nodeDatatype + ")");
-        executeStatement("INSERT INTO " + tableName + " (MOMENT, NODE) VALUES (1, '" + clustername + "')");
-        
+        executeStatement(
+                "CREATE TABLE "
+                        + tableName
+                        + " (MOMENT "
+                        + momentDatatype
+                        + ", NODE "
+                        + nodeDatatype
+                        + ")");
+        executeStatement(
+                "INSERT INTO " + tableName + " (MOMENT, NODE) VALUES (1, '" + clustername + "')");
+
         lock = createLock(props);
-        
+
         long moment = queryDatabaseSingleResult("SELECT MOMENT FROM " + tableName);
-    
+
         assertEquals(1, moment);
     }
 
     @Test
     public void lockShouldReturnTrueItTheTableIsNotLocked() throws Exception {
         lock = createLock(props);
-        
+
         assertTrue(lock.lock());
         assertTableIsLocked();
     }
@@ -139,52 +146,57 @@ public abstract class BaseJDBCLockIntegrationTest {
         Connection connection = null;
         try {
             lock = createLock(props);
-            
-            executeStatement("INSERT INTO " + tableName + " (MOMENT, NODE) VALUES (1, '" + clustername + "_2')");
+
+            executeStatement(
+                    "INSERT INTO "
+                            + tableName
+                            + " (MOMENT, NODE) VALUES (1, '"
+                            + clustername
+                            + "_2')");
             connection = lock(tableName, clustername + "_2");
-            
+
             // we can't lock only one row for the cluster
             assertFalse(lock.lock());
         } finally {
             close(connection);
         }
     }
-    
+
     @Test
     public void lockShouldReturnFalseIfTheRowIsAlreadyLocked() throws Exception {
         Connection connection = null;
         try {
             lock = createLock(props);
             connection = lock(tableName, clustername);
-            
+
             assertFalse(lock.lock());
         } finally {
             close(connection);
         }
     }
-    
+
     @Test
     public void lockShouldReturnFalseIfTheTableIsEmpty() throws Exception {
         Connection connection = null;
         try {
             lock = createLock(props);
-            truncateTable(); //Empty the table
+            truncateTable(); // Empty the table
             connection = lock(tableName, clustername);
-            
+
             assertFalse(lock.lock());
         } finally {
             close(connection);
         }
     }
-    
+
     @Test
     public void release() throws Exception {
         lock = createLock(props);
-        
+
         assertTrue(lock.lock());
-        
+
         lock.release();
-        
+
         assertNull(lock.lockConnection);
         assertTableIsUnlocked();
     }
@@ -192,34 +204,34 @@ public abstract class BaseJDBCLockIntegrationTest {
     @Test
     public void releaseShouldSucceedForAnAlreadyClosedConnection() throws Exception {
         lock = createLock(props);
-        
+
         assertTrue(lock.lock());
-        
+
         lock.lockConnection.rollback(); // release the lock
         lock.lockConnection.close();
         lock.release();
-        
+
         assertTableIsUnlocked();
     }
 
     @Test
     public void releaseShouldSucceedForANullConnectionReference() throws Exception {
         lock = createLock(props);
-        
+
         assertTrue(lock.lock());
-        
+
         lock.lockConnection.rollback(); // release the lock
         lock.lockConnection.close();
         lock.lockConnection = null;
         lock.release();
-        
+
         assertTableIsUnlocked();
     }
 
     @Test
     public void isAliveShouldReturnTrueIfItHoldsTheLock() throws Exception {
         lock = createLock(props);
-        
+
         assertTrue(lock.lock());
         assertTrue(lock.isAlive());
     }
@@ -227,25 +239,25 @@ public abstract class BaseJDBCLockIntegrationTest {
     @Test
     public void isAliveShouldReturnFalseIfTheConnectionIsClosed() throws Exception {
         lock = createLock(props);
-        
+
         assertTrue(lock.lock());
-        
+
         lock.lockConnection.rollback(); // release the lock
         lock.lockConnection.close();
-        
+
         assertFalse(lock.isAlive());
     }
 
     @Test
     public void isAliveShouldReturnFalseIfTheConnectionIsNull() throws Exception {
         lock = createLock(props);
-        
+
         assertTrue(lock.lock());
-        
+
         lock.lockConnection.rollback(); // release the lock
         lock.lockConnection.close();
         lock.lockConnection = null;
-        
+
         assertFalse(lock.isAlive());
     }
 
@@ -254,19 +266,20 @@ public abstract class BaseJDBCLockIntegrationTest {
         Connection connection = null;
         try {
             lock = createLock(props);
-            
+
             assertTrue(lock.lock());
-            
+
             lock.lockConnection.rollback(); // release the lock
             connection = lock(tableName, clustername); // another connection locks the table
-            
+
             assertFalse(lock.isAlive());
         } finally {
-            close(connection);            
+            close(connection);
         }
     }
 
-    Connection getConnection(String url, String user, String password) throws ClassNotFoundException, SQLException {
+    Connection getConnection(String url, String user, String password)
+            throws ClassNotFoundException, SQLException {
         Class.forName(driver);
         Connection connection = DriverManager.getConnection(url, user, password);
         connection.setAutoCommit(false);
@@ -276,12 +289,12 @@ public abstract class BaseJDBCLockIntegrationTest {
     void executeStatement(String stmt) throws SQLException, ClassNotFoundException {
         Connection connection = null;
         Statement statement = null;
-        
+
         try {
             connection = getConnection(url, user, password);
             statement = connection.createStatement();
             statement.setQueryTimeout(timeout);
-            statement.execute(stmt);    
+            statement.execute(stmt);
             connection.commit();
         } finally {
             close(statement);
@@ -293,7 +306,7 @@ public abstract class BaseJDBCLockIntegrationTest {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
-        
+
         try {
             connection = getConnection(url, user, password);
             statement = connection.createStatement();
@@ -321,26 +334,28 @@ public abstract class BaseJDBCLockIntegrationTest {
     }
 
     void truncateTable() throws SQLException, ClassNotFoundException {
-	    executeStatement("TRUNCATE TABLE " + tableName);
+        executeStatement("TRUNCATE TABLE " + tableName);
     }
-    
-    
+
     Connection lock(String table, String node) throws ClassNotFoundException, SQLException {
         Connection connection = null;
         Statement statement = null;
-        
+
         try {
             connection = getConnection(url, user, password);
             statement = connection.createStatement();
-            //statement.execute("SELECT * FROM " + table + " WHERE NODE = '" + node + "' FOR UPDATE");
-            //statement.execute("UPDATE " + table + " SET MOMENT = " + System.currentTimeMillis() + " WHERE NODE = '" + node + "'");
+            // statement.execute("SELECT * FROM " + table + " WHERE NODE = '" + node + "' FOR
+            // UPDATE");
+            // statement.execute("UPDATE " + table + " SET MOMENT = " + System.currentTimeMillis() +
+            // "
+            // WHERE NODE = '" + node + "'");
             statement.execute("SELECT * FROM " + table + " FOR UPDATE");
             statement.execute("UPDATE " + table + " SET MOMENT = " + System.currentTimeMillis());
         } finally {
             close(statement);
             // connection must not be closed!
         }
-        
+
         return connection;
     }
 

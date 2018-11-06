@@ -15,12 +15,11 @@
  */
 package org.apache.karaf.jaas.modules.syncope;
 
+import java.util.Map;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class SyncopeBackingEngineFactory implements BackingEngineFactory {
 
@@ -42,11 +41,8 @@ public class SyncopeBackingEngineFactory implements BackingEngineFactory {
         return instance;
     }
 
-    /**
-     * Returns the login module class, that this factory can build.
-     */
+    /** Returns the login module class, that this factory can build. */
     public String getModuleClass() {
         return SyncopeLoginModule.class.getName();
     }
-
 }

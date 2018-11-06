@@ -24,7 +24,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.PrintStream;
-
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.support.ansi.SimpleAnsi;
@@ -41,7 +40,10 @@ public class ShellTableTest {
         table.addRow().addContent("my first column value", "my second column value is quite long");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%s%n","my first column value | my second column value is quite long"), baos.toString());
+        assertEquals(
+                String.format(
+                        "%s%n", "my first column value | my second column value is quite long"),
+                baos.toString());
     }
 
     @Test
@@ -54,7 +56,9 @@ public class ShellTableTest {
         table.size(50);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%s%n","my first column value | my second column value is q"), baos.toString());
+        assertEquals(
+                String.format("%s%n", "my first column value | my second column value is q"),
+                baos.toString());
     }
 
     @Test
@@ -67,8 +71,12 @@ public class ShellTableTest {
         table.size(50);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%1$s\n%2$s%n","my first column value | my second column value is",
-                "                      | quite long"), baos.toString());
+        assertEquals(
+                String.format(
+                        "%1$s\n%2$s%n",
+                        "my first column value | my second column value is",
+                        "                      | quite long"),
+                baos.toString());
     }
 
     @Test
@@ -81,7 +89,7 @@ public class ShellTableTest {
         testNonUtf8("ANSI_X3.4-1968");
     }
 
-    private void testNonUtf8(String encoding)  throws Exception {
+    private void testNonUtf8(String encoding) throws Exception {
         ShellTable table = new ShellTable();
         table.column("col1");
         table.column("col2").maxSize(-1).wrap();
@@ -97,41 +105,42 @@ public class ShellTableTest {
         table.print(System.out);
 
         assertEquals(
-                "col1                  | col2\n" +
-                "----------------------+---------------------------\n" +
-                "my first column value | my second column value is\n" +
-                "                      | quite long\n" +
-                "col1                  | col2\n" +
-                "----------------------+---------------------------\n" +
-                "my first column value | my second column value is\n" +
-                "                      | quite long\n",
+                "col1                  | col2\n"
+                        + "----------------------+---------------------------\n"
+                        + "my first column value | my second column value is\n"
+                        + "                      | quite long\n"
+                        + "col1                  | col2\n"
+                        + "----------------------+---------------------------\n"
+                        + "my first column value | my second column value is\n"
+                        + "                      | quite long\n",
                 getString(baos));
-
     }
-    
+
     @Test
     public void testColoredTable() {
         ShellTable table = new ShellTable().forceAscii();
         table.separator("|");
-        table.column("State").colorProvider(cellContent -> {
-			if(cellContent.contains("Active"))
-				return SimpleAnsi.COLOR_GREEN;
-			
-			if(cellContent.contains("Resolved"))
-				return SimpleAnsi.COLOR_YELLOW;
-			return null;
-		});
+        table.column("State")
+                .colorProvider(
+                        cellContent -> {
+                            if (cellContent.contains("Active")) return SimpleAnsi.COLOR_GREEN;
+
+                            if (cellContent.contains("Resolved")) return SimpleAnsi.COLOR_YELLOW;
+                            return null;
+                        });
 
         table.column("Description").maxSize(-1);
         table.addRow().addContent("Normal", "This should have default color");
         table.addRow().addContent("Active", "Green color");
         table.addRow().addContent("This is Resolved", "Yellow color");
-        
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals("Normal           | This should have default color\n" + 
-        		"[32mActive          [39m | Green color\n" + 
-        		"[33mThis is Resolved[39m | Yellow color\n", baos.toString());
+        assertEquals(
+                "Normal           | This should have default color\n"
+                        + "[32mActive          [39m | Green color\n"
+                        + "[33mThis is Resolved[39m | Yellow color\n",
+                baos.toString());
     }
 
     private String getString(ByteArrayOutputStream stream) {

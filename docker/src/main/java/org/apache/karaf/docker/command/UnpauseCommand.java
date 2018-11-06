@@ -16,19 +16,26 @@
  */
 package org.apache.karaf.docker.command;
 
+import java.util.List;
 import org.apache.karaf.docker.command.completers.ContainersNameCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.util.List;
-
-@Command(scope = "docker", name = "unpause", description = "Unpause all processes within one or more containers")
+@Command(
+        scope = "docker",
+        name = "unpause",
+        description = "Unpause all processes within one or more containers")
 @Service
 public class UnpauseCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "container", description = "Name or ID of the containers to unpause", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "container",
+            description = "Name or ID of the containers to unpause",
+            required = true,
+            multiValued = true)
     @Completion(ContainersNameCompleter.class)
     List<String> containers;
 
@@ -39,5 +46,4 @@ public class UnpauseCommand extends DockerCommandSupport {
         }
         return null;
     }
-
 }

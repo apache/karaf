@@ -18,6 +18,12 @@
  */
 package org.apache.karaf.features.internal.repository;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.osgi.framework.namespace.BundleNamespace.BUNDLE_NAMESPACE;
+import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.framework.namespace.PackageNamespace.PACKAGE_NAMESPACE;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,17 +31,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.zip.GZIPOutputStream;
-
 import org.apache.felix.utils.repository.BaseRepository;
 import org.apache.karaf.util.StreamUtils;
 import org.junit.Test;
 import org.osgi.resource.Resource;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.osgi.framework.namespace.BundleNamespace.BUNDLE_NAMESPACE;
-import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
-import static org.osgi.framework.namespace.PackageNamespace.PACKAGE_NAMESPACE;
 
 public class RepositoryTest {
 
@@ -82,13 +81,10 @@ public class RepositoryTest {
 
     private URL gzip(URL url) throws IOException {
         File temp = File.createTempFile("repo", ".tmp");
-        try (
-            OutputStream os = new GZIPOutputStream(new FileOutputStream(temp));
-            InputStream is = url.openStream()
-        ) {
+        try (OutputStream os = new GZIPOutputStream(new FileOutputStream(temp));
+                InputStream is = url.openStream()) {
             StreamUtils.copy(is, os);
         }
         return temp.toURI().toURL();
     }
-
 }

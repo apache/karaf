@@ -24,7 +24,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class RoleDeleteCommand extends JaasCommandSupport {
 
-    @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "username",
+            description = "User Name",
+            required = true,
+            multiValued = false)
     private String username;
 
     @Argument(index = 1, name = "role", description = "Role", required = true, multiValued = false)
@@ -54,10 +59,13 @@ public class RoleDeleteCommand extends JaasCommandSupport {
 
     @Override
     public String toString() {
-        return "RoleDeleteCommand{" +
-                "username='" + username + '\'' +
-                ", role='" + role + '\'' +
-                '}';
+        return "RoleDeleteCommand{"
+                + "username='"
+                + username
+                + '\''
+                + ", role='"
+                + role
+                + '\''
+                + '}';
     }
-
 }

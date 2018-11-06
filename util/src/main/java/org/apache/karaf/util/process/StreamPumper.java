@@ -18,13 +18,11 @@
  */
 package org.apache.karaf.util.process;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
-/**
- * Copies all data from an input stream to an output stream.
- */
+/** Copies all data from an input stream to an output stream. */
 public class StreamPumper implements Runnable {
 
     private InputStream in;
@@ -54,9 +52,11 @@ public class StreamPumper implements Runnable {
      *
      * @param in The input stream to read data from.
      * @param out The output stream to write data to.
-     * @param closeWhenExhausted If true, the output stream will be closed when the input is exhausted.
+     * @param closeWhenExhausted If true, the output stream will be closed when the input is
+     *     exhausted.
      */
-    public StreamPumper(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
+    public StreamPumper(
+            final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
         assert in != null;
         assert out != null;
 
@@ -104,7 +104,7 @@ public class StreamPumper implements Runnable {
     /**
      * Copy data from the input stream to the output stream.
      *
-     * Terminate as soon as the input stream is closed or an error occurs.
+     * <p>Terminate as soon as the input stream is closed or an error occurs.
      */
     public void run() {
         synchronized (this) {
@@ -149,20 +149,20 @@ public class StreamPumper implements Runnable {
                     break;
                 }
             }
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             synchronized (this) {
                 exception = t;
             }
-        }
-        finally {
+        } finally {
             try {
                 out.flush();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
             if (closeWhenExhausted) {
                 try {
                     out.close();
-                } catch (IOException e) { }
+                } catch (IOException e) {
+                }
             }
             synchronized (this) {
                 finished = true;
@@ -226,9 +226,8 @@ public class StreamPumper implements Runnable {
     /**
      * Stop the pumper as soon as possible.
      *
-     * Note that it may continue to block on the input stream
-     * but it will really stop the thread as soon as it gets EOF
-     * or any byte, and it will be marked as finished.
+     * <p>Note that it may continue to block on the input stream but it will really stop the thread
+     * as soon as it gets EOF or any byte, and it will be marked as finished.
      */
     public synchronized void stop() {
         finish = true;
@@ -237,7 +236,7 @@ public class StreamPumper implements Runnable {
         }
         notifyAll();
     }
-    
+
     public InputStream getInputStream() {
         return this.in;
     }

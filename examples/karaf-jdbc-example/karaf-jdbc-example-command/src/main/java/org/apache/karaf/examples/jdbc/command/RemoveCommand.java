@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.examples.jdbc.command;
 
+import java.util.List;
 import org.apache.karaf.examples.jdbc.api.BookingService;
 import org.apache.karaf.examples.jdbc.completers.BookingIdCompleter;
 import org.apache.karaf.shell.api.action.Action;
@@ -25,16 +26,18 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.util.List;
-
 @Service
 @Command(scope = "booking", name = "remove", description = "Remove an existing bookings")
 public class RemoveCommand implements Action {
 
-    @Reference
-    private BookingService bookingService;
+    @Reference private BookingService bookingService;
 
-    @Argument(index = 0, name = "ids", description = "List of bookings to remove", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "ids",
+            description = "List of bookings to remove",
+            required = true,
+            multiValued = true)
     @Completion(BookingIdCompleter.class)
     List<Long> ids;
 
@@ -45,5 +48,4 @@ public class RemoveCommand implements Action {
         }
         return null;
     }
-
 }

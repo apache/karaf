@@ -16,6 +16,16 @@
  */
 package org.apache.karaf.management;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.security.Principal;
+import java.security.PrivilegedAction;
+import java.util.*;
+import javax.management.*;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.login.LoginException;
+import javax.security.auth.spi.LoginModule;
 import junit.framework.TestCase;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.util.jaas.JaasHelper;
@@ -24,17 +34,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-
-import javax.management.*;
-import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.security.Principal;
-import java.security.PrivilegedAction;
-import java.util.*;
 
 public class KarafMBeanServerGuardTest extends TestCase {
 
@@ -48,10 +47,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("master"),
-                guard.getRequiredRoles(on, "doit", new Object[]{}, new String[]{}));
-        assertEquals(Arrays.asList("editor", "viewer"),
-                guard.getRequiredRoles(on, "fryit", new Object[]{"blah"}, new String[]{"java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("master"),
+                guard.getRequiredRoles(on, "doit", new Object[] {}, new String[] {}));
+        assertEquals(
+                Arrays.asList("editor", "viewer"),
+                guard.getRequiredRoles(
+                        on, "fryit", new Object[] {"blah"}, new String[] {"java.lang.String"}));
     }
 
     @SuppressWarnings("unchecked")
@@ -69,9 +71,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.emptyList(), guard.getRequiredRoles(on, "doit", new Object[]{}, new String[]{}));
-        assertEquals(Arrays.asList("editor", "viewer"),
-                guard.getRequiredRoles(on, "fryit", new Object[]{"blah"}, new String[]{"java.lang.String"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(on, "doit", new Object[] {}, new String[] {}));
+        assertEquals(
+                Arrays.asList("editor", "viewer"),
+                guard.getRequiredRoles(
+                        on, "fryit", new Object[] {"blah"}, new String[] {"java.lang.String"}));
     }
 
     public void testRequiredRolesSignature() throws Exception {
@@ -85,8 +91,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("editor"),
-                guard.getRequiredRoles(on, "testit", new Object[]{"test", "toast"}, new String[]{"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("editor"),
+                guard.getRequiredRoles(
+                        on,
+                        "testit",
+                        new Object[] {"test", "toast"},
+                        new String[] {"java.lang.String", "java.lang.String"}));
     }
 
     public void testRequiredRolesSignatureEmpty() throws Exception {
@@ -100,8 +111,13 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.emptyList(),
-                guard.getRequiredRoles(on, "testit", new Object[]{"test", "toast"}, new String[]{"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(
+                        on,
+                        "testit",
+                        new Object[] {"test", "toast"},
+                        new String[] {"java.lang.String", "java.lang.String"}));
     }
 
     public void testRequiredRolesExact() throws Exception {
@@ -120,24 +136,38 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("manager"),
-                guard.getRequiredRoles(on, "testit", new Object[]{"ab"}, new String[]{"java.lang.String"}));
-        assertEquals(Collections.singletonList("admin"),
-                guard.getRequiredRoles(on, "testit", new Object[]{" a b "}, new String[]{"java.lang.String"}));
-        assertEquals("The arguments are trimmed before checking",
+        assertEquals(
+                Collections.singletonList("manager"),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {"ab"}, new String[] {"java.lang.String"}));
+        assertEquals(
                 Collections.singletonList("admin"),
-                guard.getRequiredRoles(on, "testit", new Object[]{"a b"}, new String[]{"java.lang.String"}));
-        assertEquals(Collections.singletonList("tester"),
-                guard.getRequiredRoles(on, "testit", new Object[]{"cd"}, new String[]{"java.lang.String"}));
-        assertEquals(Collections.singletonList("monkey"),
-                guard.getRequiredRoles(on, "testit", new Object[]{"cd/"}, new String[]{"java.lang.String"}));
-        assertEquals(Collections.singletonList("donkey"),
-                guard.getRequiredRoles(on, "testit", new Object[]{"cd\""}, new String[]{"java.lang.String"}));
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {" a b "}, new String[] {"java.lang.String"}));
+        assertEquals(
+                "The arguments are trimmed before checking",
+                Collections.singletonList("admin"),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {"a b"}, new String[] {"java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("tester"),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {"cd"}, new String[] {"java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("monkey"),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {"cd/"}, new String[] {"java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("donkey"),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {"cd\""}, new String[] {"java.lang.String"}));
     }
 
     public void testRequiredRolesExact2() throws Exception {
         Dictionary<String, Object> configuration = new Hashtable<>();
-        configuration.put("foo(java.lang.String,java.lang.String)[\"a\",\",\"]", "editor #this is the editor rule");
+        configuration.put(
+                "foo(java.lang.String,java.lang.String)[\"a\",\",\"]",
+                "editor #this is the editor rule");
         configuration.put("foo(java.lang.String,java.lang.String)[\",\" , \"a\"]", "viewer");
         ConfigurationAdmin ca = getMockConfigAdmin(configuration);
 
@@ -145,12 +175,27 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("editor"),
-                guard.getRequiredRoles(on, "foo", new Object[]{"a", ","}, new String[]{"java.lang.String", "java.lang.String"}));
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "foo", new Object[]{",", "a"}, new String[]{"java.lang.String", "java.lang.String"}));
-        assertEquals(Collections.emptyList(),
-                guard.getRequiredRoles(on, "foo", new Object[]{"a", "a"}, new String[]{"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("editor"),
+                guard.getRequiredRoles(
+                        on,
+                        "foo",
+                        new Object[] {"a", ","},
+                        new String[] {"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(
+                        on,
+                        "foo",
+                        new Object[] {",", "a"},
+                        new String[] {"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(
+                        on,
+                        "foo",
+                        new Object[] {"a", "a"},
+                        new String[] {"java.lang.String", "java.lang.String"}));
     }
 
     public void testRequiredRolesNumeric() throws Exception {
@@ -163,10 +208,14 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("editor"),
-                guard.getRequiredRoles(on, "bar", new Object[]{new Integer(17)}, new String[]{"int"}));
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "bar", new Object[]{new Integer(18)}, new String[]{"int"}));
+        assertEquals(
+                Collections.singletonList("editor"),
+                guard.getRequiredRoles(
+                        on, "bar", new Object[] {new Integer(17)}, new String[] {"int"}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(
+                        on, "bar", new Object[] {new Integer(18)}, new String[] {"int"}));
     }
 
     public void testRequiredRolesExactNobody() throws Exception {
@@ -180,10 +229,14 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.emptyList(),
-                guard.getRequiredRoles(on, "foo", new Object[]{"a"}, new String[]{"java.lang.String"}));
-        assertEquals(Collections.emptyList(),
-                guard.getRequiredRoles(on, "foo", new Object[]{"aa"}, new String[]{"java.lang.String"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(
+                        on, "foo", new Object[] {"a"}, new String[] {"java.lang.String"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(
+                        on, "foo", new Object[] {"aa"}, new String[] {"java.lang.String"}));
     }
 
     public void testRequiredRolesRegExp() throws Exception {
@@ -196,15 +249,25 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("manager"),
-                guard.getRequiredRoles(on, "testit", new Object[]{"ab"}, new String[]{"java.lang.String"}));
-        assertEquals(Collections.singletonList("manager"),
-                guard.getRequiredRoles(on, "testit", new Object[]{"    ab  "}, new String[]{"java.lang.String"}));
-        assertEquals(Collections.emptyList(),
-                guard.getRequiredRoles(on, "testit", new Object[]{" a b "}, new String[]{"java.lang.String"}));
-        assertEquals(Collections.singletonList("tester"),
-                guard.getRequiredRoles(on, "testit", new Object[]{" c\"d "}, new String[]{"java.lang.String"}));
-
+        assertEquals(
+                Collections.singletonList("manager"),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {"ab"}, new String[] {"java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("manager"),
+                guard.getRequiredRoles(
+                        on,
+                        "testit",
+                        new Object[] {"    ab  "},
+                        new String[] {"java.lang.String"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {" a b "}, new String[] {"java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("tester"),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {" c\"d "}, new String[] {"java.lang.String"}));
     }
 
     public void testRequiredRolesRegExpNobody() throws Exception {
@@ -217,8 +280,10 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.emptyList(),
-                guard.getRequiredRoles(on, "testit", new Object[]{"ab"}, new String[]{"java.lang.String"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(
+                        on, "testit", new Object[] {"ab"}, new String[] {"java.lang.String"}));
     }
 
     public void testRequiredRolesRegExp2() throws Exception {
@@ -231,14 +296,34 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("editor"),
-                guard.getRequiredRoles(on, "foo", new Object[]{"a", "b"}, new String[]{"java.lang.String", "java.lang.String"}));
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "foo", new Object[]{"b", "a"}, new String[]{"java.lang.String", "java.lang.String"}));
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "foo", new Object[]{"c", "c"}, new String[]{"java.lang.String", "java.lang.String"}));
-        assertEquals(Collections.emptyList(),
-                guard.getRequiredRoles(on, "foo", new Object[]{"b", "b"}, new String[]{"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("editor"),
+                guard.getRequiredRoles(
+                        on,
+                        "foo",
+                        new Object[] {"a", "b"},
+                        new String[] {"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(
+                        on,
+                        "foo",
+                        new Object[] {"b", "a"},
+                        new String[] {"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(
+                        on,
+                        "foo",
+                        new Object[] {"c", "c"},
+                        new String[] {"java.lang.String", "java.lang.String"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(
+                        on,
+                        "foo",
+                        new Object[] {"b", "b"},
+                        new String[] {"java.lang.String", "java.lang.String"}));
     }
 
     @SuppressWarnings("unchecked")
@@ -264,16 +349,21 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals("Should only return the most specific definition",
+        assertEquals(
+                "Should only return the most specific definition",
                 Collections.singletonList("editor"),
-                guard.getRequiredRoles(on, "foo", new Object[]{}, new String[]{}));
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "bar", new Object[]{"test"}, new String[]{"java.lang.String"}));
-        assertEquals("The top-level is the domain, subsections of the domain should not be searched",
+                guard.getRequiredRoles(on, "foo", new Object[] {}, new String[] {}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(
+                        on, "bar", new Object[] {"test"}, new String[] {"java.lang.String"}));
+        assertEquals(
+                "The top-level is the domain, subsections of the domain should not be searched",
                 Collections.emptyList(),
-                guard.getRequiredRoles(on, "tar", new Object[]{}, new String[]{}));
-        assertEquals(Collections.singletonList("visitor"),
-                guard.getRequiredRoles(on, "zar", new Object[]{}, new String[]{}));
+                guard.getRequiredRoles(on, "tar", new Object[] {}, new String[] {}));
+        assertEquals(
+                Collections.singletonList("visitor"),
+                guard.getRequiredRoles(on, "zar", new Object[] {}, new String[] {}));
     }
 
     @SuppressWarnings("unchecked")
@@ -292,13 +382,15 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on1 = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals("Should only return the most specific definition",
+        assertEquals(
+                "Should only return the most specific definition",
                 Collections.singletonList("editor"),
-                guard.getRequiredRoles(on1, "foo", new Object[]{}, new String[]{}));
+                guard.getRequiredRoles(on1, "foo", new Object[] {}, new String[] {}));
         ObjectName on2 = ObjectName.getInstance("tar.bar:type=Test");
-        assertEquals("Should return definition from wildcard PID",
+        assertEquals(
+                "Should return definition from wildcard PID",
                 Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on2, "foo", new Object[]{}, new String[]{}));
+                guard.getRequiredRoles(on2, "foo", new Object[] {}, new String[] {}));
     }
 
     @SuppressWarnings("unchecked")
@@ -317,13 +409,15 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on1 = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals("Should only return the most specific definition",
+        assertEquals(
+                "Should only return the most specific definition",
                 Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on1, "foo", new Object[]{}, new String[]{}));
+                guard.getRequiredRoles(on1, "foo", new Object[] {}, new String[] {}));
         ObjectName on2 = ObjectName.getInstance("tar.bar:type=Test");
-        assertEquals("Should return definition from wildcard PID",
+        assertEquals(
+                "Should return definition from wildcard PID",
                 Collections.singletonList("editor"),
-                guard.getRequiredRoles(on2, "foo", new Object[]{}, new String[]{}));
+                guard.getRequiredRoles(on2, "foo", new Object[] {}, new String[] {}));
     }
 
     @SuppressWarnings("unchecked")
@@ -342,15 +436,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on1 = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals("Should only return the most specific definition",
+        assertEquals(
+                "Should only return the most specific definition",
                 Collections.singletonList("editor"),
-                guard.getRequiredRoles(on1, "foo", new Object[]{}, new String[]{}));
+                guard.getRequiredRoles(on1, "foo", new Object[] {}, new String[] {}));
         ObjectName on2 = ObjectName.getInstance("foo.tar:type=Test");
-        assertEquals(Collections.singletonList("editor"),
-                guard.getRequiredRoles(on2, "foo", new Object[]{}, new String[]{}));
+        assertEquals(
+                Collections.singletonList("editor"),
+                guard.getRequiredRoles(on2, "foo", new Object[] {}, new String[] {}));
         ObjectName on3 = ObjectName.getInstance("boo.bar:type=Test");
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on3, "foo", new Object[]{}, new String[]{}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on3, "foo", new Object[] {}, new String[] {}));
     }
 
     public void testRequiredRolesMethodNameWildcard() throws Exception {
@@ -364,12 +461,16 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "getFoo", new Object[]{}, new String[]{}));
-        assertEquals(Arrays.asList("tester", "editor", "manager"),
-                guard.getRequiredRoles(on, "getBar", new Object[]{}, new String[]{}));
-        assertEquals(Collections.singletonList("admin"),
-                guard.getRequiredRoles(on, "test", new Object[]{new Long(17)}, new String[]{"java.lang.Long"}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on, "getFoo", new Object[] {}, new String[] {}));
+        assertEquals(
+                Arrays.asList("tester", "editor", "manager"),
+                guard.getRequiredRoles(on, "getBar", new Object[] {}, new String[] {}));
+        assertEquals(
+                Collections.singletonList("admin"),
+                guard.getRequiredRoles(
+                        on, "test", new Object[] {new Long(17)}, new String[] {"java.lang.Long"}));
     }
 
     public void testRequiredRolesMethodNameWildcard2() throws Exception {
@@ -384,12 +485,15 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "getFoo", new Object[]{}, new String[]{}));
-        assertEquals(Collections.singletonList("admin"),
-                guard.getRequiredRoles(on, "get", new Object[]{}, new String[]{}));
-        assertEquals(Collections.singletonList("janitor"),
-                guard.getRequiredRoles(on, "ge", new Object[]{}, new String[]{}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on, "getFoo", new Object[] {}, new String[] {}));
+        assertEquals(
+                Collections.singletonList("admin"),
+                guard.getRequiredRoles(on, "get", new Object[] {}, new String[] {}));
+        assertEquals(
+                Collections.singletonList("janitor"),
+                guard.getRequiredRoles(on, "ge", new Object[] {}, new String[] {}));
     }
 
     public void testRequiredRolesMethodNameWildcard3() throws Exception {
@@ -402,12 +506,15 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "getFoo", new Object[]{}, new String[]{}));
-        assertEquals(Collections.singletonList("viewer"),
-                guard.getRequiredRoles(on, "get", new Object[]{}, new String[]{}));
-        assertEquals(Collections.singletonList("admin"),
-                guard.getRequiredRoles(on, "ge", new Object[]{}, new String[]{}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on, "getFoo", new Object[] {}, new String[] {}));
+        assertEquals(
+                Collections.singletonList("viewer"),
+                guard.getRequiredRoles(on, "get", new Object[] {}, new String[] {}));
+        assertEquals(
+                Collections.singletonList("admin"),
+                guard.getRequiredRoles(on, "ge", new Object[] {}, new String[] {}));
     }
 
     @SuppressWarnings("unchecked")
@@ -425,23 +532,30 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
-        assertEquals(Collections.emptyList(),
-                guard.getRequiredRoles(on, "getBar", new Object[]{}, new String[]{}));
-        assertEquals(Collections.singletonList("admin"),
-                guard.getRequiredRoles(on, "test", new Object[]{new Long(17)}, new String[]{"java.lang.Long"}));
+        assertEquals(
+                Collections.emptyList(),
+                guard.getRequiredRoles(on, "getBar", new Object[] {}, new String[] {}));
+        assertEquals(
+                Collections.singletonList("admin"),
+                guard.getRequiredRoles(
+                        on, "test", new Object[] {new Long(17)}, new String[] {"java.lang.Long"}));
     }
 
     @SuppressWarnings("unchecked")
-    private ConfigurationAdmin getMockConfigAdmin(Dictionary<String, Object> configuration) throws IOException, InvalidSyntaxException {
+    private ConfigurationAdmin getMockConfigAdmin(Dictionary<String, Object> configuration)
+            throws IOException, InvalidSyntaxException {
         configuration.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
         return getMockConfigAdmin2(configuration);
     }
 
-    private ConfigurationAdmin getMockConfigAdmin2(Dictionary<String, Object>... configurations) throws IOException, InvalidSyntaxException {
+    private ConfigurationAdmin getMockConfigAdmin2(Dictionary<String, Object>... configurations)
+            throws IOException, InvalidSyntaxException {
         List<Configuration> allConfigs = new ArrayList<>();
         for (Dictionary<String, Object> configuration : configurations) {
             Configuration conf = EasyMock.createMock(Configuration.class);
-            EasyMock.expect(conf.getPid()).andReturn((String) configuration.get(Constants.SERVICE_PID)).anyTimes();
+            EasyMock.expect(conf.getPid())
+                    .andReturn((String) configuration.get(Constants.SERVICE_PID))
+                    .anyTimes();
             EasyMock.expect(conf.getProperties()).andReturn(configuration).anyTimes();
             EasyMock.replay(conf);
             allConfigs.add(conf);
@@ -451,10 +565,12 @@ public class KarafMBeanServerGuardTest extends TestCase {
         for (Configuration c : allConfigs) {
             EasyMock.expect(ca.getConfiguration(c.getPid(), null)).andReturn(c).anyTimes();
         }
-        EasyMock.expect(ca.listConfigurations(EasyMock.eq("(service.pid=jmx.acl*)"))).andReturn(
-                allConfigs.toArray(new Configuration[]{})).anyTimes();
-        EasyMock.expect(ca.listConfigurations(EasyMock.eq("(service.pid=jmx.acl.whitelist)"))).andReturn(
-                allConfigs.toArray(new Configuration[]{})).anyTimes();
+        EasyMock.expect(ca.listConfigurations(EasyMock.eq("(service.pid=jmx.acl*)")))
+                .andReturn(allConfigs.toArray(new Configuration[] {}))
+                .anyTimes();
+        EasyMock.expect(ca.listConfigurations(EasyMock.eq("(service.pid=jmx.acl.whitelist)")))
+                .andReturn(allConfigs.toArray(new Configuration[] {}))
+                .anyTimes();
         EasyMock.replay(ca);
         return ca;
     }
@@ -462,11 +578,14 @@ public class KarafMBeanServerGuardTest extends TestCase {
     public void testCurrentUserHasRole() throws Exception {
         Subject subject = loginWithTestRoles("test");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            assertTrue(JaasHelper.currentUserHasRole("test"));
-            assertFalse(JaasHelper.currentUserHasRole("toast"));
-            return null;
-        });
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            assertTrue(JaasHelper.currentUserHasRole("test"));
+                            assertFalse(JaasHelper.currentUserHasRole("toast"));
+                            return null;
+                        });
     }
 
     public void testCurrentUserHasCustomRole() throws Exception {
@@ -476,11 +595,16 @@ public class KarafMBeanServerGuardTest extends TestCase {
         lm.login();
         lm.commit();
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            assertTrue(JaasHelper.currentUserHasRole(TestRolePrincipal.class.getCanonicalName() + ":foo"));
-            assertFalse(JaasHelper.currentUserHasRole("foo"));
-            return null;
-        });
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            assertTrue(
+                                    JaasHelper.currentUserHasRole(
+                                            TestRolePrincipal.class.getCanonicalName() + ":foo"));
+                            assertFalse(JaasHelper.currentUserHasRole("foo"));
+                            return null;
+                        });
     }
 
     public void testInvoke() throws Throwable {
@@ -493,44 +617,80 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                Method im = MBeanServer.class.getMethod("invoke", ObjectName.class, String.class, Object[].class, String[].class);
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                Method im =
+                                        MBeanServer.class.getMethod(
+                                                "invoke",
+                                                ObjectName.class,
+                                                String.class,
+                                                Object[].class,
+                                                String[].class);
 
-                ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
+                                ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-                // The following operation should not throw an exception
-                guard.invoke(null, im, new Object[]{on, "someMethod", new Object[]{"test"}, new String[]{"java.lang.String"}});
+                                // The following operation should not throw an exception
+                                guard.invoke(
+                                        null,
+                                        im,
+                                        new Object[] {
+                                            on,
+                                            "someMethod",
+                                            new Object[] {"test"},
+                                            new String[] {"java.lang.String"}
+                                        });
 
-                try {
-                    guard.invoke(null, im, new Object[]{on, "someOtherMethod", new Object[]{}, new String[]{}});
-                    fail("Should not have allowed the invocation");
-                } catch (SecurityException se) {
-                    // good
-                }
+                                try {
+                                    guard.invoke(
+                                            null,
+                                            im,
+                                            new Object[] {
+                                                on,
+                                                "someOtherMethod",
+                                                new Object[] {},
+                                                new String[] {}
+                                            });
+                                    fail("Should not have allowed the invocation");
+                                } catch (SecurityException se) {
+                                    // good
+                                }
 
-                try {
-                    guard.invoke(null, im, new Object[]{on, "somemethingElse", new Object[]{}, new String[]{}});
-                    fail("Should not have allowed the invocation");
-                } catch (SecurityException se) {
-                    // good
-                }
-                return null;
-            } catch (Throwable ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+                                try {
+                                    guard.invoke(
+                                            null,
+                                            im,
+                                            new Object[] {
+                                                on,
+                                                "somemethingElse",
+                                                new Object[] {},
+                                                new String[] {}
+                                            });
+                                    fail("Should not have allowed the invocation");
+                                } catch (SecurityException se) {
+                                    // good
+                                }
+                                return null;
+                            } catch (Throwable ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
     }
 
     public void testGetAttributeIs() throws Throwable {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
         MBeanAttributeInfo attr = new MBeanAttributeInfo("Toast", "boolean", "", true, false, true);
-        MBeanAttributeInfo attr2 = new MBeanAttributeInfo("TestAttr", "java.lang.String", "", true, false, false);
+        MBeanAttributeInfo attr2 =
+                new MBeanAttributeInfo("TestAttr", "java.lang.String", "", true, false, false);
         MBeanAttributeInfo attr3 = new MBeanAttributeInfo("Butter", "int", "", true, true, false);
 
         MBeanInfo mbeanInfo = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(mbeanInfo.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr, attr2, attr3}).anyTimes();
+        EasyMock.expect(mbeanInfo.getAttributes())
+                .andReturn(new MBeanAttributeInfo[] {attr, attr2, attr3})
+                .anyTimes();
         EasyMock.replay(mbeanInfo);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -547,37 +707,46 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                Method im = MBeanServer.class.getMethod("getAttribute", ObjectName.class, String.class);
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                Method im =
+                                        MBeanServer.class.getMethod(
+                                                "getAttribute", ObjectName.class, String.class);
 
-                // The following operations should not throw an exception
-                guard.invoke(mbs, im, new Object[]{on, "Toast"});
-                guard.invoke(mbs, im, new Object[]{on, "TestAttr"});
+                                // The following operations should not throw an exception
+                                guard.invoke(mbs, im, new Object[] {on, "Toast"});
+                                guard.invoke(mbs, im, new Object[] {on, "TestAttr"});
 
-                try {
-                    guard.invoke(mbs, im, new Object[]{on, "Butter"});
-                    fail("Should not have allowed the invocation");
-                } catch (SecurityException se) {
-                    // good
-                }
+                                try {
+                                    guard.invoke(mbs, im, new Object[] {on, "Butter"});
+                                    fail("Should not have allowed the invocation");
+                                } catch (SecurityException se) {
+                                    // good
+                                }
 
-                return null;
-            } catch (Throwable ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+                                return null;
+                            } catch (Throwable ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
     }
 
     public void testGetAttributes() throws Throwable {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        MBeanAttributeInfo attr = new MBeanAttributeInfo("Toast", "boolean", "", true, false, false);
-        MBeanAttributeInfo attr2 = new MBeanAttributeInfo("TestSomething", "java.lang.String", "", true, true, false);
+        MBeanAttributeInfo attr =
+                new MBeanAttributeInfo("Toast", "boolean", "", true, false, false);
+        MBeanAttributeInfo attr2 =
+                new MBeanAttributeInfo("TestSomething", "java.lang.String", "", true, true, false);
         MBeanAttributeInfo attr3 = new MBeanAttributeInfo("Butter", "int", "", true, true, false);
 
         MBeanInfo mbeanInfo = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(mbeanInfo.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr, attr2, attr3}).anyTimes();
+        EasyMock.expect(mbeanInfo.getAttributes())
+                .andReturn(new MBeanAttributeInfo[] {attr, attr2, attr3})
+                .anyTimes();
         EasyMock.replay(mbeanInfo);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -593,37 +762,52 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                Method im = MBeanServer.class.getMethod("getAttributes", ObjectName.class, String[].class);
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                Method im =
+                                        MBeanServer.class.getMethod(
+                                                "getAttributes", ObjectName.class, String[].class);
 
-                // The following operations should not throw an exception
-                guard.invoke(mbs, im, new Object[]{on, new String[]{"Toast"}});
-                guard.invoke(mbs, im, new Object[]{on, new String[]{"TestSomething", "Toast"}});
+                                // The following operations should not throw an exception
+                                guard.invoke(mbs, im, new Object[] {on, new String[] {"Toast"}});
+                                guard.invoke(
+                                        mbs,
+                                        im,
+                                        new Object[] {on, new String[] {"TestSomething", "Toast"}});
 
-                try {
-                    guard.invoke(mbs, im, new Object[]{on, new String[]{"Butter", "Toast"}});
-                    fail("Should not have allowed the invocation");
-                } catch (SecurityException se) {
-                    // good
-                }
+                                try {
+                                    guard.invoke(
+                                            mbs,
+                                            im,
+                                            new Object[] {on, new String[] {"Butter", "Toast"}});
+                                    fail("Should not have allowed the invocation");
+                                } catch (SecurityException se) {
+                                    // good
+                                }
 
-                return null;
-            } catch (Throwable ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+                                return null;
+                            } catch (Throwable ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
     }
 
     public void testGetAttributes2() throws Throwable {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
         MBeanAttributeInfo attr = new MBeanAttributeInfo("Toast", "boolean", "", true, false, true);
-        MBeanAttributeInfo attr2 = new MBeanAttributeInfo("TestSomething", "boolean", "", true, false, true);
-        MBeanAttributeInfo attr3 = new MBeanAttributeInfo("Butter", "boolean", "", true, true, true);
+        MBeanAttributeInfo attr2 =
+                new MBeanAttributeInfo("TestSomething", "boolean", "", true, false, true);
+        MBeanAttributeInfo attr3 =
+                new MBeanAttributeInfo("Butter", "boolean", "", true, true, true);
 
         MBeanInfo mbeanInfo = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(mbeanInfo.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr, attr2, attr3}).anyTimes();
+        EasyMock.expect(mbeanInfo.getAttributes())
+                .andReturn(new MBeanAttributeInfo[] {attr, attr2, attr3})
+                .anyTimes();
         EasyMock.replay(mbeanInfo);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -641,35 +825,50 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                Method im = MBeanServer.class.getMethod("getAttributes", ObjectName.class, String[].class);
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                Method im =
+                                        MBeanServer.class.getMethod(
+                                                "getAttributes", ObjectName.class, String[].class);
 
-                // The following operations should not throw an exception
-                guard.invoke(mbs, im, new Object[]{on, new String[]{"Toast"}});
-                guard.invoke(mbs, im, new Object[]{on, new String[]{"TestSomething", "Toast"}});
+                                // The following operations should not throw an exception
+                                guard.invoke(mbs, im, new Object[] {on, new String[] {"Toast"}});
+                                guard.invoke(
+                                        mbs,
+                                        im,
+                                        new Object[] {on, new String[] {"TestSomething", "Toast"}});
 
-                try {
-                    guard.invoke(mbs, im, new Object[]{on, new String[]{"Butter", "Toast"}});
-                    fail("Should not have allowed the invocation");
-                } catch (SecurityException se) {
-                    // good
-                }
+                                try {
+                                    guard.invoke(
+                                            mbs,
+                                            im,
+                                            new Object[] {on, new String[] {"Butter", "Toast"}});
+                                    fail("Should not have allowed the invocation");
+                                } catch (SecurityException se) {
+                                    // good
+                                }
 
-                return null;
-            } catch (Throwable ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+                                return null;
+                            } catch (Throwable ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
     }
 
     public void testSetAttribute() throws Throwable {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        MBeanAttributeInfo a1 = new MBeanAttributeInfo("Something", "java.lang.String", "Something Attribute", true, true, false);
-        MBeanAttributeInfo a2 = new MBeanAttributeInfo("Value", "long", "Value Attribute", true, true, false);
-        MBeanAttributeInfo a3 = new MBeanAttributeInfo("Other", "boolean", "Other Attribute", true, true, false);
-        MBeanAttributeInfo[] attrs = new MBeanAttributeInfo[]{a1, a2, a3};
+        MBeanAttributeInfo a1 =
+                new MBeanAttributeInfo(
+                        "Something", "java.lang.String", "Something Attribute", true, true, false);
+        MBeanAttributeInfo a2 =
+                new MBeanAttributeInfo("Value", "long", "Value Attribute", true, true, false);
+        MBeanAttributeInfo a3 =
+                new MBeanAttributeInfo("Other", "boolean", "Other Attribute", true, true, false);
+        MBeanAttributeInfo[] attrs = new MBeanAttributeInfo[] {a1, a2, a3};
 
         MBeanInfo mbeanInfo = EasyMock.createMock(MBeanInfo.class);
         EasyMock.expect(mbeanInfo.getAttributes()).andReturn(attrs).anyTimes();
@@ -688,42 +887,63 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                Method im = MBeanServer.class.getMethod("setAttribute", ObjectName.class, Attribute.class);
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                Method im =
+                                        MBeanServer.class.getMethod(
+                                                "setAttribute", ObjectName.class, Attribute.class);
 
-                // The following operations should not throw an exception
-                guard.invoke(mbs, im, new Object[]{on, new Attribute("Something", "v1")});
-                guard.invoke(mbs, im, new Object[]{on, new Attribute("Value", 42L)});
+                                // The following operations should not throw an exception
+                                guard.invoke(
+                                        mbs,
+                                        im,
+                                        new Object[] {on, new Attribute("Something", "v1")});
+                                guard.invoke(
+                                        mbs, im, new Object[] {on, new Attribute("Value", 42L)});
 
-                try {
-                    guard.invoke(mbs, im, new Object[]{on, new Attribute("Other", Boolean.TRUE)});
-                    fail("Should not have allowed the invocation");
-                } catch (SecurityException se) {
-                    // good
-                }
+                                try {
+                                    guard.invoke(
+                                            mbs,
+                                            im,
+                                            new Object[] {
+                                                on, new Attribute("Other", Boolean.TRUE)
+                                            });
+                                    fail("Should not have allowed the invocation");
+                                } catch (SecurityException se) {
+                                    // good
+                                }
 
-                try {
-                    guard.invoke(mbs, im, new Object[]{on, new Attribute("NonExistent", "v4")});
-                    fail("Should not have found the MBean Declaration");
-                } catch (IllegalStateException ise) {
-                    // good
-                }
+                                try {
+                                    guard.invoke(
+                                            mbs,
+                                            im,
+                                            new Object[] {on, new Attribute("NonExistent", "v4")});
+                                    fail("Should not have found the MBean Declaration");
+                                } catch (IllegalStateException ise) {
+                                    // good
+                                }
 
-                return null;
-            } catch (Throwable ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+                                return null;
+                            } catch (Throwable ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
     }
 
     public void testSetAttributes() throws Throwable {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        MBeanAttributeInfo mba1 = new MBeanAttributeInfo("Something", "java.lang.String", "Something Attribute", true, true, false);
-        MBeanAttributeInfo mba2 = new MBeanAttributeInfo("Value", "long", "Value Attribute", true, true, false);
-        MBeanAttributeInfo mba3 = new MBeanAttributeInfo("Other", "boolean", "Other Attribute", true, true, false);
-        MBeanAttributeInfo[] attrs = new MBeanAttributeInfo[]{mba1, mba2, mba3};
+        MBeanAttributeInfo mba1 =
+                new MBeanAttributeInfo(
+                        "Something", "java.lang.String", "Something Attribute", true, true, false);
+        MBeanAttributeInfo mba2 =
+                new MBeanAttributeInfo("Value", "long", "Value Attribute", true, true, false);
+        MBeanAttributeInfo mba3 =
+                new MBeanAttributeInfo("Other", "boolean", "Other Attribute", true, true, false);
+        MBeanAttributeInfo[] attrs = new MBeanAttributeInfo[] {mba1, mba2, mba3};
 
         MBeanInfo mbeanInfo = EasyMock.createMock(MBeanInfo.class);
         EasyMock.expect(mbeanInfo.getAttributes()).andReturn(attrs).anyTimes();
@@ -742,53 +962,80 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                Method im = MBeanServer.class.getMethod("setAttributes", ObjectName.class, AttributeList.class);
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                Method im =
+                                        MBeanServer.class.getMethod(
+                                                "setAttributes",
+                                                ObjectName.class,
+                                                AttributeList.class);
 
-                // The following operations should not throw an exception
-                Attribute a1 = new Attribute("Something", "v1");
-                Attribute a2 = new Attribute("Value", 42L);
-                guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a1))});
-                guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a2, a1))});
+                                // The following operations should not throw an exception
+                                Attribute a1 = new Attribute("Something", "v1");
+                                Attribute a2 = new Attribute("Value", 42L);
+                                guard.invoke(
+                                        mbs,
+                                        im,
+                                        new Object[] {on, new AttributeList(Arrays.asList(a1))});
+                                guard.invoke(
+                                        mbs,
+                                        im,
+                                        new Object[] {
+                                            on, new AttributeList(Arrays.asList(a2, a1))
+                                        });
 
-                Attribute a3 = new Attribute("Other", Boolean.TRUE);
-                try {
-                    guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a1, a3))});
-                    fail("Should not have allowed the invocation");
-                } catch (SecurityException se) {
-                    // good
-                }
+                                Attribute a3 = new Attribute("Other", Boolean.TRUE);
+                                try {
+                                    guard.invoke(
+                                            mbs,
+                                            im,
+                                            new Object[] {
+                                                on, new AttributeList(Arrays.asList(a1, a3))
+                                            });
+                                    fail("Should not have allowed the invocation");
+                                } catch (SecurityException se) {
+                                    // good
+                                }
 
-                try {
-                    Attribute a4 = new Attribute("NonExistent", "v4");
-                    guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a4))});
-                    fail("Should not have found the MBean Declaration");
-                } catch (IllegalStateException ise) {
-                    // good
-                }
+                                try {
+                                    Attribute a4 = new Attribute("NonExistent", "v4");
+                                    guard.invoke(
+                                            mbs,
+                                            im,
+                                            new Object[] {
+                                                on, new AttributeList(Arrays.asList(a4))
+                                            });
+                                    fail("Should not have found the MBean Declaration");
+                                } catch (IllegalStateException ise) {
+                                    // good
+                                }
 
-                return null;
-            } catch (Throwable ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+                                return null;
+                            } catch (Throwable ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
     }
 
     public void testCanInvokeMBean() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
         final ObjectName on2 = ObjectName.getInstance("foo.bar:type=Toast");
 
-        MBeanParameterInfo[] sig = new MBeanParameterInfo[]{new MBeanParameterInfo("arg1", "java.lang.String", "")};
-        MBeanOperationInfo op = new MBeanOperationInfo("doit", "", sig, "int", MBeanOperationInfo.INFO);
+        MBeanParameterInfo[] sig =
+                new MBeanParameterInfo[] {new MBeanParameterInfo("arg1", "java.lang.String", "")};
+        MBeanOperationInfo op =
+                new MBeanOperationInfo("doit", "", sig, "int", MBeanOperationInfo.INFO);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{op}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {op}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {}).anyTimes();
         EasyMock.replay(info);
         MBeanInfo info2 = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info2.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info2.getAttributes()).andReturn(new MBeanAttributeInfo[]{}).anyTimes();
+        EasyMock.expect(info2.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info2.getAttributes()).andReturn(new MBeanAttributeInfo[] {}).anyTimes();
         EasyMock.replay(info2);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -810,27 +1057,32 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(mbs, on));
-                assertFalse(guard.canInvoke(mbs, on2));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(guard.canInvoke(mbs, on));
+                                assertFalse(guard.canInvoke(mbs, on2));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeMBean2() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        MBeanParameterInfo[] sig = new MBeanParameterInfo[]{new MBeanParameterInfo("arg1", "java.lang.String", "")};
-        MBeanOperationInfo op = new MBeanOperationInfo("doit", "", sig, "int", MBeanOperationInfo.INFO);
+        MBeanParameterInfo[] sig =
+                new MBeanParameterInfo[] {new MBeanParameterInfo("arg1", "java.lang.String", "")};
+        MBeanOperationInfo op =
+                new MBeanOperationInfo("doit", "", sig, "int", MBeanOperationInfo.INFO);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{op}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {op}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -851,29 +1103,39 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertFalse(guard.canInvoke(mbs, on));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertFalse(guard.canInvoke(mbs, on));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeAnyOverload() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        MBeanParameterInfo[] sig = new MBeanParameterInfo[]{new MBeanParameterInfo("arg1", "java.lang.String", "")};
-        MBeanOperationInfo op = new MBeanOperationInfo("doit", "", sig, "int", MBeanOperationInfo.INFO);
-        MBeanParameterInfo[] sig2 = new MBeanParameterInfo[]{
-                new MBeanParameterInfo("arg1", "java.lang.String", ""),
-                new MBeanParameterInfo("arg2", "java.lang.String", "")};
-        MBeanOperationInfo op2 = new MBeanOperationInfo("doit", "", sig2, "int", MBeanOperationInfo.INFO);
+        MBeanParameterInfo[] sig =
+                new MBeanParameterInfo[] {new MBeanParameterInfo("arg1", "java.lang.String", "")};
+        MBeanOperationInfo op =
+                new MBeanOperationInfo("doit", "", sig, "int", MBeanOperationInfo.INFO);
+        MBeanParameterInfo[] sig2 =
+                new MBeanParameterInfo[] {
+                    new MBeanParameterInfo("arg1", "java.lang.String", ""),
+                    new MBeanParameterInfo("arg2", "java.lang.String", "")
+                };
+        MBeanOperationInfo op2 =
+                new MBeanOperationInfo("doit", "", sig2, "int", MBeanOperationInfo.INFO);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{op, op2}).anyTimes();
+        EasyMock.expect(info.getOperations())
+                .andReturn(new MBeanOperationInfo[] {op, op2})
+                .anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -889,30 +1151,40 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(mbs, on, "doit"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(guard.canInvoke(mbs, on, "doit"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeAnyOverload2() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        MBeanParameterInfo[] sig = new MBeanParameterInfo[]{new MBeanParameterInfo("arg1", "java.lang.String", "")};
-        MBeanOperationInfo op = new MBeanOperationInfo("foit", "", sig, "int", MBeanOperationInfo.INFO);
-        MBeanParameterInfo[] sig2 = new MBeanParameterInfo[]{
-                new MBeanParameterInfo("arg1", "java.lang.String", ""),
-                new MBeanParameterInfo("arg2", "java.lang.String", "")};
-        MBeanOperationInfo op2 = new MBeanOperationInfo("doit", "", sig2, "int", MBeanOperationInfo.INFO);
+        MBeanParameterInfo[] sig =
+                new MBeanParameterInfo[] {new MBeanParameterInfo("arg1", "java.lang.String", "")};
+        MBeanOperationInfo op =
+                new MBeanOperationInfo("foit", "", sig, "int", MBeanOperationInfo.INFO);
+        MBeanParameterInfo[] sig2 =
+                new MBeanParameterInfo[] {
+                    new MBeanParameterInfo("arg1", "java.lang.String", ""),
+                    new MBeanParameterInfo("arg2", "java.lang.String", "")
+                };
+        MBeanOperationInfo op2 =
+                new MBeanOperationInfo("doit", "", sig2, "int", MBeanOperationInfo.INFO);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{op, op2}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{}).anyTimes();
+        EasyMock.expect(info.getOperations())
+                .andReturn(new MBeanOperationInfo[] {op, op2})
+                .anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -928,23 +1200,26 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertFalse(guard.canInvoke(mbs, on, "doit"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertFalse(guard.canInvoke(mbs, on, "doit"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeAnyOverload3() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -960,15 +1235,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertFalse(guard.canInvoke(mbs, on, "doit"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertFalse(guard.canInvoke(mbs, on, "doit"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanGetAttributeAnyOverload() throws Exception {
@@ -977,8 +1255,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("Foo", "int", "", true, true, false);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -994,15 +1272,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(mbs, on, "getFoo"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(guard.canInvoke(mbs, on, "getFoo"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanGetAttributeAnyOverload2() throws Exception {
@@ -1011,8 +1292,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("Foo", "int", "", true, true, false);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1028,15 +1309,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertFalse(guard.canInvoke(mbs, on, "getFoo"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertFalse(guard.canInvoke(mbs, on, "getFoo"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanGetAttributeAnyOverload3() throws Exception {
@@ -1045,8 +1329,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("Foo", "boolean", "", true, true, true);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1063,15 +1347,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(mbs, on, "isFoo"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(guard.canInvoke(mbs, on, "isFoo"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanGetAttributeAnyOverload4() throws Exception {
@@ -1080,8 +1367,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("Foo", "boolean", "", true, true, true);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1098,15 +1385,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertFalse(guard.canInvoke(mbs, on, "isFoo"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertFalse(guard.canInvoke(mbs, on, "isFoo"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanSetAttributeAnyOverload() throws Exception {
@@ -1115,8 +1405,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("Foo", "boolean", "", true, true, true);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1132,15 +1422,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(mbs, on, "setFoo"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(guard.canInvoke(mbs, on, "setFoo"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanSetAttributeAnyOverload2() throws Exception {
@@ -1149,8 +1442,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("Foo", "boolean", "", true, true, true);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1166,15 +1459,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertFalse(guard.canInvoke(mbs, on, "setFoo"));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertFalse(guard.canInvoke(mbs, on, "setFoo"));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeMBeanGetter() throws Exception {
@@ -1183,8 +1479,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("a1", "boolean", "", true, false, true);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1202,15 +1498,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(mbs, on));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(guard.canInvoke(mbs, on));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeMBeanGetter2() throws Exception {
@@ -1219,8 +1518,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("a1", "boolean", "", true, false, false);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1238,15 +1537,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertFalse(guard.canInvoke(mbs, on));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertFalse(guard.canInvoke(mbs, on));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeMBeanGetter3() throws Exception {
@@ -1255,8 +1557,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
         MBeanAttributeInfo attr = new MBeanAttributeInfo("A1", "boolean", "", true, false, false);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1274,25 +1576,29 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(mbs, on));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(guard.canInvoke(mbs, on));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeMBeanSetter() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        MBeanAttributeInfo attr = new MBeanAttributeInfo("A2", "java.lang.String", "", true, true, false);
+        MBeanAttributeInfo attr =
+                new MBeanAttributeInfo("A2", "java.lang.String", "", true, true, false);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1310,25 +1616,29 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(mbs, on));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(guard.canInvoke(mbs, on));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeMBeanSetter2() throws Exception {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
-        MBeanAttributeInfo attr = new MBeanAttributeInfo("A2", "java.lang.String", "", true, true, false);
+        MBeanAttributeInfo attr =
+                new MBeanAttributeInfo("A2", "java.lang.String", "", true, true, false);
 
         MBeanInfo info = EasyMock.createMock(MBeanInfo.class);
-        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[]{}).anyTimes();
-        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[]{attr}).anyTimes();
+        EasyMock.expect(info.getOperations()).andReturn(new MBeanOperationInfo[] {}).anyTimes();
+        EasyMock.expect(info.getAttributes()).andReturn(new MBeanAttributeInfo[] {attr}).anyTimes();
         EasyMock.replay(info);
 
         final MBeanServer mbs = EasyMock.createMock(MBeanServer.class);
@@ -1346,15 +1656,18 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertFalse(guard.canInvoke(mbs, on));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertFalse(guard.canInvoke(mbs, on));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeMethod() throws Exception {
@@ -1374,20 +1687,46 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(null, on, "dodo", new String[]{"java.lang.String"}));
-                assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String", "java.lang.String"}));
-                assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String"}));
-                assertFalse(guard.canInvoke(null, on, "doit", new String[]{"int"}));
-                assertFalse(guard.canInvoke(null, on, "doit", new String[]{}));
-                assertFalse(guard.canInvoke(null, on, "uuuh", new String[]{"java.lang.String"}));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(
+                                        guard.canInvoke(
+                                                null,
+                                                on,
+                                                "dodo",
+                                                new String[] {"java.lang.String"}));
+                                assertTrue(
+                                        guard.canInvoke(
+                                                null,
+                                                on,
+                                                "doit",
+                                                new String[] {
+                                                    "java.lang.String", "java.lang.String"
+                                                }));
+                                assertTrue(
+                                        guard.canInvoke(
+                                                null,
+                                                on,
+                                                "doit",
+                                                new String[] {"java.lang.String"}));
+                                assertFalse(
+                                        guard.canInvoke(null, on, "doit", new String[] {"int"}));
+                                assertFalse(guard.canInvoke(null, on, "doit", new String[] {}));
+                                assertFalse(
+                                        guard.canInvoke(
+                                                null,
+                                                on,
+                                                "uuuh",
+                                                new String[] {"java.lang.String"}));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     public void testCanInvokeMethod2() throws Exception {
@@ -1407,20 +1746,45 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
-            try {
-                assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String"}));
-                assertTrue(guard.canInvoke(null, on, "doit", new String[]{}));
-                assertTrue(guard.canInvoke(null, on, "doit", new String[]{"int"}));
-                assertFalse(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String", "java.lang.String"}));
-                assertFalse(guard.canInvoke(null, on, "dodo", new String[]{"java.lang.String"}));
-                assertFalse(guard.canInvoke(null, on, "uuuh", new String[]{"java.lang.String"}));
+        Subject.doAs(
+                subject,
+                (PrivilegedAction<Void>)
+                        () -> {
+                            try {
+                                assertTrue(
+                                        guard.canInvoke(
+                                                null,
+                                                on,
+                                                "doit",
+                                                new String[] {"java.lang.String"}));
+                                assertTrue(guard.canInvoke(null, on, "doit", new String[] {}));
+                                assertTrue(guard.canInvoke(null, on, "doit", new String[] {"int"}));
+                                assertFalse(
+                                        guard.canInvoke(
+                                                null,
+                                                on,
+                                                "doit",
+                                                new String[] {
+                                                    "java.lang.String", "java.lang.String"
+                                                }));
+                                assertFalse(
+                                        guard.canInvoke(
+                                                null,
+                                                on,
+                                                "dodo",
+                                                new String[] {"java.lang.String"}));
+                                assertFalse(
+                                        guard.canInvoke(
+                                                null,
+                                                on,
+                                                "uuuh",
+                                                new String[] {"java.lang.String"}));
 
-                return null;
-            } catch (Throwable th) {
-                throw new RuntimeException(th);
-            }
-        });
+                                return null;
+                            } catch (Throwable th) {
+                                throw new RuntimeException(th);
+                            }
+                        });
     }
 
     private Subject loginWithTestRoles(String... roles) throws LoginException {
@@ -1441,9 +1805,8 @@ public class KarafMBeanServerGuardTest extends TestCase {
             for (String role : roles) {
                 principals.add(new RolePrincipal(role));
             }
-            return principals.toArray(new Principal[]{});
+            return principals.toArray(new Principal[] {});
         }
-
 
         public TestLoginModule(String... roles) {
             this(getPrincipals(roles));
@@ -1453,7 +1816,11 @@ public class KarafMBeanServerGuardTest extends TestCase {
             this.principals = principals;
         }
 
-        public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+        public void initialize(
+                Subject subject,
+                CallbackHandler callbackHandler,
+                Map<String, ?> sharedState,
+                Map<String, ?> options) {
             this.subject = subject;
         }
 
@@ -1477,5 +1844,4 @@ public class KarafMBeanServerGuardTest extends TestCase {
             return true;
         }
     }
-
 }

@@ -17,7 +17,6 @@
 package org.apache.karaf.obr.command;
 
 import java.util.List;
-
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.shell.api.action.Argument;
@@ -25,19 +24,33 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "obr", name = "url-refresh", description = "Reloads the repositories to obtain a fresh list of bundles.")
+@Command(
+        scope = "obr",
+        name = "url-refresh",
+        description = "Reloads the repositories to obtain a fresh list of bundles.")
 @Service
 public class RefreshUrlCommand extends ObrCommandSupport {
 
-    @Option(name = "-i", aliases = { "--index" }, description = "Use index to identify URL", required = false, multiValued = false)
+    @Option(
+            name = "-i",
+            aliases = {"--index"},
+            description = "Use index to identify URL",
+            required = false,
+            multiValued = false)
     boolean useIndex;
 
-    @Argument(index = 0, name = "ids", description = "Repository URLs (or indexes if you use -i) to refresh (leave empty for all)", required = false, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "ids",
+            description =
+                    "Repository URLs (or indexes if you use -i) to refresh (leave empty for all)",
+            required = false,
+            multiValued = true)
     List<String> ids;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-		if (ids != null && !ids.isEmpty()) {
-			for (String id : ids) {
+        if (ids != null && !ids.isEmpty()) {
+            for (String id : ids) {
                 if (useIndex) {
                     Repository[] repos = admin.listRepositories();
                     int index = Integer.parseInt(id);
@@ -47,17 +60,16 @@ public class RefreshUrlCommand extends ObrCommandSupport {
                         System.err.println("Invalid index");
                     }
                 } else {
-				    admin.addRepository(id);
+                    admin.addRepository(id);
                 }
-			}
-		} else {
-			Repository[] repos = admin.listRepositories();
-			if ((repos != null) && (repos.length > 0)) {
+            }
+        } else {
+            Repository[] repos = admin.listRepositories();
+            if ((repos != null) && (repos.length > 0)) {
                 for (Repository repo : repos) {
                     admin.addRepository(repo.getURI());
                 }
-			}
-		}
+            }
+        }
     }
-
 }

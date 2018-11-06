@@ -28,7 +28,10 @@ public class CommandExampleTest extends KarafTestSupport {
     @Test
     public void test() throws Exception {
         // add command example features repository
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-command-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-command-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         // install karaf-command-example-provider feature
         installAndAssertFeature("karaf-command-example-provider");
@@ -43,5 +46,4 @@ public class CommandExampleTest extends KarafTestSupport {
         System.out.println(output);
         assertContains("AF520", output);
     }
-
 }

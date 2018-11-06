@@ -19,7 +19,6 @@ package org.apache.karaf.obr.command;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
@@ -31,14 +30,23 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "obr", name = "resolve", description = "Shows the resolution output for a given set of requirements.")
+@Command(
+        scope = "obr",
+        name = "resolve",
+        description = "Shows the resolution output for a given set of requirements.")
 @Service
 public class ResolveCommand extends ObrCommandSupport {
 
-    @Option(name = "-w", aliases = "--why", description = "Display the reason of the inclusion of the resource")
+    @Option(
+            name = "-w",
+            aliases = "--why",
+            description = "Display the reason of the inclusion of the resource")
     boolean why;
 
-    @Option(name = "-l", aliases = "--no-local", description = "Ignore local resources during resolution")
+    @Option(
+            name = "-l",
+            aliases = "--no-local",
+            description = "Ignore local resources during resolution")
     boolean noLocal;
 
     @Option(name = "--no-remote", description = "Ignore remote resources during resolution")
@@ -53,7 +61,12 @@ public class ResolveCommand extends ObrCommandSupport {
     @Option(name = "--optional", description = "Resolve optional dependencies")
     boolean optional;
 
-    @Argument(index = 0, name = "requirements", description = "Requirements", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "requirements",
+            description = "Requirements",
+            required = true,
+            multiValued = true)
     List<String> requirements;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
@@ -65,7 +78,8 @@ public class ResolveCommand extends ObrCommandSupport {
         if (!noRemote) {
             repositories.addAll(Arrays.asList(admin.listRepositories()));
         }
-        Resolver resolver = admin.resolver(repositories.toArray(new Repository[repositories.size()]));
+        Resolver resolver =
+                admin.resolver(repositories.toArray(new Repository[repositories.size()]));
         for (Requirement requirement : parseRequirements(admin, requirements)) {
             resolver.add(requirement);
         }
@@ -76,16 +90,31 @@ public class ResolveCommand extends ObrCommandSupport {
                 System.out.println("Required resource(s):");
                 printUnderline(System.out, 21);
                 for (Resource resource : resources) {
-                    System.out.println("   " + resource.getPresentationName() + " (" + resource.getVersion() + ")");
+                    System.out.println(
+                            "   "
+                                    + resource.getPresentationName()
+                                    + " ("
+                                    + resource.getVersion()
+                                    + ")");
                     if (why) {
                         Reason[] req = resolver.getReason(resource);
                         for (int reqIdx = 0; req != null && reqIdx < req.length; reqIdx++) {
                             if (!req[reqIdx].getRequirement().isOptional()) {
                                 Resource r = req[reqIdx].getResource();
                                 if (r != null) {
-                                    System.out.println("      - " + r.getPresentationName() + " / " + req[reqIdx].getRequirement().getName() + ":" + req[reqIdx].getRequirement().getFilter());
+                                    System.out.println(
+                                            "      - "
+                                                    + r.getPresentationName()
+                                                    + " / "
+                                                    + req[reqIdx].getRequirement().getName()
+                                                    + ":"
+                                                    + req[reqIdx].getRequirement().getFilter());
                                 } else {
-                                    System.out.println("      - " + req[reqIdx].getRequirement().getName() + ":" + req[reqIdx].getRequirement().getFilter());
+                                    System.out.println(
+                                            "      - "
+                                                    + req[reqIdx].getRequirement().getName()
+                                                    + ":"
+                                                    + req[reqIdx].getRequirement().getFilter());
                                 }
                             }
                         }
@@ -98,17 +127,31 @@ public class ResolveCommand extends ObrCommandSupport {
                 System.out.println("Optional resource(s):");
                 printUnderline(System.out, 21);
                 for (Resource resource : resources) {
-                    System.out.println("   " + resource.getPresentationName()
-                            + " (" + resource.getVersion() + ")");
+                    System.out.println(
+                            "   "
+                                    + resource.getPresentationName()
+                                    + " ("
+                                    + resource.getVersion()
+                                    + ")");
                     if (why) {
                         Reason[] req = resolver.getReason(resource);
                         for (int reqIdx = 0; req != null && reqIdx < req.length; reqIdx++) {
                             if (!req[reqIdx].getRequirement().isOptional()) {
                                 Resource r = req[reqIdx].getResource();
                                 if (r != null) {
-                                    System.out.println("      - " + r.getPresentationName() + " / " + req[reqIdx].getRequirement().getName() + ":" + req[reqIdx].getRequirement().getFilter());
+                                    System.out.println(
+                                            "      - "
+                                                    + r.getPresentationName()
+                                                    + " / "
+                                                    + req[reqIdx].getRequirement().getName()
+                                                    + ":"
+                                                    + req[reqIdx].getRequirement().getFilter());
                                 } else {
-                                    System.out.println("      - " + req[reqIdx].getRequirement().getName() + ":" + req[reqIdx].getRequirement().getFilter());
+                                    System.out.println(
+                                            "      - "
+                                                    + req[reqIdx].getRequirement().getName()
+                                                    + ":"
+                                                    + req[reqIdx].getRequirement().getFilter());
                                 }
                             }
                         }
@@ -116,14 +159,11 @@ public class ResolveCommand extends ObrCommandSupport {
                 }
             }
             if (deploy || start) {
-                try
-                {
+                try {
                     System.out.print("\nDeploying...");
                     resolver.deploy(start ? Resolver.START : 0);
                     System.out.println("done.");
-                }
-                catch (IllegalStateException ex)
-                {
+                } catch (IllegalStateException ex) {
                     System.err.println(ex);
                 }
             }
@@ -133,7 +173,11 @@ public class ResolveCommand extends ObrCommandSupport {
                 System.out.println("Unsatisfied requirement(s):");
                 printUnderline(System.out, 27);
                 for (Reason req : reqs) {
-                    System.out.println("   " + req.getRequirement().getName() + ":" + req.getRequirement().getFilter());
+                    System.out.println(
+                            "   "
+                                    + req.getRequirement().getName()
+                                    + ":"
+                                    + req.getRequirement().getFilter());
                     System.out.println("      " + req.getResource().getPresentationName());
                 }
             } else {
@@ -141,5 +185,4 @@ public class ResolveCommand extends ObrCommandSupport {
             }
         }
     }
-
 }

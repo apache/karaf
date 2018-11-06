@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.docker.command;
 
+import java.util.List;
 import org.apache.karaf.docker.Top;
 import org.apache.karaf.docker.command.completers.ContainersNameCompleter;
 import org.apache.karaf.shell.api.action.Argument;
@@ -23,13 +24,19 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.util.List;
-
-@Command(scope = "docker", name = "top", description = "Display the running processes of a container")
+@Command(
+        scope = "docker",
+        name = "top",
+        description = "Display the running processes of a container")
 @Service
 public class TopCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "container", description = "Name or ID of the container", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "container",
+            description = "Name or ID of the container",
+            required = true,
+            multiValued = false)
     @Completion(ContainersNameCompleter.class)
     String container;
 
@@ -43,5 +50,4 @@ public class TopCommand extends DockerCommandSupport {
         }
         return null;
     }
-
 }

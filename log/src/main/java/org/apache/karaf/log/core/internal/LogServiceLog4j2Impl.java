@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.felix.utils.collections.DictionaryAsMap;
 import org.apache.karaf.log.core.Level;
 
@@ -60,7 +59,7 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
             if (loggerName != null) {
                 names.put(loggerName, config.get(key).toString());
             }
-            
+
             loggerName = getMatching(levelPattern, key);
             if (loggerName != null) {
                 levels.put(loggerName, config.get(key).toString());
@@ -75,7 +74,7 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
 
         String l = logger;
         String val;
-        for (;;) {
+        for (; ; ) {
             val = loggers.get(l != null ? l : ROOT_LOGGER);
             if (val != null || l == null) {
                 return Collections.singletonMap(logger, val);
@@ -100,7 +99,14 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
         } else {
             String loggerKey = null;
             for (String key : config.keySet()) {
-                Matcher matcher = Pattern.compile("\\Q" + LOGGER_PREFIX + "\\E([a-zA-Z_]+)\\Q" + NAME_SUFFIX + "\\E").matcher(key);
+                Matcher matcher =
+                        Pattern.compile(
+                                        "\\Q"
+                                                + LOGGER_PREFIX
+                                                + "\\E([a-zA-Z_]+)\\Q"
+                                                + NAME_SUFFIX
+                                                + "\\E")
+                                .matcher(key);
                 if (matcher.matches()) {
                     String name = config.get(key).toString();
                     if (name.matches(logger)) {
@@ -131,5 +137,4 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
     private String level(String logger) {
         return LOGGER_PREFIX + logger + LEVEL_SUFFIX;
     }
-
 }

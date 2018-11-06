@@ -18,7 +18,6 @@ package org.apache.karaf.features.command;
 
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -27,12 +26,14 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "feature", name = "requirement-list", description = "List provisioning requirements.")
+@Command(
+        scope = "feature",
+        name = "requirement-list",
+        description = "List provisioning requirements.")
 @Service
 public class RequirementList implements Action {
 
-    @Reference
-    private FeaturesService featuresService;
+    @Reference private FeaturesService featuresService;
 
     @Option(name = "--no-format", description = "Disable table rendered output")
     boolean noFormat;

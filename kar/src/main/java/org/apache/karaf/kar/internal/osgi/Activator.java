@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.kar.internal.osgi;
 
+import java.io.File;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.kar.internal.KarServiceImpl;
@@ -27,12 +28,9 @@ import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ManagedService;
 
-import java.io.File;
-
 @Services(
         requires = @RequireService(FeaturesService.class),
-        provides = @ProvideService(KarService.class)
-)
+        provides = @ProvideService(KarService.class))
 @Managed("org.apache.karaf.kar")
 public class Activator extends BaseActivator implements ManagedService {
 
@@ -44,13 +42,11 @@ public class Activator extends BaseActivator implements ManagedService {
 
         boolean noAutoRefreshBundles = getBoolean("noAutoRefreshBundles", false);
         boolean noAutoStartBundles = getBoolean("noAutoStartBundles", false);
-        String karStorage = getString("karStorage", System.getProperty("karaf.data") + File.separator + "kar");
+        String karStorage =
+                getString("karStorage", System.getProperty("karaf.data") + File.separator + "kar");
 
-        KarServiceImpl karService = new KarServiceImpl(
-                System.getProperty("karaf.base"),
-                karStorage,
-                featuresService
-        );
+        KarServiceImpl karService =
+                new KarServiceImpl(System.getProperty("karaf.base"), karStorage, featuresService);
         karService.setNoAutoRefreshBundles(noAutoRefreshBundles);
         karService.setNoAutoStartBundles(noAutoStartBundles);
         register(KarService.class, karService);
@@ -59,5 +55,4 @@ public class Activator extends BaseActivator implements ManagedService {
         mbean.setKarService(karService);
         registerMBean(mbean, "type=kar");
     }
-
 }

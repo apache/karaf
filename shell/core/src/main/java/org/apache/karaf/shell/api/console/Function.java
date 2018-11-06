@@ -18,15 +18,11 @@ package org.apache.karaf.shell.api.console;
 
 import java.util.List;
 
-/**
- * This interface represents some code that can be executed in the
- * {@link Session}.
- */
+/** This interface represents some code that can be executed in the {@link Session}. */
 public interface Function {
 
     /**
-     * Execute this function within the given Session and with the given
-     * arguments.
+     * Execute this function within the given Session and with the given arguments.
      *
      * @param session the current session
      * @param arguments the arguments of this function
@@ -34,5 +30,4 @@ public interface Function {
      * @throws Exception if any exception occurs
      */
     Object execute(Session session, List<Object> arguments) throws Exception;
-
 }

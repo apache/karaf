@@ -17,9 +17,7 @@ package org.apache.karaf.shell.table;
 
 import org.fusesource.jansi.Ansi;
 
-/**
- * Colored support for column.
- */
+/** Colored support for column. */
 public class AnsiColumn extends Col {
 
     private Ansi.Color color;
@@ -38,17 +36,14 @@ public class AnsiColumn extends Col {
         Ansi ansi = Ansi.ansi();
         ansi.fg(color);
 
-        if (bold)
-            ansi.a(Ansi.Attribute.INTENSITY_BOLD);
+        if (bold) ansi.a(Ansi.Attribute.INTENSITY_BOLD);
 
         ansi.a(in);
 
-        if (bold)
-            ansi.a(Ansi.Attribute.INTENSITY_BOLD_OFF);
+        if (bold) ansi.a(Ansi.Attribute.INTENSITY_BOLD_OFF);
 
         ansi.fg(Ansi.Color.DEFAULT);
 
         return ansi.toString();
     }
-
 }

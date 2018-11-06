@@ -40,7 +40,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.transform.stream.StreamResult;
-
 import org.apache.karaf.features.internal.model.processing.FeaturesProcessing;
 import org.apache.karaf.features.internal.model.processing.ObjectFactory;
 import org.apache.karaf.util.xml.IndentingXMLEventWriter;
@@ -61,8 +60,9 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.AttributesImpl;
 
 /**
- * A class to help serialize {@link org.apache.karaf.features.internal.model.processing.FeaturesProcessing} model
- * but with added template comments for main sections of <code>org.apache.karaf.features.xml</code> file.
+ * A class to help serialize {@link
+ * org.apache.karaf.features.internal.model.processing.FeaturesProcessing} model but with added
+ * template comments for main sections of <code>org.apache.karaf.features.xml</code> file.
  */
 public class FeaturesProcessingSerializer {
 
@@ -83,6 +83,7 @@ public class FeaturesProcessingSerializer {
 
     /**
      * Reads {@link FeaturesProcessing features processing model} from input stream
+     *
      * @param stream
      * @return
      */
@@ -92,6 +93,7 @@ public class FeaturesProcessingSerializer {
 
     /**
      * Reads {@link FeaturesProcessing features processing model} from input stream
+     *
      * @param stream
      * @param versions additional properties to resolve placeholders in features processing XML
      * @return
@@ -101,25 +103,31 @@ public class FeaturesProcessingSerializer {
         UnmarshallerHandler handler = unmarshaller.getUnmarshallerHandler();
 
         // BundleContextPropertyResolver gives access to e.g., ${karaf.base}
-        final PropertyResolver resolver = bundleContext == null ? new DictionaryPropertyResolver(versions)
-                : new DictionaryPropertyResolver(versions, new BundleContextPropertyResolver(bundleContext));
+        final PropertyResolver resolver =
+                bundleContext == null
+                        ? new DictionaryPropertyResolver(versions)
+                        : new DictionaryPropertyResolver(
+                                versions, new BundleContextPropertyResolver(bundleContext));
 
         // indirect unmarshaling with property resolution inside XML attribute values and CDATA
         SAXParserFactory spf = SAXParserFactory.newInstance();
         spf.setNamespaceAware(true);
         XMLReader xmlReader = spf.newSAXParser().getXMLReader();
-        xmlReader.setContentHandler(new ResolvingContentHandler(new Properties() {
-            @Override
-            public String getProperty(String key) {
-                return resolver.get(key);
-            }
+        xmlReader.setContentHandler(
+                new ResolvingContentHandler(
+                        new Properties() {
+                            @Override
+                            public String getProperty(String key) {
+                                return resolver.get(key);
+                            }
 
-            @Override
-            public String getProperty(String key, String defaultValue) {
-                String value = resolver.get(key);
-                return value == null ? defaultValue : value;
-            }
-        }, handler));
+                            @Override
+                            public String getProperty(String key, String defaultValue) {
+                                String value = resolver.get(key);
+                                return value == null ? defaultValue : value;
+                            }
+                        },
+                        handler));
         xmlReader.parse(new InputSource(stream));
 
         return (FeaturesProcessing) handler.getResult();
@@ -127,6 +135,7 @@ public class FeaturesProcessingSerializer {
 
     /**
      * Writes the model to output stream and adds comments for main sections.
+     *
      * @param model
      * @param output
      */
@@ -138,16 +147,26 @@ public class FeaturesProcessingSerializer {
             marshaller.marshal(model, new StreamResult(baos));
 
             Map<String, Boolean> emptyElements = new HashMap<>();
-            emptyElements.put("blacklistedRepositories", model.getBlacklistedRepositories().size() == 0);
+            emptyElements.put(
+                    "blacklistedRepositories", model.getBlacklistedRepositories().size() == 0);
             emptyElements.put("blacklistedFeatures", model.getBlacklistedFeatures().size() == 0);
             emptyElements.put("blacklistedBundles", model.getBlacklistedBundles().size() == 0);
-            emptyElements.put("overrideBundleDependency", model.getOverrideBundleDependency().getRepositories().size()
-                    + model.getOverrideBundleDependency().getFeatures().size()
-                    + model.getOverrideBundleDependency().getBundles().size() == 0);
-            emptyElements.put("bundleReplacements", model.getBundleReplacements().getOverrideBundles().size() == 0);
-            emptyElements.put("featureReplacements", model.getFeatureReplacements().getReplacements().size() == 0);
+            emptyElements.put(
+                    "overrideBundleDependency",
+                    model.getOverrideBundleDependency().getRepositories().size()
+                                    + model.getOverrideBundleDependency().getFeatures().size()
+                                    + model.getOverrideBundleDependency().getBundles().size()
+                            == 0);
+            emptyElements.put(
+                    "bundleReplacements",
+                    model.getBundleReplacements().getOverrideBundles().size() == 0);
+            emptyElements.put(
+                    "featureReplacements",
+                    model.getFeatureReplacements().getReplacements().size() == 0);
 
-            // A mix of direct write and stream of XML events. It's not easy (without knowing StAX impl) to
+            // A mix of direct write and stream of XML events. It's not easy (without knowing StAX
+            // impl)
+            // to
             // output self closed tags for example.
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!--\n");
@@ -158,8 +177,12 @@ public class FeaturesProcessingSerializer {
             Properties props = new Properties();
             props.load(getClass().getResourceAsStream("feature-processing-comments.properties"));
 
-            XMLEventReader xmlEventReader = XMLInputFactory.newFactory().createXMLEventReader(new ByteArrayInputStream(baos.toByteArray()));
-            XMLEventWriter xmlEventWriter = new IndentingXMLEventWriter(XMLOutputFactory.newFactory().createXMLEventWriter(writer), "    ");
+            XMLEventReader xmlEventReader =
+                    XMLInputFactory.newFactory()
+                            .createXMLEventReader(new ByteArrayInputStream(baos.toByteArray()));
+            XMLEventWriter xmlEventWriter =
+                    new IndentingXMLEventWriter(
+                            XMLOutputFactory.newFactory().createXMLEventWriter(writer), "    ");
             XMLEventFactory evFactory = XMLEventFactory.newFactory();
             int depth = 0;
             boolean skipClose = false;
@@ -243,11 +266,17 @@ public class FeaturesProcessingSerializer {
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+        public void startElement(String uri, String localName, String qName, Attributes atts)
+                throws SAXException {
             AttributesImpl resolvedAttributes = new AttributesImpl(atts);
             for (int i = 0; i < atts.getLength(); i++) {
-                resolvedAttributes.setAttribute(i, atts.getURI(i), atts.getLocalName(i), atts.getQName(i),
-                        atts.getType(i), resolve(atts.getValue(i)));
+                resolvedAttributes.setAttribute(
+                        i,
+                        atts.getURI(i),
+                        atts.getLocalName(i),
+                        atts.getQName(i),
+                        atts.getType(i),
+                        resolve(atts.getValue(i)));
             }
             if (inElement) {
                 flushBuffer(false);
@@ -292,6 +321,7 @@ public class FeaturesProcessingSerializer {
 
         /**
          * Pass collected characters to target {@link ContentHandler}
+         *
          * @param resolve whether to expect placeholders in collected text
          */
         private void flushBuffer(boolean resolve) throws SAXException {
@@ -303,14 +333,13 @@ public class FeaturesProcessingSerializer {
         }
 
         private String resolve(String value) {
-            String resolved = org.ops4j.util.collections.PropertyResolver.resolve(properties, value);
+            String resolved =
+                    org.ops4j.util.collections.PropertyResolver.resolve(properties, value);
             if (resolved.contains("${")) {
                 // there are still unresolved properties - just log warning
                 LOG.warn("Value {} has unresolved properties, please check configuration.", value);
             }
             return resolved;
         }
-
     }
-
 }

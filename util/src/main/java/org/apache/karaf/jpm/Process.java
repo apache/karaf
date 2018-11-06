@@ -19,19 +19,19 @@ package org.apache.karaf.jpm;
 import java.io.IOException;
 import java.io.Serializable;
 
-/**
- * Interface representing a process
- */
+/** Interface representing a process */
 public interface Process extends Serializable {
 
     /**
      * Retrieves the PID of the process
+     *
      * @return the pid
      */
     int getPid();
 
     /**
      * Check if this process is still running
+     *
      * @return <code>true</code> if the process is running
      * @throws IOException if an error occurs
      */
@@ -43,5 +43,4 @@ public interface Process extends Serializable {
      * @throws IOException If an error occurs.
      */
     void destroy() throws IOException;
-
 }

@@ -18,18 +18,17 @@
  */
 package org.apache.karaf.util.config;
 
+import static org.apache.felix.utils.properties.InterpolationHelper.substVars;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
-
+import java.util.StringTokenizer;
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
-import java.util.StringTokenizer;
-
-import static org.apache.felix.utils.properties.InterpolationHelper.substVars;
 
 public class PropertiesLoader {
 
@@ -37,22 +36,19 @@ public class PropertiesLoader {
 
     private static final String OPTIONALS_PROPERTY = "${optionals}"; // optionals include
 
-    private static final String OVERRIDE_PREFIX = "karaf.override."; // prefix that marks that system property should override defaults.
+    private static final String OVERRIDE_PREFIX =
+            "karaf.override."; // prefix that marks that system property should override defaults.
 
     /**
-     * <p>
-     * Loads the configuration properties in the configuration property file
-     * associated with the framework installation; these properties
-     * are accessible to the framework and to bundles and are intended
-     * for configuration purposes. By default, the configuration property
-     * file is located in the <tt>conf/</tt> directory of the Felix
-     * installation directory and is called "<tt>config.properties</tt>".
-     * The installation directory of Felix is assumed to be the parent
-     * directory of the <tt>felix.jar</tt> file as found on the system class
-     * path property. The precise file from which to load configuration
-     * properties can be set by initializing the "<code>felix.config.properties</code>"
-     * system property to an arbitrary URL.
-     * </p>
+     * Loads the configuration properties in the configuration property file associated with the
+     * framework installation; these properties are accessible to the framework and to bundles and
+     * are intended for configuration purposes. By default, the configuration property file is
+     * located in the <tt>conf/</tt> directory of the Felix installation directory and is called
+     * "<tt>config.properties</tt>". The installation directory of Felix is assumed to be the parent
+     * directory of the <tt>felix.jar</tt> file as found on the system class path property. The
+     * precise file from which to load configuration properties can be set by initializing the "
+     * <code>
+     * felix.config.properties</code>" system property to an arbitrary URL.
      *
      * @param file the config file where to load the properties.
      * @return A <code>Properties</code> instance or <code>null</code> if there was an error.
@@ -63,8 +59,7 @@ public class PropertiesLoader {
         URL configPropURL;
         try {
             configPropURL = file.toURI().toURL();
-        }
-        catch (MalformedURLException ex) {
+        } catch (MalformedURLException ex) {
             System.err.print("Main: " + ex);
             return null;
         }
@@ -74,28 +69,25 @@ public class PropertiesLoader {
         configProps.substitute();
 
         // Perform variable substitution for system properties.
-//        for (Enumeration<?> e = configProps.propertyNames(); e.hasMoreElements();) {
-//            String name = (String) e.nextElement();
-//            configProps.setProperty(name,
-//                    SubstHelper.substVars(configProps.getProperty(name), name, null, configProps));
-//        }
+        //        for (Enumeration<?> e = configProps.propertyNames(); e.hasMoreElements();) {
+        //            String name = (String) e.nextElement();
+        //            configProps.setProperty(name,
+        //                    SubstHelper.substVars(configProps.getProperty(name), name, null,
+        // configProps));
+        //        }
 
         return configProps;
     }
 
     /**
-     * <p>
-     * Loads the properties in the system property file associated with the
-     * framework installation into <tt>System.setProperty()</tt>. These properties
-     * are not directly used by the framework in anyway. By default, the system
-     * property file is located in the <tt>conf/</tt> directory of the Felix
-     * installation directory and is called "<tt>system.properties</tt>". The
-     * installation directory of Felix is assumed to be the parent directory of
-     * the <tt>felix.jar</tt> file as found on the system class path property.
-     * The precise file from which to load system properties can be set by
-     * initializing the "<tt>felix.system.properties</tt>" system property to an
-     * arbitrary URL.
-     * </p>
+     * Loads the properties in the system property file associated with the framework installation
+     * into <tt>System.setProperty()</tt>. These properties are not directly used by the framework
+     * in anyway. By default, the system property file is located in the <tt>conf/</tt> directory of
+     * the Felix installation directory and is called "<tt>system.properties</tt>". The installation
+     * directory of Felix is assumed to be the parent directory of the <tt>felix.jar</tt> file as
+     * found on the system class path property. The precise file from which to load system
+     * properties can be set by initializing the "<tt>felix.system.properties</tt>" system property
+     * to an arbitrary URL.
      *
      * @param file the Karaf base folder.
      * @throws IOException if the system file can't be loaded.
@@ -103,16 +95,16 @@ public class PropertiesLoader {
     public static void loadSystemProperties(File file) throws IOException {
         Properties props = null;
         try {
-        	URL configPropURL = file.toURI().toURL();
-        	props = loadPropertiesFile(configPropURL, true);
-        }
-        catch (Exception ex) {
-        	// Ignore
-        	return;
+            URL configPropURL = file.toURI().toURL();
+            props = loadPropertiesFile(configPropURL, true);
+        } catch (Exception ex) {
+            // Ignore
+            return;
         }
 
-        InterpolationHelper.SubstitutionCallback callback = new InterpolationHelper.BundleContextSubstitutionCallback(null);
-        for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
+        InterpolationHelper.SubstitutionCallback callback =
+                new InterpolationHelper.BundleContextSubstitutionCallback(null);
+        for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
             if (name.startsWith(OVERRIDE_PREFIX)) {
                 String overrideName = name.substring(OVERRIDE_PREFIX.length());
@@ -126,12 +118,11 @@ public class PropertiesLoader {
     }
 
     public static void copySystemProperties(Properties configProps) {
-        for (Enumeration<?> e = System.getProperties().propertyNames();
-             e.hasMoreElements();) {
+        for (Enumeration<?> e = System.getProperties().propertyNames(); e.hasMoreElements(); ) {
             String key = (String) e.nextElement();
-            if (key.startsWith("felix.") ||
-                    key.startsWith("karaf.") ||
-                    key.startsWith("org.osgi.framework.")) {
+            if (key.startsWith("felix.")
+                    || key.startsWith("karaf.")
+                    || key.startsWith("org.osgi.framework.")) {
                 configProps.setProperty(key, System.getProperty(key));
             }
         }
@@ -146,7 +137,8 @@ public class PropertiesLoader {
         }
     }
 
-    public static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
+    public static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound)
+            throws Exception {
         Properties configProps = new Properties(null, false);
         try {
             configProps.load(configPropURL);
@@ -165,7 +157,8 @@ public class PropertiesLoader {
         return configProps;
     }
 
-    private static void loadIncludes(String propertyName, boolean mandatory, URL configPropURL, Properties configProps)
+    private static void loadIncludes(
+            String propertyName, boolean mandatory, URL configPropURL, Properties configProps)
             throws Exception {
         String includes = configProps.get(propertyName);
         if (includes != null) {
@@ -179,8 +172,7 @@ public class PropertiesLoader {
                         Properties props = loadPropertiesFile(url, mandatory);
                         configProps.putAll(props);
                     }
-                }
-                while (location != null);
+                } while (location != null);
             }
         }
         configProps.remove(propertyName);
@@ -237,5 +229,4 @@ public class PropertiesLoader {
 
         return retVal;
     }
-
 }

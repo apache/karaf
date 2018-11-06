@@ -17,11 +17,10 @@
 
 package org.apache.karaf.tools.utils;
 
-import com.google.common.io.Resources;
-import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
-import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
+import com.google.common.io.Resources;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -30,20 +29,19 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
+import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-/**
- * Test the property editing system.
- * See src/test/resources/.../test-edit.xml.
- */
+/** Test the property editing system. See src/test/resources/.../test-edit.xml. */
 public class KarafPropertiesEditorTest {
-    private static final String ETC_TO_START_WITH = "../../main/src/test/resources/test-karaf-home/etc/";
+    private static final String ETC_TO_START_WITH =
+            "../../main/src/test/resources/test-karaf-home/etc/";
 
     @Test
     public void onceOver() throws Exception {
-        KarafPropertyInstructionsModelStaxReader kipmsr = new KarafPropertyInstructionsModelStaxReader();
+        KarafPropertyInstructionsModelStaxReader kipmsr =
+                new KarafPropertyInstructionsModelStaxReader();
         URL editsUrl = Resources.getResource(KarafPropertiesEditorTest.class, "test-edits.xml");
         KarafPropertyEdits edits;
         try (InputStream editsStream = Resources.asByteSource(editsUrl).openStream()) {

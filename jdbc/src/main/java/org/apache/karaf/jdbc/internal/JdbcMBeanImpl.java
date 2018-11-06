@@ -16,18 +16,14 @@
  */
 package org.apache.karaf.jdbc.internal;
 
+import java.util.List;
+import java.util.Map;
+import javax.management.MBeanException;
+import javax.management.openmbean.*;
 import org.apache.karaf.jdbc.JdbcMBean;
 import org.apache.karaf.jdbc.JdbcService;
 
-import javax.management.MBeanException;
-import javax.management.openmbean.*;
-
-import java.util.List;
-import java.util.Map;
-
-/**
- * Default implementation of the JDBC MBean.
- */
+/** Default implementation of the JDBC MBean. */
 public class JdbcMBeanImpl implements JdbcMBean {
 
     private JdbcService jdbcService;
@@ -35,25 +31,50 @@ public class JdbcMBeanImpl implements JdbcMBean {
     @Override
     public TabularData getDatasources() throws MBeanException {
         try {
-            CompositeType type = new CompositeType("DataSource", "JDBC DataSource",
-                    new String[]{ "name", "product", "version", "url", "status"},
-                    new String[]{ "Name", "Database product", "Database version", "JDBC URL", "Status" },
-                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
-            TabularType tableType = new TabularType("JDBC DataSources", "Table of the JDBC DataSources",
-                    type, new String[]{ "name" });
+            CompositeType type =
+                    new CompositeType(
+                            "DataSource",
+                            "JDBC DataSource",
+                            new String[] {"name", "product", "version", "url", "status"},
+                            new String[] {
+                                "Name", "Database product", "Database version", "JDBC URL", "Status"
+                            },
+                            new OpenType[] {
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType(
+                            "JDBC DataSources",
+                            "Table of the JDBC DataSources",
+                            type,
+                            new String[] {"name"});
             TabularData table = new TabularDataSupport(tableType);
 
             for (String datasource : jdbcService.datasources()) {
                 try {
                     Map<String, String> info = jdbcService.info(datasource);
-                    CompositeData data = new CompositeDataSupport(type,
-                            new String[]{"name", "product", "version", "url", "status"},
-                            new Object[]{datasource, info.get("db.product"), info.get("db.version"), info.get("url"), "OK"});
+                    CompositeData data =
+                            new CompositeDataSupport(
+                                    type,
+                                    new String[] {"name", "product", "version", "url", "status"},
+                                    new Object[] {
+                                        datasource,
+                                        info.get("db.product"),
+                                        info.get("db.version"),
+                                        info.get("url"),
+                                        "OK"
+                                    });
                     table.put(data);
                 } catch (Exception e) {
-                    CompositeData data = new CompositeDataSupport(type,
-                            new String[]{"name", "product", "version", "url", "status"},
-                            new Object[]{datasource, "", "", "", "ERROR"});
+                    CompositeData data =
+                            new CompositeDataSupport(
+                                    type,
+                                    new String[] {"name", "product", "version", "url", "status"},
+                                    new Object[] {datasource, "", "", "", "ERROR"});
                     table.put(data);
                 }
             }
@@ -64,9 +85,19 @@ public class JdbcMBeanImpl implements JdbcMBean {
     }
 
     @Override
-    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws MBeanException {
+    public void create(
+            String name,
+            String driverName,
+            String driverClass,
+            String databaseName,
+            String url,
+            String user,
+            String password,
+            String databaseType)
+            throws MBeanException {
         try {
-            jdbcService.create(name, driverName, driverClass, databaseName, url, user, password, databaseType);
+            jdbcService.create(
+                    name, driverName, driverClass, databaseName, url, user, password, databaseType);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
@@ -101,8 +132,8 @@ public class JdbcMBeanImpl implements JdbcMBean {
             }
             String[] columns = result.keySet().toArray(new String[result.keySet().size()]);
 
-            CompositeType type = new CompositeType("Columns", "Columns",
-                    columns, columns, stringTypes);
+            CompositeType type =
+                    new CompositeType("Columns", "Columns", columns, columns, stringTypes);
             TabularType rows = new TabularType("Result", "Result Rows", type, columns);
             TabularData table = new TabularDataSupport(rows);
 
@@ -144,8 +175,8 @@ public class JdbcMBeanImpl implements JdbcMBean {
             }
             String[] columns = result.keySet().toArray(new String[result.keySet().size()]);
 
-            CompositeType type = new CompositeType("Columns", "Columns",
-                    columns, columns, stringTypes);
+            CompositeType type =
+                    new CompositeType("Columns", "Columns", columns, columns, stringTypes);
             TabularType rows = new TabularType("Result", "Result Rows", type, columns);
             TabularData table = new TabularDataSupport(rows);
 
@@ -173,5 +204,4 @@ public class JdbcMBeanImpl implements JdbcMBean {
     public void setJdbcService(JdbcService jdbcService) {
         this.jdbcService = jdbcService;
     }
-
 }

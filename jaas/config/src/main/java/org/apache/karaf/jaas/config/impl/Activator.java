@@ -40,48 +40,59 @@ public class Activator implements BundleActivator {
 
         final OsgiKeystoreManager keystoreManager = new OsgiKeystoreManager();
 
-        keystoreInstanceServiceTracker = new ServiceTracker<>(
-                context, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
-            @Override
-            public KeystoreInstance addingService(ServiceReference<KeystoreInstance> reference) {
-                KeystoreInstance service = context.getService(reference);
-                keystoreManager.register(service, null);
-                return service;
-            }
+        keystoreInstanceServiceTracker =
+                new ServiceTracker<>(
+                        context,
+                        KeystoreInstance.class,
+                        new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
+                            @Override
+                            public KeystoreInstance addingService(
+                                    ServiceReference<KeystoreInstance> reference) {
+                                KeystoreInstance service = context.getService(reference);
+                                keystoreManager.register(service, null);
+                                return service;
+                            }
 
-            @Override
-            public void modifiedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
-            }
+                            @Override
+                            public void modifiedService(
+                                    ServiceReference<KeystoreInstance> reference,
+                                    KeystoreInstance service) {}
 
-            @Override
-            public void removedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
-                keystoreManager.unregister(service, null);
-                context.ungetService(reference);
-            }
-        });
+                            @Override
+                            public void removedService(
+                                    ServiceReference<KeystoreInstance> reference,
+                                    KeystoreInstance service) {
+                                keystoreManager.unregister(service, null);
+                                context.ungetService(reference);
+                            }
+                        });
         keystoreInstanceServiceTracker.open();
 
         osgiConfiguration = new OsgiConfiguration();
         osgiConfiguration.init();
 
-        jaasRealmServiceTracker = new ServiceTracker<>(
-                context, JaasRealm.class, new ServiceTrackerCustomizer<JaasRealm, JaasRealm>() {
-            @Override
-            public JaasRealm addingService(ServiceReference<JaasRealm> reference) {
-                JaasRealm service = context.getService(reference);
-                osgiConfiguration.register(service, null);
-                return service;
-            }
+        jaasRealmServiceTracker =
+                new ServiceTracker<>(
+                        context,
+                        JaasRealm.class,
+                        new ServiceTrackerCustomizer<JaasRealm, JaasRealm>() {
+                            @Override
+                            public JaasRealm addingService(ServiceReference<JaasRealm> reference) {
+                                JaasRealm service = context.getService(reference);
+                                osgiConfiguration.register(service, null);
+                                return service;
+                            }
 
-            @Override
-            public void modifiedService(ServiceReference<JaasRealm> reference, JaasRealm service) {
-            }
+                            @Override
+                            public void modifiedService(
+                                    ServiceReference<JaasRealm> reference, JaasRealm service) {}
 
-            @Override
-            public void removedService(ServiceReference<JaasRealm> reference, JaasRealm service) {
-                osgiConfiguration.unregister(service, null);
-            }
-        });
+                            @Override
+                            public void removedService(
+                                    ServiceReference<JaasRealm> reference, JaasRealm service) {
+                                osgiConfiguration.unregister(service, null);
+                            }
+                        });
         jaasRealmServiceTracker.open();
 
         registration = context.registerService(KeystoreManager.class, keystoreManager, null);

@@ -26,18 +26,18 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name = "overrideBundleDependency", propOrder = {
-        "repositories",
-        "features",
-        "bundles"
-})
+@XmlType(
+        name = "overrideBundleDependency",
+        propOrder = {"repositories", "features", "bundles"})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OverrideBundleDependency {
 
     @XmlElement(name = "repository")
     private List<OverrideDependency> repositories = new LinkedList<>();
+
     @XmlElement(name = "feature")
     private List<OverrideFeatureDependency> features = new LinkedList<>();
+
     @XmlElement(name = "bundle")
     private List<OverrideDependency> bundles = new LinkedList<>();
 
@@ -56,10 +56,8 @@ public class OverrideBundleDependency {
     @XmlType(name = "overrideDependency")
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class OverrideDependency {
-        @XmlAttribute
-        private String uri;
-        @XmlAttribute
-        private boolean dependency = false;
+        @XmlAttribute private String uri;
+        @XmlAttribute private boolean dependency = false;
 
         public String getUri() {
             return uri;
@@ -81,12 +79,9 @@ public class OverrideBundleDependency {
     @XmlType(name = "overrideFeatureDependency")
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class OverrideFeatureDependency {
-        @XmlAttribute
-        private String name;
-        @XmlAttribute
-        private String version;
-        @XmlAttribute
-        private boolean dependency = false;
+        @XmlAttribute private String name;
+        @XmlAttribute private String version;
+        @XmlAttribute private boolean dependency = false;
 
         public String getName() {
             return name;
@@ -112,5 +107,4 @@ public class OverrideBundleDependency {
             this.dependency = dependency;
         }
     }
-
 }

@@ -20,19 +20,21 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-
 import org.apache.karaf.features.ConfigInfo;
 
 /**
- * <p>Configuration entries which should be created during feature installation. This configuration may be used with OSGi Configuration Admin.</p>
- * <p>Java class for config complex type.</p>
- * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ * Configuration entries which should be created during feature installation. This configuration may
+ * be used with OSGi Configuration Admin.
+ *
+ * <p>Java class for config complex type.
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ *
  * <pre>
  * &lt;complexType name="config"&gt;
  *   &lt;simpleContent&gt;
@@ -44,23 +46,25 @@ import org.apache.karaf.features.ConfigInfo;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "config", propOrder = {"value"})
+@XmlType(
+        name = "config",
+        propOrder = {"value"})
 public class Config implements ConfigInfo {
 
-    @XmlValue
-    protected String value;
+    @XmlValue protected String value;
+
     @XmlAttribute(required = true)
     protected String name;
+
     @XmlAttribute(required = false)
-	private Boolean append = false;
-    @XmlAttribute
-	private Boolean external = false;
+    private Boolean append = false;
+
+    @XmlAttribute private Boolean external = false;
 
     /**
      * Gets the value of the value property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String }
      */
     public String getValue() {
         return value;
@@ -69,8 +73,7 @@ public class Config implements ConfigInfo {
     /**
      * Sets the value of the value property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String }
      */
     public void setValue(String value) {
         this.value = value;
@@ -79,8 +82,7 @@ public class Config implements ConfigInfo {
     /**
      * Gets the value of the name property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String }
      */
     public String getName() {
         return name;
@@ -89,48 +91,42 @@ public class Config implements ConfigInfo {
     /**
      * Sets the value of the name property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String }
      */
     public void setName(String value) {
         this.name = value;
     }
 
-	/**
-	 * @return the append
-	 */
-	public boolean isAppend() {
-		return append;
-	}
+    /** @return the append */
+    public boolean isAppend() {
+        return append;
+    }
 
-	/**
-	 * @param append the append to set
-	 */
-	public void setAppend(boolean append) {
-		this.append = append;
-	}
+    /** @param append the append to set */
+    public void setAppend(boolean append) {
+        this.append = append;
+    }
 
-	public boolean isExternal() {
-		return external;
-	}
+    public boolean isExternal() {
+        return external;
+    }
 
-	public void setExternal(boolean external) {
-		this.external = external;
-	}
+    public void setExternal(boolean external) {
+        this.external = external;
+    }
 
-	public Properties getProperties() {
-		Properties props = new Properties();
-		try {
-			org.apache.felix.utils.properties.Properties properties
-					= new org.apache.felix.utils.properties.Properties();
-			properties.load(new StringReader(value));
-			for (Map.Entry<String, String> e : properties.entrySet()) {
-				props.put(e.getKey(), e.getValue());
-			}
-		} catch (IOException e) {
-			// ignore??
-		}
-		return props;
-	}
-
+    public Properties getProperties() {
+        Properties props = new Properties();
+        try {
+            org.apache.felix.utils.properties.Properties properties =
+                    new org.apache.felix.utils.properties.Properties();
+            properties.load(new StringReader(value));
+            for (Map.Entry<String, String> e : properties.entrySet()) {
+                props.put(e.getKey(), e.getValue());
+            }
+        } catch (IOException e) {
+            // ignore??
+        }
+        return props;
+    }
 }

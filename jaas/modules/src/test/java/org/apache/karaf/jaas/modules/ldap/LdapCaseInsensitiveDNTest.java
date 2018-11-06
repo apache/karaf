@@ -24,9 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-
 import javax.security.auth.Subject;
-
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
@@ -41,28 +39,29 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith ( FrameworkRunner.class )
+@RunWith(FrameworkRunner.class)
 @CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP")})
-@CreateDS(name = "LdapCaseInsensitiveDNTest-class",
- partitions = { @CreatePartition(name = "example", suffix = "dc=example,dc=com") })
-@ApplyLdifFiles(
-   "org/apache/karaf/jaas/modules/ldap/example.com.ldif"
-)
+@CreateDS(
+        name = "LdapCaseInsensitiveDNTest-class",
+        partitions = {@CreatePartition(name = "example", suffix = "dc=example,dc=com")})
+@ApplyLdifFiles("org/apache/karaf/jaas/modules/ldap/example.com.ldif")
 public class LdapCaseInsensitiveDNTest extends LdapLoginModuleTest {
-    
+
     @Before
     @Override
     public void updatePort() throws Exception {
-        ldapProps("org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties", 
-                  LdapLoginModuleTest::replacePort);
+        ldapProps(
+                "org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties",
+                LdapLoginModuleTest::replacePort);
     }
-    
+
     @Test
     public void testCaseInsensitiveDN() throws Exception {
         Properties options = ldapLoginModuleOptions();
         LDAPLoginModule module = new LDAPLoginModule();
         Subject subject = new Subject();
-        module.initialize(subject, new NamePasswordCallbackHandler("admin", "admin123"), null, options);
+        module.initialize(
+                subject, new NamePasswordCallbackHandler("admin", "admin123"), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login());
@@ -73,7 +72,10 @@ public class LdapCaseInsensitiveDNTest extends LdapLoginModuleTest {
         assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("admin"));
 
         assertTrue(module.logout());
-        assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
+        assertEquals(
+                "Principals should be gone as the user has logged out",
+                0,
+                subject.getPrincipals().size());
     }
 
     protected Properties ldapLoginModuleOptions() throws IOException {
@@ -81,8 +83,10 @@ public class LdapCaseInsensitiveDNTest extends LdapLoginModuleTest {
         if (basedir == null) {
             basedir = new File(".").getCanonicalPath();
         }
-        File file = new File(basedir + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties");
+        File file =
+                new File(
+                        basedir
+                                + "/target/test-classes/org/apache/karaf/jaas/modules/ldap/ldapCaseInsensitiveDN.properties");
         return new Properties(file);
     }
 }
-            

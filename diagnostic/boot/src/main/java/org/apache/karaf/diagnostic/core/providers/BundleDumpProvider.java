@@ -19,25 +19,20 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.karaf.diagnostic.core.common.TextDumpProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
- * Dump provider which produces file named bundles.txt with list of
- * installed bundles and it's state.
+ * Dump provider which produces file named bundles.txt with list of installed bundles and it's
+ * state.
  */
 public class BundleDumpProvider extends TextDumpProvider {
 
-    /**
-     * Static map with state mask to string representation.
-     */
+    /** Static map with state mask to string representation. */
     private static Map<Integer, String> stateMap = new HashMap<>();
 
-    /**
-     * Map bundle states to string representation.
-     */
+    /** Map bundle states to string representation. */
     static {
         stateMap.put(0x00000001, "UNINSTALLED");
         stateMap.put(0x00000002, "INSTALLED");
@@ -47,14 +42,12 @@ public class BundleDumpProvider extends TextDumpProvider {
         stateMap.put(0x00000020, "ACTIVE");
     }
 
-    /**
-     * Bundle context.
-     */
+    /** Bundle context. */
     private BundleContext bundleContext;
 
     /**
      * Creates new bundle information file.
-     *  
+     *
      * @param context Bundle context to access framework state.
      */
     public BundleDumpProvider(BundleContext context) {
@@ -62,9 +55,7 @@ public class BundleDumpProvider extends TextDumpProvider {
         this.bundleContext = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected void writeDump(OutputStreamWriter writer) throws IOException {
         // get bundle states
         Bundle[] bundles = bundleContext.getBundles();
@@ -75,11 +66,17 @@ public class BundleDumpProvider extends TextDumpProvider {
         writer.write("Id\tSymbolic name\tVersion\tState\n");
         for (Bundle bundle : bundles) {
             // write row :)
-            writer.write(bundle.getBundleId() + "\t" + bundle.getSymbolicName() + '\t' + bundle.getVersion()
-                + "\t" + stateMap.get(bundle.getState()) + "\n");
+            writer.write(
+                    bundle.getBundleId()
+                            + "\t"
+                            + bundle.getSymbolicName()
+                            + '\t'
+                            + bundle.getVersion()
+                            + "\t"
+                            + stateMap.get(bundle.getState())
+                            + "\n");
         }
 
         writer.flush();
     }
-
 }

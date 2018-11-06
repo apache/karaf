@@ -24,18 +24,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.osgi.framework.BundleContext;
 
-/**
- * Track multiple services by their type
- */
+/** Track multiple services by their type */
 @SuppressWarnings("rawtypes")
 public abstract class AggregateServiceTracker {
 
     private final BundleContext bundleContext;
-    private final ConcurrentMap<Class, SingleServiceTracker> singleTrackers = new ConcurrentHashMap<>();
-    private final ConcurrentMap<Class, MultiServiceTracker> multiTrackers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class, SingleServiceTracker> singleTrackers =
+            new ConcurrentHashMap<>();
+    private final ConcurrentMap<Class, MultiServiceTracker> multiTrackers =
+            new ConcurrentHashMap<>();
     private final ConcurrentMap<Class, Boolean> optional = new ConcurrentHashMap<>();
     private volatile State state = new State();
     private volatile boolean opening = true;
@@ -46,12 +45,13 @@ public abstract class AggregateServiceTracker {
 
     public <T> void trackList(final Class<T> service) {
         if (multiTrackers.get(service) == null) {
-            MultiServiceTracker<T> tracker = new MultiServiceTracker<T>(bundleContext, service) {
-                @Override
-                public void updateState(List<T> services) {
-                    updateStateMulti(service, services);
-                }
-            };
+            MultiServiceTracker<T> tracker =
+                    new MultiServiceTracker<T>(bundleContext, service) {
+                        @Override
+                        public void updateState(List<T> services) {
+                            updateStateMulti(service, services);
+                        }
+                    };
             multiTrackers.put(service, tracker);
         }
     }
@@ -59,17 +59,17 @@ public abstract class AggregateServiceTracker {
     public <T> void trackSingle(final Class<T> service, boolean optional) {
         this.optional.merge(service, optional, Boolean::logicalAnd);
         if (singleTrackers.get(service) == null) {
-            SingleServiceTracker<T> tracker = new SingleServiceTracker<T>(bundleContext, service) {
-                @Override
-                public void updateState(T oldSvc, T newSvc) {
-                    updateStateSingle(service, newSvc);
-                }
-            };
+            SingleServiceTracker<T> tracker =
+                    new SingleServiceTracker<T>(bundleContext, service) {
+                        @Override
+                        public void updateState(T oldSvc, T newSvc) {
+                            updateStateSingle(service, newSvc);
+                        }
+                    };
             singleTrackers.putIfAbsent(service, tracker);
         }
     }
 
-    
     public State open() {
         for (SingleServiceTracker tracker : singleTrackers.values()) {
             tracker.open();
@@ -133,7 +133,9 @@ public abstract class AggregateServiceTracker {
         private final Map<Class, Object> single = new HashMap<>();
 
         public boolean isSatisfied() {
-            return singleTrackers.keySet().stream()
+            return singleTrackers
+                    .keySet()
+                    .stream()
                     .noneMatch(c -> !optional.get(c) && !single.containsKey(c));
         }
 
@@ -154,7 +156,5 @@ public abstract class AggregateServiceTracker {
             }
             return missing;
         }
-
     }
-
 }

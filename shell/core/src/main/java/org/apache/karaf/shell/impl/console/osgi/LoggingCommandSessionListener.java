@@ -20,7 +20,6 @@ package org.apache.karaf.shell.impl.console.osgi;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.CommandSessionListener;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
@@ -29,7 +28,8 @@ import org.slf4j.LoggerFactory;
 
 public class LoggingCommandSessionListener implements CommandSessionListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingCommandSessionListener.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(LoggingCommandSessionListener.class);
 
     private Collection<CommandLoggingFilter> filters = Collections.emptyList();
 
@@ -49,7 +49,7 @@ public class LoggingCommandSessionListener implements CommandSessionListener {
     }
 
     public void beforeExecute(CommandSession session, CharSequence command) {
-        if ( LOGGER.isDebugEnabled() ) {
+        if (LOGGER.isDebugEnabled()) {
             command = filter(command);
             LOGGER.debug("Executing command: '" + command + "'");
         }

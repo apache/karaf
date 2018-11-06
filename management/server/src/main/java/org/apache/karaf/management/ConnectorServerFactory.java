@@ -16,9 +16,6 @@
  */
 package org.apache.karaf.management;
 
-import org.apache.karaf.jaas.config.KeystoreManager;
-import org.apache.karaf.management.internal.MBeanInvocationHandler;
-
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.BindException;
@@ -34,7 +31,6 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.security.GeneralSecurityException;
 import java.util.Enumeration;
 import java.util.Map;
-
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -48,10 +44,16 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
+import org.apache.karaf.jaas.config.KeystoreManager;
+import org.apache.karaf.management.internal.MBeanInvocationHandler;
 
 public class ConnectorServerFactory {
 
-    private enum AuthenticatorType {NONE, PASSWORD, CERTIFICATE}
+    private enum AuthenticatorType {
+        NONE,
+        PASSWORD,
+        CERTIFICATE
+    }
 
     private MBeanServer server;
     private KarafMBeanServerGuard guard;
@@ -151,7 +153,8 @@ public class ConnectorServerFactory {
     }
 
     /**
-     * Use this param to allow KeyStoreManager to wait for expected keystores to be loaded by other bundle
+     * Use this param to allow KeyStoreManager to wait for expected keystores to be loaded by other
+     * bundle
      *
      * @param keyStoreAvailabilityTimeout The keystore timeout.
      */
@@ -204,10 +207,11 @@ public class ConnectorServerFactory {
     }
 
     /**
-     * Algorithm to use.
-     * As different JVMs have different implementations available, the default algorithm can be used by supplying the value "Default".
+     * Algorithm to use. As different JVMs have different implementations available, the default
+     * algorithm can be used by supplying the value "Default".
      *
-     * @param algorithm the algorithm to use, or "Default" to use the default from {@link javax.net.ssl.KeyManagerFactory#getDefaultAlgorithm()}
+     * @param algorithm the algorithm to use, or "Default" to use the default from {@link
+     *     javax.net.ssl.KeyManagerFactory#getDefaultAlgorithm()}
      */
     public void setAlgorithm(String algorithm) {
         if ("default".equalsIgnoreCase(algorithm)) {
@@ -225,7 +229,6 @@ public class ConnectorServerFactory {
         this.secureProtocol = secureProtocol;
     }
 
-
     private boolean isClientAuth() {
         return this.authenticatorType.equals(AuthenticatorType.CERTIFICATE);
     }
@@ -236,23 +239,30 @@ public class ConnectorServerFactory {
             throw new IllegalArgumentException("server must be set");
         }
         JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
-        if ( isClientAuth() ) {
+        if (isClientAuth()) {
             this.secured = true;
         }
 
-        if ( this.secured ) {
+        if (this.secured) {
             setupSsl();
         } else {
             setupKarafRMIServerSocketFactory();
         }
 
-        if ( ! AuthenticatorType.PASSWORD.equals( this.authenticatorType ) ) {
-            this.environment.remove( "jmx.remote.authenticator" );
+        if (!AuthenticatorType.PASSWORD.equals(this.authenticatorType)) {
+            this.environment.remove("jmx.remote.authenticator");
         }
 
         MBeanInvocationHandler handler = new MBeanInvocationHandler(server, guard);
-        MBeanServer guardedServer = (MBeanServer) Proxy.newProxyInstance(server.getClass().getClassLoader(), new Class[]{ MBeanServer.class }, handler);
-        this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url, this.environment, guardedServer);
+        MBeanServer guardedServer =
+                (MBeanServer)
+                        Proxy.newProxyInstance(
+                                server.getClass().getClassLoader(),
+                                new Class[] {MBeanServer.class},
+                                handler);
+        this.connectorServer =
+                JMXConnectorServerFactory.newJMXConnectorServer(
+                        url, this.environment, guardedServer);
 
         if (this.objectName != null) {
             this.server.registerMBean(this.connectorServer, this.objectName);
@@ -260,25 +270,36 @@ public class ConnectorServerFactory {
 
         try {
             if (this.threaded) {
-                Thread connectorThread = new Thread(() -> {
-                    try {
-                        Thread.currentThread().setContextClassLoader(ConnectorServerFactory.class.getClassLoader());
-                        connectorServer.start();
-                    } catch (IOException ex) {
-                        if (ex.getCause() instanceof BindException){
-                            // we want just the port message
-                            int endIndex = ex.getMessage().indexOf("nested exception is");
-                            // check to make sure we do not get an index out of range
-                            if (endIndex > ex.getMessage().length() || endIndex < 0){
-                                endIndex = ex.getMessage().length();
-                            }
-                            throw new RuntimeException("\n" + ex.getMessage().substring(0, endIndex) +
-                                                    "\nYou may have started two containers.  If you need to start a second container or the default ports are already in use " +
-                                                    "update the config file etc/org.apache.karaf.management.cfg and change the Registry Port and Server Port to unused ports");
-                        }
-                        throw new RuntimeException("Could not start JMX connector server", ex);
-                    }
-                });
+                Thread connectorThread =
+                        new Thread(
+                                () -> {
+                                    try {
+                                        Thread.currentThread()
+                                                .setContextClassLoader(
+                                                        ConnectorServerFactory.class
+                                                                .getClassLoader());
+                                        connectorServer.start();
+                                    } catch (IOException ex) {
+                                        if (ex.getCause() instanceof BindException) {
+                                            // we want just the port message
+                                            int endIndex =
+                                                    ex.getMessage().indexOf("nested exception is");
+                                            // check to make sure we do not get an index out of
+                                            // range
+                                            if (endIndex > ex.getMessage().length()
+                                                    || endIndex < 0) {
+                                                endIndex = ex.getMessage().length();
+                                            }
+                                            throw new RuntimeException(
+                                                    "\n"
+                                                            + ex.getMessage().substring(0, endIndex)
+                                                            + "\nYou may have started two containers.  If you need to start a second container or the default ports are already in use "
+                                                            + "update the config file etc/org.apache.karaf.management.cfg and change the Registry Port and Server Port to unused ports");
+                                        }
+                                        throw new RuntimeException(
+                                                "Could not start JMX connector server", ex);
+                                    }
+                                });
                 connectorThread.setName("JMX Connector Thread [" + this.serviceUrl + "]");
                 connectorThread.setDaemon(this.daemon);
                 connectorThread.start();
@@ -312,13 +333,22 @@ public class ConnectorServerFactory {
     }
 
     private void setupSsl() throws GeneralSecurityException {
-        SSLServerSocketFactory sssf = keystoreManager.createSSLServerFactory(null, secureProtocol, algorithm, keyStore, keyAlias, trustStore,keyStoreAvailabilityTimeout);
-        RMIServerSocketFactory rssf = new KarafSslRMIServerSocketFactory(sssf, isClientAuth(), getRmiServerHost());
+        SSLServerSocketFactory sssf =
+                keystoreManager.createSSLServerFactory(
+                        null,
+                        secureProtocol,
+                        algorithm,
+                        keyStore,
+                        keyAlias,
+                        trustStore,
+                        keyStoreAvailabilityTimeout);
+        RMIServerSocketFactory rssf =
+                new KarafSslRMIServerSocketFactory(sssf, isClientAuth(), getRmiServerHost());
         RMIClientSocketFactory rcsf = new SslRMIClientSocketFactory();
         environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rssf);
         environment.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rcsf);
-        //@TODO secure RMI connector as well?
-        //env.put("com.sun.jndi.rmi.factory.socket", rcsf);
+        // @TODO secure RMI connector as well?
+        // env.put("com.sun.jndi.rmi.factory.socket", rcsf);
     }
 
     private void setupKarafRMIServerSocketFactory() {
@@ -331,7 +361,8 @@ public class ConnectorServerFactory {
         private boolean clientAuth;
         private String rmiServerHost;
 
-        public KarafSslRMIServerSocketFactory(SSLServerSocketFactory sssf, boolean clientAuth, String rmiServerHost) {
+        public KarafSslRMIServerSocketFactory(
+                SSLServerSocketFactory sssf, boolean clientAuth, String rmiServerHost) {
             this.sssf = sssf;
             this.clientAuth = clientAuth;
             this.rmiServerHost = rmiServerHost;
@@ -344,7 +375,10 @@ public class ConnectorServerFactory {
                 ss.setNeedClientAuth(clientAuth);
                 return new LocalOnlySSLServerSocket(ss);
             } else {
-                final SSLServerSocket ss = (SSLServerSocket) sssf.createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
+                final SSLServerSocket ss =
+                        (SSLServerSocket)
+                                sssf.createServerSocket(
+                                        port, 50, InetAddress.getByName(rmiServerHost));
                 ss.setNeedClientAuth(clientAuth);
                 return ss;
             }
@@ -361,10 +395,13 @@ public class ConnectorServerFactory {
         public ServerSocket createServerSocket(int port) throws IOException {
             InetAddress host = InetAddress.getByName(rmiServerHost);
             if (host.isLoopbackAddress()) {
-                final ServerSocket ss = ServerSocketFactory.getDefault().createServerSocket(port, 50);
+                final ServerSocket ss =
+                        ServerSocketFactory.getDefault().createServerSocket(port, 50);
                 return new LocalOnlyServerSocket(ss);
             } else {
-                final ServerSocket ss = ServerSocketFactory.getDefault().createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
+                final ServerSocket ss =
+                        ServerSocketFactory.getDefault()
+                                .createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
                 return ss;
             }
         }
@@ -566,6 +603,7 @@ public class ConnectorServerFactory {
         public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
             ss.setPerformancePreferences(connectionTime, latency, bandwidth);
         }
+
         public String[] getEnabledCipherSuites() {
             return ss.getEnabledCipherSuites();
         }
@@ -659,7 +697,7 @@ public class ConnectorServerFactory {
         } catch (Exception e) {
             // Ignore
         }
-        throw new IOException("Only connections from clients running on the host where the RMI remote objects have been exported are accepted.");
+        throw new IOException(
+                "Only connections from clients running on the host where the RMI remote objects have been exported are accepted.");
     }
-
 }

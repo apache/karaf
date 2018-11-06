@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.jdbc.command.completers;
 
+import java.util.List;
 import org.apache.karaf.jdbc.JdbcService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -24,16 +25,11 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-import java.util.List;
-
-/**
- * Completer on the JDBC datasources file name.
- */
+/** Completer on the JDBC datasources file name. */
 @Service
 public class DataSourcesFileNameCompleter implements Completer {
 
-    @Reference
-    private JdbcService jdbcService;
+    @Reference private JdbcService jdbcService;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -51,5 +47,4 @@ public class DataSourcesFileNameCompleter implements Completer {
     public void setJdbcService(JdbcService jdbcService) {
         this.jdbcService = jdbcService;
     }
-
 }

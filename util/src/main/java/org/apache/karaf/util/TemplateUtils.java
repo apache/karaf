@@ -27,18 +27,21 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class TemplateUtils {
-    private TemplateUtils() {
-    }
+    private TemplateUtils() {}
 
-    public static void createFromTemplate(File outFile, InputStream templateIs, HashMap<String, String> properties) {
+    public static void createFromTemplate(
+            File outFile, InputStream templateIs, HashMap<String, String> properties) {
         if (outFile.exists()) {
-            throw new IllegalArgumentException("File " + outFile.getPath()
-                                               + " already exists. Remove it if you wish to recreate it.");
+            throw new IllegalArgumentException(
+                    "File "
+                            + outFile.getPath()
+                            + " already exists. Remove it if you wish to recreate it.");
         }
         PrintStream out = null;
         Scanner scanner = null;
         try {
-            // read it line at a time so that we can use the platform line ending when we write it out
+            // read it line at a time so that we can use the platform line ending when we write it
+            // out
             out = new PrintStream(new FileOutputStream(outFile));
             scanner = new Scanner(templateIs);
 
@@ -78,5 +81,4 @@ public class TemplateUtils {
             // nothing to do
         }
     }
-
 }

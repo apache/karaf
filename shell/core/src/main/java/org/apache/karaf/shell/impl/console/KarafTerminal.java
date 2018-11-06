@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-
 import org.apache.karaf.shell.api.console.Terminal;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Size;
@@ -85,9 +84,7 @@ public class KarafTerminal extends AbstractTerminal implements org.jline.termina
     }
 
     @Override
-    public void setAttributes(Attributes attr) {
-
-    }
+    public void setAttributes(Attributes attr) {}
 
     @Override
     public Size getSize() {
@@ -102,7 +99,5 @@ public class KarafTerminal extends AbstractTerminal implements org.jline.termina
     }
 
     @Override
-    public void close() throws IOException {
-    }
+    public void close() throws IOException {}
 }
-

@@ -26,7 +26,12 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class SearchCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "term", description = "Search term", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "term",
+            description = "Search term",
+            required = true,
+            multiValued = false)
     String term;
 
     @Override
@@ -38,16 +43,15 @@ public class SearchCommand extends DockerCommandSupport {
         table.column("Official");
         table.column("Star Count");
         for (ImageSearch search : getDockerService().search(term, url)) {
-            table.addRow().addContent(
-                    search.getName(),
-                    search.getDescription(),
-                    search.isAutomated(),
-                    search.isOfficial(),
-                    search.getStarCount()
-            );
+            table.addRow()
+                    .addContent(
+                            search.getName(),
+                            search.getDescription(),
+                            search.isAutomated(),
+                            search.isOfficial(),
+                            search.getStarCount());
         }
         table.print(System.out);
         return null;
     }
-
 }

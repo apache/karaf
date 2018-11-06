@@ -17,7 +17,6 @@
 package org.apache.karaf.maven.command;
 
 import java.util.Dictionary;
-
 import org.apache.karaf.maven.core.MavenRepositoryURL;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
@@ -30,7 +29,12 @@ import org.apache.maven.settings.Server;
 @Service
 public class RepositoryListCommand extends MavenSecuritySupport {
 
-    @Option(name = "-v", aliases = { "--verbose" }, description = "Show additional information (policies, source)", required = false, multiValued = false)
+    @Option(
+            name = "-v",
+            aliases = {"--verbose"},
+            description = "Show additional information (policies, source)",
+            required = false,
+            multiValued = false)
     boolean verbose;
 
     @Override
@@ -55,7 +59,8 @@ public class RepositoryListCommand extends MavenSecuritySupport {
             Row row = table.addRow();
             row.addContent(repoURL.getId(), repoURL.getURL());
             if (verbose) {
-                row.addContent(repositoryKindInfo(repoURL, false),
+                row.addContent(
+                        repositoryKindInfo(repoURL, false),
                         repositoryKindInfo(repoURL, true),
                         repoURL.getFrom());
             }
@@ -85,10 +90,10 @@ public class RepositoryListCommand extends MavenSecuritySupport {
         repositories = repositories(config, false);
         for (MavenRepositoryURL repoURL : repositories) {
             Row row = table.addRow();
-            row.addContent(repoURL.getId(),
-                    repoURL.getURL());
+            row.addContent(repoURL.getId(), repoURL.getURL());
             if (verbose) {
-                row.addContent(repositoryKindInfo(repoURL, false),
+                row.addContent(
+                        repositoryKindInfo(repoURL, false),
                         repositoryKindInfo(repoURL, true),
                         repoURL.getFrom());
             }
@@ -100,6 +105,7 @@ public class RepositoryListCommand extends MavenSecuritySupport {
 
     /**
      * Information about release/snapshot handing for give repository URL
+     *
      * @param repoURL
      * @param snapshots
      * @return
@@ -108,20 +114,23 @@ public class RepositoryListCommand extends MavenSecuritySupport {
         if (snapshots) {
             if (repoURL.isSnapshotsEnabled()) {
                 String snapshotsUpdatePolicy = repoURL.getSnapshotsUpdatePolicy();
-                return String.format("yes (%s)",
-                        snapshotsUpdatePolicy == null || "".equals(snapshotsUpdatePolicy.trim()) ? "daily" : snapshotsUpdatePolicy
-                );
+                return String.format(
+                        "yes (%s)",
+                        snapshotsUpdatePolicy == null || "".equals(snapshotsUpdatePolicy.trim())
+                                ? "daily"
+                                : snapshotsUpdatePolicy);
             }
         } else {
             if (repoURL.isReleasesEnabled()) {
                 String releasesUpdatePolicy = repoURL.getReleasesUpdatePolicy();
-                return String.format("yes (%s)",
-                        releasesUpdatePolicy == null || "".equals(releasesUpdatePolicy.trim()) ? "daily" : releasesUpdatePolicy
-                );
+                return String.format(
+                        "yes (%s)",
+                        releasesUpdatePolicy == null || "".equals(releasesUpdatePolicy.trim())
+                                ? "daily"
+                                : releasesUpdatePolicy);
             }
         }
 
         return "no";
     }
-
 }

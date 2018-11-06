@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.profile.command;
 
-
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.ProfileService;
@@ -33,30 +32,42 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ProfileRename implements Action {
 
-    @Option(name = "--version", description = "The profile version to rename. Defaults to the current default version.")
+    @Option(
+            name = "--version",
+            description = "The profile version to rename. Defaults to the current default version.")
     private String versionId;
 
-    @Option(name = "-f", aliases = "--force", description = "Flag to allow replacing the target profile (if exists).")
+    @Option(
+            name = "-f",
+            aliases = "--force",
+            description = "Flag to allow replacing the target profile (if exists).")
     private boolean force;
 
-    @Argument(index = 0, required = true, name = "profile name", description = "Name of the profile.")
+    @Argument(
+            index = 0,
+            required = true,
+            name = "profile name",
+            description = "Name of the profile.")
     @Completion(ProfileCompleter.class)
     private String profileName;
 
-    @Argument(index = 1, required = true, name = "new profile name", description = "New name of the profile.")
+    @Argument(
+            index = 1,
+            required = true,
+            name = "new profile name",
+            description = "New name of the profile.")
     private String newName;
 
-    @Reference
-    private ProfileService profileService;
+    @Reference private ProfileService profileService;
 
     @Override
     public Object execute() throws Exception {
-        Profile profile = ProfileBuilder.Factory.createFrom(profileService.getProfile(profileName))
-                .identity(newName)
-                .getProfile();
+        Profile profile =
+                ProfileBuilder.Factory.createFrom(profileService.getProfile(profileName))
+                        .identity(newName)
+                        .getProfile();
         profileService.createProfile(profile);
         profileService.deleteProfile(profileName);
         return null;
     }
-
 }

@@ -16,12 +16,8 @@
  */
 package org.apache.karaf.log.core;
 
-/**
- * Enumeration of available log levels for the log:set command and
- * the command completer
- */
+/** Enumeration of available log levels for the log:set command and the command completer */
 public enum Level {
-
     TRACE,
     DEBUG,
     INFO,
@@ -29,23 +25,23 @@ public enum Level {
     ERROR,
     OFF,
     DEFAULT;
-    
+
     /**
      * Convert the list of values into a String array
-     * 
+     *
      * @return all the values as a String array
      */
     public static String[] strings() {
         String[] values = new String[values().length];
-        for (int i = 0 ; i < values.length ; i++) {
+        for (int i = 0; i < values.length; i++) {
             values[i] = values()[i].name();
         }
         return values;
     }
-    
+
     /**
      * Check if the string value represents the default level
-     * 
+     *
      * @param level the level value
      * @return <code>true</code> if the value represents the {@link #DEFAULT} level
      */

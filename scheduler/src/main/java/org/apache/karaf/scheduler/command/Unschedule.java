@@ -33,8 +33,7 @@ public class Unschedule implements Action {
     @Completion(JobNameCompleter.class)
     String name;
 
-    @Reference
-    Scheduler scheduler;
+    @Reference Scheduler scheduler;
 
     @Override
     public Object execute() throws Exception {

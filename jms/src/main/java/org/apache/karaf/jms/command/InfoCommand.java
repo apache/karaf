@@ -16,14 +16,15 @@
  */
 package org.apache.karaf.jms.command;
 
-
 import java.util.Map;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "jms", name = "info", description = "Provides details about a JMS connection factory.")
+@Command(
+        scope = "jms",
+        name = "info",
+        description = "Provides details about a JMS connection factory.")
 @Service
 public class InfoCommand extends JmsConnectionCommandSupport {
 
@@ -42,5 +43,4 @@ public class InfoCommand extends JmsConnectionCommandSupport {
 
         return null;
     }
-
 }

@@ -22,9 +22,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-/**
- * {@link CallbackHandler} implementation handling a name and password.
- */
+/** {@link CallbackHandler} implementation handling a name and password. */
 public class NamePasswordCallbackHandler implements CallbackHandler {
     private final String name;
     private final String password;

@@ -14,15 +14,14 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.net.ssl.SSLSocketFactory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.net.ssl.SSLSocketFactory;
 import org.apache.karaf.jaas.config.KeystoreManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -76,7 +75,6 @@ public class LDAPOptions {
         if (o == null || getClass() != o.getClass()) return false;
         LDAPOptions that = (LDAPOptions) o;
         return options.equals(that.options);
-
     }
 
     @Override
@@ -131,9 +129,10 @@ public class LDAPOptions {
             String[] mappings = option.split(";");
             for (String mapping : mappings) {
                 int index = mapping.lastIndexOf("=");
-                String ldapRole = mapping.substring(0,index).trim();
-                String[] karafRoles = mapping.substring(index+1).split(",");
-                final Set<String> karafRolesSet = roleMapping.computeIfAbsent(ldapRole, k -> new HashSet<>());
+                String ldapRole = mapping.substring(0, index).trim();
+                String[] karafRoles = mapping.substring(index + 1).split(",");
+                final Set<String> karafRolesSet =
+                        roleMapping.computeIfAbsent(ldapRole, k -> new HashSet<>());
                 for (String karafRole : karafRoles) {
                     karafRolesSet.add(karafRole.trim());
                 }
@@ -177,11 +176,18 @@ public class LDAPOptions {
             env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
             ref = bundleContext.getServiceReference(KeystoreManager.class);
             KeystoreManager manager = bundleContext.getService(ref);
-            SSLSocketFactory factory = manager.createSSLFactory(
-                    getSslProvider(), getSslProtocol(), getSslAlgorithm(), getSslKeystore(),
-                    getSslKeyAlias(), getSslTrustStore(), getSslTimeout());
+            SSLSocketFactory factory =
+                    manager.createSSLFactory(
+                            getSslProvider(),
+                            getSslProtocol(),
+                            getSslAlgorithm(),
+                            getSslKeystore(),
+                            getSslKeyAlias(),
+                            getSslTrustStore(),
+                            getSslTimeout());
             ManagedSSLSocketFactory.setSocketFactory(new ManagedSSLSocketFactory(factory));
-            Thread.currentThread().setContextClassLoader(ManagedSSLSocketFactory.class.getClassLoader());
+            Thread.currentThread()
+                    .setContextClassLoader(ManagedSSLSocketFactory.class.getClassLoader());
         } catch (Exception e) {
             throw new NamingException("Unable to setup SSL support for LDAP: " + e.getMessage());
         } finally {
@@ -273,5 +279,4 @@ public class LDAPOptions {
         final Object object = options.get(DISABLE_CACHE);
         return object == null || Boolean.parseBoolean((String) object);
     }
-
 }

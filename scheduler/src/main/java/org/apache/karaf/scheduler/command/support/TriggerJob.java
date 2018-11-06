@@ -43,5 +43,4 @@ public class TriggerJob implements Runnable {
             LOGGER.error("Failed to trigger job {}", name, ex);
         }
     }
-
 }

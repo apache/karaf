@@ -28,5 +28,4 @@ public interface CommandWithAction extends Function {
     org.apache.felix.gogo.commands.Action createNewAction();
 
     void releaseAction(org.apache.felix.gogo.commands.Action action) throws Exception;
-
 }

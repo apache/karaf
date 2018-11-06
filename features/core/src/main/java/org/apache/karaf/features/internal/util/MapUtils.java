@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal.util;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,12 +29,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.util.stream.Collectors.toSet;
-
 public final class MapUtils {
 
-    private MapUtils() {
-    }
+    private MapUtils() {}
 
     public static <S, T> Map<S, Set<T>> invert(Map<T, S> map) {
         Map<S, Set<T>> inverted = new HashMap<>(map.size());
@@ -43,9 +42,10 @@ public final class MapUtils {
     }
 
     /**
-     * Changes mapping from <code>S</code> -&gt; <code>Set&lt;T&gt;</code> to mapping
-     * <code>S</code> -&gt; <code>Set&lt;U&gt;</code> using {@link Function} that can change <code>T</code> to
-     * <code>U</code>.
+     * Changes mapping from <code>S</code> -&gt; <code>Set&lt;T&gt;</code> to mapping <code>S</code>
+     * -&gt; <code>Set&lt;U&gt;</code> using {@link Function} that can change <code>T</code> to
+     * <code>
+     * U</code>.
      *
      * @param mapset
      * @param function
@@ -73,7 +73,8 @@ public final class MapUtils {
         return result;
     }
 
-    public static <S, T, U> Map<T, U> build(Collection<S> col, Function<S, T> key, Function<S, U> value) {
+    public static <S, T, U> Map<T, U> build(
+            Collection<S> col, Function<S, T> key, Function<S, U> value) {
         Map<T, U> result = new HashMap<>(col.size());
         for (S s : col) {
             T t = key.apply(s);
@@ -85,7 +86,8 @@ public final class MapUtils {
         return result;
     }
 
-    public static <S, T, U> Function<S, U> compose(final Function<S, T> f1, final Function<T, U> f2) {
+    public static <S, T, U> Function<S, U> compose(
+            final Function<S, T> f1, final Function<T, U> f2) {
         return s -> f2.apply(f1.apply(s));
     }
 
@@ -107,8 +109,11 @@ public final class MapUtils {
     }
 
     /**
-     * Produces a map where each set value in <code>from</code> map has every element that's in <code>to</code>
-     * map's set value removed. If <code>from</code> map is left with empty set value, entire set is removed.
+     * Produces a map where each set value in <code>from</code> map has every element that's in
+     * <code>
+     * to</code> map's set value removed. If <code>from</code> map is left with empty set value,
+     * entire set is removed.
+     *
      * @param from
      * @param to
      * @param <S>
@@ -128,7 +133,8 @@ public final class MapUtils {
     }
 
     public static <S, T> void retain(Map<S, Set<T>> from, Map<S, Set<T>> toRetain) {
-        for (Iterator<Map.Entry<S, Set<T>>> iterator = from.entrySet().iterator(); iterator.hasNext();) {
+        for (Iterator<Map.Entry<S, Set<T>>> iterator = from.entrySet().iterator();
+                iterator.hasNext(); ) {
             Map.Entry<S, Set<T>> entry = iterator.next();
             Set<T> s = toRetain.get(entry.getKey());
             if (s != null) {
@@ -140,8 +146,10 @@ public final class MapUtils {
     }
 
     /**
-     * Removes all values from <code>toRemove</code> map from <code>from</code> map. After removal, set values
-     * in <code>from</code> map may be smaller or removed entirely (if there are no more values in given set).
+     * Removes all values from <code>toRemove</code> map from <code>from</code> map. After removal,
+     * set values in <code>from</code> map may be smaller or removed entirely (if there are no more
+     * values in given set).
+     *
      * @param from
      * @param toRemove
      * @param <S>
@@ -159,9 +167,7 @@ public final class MapUtils {
         }
     }
 
-    @SuppressWarnings({
-     "unchecked", "rawtypes"
-    })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <S> S copy(S obj) {
         if (obj instanceof List) {
             List r = new ArrayList();
@@ -185,9 +191,7 @@ public final class MapUtils {
         return obj;
     }
 
-    @SuppressWarnings({
-     "rawtypes", "unchecked"
-    })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static <S> void copy(S s1, S s2) {
         if (s1 instanceof Collection) {
             for (Object o : (Collection) s1) {
@@ -241,5 +245,4 @@ public final class MapUtils {
     public static <S> Set<S> filter(Set<S> s, Predicate<S> predicate) {
         return s.stream().filter(predicate).collect(toSet());
     }
-
 }

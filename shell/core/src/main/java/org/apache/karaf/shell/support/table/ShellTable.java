@@ -16,10 +16,6 @@
  */
 package org.apache.karaf.shell.support.table;
 
-import org.apache.felix.gogo.runtime.threadio.ThreadPrintStream;
-import org.apache.felix.service.command.Job;
-import org.jline.terminal.Terminal;
-
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -28,6 +24,9 @@ import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.felix.gogo.runtime.threadio.ThreadPrintStream;
+import org.apache.felix.service.command.Job;
+import org.jline.terminal.Terminal;
 
 public class ShellTable {
 
@@ -51,9 +50,7 @@ public class ShellTable {
     private String emptyTableText;
     private boolean forceAscii;
 
-    public ShellTable() {
-
-    }
+    public ShellTable() {}
 
     public ShellTable noHeaders() {
         this.showHeaders = false;
@@ -86,7 +83,7 @@ public class ShellTable {
         rows.add(row);
         return row;
     }
-    
+
     public ShellTable forceAscii() {
         forceAscii = true;
         return this;
@@ -107,11 +104,11 @@ public class ShellTable {
         print(out, true);
     }
 
-    public void print(PrintStream out, boolean format)  {
+    public void print(PrintStream out, boolean format) {
         print(out, null, format);
     }
 
-    public void print(PrintStream out, Charset charset, boolean format)  {
+    public void print(PrintStream out, Charset charset, boolean format) {
         boolean unicode = supportsUnicode(out, charset);
         String separator = unicode ? this.separator : DEFAULT_SEPARATOR_ASCII;
 
@@ -167,9 +164,9 @@ public class ShellTable {
             return false;
         }
         CharsetEncoder encoder = charset.newEncoder();
-        return encoder.canEncode(separator) 
-            && encoder.canEncode(SEP_HORIZONTAL)
-            && encoder.canEncode(SEP_CROSS);
+        return encoder.canEncode(separator)
+                && encoder.canEncode(SEP_HORIZONTAL)
+                && encoder.canEncode(SEP_CROSS);
     }
 
     private Charset getEncoding(PrintStream ps) {
@@ -211,16 +208,14 @@ public class ShellTable {
                 return;
             }
         }
-
     }
 
     private String underline(int length, boolean crossAtBeg, boolean supported) {
         char[] exmarks = new char[length];
-        Arrays.fill(exmarks,  supported ? SEP_HORIZONTAL : SEP_HORIZONTAL_ASCII);
+        Arrays.fill(exmarks, supported ? SEP_HORIZONTAL : SEP_HORIZONTAL_ASCII);
         if (crossAtBeg) {
             exmarks[1] = supported ? SEP_CROSS : SEP_CROSS_ASCII;
         }
         return new String(exmarks);
     }
-
 }

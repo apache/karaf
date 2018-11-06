@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
-
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -32,7 +31,6 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-
 import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundlesMBean;
@@ -44,9 +42,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * BundlesMBean implementation.
- */
+/** BundlesMBean implementation. */
 public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
     private Logger LOG = LoggerFactory.getLogger(BundlesMBeanImpl.class);
@@ -54,7 +50,8 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     private BundleContext bundleContext;
     private final BundleService bundleService;
 
-    public BundlesMBeanImpl(BundleContext bundleContext, BundleService bundleService) throws NotCompliantMBeanException {
+    public BundlesMBeanImpl(BundleContext bundleContext, BundleService bundleService)
+            throws NotCompliantMBeanException {
         super(BundlesMBean.class);
         this.bundleContext = bundleContext;
         this.bundleService = bundleService;
@@ -67,11 +64,40 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
 
     public TabularData getBundles() throws MBeanException {
         try {
-            CompositeType bundleType = new CompositeType("Bundle", "OSGi Bundle",
-                    new String[]{"ID", "Name", "Symbolic Name", "Version", "Start Level", "State", "Update Location"},
-                    new String[]{"ID of the Bundle", "Name of the Bundle", "Symbolic Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle", "Update location of the Bundle"},
-                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("Bundles", "Tables of all bundles", bundleType, new String[]{"ID"});
+            CompositeType bundleType =
+                    new CompositeType(
+                            "Bundle",
+                            "OSGi Bundle",
+                            new String[] {
+                                "ID",
+                                "Name",
+                                "Symbolic Name",
+                                "Version",
+                                "Start Level",
+                                "State",
+                                "Update Location"
+                            },
+                            new String[] {
+                                "ID of the Bundle",
+                                "Name of the Bundle",
+                                "Symbolic Name of the Bundle",
+                                "Version of the Bundle",
+                                "Start Level of the Bundle",
+                                "Current State of the Bundle",
+                                "Update location of the Bundle"
+                            },
+                            new OpenType[] {
+                                SimpleType.LONG,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.INTEGER,
+                                SimpleType.STRING,
+                                SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType(
+                            "Bundles", "Tables of all bundles", bundleType, new String[] {"ID"});
             TabularData table = new TabularDataSupport(tableType);
 
             Bundle[] bundles = bundleContext.getBundles();
@@ -80,9 +106,27 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 try {
                     BundleInfo info = bundleService.getInfo(bundle);
                     String bundleStateString = info.getState().toString();
-                    CompositeData data = new CompositeDataSupport(bundleType,
-                            new String[]{"ID", "Name", "Symbolic Name", "Version", "Start Level", "State", "Update Location"},
-                            new Object[]{info.getBundleId(), info.getName(), info.getSymbolicName(), info.getVersion(), info.getStartLevel(), bundleStateString, info.getUpdateLocation()});
+                    CompositeData data =
+                            new CompositeDataSupport(
+                                    bundleType,
+                                    new String[] {
+                                        "ID",
+                                        "Name",
+                                        "Symbolic Name",
+                                        "Version",
+                                        "Start Level",
+                                        "State",
+                                        "Update Location"
+                                    },
+                                    new Object[] {
+                                        info.getBundleId(),
+                                        info.getName(),
+                                        info.getSymbolicName(),
+                                        info.getVersion(),
+                                        info.getStartLevel(),
+                                        bundleStateString,
+                                        info.getUpdateLocation()
+                                    });
                     table.put(data);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
@@ -99,7 +143,8 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             List<Bundle> bundles = selectBundles(bundleId);
 
             if (bundles.size() != 1) {
-                throw new IllegalArgumentException("Provided bundle Id doesn't return any bundle or more than one bundle selected");
+                throw new IllegalArgumentException(
+                        "Provided bundle Id doesn't return any bundle or more than one bundle selected");
             }
 
             return getBundleStartLevel(bundles.get(0)).getStartLevel();
@@ -165,7 +210,8 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             }
 
             if (bundles.size() != 1) {
-                throw new IllegalArgumentException("Provided bundle Id doesn't return any bundle or more than one bundle selected");
+                throw new IllegalArgumentException(
+                        "Provided bundle Id doesn't return any bundle or more than one bundle selected");
             }
 
             InputStream is = new URL(location).openStream();
@@ -273,11 +319,21 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     @Override
     public TabularData getDiag() throws MBeanException {
         try {
-            CompositeType diagType = new CompositeType("Diag", "OSGi Bundle Diag",
-                    new String[]{"Name", "Status", "Diag"},
-                    new String[]{"Bundle Name", "Current Status", "Diagnostic"},
-                    new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("Diagnostics", "Tables of all bundles diagnostic", diagType, new String[]{"Name"});
+            CompositeType diagType =
+                    new CompositeType(
+                            "Diag",
+                            "OSGi Bundle Diag",
+                            new String[] {"Name", "Status", "Diag"},
+                            new String[] {"Bundle Name", "Current Status", "Diagnostic"},
+                            new OpenType[] {
+                                SimpleType.STRING, SimpleType.STRING, SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType(
+                            "Diagnostics",
+                            "Tables of all bundles diagnostic",
+                            diagType,
+                            new String[] {"Name"});
             TabularData table = new TabularDataSupport(tableType);
 
             Bundle[] bundles = bundleContext.getBundles();
@@ -286,9 +342,11 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                 String name = ShellUtil.getBundleName(bundle);
                 String status = bundleInfo.getState().toString();
                 String diag = bundleService.getDiag(bundle);
-                CompositeData data = new CompositeDataSupport(diagType,
-                        new String[]{"Name", "Status", "Diag"},
-                        new Object[]{name, status, diag});
+                CompositeData data =
+                        new CompositeDataSupport(
+                                diagType,
+                                new String[] {"Name", "Status", "Diag"},
+                                new Object[] {name, status, diag});
                 table.put(data);
             }
 
@@ -315,5 +373,4 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             throw new MBeanException(null, e.toString());
         }
     }
-
 }

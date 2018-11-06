@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.examples.command.completers;
 
+import java.util.List;
 import org.apache.karaf.examples.command.api.Booking;
 import org.apache.karaf.examples.command.api.BookingService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -25,13 +26,10 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-import java.util.List;
-
 @Service
 public class BookingIdCompleter implements Completer {
 
-    @Reference
-    private BookingService bookingService;
+    @Reference private BookingService bookingService;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -41,5 +39,4 @@ public class BookingIdCompleter implements Completer {
         }
         return delegate.complete(session, commandLine, candidates);
     }
-
 }

@@ -15,21 +15,16 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
-
-
-import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -39,7 +34,7 @@ public class HttpTest extends KarafTestSupport {
     public void installHttpFeature() throws Exception {
         installAndAssertFeature("webconsole");
     }
-    
+
     @Test
     public void list() throws Exception {
         waitForService("(objectClass=javax.servlet.ServletContext)", 5000);
@@ -53,5 +48,4 @@ public class HttpTest extends KarafTestSupport {
         TabularData servlets = (TabularData) mbeanServer.getAttribute(name, "Servlets");
         assertTrue(servlets.size() > 0);
     }
-
 }

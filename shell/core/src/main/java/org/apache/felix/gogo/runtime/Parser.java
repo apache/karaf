@@ -21,44 +21,36 @@ package org.apache.felix.gogo.runtime;
 import java.util.*;
 import java.util.regex.Pattern;
 
-
 //
 // NOTE: this file is included to fix FELIX-5805 but should be removed
 // once the fix is released as part of gogo.
 //
 //
-public class Parser
-{
+public class Parser {
 
-    public static abstract class Executable extends Token
-    {
-        public Executable(Token cs)
-        {
+    public abstract static class Executable extends Token {
+        public Executable(Token cs) {
             super(cs);
         }
     }
 
-    public static class Operator extends Executable
-    {
+    public static class Operator extends Executable {
         public Operator(Token cs) {
             super(cs);
         }
     }
 
-    public static class Statement extends Executable
-    {
+    public static class Statement extends Executable {
         private final List<Token> tokens;
         private final List<Token> redirections;
 
-        public Statement(Token cs, List<Token> tokens, List<Token> redirections)
-        {
+        public Statement(Token cs, List<Token> tokens, List<Token> redirections) {
             super(cs);
             this.tokens = tokens;
             this.redirections = redirections;
         }
 
-        public List<Token> tokens()
-        {
+        public List<Token> tokens() {
             return tokens;
         }
 
@@ -67,107 +59,79 @@ public class Parser
         }
     }
 
-    /**
-     * pipe1 ; pipe2 ; ...
-     */
-    public static class Program extends Token
-    {
+    /** pipe1 ; pipe2 ; ... */
+    public static class Program extends Token {
         private final List<Executable> tokens;
 
-        public Program(Token cs, List<Executable> tokens)
-        {
+        public Program(Token cs, List<Executable> tokens) {
             super(cs);
             this.tokens = tokens;
         }
 
-        public List<Executable> tokens()
-        {
+        public List<Executable> tokens() {
             return tokens;
         }
     }
 
-    /**
-     * token1 | token2 | ...
-     */
-    public static class Pipeline extends Executable
-    {
+    /** token1 | token2 | ... */
+    public static class Pipeline extends Executable {
         private final List<Executable> tokens;
 
-        public Pipeline(Token cs, List<Executable> tokens)
-        {
+        public Pipeline(Token cs, List<Executable> tokens) {
             super(cs);
             this.tokens = tokens;
         }
 
-        public List<Executable> tokens()
-        {
+        public List<Executable> tokens() {
             return tokens;
         }
-
     }
 
-    /**
-     * ( program )
-     */
-    public static class Sequence extends Executable
-    {
+    /** ( program ) */
+    public static class Sequence extends Executable {
         private final Program program;
 
-        public Sequence(Token cs, Program program)
-        {
+        public Sequence(Token cs, Program program) {
             super(cs);
             this.program = program;
         }
 
-        public Program program()
-        {
+        public Program program() {
             return program;
         }
     }
 
-    /**
-     * { program }
-     */
-    public static class Closure extends Token
-    {
+    /** { program } */
+    public static class Closure extends Token {
         private final Program program;
 
-        public Closure(Token cs, Program program)
-        {
+        public Closure(Token cs, Program program) {
             super(cs);
             this.program = program;
         }
 
-        public Program program()
-        {
+        public Program program() {
             return program;
         }
     }
 
-    /**
-     * [ a b ...]
-     * [ k1=v1 k2=v2 ...]
-     */
-    public static class Array extends Token
-    {
+    /** [ a b ...] [ k1=v1 k2=v2 ...] */
+    public static class Array extends Token {
         private final List<Token> list;
         private final Map<Token, Token> map;
 
-        public Array(Token cs, List<Token> list, Map<Token, Token> map)
-        {
+        public Array(Token cs, List<Token> list, Map<Token, Token> map) {
             super(cs);
             assert list != null ^ map != null;
             this.list = list;
             this.map = map;
         }
 
-        public List<Token> list()
-        {
+        public List<Token> list() {
             return list;
         }
 
-        public Map<Token, Token> map()
-        {
+        public Map<Token, Token> map() {
             return map;
         }
     }
@@ -177,8 +141,7 @@ public class Parser
     protected final List<Token> tokens = new ArrayList<>();
     protected final List<Statement> statements = new ArrayList<>();
 
-    public Parser(CharSequence line)
-    {
+    public Parser(CharSequence line) {
         this.tz = new Tokenizer(line);
     }
 
@@ -187,7 +150,9 @@ public class Parser
     }
 
     public List<Statement> statements() {
-        Collections.sort(statements, new Comparator<Statement>() {
+        Collections.sort(
+                statements,
+                new Comparator<Statement>() {
                     @Override
                     public int compare(Statement o1, Statement o2) {
                         return Integer.compare(o1.start, o2.start);
@@ -196,87 +161,74 @@ public class Parser
         return Collections.unmodifiableList(statements);
     }
 
-    public Program program()
-    {
+    public Program program() {
         List<Executable> tokens = new ArrayList<>();
         List<Executable> pipes = null;
         int start = tz.index - 1;
-        while (true)
-        {
+        while (true) {
             Statement ex;
             Token t = next();
-            if (t == null)
-            {
-                if (pipes != null)
-                {
-                    throw new EOFError(tz.line, tz.column, "unexpected EOT while looking for a statement after |", getMissing("pipe"), "0");
-                }
-                else
-                {
+            if (t == null) {
+                if (pipes != null) {
+                    throw new EOFError(
+                            tz.line,
+                            tz.column,
+                            "unexpected EOT while looking for a statement after |",
+                            getMissing("pipe"),
+                            "0");
+                } else {
                     return new Program(whole(tokens, start), tokens);
                 }
             }
-            if (Token.eq("}", t) || Token.eq(")", t) || Token.eq("]", t))
-            {
-                if (pipes != null)
-                {
-                    throw new EOFError(t.line, t.column, "unexpected token '" + t + "' while looking for a statement after |", getMissing("pipe"), "0");
-                }
-                else if (stack.isEmpty())
-                {
+            if (Token.eq("}", t) || Token.eq(")", t) || Token.eq("]", t)) {
+                if (pipes != null) {
+                    throw new EOFError(
+                            t.line,
+                            t.column,
+                            "unexpected token '" + t + "' while looking for a statement after |",
+                            getMissing("pipe"),
+                            "0");
+                } else if (stack.isEmpty()) {
                     throw new SyntaxError(t.line, t.column, "unexpected token '" + t + "'");
-                }
-                else
-                {
+                } else {
                     push(t);
                     return new Program(whole(tokens, start), tokens);
                 }
-            }
-            else
-            {
+            } else {
                 push(t);
                 ex = statement();
             }
             t = next();
-            if (t == null || Token.eq(";", t) || Token.eq("\n", t) || Token.eq("&", t) || Token.eq("&&", t) || Token.eq("||", t))
-            {
-                if (pipes != null)
-                {
+            if (t == null
+                    || Token.eq(";", t)
+                    || Token.eq("\n", t)
+                    || Token.eq("&", t)
+                    || Token.eq("&&", t)
+                    || Token.eq("||", t)) {
+                if (pipes != null) {
                     pipes.add(ex);
                     tokens.add(new Pipeline(whole(pipes, start), pipes));
                     pipes = null;
-                }
-                else
-                {
+                } else {
                     tokens.add(ex);
                 }
-                if (t == null)
-                {
+                if (t == null) {
                     return new Program(whole(tokens, start), tokens);
-                }
-                else {
+                } else {
                     tokens.add(new Operator(t));
                 }
-            }
-            else if (Token.eq("|", t) || Token.eq("|&", t))
-            {
-                if (pipes == null)
-                {
+            } else if (Token.eq("|", t) || Token.eq("|&", t)) {
+                if (pipes == null) {
                     pipes = new ArrayList<>();
                 }
                 pipes.add(ex);
                 pipes.add(new Operator(t));
-            }
-            else
-            {
-                if (pipes != null)
-                {
+            } else {
+                if (pipes != null) {
                     pipes.add(ex);
                     tokens.add(new Pipeline(whole(pipes, start), pipes));
                     pipes = null;
-                }
-                else
-                {
+                } else {
                     tokens.add(ex);
                 }
                 push(t);
@@ -297,8 +249,7 @@ public class Parser
         return token;
     }
 
-    public Sequence sequence()
-    {
+    public Sequence sequence() {
         Token start = start("(", "sequence");
         expectNotNull();
         Program program = program();
@@ -306,8 +257,7 @@ public class Parser
         return new Sequence(whole(start, end), program);
     }
 
-    public Closure closure()
-    {
+    public Closure closure() {
         Token start = start("{", "closure");
         expectNotNull();
         Program program = program();
@@ -316,17 +266,16 @@ public class Parser
     }
 
     private static final Pattern redirNoArg = Pattern.compile("[0-9]?>&[0-9-]|[0-9-]?<&[0-9-]");
-    private static final Pattern redirArg = Pattern.compile("[0-9&]?>|[0-9]?>>|[0-9]?<|[0-9]?<>|<<<");
+    private static final Pattern redirArg =
+            Pattern.compile("[0-9&]?>|[0-9]?>>|[0-9]?<|[0-9]?<>|<<<");
     private static final Pattern redirHereDoc = Pattern.compile("<<-?");
 
-    public Statement statement()
-    {
+    public Statement statement() {
         List<Token> tokens = new ArrayList<>();
         List<Token> redirs = new ArrayList<>();
         boolean needRedirArg = false;
         int start = tz.index;
-        while (true)
-        {
+        while (true) {
             Token t = next();
             if (t == null
                     || Token.eq("\n", t)
@@ -338,51 +287,39 @@ public class Parser
                     || Token.eq("|&", t)
                     || Token.eq("}", t)
                     || Token.eq(")", t)
-                    || Token.eq("]", t))
-            {
-                if (needRedirArg)
-                {
-                    throw new EOFError(tz.line, tz.column, "Expected file name for redirection", "redir", "foo");
+                    || Token.eq("]", t)) {
+                if (needRedirArg) {
+                    throw new EOFError(
+                            tz.line,
+                            tz.column,
+                            "Expected file name for redirection",
+                            "redir",
+                            "foo");
                 }
                 push(t);
                 break;
             }
-            if (Token.eq("{", t))
-            {
+            if (Token.eq("{", t)) {
                 push(t);
                 tokens.add(closure());
-            }
-            else if (Token.eq("[", t))
-            {
+            } else if (Token.eq("[", t)) {
                 push(t);
                 tokens.add(array());
-            }
-            else if (Token.eq("(", t))
-            {
+            } else if (Token.eq("(", t)) {
                 push(t);
                 tokens.add(sequence());
-            }
-            else if (needRedirArg)
-            {
+            } else if (needRedirArg) {
                 redirs.add(t);
                 needRedirArg = false;
-            }
-            else if (redirNoArg.matcher(t).matches())
-            {
+            } else if (redirNoArg.matcher(t).matches()) {
                 redirs.add(t);
-            }
-            else if (redirArg.matcher(t).matches())
-            {
+            } else if (redirArg.matcher(t).matches()) {
                 redirs.add(t);
                 needRedirArg = true;
-            }
-            else if (redirHereDoc.matcher(t).matches())
-            {
+            } else if (redirHereDoc.matcher(t).matches()) {
                 redirs.add(t);
                 redirs.add(tz.readHereDoc(t.charAt(t.length() - 1) == '-'));
-            }
-            else
-            {
+            } else {
                 tokens.add(t);
             }
         }
@@ -391,107 +328,109 @@ public class Parser
         return statement;
     }
 
-    public Array array()
-    {
+    public Array array() {
         Token start = start("[", "array");
         Boolean isMap = null;
         List<Token> list = new ArrayList<>();
         Map<Token, Token> map = new LinkedHashMap<>();
-        while (true)
-        {
+        while (true) {
             Token key = next();
-            if (key == null)
-            {
+            if (key == null) {
                 throw new EOFError(tz.line, tz.column, "unexpected EOT", getMissing(), "]");
             }
-            if (Token.eq("]", key))
-            {
+            if (Token.eq("]", key)) {
                 push(key);
                 break;
             }
-            if (Token.eq("\n", key))
-            {
+            if (Token.eq("\n", key)) {
                 continue;
             }
-            if (Token.eq("{", key) || Token.eq(";", key) || Token.eq("&", key) || Token.eq("&&", key) || Token.eq("||", key)
-                    || Token.eq("|", key) || Token.eq("|&", key) || Token.eq(")", key) || Token.eq("}", key) || Token.eq("=", key))
-            {
-                throw new SyntaxError(key.line(), key.column(), "unexpected token '" + key + "' while looking for array key");
+            if (Token.eq("{", key)
+                    || Token.eq(";", key)
+                    || Token.eq("&", key)
+                    || Token.eq("&&", key)
+                    || Token.eq("||", key)
+                    || Token.eq("|", key)
+                    || Token.eq("|&", key)
+                    || Token.eq(")", key)
+                    || Token.eq("}", key)
+                    || Token.eq("=", key)) {
+                throw new SyntaxError(
+                        key.line(),
+                        key.column(),
+                        "unexpected token '" + key + "' while looking for array key");
             }
-            if (Token.eq("(", key))
-            {
+            if (Token.eq("(", key)) {
                 push(key);
                 key = sequence();
             }
-            if (Token.eq("[", key))
-            {
+            if (Token.eq("[", key)) {
                 push(key);
                 key = array();
             }
-            if (isMap == null)
-            {
+            if (isMap == null) {
                 Token n = next();
-                if (n == null)
-                {
-                    throw new EOFError(tz.line, tz.column, "unexpected EOF while looking for array token", getMissing(), "]");
+                if (n == null) {
+                    throw new EOFError(
+                            tz.line,
+                            tz.column,
+                            "unexpected EOF while looking for array token",
+                            getMissing(),
+                            "]");
                 }
                 isMap = Token.eq("=", n);
                 push(n);
             }
-            if (isMap)
-            {
+            if (isMap) {
                 expect("=");
                 Token val = next();
-                if (val == null)
-                {
-                    throw new EOFError(tz.line, tz.column, "unexpected EOF while looking for array value", getMissing(), "0");
-                }
-                else if (Token.eq(";", val) || Token.eq("&", val) || Token.eq("&&", val) || Token.eq("||", val) || Token.eq("|", val) || Token.eq("|&", val)
-                        || Token.eq(")", key) || Token.eq("}", key) || Token.eq("=", key))
-                {
-                    throw new SyntaxError(key.line(), key.column(), "unexpected token '" + key + "' while looking for array value");
-                }
-                else if (Token.eq("[", val))
-                {
+                if (val == null) {
+                    throw new EOFError(
+                            tz.line,
+                            tz.column,
+                            "unexpected EOF while looking for array value",
+                            getMissing(),
+                            "0");
+                } else if (Token.eq(";", val)
+                        || Token.eq("&", val)
+                        || Token.eq("&&", val)
+                        || Token.eq("||", val)
+                        || Token.eq("|", val)
+                        || Token.eq("|&", val)
+                        || Token.eq(")", key)
+                        || Token.eq("}", key)
+                        || Token.eq("=", key)) {
+                    throw new SyntaxError(
+                            key.line(),
+                            key.column(),
+                            "unexpected token '" + key + "' while looking for array value");
+                } else if (Token.eq("[", val)) {
                     push(val);
                     val = array();
-                }
-                else if (Token.eq("(", val))
-                {
+                } else if (Token.eq("(", val)) {
                     push(val);
                     val = sequence();
-                }
-                else if (Token.eq("{", val))
-                {
+                } else if (Token.eq("{", val)) {
                     push(val);
                     val = closure();
                 }
                 map.put(key, val);
-            }
-            else
-            {
+            } else {
                 list.add(key);
             }
         }
         Token end = end("]");
-        if (isMap == null || !isMap)
-        {
+        if (isMap == null || !isMap) {
             return new Array(whole(start, end), list, null);
-        }
-        else
-        {
+        } else {
             return new Array(whole(start, end), null, map);
         }
     }
 
-    protected void expectNotNull()
-    {
+    protected void expectNotNull() {
         Token t = next();
-        if (t == null)
-        {
-            throw new EOFError(tz.line, tz.column,
-                    "unexpected EOT",
-                    getMissing(), "0");
+        if (t == null) {
+            throw new EOFError(tz.line, tz.column, "unexpected EOT", getMissing(), "0");
         }
         push(t);
     }
@@ -548,26 +487,27 @@ public class Parser
         return t;
     }
 
-    protected Token expect(String str)
-    {
+    protected Token expect(String str) {
         Token start = next();
-        if (start == null)
-        {
-            throw new EOFError(tz.line, tz.column,
+        if (start == null) {
+            throw new EOFError(
+                    tz.line,
+                    tz.column,
                     "unexpected EOT looking for '" + str + "",
-                    getMissing(), str);
+                    getMissing(),
+                    str);
         }
-        if (!Token.eq(str, start))
-        {
-            throw new SyntaxError(start.line, start.column, "expected '" + str + "' but got '" + start.toString() + "'");
+        if (!Token.eq(str, start)) {
+            throw new SyntaxError(
+                    start.line,
+                    start.column,
+                    "expected '" + str + "' but got '" + start.toString() + "'");
         }
         return start;
     }
 
-    protected Token whole(List<? extends Token> tokens, int index)
-    {
-        if (tokens.isEmpty())
-        {
+    protected Token whole(List<? extends Token> tokens, int index) {
+        if (tokens.isEmpty()) {
             index = Math.min(index, tz.text().length());
             return tz.text().subSequence(index, index);
         }
@@ -576,9 +516,7 @@ public class Parser
         return whole(b, e);
     }
 
-    protected Token whole(Token b, Token e)
-    {
+    protected Token whole(Token b, Token e) {
         return tz.text.subSequence(b.start - tz.text.start, e.start + e.length() - tz.text.start);
     }
-
 }

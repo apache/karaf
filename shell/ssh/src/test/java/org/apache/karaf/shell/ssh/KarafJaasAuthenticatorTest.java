@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Map;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -33,7 +32,6 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.spi.LoginModule;
-
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.mina.core.session.DummySession;
@@ -54,18 +52,24 @@ public class KarafJaasAuthenticatorTest {
     @Before
     public void init() throws Exception {
         configuration = Configuration.getConfiguration();
-        Configuration.setConfiguration(new Configuration() {
-            @Override
-            public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-                return new AppConfigurationEntry[] {
-                        new AppConfigurationEntry(SayYes.class.getName(), AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, emptyMap())
-                };
-            }
-        });
+        Configuration.setConfiguration(
+                new Configuration() {
+                    @Override
+                    public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
+                        return new AppConfigurationEntry[] {
+                            new AppConfigurationEntry(
+                                    SayYes.class.getName(),
+                                    AppConfigurationEntry.LoginModuleControlFlag.REQUIRED,
+                                    emptyMap())
+                        };
+                    }
+                });
         final SshServer server = new SshServer();
         server.setRandomFactory(new SingletonRandomFactory(SecurityUtils.getRandomFactory()));
-        this.session = new ServerSessionImpl(server,
-                new MinaSession(new MinaConnector(null, null, null), new DummySession()));
+        this.session =
+                new ServerSessionImpl(
+                        server,
+                        new MinaSession(new MinaConnector(null, null, null), new DummySession()));
     }
 
     @After
@@ -75,36 +79,36 @@ public class KarafJaasAuthenticatorTest {
 
     @Test
     public void authenticateOk() {
-        final KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator("karaf", "test",
-                new Class<?>[]{RolePrincipal.class});
+        final KarafJaasAuthenticator authenticator =
+                new KarafJaasAuthenticator("karaf", "test", new Class<?>[] {RolePrincipal.class});
         assertTrue(authenticator.authenticate("test", "test", session));
     }
 
     @Test
     public void authenticateKo() {
-        final KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator("karaf", "test",
-                new Class<?>[]{RolePrincipal.class});
+        final KarafJaasAuthenticator authenticator =
+                new KarafJaasAuthenticator("karaf", "test", new Class<?>[] {RolePrincipal.class});
         assertFalse(authenticator.authenticate("testko", "test", session));
     }
 
     @Test
     public void invalidRole() {
-        final KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator("karaf", "test",
-                new Class<?>[]{RolePrincipal.class});
+        final KarafJaasAuthenticator authenticator =
+                new KarafJaasAuthenticator("karaf", "test", new Class<?>[] {RolePrincipal.class});
         assertFalse(authenticator.authenticate("customRole", "test", session));
     }
 
     @Test
     public void noRole() {
-        final KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator("karaf", "test",
-                new Class<?>[0]);
+        final KarafJaasAuthenticator authenticator =
+                new KarafJaasAuthenticator("karaf", "test", new Class<?>[0]);
         assertFalse(authenticator.authenticate("norole", "test", session));
     }
 
     @Test
     public void customRole() {
-        final KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator("karaf", "test",
-                new Class<?>[]{UserPrincipal.class});
+        final KarafJaasAuthenticator authenticator =
+                new KarafJaasAuthenticator("karaf", "test", new Class<?>[] {UserPrincipal.class});
         assertTrue(authenticator.authenticate("customRole", "test", session));
     }
 
@@ -113,13 +117,14 @@ public class KarafJaasAuthenticatorTest {
         private Subject subject;
 
         @Override
-        public void initialize(final Subject subject,
-                               final CallbackHandler callbackHandler,
-                               final Map<String, ?> sharedState,
-                               final Map<String, ?> options) {
+        public void initialize(
+                final Subject subject,
+                final CallbackHandler callbackHandler,
+                final Map<String, ?> sharedState,
+                final Map<String, ?> options) {
             final NameCallback nameCallback = new NameCallback("name?");
             try {
-                callbackHandler.handle(new Callback[]{nameCallback});
+                callbackHandler.handle(new Callback[] {nameCallback});
             } catch (final IOException | UnsupportedCallbackException e) {
                 throw new IllegalArgumentException(e);
             }

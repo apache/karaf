@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.junit.Test;
 
 public class SyncopeLoginModuleTest {
@@ -46,7 +45,8 @@ public class SyncopeLoginModuleTest {
     public void testRolesExtractionSyncope2() throws Exception {
         String syncopeResponse = read("syncope2Response.json");
         SyncopeLoginModule syncopeLoginModule = new SyncopeLoginModule();
-        Map<String, String> options = Collections.singletonMap(SyncopeLoginModule.USE_ROLES_FOR_SYNCOPE2, "true");
+        Map<String, String> options =
+                Collections.singletonMap(SyncopeLoginModule.USE_ROLES_FOR_SYNCOPE2, "true");
         syncopeLoginModule.initialize(null, null, Collections.emptyMap(), options);
         List<String> roles = syncopeLoginModule.extractingRolesSyncope2(syncopeResponse);
         assertThat(roles, contains("admin", "another"));
@@ -63,7 +63,6 @@ public class SyncopeLoginModuleTest {
     private String read(String resourceName) throws URISyntaxException, IOException {
         URI response = this.getClass().getResource(resourceName).toURI();
         return Files.lines(Paths.get(response), Charset.forName("UTF-8"))
-            .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining("\n"));
     }
-
 }

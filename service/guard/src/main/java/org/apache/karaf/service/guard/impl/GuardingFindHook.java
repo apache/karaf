@@ -16,13 +16,12 @@
  */
 package org.apache.karaf.service.guard.impl;
 
+import java.util.Collection;
+import java.util.Iterator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.service.FindHook;
-
-import java.util.Collection;
-import java.util.Iterator;
 
 public class GuardingFindHook implements FindHook {
 
@@ -30,18 +29,27 @@ public class GuardingFindHook implements FindHook {
     private final GuardProxyCatalog guardProxyCatalog;
     private final Filter servicesFilter;
 
-    GuardingFindHook(BundleContext bundleContext, GuardProxyCatalog guardProxyCatalog, Filter securedServicesFilter) {
+    GuardingFindHook(
+            BundleContext bundleContext,
+            GuardProxyCatalog guardProxyCatalog,
+            Filter securedServicesFilter) {
         this.bundleContext = bundleContext;
         this.guardProxyCatalog = guardProxyCatalog;
         this.servicesFilter = securedServicesFilter;
     }
 
-    public void find(BundleContext bundleContext, String name, String filter, boolean allServices, Collection<ServiceReference<?>> references) {
+    public void find(
+            BundleContext bundleContext,
+            String name,
+            String filter,
+            boolean allServices,
+            Collection<ServiceReference<?>> references) {
         if (servicesFilter == null) {
             return;
         }
 
-        if (this.bundleContext.equals(bundleContext) || bundleContext.getBundle().getBundleId() == 0) {
+        if (this.bundleContext.equals(bundleContext)
+                || bundleContext.getBundle().getBundleId() == 0) {
             // don't hide anything from this bundle or the system bundle
             return;
         }
@@ -58,5 +66,4 @@ public class GuardingFindHook implements FindHook {
             }
         }
     }
-
 }

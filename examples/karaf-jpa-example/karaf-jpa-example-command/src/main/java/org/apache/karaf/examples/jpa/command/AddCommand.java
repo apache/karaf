@@ -27,13 +27,22 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Command(scope = "booking", name = "add", description = "Add a booking")
 public class AddCommand implements Action {
 
-    @Reference
-    private BookingService bookingService;
+    @Reference private BookingService bookingService;
 
-    @Argument(index = 0, name = "customer", description = "Booking customer", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "customer",
+            description = "Booking customer",
+            required = true,
+            multiValued = false)
     String customer;
 
-    @Argument(index = 1, name = "flight", description = "Booking flight", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "flight",
+            description = "Booking flight",
+            required = true,
+            multiValued = false)
     String flight;
 
     @Override
@@ -41,5 +50,4 @@ public class AddCommand implements Action {
         bookingService.add(flight, customer);
         return null;
     }
-
 }

@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +27,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.karaf.features.FeaturePattern;
@@ -38,9 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Helper class to deal with blacklisted features and bundles. It doesn't process JAXB model at all - it only
- * provides information about repository/feature/bundle being blacklisted.
- * The task of actual blacklisting (altering JAXB model) is performed in {@link FeaturesProcessor}
+ * Helper class to deal with blacklisted features and bundles. It doesn't process JAXB model at all
+ * - it only provides information about repository/feature/bundle being blacklisted. The task of
+ * actual blacklisting (altering JAXB model) is performed in {@link FeaturesProcessor}
  */
 public class Blacklist {
 
@@ -72,11 +70,11 @@ public class Blacklist {
         Set<String> blacklist = new HashSet<>();
         if (blacklistUrl != null) {
             try (InputStream is = new URL(blacklistUrl).openStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
                 reader.lines() //
-                    .map(String::trim) //
-                    .filter(line -> !line.isEmpty() && !line.startsWith("#"))
-                    .forEach(blacklist::add);
+                        .map(String::trim) //
+                        .filter(line -> !line.isEmpty() && !line.startsWith("#"))
+                        .forEach(blacklist::add);
             } catch (FileNotFoundException e) {
                 LOGGER.debug("Unable to load blacklist bundles list", e.toString());
             } catch (Exception e) {
@@ -88,8 +86,8 @@ public class Blacklist {
     }
 
     /**
-     * Extracts blacklisting clauses related to bundles, features and repositories and changes them to more
-     * usable form.
+     * Extracts blacklisting clauses related to bundles, features and repositories and changes them
+     * to more usable form.
      */
     private void compileClauses() {
         for (Clause c : clauses) {
@@ -117,7 +115,12 @@ public class Blacklist {
                         try {
                             repositoryBlacklist.add(new LocationPattern(location));
                         } catch (IllegalArgumentException e) {
-                            LOG.warn("Problem parsing repository blacklist URI \"" + location + "\": " + e.getMessage() + ". Ignoring.");
+                            LOG.warn(
+                                    "Problem parsing repository blacklist URI \""
+                                            + location
+                                            + "\": "
+                                            + e.getMessage()
+                                            + ". Ignoring.");
                         }
                     }
                     break;
@@ -125,7 +128,12 @@ public class Blacklist {
                     try {
                         featureBlacklist.add(new FeaturePattern(c.toString()));
                     } catch (IllegalArgumentException e) {
-                        LOG.warn("Problem parsing blacklisted feature identifier \"" + c.toString() + "\": " + e.getMessage() + ". Ignoring.");
+                        LOG.warn(
+                                "Problem parsing blacklisted feature identifier \""
+                                        + c.toString()
+                                        + "\": "
+                                        + e.getMessage()
+                                        + ". Ignoring.");
                     }
                     break;
                 case TYPE_BUNDLE:
@@ -140,7 +148,12 @@ public class Blacklist {
                         try {
                             bundleBlacklist.add(new LocationPattern(location));
                         } catch (IllegalArgumentException e) {
-                            LOG.warn("Problem parsing bundle blacklist URI \"" + location + "\": " + e.getMessage() + ". Ignoring.");
+                            LOG.warn(
+                                    "Problem parsing bundle blacklist URI \""
+                                            + location
+                                            + "\": "
+                                            + e.getMessage()
+                                            + ". Ignoring.");
                         }
                     }
                     break;
@@ -150,6 +163,7 @@ public class Blacklist {
 
     /**
      * Checks whether features XML repository URI is blacklisted.
+     *
      * @param uri
      * @return
      */
@@ -163,8 +177,9 @@ public class Blacklist {
     }
 
     /**
-     * Checks whether the feature is blacklisted according to configured rules by name
-     * (possibly with wildcards) and optional version (possibly specified as version range)
+     * Checks whether the feature is blacklisted according to configured rules by name (possibly
+     * with wildcards) and optional version (possibly specified as version range)
+     *
      * @param name
      * @param version
      * @return
@@ -180,6 +195,7 @@ public class Blacklist {
 
     /**
      * Checks whether the bundle URI is blacklisted according to configured rules
+     *
      * @param uri
      * @return
      */
@@ -194,6 +210,7 @@ public class Blacklist {
 
     /**
      * Merge clauses from another {@link Blacklist} into this object
+     *
      * @param others
      */
     public void merge(Blacklist others) {
@@ -216,11 +233,11 @@ public class Blacklist {
         return clauses;
     }
 
-    public void blacklist(Features featuresModel) {
-    }
+    public void blacklist(Features featuresModel) {}
 
     /**
      * Directly add {@link LocationPattern} as blacklisted features XML repository URI
+     *
      * @param locationPattern
      */
     public void blacklistRepository(LocationPattern locationPattern) {
@@ -229,6 +246,7 @@ public class Blacklist {
 
     /**
      * Directly add {@link FeaturePattern} as blacklisted feature ID
+     *
      * @param featurePattern
      */
     public void blacklistFeature(FeaturePattern featurePattern) {
@@ -237,6 +255,7 @@ public class Blacklist {
 
     /**
      * Directly add {@link LocationPattern} as blacklisted bundle URI
+     *
      * @param locationPattern
      */
     public void blacklistBundle(LocationPattern locationPattern) {
@@ -254,5 +273,4 @@ public class Blacklist {
     public List<LocationPattern> getBundleBlacklist() {
         return bundleBlacklist;
     }
-
 }

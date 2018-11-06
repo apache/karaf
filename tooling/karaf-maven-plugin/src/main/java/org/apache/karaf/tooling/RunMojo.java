@@ -18,6 +18,12 @@
  */
 package org.apache.karaf.tooling;
 
+import java.io.*;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -43,63 +49,46 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-import java.io.*;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-/**
- * Run a Karaf instance
- */
-@Mojo(name = "run", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = false)
+/** Run a Karaf instance */
+@Mojo(
+        name = "run",
+        defaultPhase = LifecyclePhase.PACKAGE,
+        requiresDependencyResolution = ResolutionScope.RUNTIME,
+        threadSafe = false)
 public class RunMojo extends MojoSupport {
 
-    /**
-     * Directory containing Karaf container base directory.
-     */
+    /** Directory containing Karaf container base directory. */
     @Parameter(defaultValue = "${project.build.directory}/karaf")
     private File karafDirectory = null;
 
-    /**
-     * Location where to download the Karaf distribution
-     */
+    /** Location where to download the Karaf distribution */
     @Parameter(defaultValue = "mvn:org.apache.karaf/apache-karaf/LATEST/zip")
     private String karafDistribution = null;
 
-    /**
-     * Define if the project artifact should be deployed in the started container or not
-     */
+    /** Define if the project artifact should be deployed in the started container or not */
     @Parameter(defaultValue = "true")
     private boolean deployProjectArtifact = true;
 
     /**
-     * A list of URLs referencing feature repositories that will be added
-     * to the karaf instance started by this goal.
+     * A list of URLs referencing feature repositories that will be added to the karaf instance
+     * started by this goal.
      */
-    @Parameter
-    private String[] featureRepositories = null;
+    @Parameter private String[] featureRepositories = null;
 
-    /**
-     * Comma-separated list of features to install.
-     */
+    /** Comma-separated list of features to install. */
     @Parameter(defaultValue = "")
     private String featuresToInstall = null;
 
-    /**
-     * Define if the Karaf container keep running or stop just after the goal execution
-     */
+    /** Define if the Karaf container keep running or stop just after the goal execution */
     @Parameter(defaultValue = "true")
     private boolean keepRunning = true;
 
-    /**
-     * Define if the Karaf embedded sshd should be started or not
-     */
+    /** Define if the Karaf embedded sshd should be started or not */
     @Parameter(defaultValue = "false")
     private String startSsh = "false";
 
-    private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
+    private static final Pattern mvnPattern =
+            Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (karafDirectory.exists()) {
@@ -143,8 +132,7 @@ public class RunMojo extends MojoSupport {
             addFeatureRepositories(featureService);
             deploy(bundleContext, featureService);
             addFeatures(featureService);
-            if (keepRunning)
-                main.awaitShutdown();
+            if (keepRunning) main.awaitShutdown();
             main.destroy();
         } catch (Throwable e) {
             throw new MojoExecutionException("Can't start container", e);
@@ -154,9 +142,9 @@ public class RunMojo extends MojoSupport {
     }
 
     void addFeatureRepositories(Object featureService) throws MojoExecutionException {
-    	if (featureRepositories != null) {
+        if (featureRepositories != null) {
             try {
-            	Class<? extends Object> serviceClass = featureService.getClass();
+                Class<? extends Object> serviceClass = featureService.getClass();
                 Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
 
                 for (String featureRepo : featureRepositories) {
@@ -165,7 +153,7 @@ public class RunMojo extends MojoSupport {
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to add feature repositories to karaf", e);
             }
-    	}
+        }
     }
 
     void deploy(BundleContext bundleContext, Object featureService) throws MojoExecutionException {
@@ -173,17 +161,21 @@ public class RunMojo extends MojoSupport {
             File artifact = project.getArtifact().getFile();
             File attachedFeatureFile = getAttachedFeatureFile(project);
             boolean artifactExists = artifact != null && artifact.exists();
-            boolean attachedFeatureFileExists = attachedFeatureFile != null && attachedFeatureFile.exists();
+            boolean attachedFeatureFileExists =
+                    attachedFeatureFile != null && attachedFeatureFile.exists();
             if (artifactExists) {
                 if (project.getPackaging().equals("bundle")) {
                     try {
-                        Bundle bundle = bundleContext.installBundle(artifact.toURI().toURL().toString());
+                        Bundle bundle =
+                                bundleContext.installBundle(artifact.toURI().toURL().toString());
                         bundle.start();
                     } catch (Exception e) {
-                        throw new MojoExecutionException("Can't deploy project artifact in container", e);
+                        throw new MojoExecutionException(
+                                "Can't deploy project artifact in container", e);
                     }
                 } else {
-                    throw new MojoExecutionException("Packaging " + project.getPackaging() + " is not supported");
+                    throw new MojoExecutionException(
+                            "Packaging " + project.getPackaging() + " is not supported");
                 }
             } else if (attachedFeatureFileExists) {
                 addFeaturesAttachmentAsFeatureRepository(featureService, attachedFeatureFile);
@@ -194,10 +186,11 @@ public class RunMojo extends MojoSupport {
     }
 
     void addFeatures(Object featureService) throws MojoExecutionException {
-    	if (featuresToInstall != null) {
+        if (featuresToInstall != null) {
             try {
-            	Class<? extends Object> serviceClass = featureService.getClass();
-                Method installFeatureMethod = serviceClass.getMethod("installFeature", String.class);
+                Class<? extends Object> serviceClass = featureService.getClass();
+                Method installFeatureMethod =
+                        serviceClass.getMethod("installFeature", String.class);
                 String[] features = featuresToInstall.split(" *, *");
                 for (String feature : features) {
                     installFeatureMethod.invoke(featureService, feature);
@@ -206,7 +199,7 @@ public class RunMojo extends MojoSupport {
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to add features to karaf", e);
             }
-    	}
+        }
     }
 
     public static void extract(File sourceFile, File targetFolder) throws IOException {
@@ -215,19 +208,22 @@ public class RunMojo extends MojoSupport {
         } else if (sourceFile.getAbsolutePath().indexOf(".tar.gz") > 0) {
             extractTarGzDistribution(sourceFile, targetFolder);
         } else {
-            throw new IllegalStateException("Unknown packaging of distribution; only zip or tar.gz could be handled.");
+            throw new IllegalStateException(
+                    "Unknown packaging of distribution; only zip or tar.gz could be handled.");
         }
         return;
     }
 
-    private static void extractTarGzDistribution(File sourceDistribution, File _targetFolder) throws IOException {
+    private static void extractTarGzDistribution(File sourceDistribution, File _targetFolder)
+            throws IOException {
         File uncompressedFile = File.createTempFile("uncompressedTarGz-", ".tar");
         extractGzArchive(new FileInputStream(sourceDistribution), uncompressedFile);
         extract(new TarArchiveInputStream(new FileInputStream(uncompressedFile)), _targetFolder);
         FileUtils.forceDelete(uncompressedFile);
     }
 
-    private static void extractZipDistribution(File sourceDistribution, File _targetFolder) throws IOException {
+    private static void extractZipDistribution(File sourceDistribution, File _targetFolder)
+            throws IOException {
         extract(new ZipArchiveInputStream(new FileInputStream(sourceDistribution)), _targetFolder);
     }
 
@@ -257,21 +253,18 @@ public class RunMojo extends MojoSupport {
                 File file = new File(targetDir, name);
                 if (entry.isDirectory()) {
                     file.mkdirs();
-                }
-                else {
+                } else {
                     file.getParentFile().mkdirs();
                     OutputStream os = new FileOutputStream(file);
                     try {
                         IOUtils.copy(is, os);
-                    }
-                    finally {
+                    } finally {
                         IOUtils.closeQuietly(os);
                     }
                 }
                 entry = is.getNextEntry();
             }
-        }
-        finally {
+        } finally {
             is.close();
         }
     }
@@ -309,10 +302,9 @@ public class RunMojo extends MojoSupport {
     }
 
     /**
-     * Return a path for an artifact:
-     * - if the input is already a path (doesn't contain ':'), the same path is returned.
-     * - if the input is a Maven URL, the input is converted to a default repository location path, type and classifier
-     *   are optional.
+     * Return a path for an artifact: - if the input is already a path (doesn't contain ':'), the
+     * same path is returned. - if the input is a Maven URL, the input is converted to a default
+     * repository location path, type and classifier are optional.
      *
      * @param name artifact data
      * @return path as supplied or a default Maven repository path
@@ -364,10 +356,11 @@ public class RunMojo extends MojoSupport {
         return null;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" }) Object findFeatureService(BundleContext bundleContext) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    Object findFeatureService(BundleContext bundleContext) {
         // Use Object as the service type and use reflection when calling the service,
-    	// because the returned services use the OSGi classloader
-    	ServiceReference ref = bundleContext.getServiceReference(FeaturesService.class);
+        // because the returned services use the OSGi classloader
+        ServiceReference ref = bundleContext.getServiceReference(FeaturesService.class);
         if (ref != null) {
             Object featureService = bundleContext.getService(ref);
             return featureService;
@@ -376,18 +369,20 @@ public class RunMojo extends MojoSupport {
         return null;
     }
 
-    private void addFeaturesAttachmentAsFeatureRepository(Object featureService, File attachedFeatureFile) throws MojoExecutionException {
+    private void addFeaturesAttachmentAsFeatureRepository(
+            Object featureService, File attachedFeatureFile) throws MojoExecutionException {
         if (featureService != null) {
             try {
-            	Class<? extends Object> serviceClass = featureService.getClass();
-            	Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
+                Class<? extends Object> serviceClass = featureService.getClass();
+                Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
                 addRepositoryMethod.invoke(featureService, attachedFeatureFile.toURI());
             } catch (Exception e) {
-                throw new MojoExecutionException("Failed to register attachment as feature repository", e);
+                throw new MojoExecutionException(
+                        "Failed to register attachment as feature repository", e);
             }
         } else {
-            throw new MojoExecutionException("Failed to find the FeatureService when adding a feature repository");
+            throw new MojoExecutionException(
+                    "Failed to find the FeatureService when adding a feature repository");
         }
     }
-
 }

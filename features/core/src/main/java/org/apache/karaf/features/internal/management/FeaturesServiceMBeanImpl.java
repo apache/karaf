@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
@@ -30,7 +29,6 @@ import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
 import javax.management.StandardEmitterMBean;
 import javax.management.openmbean.TabularData;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
@@ -45,11 +43,9 @@ import org.apache.karaf.features.management.codec.JmxRepositoryEvent;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-/**
- * Implementation of {@link FeaturesServiceMBean}.
- */
-public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
-        MBeanRegistration, FeaturesServiceMBean {
+/** Implementation of {@link FeaturesServiceMBean}. */
+public class FeaturesServiceMBeanImpl extends StandardEmitterMBean
+        implements MBeanRegistration, FeaturesServiceMBean {
 
     private ServiceRegistration<FeaturesListener> registration;
 
@@ -62,8 +58,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     private FeaturesService featuresService;
 
     public FeaturesServiceMBeanImpl() throws NotCompliantMBeanException {
-        super(FeaturesServiceMBean.class,
-              new NotificationBroadcasterSupport(getBroadcastInfo()));
+        super(FeaturesServiceMBean.class, new NotificationBroadcasterSupport(getBroadcastInfo()));
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
@@ -72,20 +67,20 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void postRegister(Boolean registrationDone) {
-        registration = bundleContext.registerService(FeaturesListener.class,
-                getFeaturesListener(), new Hashtable<String, String>());
+        registration =
+                bundleContext.registerService(
+                        FeaturesListener.class,
+                        getFeaturesListener(),
+                        new Hashtable<String, String>());
     }
 
     public void preDeregister() throws Exception {
         registration.unregister();
     }
 
-    public void postDeregister() {
-    }
+    public void postDeregister() {}
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public TabularData getFeatures() throws Exception {
         try {
             List<Feature> allFeatures = Arrays.asList(featuresService.listFeatures());
@@ -93,7 +88,11 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
             ArrayList<JmxFeature> features = new ArrayList<>();
             for (Feature feature : allFeatures) {
                 try {
-                    features.add(new JmxFeature(feature, insFeatures.contains(feature), featuresService.isRequired(feature)));
+                    features.add(
+                            new JmxFeature(
+                                    feature,
+                                    insFeatures.contains(feature),
+                                    featuresService.isRequired(feature)));
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }
@@ -105,9 +104,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public TabularData getRepositories() throws Exception {
         try {
             List<Repository> allRepositories = Arrays.asList(featuresService.listRepositories());
@@ -191,7 +188,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
                     uris.add(u);
                 }
             }
-            for (URI u :uris) {
+            for (URI u : uris) {
                 featuresService.refreshRepository(u);
             }
         }
@@ -202,7 +199,8 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void installFeature(String name, boolean noRefresh) throws Exception {
-        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options =
+                EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
@@ -210,7 +208,8 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void installFeature(String name, boolean noRefresh, boolean noStart) throws Exception {
-        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options =
+                EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
@@ -225,15 +224,18 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void installFeature(String name, String version, boolean noRefresh) throws Exception {
-        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options =
+                EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
         featuresService.installFeature(name, version, options);
     }
 
-    public void installFeature(String name, String version, boolean noRefresh, boolean noStart) throws Exception {
-        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+    public void installFeature(String name, String version, boolean noRefresh, boolean noStart)
+            throws Exception {
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options =
+                EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
@@ -265,7 +267,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
     private TabularData infoFeature(Feature[] f) throws Exception {
         ArrayList<JmxFeature> features = new ArrayList<>();
-        for (Feature feature:f) {
+        for (Feature feature : f) {
             boolean installed = featuresService.isInstalled(feature);
             boolean required = featuresService.isRequired(feature);
             JmxFeature jmxFeature = new JmxFeature(feature, installed, required);
@@ -279,7 +281,8 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void uninstallFeature(String name, boolean noRefresh) throws Exception {
-        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options =
+                EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
         if (noRefresh) {
             options.add(org.apache.karaf.features.FeaturesService.Option.NoAutoRefreshBundles);
         }
@@ -291,7 +294,8 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     }
 
     public void uninstallFeature(String name, String version, boolean noRefresh) throws Exception {
-        EnumSet<org.apache.karaf.features.FeaturesService.Option> options = EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
+        EnumSet<org.apache.karaf.features.FeaturesService.Option> options =
+                EnumSet.noneOf(org.apache.karaf.features.FeaturesService.Option.class);
         if (noRefresh) {
             options.add(FeaturesService.Option.NoAutoRefreshBundles);
         }
@@ -310,7 +314,8 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         return new FeaturesListener() {
             public void featureEvent(FeatureEvent event) {
                 if (!event.isReplay()) {
-                    Notification notification = new Notification(FEATURE_EVENT_TYPE, objectName, sequenceNumber++);
+                    Notification notification =
+                            new Notification(FEATURE_EVENT_TYPE, objectName, sequenceNumber++);
                     notification.setUserData(new JmxFeatureEvent(event).asCompositeData());
                     sendNotification(notification);
                 }
@@ -318,22 +323,27 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
             public void repositoryEvent(RepositoryEvent event) {
                 if (!event.isReplay()) {
-                    Notification notification = new Notification(REPOSITORY_EVENT_TYPE, objectName, sequenceNumber++);
+                    Notification notification =
+                            new Notification(REPOSITORY_EVENT_TYPE, objectName, sequenceNumber++);
                     notification.setUserData(new JmxRepositoryEvent(event).asCompositeData());
                     sendNotification(notification);
                 }
             }
-
         };
     }
 
     private static MBeanNotificationInfo[] getBroadcastInfo() {
         String type = Notification.class.getCanonicalName();
-        MBeanNotificationInfo info1 = new MBeanNotificationInfo(new String[]{FEATURE_EVENT_EVENT_TYPE},
-                type, "Some features notification");
-        MBeanNotificationInfo info2 = new MBeanNotificationInfo(new String[]{REPOSITORY_EVENT_EVENT_TYPE},
-                type, "Some repository notification");
-        return new MBeanNotificationInfo[]{info1, info2};
+        MBeanNotificationInfo info1 =
+                new MBeanNotificationInfo(
+                        new String[] {FEATURE_EVENT_EVENT_TYPE},
+                        type,
+                        "Some features notification");
+        MBeanNotificationInfo info2 =
+                new MBeanNotificationInfo(
+                        new String[] {REPOSITORY_EVENT_EVENT_TYPE},
+                        type,
+                        "Some repository notification");
+        return new MBeanNotificationInfo[] {info1, info2};
     }
-
 }

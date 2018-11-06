@@ -17,7 +17,6 @@
 package org.apache.karaf.diagnostic.core.internal;
 
 import java.io.Closeable;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -28,8 +27,13 @@ public class Activator implements BundleActivator {
         if (!isWindows()) {
             ClassLoader cl = this.getClass().getClassLoader();
             try {
-                Class<?> dumpHandlerClazz = cl.loadClass("org.apache.karaf.diagnostic.core.internal.DumpHandler");
-                dumpHandler = (Closeable) dumpHandlerClazz.getConstructor(BundleContext.class).newInstance(context);
+                Class<?> dumpHandlerClazz =
+                        cl.loadClass("org.apache.karaf.diagnostic.core.internal.DumpHandler");
+                dumpHandler =
+                        (Closeable)
+                                dumpHandlerClazz
+                                        .getConstructor(BundleContext.class)
+                                        .newInstance(context);
             } catch (Throwable e) {
                 // Will happen if sun.misc.SignalHandler is not available
             }
@@ -45,5 +49,4 @@ public class Activator implements BundleActivator {
     private boolean isWindows() {
         return System.getProperty("os.name", "Unknown").startsWith("Win");
     }
-
 }

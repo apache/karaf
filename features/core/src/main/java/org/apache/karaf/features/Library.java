@@ -28,17 +28,20 @@ public interface Library {
     String getType();
 
     /**
-     * Whether given library's exported packages should be added to <code>org.osgi.framework.system.packages.extra</code>
-     * property in <code>${karaf.etc}/config.properties</code>.
+     * Whether given library's exported packages should be added to <code>
+     * org.osgi.framework.system.packages.extra</code> property in <code>
+     * ${karaf.etc}/config.properties</code>.
+     *
      * @return
      */
     boolean isExport();
 
     /**
-     * Whether given library's exported packages should be added to <code>org.osgi.framework.bootdelegation</code>
-     * property in <code>${karaf.etc}/config.properties</code>
+     * Whether given library's exported packages should be added to <code>
+     * org.osgi.framework.bootdelegation</code> property in <code>${karaf.etc}/config.properties
+     * </code>
+     *
      * @return
      */
     boolean isDelegate();
-
 }

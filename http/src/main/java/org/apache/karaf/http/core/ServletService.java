@@ -21,5 +21,4 @@ import java.util.List;
 public interface ServletService {
 
     List<ServletInfo> getServlets();
-
 }

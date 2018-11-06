@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.jms.command;
 
-
 import org.apache.karaf.jms.command.completers.ConnectionFactoriesFileNameCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -27,7 +26,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class DeleteCommand extends JmsCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The JMS connection factory name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The JMS connection factory name",
+            required = true,
+            multiValued = false)
     @Completion(ConnectionFactoriesFileNameCompleter.class)
     String name;
 
@@ -36,5 +40,4 @@ public class DeleteCommand extends JmsCommandSupport {
         getJmsService().delete(name);
         return null;
     }
-
 }

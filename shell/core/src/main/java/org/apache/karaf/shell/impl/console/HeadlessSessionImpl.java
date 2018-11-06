@@ -26,7 +26,6 @@ import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.api.console.Command;
@@ -48,11 +47,22 @@ public class HeadlessSessionImpl implements Session {
     final CommandSession session;
     final Registry registry;
 
-    public HeadlessSessionImpl(SessionFactory factory, CommandProcessor processor, InputStream in, PrintStream out, PrintStream err) {
+    public HeadlessSessionImpl(
+            SessionFactory factory,
+            CommandProcessor processor,
+            InputStream in,
+            PrintStream out,
+            PrintStream err) {
         this(factory, processor, in, out, err, null);
     }
 
-    public HeadlessSessionImpl(SessionFactory factory, CommandProcessor processor, InputStream in, PrintStream out, PrintStream err, Session parent) {
+    public HeadlessSessionImpl(
+            SessionFactory factory,
+            CommandProcessor processor,
+            InputStream in,
+            PrintStream out,
+            PrintStream err,
+            Session parent) {
         // Parent session
         this.parent = parent;
         // Terminal
@@ -167,7 +177,8 @@ public class HeadlessSessionImpl implements Session {
             List<Command> commands = registry.getCommands();
             for (String scope : scopes) {
                 for (Command command : commands) {
-                    if ((Session.SCOPE_GLOBAL.equals(scope) || command.getScope().equals(scope)) && command.getName().equals(name)) {
+                    if ((Session.SCOPE_GLOBAL.equals(scope) || command.getScope().equals(scope))
+                            && command.getName().equals(name)) {
                         return command.getScope() + ":" + name;
                     }
                 }
@@ -215,24 +226,18 @@ public class HeadlessSessionImpl implements Session {
         }
 
         @Override
-        public void setEchoEnabled(boolean enabled) {
-        }
+        public void setEchoEnabled(boolean enabled) {}
 
         @Override
-        public void addSignalListener(SignalListener listener, Signal... signal) {
-        }
+        public void addSignalListener(SignalListener listener, Signal... signal) {}
 
         @Override
-        public void addSignalListener(SignalListener listener, EnumSet<Signal> signals) {
-        }
+        public void addSignalListener(SignalListener listener, EnumSet<Signal> signals) {}
 
         @Override
-        public void addSignalListener(SignalListener listener) {
-        }
+        public void addSignalListener(SignalListener listener) {}
 
         @Override
-        public void removeSignalListener(SignalListener listener) {
-        }
+        public void removeSignalListener(SignalListener listener) {}
     }
-
 }

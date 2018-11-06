@@ -14,6 +14,15 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
+import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -31,33 +40,23 @@ import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.NamePubkeyCallbackHandler;
-import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
-import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
 import org.apache.log4j.Level;
 import org.hamcrest.Matchers;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(FrameworkRunner.class)
-@CreateLdapServer(transports = {
-    @CreateTransport(protocol = "LDAP")})
-@CreateDS(name = "LdapPubkeyLoginModuleTest-class",
-        partitions = {
-            @CreatePartition(name = "example", suffix = "dc=example,dc=com")})
-@ApplyLdifFiles(
-        "org/apache/karaf/jaas/modules/ldap/example.com_pubkey.ldif"
-)
+@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP")})
+@CreateDS(
+        name = "LdapPubkeyLoginModuleTest-class",
+        partitions = {@CreatePartition(name = "example", suffix = "dc=example,dc=com")})
+@ApplyLdifFiles("org/apache/karaf/jaas/modules/ldap/example.com_pubkey.ldif")
 public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
 
-    private static final String LDAP_PROPERTIES_FILE = "org/apache/karaf/jaas/modules/ldap/ldap_pubkey.properties";
+    private static final String LDAP_PROPERTIES_FILE =
+            "org/apache/karaf/jaas/modules/ldap/ldap_pubkey.properties";
 
     @Before
     public void updatePort() throws Exception {
@@ -78,8 +77,10 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         Properties options = ldapLoginModuleOptions();
         LDAPPubkeyLoginModule module = new LDAPPubkeyLoginModule();
         Subject subject = new Subject();
-        Path pubkeyFile = srcTestResourcePath("org/apache/karaf/jaas/modules/ldap/ldaptest.admin.id_rsa");
-        module.initialize(subject, new NamePubkeyCallbackHandler("admin", pubkeyFile), null, options);
+        Path pubkeyFile =
+                srcTestResourcePath("org/apache/karaf/jaas/modules/ldap/ldaptest.admin.id_rsa");
+        module.initialize(
+                subject, new NamePubkeyCallbackHandler("admin", pubkeyFile), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login());
@@ -90,7 +91,10 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("admin"));
 
         assertTrue(module.logout());
-        assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
+        assertEquals(
+                "Principals should be gone as the user has logged out",
+                0,
+                subject.getPrincipals().size());
     }
 
     @Test
@@ -98,8 +102,10 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         Properties options = ldapLoginModuleOptions();
         LDAPPubkeyLoginModule module = new LDAPPubkeyLoginModule();
         Subject subject = new Subject();
-        Path pubkeyFile = srcTestResourcePath("org/apache/karaf/jaas/modules/ldap/ldaptest.cheese.id_rsa");
-        module.initialize(subject, new NamePubkeyCallbackHandler("cheese", pubkeyFile), null, options);
+        Path pubkeyFile =
+                srcTestResourcePath("org/apache/karaf/jaas/modules/ldap/ldaptest.cheese.id_rsa");
+        module.initialize(
+                subject, new NamePubkeyCallbackHandler("cheese", pubkeyFile), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertTrue(module.login());
@@ -110,7 +116,10 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         assertThat(names(subject.getPrincipals(RolePrincipal.class)), Matchers.empty());
 
         assertTrue(module.logout());
-        assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
+        assertEquals(
+                "Principals should be gone as the user has logged out",
+                0,
+                subject.getPrincipals().size());
     }
 
     @Test
@@ -118,8 +127,10 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         Properties options = ldapLoginModuleOptions();
         LDAPPubkeyLoginModule module = new LDAPPubkeyLoginModule();
         Subject subject = new Subject();
-        Path pubkeyFile = srcTestResourcePath("org/apache/karaf/jaas/modules/ldap/ldaptest.cheese.id_rsa");
-        module.initialize(subject, new NamePubkeyCallbackHandler("admin", pubkeyFile), null, options);
+        Path pubkeyFile =
+                srcTestResourcePath("org/apache/karaf/jaas/modules/ldap/ldaptest.cheese.id_rsa");
+        module.initialize(
+                subject, new NamePubkeyCallbackHandler("admin", pubkeyFile), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(LDAPLoginModule.class);
@@ -133,7 +144,6 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         } finally {
             logger.setLevel(oldLevel);
         }
-
     }
 
     @Test
@@ -141,8 +151,10 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         Properties options = ldapLoginModuleOptions();
         LDAPPubkeyLoginModule module = new LDAPPubkeyLoginModule();
         Subject subject = new Subject();
-        Path pubkeyFile = srcTestResourcePath("org/apache/karaf/jaas/modules/ldap/ldaptest.admin.id_rsa");
-        module.initialize(subject, new NamePubkeyCallbackHandler("imnothere", pubkeyFile), null, options);
+        Path pubkeyFile =
+                srcTestResourcePath("org/apache/karaf/jaas/modules/ldap/ldaptest.admin.id_rsa");
+        module.initialize(
+                subject, new NamePubkeyCallbackHandler("imnothere", pubkeyFile), null, options);
 
         assertEquals("Precondition", 0, subject.getPrincipals().size());
         assertFalse(module.login());
@@ -165,5 +177,4 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         File file = new File(basedir + "/target/test-classes/" + LDAP_PROPERTIES_FILE);
         return new Properties(file);
     }
-
 }

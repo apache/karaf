@@ -16,29 +16,54 @@
  */
 package org.apache.karaf.jms.command;
 
-
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "jms", name = "move", description = "Move messages from one JMS queue to another one.")
+@Command(
+        scope = "jms",
+        name = "move",
+        description = "Move messages from one JMS queue to another one.")
 @Service
 public class MoveCommand extends JmsConnectionCommandSupport {
 
-    @Argument(index = 1, name = "source", description = "The source JMS queue", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "source",
+            description = "The source JMS queue",
+            required = true,
+            multiValued = false)
     String source;
 
-    @Argument(index = 2, name = "destination", description = "The destination JMS queue", required = true, multiValued = false)
+    @Argument(
+            index = 2,
+            name = "destination",
+            description = "The destination JMS queue",
+            required = true,
+            multiValued = false)
     String destination;
 
-    @Option(name = "-s", aliases = { "--selector" }, description = "Selector to move only some messages", required = false, multiValued = false)
+    @Option(
+            name = "-s",
+            aliases = {"--selector"},
+            description = "Selector to move only some messages",
+            required = false,
+            multiValued = false)
     String selector;
 
     @Override
     public Object execute() throws Exception {
-        System.out.println(getJmsService().move(connectionFactory, source, destination, selector, username, password) + " message(s) moved");
+        System.out.println(
+                getJmsService()
+                                .move(
+                                        connectionFactory,
+                                        source,
+                                        destination,
+                                        selector,
+                                        username,
+                                        password)
+                        + " message(s) moved");
         return null;
     }
-
 }

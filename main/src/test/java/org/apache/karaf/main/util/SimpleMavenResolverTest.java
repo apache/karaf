@@ -23,27 +23,31 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
-
-import org.junit.Assert;
-
 import org.apache.karaf.util.maven.Parser;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class SimpleMavenResolverTest {
-    private static final String ARTIFACT_COORDS = "mvn:org.apache.karaf.features/framework/1.0.0/xml/features";
+    private static final String ARTIFACT_COORDS =
+            "mvn:org.apache.karaf.features/framework/1.0.0/xml/features";
 
     @Test
     public void mavenToPath() throws MalformedURLException {
         String resolvedPath = Parser.pathFromMaven(ARTIFACT_COORDS);
-        Assert.assertEquals("org/apache/karaf/features/framework/1.0.0/framework-1.0.0-features.xml", resolvedPath);
+        Assert.assertEquals(
+                "org/apache/karaf/features/framework/1.0.0/framework-1.0.0-features.xml",
+                resolvedPath);
     }
-    
+
     @Test
     public void testResolve() throws URISyntaxException {
-        File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
+        File basedir =
+                new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
         File system = new File(home, "system");
         SimpleMavenResolver resolver = new SimpleMavenResolver(Collections.singletonList(system));
-        resolver.resolve(new URI(ARTIFACT_COORDS)); // Will throw exception if the artifact can not be resolved
+        resolver.resolve(
+                new URI(ARTIFACT_COORDS)); // Will throw exception if the artifact can not be
+        // resolved
     }
 }

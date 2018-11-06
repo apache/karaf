@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.commands.basic;
 
 import java.util.List;
-
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.CommandWithAction;
@@ -36,7 +35,7 @@ public abstract class AbstractCommand implements CommandWithAction {
                 return null;
             }
         } finally {
-        	releaseAction(action);
+            releaseAction(action);
         }
     }
 
@@ -47,17 +46,16 @@ public abstract class AbstractCommand implements CommandWithAction {
     public abstract Action createNewAction();
 
     /**
-     * Release the used Action.
-     * This method has to be overridden for pool based Actions.
+     * Release the used Action. This method has to be overridden for pool based Actions.
+     *
      * @param action Action that was executed
      * @throws Exception if something went wrong during the Action release
      */
     public void releaseAction(Action action) throws Exception {
-    	// Do nothing by default (stateful)
+        // Do nothing by default (stateful)
     }
 
     protected ActionPreparator getPreparator() throws Exception {
         return new DefaultActionPreparator();
     }
-    
 }

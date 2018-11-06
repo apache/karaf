@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.profile.command;
 
+import static org.apache.karaf.profile.impl.Utils.join;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.shell.api.action.Action;
@@ -29,9 +30,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-import static org.apache.karaf.profile.impl.Utils.join;
-
-
 @Command(name = "list", scope = "profile", description = "Lists all profiles")
 @Service
 public class ProfileList implements Action {
@@ -39,8 +37,7 @@ public class ProfileList implements Action {
     @Option(name = "--hidden", description = "Display hidden profiles")
     private boolean hidden;
 
-    @Reference
-    private ProfileService profileService;
+    @Reference private ProfileService profileService;
 
     @Override
     public Object execute() throws Exception {
@@ -59,5 +56,4 @@ public class ProfileList implements Action {
         table.print(System.out);
         return null;
     }
-
 }

@@ -26,5 +26,4 @@ public interface BookingMBean {
     void add(long id, String flight, String customer) throws MBeanException;
 
     void remove(long id) throws MBeanException;
-
 }

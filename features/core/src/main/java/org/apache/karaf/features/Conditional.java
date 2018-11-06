@@ -26,7 +26,7 @@ public interface Conditional extends Blacklisting {
 
     List<BundleInfo> getBundles();
 
-//    Map<String, Map<String, String>> getConfigurations();
+    //    Map<String, Map<String, String>> getConfigurations();
     List<ConfigInfo> getConfigurations();
 
     List<ConfigFileInfo> getConfigurationFiles();

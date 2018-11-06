@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Assume;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
@@ -45,7 +44,8 @@ public class RunIfRule implements MethodRule {
     }
 
     public Statement apply(Statement base, FrameworkMethod method, Object target) {
-        List<RunIf> ignores = findRunIfs(method.getAnnotations(), new ArrayList<>(), new HashSet<>());
+        List<RunIf> ignores =
+                findRunIfs(method.getAnnotations(), new ArrayList<>(), new HashSet<>());
         if (ignores.isEmpty()) {
             return base;
         }
@@ -58,7 +58,8 @@ public class RunIfRule implements MethodRule {
         return base;
     }
 
-    private List<RunIf> findRunIfs(Annotation[] annotations, List<RunIf> ignores, Set<Class> tested) {
+    private List<RunIf> findRunIfs(
+            Annotation[] annotations, List<RunIf> ignores, Set<Class> tested) {
         for (Annotation annotation : annotations) {
             if (tested.add(annotation.getClass())) {
                 if (annotation instanceof RunIf) {
@@ -79,11 +80,14 @@ public class RunIfRule implements MethodRule {
         try {
             if (cond.isMemberClass()) {
                 if (Modifier.isStatic(cond.getModifiers())) {
-                    return cond.getDeclaredConstructor(new Class<?>[]{}).newInstance();
-                } else if (instance != null && instance.getClass().isAssignableFrom(cond.getDeclaringClass())) {
-                    return cond.getDeclaredConstructor(new Class<?>[]{instance.getClass()}).newInstance(instance);
+                    return cond.getDeclaredConstructor(new Class<?>[] {}).newInstance();
+                } else if (instance != null
+                        && instance.getClass().isAssignableFrom(cond.getDeclaringClass())) {
+                    return cond.getDeclaredConstructor(new Class<?>[] {instance.getClass()})
+                            .newInstance(instance);
                 }
-                throw new IllegalArgumentException("Unable to instanciate " + cond.getClass().getName());
+                throw new IllegalArgumentException(
+                        "Unable to instanciate " + cond.getClass().getName());
             } else {
                 return cond.newInstance();
             }
@@ -106,5 +110,4 @@ public class RunIfRule implements MethodRule {
             Assume.assumeTrue("Ignored by " + condition.getClass().getSimpleName(), false);
         }
     }
-
 }

@@ -21,7 +21,6 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.apache.karaf.log.core.Level;
 import org.apache.karaf.log.core.LogService;
 import org.ops4j.pax.logging.spi.PaxAppender;
@@ -36,7 +35,6 @@ public class LogServiceImpl implements LogService, PaxAppender {
     private final ConfigurationAdmin configAdmin;
     private final CircularBuffer<PaxLoggingEvent> buffer;
     private List<PaxAppender> appenders;
-    
 
     public LogServiceImpl(ConfigurationAdmin configAdmin, int size) {
         this.configAdmin = configAdmin;
@@ -47,19 +45,16 @@ public class LogServiceImpl implements LogService, PaxAppender {
     private LogServiceInternal getDelegate(Dictionary<String, Object> config) {
         if (config.get("log4j.rootLogger") != null) {
             return new LogServiceLog4j1Impl(config);
-        }
-        else if (config.get("log4j2.rootLogger.level") != null) {
+        } else if (config.get("log4j2.rootLogger.level") != null) {
             return new LogServiceLog4j2Impl(config);
-        }
-        else if (config.get("org.ops4j.pax.logging.log4j2.config.file") != null) {
+        } else if (config.get("org.ops4j.pax.logging.log4j2.config.file") != null) {
             String file = config.get("org.ops4j.pax.logging.log4j2.config.file").toString();
             if (file.endsWith(".xml")) {
                 return new LogServiceLog4j2XmlImpl(file);
             } else {
                 throw new IllegalStateException("Unsupported Log4j2 configuration type: " + file);
             }
-        }
-        else {
+        } else {
             throw new IllegalStateException("Unrecognized configuration");
         }
     }
@@ -138,7 +133,7 @@ public class LogServiceImpl implements LogService, PaxAppender {
     public void clearEvents() {
         buffer.clear();
     }
-    
+
     @Override
     public PaxLoggingEvent getLastException(String logger) {
         PaxLoggingEvent throwableEvent = null;
@@ -147,14 +142,14 @@ public class LogServiceImpl implements LogService, PaxAppender {
             // if this is an exception, and the log is the same as the requested log,
             // then save this exception and continue iterating from oldest to newest
             if ((event.getThrowableStrRep() != null)
-                    &&(logger != null)
-                    &&(checkIfFromRequestedLog(event, logger))) {
+                    && (logger != null)
+                    && (checkIfFromRequestedLog(event, logger))) {
                 throwableEvent = event;
-              // Do not break, as we iterate from the oldest to the newest event
-            } else if ((event.getThrowableStrRep() != null)&&(logger == null)) {
+                // Do not break, as we iterate from the oldest to the newest event
+            } else if ((event.getThrowableStrRep() != null) && (logger == null)) {
                 // now check if there has been no log passed in, and if this is an exception
                 // then save this exception and continue iterating from oldest to newest
-                throwableEvent = event;             
+                throwableEvent = event;
             }
         }
 
@@ -184,5 +179,4 @@ public class LogServiceImpl implements LogService, PaxAppender {
             }
         }
     }
-
 }

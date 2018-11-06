@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.CommandWithAction;
@@ -61,8 +60,9 @@ public class OldArgumentCompleter implements Completer {
     final Map<Integer, Field> arguments = new HashMap<>();
     boolean strict = true;
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public OldArgumentCompleter(CommandSession session, CommandWithAction function, String command) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public OldArgumentCompleter(
+            CommandSession session, CommandWithAction function, String command) {
         this.function = function;
         // Command name completer
         commandCompleter = new StringsCompleter(getNames(session, command));
@@ -84,14 +84,20 @@ public class OldArgumentCompleter implements Completer {
                 if (argument != null) {
                     Integer key = argument.index();
                     if (arguments.containsKey(key)) {
-                        LOGGER.warn("Duplicate @Argument annotations on class " + type.getName() + " for index: " + key + " see: " + field);
+                        LOGGER.warn(
+                                "Duplicate @Argument annotations on class "
+                                        + type.getName()
+                                        + " for index: "
+                                        + key
+                                        + " see: "
+                                        + field);
                     } else {
                         arguments.put(key, field);
                     }
                 }
             }
         }
-//        options.put(HelpOption.HELP.name(), HelpOption.HELP);
+        //        options.put(HelpOption.HELP.name(), HelpOption.HELP);
         optionsCompleter = new StringsCompleter(options.keySet());
         // Build arguments completers
         argsCompleters = new ArrayList<>();
@@ -116,17 +122,31 @@ public class OldArgumentCompleter implements Completer {
         } else {
             optionalCompleters = new HashMap<>();
             final Map<Integer, Method> methods = new HashMap<>();
-            for (Class<?> type = function.getActionClass(); type != null; type = type.getSuperclass()) {
+            for (Class<?> type = function.getActionClass();
+                    type != null;
+                    type = type.getSuperclass()) {
                 for (Method method : type.getDeclaredMethods()) {
                     CompleterValues completerMethod = method.getAnnotation(CompleterValues.class);
                     if (completerMethod != null) {
                         int index = completerMethod.index();
                         Integer key = index;
                         if (index >= arguments.size() || index < 0) {
-                            LOGGER.warn("Index out of range on @CompleterValues on class " + type.getName() + " for index: " + key + " see: " + method);
+                            LOGGER.warn(
+                                    "Index out of range on @CompleterValues on class "
+                                            + type.getName()
+                                            + " for index: "
+                                            + key
+                                            + " see: "
+                                            + method);
                         }
                         if (methods.containsKey(key)) {
-                            LOGGER.warn("Duplicate @CompleterMethod annotations on class " + type.getName() + " for index: " + key + " see: " + method);
+                            LOGGER.warn(
+                                    "Duplicate @CompleterMethod annotations on class "
+                                            + type.getName()
+                                            + " for index: "
+                                            + key
+                                            + " see: "
+                                            + method);
                         } else {
                             methods.put(key, method);
                         }
@@ -149,13 +169,16 @@ public class OldArgumentCompleter implements Completer {
                             LOGGER.warn("Could not use value " + value + " as set of completions!");
                         }
                     } catch (IllegalAccessException e) {
-                        LOGGER.warn("Could not invoke @CompleterMethod on " + function + ". " + e, e);
+                        LOGGER.warn(
+                                "Could not invoke @CompleterMethod on " + function + ". " + e, e);
                     } catch (InvocationTargetException e) {
                         Throwable target = e.getTargetException();
                         if (target == null) {
                             target = e;
                         }
-                        LOGGER.warn("Could not invoke @CompleterMethod on " + function + ". " + target, target);
+                        LOGGER.warn(
+                                "Could not invoke @CompleterMethod on " + function + ". " + target,
+                                target);
                     } finally {
                         try {
                             function.releaseAction(action);
@@ -168,7 +191,8 @@ public class OldArgumentCompleter implements Completer {
                     Class<?> type = field.getType();
                     if (type.isAssignableFrom(File.class)) {
                         argCompleter = new FileCompleter(session);
-                    } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
+                    } else if (type.isAssignableFrom(Boolean.class)
+                            || type.isAssignableFrom(boolean.class)) {
                         argCompleter = new StringsCompleter(new String[] {"false", "true"}, false);
                     } else if (type.isAssignableFrom(Enum.class)) {
                         Set<String> values = new HashSet<>();
@@ -191,13 +215,13 @@ public class OldArgumentCompleter implements Completer {
         if (s.length == 1) {
             return s;
         } else {
-            return new String[] { command, s[1] };
+            return new String[] {command, s[1]};
         }
     }
 
     /**
-     * If true, a completion at argument index N will only succeed
-     * if all the completions from 0-(N-1) also succeed.
+     * If true, a completion at argument index N will only succeed if all the completions from
+     * 0-(N-1) also succeed.
      *
      * @param strict The new value of the strict flag.
      */
@@ -206,8 +230,8 @@ public class OldArgumentCompleter implements Completer {
     }
 
     /**
-     * Return whether a completion at argument index N will succees
-     * if all the completions from arguments 0-(N-1) also succeed.
+     * Return whether a completion at argument index N will succees if all the completions from
+     * arguments 0-(N-1) also succeed.
      *
      * @return The value of the strict flag.
      */
@@ -215,16 +239,15 @@ public class OldArgumentCompleter implements Completer {
         return this.strict;
     }
 
-    public int complete(final String buffer, final int cursor,
-                        final List<String> candidates) {
+    public int complete(final String buffer, final int cursor, final List<String> candidates) {
         ArgumentList list = delimit(buffer, cursor);
         int argpos = list.getArgumentPosition();
         int argIndex = list.getCursorArgumentIndex();
 
-        //Store the argument list so that it can be used by completers.
+        // Store the argument list so that it can be used by completers.
         CommandSession commandSession = CommandSessionHolder.getSession();
-        if(commandSession != null) {
-            commandSession.put(ARGUMENTS_LIST,list);
+        if (commandSession != null) {
+            commandSession.put(ARGUMENTS_LIST, list);
         }
 
         Completer comp = null;
@@ -251,25 +274,32 @@ public class OldArgumentCompleter implements Completer {
                     return -1;
                 }
                 Field field = fields.get(option);
-                if (field != null && field.getType() != boolean.class && field.getType() != Boolean.class) {
+                if (field != null
+                        && field.getType() != boolean.class
+                        && field.getType() != Boolean.class) {
                     if (++index == argIndex) {
                         comp = NullCompleter.INSTANCE;
                     }
                 }
                 index++;
             }
-            if (comp == null && index >= argIndex && index < args.length && args[index].startsWith("-")) {
+            if (comp == null
+                    && index >= argIndex
+                    && index < args.length
+                    && args[index].startsWith("-")) {
                 comp = optionsCompleter;
             }
         }
-        //Now check for if last Option has a completer
+        // Now check for if last Option has a completer
         int lastAgurmentIndex = argIndex - 1;
         if (lastAgurmentIndex >= 1) {
             Option lastOption = options.get(args[lastAgurmentIndex]);
             if (lastOption != null) {
 
                 Field lastField = fields.get(lastOption);
-                if (lastField != null && lastField.getType() != boolean.class && lastField.getType() != Boolean.class) {
+                if (lastField != null
+                        && lastField.getType() != boolean.class
+                        && lastField.getType() != Boolean.class) {
                     Option option = lastField.getAnnotation(Option.class);
                     if (option != null) {
                         Completer optionValueCompleter = null;
@@ -279,13 +309,16 @@ public class OldArgumentCompleter implements Completer {
                             if (optionValueCompleter == null) {
                                 String[] aliases = option.aliases();
                                 if (aliases.length > 0) {
-                                    for (int i = 0; i < aliases.length && optionValueCompleter == null; i++) {
-                                        optionValueCompleter = optionalCompleters.get(option.aliases()[i]);
+                                    for (int i = 0;
+                                            i < aliases.length && optionValueCompleter == null;
+                                            i++) {
+                                        optionValueCompleter =
+                                                optionalCompleters.get(option.aliases()[i]);
                                     }
                                 }
                             }
                         }
-                        if(optionValueCompleter != null) {
+                        if (optionValueCompleter != null) {
                             comp = optionValueCompleter;
                         }
                     }
@@ -297,14 +330,22 @@ public class OldArgumentCompleter implements Completer {
         if (comp == null) {
             int indexArg = 0;
             while (index < argIndex) {
-                Completer sub = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
+                Completer sub =
+                        argsCompleters.get(
+                                indexArg >= argsCompleters.size()
+                                        ? argsCompleters.size() - 1
+                                        : indexArg);
                 if (!verifyCompleter(sub, args[index])) {
                     return -1;
                 }
                 index++;
                 indexArg++;
             }
-            comp = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
+            comp =
+                    argsCompleters.get(
+                            indexArg >= argsCompleters.size()
+                                    ? argsCompleters.size() - 1
+                                    : indexArg);
         }
 
         int ret = comp.complete(list.getCursorArgument(), argpos, candidates);
@@ -316,22 +357,18 @@ public class OldArgumentCompleter implements Completer {
         int pos = ret + (list.getBufferPosition() - argpos);
 
         /**
-         * Special case: when completing in the middle of a line, and the
-         * area under the cursor is a delimiter, then trim any delimiters
-         * from the candidates, since we do not need to have an extra
-         * delimiter.
+         * Special case: when completing in the middle of a line, and the area under the cursor is a
+         * delimiter, then trim any delimiters from the candidates, since we do not need to have an
+         * extra delimiter.
          *
-         * E.g., if we have a completion for "foo", and we
-         * enter "f bar" into the buffer, and move to after the "f"
-         * and hit TAB, we want "foo bar" instead of "foo  bar".
+         * <p>E.g., if we have a completion for "foo", and we enter "f bar" into the buffer, and
+         * move to after the "f" and hit TAB, we want "foo bar" instead of "foo bar".
          */
-
         if ((buffer != null) && (cursor != buffer.length()) && isDelimiter(buffer, cursor)) {
             for (int i = 0; i < candidates.size(); i++) {
                 String val = candidates.get(i);
 
-                while ((val.length() > 0)
-                    && isDelimiter(val, val.length() - 1)) {
+                while ((val.length() > 0) && isDelimiter(val, val.length() - 1)) {
                     val = val.substring(0, val.length() - 1);
                 }
 
@@ -344,7 +381,8 @@ public class OldArgumentCompleter implements Completer {
 
     protected boolean verifyCompleter(Completer completer, String argument) {
         List<String> candidates = new ArrayList<>();
-        return completer.complete(argument, argument.length(), candidates) != -1 && !candidates.isEmpty();
+        return completer.complete(argument, argument.length(), candidates) != -1
+                && !candidates.isEmpty();
     }
 
     public ArgumentList delimit(final String buffer, final int cursor) {
@@ -352,17 +390,16 @@ public class OldArgumentCompleter implements Completer {
         try {
             List<List<List<String>>> program = parser.program();
             List<String> pipe = program.get(parser.c0).get(parser.c1);
-            return new ArgumentList(pipe.toArray(new String[pipe.size()]), parser.c2, parser.c3, cursor);
+            return new ArgumentList(
+                    pipe.toArray(new String[pipe.size()]), parser.c2, parser.c3, cursor);
         } catch (Throwable t) {
-            return new ArgumentList(new String[] { buffer }, 0, cursor, cursor);
+            return new ArgumentList(new String[] {buffer}, 0, cursor, cursor);
         }
     }
 
     /**
-     * Return true if the specified character is a whitespace
-     * parameter. Check to ensure that the character is not
-     * escaped and returns true from
-     * {@link #isDelimiterChar}.
+     * Return true if the specified character is a whitespace parameter. Check to ensure that the
+     * character is not escaped and returns true from {@link #isDelimiterChar}.
      *
      * @param buffer The complete command buffer.
      * @param pos The index of the character in the buffer.
@@ -377,8 +414,8 @@ public class OldArgumentCompleter implements Completer {
     }
 
     /**
-     * The character is a delimiter if it is whitespace, and the
-     * preceding character is not an escape character.
+     * The character is a delimiter if it is whitespace, and the preceding character is not an
+     * escape character.
      *
      * @param buffer The complete command buffer.
      * @param pos The position of the character in the buffer.
@@ -388,9 +425,7 @@ public class OldArgumentCompleter implements Completer {
         return Character.isWhitespace(buffer.charAt(pos));
     }
 
-    /**
-     * The result of a delimited buffer.
-     */
+    /** The result of a delimited buffer. */
     public static class ArgumentList {
 
         private String[] arguments;
@@ -399,13 +434,16 @@ public class OldArgumentCompleter implements Completer {
         private int bufferPosition;
 
         /**
-         *  @param arguments The array of tokens.
-         *  @param cursorArgumentIndex The token index of the cursor.
-         *  @param argumentPosition The position of the cursor in the current token.
-         *  @param bufferPosition The position of the cursor in the whole buffer.
+         * @param arguments The array of tokens.
+         * @param cursorArgumentIndex The token index of the cursor.
+         * @param argumentPosition The position of the cursor in the current token.
+         * @param bufferPosition The position of the cursor in the whole buffer.
          */
-        public ArgumentList(String[] arguments, int cursorArgumentIndex,
-            int argumentPosition, int bufferPosition) {
+        public ArgumentList(
+                String[] arguments,
+                int cursorArgumentIndex,
+                int argumentPosition,
+                int bufferPosition) {
             this.arguments = arguments;
             this.cursorArgumentIndex = cursorArgumentIndex;
             this.argumentPosition = argumentPosition;
@@ -421,8 +459,7 @@ public class OldArgumentCompleter implements Completer {
         }
 
         public String getCursorArgument() {
-            if ((cursorArgumentIndex < 0)
-                || (cursorArgumentIndex >= arguments.length)) {
+            if ((cursorArgumentIndex < 0) || (cursorArgumentIndex >= arguments.length)) {
                 return null;
             }
 

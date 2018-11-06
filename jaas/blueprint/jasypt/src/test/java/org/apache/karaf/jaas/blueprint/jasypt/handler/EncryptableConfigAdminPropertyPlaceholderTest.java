@@ -14,6 +14,11 @@
  */
 package org.apache.karaf.jaas.blueprint.jasypt.handler;
 
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
+
+import java.io.*;
+import java.util.*;
+import java.util.jar.JarInputStream;
 import junit.framework.TestCase;
 import org.apache.felix.connect.PojoServiceRegistryFactoryImpl;
 import org.apache.felix.connect.launch.BundleDescriptor;
@@ -31,12 +36,6 @@ import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
-
-import java.io.*;
-import java.util.*;
-import java.util.jar.JarInputStream;
-
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
 
@@ -58,28 +57,39 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
         env.setPassword("password");
         enc.setConfig(env);
 
-        System.setProperty("org.osgi.framework.storage", "target/osgi/" + System.currentTimeMillis());
+        System.setProperty(
+                "org.osgi.framework.storage", "target/osgi/" + System.currentTimeMillis());
         System.setProperty("karaf.name", "root");
 
-        List<BundleDescriptor> bundles = new ClasspathScanner().scanForBundles("(Bundle-SymbolicName=*)");
-        bundles.add(getBundleDescriptor(
-                "target/jasypt2.jar",
-                bundle().add("OSGI-INF/blueprint/karaf-jaas-jasypt.xml", getClass().getResource("/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
-                        .set("Manifest-Version", "2")
-                        .set("Bundle-ManifestVersion", "2")
-                        .set("Bundle-SymbolicName", "jasypt")
-                        .set("Bundle-Version", "0.0.0")));
-        bundles.add(getBundleDescriptor(
-                "target/test2.jar",
-                bundle().add("OSGI-INF/blueprint/configadmin-test.xml", getClass().getResource("configadmin-test.xml"))
-                        .set("Manifest-Version", "2")
-                        .set("Bundle-ManifestVersion", "2")
-                        .set("Bundle-SymbolicName", "configtest")
-                        .set("Bundle-Version", "0.0.0")));
+        List<BundleDescriptor> bundles =
+                new ClasspathScanner().scanForBundles("(Bundle-SymbolicName=*)");
+        bundles.add(
+                getBundleDescriptor(
+                        "target/jasypt2.jar",
+                        bundle().add(
+                                        "OSGI-INF/blueprint/karaf-jaas-jasypt.xml",
+                                        getClass()
+                                                .getResource(
+                                                        "/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
+                                .set("Manifest-Version", "2")
+                                .set("Bundle-ManifestVersion", "2")
+                                .set("Bundle-SymbolicName", "jasypt")
+                                .set("Bundle-Version", "0.0.0")));
+        bundles.add(
+                getBundleDescriptor(
+                        "target/test2.jar",
+                        bundle().add(
+                                        "OSGI-INF/blueprint/configadmin-test.xml",
+                                        getClass().getResource("configadmin-test.xml"))
+                                .set("Manifest-Version", "2")
+                                .set("Bundle-ManifestVersion", "2")
+                                .set("Bundle-SymbolicName", "configtest")
+                                .set("Bundle-Version", "0.0.0")));
 
         Map config = new HashMap();
         config.put(PojoServiceRegistryFactory.BUNDLE_DESCRIPTORS, bundles);
-        PojoServiceRegistry reg = new PojoServiceRegistryFactoryImpl().newPojoServiceRegistry(config);
+        PojoServiceRegistry reg =
+                new PojoServiceRegistryFactoryImpl().newPojoServiceRegistry(config);
         bundleContext = reg.getBundleContext();
     }
 
@@ -94,9 +104,7 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
             headers.put(entry.getKey().toString(), entry.getValue().toString());
         }
         return new BundleDescriptor(
-                getClass().getClassLoader(),
-                "jar:" + file.toURI().toString() + "!/",
-                headers);
+                getClass().getClassLoader(), "jar:" + file.toURI().toString() + "!/", headers);
     }
 
     @After
@@ -143,14 +151,11 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
                     assertEquals(encryptedValue, val);
                     // Decrypt and check value
                     String decrypt = enc.decrypt(val);
-                    assertEquals("bar",decrypt);
+                    assertEquals("bar", decrypt);
                 }
             }
-
         }
-
     }
-
 
     protected <T> T getOsgiService(Class<T> type, long timeout) {
         return getOsgiService(type, null, timeout);
@@ -172,7 +177,14 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
                 if (filter.startsWith("(")) {
                     flt = "(&(" + Constants.OBJECTCLASS + "=" + type.getName() + ")" + filter + ")";
                 } else {
-                    flt = "(&(" + Constants.OBJECTCLASS + "=" + type.getName() + ")(" + filter + "))";
+                    flt =
+                            "(&("
+                                    + Constants.OBJECTCLASS
+                                    + "="
+                                    + type.getName()
+                                    + ")("
+                                    + filter
+                                    + "))";
                 }
             } else {
                 flt = "(" + Constants.OBJECTCLASS + "=" + type.getName() + ")";
@@ -187,11 +199,13 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
                 Dictionary dic = bundleContext.getBundle().getHeaders();
                 System.err.println("Test bundle headers: " + explode(dic));
 
-                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, null))) {
+                for (ServiceReference ref :
+                        asCollection(bundleContext.getAllServiceReferences(null, null))) {
                     System.err.println("ServiceReference: " + ref);
                 }
 
-                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, flt))) {
+                for (ServiceReference ref :
+                        asCollection(bundleContext.getAllServiceReferences(null, flt))) {
                     System.err.println("Filtered ServiceReference: " + ref);
                 }
 

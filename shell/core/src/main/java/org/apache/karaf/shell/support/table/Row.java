@@ -22,12 +22,12 @@ import java.util.List;
 public class Row {
     private List<Object> data;
     private List<String> content;
-    
+
     Row() {
         data = new ArrayList<>();
         content = new ArrayList<>();
     }
-    
+
     Row(List<Col> cols) {
         this();
         for (Col col : cols) {
@@ -39,10 +39,10 @@ public class Row {
         this.data = data;
     }
 
-    public void addContent(Object ... cellDataAr) {
+    public void addContent(Object... cellDataAr) {
         data.addAll(Arrays.asList(cellDataAr));
     }
-    
+
     void formatContent(List<Col> cols) {
         content.clear();
         int c = 0;
@@ -51,10 +51,11 @@ public class Row {
             c++;
         }
     }
-    
+
     String getContent(List<Col> cols, String separator) {
         if (cols.size() != content.size()) {
-            throw new RuntimeException("Number of columns and number of content elements do not match");
+            throw new RuntimeException(
+                    "Number of columns and number of content elements do not match");
         }
 
         List<String[]> contents = new ArrayList<>();
@@ -88,5 +89,4 @@ public class Row {
         }
         return st.toString();
     }
-
 }

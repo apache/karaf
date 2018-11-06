@@ -26,9 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.security.auth.Subject;
-
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.api.console.Session;
 import org.jline.utils.AttributedString;
@@ -158,8 +156,12 @@ public class ShellUtil {
                 String str = applyStyle(getStackTrace(t), cm, "st");
                 session.getConsole().print(str);
             } else if ("CommandNotFoundException".equals(name)) {
-                String str = applyStyle("Command not found: ", cm, "em")
-                           + applyStyle((String) t.getClass().getMethod("getCommand").invoke(t), cm, "ee");
+                String str =
+                        applyStyle("Command not found: ", cm, "em")
+                                + applyStyle(
+                                        (String) t.getClass().getMethod("getCommand").invoke(t),
+                                        cm,
+                                        "ee");
                 session.getConsole().println(str);
             } else if ("CommandException".equals(name)) {
                 String str;
@@ -169,12 +171,18 @@ public class ShellUtil {
                     str = applyStyle(t.getMessage(), cm, "em");
                 }
                 session.getConsole().println(str);
-            } else  if ("execution".equals(pst)) {
+            } else if ("execution".equals(pst)) {
                 String str = applyStyle(getStackTrace(t), cm, "st");
                 session.getConsole().print(str);
             } else {
-                String str = applyStyle("Error executing command: ", cm, "em")
-                           + applyStyle(t.getMessage() != null ? t.getMessage() : t.getClass().getName(), cm, "ee");
+                String str =
+                        applyStyle("Error executing command: ", cm, "em")
+                                + applyStyle(
+                                        t.getMessage() != null
+                                                ? t.getMessage()
+                                                : t.getClass().getName(),
+                                        cm,
+                                        "ee");
                 session.getConsole().println(str);
             }
             session.getConsole().flush();
@@ -223,8 +231,7 @@ public class ShellUtil {
                 break;
             }
         }
-        return new AttributedString(text, new StyleResolver(colors::get).resolve("." + t))
-                .toAnsi();
+        return new AttributedString(text, new StyleResolver(colors::get).resolve("." + t)).toAnsi();
     }
 
     public static Map<String, String> getKsColorMap(Session session) {
@@ -237,10 +244,12 @@ public class ShellUtil {
         if (str == null) {
             str = def;
         }
-        String sep = str.matches("[a-z]{2}=[0-9]*(;[0-9]+)*(:[a-z]{2}=[0-9]*(;[0-9]+)*)*") ? ":" : " ";
+        String sep =
+                str.matches("[a-z]{2}=[0-9]*(;[0-9]+)*(:[a-z]{2}=[0-9]*(;[0-9]+)*)*") ? ":" : " ";
         return Arrays.stream(str.split(sep))
-                .collect(Collectors.toMap(s -> s.substring(0, s.indexOf('=')),
-                        s -> s.substring(s.indexOf('=') + 1)));
+                .collect(
+                        Collectors.toMap(
+                                s -> s.substring(0, s.indexOf('=')),
+                                s -> s.substring(s.indexOf('=') + 1)));
     }
-
 }

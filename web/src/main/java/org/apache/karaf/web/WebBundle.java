@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.web;
 
-/**
- * Container for WebBundle information.
- */
+/** Container for WebBundle information. */
 public class WebBundle {
 
     private long bundleId;
@@ -75,5 +73,4 @@ public class WebBundle {
     public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
     }
-
 }

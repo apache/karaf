@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.docker.command;
 
+import java.util.List;
 import org.apache.karaf.docker.command.completers.ContainersNameCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -23,17 +24,24 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.util.List;
-
 @Command(scope = "docker", name = "kill", description = "Kill one or more running containers")
 @Service
 public class KillCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "container", description = "Name or ID of the containers to kill", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "container",
+            description = "Name or ID of the containers to kill",
+            required = true,
+            multiValued = true)
     @Completion(ContainersNameCompleter.class)
     List<String> containers;
 
-    @Option(name = "--signal", description = "The signal to send to the processes", required = false,  multiValued = false)
+    @Option(
+            name = "--signal",
+            description = "The signal to send to the processes",
+            required = false,
+            multiValued = false)
     String signal = "SIGKILL";
 
     @Override
@@ -43,5 +51,4 @@ public class KillCommand extends DockerCommandSupport {
         }
         return null;
     }
-
 }

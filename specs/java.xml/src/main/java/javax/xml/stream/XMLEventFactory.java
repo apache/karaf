@@ -23,9 +23,10 @@ import javax.xml.stream.events.*;
 
 public abstract class XMLEventFactory {
 
-    private static final String DEFAULT_IMPL = "com.sun.xml.internal.stream.events.XMLEventFactoryImpl";
+    private static final String DEFAULT_IMPL =
+            "com.sun.xml.internal.stream.events.XMLEventFactoryImpl";
 
-    protected XMLEventFactory(){}
+    protected XMLEventFactory() {}
 
     public static XMLEventFactory newDefaultFactory() {
         return $FactoryFinder.newInstance(XMLEventFactory.class, DEFAULT_IMPL, null, false, true);
@@ -40,51 +41,76 @@ public abstract class XMLEventFactory {
     }
 
     @Deprecated
-    public static XMLEventFactory newInstance(String factoryId, ClassLoader classLoader) throws FactoryConfigurationError {
+    public static XMLEventFactory newInstance(String factoryId, ClassLoader classLoader)
+            throws FactoryConfigurationError {
         return $FactoryFinder.find(XMLEventFactory.class, factoryId, classLoader, null);
     }
 
-    public static XMLEventFactory newFactory(String factoryId, ClassLoader classLoader) throws FactoryConfigurationError {
+    public static XMLEventFactory newFactory(String factoryId, ClassLoader classLoader)
+            throws FactoryConfigurationError {
         return $FactoryFinder.find(XMLEventFactory.class, factoryId, classLoader, null);
     }
 
     public abstract void setLocation(Location location);
 
-    public abstract Attribute createAttribute(String prefix, String namespaceURI, String localName, String value);
+    public abstract Attribute createAttribute(
+            String prefix, String namespaceURI, String localName, String value);
 
     public abstract Attribute createAttribute(String localName, String value);
 
     public abstract Attribute createAttribute(QName name, String value);
 
     public abstract Namespace createNamespace(String namespaceURI);
-    
+
     public abstract Namespace createNamespace(String prefix, String namespaceUri);
 
-    public abstract StartElement createStartElement(QName name, Iterator<? extends Attribute> attributes, Iterator<? extends Namespace> namespaces);
+    public abstract StartElement createStartElement(
+            QName name,
+            Iterator<? extends Attribute> attributes,
+            Iterator<? extends Namespace> namespaces);
 
-    public abstract StartElement createStartElement(String prefix, String namespaceUri, String localName);
-    
-    public abstract StartElement createStartElement(String prefix, String namespaceUri, String localName, Iterator<? extends Attribute> attributes, Iterator<? extends Namespace> namespaces);
+    public abstract StartElement createStartElement(
+            String prefix, String namespaceUri, String localName);
 
-    public abstract StartElement createStartElement(String prefix, String namespaceUri, String localName, Iterator<? extends Attribute> attributes, Iterator<? extends Namespace> namespaces, NamespaceContext context);
+    public abstract StartElement createStartElement(
+            String prefix,
+            String namespaceUri,
+            String localName,
+            Iterator<? extends Attribute> attributes,
+            Iterator<? extends Namespace> namespaces);
 
-    public abstract EndElement createEndElement(QName name, Iterator<? extends Namespace> namespaces);
+    public abstract StartElement createStartElement(
+            String prefix,
+            String namespaceUri,
+            String localName,
+            Iterator<? extends Attribute> attributes,
+            Iterator<? extends Namespace> namespaces,
+            NamespaceContext context);
 
-    public abstract EndElement createEndElement(String prefix, String namespaceUri, String localName);
-    
-    public abstract EndElement createEndElement(String prefix, String namespaceUri, String localName, Iterator<? extends Namespace> namespaces);
+    public abstract EndElement createEndElement(
+            QName name, Iterator<? extends Namespace> namespaces);
+
+    public abstract EndElement createEndElement(
+            String prefix, String namespaceUri, String localName);
+
+    public abstract EndElement createEndElement(
+            String prefix,
+            String namespaceUri,
+            String localName,
+            Iterator<? extends Namespace> namespaces);
 
     public abstract Characters createCharacters(String content);
 
     public abstract Characters createCData(String content);
 
     public abstract Characters createSpace(String content);
-    
+
     public abstract Characters createIgnorableSpace(String content);
 
     public abstract StartDocument createStartDocument();
 
-    public abstract StartDocument createStartDocument(String encoding, String version, boolean standalone);
+    public abstract StartDocument createStartDocument(
+            String encoding, String version, boolean standalone);
 
     public abstract StartDocument createStartDocument(String encoding, String version);
 
@@ -92,8 +118,9 @@ public abstract class XMLEventFactory {
 
     public abstract EndDocument createEndDocument();
 
-    public abstract EntityReference createEntityReference(String name, EntityDeclaration declaration);
-    
+    public abstract EntityReference createEntityReference(
+            String name, EntityDeclaration declaration);
+
     public abstract Comment createComment(String text);
 
     public abstract ProcessingInstruction createProcessingInstruction(String target, String data);

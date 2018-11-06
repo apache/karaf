@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.function.Predicate;
-
 import org.junit.Test;
 import org.osgi.service.event.Event;
 
@@ -34,7 +33,7 @@ public class TopicPredicateTest {
         assertTrue(matcher.test(event("myTopic")));
         assertTrue(matcher.test(event("my/other")));
     }
-     
+
     @Test
     public void testMatchSpecific() {
         Predicate<Event> matcher = matchTopic("myTopic");
@@ -42,7 +41,7 @@ public class TopicPredicateTest {
         assertFalse(matcher.test(event("myTopic/test")));
         assertFalse(matcher.test(event("my/other")));
     }
-    
+
     @Test
     public void testMatchSubTopics() {
         Predicate<Event> matcher = matchTopic("myTopic*");

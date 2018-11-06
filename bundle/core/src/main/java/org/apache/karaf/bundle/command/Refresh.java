@@ -17,7 +17,6 @@
 package org.apache.karaf.bundle.command;
 
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
@@ -26,7 +25,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
 @Command(scope = "bundle", name = "refresh", description = "Refresh bundles.")
 @Service
 public class Refresh extends BundlesCommand {
-    
+
     public Refresh() {
         defaultAllBundles = false;
     }
@@ -41,7 +40,5 @@ public class Refresh extends BundlesCommand {
     }
 
     @Override
-    protected void executeOnBundle(Bundle bundle) throws Exception {
-    }
-
+    protected void executeOnBundle(Bundle bundle) throws Exception {}
 }

@@ -16,14 +16,13 @@
  */
 package org.apache.karaf.audit.logger;
 
-import org.apache.karaf.audit.Event;
-import org.apache.karaf.audit.EventLayout;
-import org.apache.karaf.audit.EventLogger;
-
 import java.io.IOException;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.karaf.audit.Event;
+import org.apache.karaf.audit.EventLayout;
+import org.apache.karaf.audit.EventLogger;
 
 public class JulEventLogger implements EventLogger {
 
@@ -52,10 +51,8 @@ public class JulEventLogger implements EventLogger {
     }
 
     @Override
-    public void flush() throws IOException {
-    }
+    public void flush() throws IOException {}
 
     @Override
-    public void close() throws IOException {
-    }
+    public void close() throws IOException {}
 }

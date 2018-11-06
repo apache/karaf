@@ -20,14 +20,15 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 /**
- * The <code>SessionFactory</code> can be used to create
- * {@link Session} to execute commands.
+ * The <code>SessionFactory</code> can be used to create {@link Session} to execute commands.
  *
- * The {@link org.apache.karaf.shell.api.console.Registry} associated
- * with this <code>SessionFactory</code> will contain: <ul>
- *     <li>{@link SessionFactory}</li>
- *     <li>{@link Registry}</li>
- *     <li>{@link Command}s</li>
+ * <p>The {@link org.apache.karaf.shell.api.console.Registry} associated with this <code>
+ * SessionFactory</code> will contain:
+ *
+ * <ul>
+ *   <li>{@link SessionFactory}
+ *   <li>{@link Registry}
+ *   <li>{@link Command}s
  * </ul>
  */
 public interface SessionFactory {
@@ -42,22 +43,30 @@ public interface SessionFactory {
     /**
      * Create new interactive session.
      *
-     * @param in the input stream, can be <code>null</code> if the session is only used to execute a command using {@link Session#execute(CharSequence)}
+     * @param in the input stream, can be <code>null</code> if the session is only used to execute a
+     *     command using {@link Session#execute(CharSequence)}
      * @param out the output stream
      * @param err the error stream
      * @param term the {@link Terminal} to use, may be <code>null</code>
      * @param encoding the encoding to use for the input stream, may be <code>null</code>
-     * @param closeCallback a callback to be called when the session is closed, may be <code>null</code>
+     * @param closeCallback a callback to be called when the session is closed, may be <code>null
+     *     </code>
      * @return the new session
      */
-    Session create(InputStream in, PrintStream out, PrintStream err, Terminal term, String encoding, Runnable closeCallback);
+    Session create(
+            InputStream in,
+            PrintStream out,
+            PrintStream err,
+            Terminal term,
+            String encoding,
+            Runnable closeCallback);
 
     /**
-     * Create a new headless session.
-     * Headless session can only be used to execute commands, so that
+     * Create a new headless session. Headless session can only be used to execute commands, so that
      * {@link org.apache.karaf.shell.api.console.Session#run()} can not be used.
      *
-     * @param in the input stream, can be <code>null</code> if the session is only used to execute a command using {@link Session#execute(CharSequence)}
+     * @param in the input stream, can be <code>null</code> if the session is only used to execute a
+     *     command using {@link Session#execute(CharSequence)}
      * @param out the output stream
      * @param err the error stream
      * @return the new session
@@ -65,17 +74,17 @@ public interface SessionFactory {
     Session create(InputStream in, PrintStream out, PrintStream err);
 
     /**
-     * Create a new headless session inheriting from the parent session.
-     * Headless session can only be used to execute commands, so that
-     * {@link org.apache.karaf.shell.api.console.Session#run()} can not be used.
-     * All variables and the terminal properties from the parent session will be available.
+     * Create a new headless session inheriting from the parent session. Headless session can only
+     * be used to execute commands, so that {@link org.apache.karaf.shell.api.console.Session#run()}
+     * can not be used. All variables and the terminal properties from the parent session will be
+     * available.
      *
-     * @param in the input stream, can be <code>null</code> if the session is only used to execute a command using {@link Session#execute(CharSequence)}
+     * @param in the input stream, can be <code>null</code> if the session is only used to execute a
+     *     command using {@link Session#execute(CharSequence)}
      * @param out the output stream
      * @param err the error stream
      * @param session the parent session
      * @return the new session
      */
     Session create(InputStream in, PrintStream out, PrintStream err, Session session);
-
 }

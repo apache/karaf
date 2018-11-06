@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.felix.utils.manifest.Attribute;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Directive;
@@ -40,12 +39,12 @@ import org.osgi.service.subsystem.SubsystemConstants;
 @Service
 public class InfoAction extends SubsystemSupport implements Action {
 
-    protected final static String SUBSYSTEM_PREFIX = "Subsystem-";
-    protected final static String PACKAGE_SUFFFIX = "-Package";
-    protected final static String SERVICE_SUFFIX = "-Service";
-    protected final static String CAPABILITY_SUFFIX = "-Capability";
-    protected final static String IMPORT_PACKAGES_ATTRIB = "Import-Package";
-    protected final static String REQUIRE_BUNDLE_ATTRIB = "Require-Bundle";
+    protected static final String SUBSYSTEM_PREFIX = "Subsystem-";
+    protected static final String PACKAGE_SUFFFIX = "-Package";
+    protected static final String SERVICE_SUFFIX = "-Service";
+    protected static final String CAPABILITY_SUFFIX = "-Capability";
+    protected static final String IMPORT_PACKAGES_ATTRIB = "Import-Package";
+    protected static final String REQUIRE_BUNDLE_ATTRIB = "Require-Bundle";
 
     @Option(name = "--indent", description = "Indentation method")
     int indent = -1;
@@ -129,7 +128,8 @@ public class InfoAction extends SubsystemSupport implements Action {
         Iterator<Map.Entry<String, Object>> it = otherAttribs.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> e = it.next();
-            output.append(String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
+            output.append(
+                    String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
         }
         if (otherAttribs.size() > 0) {
             output.append('\n');
@@ -189,7 +189,11 @@ public class InfoAction extends SubsystemSupport implements Action {
             Map.Entry<String, Object> e = it.next();
             output.append(e.getKey());
             output.append(" = \n");
-            formatHeader(ShellUtil.getValueString(e.getValue()), formatters.get(e.getKey()), output, indent);
+            formatHeader(
+                    ShellUtil.getValueString(e.getValue()),
+                    formatters.get(e.getKey()),
+                    output,
+                    indent);
             output.append("\n");
         }
         if (packagesAttribs.size() > 0) {
@@ -201,15 +205,18 @@ public class InfoAction extends SubsystemSupport implements Action {
 
     protected interface ClauseFormatter {
         void pre(Clause clause, StringBuilder output);
+
         void post(Clause clause, StringBuilder output);
     }
 
-    protected void formatHeader(String header, ClauseFormatter formatter, StringBuilder builder, int indent) {
+    protected void formatHeader(
+            String header, ClauseFormatter formatter, StringBuilder builder, int indent) {
         Clause[] clauses = Parser.parseHeader(header);
         formatClauses(clauses, formatter, builder, indent);
     }
 
-    protected void formatClauses(Clause[] clauses, ClauseFormatter formatter, StringBuilder builder, int indent) {
+    protected void formatClauses(
+            Clause[] clauses, ClauseFormatter formatter, StringBuilder builder, int indent) {
         boolean first = true;
         for (Clause clause : clauses) {
             if (first) {
@@ -221,7 +228,8 @@ public class InfoAction extends SubsystemSupport implements Action {
         }
     }
 
-    protected void formatClause(Clause clause, ClauseFormatter formatter, StringBuilder builder, int indent) {
+    protected void formatClause(
+            Clause clause, ClauseFormatter formatter, StringBuilder builder, int indent) {
         builder.append("\t");
         if (formatter != null) {
             formatter.pre(clause, builder);
@@ -234,7 +242,6 @@ public class InfoAction extends SubsystemSupport implements Action {
 
     protected int getTermWidth() {
         return terminal != null ? terminal.getWidth() : 80;
-
     }
 
     protected void formatClause(Clause clause, StringBuilder builder, int indent) {
@@ -284,7 +291,6 @@ public class InfoAction extends SubsystemSupport implements Action {
             }
         }
     }
-
 
     /*
     private boolean checkBundle(String bundleName, String version) {

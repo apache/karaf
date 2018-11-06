@@ -16,20 +16,16 @@
  */
 package org.apache.karaf.docker;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-/**
- * DockerClient factory test.
- */
+/** DockerClient factory test. */
 public class DockerClientTest {
 
     private DockerClient dockerClient;
@@ -47,7 +43,7 @@ public class DockerClientTest {
         System.out.println("\tDriver: " + info.getDriver());
         System.out.println("\tDriver Status: " + info.getDriverStatus());
         System.out.println("\tExecution Driver: " + info.getExecutionDriver());
-        System.out.println("\tIndex Server Address: "  + info.getIndexServerAddress());
+        System.out.println("\tIndex Server Address: " + info.getIndexServerAddress());
         System.out.println("\tInit Path: " + info.getInitPath());
         System.out.println("\tInit SHA1: " + info.getInitSha1());
         System.out.println("\tKernel Version: " + info.getKernelVersion());
@@ -93,7 +89,9 @@ public class DockerClientTest {
     @Test
     @Ignore("Need a running Docker daemon")
     public void testHistoryImage() throws Exception {
-        for (ImageHistory history : dockerClient.history("sha256:f3ea90d50ffd7851cb984764409326b82593c612fe6e6dc7933d9568f735084b")) {
+        for (ImageHistory history :
+                dockerClient.history(
+                        "sha256:f3ea90d50ffd7851cb984764409326b82593c612fe6e6dc7933d9568f735084b")) {
             System.out.println("----");
             System.out.println("ID: " + history.getId());
             System.out.println("Created: " + history.getCreated());
@@ -127,7 +125,10 @@ public class DockerClientTest {
     @Test
     @Ignore("Need a running Docker daemon")
     public void testRemoveImage() throws Exception {
-        dockerClient.rmi("sha256:f3ea90d50ffd7851cb984764409326b82593c612fe6e6dc7933d9568f735084b", true, false);
+        dockerClient.rmi(
+                "sha256:f3ea90d50ffd7851cb984764409326b82593c612fe6e6dc7933d9568f735084b",
+                true,
+                false);
     }
 
     @Test
@@ -142,7 +143,14 @@ public class DockerClientTest {
             System.out.println("Image ID: " + container.getImageId());
             System.out.println("Names: " + container.getNames());
             for (Port port : container.getPorts()) {
-                System.out.println("Port: " + port.getPublicPort() + ":" + port.getPrivatePort() + " (" + port.getType() + ")");
+                System.out.println(
+                        "Port: "
+                                + port.getPublicPort()
+                                + ":"
+                                + port.getPrivatePort()
+                                + " ("
+                                + port.getType()
+                                + ")");
             }
             System.out.println("Status: " + container.getStatus());
             System.out.println("State: " + container.getState());
@@ -174,7 +182,7 @@ public class DockerClientTest {
         config.setImage("karaf:latest");
         config.setHostname("docker");
         config.setUser("");
-        config.setCmd(new String[]{ "/bin/karaf" });
+        config.setCmd(new String[] {"/bin/karaf"});
         config.setWorkingDir("");
         config.setOpenStdin(true);
         config.setStdinOnce(true);
@@ -190,11 +198,11 @@ public class DockerClientTest {
         // getting the dock
         File dock = new File("/tmp/docker", "karaf");
         if (dock.exists()) {
-            hostConfig.setBinds(new String[]{dock.getAbsolutePath() + ":/opt/apache-karaf"});
+            hostConfig.setBinds(new String[] {dock.getAbsolutePath() + ":/opt/apache-karaf"});
         }
 
         hostConfig.setNetworkMode("bridge");
-        hostConfig.setLxcConf(new String[]{});
+        hostConfig.setLxcConf(new String[] {});
 
         Map<String, List<HostPortBinding>> portBindings = new HashMap<>();
         List<HostPortBinding> hostPortBindings = new ArrayList<>();
@@ -281,5 +289,4 @@ public class DockerClientTest {
             System.out.println();
         }
     }
-
 }

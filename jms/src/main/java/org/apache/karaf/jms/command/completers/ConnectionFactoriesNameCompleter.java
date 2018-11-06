@@ -17,7 +17,6 @@
 package org.apache.karaf.jms.command.completers;
 
 import java.util.List;
-
 import org.apache.karaf.jms.JmsService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -26,14 +25,11 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-/**
- * Completer on the JMS connection factories name.
- */
+/** Completer on the JMS connection factories name. */
 @Service
 public class ConnectionFactoriesNameCompleter implements Completer {
 
-    @Reference
-    private JmsService jmsService;
+    @Reference private JmsService jmsService;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -55,5 +51,4 @@ public class ConnectionFactoriesNameCompleter implements Completer {
     public void setJmsService(JmsService jmsService) {
         this.jmsService = jmsService;
     }
-
 }

@@ -16,22 +16,23 @@
  */
 package org.apache.karaf.audit.util;
 
-import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-
-import javax.security.auth.Subject;
 import java.io.IOException;
 import java.io.Writer;
 import java.security.Principal;
+import javax.security.auth.Subject;
+import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 
 public final class Buffer implements Appendable, CharSequence {
 
     public enum Format {
-        Json, Syslog
+        Json,
+        Syslog
     }
 
-    private static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7',
-                                       '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    private static final char[] HEX_DIGITS = {
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+    };
 
     protected final Format format;
     protected final int capacity;
@@ -269,7 +270,9 @@ public final class Buffer implements Appendable, CharSequence {
                     d[position++] = 't';
                     break;
                 default:
-                    if (c < ' ' || (c >= '\u0080' && c < '\u00a0') || (c >= '\u2000' && c < '\u2100')) {
+                    if (c < ' '
+                            || (c >= '\u0080' && c < '\u00a0')
+                            || (c >= '\u2000' && c < '\u2100')) {
                         d[position++] = '\\';
                         d[position++] = 'u';
                         d[position++] = HEX_DIGITS[c >> 12];
@@ -302,5 +305,4 @@ public final class Buffer implements Appendable, CharSequence {
         }
         return position;
     }
-
 }

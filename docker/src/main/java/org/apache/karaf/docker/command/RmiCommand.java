@@ -27,14 +27,29 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class RmiCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "image", description = "The image to remove", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "image",
+            description = "The image to remove",
+            required = true,
+            multiValued = false)
     @Completion(ImagesRepoTagsCompleter.class)
     String image;
 
-    @Option(name = "-f", aliases = "--force", description = "Force image remove", required = false, multiValued = false)
+    @Option(
+            name = "-f",
+            aliases = "--force",
+            description = "Force image remove",
+            required = false,
+            multiValued = false)
     boolean force;
 
-    @Option(name = "-np", aliases = "--noprune", description = "Don't prune image", required = false, multiValued = false)
+    @Option(
+            name = "-np",
+            aliases = "--noprune",
+            description = "Don't prune image",
+            required = false,
+            multiValued = false)
     boolean noprune;
 
     @Override
@@ -42,5 +57,4 @@ public class RmiCommand extends DockerCommandSupport {
         getDockerService().rmi(image, force, noprune, url);
         return null;
     }
-
 }

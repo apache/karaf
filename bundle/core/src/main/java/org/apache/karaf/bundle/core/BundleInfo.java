@@ -17,30 +17,34 @@
 package org.apache.karaf.bundle.core;
 
 import java.util.List;
-
 import org.osgi.framework.Bundle;
 
 public interface BundleInfo {
 
     long getBundleId();
+
     String getSymbolicName();
+
     String getName();
+
     String getUpdateLocation();
+
     String getVersion();
+
     String getRevisions();
-    
+
     /**
      * Combined bundle state from OSGi and all BundleStateServices
      *
      * @return the current {@link BundleState}.
      */
     BundleState getState();
-    
-    int getStartLevel();
-    
-    boolean isFragment();
-    
-    List<Bundle> getFragments();
-    List<Bundle> getFragmentHosts();
 
+    int getStartLevel();
+
+    boolean isFragment();
+
+    List<Bundle> getFragments();
+
+    List<Bundle> getFragmentHosts();
 }

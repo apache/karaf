@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.tooling;
 
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -26,8 +27,6 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import static org.easymock.EasyMock.*;
-
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.junit.Test;
@@ -49,20 +48,24 @@ public class RunMojoTest extends EasyMockSupport {
     }
 
     @Test
-    public void testAddFeatureRepositoriesWithEmptyRepoListAndNullFeatureService() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MojoExecutionException  {
+    public void testAddFeatureRepositoriesWithEmptyRepoListAndNullFeatureService()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException, MojoExecutionException {
         RunMojo mojo = new RunMojo();
         String[] empty = new String[0];
         setPrivateField(mojo, "featureRepositories", empty);
         try {
             mojo.addFeatureRepositories(null);
             fail("Expected MojoExecutionException to be thrown");
-        } catch(MojoExecutionException e) {
+        } catch (MojoExecutionException e) {
             assertEquals("Failed to add feature repositories to karaf", e.getMessage());
         }
     }
 
     @Test
-    public void testAddFeatureRepositoriesWithEmptyRepoList() throws MojoExecutionException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testAddFeatureRepositoriesWithEmptyRepoList()
+            throws MojoExecutionException, NoSuchFieldException, SecurityException,
+                    IllegalArgumentException, IllegalAccessException {
         FeaturesService featureService = mock(FeaturesService.class);
         replay(featureService);
 
@@ -81,14 +84,16 @@ public class RunMojoTest extends EasyMockSupport {
         replay(featureService);
 
         RunMojo mojo = new RunMojo();
-        String[] features = { "liquibase-core", "ukelonn" };
+        String[] features = {"liquibase-core", "ukelonn"};
         setPrivateField(mojo, "featureRepositories", features);
         mojo.addFeatureRepositories(featureService);
         verify(featureService);
     }
 
     @Test
-    public void testDeployWithDeployProjectArtifactFalse() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MojoExecutionException {
+    public void testDeployWithDeployProjectArtifactFalse()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException, MojoExecutionException {
         BundleContext context = mock(BundleContext.class);
         RunMojo mojo = new RunMojo();
         setPrivateField(mojo, "deployProjectArtifact", false);
@@ -96,7 +101,9 @@ public class RunMojoTest extends EasyMockSupport {
     }
 
     @Test
-    public void testDeployWithNullArtifact() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testDeployWithNullArtifact()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException {
         BundleContext context = mock(BundleContext.class);
         Artifact artifact = mock(Artifact.class);
         RunMojo mojo = new RunMojo();
@@ -112,7 +119,9 @@ public class RunMojoTest extends EasyMockSupport {
     }
 
     @Test
-    public void testDeployWithNonExistingArtifact() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testDeployWithNonExistingArtifact()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException {
         BundleContext context = mock(BundleContext.class);
         Artifact artifact = mock(Artifact.class);
         File artifactFile = mock(File.class);
@@ -131,7 +140,9 @@ public class RunMojoTest extends EasyMockSupport {
     }
 
     @Test
-    public void testDeployWithExistingArtifactButProjectNotBundle() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testDeployWithExistingArtifactButProjectNotBundle()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException {
         BundleContext context = mock(BundleContext.class);
         Artifact artifact = mock(Artifact.class);
         File artifactFile = mock(File.class);
@@ -152,7 +163,9 @@ public class RunMojoTest extends EasyMockSupport {
     }
 
     @Test
-    public void testDeployWithExistingArtifactFailsInInstall() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testDeployWithExistingArtifactFailsInInstall()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException {
         BundleContext context = mock(BundleContext.class);
         Artifact artifact = mock(Artifact.class);
         File artifactFile = niceMock(File.class);
@@ -174,7 +187,9 @@ public class RunMojoTest extends EasyMockSupport {
     }
 
     @Test
-    public void testDeployWithExistingArtifact() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException, BundleException, MojoExecutionException {
+    public void testDeployWithExistingArtifact()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException, IOException, BundleException, MojoExecutionException {
         BundleContext context = niceMock(BundleContext.class);
         Bundle bundle = niceMock(Bundle.class);
         expect(context.installBundle(anyString())).andReturn(bundle);
@@ -198,7 +213,9 @@ public class RunMojoTest extends EasyMockSupport {
     }
 
     @Test
-    public void testDeployWithPomArtifactAndAttachedFeatureXmlNoFeatureService() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException, BundleException, MojoExecutionException {
+    public void testDeployWithPomArtifactAndAttachedFeatureXmlNoFeatureService()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException, IOException, BundleException, MojoExecutionException {
         File artifactFeaturesAttachmentFile = File.createTempFile("someproject-features", ".xml");
         try {
             BundleContext context = niceMock(BundleContext.class);
@@ -224,7 +241,9 @@ public class RunMojoTest extends EasyMockSupport {
                 mojo.deploy(context, null);
                 fail("Expected MojoExecutionException");
             } catch (MojoExecutionException e) {
-                assertEquals("Failed to find the FeatureService when adding a feature repository", e.getMessage());
+                assertEquals(
+                        "Failed to find the FeatureService when adding a feature repository",
+                        e.getMessage());
             }
         } finally {
             artifactFeaturesAttachmentFile.delete();
@@ -233,7 +252,8 @@ public class RunMojoTest extends EasyMockSupport {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testDeployWithPomArtifactAndAttachedFeatureXmlRepoRegistrationFails() throws Exception {
+    public void testDeployWithPomArtifactAndAttachedFeatureXmlRepoRegistrationFails()
+            throws Exception {
         File artifactFeaturesAttachmentFile = File.createTempFile("someproject-features", ".xml");
         try {
             FeaturesService featureService = niceMock(FeaturesService.class);
@@ -329,8 +349,11 @@ public class RunMojoTest extends EasyMockSupport {
             project.setArtifact(artifact);
             project.addAttachedArtifact(artifactFeaturesAttachment);
             setInheritedPrivateField(mojo, "project", project);
-            setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
-            String[] featureRepos = { "mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features" };
+            setPrivateField(
+                    mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+            String[] featureRepos = {
+                "mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features"
+            };
             setPrivateField(mojo, "featureRepositories", featureRepos);
             mojo.deploy(context, featureService);
             verify(featureService);
@@ -339,23 +362,21 @@ public class RunMojoTest extends EasyMockSupport {
         }
     }
 
-    /**
-     * Just check the string split behaviour on various feature strings.
-     */
+    /** Just check the string split behaviour on various feature strings. */
     @Test
     public void testStringSplit() {
-    	String[] split1 = "liquibase-core, ukelonn-db-derby-test, ukelonn".split(" *, *");
-    	assertEquals(3, split1.length);
-    	String[] split2 = "liquibase-core".split(" *, *");
-    	assertEquals(1, split2.length);
-    	String[] split3 = " ".split(" *, *");
-    	assertEquals(1, split3.length);
-    	String[] split4 = " , ".split(" *, *");
-    	assertEquals(0, split4.length);
-    	String[] split5 = "liquibase-core, ".split(" *, *");
-    	assertEquals(1, split5.length);
-    	String[] split6 = "liquibase-core, , ".split(" *, *");
-    	assertEquals(1, split6.length);
+        String[] split1 = "liquibase-core, ukelonn-db-derby-test, ukelonn".split(" *, *");
+        assertEquals(3, split1.length);
+        String[] split2 = "liquibase-core".split(" *, *");
+        assertEquals(1, split2.length);
+        String[] split3 = " ".split(" *, *");
+        assertEquals(1, split3.length);
+        String[] split4 = " , ".split(" *, *");
+        assertEquals(0, split4.length);
+        String[] split5 = "liquibase-core, ".split(" *, *");
+        assertEquals(1, split5.length);
+        String[] split6 = "liquibase-core, , ".split(" *, *");
+        assertEquals(1, split6.length);
     }
 
     @Test
@@ -369,9 +390,12 @@ public class RunMojoTest extends EasyMockSupport {
     }
 
     @Test
-    public void testAddFeaturesNullFeatureService() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testAddFeaturesNullFeatureService()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException {
         RunMojo mojo = new RunMojo();
-        setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+        setPrivateField(
+                mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
 
         try {
             mojo.addFeatures(null);
@@ -388,7 +412,8 @@ public class RunMojoTest extends EasyMockSupport {
         replay(featureService);
 
         RunMojo mojo = new RunMojo();
-        setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+        setPrivateField(
+                mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
         mojo.addFeatures(featureService);
         verify(featureService);
     }
@@ -419,16 +444,19 @@ public class RunMojoTest extends EasyMockSupport {
         assertNotNull(service);
     }
 
-    private void setPrivateField(Object obj, String fieldName, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    private void setPrivateField(Object obj, String fieldName, Object value)
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException {
         Field field = obj.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(obj, value);
     }
 
-    private void setInheritedPrivateField(Object obj, String fieldName, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    private void setInheritedPrivateField(Object obj, String fieldName, Object value)
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+                    IllegalAccessException {
         Field field = obj.getClass().getSuperclass().getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(obj, value);
     }
-
 }

@@ -25,21 +25,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-
 import org.apache.felix.utils.version.VersionCleaner;
 
-
 /**
- * <p>Definition of the Feature.</p>
- * <p>Java class for feature complex type.</p>
- * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ * Definition of the Feature.
+ *
+ * <p>Java class for feature complex type.
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ *
  * <pre>
  * &lt;complexType name="feature"&gt;
  *   &lt;complexContent&gt;
@@ -64,60 +64,74 @@ import org.apache.felix.utils.version.VersionCleaner;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "feature", propOrder = {
-        "details",
-        "config",
-        "configfile",
-        "feature",
-        "bundle",
-        "conditional",
-        "capability",
-        "requirement",
-        "library",
-        "scoping"
+@XmlType(
+        name = "feature",
+        propOrder = {
+            "details",
+            "config",
+            "configfile",
+            "feature",
+            "bundle",
+            "conditional",
+            "capability",
+            "requirement",
+            "library",
+            "scoping"
         })
 public class Feature extends Content implements org.apache.karaf.features.Feature {
 
     public static final char VERSION_SEPARATOR = '/';
     public static final String DEFAULT_VERSION = "0.0.0";
 
-    @XmlElement(name = "details", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+    @XmlElement(
+            name = "details",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected String details;
+
     @XmlAttribute(required = true)
     protected String name;
-    @XmlTransient
-    protected String version;
-    @XmlAttribute
-    protected String description;
-    @XmlAttribute
-    protected String resolver;
-    @XmlAttribute
-    protected String install;
+
+    @XmlTransient protected String version;
+    @XmlAttribute protected String description;
+    @XmlAttribute protected String resolver;
+    @XmlAttribute protected String install;
+
     @XmlAttribute(name = "start-level")
     protected Integer startLevel;
-    @XmlAttribute
-    protected Boolean hidden;
-    @XmlElement(name = "conditional", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
-    protected List<Conditional> conditional;
-    @XmlElement(name = "capability", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
-    protected List<Capability> capability;
-    @XmlElement(name = "requirement", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
-    protected List<Requirement> requirement;
-    @XmlElement(name = "scoping", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
-    protected Scoping scoping;
-    @XmlElement(name = "library", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
-    protected List<Library> library;
-    @XmlTransient
-    protected String namespace;
-    @XmlTransient
-    protected List<String> resourceRepositories;
-    @XmlTransient
-    protected String repositoryUrl;
-    @XmlTransient
-    private boolean blacklisted;
 
-    public Feature() {
-    }
+    @XmlAttribute protected Boolean hidden;
+
+    @XmlElement(
+            name = "conditional",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+    protected List<Conditional> conditional;
+
+    @XmlElement(
+            name = "capability",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+    protected List<Capability> capability;
+
+    @XmlElement(
+            name = "requirement",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+    protected List<Requirement> requirement;
+
+    @XmlElement(
+            name = "scoping",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+    protected Scoping scoping;
+
+    @XmlElement(
+            name = "library",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+    protected List<Library> library;
+
+    @XmlTransient protected String namespace;
+    @XmlTransient protected List<String> resourceRepositories;
+    @XmlTransient protected String repositoryUrl;
+    @XmlTransient private boolean blacklisted;
+
+    public Feature() {}
 
     public Feature(String name) {
         this.name = name;
@@ -137,8 +151,6 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         } else {
             return new Feature(str);
         }
-
-
     }
 
     public String getId() {
@@ -187,8 +199,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     }
 
     /**
-     * Since version has a default value ("0.0.0"), returns
-     * whether or not the version has been set.
+     * Since version has a default value ("0.0.0"), returns whether or not the version has been set.
      *
      * @return true if the feature has a version, false else.
      */
@@ -307,19 +318,17 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     /**
      * Get the value of the conditional property.
      *
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the feature property.
+     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the feature property.
      *
-     * For example, to add a new item, do as follows:
+     * <p>For example, to add a new item, do as follows:
      *
      * <pre>
      *    getConditionals().add(newItem);
      * </pre>
      *
-     * Objects of the following type(s) are allowed in the list
-     * {@link Conditional}.
+     * Objects of the following type(s) are allowed in the list {@link Conditional}.
      *
      * @return the list of feature conditions.
      */
@@ -405,7 +414,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     @SuppressWarnings("rawtypes")
     protected void interpolation(Properties properties) {
-        for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration e = properties.propertyNames(); e.hasMoreElements(); ) {
             String key = (String) e.nextElement();
             String val = properties.getProperty(key);
             Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);
@@ -436,9 +445,10 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         if (config != null) {
             for (Config c : config) {
                 String v = c.getValue();
-                v = Stream.of(v.split("\n"))
-                        .map(String::trim)
-                        .collect(Collectors.joining("\n", "", "\n"));
+                v =
+                        Stream.of(v.split("\n"))
+                                .map(String::trim)
+                                .collect(Collectors.joining("\n", "", "\n"));
                 c.setValue(v);
             }
         }
@@ -455,9 +465,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
 
     @Override
     public List<String> getResourceRepositories() {
-        return resourceRepositories != null
-                ? resourceRepositories
-                : Collections.emptyList();
+        return resourceRepositories != null ? resourceRepositories : Collections.emptyList();
     }
 
     public void setResourceRepositories(List<String> resourceRepositories) {
@@ -481,5 +489,4 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
     public void setBlacklisted(boolean blacklisted) {
         this.blacklisted = blacklisted;
     }
-
 }

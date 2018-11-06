@@ -17,10 +17,8 @@
 package org.apache.karaf.http.core.internal;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -32,18 +30,16 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-
 import org.apache.karaf.http.core.*;
 
-/**
- * Implementation of the HTTP MBean.
- */
+/** Implementation of the HTTP MBean. */
 public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
 
     private ServletService servletService;
     private ProxyService proxyService;
 
-    public HttpMBeanImpl(ServletService servletService, ProxyService proxyService) throws NotCompliantMBeanException {
+    public HttpMBeanImpl(ServletService servletService, ProxyService proxyService)
+            throws NotCompliantMBeanException {
         super(HttpMBean.class);
         this.servletService = servletService;
         this.proxyService = proxyService;
@@ -52,17 +48,52 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
     @Override
     public TabularData getServlets() throws MBeanException {
         try {
-            CompositeType servletType = new CompositeType("Servlet", "HTTP Servlet",
-                new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
-                new String[]{"ID of the bundle that registered the servlet", "Class name of the servlet", "Servlet Name", "Current state of the servlet", "Aliases of the servlet", "URL of the servlet"},
-                new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("Servlets", "Table of all HTTP servlets", servletType, new String[]{"Bundle-ID", "Servlet Name", "State"});
+            CompositeType servletType =
+                    new CompositeType(
+                            "Servlet",
+                            "HTTP Servlet",
+                            new String[] {
+                                "Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"
+                            },
+                            new String[] {
+                                "ID of the bundle that registered the servlet",
+                                "Class name of the servlet",
+                                "Servlet Name",
+                                "Current state of the servlet",
+                                "Aliases of the servlet",
+                                "URL of the servlet"
+                            },
+                            new OpenType[] {
+                                SimpleType.LONG,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType(
+                            "Servlets",
+                            "Table of all HTTP servlets",
+                            servletType,
+                            new String[] {"Bundle-ID", "Servlet Name", "State"});
             TabularData table = new TabularDataSupport(tableType);
             List<ServletInfo> servletInfos = servletService.getServlets();
             for (ServletInfo info : servletInfos) {
-                CompositeData data = new CompositeDataSupport(servletType,
-                        new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
-                        new Object[]{info.getBundleId(), info.getClassName(), info.getName(), info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls())});
+                CompositeData data =
+                        new CompositeDataSupport(
+                                servletType,
+                                new String[] {
+                                    "Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"
+                                },
+                                new Object[] {
+                                    info.getBundleId(),
+                                    info.getClassName(),
+                                    info.getName(),
+                                    info.getStateString(),
+                                    info.getAlias(),
+                                    Arrays.toString(info.getUrls())
+                                });
                 table.put(data);
             }
             return table;
@@ -93,5 +124,4 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
             throw new MBeanException(null, e.toString());
         }
     }
-
 }

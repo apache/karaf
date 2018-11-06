@@ -1,18 +1,15 @@
 /**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.apache.karaf.deployer.features;
@@ -24,14 +21,11 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
-
 import org.apache.karaf.util.DeployerUtils;
 import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.Constants;
 
-/**
- * Transform a feature descriptor into an bundles bundle
- */
+/** Transform a feature descriptor into an bundles bundle */
 public class FeatureTransformer {
 
     public static void transform(URL url, OutputStream os) throws Exception {
@@ -61,9 +55,7 @@ public class FeatureTransformer {
         out.closeEntry();
         e = new ZipEntry("META-INF/" + FeatureDeploymentListener.FEATURE_PATH + "/" + name);
         out.putNextEntry(e);
-        try (
-            InputStream fis = url.openStream()
-        ) {
+        try (InputStream fis = url.openStream()) {
             StreamUtils.copy(fis, out);
         }
         out.closeEntry();
@@ -85,12 +77,20 @@ public class FeatureTransformer {
             groupId = parts[0];
             artifactId = parts[1];
             version = parts[2];
-            type = (parts.length >= 4) ?  "." + parts[3] : ".jar";
-            qualifier = (parts.length >= 5) ? "-" + parts[4] :  "";
-            return groupId.replace('.', '/') + "/" + artifactId + "/"
-                    + version + "/" + artifactId + "-" + version + qualifier + type;
+            type = (parts.length >= 4) ? "." + parts[3] : ".jar";
+            qualifier = (parts.length >= 5) ? "-" + parts[4] : "";
+            return groupId.replace('.', '/')
+                    + "/"
+                    + artifactId
+                    + "/"
+                    + version
+                    + "/"
+                    + artifactId
+                    + "-"
+                    + version
+                    + qualifier
+                    + type;
         }
         return url.getPath();
     }
-
 }

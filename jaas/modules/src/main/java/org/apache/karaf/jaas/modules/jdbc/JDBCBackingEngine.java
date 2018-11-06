@@ -15,16 +15,6 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
-import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
-
 import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,6 +22,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.sql.DataSource;
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JDBCBackingEngine implements BackingEngine {
 
@@ -208,13 +206,13 @@ public class JDBCBackingEngine implements BackingEngine {
     public List<GroupPrincipal> listGroups(UserPrincipal principal) {
         try {
             try (Connection connection = dataSource.getConnection()) {
-            List<GroupPrincipal> roles = new ArrayList<>();
-            for (String role : rawSelect(connection, selectRolesQuery, principal.getName())) {
-                if (role.startsWith(GROUP_PREFIX)) {
-                    roles.add(new GroupPrincipal(role.substring(GROUP_PREFIX.length())));
+                List<GroupPrincipal> roles = new ArrayList<>();
+                for (String role : rawSelect(connection, selectRolesQuery, principal.getName())) {
+                    if (role.startsWith(GROUP_PREFIX)) {
+                        roles.add(new GroupPrincipal(role.substring(GROUP_PREFIX.length())));
+                    }
                 }
-            }
-            return roles;
+                return roles;
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error deleting role", e);
@@ -275,14 +273,19 @@ public class JDBCBackingEngine implements BackingEngine {
         deleteRole(GROUP_PREFIX + group, role);
     }
 
-    protected void rawUpdate(Connection connection, String query, String... params) throws SQLException {
+    protected void rawUpdate(Connection connection, String query, String... params)
+            throws SQLException {
         int rows = JDBCUtils.rawUpdate(connection, query, params);
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Executing [%s], params=%s. %d rows affected.", query, Arrays.toString(params), rows));
+            logger.debug(
+                    String.format(
+                            "Executing [%s], params=%s. %d rows affected.",
+                            query, Arrays.toString(params), rows));
         }
     }
 
-    protected List<String> rawSelect(Connection connection, String query, String... params) throws SQLException {
+    protected List<String> rawSelect(Connection connection, String query, String... params)
+            throws SQLException {
         return JDBCUtils.rawSelect(connection, query, params);
     }
 
@@ -342,7 +345,6 @@ public class JDBCBackingEngine implements BackingEngine {
         this.selectRolesQuery = selectRolesQuery;
     }
 
-    
     @Override
     public Map<GroupPrincipal, String> listGroups() {
         throw new UnsupportedOperationException();
@@ -351,6 +353,5 @@ public class JDBCBackingEngine implements BackingEngine {
     @Override
     public void createGroup(String group) {
         throw new UnsupportedOperationException();
-        
     }
 }

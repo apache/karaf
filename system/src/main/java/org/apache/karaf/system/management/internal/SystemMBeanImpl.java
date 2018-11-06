@@ -16,23 +16,20 @@
  */
 package org.apache.karaf.system.management.internal;
 
+import java.io.File;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 import org.apache.karaf.system.FrameworkType;
 import org.apache.karaf.system.SystemService;
 import org.apache.karaf.system.management.SystemMBean;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
-import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import java.io.File;
-import java.io.PrintStream;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-/**
- * System MBean implementation.
- */
+/** System MBean implementation. */
 public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
 
     private SystemService systemService;
@@ -152,7 +149,8 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
     }
 
     @Override
-    public Map<String, String> getProperties(boolean unset, boolean dumpToFile) throws MBeanException {
+    public Map<String, String> getProperties(boolean unset, boolean dumpToFile)
+            throws MBeanException {
         try {
             Map<String, String> result = new HashMap<>();
 
@@ -193,7 +191,13 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
             setProperty(props, Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, def);
 
             if (dumpToFile) {
-                PrintStream ps = new PrintStream(new File(bundleContext.getProperty("karaf.data"), "dump-properties-" + java.lang.System.currentTimeMillis() + ".properties"));
+                PrintStream ps =
+                        new PrintStream(
+                                new File(
+                                        bundleContext.getProperty("karaf.data"),
+                                        "dump-properties-"
+                                                + java.lang.System.currentTimeMillis()
+                                                + ".properties"));
                 ps.println("#Dump of the System and OSGi properties");
                 ps.println("#Dump executed at " + new SimpleDateFormat().format(new Date()));
                 printOrderedProperties(props, ps);
@@ -251,5 +255,4 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
     public void setProperty(String key, String value, boolean persistent) {
         systemService.setSystemProperty(key, value, persistent);
     }
-
 }

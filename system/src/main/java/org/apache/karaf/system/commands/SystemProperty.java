@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -36,33 +35,42 @@ import org.apache.karaf.system.SystemService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
-/**
- * Command that allow access to system properties easily.
- */
+/** Command that allow access to system properties easily. */
 @Command(scope = "system", name = "property", description = "Get or set a system property.")
 @Service
 public class SystemProperty implements Action {
 
-    @Option(name = "-p", aliases = {"--persistent"}, description = "Persist the new value to the etc/system.properties file")
+    @Option(
+            name = "-p",
+            aliases = {"--persistent"},
+            description = "Persist the new value to the etc/system.properties file")
     boolean persistent;
 
-    @Option(name = "-f", aliases = {"--file-dump"}, description = "Dump all system properties in a file (in data folder)")
+    @Option(
+            name = "-f",
+            aliases = {"--file-dump"},
+            description = "Dump all system properties in a file (in data folder)")
     boolean dumpToFile;
 
-    @Option(name = "-u", aliases = {"--unset"}, description = "Show unset know properties with value unset")
+    @Option(
+            name = "-u",
+            aliases = {"--unset"},
+            description = "Show unset know properties with value unset")
     boolean unset;
 
     @Argument(index = 0, name = "key", required = false, description = "The system property name")
     String key;
 
-    @Argument(index = 1, name = "value", required = false, description = "New value for the system property")
+    @Argument(
+            index = 1,
+            name = "value",
+            required = false,
+            description = "New value for the system property")
     String value;
 
-    @Reference
-    BundleContext bundleContext;
+    @Reference BundleContext bundleContext;
 
-    @Reference
-    SystemService systemService;
+    @Reference SystemService systemService;
 
     @Override
     public Object execute() throws Exception {
@@ -104,13 +112,15 @@ public class SystemProperty implements Action {
             setProperty(props, Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, def);
 
             if (dumpToFile) {
-                PrintStream ps = new PrintStream(
-                        new File(
-                                bundleContext.getProperty("karaf.data"),
-                                "dump-properties-" + System.currentTimeMillis() + ".properties"
-                        )
-                );
-                ps.println("#Dump of the System and OSGi properties with the command system:property");
+                PrintStream ps =
+                        new PrintStream(
+                                new File(
+                                        bundleContext.getProperty("karaf.data"),
+                                        "dump-properties-"
+                                                + System.currentTimeMillis()
+                                                + ".properties"));
+                ps.println(
+                        "#Dump of the System and OSGi properties with the command system:property");
                 ps.println("#Dump executed at " + new SimpleDateFormat().format(new Date()));
                 printOrderedProperties(props, ps);
                 ps.flush();
@@ -151,5 +161,4 @@ public class SystemProperty implements Action {
             props.setProperty(key, val);
         }
     }
-
 }

@@ -17,17 +17,15 @@ package org.apache.karaf.diagnostic.core;
 
 import java.io.OutputStream;
 
-/**
- * Destination for created dumps.
- */
+/** Destination for created dumps. */
 public interface DumpDestination {
 
     /**
      * Create new entry in dump destination.
-     * 
-     * Destination does not close returned output stream by default, dump
-     * provider should do this after completing write operation.
-     * 
+     *
+     * <p>Destination does not close returned output stream by default, dump provider should do this
+     * after completing write operation.
+     *
      * @param name Name of file in destination.
      * @return Output stream ready to write.
      * @throws Exception When entry cannot be added.
@@ -40,5 +38,4 @@ public interface DumpDestination {
      * @throws Exception If the save operation fails.
      */
     void save() throws Exception;
-
 }

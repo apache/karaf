@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Library;
 import org.apache.karaf.features.Repository;
@@ -45,7 +44,8 @@ public class FeaturesValidationTest {
 
     @Test
     public void testNs11() throws Exception {
-        Repository features = unmarshalAndValidate("f04.xml");;
+        Repository features = unmarshalAndValidate("f04.xml");
+        ;
         assertNotNull(features);
     }
 
@@ -86,5 +86,4 @@ public class FeaturesValidationTest {
         URI uri = getClass().getResource(path).toURI();
         return new RepositoryImpl(uri, true);
     }
-
 }

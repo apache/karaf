@@ -27,13 +27,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
-
-import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.features.internal.model.Feature;
 
-@XmlType(name = "featureReplacements", propOrder = {
-        "replacements"
-})
+@XmlType(
+        name = "featureReplacements",
+        propOrder = {"replacements"})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class FeatureReplacements {
 
@@ -55,15 +53,13 @@ public class FeatureReplacements {
         REMOVE
     }
 
-    @XmlType(name = "overrideFeature", propOrder = {
-            "feature"
-    })
+    @XmlType(
+            name = "overrideFeature",
+            propOrder = {"feature"})
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class OverrideFeature {
-        @XmlAttribute
-        private FeatureOverrideMode mode = FeatureOverrideMode.REPLACE;
-        @XmlElement
-        private Feature feature;
+        @XmlAttribute private FeatureOverrideMode mode = FeatureOverrideMode.REPLACE;
+        @XmlElement private Feature feature;
 
         public FeatureOverrideMode getMode() {
             return mode;
@@ -81,5 +77,4 @@ public class FeatureReplacements {
             this.feature = feature;
         }
     }
-
 }

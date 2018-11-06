@@ -23,8 +23,9 @@ import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 
-@Services(requires = @RequireService(ServiceComponentRuntime.class),
-          provides = @ProvideService(BundleStateService.class))
+@Services(
+        requires = @RequireService(ServiceComponentRuntime.class),
+        provides = @ProvideService(BundleStateService.class))
 public class Activator extends BaseActivator {
 
     @Override
@@ -34,5 +35,4 @@ public class Activator extends BaseActivator {
             register(BundleStateService.class, new ScrBundleStateService(scr));
         }
     }
-
 }

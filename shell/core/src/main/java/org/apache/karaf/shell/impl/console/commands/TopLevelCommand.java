@@ -18,19 +18,18 @@
  */
 package org.apache.karaf.shell.impl.console.commands;
 
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_NORMAL;
+
 import java.io.PrintStream;
 import java.util.List;
-
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.CommandException;
-
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_RED;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_BOLD;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
 public abstract class TopLevelCommand implements Command {
 
@@ -42,7 +41,7 @@ public abstract class TopLevelCommand implements Command {
     @Override
     public Completer getCompleter(boolean scoped) {
         return null;
-//        return new StringsCompleter(new String[] { getName() });
+        //        return new StringsCompleter(new String[] { getName() });
     }
 
     @Override
@@ -57,10 +56,15 @@ public abstract class TopLevelCommand implements Command {
             return null;
         }
         if (!arguments.isEmpty()) {
-            String msg = COLOR_RED
-                    + "Error executing command "
-                    + INTENSITY_BOLD + getName() + INTENSITY_NORMAL
-                    + COLOR_DEFAULT + ": " + "too many arguments specified";
+            String msg =
+                    COLOR_RED
+                            + "Error executing command "
+                            + INTENSITY_BOLD
+                            + getName()
+                            + INTENSITY_NORMAL
+                            + COLOR_DEFAULT
+                            + ": "
+                            + "too many arguments specified";
             throw new CommandException(msg);
         }
         doExecute(session);
@@ -88,5 +92,4 @@ public abstract class TopLevelCommand implements Command {
     }
 
     protected abstract void doExecute(Session session) throws Exception;
-
 }

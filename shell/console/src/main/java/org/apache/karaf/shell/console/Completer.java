@@ -24,5 +24,4 @@ import java.util.List;
 public interface Completer {
 
     int complete(String buffer, int cursor, List<String> candidates);
-
 }

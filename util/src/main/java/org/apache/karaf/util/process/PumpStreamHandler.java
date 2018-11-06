@@ -18,9 +18,9 @@
  */
 package org.apache.karaf.util.process;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
 /**
  * Copies standard output and error of children streams to standard output and error of the parent.
@@ -45,7 +45,8 @@ public class PumpStreamHandler {
     // NOTE: May want to use a ThreadPool here, 3 threads per/pair seems kinda expensive :-(
     //
 
-    public PumpStreamHandler(final InputStream in, final OutputStream out, final OutputStream err, String name) {
+    public PumpStreamHandler(
+            final InputStream in, final OutputStream out, final OutputStream err, String name) {
         assert in != null;
         assert out != null;
         assert err != null;
@@ -103,11 +104,11 @@ public class PumpStreamHandler {
 
         if (in != null) {
             inputPump = createInputPump(in, out, true);
-        }
-        else {
+        } else {
             try {
                 out.close();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -124,9 +125,7 @@ public class PumpStreamHandler {
         setChildErrorStream(p.getErrorStream());
     }
 
-    /**
-     * Start pumping the streams.
-     */
+    /** Start pumping the streams. */
     public void start() {
         if (outputPump != null) {
             Thread thread = new Thread(outputPump);
@@ -150,49 +149,50 @@ public class PumpStreamHandler {
         }
     }
 
-    /**
-     * Stop pumping the streams.
-     */
+    /** Stop pumping the streams. */
     public void stop() {
         if (outputPump != null) {
             try {
                 outputPump.stop();
                 outputPump.waitFor();
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // ignore
             }
             try {
                 outputPump.getIn().close();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
         }
 
         if (errorPump != null) {
             try {
                 errorPump.stop();
                 errorPump.waitFor();
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // ignore
             }
             try {
                 errorPump.getIn().close();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
         }
 
         if (inputPump != null) {
             inputPump.stop();
             try {
                 inputPump.getOut().close();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
         }
 
         try {
             err.flush();
-        } catch (IOException e) { }
+        } catch (IOException e) {
+        }
         try {
             out.flush();
-        } catch (IOException e) { }
+        } catch (IOException e) {
+        }
     }
 
     /**
@@ -236,15 +236,15 @@ public class PumpStreamHandler {
     }
 
     /**
-     * Create a stream pumper to copy the given input stream to the
-     * given output stream.
+     * Create a stream pumper to copy the given input stream to the given output stream.
      *
      * @param in The input stream to copy from.
      * @param out The output stream to copy to.
      * @param closeWhenExhausted If true close the input stream.
      * @return A thread object that does the pumping.
      */
-    protected StreamPumper createPump(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
+    protected StreamPumper createPump(
+            final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
         assert in != null;
         assert out != null;
 
@@ -253,30 +253,30 @@ public class PumpStreamHandler {
     }
 
     /**
-     * Create a stream pumper to copy the given input stream to the
-     * given output stream. Used for standard input.
+     * Create a stream pumper to copy the given input stream to the given output stream. Used for
+     * standard input.
      *
      * @param in The input stream to copy from.
      * @param out The output stream to copy to.
      * @param closeWhenExhausted If true close the input stream.
      * @return A thread object that does the pumping.
      */
-    protected StreamPumper createInputPump(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
+    protected StreamPumper createInputPump(
+            final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
         assert in != null;
         assert out != null;
 
         StreamPumper pumper = new StreamPumper(in, out, closeWhenExhausted);
-//        pumper.setNonBlocking(true);
+        //        pumper.setNonBlocking(true);
         pumper.setAutoflush(true);
         return pumper;
     }
-    
+
     public StreamPumper getOutputPump() {
         return this.outputPump;
     }
-    
+
     public StreamPumper getErrorPump() {
         return this.errorPump;
     }
-
 }

@@ -28,10 +28,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
-
 import org.apache.karaf.jdbc.JdbcService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -43,23 +41,31 @@ import org.osgi.service.jdbc.DataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Default implementation of the JDBC Service.
- */
+/** Default implementation of the JDBC Service. */
 public class JdbcServiceImpl implements JdbcService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcServiceImpl.class);
 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
-    
+
     @Override
-    public void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws Exception {
+    public void create(
+            String name,
+            String driverName,
+            String driverClass,
+            String databaseName,
+            String url,
+            String user,
+            String password,
+            String databaseType)
+            throws Exception {
         if (driverName == null && driverClass == null) {
             throw new IllegalStateException("No driverName or driverClass supplied");
         }
         if (datasources().contains(name)) {
-            throw new IllegalArgumentException("There is already a DataSource with the name " + name);
+            throw new IllegalArgumentException(
+                    "There is already a DataSource with the name " + name);
         }
         Dictionary<String, String> properties = new Hashtable<>();
         properties.put(DataSourceFactory.JDBC_DATASOURCE_NAME, name);
@@ -82,7 +88,10 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public void delete(String name) throws Exception {
-        String filter = String.format("(&(service.factoryPid=org.ops4j.datasource)(%s=%s))", DataSourceFactory.JDBC_DATASOURCE_NAME, name);
+        String filter =
+                String.format(
+                        "(&(service.factoryPid=org.ops4j.datasource)(%s=%s))",
+                        DataSourceFactory.JDBC_DATASOURCE_NAME, name);
         Configuration[] configs = configAdmin.listConfigurations(filter);
         for (Configuration config : configs) {
             config.delete();
@@ -94,9 +103,18 @@ public class JdbcServiceImpl implements JdbcService {
     public List<String> datasources() throws Exception {
         List<String> datasources = new ArrayList<>();
 
-        ServiceReference<?>[] references = bundleContext.getServiceReferences((String) null,
-                "(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")("
-                        + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))");
+        ServiceReference<?>[] references =
+                bundleContext.getServiceReferences(
+                        (String) null,
+                        "(|("
+                                + Constants.OBJECTCLASS
+                                + "="
+                                + DataSource.class.getName()
+                                + ")("
+                                + Constants.OBJECTCLASS
+                                + "="
+                                + XADataSource.class.getName()
+                                + "))");
         if (references != null) {
             for (ServiceReference reference : references) {
                 if (reference.getProperty("osgi.jndi.service.name") != null) {
@@ -106,7 +124,10 @@ public class JdbcServiceImpl implements JdbcService {
                 } else if (reference.getProperty("name") != null) {
                     datasources.add(reference.getProperty("name").toString());
                 } else if (reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME) != null) {
-                    datasources.add(reference.getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME).toString());
+                    datasources.add(
+                            reference
+                                    .getProperty(DataSourceFactory.JDBC_DATASOURCE_NAME)
+                                    .toString());
                 } else {
                     datasources.add(reference.getProperty(Constants.SERVICE_ID).toString());
                 }
@@ -118,7 +139,8 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public Map<String, List<String>> query(String datasource, String query) throws Exception {
-        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
+        try (JdbcConnector jdbcConnector =
+                new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             Map<String, List<String>> map = new HashMap<>();
             Statement statement = jdbcConnector.createStatement();
             ResultSet resultSet = jdbcConnector.register(statement.executeQuery(query));
@@ -137,16 +159,19 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public void execute(String datasource, String command) throws Exception {
-        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
+        try (JdbcConnector jdbcConnector =
+                new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             jdbcConnector.createStatement().execute(command);
         }
     }
 
     @Override
     public Map<String, List<String>> tables(String datasource) throws Exception {
-        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
+        try (JdbcConnector jdbcConnector =
+                new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
-            ResultSet resultSet = jdbcConnector.register(dbMetaData.getTables(null, null, null, null));
+            ResultSet resultSet =
+                    jdbcConnector.register(dbMetaData.getTables(null, null, null, null));
             ResultSetMetaData metaData = resultSet.getMetaData();
             Map<String, List<String>> map = new HashMap<>();
             for (int c = 1; c <= metaData.getColumnCount(); c++) {
@@ -163,7 +188,8 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public Map<String, String> info(String datasource) throws Exception {
-        try (JdbcConnector jdbcConnector = new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
+        try (JdbcConnector jdbcConnector =
+                new JdbcConnector(bundleContext, lookupDataSource(datasource))) {
             DatabaseMetaData dbMetaData = jdbcConnector.connect().getMetaData();
             Map<String, String> map = new HashMap<>();
             map.put("db.product", dbMetaData.getDatabaseProductName());
@@ -182,10 +208,28 @@ public class JdbcServiceImpl implements JdbcService {
     private ServiceReference<?> lookupDataSource(String name) {
         ServiceReference<?>[] references;
         try {
-            references = bundleContext.getServiceReferences((String) null,
-                    "(&(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")"
-                            + "(" + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))"
-                            + "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + ")))");
+            references =
+                    bundleContext.getServiceReferences(
+                            (String) null,
+                            "(&(|("
+                                    + Constants.OBJECTCLASS
+                                    + "="
+                                    + DataSource.class.getName()
+                                    + ")"
+                                    + "("
+                                    + Constants.OBJECTCLASS
+                                    + "="
+                                    + XADataSource.class.getName()
+                                    + "))"
+                                    + "(|(osgi.jndi.service.name="
+                                    + name
+                                    + ")(datasource="
+                                    + name
+                                    + ")(name="
+                                    + name
+                                    + ")(service.id="
+                                    + name
+                                    + ")))");
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException("Error finding datasource with name " + name, e);
         }
@@ -194,8 +238,11 @@ public class JdbcServiceImpl implements JdbcService {
         }
         if (references.length > 1) {
             Arrays.sort(references);
-            if (getRank(references[references.length - 1]) == getRank(references[references.length - 2])) {
-                LOGGER.warn("Multiple JDBC datasources found with the same service ranking for " + name);
+            if (getRank(references[references.length - 1])
+                    == getRank(references[references.length - 2])) {
+                LOGGER.warn(
+                        "Multiple JDBC datasources found with the same service ranking for "
+                                + name);
             }
         }
         return references[references.length - 1];
@@ -213,12 +260,14 @@ public class JdbcServiceImpl implements JdbcService {
     public List<String> factoryNames() throws Exception {
         List<String> factories = new ArrayList<>();
 
-        Collection<ServiceReference<DataSourceFactory>> references = bundleContext.getServiceReferences(DataSourceFactory.class, null);
+        Collection<ServiceReference<DataSourceFactory>> references =
+                bundleContext.getServiceReferences(DataSourceFactory.class, null);
         if (references == null) {
             return factories;
         }
         for (ServiceReference<DataSourceFactory> reference : references) {
-            String driverName = (String)reference.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_NAME);
+            String driverName =
+                    (String) reference.getProperty(DataSourceFactory.OSGI_JDBC_DRIVER_NAME);
             if (driverName != null) {
                 factories.add(driverName);
             }

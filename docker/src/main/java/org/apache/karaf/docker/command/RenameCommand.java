@@ -26,11 +26,21 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class RenameCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "container", description = "Name or ID of the container to rename", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "container",
+            description = "Name or ID of the container to rename",
+            required = true,
+            multiValued = false)
     @Completion(ContainersNameCompleter.class)
     String container;
 
-    @Argument(index = 1, name = "newName", description = "New name of the container", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "newName",
+            description = "New name of the container",
+            required = true,
+            multiValued = false)
     String newName;
 
     @Override
@@ -38,5 +48,4 @@ public class RenameCommand extends DockerCommandSupport {
         getDockerService().rename(container, newName, url);
         return null;
     }
-
 }

@@ -1,20 +1,16 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.karaf.tooling.commands;
 
@@ -26,16 +22,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.impl.action.command.HelpOption;
 
-/**
- * Prints documentation in wiki syntax
- */
+/** Prints documentation in wiki syntax */
 public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
 
     @Override
@@ -61,14 +54,17 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
                         arguments.add(null);
                     }
                     if (arguments.get(index) != null) {
-                        throw new IllegalArgumentException("Duplicate argument index: " + index + " on Action " + action.getClass().getName());
+                        throw new IllegalArgumentException(
+                                "Duplicate argument index: "
+                                        + index
+                                        + " on Action "
+                                        + action.getClass().getName());
                     }
                     arguments.set(index, argument);
                 }
             }
         }
-        if (includeHelpOption)
-            options.add(HelpOption.HELP);
+        if (includeHelpOption) options.add(HelpOption.HELP);
 
         out.println("h1. " + command.scope() + ":" + command.name());
         out.println();
@@ -85,7 +81,8 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
         if (arguments.size() > 0) {
             syntax.append(' ');
             for (Argument argument : arguments) {
-                syntax.append(String.format(argument.required() ? "%s " : "\\[%s\\] ", argument.name()));
+                syntax.append(
+                        String.format(argument.required() ? "%s " : "\\[%s\\] ", argument.name()));
             }
         }
         out.println("h2. Syntax");
@@ -146,5 +143,4 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
             writer.println();
         }
     }
-
 }

@@ -21,14 +21,12 @@ package org.apache.karaf.shell.ssh;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.sshd.server.ServerBuilder;
-import org.apache.sshd.server.SshServer;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.cipher.Cipher;
 import org.apache.sshd.common.kex.KeyExchange;
 import org.apache.sshd.common.mac.Mac;
-
+import org.apache.sshd.server.ServerBuilder;
+import org.apache.sshd.server.SshServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +34,8 @@ public class SshUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshUtils.class);
 
-    public static <S> List<NamedFactory<S>> filter(Class<S> type,
-            Collection<NamedFactory<S>> factories, String[] names) {
+    public static <S> List<NamedFactory<S>> filter(
+            Class<S> type, Collection<NamedFactory<S>> factories, String[] names) {
         List<NamedFactory<S>> list = new ArrayList<>();
         for (String name : names) {
             name = name.trim();
@@ -50,8 +48,12 @@ public class SshUtils {
                 }
             }
             if (!found) {
-                LOGGER.warn("Configured " + type.getSimpleName().toLowerCase()
-                        + " '" + name + "' not available");
+                LOGGER.warn(
+                        "Configured "
+                                + type.getSimpleName().toLowerCase()
+                                + " '"
+                                + name
+                                + "' not available");
             }
         }
         return list;
@@ -74,9 +76,7 @@ public class SshUtils {
         return filter(KeyExchange.class, avail, names);
     }
 
-    /**
-     * Simple helper class to avoid duplicating available configuration entries.
-     */
+    /** Simple helper class to avoid duplicating available configuration entries. */
     private static final class ServerConfig extends ServerBuilder {
 
         public ServerConfig() {
@@ -84,8 +84,7 @@ public class SshUtils {
         }
 
         /**
-         * Just initializes the default configuration - does not create a
-         * server instance.
+         * Just initializes the default configuration - does not create a server instance.
          *
          * @return always <code>null</code>
          */
@@ -95,8 +94,7 @@ public class SshUtils {
         }
 
         /**
-         * Just initializes the default configuration - does not create a
-         * server instance.
+         * Just initializes the default configuration - does not create a server instance.
          *
          * @return always <code>null</code>
          */
@@ -104,14 +102,14 @@ public class SshUtils {
         public SshServer build(boolean isFillWithDefaultValues) {
             if (isFillWithDefaultValues) {
                 this.fillWithDefaultValues();
-             }
+            }
             return null;
         }
 
         public List<NamedFactory<KeyExchange>> getKeyExchangeFactories() {
             return keyExchangeFactories;
-         }
- 
+        }
+
         public List<NamedFactory<Cipher>> getCipherFactories() {
             return cipherFactories;
         }
@@ -120,5 +118,4 @@ public class SshUtils {
             return macFactories;
         }
     }
-
 }

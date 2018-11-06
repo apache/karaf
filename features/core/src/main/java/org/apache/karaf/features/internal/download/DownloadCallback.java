@@ -19,5 +19,4 @@ package org.apache.karaf.features.internal.download;
 public interface DownloadCallback {
 
     void downloaded(StreamProvider provider) throws Exception;
-
 }

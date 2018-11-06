@@ -16,8 +16,7 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
-
+import java.util.Map;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -27,20 +26,15 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import java.util.Map;
+import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
 
 public class JmxProperty {
 
+    /** The CompositeType which represents a single property */
+    public static final CompositeType PROPERTY = createPropertyType();
 
-    /**
-     * The CompositeType which represents a single property
-     */
-    public final static CompositeType PROPERTY = createPropertyType();
-
-    /**
-     * The TabularType which represents a list of properties
-     */
-    public final static TabularType PROPERTY_TABLE = createPropertyTableType();
+    /** The TabularType which represents a list of properties */
+    public static final TabularType PROPERTY_TABLE = createPropertyTableType();
 
     private final CompositeData data;
 
@@ -82,8 +76,8 @@ public class JmxProperty {
             itemDescriptions[0] = "The property key";
             itemDescriptions[1] = "The property value";
 
-            return new CompositeType("Property", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "Property", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build property type", e);
         }
@@ -91,8 +85,11 @@ public class JmxProperty {
 
     private static TabularType createPropertyTableType() {
         try {
-            return new TabularType("References", "The table of all properties",
-                    PROPERTY, new String[] {ServiceComponentRuntimeMBean.PROPERTY_KEY});
+            return new TabularType(
+                    "References",
+                    "The table of all properties",
+                    PROPERTY,
+                    new String[] {ServiceComponentRuntimeMBean.PROPERTY_KEY});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build properties table type", e);
         }

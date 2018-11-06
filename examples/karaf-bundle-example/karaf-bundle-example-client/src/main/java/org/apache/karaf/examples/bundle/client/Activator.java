@@ -31,30 +31,36 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
-        bookingServiceTracker = new ServiceTracker<BookingService, BookingService>(bundleContext, BookingService.class, null) {
+        bookingServiceTracker =
+                new ServiceTracker<BookingService, BookingService>(
+                        bundleContext, BookingService.class, null) {
 
-            @Override
-            public BookingService addingService(ServiceReference<BookingService> reference) {
-                BookingService bookingService = bundleContext.getService(reference);
+                    @Override
+                    public BookingService addingService(
+                            ServiceReference<BookingService> reference) {
+                        BookingService bookingService = bundleContext.getService(reference);
 
-                ClientServiceImpl clientService = new ClientServiceImpl();
-                clientService.setBookingService(bookingService);
-                clientServiceRegistration = bundleContext.registerService(ClientService.class, clientService, null);
+                        ClientServiceImpl clientService = new ClientServiceImpl();
+                        clientService.setBookingService(bookingService);
+                        clientServiceRegistration =
+                                bundleContext.registerService(
+                                        ClientService.class, clientService, null);
 
-                display = new Display();
-                display.setClientService(clientService);
-                display.init();
+                        display = new Display();
+                        display.setClientService(clientService);
+                        display.init();
 
-                return bookingService;
-            }
+                        return bookingService;
+                    }
 
-            @Override
-            public void removedService(ServiceReference<BookingService> reference, BookingService service) {
-                display.destroy();
+                    @Override
+                    public void removedService(
+                            ServiceReference<BookingService> reference, BookingService service) {
+                        display.destroy();
 
-                clientServiceRegistration.unregister();
-            }
-        };
+                        clientServiceRegistration.unregister();
+                    }
+                };
 
         bookingServiceTracker.open();
     }

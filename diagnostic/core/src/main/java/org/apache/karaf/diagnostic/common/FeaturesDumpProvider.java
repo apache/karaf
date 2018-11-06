@@ -16,27 +16,23 @@
 package org.apache.karaf.diagnostic.common;
 
 import java.io.OutputStreamWriter;
-
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 
 /**
- * Dump provider which add file named features.txt with informations
- * about installed features and repositories.
+ * Dump provider which add file named features.txt with informations about installed features and
+ * repositories.
  */
 public class FeaturesDumpProvider extends TextDumpProvider {
 
-    /**
-     * Feature service.
-     */
+    /** Feature service. */
     private final FeaturesService features;
 
     /**
-     * Creates new dump entry witch contains information about
-     * karaf features.
-     * 
+     * Creates new dump entry witch contains information about karaf features.
+     *
      * @param features Feature service.
      */
     public FeaturesDumpProvider(FeaturesService features) {
@@ -44,9 +40,7 @@ public class FeaturesDumpProvider extends TextDumpProvider {
         this.features = features;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected void writeDump(OutputStreamWriter outputStreamWriter) throws Exception {
         // creates header
         outputStreamWriter.write("Repositories:\n");
@@ -74,5 +68,4 @@ public class FeaturesDumpProvider extends TextDumpProvider {
         // flush & close stream
         outputStreamWriter.close();
     }
-
 }

@@ -23,10 +23,8 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
 import java.util.Set;
-
 import javax.security.auth.Subject;
 import javax.security.auth.SubjectDomainCombiner;
-
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 
 public class JaasHelper {
@@ -73,38 +71,54 @@ public class JaasHelper {
         return false;
     }
 
-    public static void runAs(final Subject subject,
-                             final Runnable action) {
+    public static void runAs(final Subject subject, final Runnable action) {
         if (action == null) {
             throw new NullPointerException();
         }
-        doAs(subject, (PrivilegedAction<Object>)(() -> { action.run(); return null; } ));
+        doAs(
+                subject,
+                (PrivilegedAction<Object>)
+                        (() -> {
+                            action.run();
+                            return null;
+                        }));
     }
 
-    public static <T> T doAs(final Subject subject,
-                             final PrivilegedAction<T> action) {
+    public static <T> T doAs(final Subject subject, final PrivilegedAction<T> action) {
         if (action == null) {
             throw new NullPointerException();
         }
         // set up the new Subject-based AccessControlContext for doPrivileged
         final AccessControlContext currentAcc = AccessController.getContext();
-        final AccessControlContext newAcc = AccessController.doPrivileged
-                ((PrivilegedAction<AccessControlContext>) () -> new AccessControlContext(currentAcc,
-                        subject != null ? new OsgiSubjectDomainCombiner(subject) : null));
+        final AccessControlContext newAcc =
+                AccessController.doPrivileged(
+                        (PrivilegedAction<AccessControlContext>)
+                                () ->
+                                        new AccessControlContext(
+                                                currentAcc,
+                                                subject != null
+                                                        ? new OsgiSubjectDomainCombiner(subject)
+                                                        : null));
         // call doPrivileged and push this new context on the stack
         return AccessController.doPrivileged(action, newAcc);
     }
 
-    public static <T> T doAs(final Subject subject,
-                             final PrivilegedExceptionAction<T> action) throws PrivilegedActionException {
+    public static <T> T doAs(final Subject subject, final PrivilegedExceptionAction<T> action)
+            throws PrivilegedActionException {
         if (action == null) {
             throw new NullPointerException();
         }
         // set up the new Subject-based AccessControlContext for doPrivileged
         final AccessControlContext currentAcc = AccessController.getContext();
-        final AccessControlContext newAcc = AccessController.doPrivileged
-                ((PrivilegedAction<AccessControlContext>) () -> new AccessControlContext(currentAcc,
-                        subject != null ? new OsgiSubjectDomainCombiner(subject) : null));
+        final AccessControlContext newAcc =
+                AccessController.doPrivileged(
+                        (PrivilegedAction<AccessControlContext>)
+                                () ->
+                                        new AccessControlContext(
+                                                currentAcc,
+                                                subject != null
+                                                        ? new OsgiSubjectDomainCombiner(subject)
+                                                        : null));
         // call doPrivileged and push this new context on the stack
         return AccessController.doPrivileged(action, newAcc);
     }
@@ -118,8 +132,8 @@ public class JaasHelper {
             this.subject = subject;
         }
 
-        public ProtectionDomain[] combine(ProtectionDomain[] currentDomains,
-                                          ProtectionDomain[] assignedDomains) {
+        public ProtectionDomain[] combine(
+                ProtectionDomain[] currentDomains, ProtectionDomain[] assignedDomains) {
             int cLen = (currentDomains == null ? 0 : currentDomains.length);
             int aLen = (assignedDomains == null ? 0 : assignedDomains.length);
             ProtectionDomain[] newDomains = new ProtectionDomain[cLen + aLen];
@@ -166,7 +180,11 @@ public class JaasHelper {
         private final ProtectionDomain delegate;
 
         DelegatingProtectionDomain(ProtectionDomain delegate, Principal[] principals) {
-            super(delegate.getCodeSource(), delegate.getPermissions(), delegate.getClassLoader(), principals);
+            super(
+                    delegate.getCodeSource(),
+                    delegate.getPermissions(),
+                    delegate.getClassLoader(),
+                    principals);
             this.delegate = delegate;
         }
 
@@ -174,6 +192,5 @@ public class JaasHelper {
         public boolean implies(Permission permission) {
             return delegate.implies(permission);
         }
-
     }
 }

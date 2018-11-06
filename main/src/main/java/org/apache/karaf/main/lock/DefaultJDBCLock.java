@@ -19,30 +19,27 @@
 package org.apache.karaf.main.lock;
 
 import java.sql.*;
-
-import org.apache.felix.utils.properties.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.main.util.BootstrapLogManager;
 
 /**
- * Represents an exclusive lock on a database,
- * used to avoid multiple Karaf instances attempting
- * to become master.
+ * Represents an exclusive lock on a database, used to avoid multiple Karaf instances attempting to
+ * become master.
  */
 public class DefaultJDBCLock implements Lock {
 
     final Logger LOG = Logger.getLogger(this.getClass().getName());
-    
-    private static final String PROPERTY_LOCK_URL               = "karaf.lock.jdbc.url";
-    private static final String PROPERTY_LOCK_JDBC_DRIVER       = "karaf.lock.jdbc.driver";
-    private static final String PROPERTY_LOCK_JDBC_USER         = "karaf.lock.jdbc.user";
-    private static final String PROPERTY_LOCK_JDBC_PASSWORD     = "karaf.lock.jdbc.password";
-    private static final String PROPERTY_LOCK_JDBC_TABLE        = "karaf.lock.jdbc.table";
-    private static final String PROPERTY_LOCK_JDBC_CLUSTERNAME  = "karaf.lock.jdbc.clustername";
-    private static final String PROPERTY_LOCK_JDBC_TIMEOUT      = "karaf.lock.jdbc.timeout";
-    
+
+    private static final String PROPERTY_LOCK_URL = "karaf.lock.jdbc.url";
+    private static final String PROPERTY_LOCK_JDBC_DRIVER = "karaf.lock.jdbc.driver";
+    private static final String PROPERTY_LOCK_JDBC_USER = "karaf.lock.jdbc.user";
+    private static final String PROPERTY_LOCK_JDBC_PASSWORD = "karaf.lock.jdbc.password";
+    private static final String PROPERTY_LOCK_JDBC_TABLE = "karaf.lock.jdbc.table";
+    private static final String PROPERTY_LOCK_JDBC_CLUSTERNAME = "karaf.lock.jdbc.clustername";
+    private static final String PROPERTY_LOCK_JDBC_TIMEOUT = "karaf.lock.jdbc.timeout";
+
     private static final String DEFAULT_PASSWORD = "";
     private static final String DEFAULT_USER = "";
     private static final String DEFAULT_TABLE = "KARAF_LOCK";
@@ -53,7 +50,7 @@ public class DefaultJDBCLock implements Lock {
     Connection lockConnection;
     String url;
     String driver;
-    String user; 
+    String user;
     String password;
     String table;
     String clusterName;
@@ -67,10 +64,11 @@ public class DefaultJDBCLock implements Lock {
         this.password = props.getProperty(PROPERTY_LOCK_JDBC_PASSWORD, DEFAULT_PASSWORD);
         this.table = props.getProperty(PROPERTY_LOCK_JDBC_TABLE, DEFAULT_TABLE);
         this.clusterName = props.getProperty(PROPERTY_LOCK_JDBC_CLUSTERNAME, DEFAULT_CLUSTERNAME);
-        this.timeout = Integer.parseInt(props.getProperty(PROPERTY_LOCK_JDBC_TIMEOUT, DEFAULT_TIMEOUT));
+        this.timeout =
+                Integer.parseInt(props.getProperty(PROPERTY_LOCK_JDBC_TIMEOUT, DEFAULT_TIMEOUT));
 
         this.statements = createStatements();
-        
+
         init();
     }
 
@@ -85,7 +83,7 @@ public class DefaultJDBCLock implements Lock {
         statements.setNodeName(clusterName);
         return statements;
     }
-    
+
     void init() {
         try {
             createDatabase();
@@ -100,14 +98,16 @@ public class DefaultJDBCLock implements Lock {
     }
 
     /**
-     * This method is called to check and create the required schemas that are used by this instance.
+     * This method is called to check and create the required schemas that are used by this
+     * instance.
      */
     void createSchema() {
         if (schemaExists()) {
             return;
         }
-        
-        String[] createStatments = this.statements.getLockCreateSchemaStatements(getCurrentTimeMillis());
+
+        String[] createStatments =
+                this.statements.getLockCreateSchemaStatements(getCurrentTimeMillis());
         Statement statement = null;
         Connection connection = null;
 
@@ -119,14 +119,13 @@ public class DefaultJDBCLock implements Lock {
                 LOG.info("Executing statement: " + stmt);
                 statement.execute(stmt);
             }
-            
+
             getConnection().commit();
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Could not create schema", e);
             try {
                 // Rollback transaction if and only if there was a failure...
-                if (connection != null)
-                    connection.rollback();
+                if (connection != null) connection.rollback();
             } catch (Exception ie) {
                 // Do nothing....
             }
@@ -136,7 +135,8 @@ public class DefaultJDBCLock implements Lock {
     }
 
     /**
-     * This method is called to determine if the required database schemas have already been created or not.
+     * This method is called to determine if the required database schemas have already been created
+     * or not.
      *
      * @return true, if the schemas are available else false.
      */
@@ -147,8 +147,7 @@ public class DefaultJDBCLock implements Lock {
     /**
      * This method is called to determine if the required table is available or not.
      *
-     * @param tableName  The name of the table to determine if it exists
-     *
+     * @param tableName The name of the table to determine if it exists
      * @return true, if the table exists else false
      */
     boolean schemaExist(String tableName) {
@@ -157,11 +156,12 @@ public class DefaultJDBCLock implements Lock {
             return metadata != null && (checkTableExists(tableName.toLowerCase(), metadata));
         } catch (Exception ignore) {
             return false;
-            //throw new RuntimeException("Error testing for db table", ignore);
+            // throw new RuntimeException("Error testing for db table", ignore);
         }
     }
 
-    private boolean checkTableExists(String tableName, DatabaseMetaData metadata) throws SQLException {
+    private boolean checkTableExists(String tableName, DatabaseMetaData metadata)
+            throws SQLException {
         try (ResultSet rs = metadata.getTables(null, null, tableName, new String[] {"TABLE"})) {
             return rs.next();
         }
@@ -173,14 +173,14 @@ public class DefaultJDBCLock implements Lock {
      */
     public boolean lock() {
         boolean result = acquireLock();
-        
+
         if (result) {
             result = updateLock();
         }
-        
+
         return result;
     }
-    
+
     boolean acquireLock() {
         String lockCreateStatement = statements.getLockCreateStatement();
         PreparedStatement preparedStatement = null;
@@ -204,7 +204,7 @@ public class DefaultJDBCLock implements Lock {
         String lockUpdateStatement = statements.getLockUpdateStatement(getCurrentTimeMillis());
         PreparedStatement preparedStatement = null;
         boolean lockUpdated = false;
-        
+
         try {
             preparedStatement = getConnection().prepareStatement(lockUpdateStatement);
             preparedStatement.setQueryTimeout(timeout);
@@ -215,13 +215,11 @@ public class DefaultJDBCLock implements Lock {
         } finally {
             closeSafely(preparedStatement);
         }
-        
+
         return lockUpdated;
     }
-    
-    /**
-     * Can be overridden to suppress logs in tests
-     */
+
+    /** Can be overridden to suppress logs in tests */
     public void log(Level level, String msg, Exception e) {
         LOG.log(level, msg, e);
     }
@@ -244,7 +242,7 @@ public class DefaultJDBCLock implements Lock {
                 }
             }
         }
-        
+
         lockConnection = null;
     }
 
@@ -253,20 +251,18 @@ public class DefaultJDBCLock implements Lock {
      * @see org.apache.karaf.main.Lock#isAlive()
      */
     public boolean isAlive() throws Exception {
-        if (!isConnected()) { 
+        if (!isConnected()) {
             LOG.severe("Lost lock!");
-            return false; 
+            return false;
         }
 
         return updateLock();
     }
 
     /**
-     * This method is called to determine if this instance jdbc connection is
-     * still connected.
+     * This method is called to determine if this instance jdbc connection is still connected.
      *
      * @return true, if the connection is still connected else false
-     *
      * @throws SQLException
      */
     boolean isConnected() throws SQLException {
@@ -307,7 +303,6 @@ public class DefaultJDBCLock implements Lock {
      * This method will return an active connection for this given jdbc driver.
      *
      * @return jdbc Connection instance
-     *
      * @throws Exception
      */
     Connection getConnection() throws Exception {
@@ -315,36 +310,37 @@ public class DefaultJDBCLock implements Lock {
             lockConnection = createConnection(driver, url, user, password);
             lockConnection.setAutoCommit(false);
         }
-        
+
         return lockConnection;
     }
 
     /**
      * Create a new jdbc connection.
-     * 
+     *
      * @param driver
      * @param url
      * @param username
      * @param password
      * @return a new jdbc connection
-     * @throws Exception 
+     * @throws Exception
      */
-    Connection createConnection(String driver, String url, String username, String password) throws Exception {
+    Connection createConnection(String driver, String url, String username, String password)
+            throws Exception {
         if (url.toLowerCase().startsWith("jdbc:derby")) {
             url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
         }
-        
+
         try {
             return doCreateConnection(driver, url, username, password);
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error occured while setting up JDBC connection", e);
-            throw e; 
+            throw e;
         }
     }
 
     /**
      * This method could be used to inject a mock jdbc connection for testing purposes.
-     * 
+     *
      * @param driver
      * @param url
      * @param username
@@ -353,13 +349,14 @@ public class DefaultJDBCLock implements Lock {
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    Connection doCreateConnection(String driver, String url, String username, String password) throws ClassNotFoundException, SQLException {
+    Connection doCreateConnection(String driver, String url, String username, String password)
+            throws ClassNotFoundException, SQLException {
         Class.forName(driver);
         // results in a closed connection in Derby if the update lock table request timed out
         // DriverManager.setLoginTimeout(timeout);
         return DriverManager.getConnection(url, username, password);
     }
-    
+
     long getCurrentTimeMillis() {
         return System.currentTimeMillis();
     }

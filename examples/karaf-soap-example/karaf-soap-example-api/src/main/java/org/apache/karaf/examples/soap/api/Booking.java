@@ -16,9 +16,7 @@
  */
 package org.apache.karaf.examples.soap.api;
 
-/**
- * A regular POJO.
- */
+/** A regular POJO. */
 public class Booking {
 
     private Long id;

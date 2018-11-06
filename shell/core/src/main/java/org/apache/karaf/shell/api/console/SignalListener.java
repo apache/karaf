@@ -18,9 +18,7 @@
  */
 package org.apache.karaf.shell.api.console;
 
-/**
- * Define a listener to receive signals
- */
+/** Define a listener to receive signals */
 public interface SignalListener {
 
     /**

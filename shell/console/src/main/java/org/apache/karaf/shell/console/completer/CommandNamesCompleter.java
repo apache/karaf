@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.CommandSessionHolder;
@@ -32,9 +31,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceListener;
 
-/**
- * Completes command names
- */
+/** Completes command names */
 @Deprecated
 public class CommandNamesCompleter implements Completer {
 
@@ -56,7 +53,6 @@ public class CommandNamesCompleter implements Completer {
             // Ignore in case we're not in OSGi
         }
     }
-
 
     public int complete(String buffer, int cursor, List<String> candidates) {
         if (session == null) {
@@ -88,12 +84,11 @@ public class CommandNamesCompleter implements Completer {
                 throw new IllegalStateException("Bundle is stopped");
             }
             ServiceListener listener = event -> commands.clear();
-            context.addServiceListener(listener,
-                    String.format("(&(%s=*)(%s=*))",
-                            CommandProcessor.COMMAND_SCOPE,
-                            CommandProcessor.COMMAND_FUNCTION));
+            context.addServiceListener(
+                    listener,
+                    String.format(
+                            "(&(%s=*)(%s=*))",
+                            CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION));
         }
     }
-
 }
-

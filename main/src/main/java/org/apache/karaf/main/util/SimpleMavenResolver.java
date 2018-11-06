@@ -22,30 +22,28 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
-
 import org.apache.karaf.util.maven.Parser;
 
-/**
- * Resolves local maven artifacts and raw file paths
- */
+/** Resolves local maven artifacts and raw file paths */
 public class SimpleMavenResolver implements ArtifactResolver {
     private final List<File> mavenRepos;
 
     /**
-     * 
-     * @param mavenRepos list of base dirs of maven repos that should be used when resolving maven artifacts
+     * @param mavenRepos list of base dirs of maven repos that should be used when resolving maven
+     *     artifacts
      */
     public SimpleMavenResolver(List<File> mavenRepos) {
         this.mavenRepos = mavenRepos;
     }
 
     /**
-     * Resolve from pax-url format for maven URIs to the file that is referenced by the URI
-     * The URI format is:
+     * Resolve from pax-url format for maven URIs to the file that is referenced by the URI The URI
+     * format is:
      * mvn:&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;/&lt;type&gt;/&lt;classifier&gt;
-     * 
-     * If artifactUri does not match the Syntax the local file that corresponds to the path is returned
-     * 
+     *
+     * <p>If artifactUri does not match the Syntax the local file that corresponds to the path is
+     * returned
+     *
      * @param artifactUri Maven artifact URI
      * @return resolved URI
      */
@@ -76,5 +74,4 @@ public class SimpleMavenResolver implements ArtifactResolver {
             return null;
         }
     }
-
 }

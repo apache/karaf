@@ -22,8 +22,8 @@ import java.util.concurrent.Callable;
 /**
  * Service registry.
  *
- * The registry can be used to register various services used during injection along
- * with {@link Command}s.
+ * <p>The registry can be used to register various services used during injection along with {@link
+ * Command}s.
  *
  * @see org.apache.karaf.shell.api.console.SessionFactory
  * @see org.apache.karaf.shell.api.console.Session
@@ -47,10 +47,9 @@ public interface Registry {
     Command getCommand(String scope, String name);
 
     /**
-     * Register a delayed service (or factory).
-     * In cases where instances must be created for each injection,
-     * a {@link Callable} can be registered and each injection will
-     * call it to obtain the actual service implementation.
+     * Register a delayed service (or factory). In cases where instances must be created for each
+     * injection, a {@link Callable} can be registered and each injection will call it to obtain the
+     * actual service implementation.
      *
      * @param factory the service factory.
      * @param clazz the registration class.
@@ -66,9 +65,8 @@ public interface Registry {
     void register(Object service);
 
     /**
-     * Unregister a service.
-     * If the registration has been done using a factory, the same
-     * factory should be used to unregister.
+     * Unregister a service. If the registration has been done using a factory, the same factory
+     * should be used to unregister.
      *
      * @param service unregister a given service.
      */
@@ -99,5 +97,4 @@ public interface Registry {
      * @return true if at least one service is found for the corresponding interface, false else.
      */
     boolean hasService(Class<?> clazz);
-
 }

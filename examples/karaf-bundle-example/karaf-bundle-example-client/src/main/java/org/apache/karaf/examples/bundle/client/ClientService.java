@@ -16,14 +16,12 @@
  */
 package org.apache.karaf.examples.bundle.client;
 
-import org.apache.karaf.examples.bundle.common.Booking;
-
 import java.util.List;
+import org.apache.karaf.examples.bundle.common.Booking;
 
 public interface ClientService {
 
     List<Booking> bookings();
 
     void addBooking(Booking booking);
-
 }

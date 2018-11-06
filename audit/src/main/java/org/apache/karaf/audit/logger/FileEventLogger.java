@@ -16,11 +16,6 @@
  */
 package org.apache.karaf.audit.logger;
 
-import org.apache.karaf.audit.Event;
-import org.apache.karaf.audit.EventLayout;
-import org.apache.karaf.audit.EventLogger;
-import org.apache.karaf.audit.util.FastDateFormat;
-
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.Flushable;
@@ -40,6 +35,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
+import org.apache.karaf.audit.Event;
+import org.apache.karaf.audit.EventLayout;
+import org.apache.karaf.audit.EventLogger;
+import org.apache.karaf.audit.util.FastDateFormat;
 
 public class FileEventLogger implements EventLogger {
 
@@ -56,7 +55,15 @@ public class FileEventLogger implements EventLogger {
     private Writer writer;
     private FastDateFormat fastDateFormat = new FastDateFormat();
 
-    public FileEventLogger(String path, String encoding, String policy, int files, boolean compress, ThreadFactory factory, EventLayout layout) throws IOException {
+    public FileEventLogger(
+            String path,
+            String encoding,
+            String policy,
+            int files,
+            boolean compress,
+            ThreadFactory factory,
+            EventLayout layout)
+            throws IOException {
         this.path = Paths.get(path);
         this.encoding = Charset.forName(encoding);
         this.policy = policy;
@@ -116,16 +123,23 @@ public class FileEventLogger implements EventLogger {
             size = Files.size(path);
             fastDateFormat.sameDay(Files.getLastModifiedTime(path).toMillis());
             if (trigger(timestamp)) {
-                Path temp = Files.createTempFile(path.getParent(), path.getFileName().toString(), ".tmp");
+                Path temp =
+                        Files.createTempFile(
+                                path.getParent(), path.getFileName().toString(), ".tmp");
                 Files.move(path, temp);
                 executor.execute(() -> rotate(temp, timestamp));
             }
         }
         fastDateFormat.sameDay(timestamp);
-        writer = new Writer(Files.newBufferedWriter(path, encoding, StandardOpenOption.CREATE, StandardOpenOption.APPEND));
+        writer =
+                new Writer(
+                        Files.newBufferedWriter(
+                                path,
+                                encoding,
+                                StandardOpenOption.CREATE,
+                                StandardOpenOption.APPEND));
         size = 0;
     }
-
 
     private void check(long timestamp) throws IOException {
         if (trigger(timestamp)) {
@@ -136,35 +150,53 @@ public class FileEventLogger implements EventLogger {
                 }
                 writer.close();
             }
-            Path temp = Files.createTempFile(path.getParent(), path.getFileName().toString() + ".", ".tmp");
+            Path temp =
+                    Files.createTempFile(
+                            path.getParent(), path.getFileName().toString() + ".", ".tmp");
             Files.delete(temp);
             Files.move(path, temp, StandardCopyOption.ATOMIC_MOVE);
             executor.execute(() -> rotate(temp, timestamp));
-            writer = new Writer(Files.newBufferedWriter(path, encoding, StandardOpenOption.CREATE, StandardOpenOption.APPEND));
+            writer =
+                    new Writer(
+                            Files.newBufferedWriter(
+                                    path,
+                                    encoding,
+                                    StandardOpenOption.CREATE,
+                                    StandardOpenOption.APPEND));
             size = 0;
         }
     }
 
     private boolean trigger(long timestamp) {
-        return maxSize > 0 && size > maxSize
-                || daily && !fastDateFormat.sameDay(timestamp);
+        return maxSize > 0 && size > maxSize || daily && !fastDateFormat.sameDay(timestamp);
     }
 
     private void rotate(Path path, long timestamp) {
         try {
             // Compute final name
             String[] fix = getFileNameFix();
-            List<String> paths = Files.list(path.getParent())
-                    .filter(p -> !p.equals(this.path))
-                    .map(Path::getFileName)
-                    .map(Path::toString)
-                    .filter(p -> p.startsWith(fix[0]))
-                    .filter(p -> !p.endsWith(".tmp"))
-                    .collect(Collectors.toList());
+            List<String> paths =
+                    Files.list(path.getParent())
+                            .filter(p -> !p.equals(this.path))
+                            .map(Path::getFileName)
+                            .map(Path::toString)
+                            .filter(p -> p.startsWith(fix[0]))
+                            .filter(p -> !p.endsWith(".tmp"))
+                            .collect(Collectors.toList());
             String date = new FastDateFormat().getDate(timestamp, FastDateFormat.YYYY_MM_DD);
-            List<String> sameDate = paths.stream()
-                    .filter(p -> p.matches("\\Q" + fix[0] + "-" + date + "\\E(-[0-9]+)?\\Q" + fix[1] + "\\E"))
-                    .collect(Collectors.toList());
+            List<String> sameDate =
+                    paths.stream()
+                            .filter(
+                                    p ->
+                                            p.matches(
+                                                    "\\Q"
+                                                            + fix[0]
+                                                            + "-"
+                                                            + date
+                                                            + "\\E(-[0-9]+)?\\Q"
+                                                            + fix[1]
+                                                            + "\\E"))
+                            .collect(Collectors.toList());
             String name = fix[0] + "-" + date + fix[1];
             int idx = 0;
             while (sameDate.contains(name)) {
@@ -174,8 +206,12 @@ public class FileEventLogger implements EventLogger {
             Path finalPath = path.resolveSibling(name);
             // Compress or move the file
             if (compress) {
-                try (OutputStream out = Files.newOutputStream(finalPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
-                     GZIPOutputStream zip = new GZIPOutputStream(out)) {
+                try (OutputStream out =
+                                Files.newOutputStream(
+                                        finalPath,
+                                        StandardOpenOption.WRITE,
+                                        StandardOpenOption.CREATE_NEW);
+                        GZIPOutputStream zip = new GZIPOutputStream(out)) {
                     Files.copy(path, zip);
                 }
                 Files.delete(path);
@@ -197,12 +233,12 @@ public class FileEventLogger implements EventLogger {
 
     private String[] getFileNameFix() {
         String str = path.getFileName().toString();
-        String sfx = compress ? ".gz": "";
+        String sfx = compress ? ".gz" : "";
         int idx = str.lastIndexOf('.');
         if (idx > 0) {
-            return new String[] { str.substring(0, idx), str.substring(idx) + sfx };
+            return new String[] {str.substring(0, idx), str.substring(idx) + sfx};
         } else {
-            return new String[] { str, sfx };
+            return new String[] {str, sfx};
         }
     }
 

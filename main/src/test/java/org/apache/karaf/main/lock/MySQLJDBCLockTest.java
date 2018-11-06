@@ -22,29 +22,27 @@ import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
 import java.util.logging.Level;
-
 import org.apache.felix.utils.properties.Properties;
-
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class MySQLJDBCLockTest extends BaseJDBCLockTest {
-    
+
     @Before
     @Override
     public void setUp() throws Exception {
         driver = "com.mysql.jdbc.Driver";
         url = "jdbc:mysql://127.0.0.1:3306/test";
         createTableStmtSuffix = " ENGINE=INNODB";
-        
+
         super.setUp();
     }
-    
+
     MySQLJDBCLock createLock(Properties props) {
         return new MySQLJDBCLock(props) {
             @Override
-            Connection doCreateConnection(String driver, String url, String username, String password) {
+            Connection doCreateConnection(
+                    String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
                 assertEquals(this.url + "?createDatabaseIfNotExist=true", url);
                 assertEquals(this.user, username);
@@ -56,37 +54,39 @@ public class MySQLJDBCLockTest extends BaseJDBCLockTest {
             long getCurrentTimeMillis() {
                 return 1;
             }
-            
+
             @Override
             public void log(Level level, String msg, Exception e) {
                 // Suppress log
             }
         };
     }
-    
+
     @Test
     public void createConnectionShouldConcatinateOptionsCorrect() {
         props.put("karaf.lock.jdbc.url", this.url + "?connectTimeout=10000");
-        
-        lock = new MySQLJDBCLock(props) {
-            @Override
-            boolean schemaExists() {
-                return true;
-            }
-            
-            @Override
-            Connection doCreateConnection(String driver, String url, String username, String password) {
-                assertEquals(this.driver, driver);
-                assertEquals(this.url + "&createDatabaseIfNotExist=true", url);
-                assertEquals(this.user, username);
-                assertEquals(this.password, password);
-                return connection;
-            }
 
-            @Override
-            long getCurrentTimeMillis() {
-                return 1;
-            }
-        };
+        lock =
+                new MySQLJDBCLock(props) {
+                    @Override
+                    boolean schemaExists() {
+                        return true;
+                    }
+
+                    @Override
+                    Connection doCreateConnection(
+                            String driver, String url, String username, String password) {
+                        assertEquals(this.driver, driver);
+                        assertEquals(this.url + "&createDatabaseIfNotExist=true", url);
+                        assertEquals(this.user, username);
+                        assertEquals(this.password, password);
+                        return connection;
+                    }
+
+                    @Override
+                    long getCurrentTimeMillis() {
+                        return 1;
+                    }
+                };
     }
 }

@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 package org.apache.karaf.service.command;
+
 import org.junit.Test;
 
 public class ListServiceNamesTest {
 
-    public ListServiceNamesTest() {
-        
-    }
-    
+    public ListServiceNamesTest() {}
+
     @Test
     public void listAll() throws Exception {
         ListServices listServices = new ListServices();
@@ -30,5 +29,4 @@ public class ListServiceNamesTest {
         listServices.onlyNames = true;
         listServices.execute();
     }
-
 }

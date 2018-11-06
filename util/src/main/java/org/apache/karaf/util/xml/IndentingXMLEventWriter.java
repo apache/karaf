@@ -71,8 +71,7 @@ public class IndentingXMLEventWriter implements XMLEventWriter {
             case XMLStreamConstants.END_ELEMENT:
                 this.newLineBeforeStartElement = false;
                 this.depth--;
-                if (this.indentBeforeEndElement)
-                    this.possiblyIndent();
+                if (this.indentBeforeEndElement) this.possiblyIndent();
                 this.indentBeforeEndElement = true;
                 this.wrappedWriter.add(event);
                 this.wrappedWriter.add(factory.createCharacters("\n"));
@@ -91,13 +90,13 @@ public class IndentingXMLEventWriter implements XMLEventWriter {
 
     /**
      * Indent at non-zero depth
+     *
      * @throws XMLStreamException
      */
     private void possiblyIndent() throws XMLStreamException {
         if (this.depth > 0) {
             StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < this.depth; i++)
-                sb.append(this.indentationString);
+            for (int i = 0; i < this.depth; i++) sb.append(this.indentationString);
             this.wrappedWriter.add(factory.createCharacters(sb.toString()));
         }
     }
@@ -140,5 +139,4 @@ public class IndentingXMLEventWriter implements XMLEventWriter {
     public void setIndentationString(String indentationString) {
         this.indentationString = indentationString;
     }
-
 }

@@ -41,5 +41,4 @@ public class Activator extends BaseActivator {
         InstancesMBeanImpl mbean = new InstancesMBeanImpl(instanceService);
         registerMBean(mbean, "type=instance");
     }
-
 }

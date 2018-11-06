@@ -29,10 +29,13 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ProxyRemoveCommand implements Action {
 
-    @Reference
-    private ProxyService proxyService;
+    @Reference private ProxyService proxyService;
 
-    @Argument(name = "prefix", description = "The HTTP proxy prefix", required = true, multiValued = false)
+    @Argument(
+            name = "prefix",
+            description = "The HTTP proxy prefix",
+            required = true,
+            multiValued = false)
     @Completion(ProxyUrlCompleter.class)
     String prefix;
 
@@ -41,5 +44,4 @@ public class ProxyRemoveCommand implements Action {
         proxyService.removeProxy(prefix);
         return null;
     }
-
 }

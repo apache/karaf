@@ -30,21 +30,29 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class BindCommand implements Action {
 
-    @Argument(index = 0, name = "service", description = "The ID of the OSGi service to bind", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "service",
+            description = "The ID of the OSGi service to bind",
+            required = true,
+            multiValued = false)
     @Completion(ServicesIdCompleter.class)
     Long serviceId;
 
-    @Argument(index = 1, name = "name", description = "The JNDI name to bind the OSGi service", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "name",
+            description = "The JNDI name to bind the OSGi service",
+            required = true,
+            multiValued = false)
     @Completion(ContextsCompleter.class)
     String name;
 
-    @Reference
-    JndiService jndiService;
+    @Reference JndiService jndiService;
 
     @Override
     public Object execute() throws Exception {
         jndiService.bind(serviceId, name);
         return null;
     }
-
 }

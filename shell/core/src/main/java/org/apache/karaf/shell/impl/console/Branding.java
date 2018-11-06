@@ -18,17 +18,15 @@
  */
 package org.apache.karaf.shell.impl.console;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.util.Properties;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Branding {
     static final Logger LOGGER = LoggerFactory.getLogger(Branding.class);
 
-    private Branding() { }
+    private Branding() {}
 
     public static Properties loadBrandingProperties(boolean ssh) {
         Properties props = new Properties();
@@ -73,5 +71,4 @@ public final class Branding {
             props.load(is);
         }
     }
-
 }

@@ -27,9 +27,7 @@ import java.nio.file.Path;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
-
 import javax.security.auth.Subject;
-
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.ShellUtil;
@@ -52,10 +50,10 @@ public class ShellCommand implements Command, SessionAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShellCommand.class);
 
     private static final Class[] SECURITY_BUGFIX = {
-                    JaasHelper.class,
-                    JaasHelper.OsgiSubjectDomainCombiner.class,
-                    JaasHelper.DelegatingProtectionDomain.class,
-            };
+        JaasHelper.class,
+        JaasHelper.OsgiSubjectDomainCombiner.class,
+        JaasHelper.DelegatingProtectionDomain.class,
+    };
 
     private String command;
     private InputStream in;
@@ -99,23 +97,35 @@ public class ShellCommand implements Command, SessionAware {
     public void run() {
         int exitStatus = 0;
         try {
-            final Session session = sessionFactory.create(in, new PrintStream(out), new PrintStream(err));
-            for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
+            final Session session =
+                    sessionFactory.create(in, new PrintStream(out), new PrintStream(err));
+            for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
                 session.put(e.getKey(), e.getValue());
             }
             try {
-                Subject subject = this.session != null ? this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                Subject subject =
+                        this.session != null
+                                ? this.session.getAttribute(
+                                        KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY)
+                                : null;
                 Object result;
                 if (subject != null) {
                     try {
-                        result = JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
-                            String scriptFileName = System.getProperty(EXEC_INIT_SCRIPT);
-                            if (scriptFileName == null) {
-                                scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
-                            }
-                            executeScript(scriptFileName, session);
-                            return session.execute(command);
-                        });
+                        result =
+                                JaasHelper.doAs(
+                                        subject,
+                                        (PrivilegedExceptionAction<Object>)
+                                                () -> {
+                                                    String scriptFileName =
+                                                            System.getProperty(EXEC_INIT_SCRIPT);
+                                                    if (scriptFileName == null) {
+                                                        scriptFileName =
+                                                                System.getProperty(
+                                                                        SHELL_INIT_SCRIPT);
+                                                    }
+                                                    executeScript(scriptFileName, session);
+                                                    return session.execute(command);
+                                                });
                     } catch (PrivilegedActionException e) {
                         throw e.getException();
                     }
@@ -127,15 +137,15 @@ public class ShellCommand implements Command, SessionAware {
                     executeScript(scriptFileName, session);
                     result = session.execute(command);
                 }
-                if (result != null)
-                {
-                	if(result instanceof Integer) {
-                		// if it is an integer it's interpreted as a return code
-                		exitStatus = (Integer) result;
-                	}
+                if (result != null) {
+                    if (result instanceof Integer) {
+                        // if it is an integer it's interpreted as a return code
+                        exitStatus = (Integer) result;
+                    }
 
                     // TODO: print the result of the command ?
-//                    session.getConsole().println(session.format(result, Converter.INSPECT));
+                    //                    session.getConsole().println(session.format(result,
+                    // Converter.INSPECT));
                 }
             } catch (Throwable t) {
                 exitStatus = 1;
@@ -150,8 +160,7 @@ public class ShellCommand implements Command, SessionAware {
         }
     }
 
-    public void destroy() {
-	}
+    public void destroy() {}
 
     private void executeScript(String names, Session session) {
         FilesStream.stream(names).forEach(p -> doExecuteScript(session, p));
@@ -159,13 +168,12 @@ public class ShellCommand implements Command, SessionAware {
 
     private void doExecuteScript(Session session, Path scriptFileName) {
         try {
-            String script = String.join("\n",
-                    Files.readAllLines(scriptFileName));
+            String script = String.join("\n", Files.readAllLines(scriptFileName));
             session.execute(script);
         } catch (Exception e) {
             LOGGER.debug("Error in initialization script {}", scriptFileName, e);
-            System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
+            System.err.println(
+                    "Error in initialization script: " + scriptFileName + ": " + e.getMessage());
         }
     }
-
 }

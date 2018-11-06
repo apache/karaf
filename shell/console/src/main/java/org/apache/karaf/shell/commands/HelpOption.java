@@ -23,33 +23,34 @@ import java.lang.annotation.Annotation;
 @Deprecated
 public class HelpOption {
 
-    public static final Option HELP = new Option() {
-        public String name() {
-            return "--help";
-        }
+    public static final Option HELP =
+            new Option() {
+                public String name() {
+                    return "--help";
+                }
 
-        public String[] aliases() {
-            return new String[]{};
-        }
+                public String[] aliases() {
+                    return new String[] {};
+                }
 
-        public String description() {
-            return "Display this help message";
-        }
+                public String description() {
+                    return "Display this help message";
+                }
 
-        public boolean required() {
-            return false;
-        }
+                public boolean required() {
+                    return false;
+                }
 
-        public boolean multiValued() {
-            return false;
-        }
+                public boolean multiValued() {
+                    return false;
+                }
 
-        public String valueToShowInHelp() {
-            return Option.DEFAULT_STRING;
-        }
+                public String valueToShowInHelp() {
+                    return Option.DEFAULT_STRING;
+                }
 
-        public Class<? extends Annotation> annotationType() {
-            return Option.class;
-        }
-    };
+                public Class<? extends Annotation> annotationType() {
+                    return Option.class;
+                }
+            };
 }

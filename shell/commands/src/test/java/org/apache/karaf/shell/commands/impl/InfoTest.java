@@ -19,8 +19,6 @@
 package org.apache.karaf.shell.commands.impl;
 
 import junit.framework.TestCase;
-
-import org.apache.karaf.shell.commands.impl.InfoAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,5 +37,4 @@ public class InfoTest extends TestCase {
         // update 2 days and 2 hours
         assertEquals("2 days 2 hours", infoAction.printDuration(50 * 3600 * 1000));
     }
-
 }

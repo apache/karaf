@@ -20,29 +20,27 @@ import java.util.List;
 
 public interface PackageService {
 
-	/**
-	 * Get the simplified package exports of a bundle. This does not show the
-	 * package versions.
-	 * 
-	 * @param bundleId The bundle ID.
-	 * @return The {@link List} of package exports in the given bundle.
-	 */
+    /**
+     * Get the simplified package exports of a bundle. This does not show the package versions.
+     *
+     * @param bundleId The bundle ID.
+     * @return The {@link List} of package exports in the given bundle.
+     */
     List<String> getExports(long bundleId);
 
     List<String> getImports(long bundleId);
 
-	/**
-	 * Get all package exports with their version, and the bundles exporting them.
-	 * 
-	 * @return A {@link List} containing all package exports (as {@link PackageVersion}).
-	 */
+    /**
+     * Get all package exports with their version, and the bundles exporting them.
+     *
+     * @return A {@link List} containing all package exports (as {@link PackageVersion}).
+     */
     List<PackageVersion> getExports();
 
     /**
-	 * Get all package imports with their requirement.
-     *  
+     * Get all package imports with their requirement.
+     *
      * @return A {@link List} containing all package imports (as {@link PackageRequirement}).
      */
     List<PackageRequirement> getImports();
-
 }

@@ -20,7 +20,10 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.service.subsystem.Subsystem;
 
-@Command(scope = "subsystem", name = "uninstall", description = "Uninstall the specified subsystems")
+@Command(
+        scope = "subsystem",
+        name = "uninstall",
+        description = "Uninstall the specified subsystems")
 @Service
 public class UninstallAction extends SubsystemSupport implements Action {
 
@@ -35,5 +38,4 @@ public class UninstallAction extends SubsystemSupport implements Action {
         }
         return null;
     }
-
 }

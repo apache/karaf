@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -40,76 +39,86 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
     private final BundleContext context;
     private final List<Configuration> configurations;
 
-    public StaticConfigAdminImpl(BundleContext context, List<Configuration> configs) throws IOException {
+    public StaticConfigAdminImpl(BundleContext context, List<Configuration> configs)
+            throws IOException {
         Objects.requireNonNull(configs, "configs");
         this.context = context;
         this.configurations = configs;
-        ServiceTracker<ManagedService, ManagedService> serviceTracker = new ServiceTracker<ManagedService, ManagedService>(context, ManagedService.class, null) {
-            @Override
-            public ManagedService addingService(ServiceReference<ManagedService> reference) {
-                ManagedService service = context.getService(reference);
-                Object pidObj = reference.getProperty(Constants.SERVICE_PID);
-                if (pidObj instanceof String) {
-                    String pid = (String) pidObj;
-                    boolean found = false;
-                    for (Configuration config : configurations) {
-                        if (config.getPid().equals(pid) && config.getFactoryPid() == null) {
-                            try {
-                                found = true;
-                                service.updated(config.getProperties());
-                            } catch (ConfigurationException e) {
-                                e.printStackTrace();
+        ServiceTracker<ManagedService, ManagedService> serviceTracker =
+                new ServiceTracker<ManagedService, ManagedService>(
+                        context, ManagedService.class, null) {
+                    @Override
+                    public ManagedService addingService(
+                            ServiceReference<ManagedService> reference) {
+                        ManagedService service = context.getService(reference);
+                        Object pidObj = reference.getProperty(Constants.SERVICE_PID);
+                        if (pidObj instanceof String) {
+                            String pid = (String) pidObj;
+                            boolean found = false;
+                            for (Configuration config : configurations) {
+                                if (config.getPid().equals(pid) && config.getFactoryPid() == null) {
+                                    try {
+                                        found = true;
+                                        service.updated(config.getProperties());
+                                    } catch (ConfigurationException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
+                            if (!found) {
+                                try {
+                                    service.updated(null);
+                                } catch (ConfigurationException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } else {
+                            System.err.println("Unsupported pid: " + pidObj);
                         }
+                        return service;
                     }
-                    if (!found) {
-                        try {
-                            service.updated(null);
-                        } catch (ConfigurationException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } else {
-                    System.err.println("Unsupported pid: " + pidObj);
-                }
-                return service;
-            }
 
-            @Override
-            public void removedService(ServiceReference<ManagedService> reference, ManagedService service) {
-                context.ungetService(reference);
-            }
-        };
+                    @Override
+                    public void removedService(
+                            ServiceReference<ManagedService> reference, ManagedService service) {
+                        context.ungetService(reference);
+                    }
+                };
         serviceTracker.open();
 
-        ServiceTracker<ManagedServiceFactory, ManagedServiceFactory> factoryTracker
-                = new ServiceTracker<ManagedServiceFactory, ManagedServiceFactory>(context, ManagedServiceFactory.class, null) {
-            @Override
-            public ManagedServiceFactory addingService(ServiceReference<ManagedServiceFactory> reference) {
-                ManagedServiceFactory factory = context.getService(reference);
-                Object pidObj = reference.getProperty(Constants.SERVICE_PID);
-                if (pidObj instanceof String) {
-                    String pid = (String) pidObj;
-                    for (Configuration config : configurations) {
-                        if (config.getPid().equals(pid) && config.getFactoryPid() != null) {
-                            try {
-                                factory.updated(config.getFactoryPid(), config.getProperties());
-                            } catch (ConfigurationException e) {
-                                e.printStackTrace();
+        ServiceTracker<ManagedServiceFactory, ManagedServiceFactory> factoryTracker =
+                new ServiceTracker<ManagedServiceFactory, ManagedServiceFactory>(
+                        context, ManagedServiceFactory.class, null) {
+                    @Override
+                    public ManagedServiceFactory addingService(
+                            ServiceReference<ManagedServiceFactory> reference) {
+                        ManagedServiceFactory factory = context.getService(reference);
+                        Object pidObj = reference.getProperty(Constants.SERVICE_PID);
+                        if (pidObj instanceof String) {
+                            String pid = (String) pidObj;
+                            for (Configuration config : configurations) {
+                                if (config.getPid().equals(pid) && config.getFactoryPid() != null) {
+                                    try {
+                                        factory.updated(
+                                                config.getFactoryPid(), config.getProperties());
+                                    } catch (ConfigurationException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
+                        } else {
+                            System.err.println("Unsupported pid: " + pidObj);
                         }
+                        return factory;
                     }
-                } else {
-                    System.err.println("Unsupported pid: " + pidObj);
-                }
-                return factory;
-            }
 
-            @Override
-            public void removedService(ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory service) {
-                super.removedService(reference, service);
-            }
-        };
+                    @Override
+                    public void removedService(
+                            ServiceReference<ManagedServiceFactory> reference,
+                            ManagedServiceFactory service) {
+                        super.removedService(reference, service);
+                    }
+                };
         factoryTracker.open();
     }
 
@@ -119,7 +128,8 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
     }
 
     @Override
-    public Configuration createFactoryConfiguration(String factoryPid, String location) throws IOException {
+    public Configuration createFactoryConfiguration(String factoryPid, String location)
+            throws IOException {
         throw new UnsupportedOperationException();
     }
 
@@ -141,7 +151,8 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
     }
 
     @Override
-    public Configuration[] listConfigurations(String filter) throws IOException, InvalidSyntaxException {
+    public Configuration[] listConfigurations(String filter)
+            throws IOException, InvalidSyntaxException {
         List<Configuration> configs;
         if (filter == null) {
             configs = configurations;
@@ -156,5 +167,4 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
         }
         return configs.isEmpty() ? null : configs.toArray(new Configuration[configs.size()]);
     }
-
 }

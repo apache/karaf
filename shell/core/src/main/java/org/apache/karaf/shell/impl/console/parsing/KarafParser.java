@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.felix.gogo.jline.ParsedLineImpl;
 import org.apache.felix.gogo.runtime.EOFError;
 import org.apache.felix.gogo.runtime.Parser.Program;
@@ -54,18 +53,21 @@ public class KarafParser implements org.jline.reader.Parser {
         }
     }
 
-    private ParsedLine doParse(String line, int cursor, ParseContext parseContext) throws SyntaxError {
+    private ParsedLine doParse(String line, int cursor, ParseContext parseContext)
+            throws SyntaxError {
         Program program = null;
         List<Statement> statements = null;
         String repaired = line;
         while (program == null) {
             try {
-                org.apache.felix.gogo.runtime.Parser parser = new org.apache.felix.gogo.runtime.Parser(repaired);
+                org.apache.felix.gogo.runtime.Parser parser =
+                        new org.apache.felix.gogo.runtime.Parser(repaired);
                 program = parser.program();
                 statements = parser.statements();
             } catch (EOFError e) {
                 // Make sure we don't loop forever
-                if (parseContext == ParseContext.COMPLETE && repaired.length() < line.length() + 1024) {
+                if (parseContext == ParseContext.COMPLETE
+                        && repaired.length() < line.length() + 1024) {
                     repaired = repaired + " " + e.repair();
                 } else {
                     throw e;
@@ -91,31 +93,38 @@ public class KarafParser implements org.jline.reader.Parser {
         if (statement != null && statement.tokens() != null && !statement.tokens().isEmpty()) {
             String cmdName = session.resolveCommand(statement.tokens().get(0).toString());
             String[] parts = cmdName.split(":");
-            Command cmd = parts.length == 2 ? session.getRegistry().getCommand(parts[0], parts[1]) : null;
+            Command cmd =
+                    parts.length == 2 ? session.getRegistry().getCommand(parts[0], parts[1]) : null;
             Parser cmdParser = cmd != null ? cmd.getParser() : null;
             if (cmdParser != null) {
-                final CommandLine cmdLine = cmdParser.parse(session, statement.toString(), cursor - statement.start());
+                final CommandLine cmdLine =
+                        cmdParser.parse(session, statement.toString(), cursor - statement.start());
                 return new ParsedLine() {
                     @Override
                     public String word() {
                         return cmdLine.getCursorArgument();
                     }
+
                     @Override
                     public int wordCursor() {
                         return cmdLine.getArgumentPosition();
                     }
+
                     @Override
                     public int wordIndex() {
                         return cmdLine.getCursorArgumentIndex();
                     }
+
                     @Override
                     public List<String> words() {
                         return Arrays.asList(cmdLine.getArguments());
                     }
+
                     @Override
                     public String line() {
                         return cmdLine.getBuffer();
                     }
+
                     @Override
                     public int cursor() {
                         return cmdLine.getBufferPosition();
@@ -135,5 +144,4 @@ public class KarafParser implements org.jline.reader.Parser {
             return new ParsedLineImpl(program, program, cursor, Collections.singletonList(program));
         }
     }
-
 }

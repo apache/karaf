@@ -18,13 +18,10 @@
  */
 package org.apache.karaf.shell.api.console;
 
-/**
- * A <code>Parser</code> is used by the console to parse a command line.
- */
+/** A <code>Parser</code> is used by the console to parse a command line. */
 public interface Parser {
 
     CommandLine parse(Session session, String command, int cursor);
 
     String preprocess(Session session, CommandLine commandLine);
-
 }

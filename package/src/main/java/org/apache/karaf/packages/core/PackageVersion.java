@@ -18,7 +18,6 @@ package org.apache.karaf.packages.core;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -27,12 +26,12 @@ public class PackageVersion {
     private String packageName;
     private Version version;
     private Set<Bundle> bundles = new HashSet<>();
-    
+
     public PackageVersion(String packageName, Version version) {
         this.packageName = packageName;
         this.version = version;
     }
-    
+
     public String getPackageName() {
         return packageName;
     }
@@ -40,13 +39,12 @@ public class PackageVersion {
     public Version getVersion() {
         return version;
     }
-    
+
     public void addBundle(Bundle bundle) {
         this.bundles.add(bundle);
     }
-    
+
     public Set<Bundle> getBundles() {
         return this.bundles;
     }
-
 }

@@ -20,13 +20,12 @@ package org.apache.karaf.shell.console;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.service.command.Function;
 
 @Deprecated
 public interface CompletableFunction extends Function {
 
     List<Completer> getCompleters();
-    Map<String, Completer> getOptionalCompleters();
 
+    Map<String, Completer> getOptionalCompleters();
 }

@@ -17,32 +17,25 @@ package org.apache.karaf.diagnostic.common;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 
-/**
- * Base class for dump providers which writes text to destination.
- */
+/** Base class for dump providers which writes text to destination. */
 public abstract class TextDumpProvider implements DumpProvider {
 
-    /**
-     * Name of the file.
-     */
+    /** Name of the file. */
     private final String name;
 
     /**
      * Creates new dump provider.
-     * 
+     *
      * @param name Name of the file.
      */
     protected TextDumpProvider(String name) {
         this.name = name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public final void createDump(DumpDestination destination) throws Exception {
         OutputStream outputStream = destination.add(name);
@@ -57,10 +50,9 @@ public abstract class TextDumpProvider implements DumpProvider {
 
     /**
      * This method should create output.
-     * 
+     *
      * @param outputStreamWriter Stream which points to file specified in constructor.
      * @throws Exception If any problem occur.
      */
     protected abstract void writeDump(OutputStreamWriter outputStreamWriter) throws Exception;
-
 }

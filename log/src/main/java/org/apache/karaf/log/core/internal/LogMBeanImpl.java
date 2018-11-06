@@ -16,17 +16,13 @@
  */
 package org.apache.karaf.log.core.internal;
 
+import java.util.Map;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-
 import org.apache.karaf.log.core.LogMBean;
 import org.apache.karaf.log.core.LogService;
 
-import java.util.Map;
-
-/**
- * Implementation of the LogMBean.
- */
+/** Implementation of the LogMBean. */
 public class LogMBeanImpl extends StandardMBean implements LogMBean {
 
     private final LogService logService;
@@ -55,5 +51,4 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
     public void setLevel(String logger, String level) {
         this.logService.setLevel(logger, level);
     }
-
 }

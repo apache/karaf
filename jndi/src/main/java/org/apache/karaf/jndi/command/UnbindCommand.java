@@ -29,17 +29,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class UnbindCommand implements Action {
 
-    @Argument(index = 0, name = "name", description = "The JNDI name to unbind", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The JNDI name to unbind",
+            required = true,
+            multiValued = false)
     @Completion(NamesCompleter.class)
     String name;
 
-    @Reference
-    JndiService jndiService;
+    @Reference JndiService jndiService;
 
     @Override
     public Object execute() throws Exception {
         jndiService.unbind(name);
         return null;
     }
-
 }

@@ -19,9 +19,7 @@ package org.slf4j.impl;
 import org.slf4j.helpers.MarkerIgnoringBase;
 import org.slf4j.helpers.MessageFormatter;
 
-/**
- * A simple logger that can be controlled from the ssh client
- */
+/** A simple logger that can be controlled from the ssh client */
 public class SimpleLogger extends MarkerIgnoringBase {
     private static final long serialVersionUID = 1L;
     public static final int ERROR = 0;
@@ -85,7 +83,7 @@ public class SimpleLogger extends MarkerIgnoringBase {
     }
 
     public void debug(String format, Object arg) {
-		log(DEBUG, format, arg);
+        log(DEBUG, format, arg);
     }
 
     public void debug(String format, Object arg1, Object arg2) {
@@ -93,7 +91,7 @@ public class SimpleLogger extends MarkerIgnoringBase {
     }
 
     public void debug(String format, Object[] argArray) {
-		log(DEBUG, format, argArray, null);
+        log(DEBUG, format, argArray, null);
     }
 
     public void debug(String msg, Throwable t) {
@@ -105,23 +103,23 @@ public class SimpleLogger extends MarkerIgnoringBase {
     }
 
     public void info(String msg) {
-		log(INFO, msg);
+        log(INFO, msg);
     }
 
     public void info(String format, Object arg) {
-		log(INFO, format, arg);
+        log(INFO, format, arg);
     }
 
     public void info(String format, Object arg1, Object arg2) {
-		log(INFO, format, arg1, arg2);
+        log(INFO, format, arg1, arg2);
     }
 
     public void info(String format, Object[] argArray) {
-		log(INFO, format, argArray);
+        log(INFO, format, argArray);
     }
 
     public void info(String msg, Throwable t) {
-		log(INFO, msg, t);
+        log(INFO, msg, t);
     }
 
     public boolean isWarnEnabled() {
@@ -129,7 +127,7 @@ public class SimpleLogger extends MarkerIgnoringBase {
     }
 
     public void warn(String msg) {
-		log(WARN, msg);
+        log(WARN, msg);
     }
 
     public void warn(String format, Object arg) {
@@ -141,11 +139,11 @@ public class SimpleLogger extends MarkerIgnoringBase {
     }
 
     public void warn(String format, Object[] argArray) {
- 		log(WARN, format, argArray);
+        log(WARN, format, argArray);
     }
 
     public void warn(String msg, Throwable t) {
- 		log(WARN, msg, t);
+        log(WARN, msg, t);
     }
 
     public boolean isErrorEnabled() {
@@ -157,7 +155,7 @@ public class SimpleLogger extends MarkerIgnoringBase {
     }
 
     public void error(String format, Object arg) {
-		log(ERROR, format, arg);
+        log(ERROR, format, arg);
     }
 
     public void error(String format, Object arg1, Object arg2) {
@@ -165,16 +163,16 @@ public class SimpleLogger extends MarkerIgnoringBase {
     }
 
     public void error(String format, Object[] argArray) {
-		log(ERROR, format, argArray);
+        log(ERROR, format, argArray);
     }
 
     public void error(String msg, Throwable t) {
-		log(ERROR, msg, t);
+        log(ERROR, msg, t);
     }
 
-	protected boolean isLogEnabled(int level) {
-		return SimpleLogger.level >= level;
-	}
+    protected boolean isLogEnabled(int level) {
+        return SimpleLogger.level >= level;
+    }
 
     protected void log(int level, String msg) {
         if (isLogEnabled(level)) {
@@ -203,11 +201,11 @@ public class SimpleLogger extends MarkerIgnoringBase {
         }
     }
 
-	protected void log(int level, String msg, Throwable t) {
+    protected void log(int level, String msg, Throwable t) {
         if (isLogEnabled(level)) {
             doLog(level, msg, t);
         }
-	}
+    }
 
     protected void doLog(int level, String msg, Throwable t) {
         StringBuffer buf = new StringBuffer();
@@ -218,15 +216,20 @@ public class SimpleLogger extends MarkerIgnoringBase {
         buf.append("] ");
         switch (level) {
             case TRACE:
-                buf.append("TRACE"); break;
+                buf.append("TRACE");
+                break;
             case DEBUG:
-                buf.append("DEBUG"); break;
+                buf.append("DEBUG");
+                break;
             case INFO:
-                buf.append("INFO"); break;
+                buf.append("INFO");
+                break;
             case WARN:
-                buf.append("WARN"); break;
+                buf.append("WARN");
+                break;
             case ERROR:
-                buf.append("ERROR"); break;
+                buf.append("ERROR");
+                break;
         }
         buf.append(" ");
         buf.append(name);

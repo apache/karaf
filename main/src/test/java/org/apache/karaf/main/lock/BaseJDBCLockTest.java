@@ -29,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.felix.utils.properties.Properties;
-
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.easymock.EasyMock;
 import org.junit.Before;
@@ -89,14 +88,32 @@ public abstract class BaseJDBCLockTest {
         expect(connection.isClosed()).andReturn(false);
         connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData).anyTimes();
-        expect(metaData.getTables(isNull(), isNull(), anyString(), aryEq(new String[]{"TABLE"}))).andReturn(resultSet);
+        expect(metaData.getTables(isNull(), isNull(), anyString(), aryEq(new String[] {"TABLE"})))
+                .andReturn(resultSet);
         expect(resultSet.next()).andReturn(false);
         resultSet.close();
         expectLastCall().atLeastOnce();
         expect(connection.isClosed()).andReturn(false);
         expect(connection.createStatement()).andReturn(statement);
-        expect(statement.execute("CREATE TABLE " + tableName + " (MOMENT " + momentDatatype + ", NODE " + nodeDatatype + ")" + createTableStmtSuffix)).andReturn(false);
-        expect(statement.execute("INSERT INTO " + tableName + " (MOMENT, NODE) VALUES (1, '" + clustername + "')")).andReturn(false);
+        expect(
+                        statement.execute(
+                                "CREATE TABLE "
+                                        + tableName
+                                        + " (MOMENT "
+                                        + momentDatatype
+                                        + ", NODE "
+                                        + nodeDatatype
+                                        + ")"
+                                        + createTableStmtSuffix))
+                .andReturn(false);
+        expect(
+                        statement.execute(
+                                "INSERT INTO "
+                                        + tableName
+                                        + " (MOMENT, NODE) VALUES (1, '"
+                                        + clustername
+                                        + "')"))
+                .andReturn(false);
         statement.close();
         connection.commit();
 
@@ -111,7 +128,8 @@ public abstract class BaseJDBCLockTest {
     public void initShouldNotCreateTheSchemaIfItAlreadyExists() throws Exception {
         connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
-        expect(metaData.getTables(isNull(), isNull(), anyString(), aryEq(new String[]{"TABLE"}))).andReturn(resultSet);
+        expect(metaData.getTables(isNull(), isNull(), anyString(), aryEq(new String[] {"TABLE"})))
+                .andReturn(resultSet);
         expect(resultSet.next()).andReturn(true);
         resultSet.close();
         expectLastCall().atLeastOnce();
@@ -128,12 +146,14 @@ public abstract class BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeUpdate()).andReturn(1);
         preparedStatement.close();
@@ -152,12 +172,14 @@ public abstract class BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeUpdate()).andThrow(new SQLException());
         preparedStatement.close();
@@ -176,12 +198,14 @@ public abstract class BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeUpdate()).andThrow(new SQLException());
         preparedStatement.close();
@@ -247,7 +271,8 @@ public abstract class BaseJDBCLockTest {
 
         expect(connection.isClosed()).andReturn(false);
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeUpdate()).andReturn(1);
         preparedStatement.close();
@@ -297,7 +322,8 @@ public abstract class BaseJDBCLockTest {
 
         expect(connection.isClosed()).andReturn(false);
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeUpdate()).andThrow(new SQLException());
         preparedStatement.close();
@@ -316,12 +342,14 @@ public abstract class BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeUpdate()).andReturn(0);
         preparedStatement.close();

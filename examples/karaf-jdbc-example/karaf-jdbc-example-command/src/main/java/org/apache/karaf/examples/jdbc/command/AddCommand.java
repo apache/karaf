@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.examples.jdbc.command;
 
+import java.util.Random;
 import org.apache.karaf.examples.jdbc.api.Booking;
 import org.apache.karaf.examples.jdbc.api.BookingService;
 import org.apache.karaf.shell.api.action.Action;
@@ -25,23 +26,34 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.util.Random;
-import java.util.UUID;
-
 @Service
 @Command(scope = "booking", name = "add", description = "Add a booking")
 public class AddCommand implements Action {
 
-    @Reference
-    private BookingService bookingService;
+    @Reference private BookingService bookingService;
 
-    @Option(name = "-i", aliases = "--id", description = "Booking ID", required = false, multiValued = false)
+    @Option(
+            name = "-i",
+            aliases = "--id",
+            description = "Booking ID",
+            required = false,
+            multiValued = false)
     Long id = 0L;
 
-    @Argument(index = 0, name = "customer", description = "Booking customer", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "customer",
+            description = "Booking customer",
+            required = true,
+            multiValued = false)
     String customer;
 
-    @Argument(index = 1, name = "flight", description = "Booking flight", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "flight",
+            description = "Booking flight",
+            required = true,
+            multiValued = false)
     String flight;
 
     @Override
@@ -57,5 +69,4 @@ public class AddCommand implements Action {
         bookingService.add(booking);
         return null;
     }
-
 }

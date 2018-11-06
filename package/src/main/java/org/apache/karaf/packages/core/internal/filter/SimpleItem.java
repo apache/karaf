@@ -17,7 +17,11 @@
 package org.apache.karaf.packages.core.internal.filter;
 
 public class SimpleItem implements Expression {
-    enum FilterType { equal, gt, lt }
+    enum FilterType {
+        equal,
+        gt,
+        lt
+    }
 
     public String attr;
     public FilterType filterType;

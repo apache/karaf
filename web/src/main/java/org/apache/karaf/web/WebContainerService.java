@@ -18,9 +18,7 @@ package org.apache.karaf.web;
 
 import java.util.List;
 
-/**
- * Describe the WebContainer service.
- */
+/** Describe the WebContainer service. */
 public interface WebContainerService {
 
     /**
@@ -58,10 +56,9 @@ public interface WebContainerService {
 
     /**
      * Retrieve the Web-ContextPath of the corresponding bundle.
-     * 
+     *
      * @param id The ID of the bundle.
      * @return The web context associated with the given bundle.
      */
-	String getWebContextPath(Long id);
-
+    String getWebContextPath(Long id);
 }

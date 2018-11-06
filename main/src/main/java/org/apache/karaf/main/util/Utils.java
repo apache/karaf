@@ -28,31 +28,46 @@ import java.util.StringTokenizer;
 
 public class Utils {
 
-    public static File getKarafHome(Class<?> mainClass, String karafHomeProperty, String karafHomeEnv) throws IOException {
+    public static File getKarafHome(
+            Class<?> mainClass, String karafHomeProperty, String karafHomeEnv) throws IOException {
         File rc = null;
 
         // Use the system property if specified.
         String path = System.getProperty(karafHomeProperty);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + karafHomeProperty + " system property", false, true);
+            rc =
+                    validateDirectoryExists(
+                            path, "Invalid " + karafHomeProperty + " system property", false, true);
         }
 
         if (rc == null) {
             path = System.getenv(karafHomeEnv);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + karafHomeEnv + " environment variable", false, true);
+                rc =
+                        validateDirectoryExists(
+                                path,
+                                "Invalid " + karafHomeEnv + " environment variable",
+                                false,
+                                true);
             }
         }
 
         // Try to figure it out using the jar file this class was loaded from.
         if (rc == null) {
             // guess the home from the location of the jar
-            URL url = mainClass.getClassLoader().getResource(mainClass.getName().replace(".", "/") + ".class");
+            URL url =
+                    mainClass
+                            .getClassLoader()
+                            .getResource(mainClass.getName().replace(".", "/") + ".class");
             if (url != null) {
                 try {
                     JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
                     url = jarConnection.getJarFileURL();
-                    rc = new File(new URI(url.toString())).getCanonicalFile().getParentFile().getParentFile();
+                    rc =
+                            new File(new URI(url.toString()))
+                                    .getCanonicalFile()
+                                    .getParentFile()
+                                    .getParentFile();
                 } catch (Exception ignored) {
                 }
             }
@@ -69,13 +84,19 @@ public class Utils {
             }
         }
         if (rc == null) {
-            throw new IOException("The Karaf install directory could not be determined.  Please set the " + karafHomeProperty + " system property or the " + karafHomeEnv + " environment variable.");
+            throw new IOException(
+                    "The Karaf install directory could not be determined.  Please set the "
+                            + karafHomeProperty
+                            + " system property or the "
+                            + karafHomeEnv
+                            + " environment variable.");
         }
 
         return rc;
     }
 
-    public static File validateDirectoryExists(String path, String errPrefix, boolean createDirectory, boolean validate) {
+    public static File validateDirectoryExists(
+            String path, String errPrefix, boolean createDirectory, boolean validate) {
         File rc;
         try {
             rc = new File(path).getCanonicalFile();
@@ -89,7 +110,8 @@ public class Utils {
             try {
                 rc.mkdirs();
             } catch (SecurityException se) {
-                throw new IllegalArgumentException(errPrefix + " '" + path + "' : " + se.getMessage());
+                throw new IllegalArgumentException(
+                        errPrefix + " '" + path + "' : " + se.getMessage());
             }
         }
         if (rc.exists() && !rc.isDirectory()) {
@@ -97,51 +119,66 @@ public class Utils {
         }
         return rc;
     }
-    
-    public static File getKarafDirectory(String directoryProperty, String directoryEnvironmentVariable, File defaultValue, boolean create, boolean validate) {
+
+    public static File getKarafDirectory(
+            String directoryProperty,
+            String directoryEnvironmentVariable,
+            File defaultValue,
+            boolean create,
+            boolean validate) {
         File rc = null;
-        
+
         String path = System.getProperty(directoryProperty);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + directoryProperty + " system property", create, validate);
+            rc =
+                    validateDirectoryExists(
+                            path,
+                            "Invalid " + directoryProperty + " system property",
+                            create,
+                            validate);
         }
-        
+
         if (rc == null) {
             path = System.getenv(directoryEnvironmentVariable);
             if (path != null && validate) {
-                rc = validateDirectoryExists(path, "Invalid " + directoryEnvironmentVariable  + " environment variable", create, validate);
+                rc =
+                        validateDirectoryExists(
+                                path,
+                                "Invalid " + directoryEnvironmentVariable + " environment variable",
+                                create,
+                                validate);
             }
         }
-        
+
         if (rc == null) {
             rc = defaultValue;
         }
-        
+
         return rc;
     }
 
-    //-----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
     /**
      * Recursively delete a directory.
+     *
      * @param directory directory to delete
      * @throws IOException in case deletion is unsuccessful
      */
-    public static void deleteDirectory(File directory)
-        throws IOException {
+    public static void deleteDirectory(File directory) throws IOException {
         if (!directory.exists()) {
             return;
         }
 
         cleanDirectory(directory);
         if (!directory.delete()) {
-            String message =
-                "Unable to delete directory " + directory + ".";
+            String message = "Unable to delete directory " + directory + ".";
             throw new IOException(message);
         }
     }
 
     /**
      * Clean a directory without deleting it.
+     *
      * @param directory directory to clean
      * @throws IOException in case cleaning is unsuccessful
      */
@@ -157,7 +194,7 @@ public class Utils {
         }
 
         File[] files = directory.listFiles();
-        if (files == null) {  // null if security restricted
+        if (files == null) { // null if security restricted
             throw new IOException("Failed to list contents of " + directory);
         }
 
@@ -176,17 +213,16 @@ public class Utils {
     }
 
     /**
-     * <p>
      * Delete a file. If file is a directory, delete it and all sub-directories.
-     * </p>
-     * <p>
-     * The difference between File.delete() and this method are:
-     * </p>
+     *
+     * <p>The difference between File.delete() and this method are:
+     *
      * <ul>
-     * <li>A directory to be deleted does not have to be empty.</li>
-     * <li>You get exceptions when a file or directory cannot be deleted.
-     *      (java.io.File methods returns a boolean)</li>
+     *   <li>A directory to be deleted does not have to be empty.
+     *   <li>You get exceptions when a file or directory cannot be deleted. (java.io.File methods
+     *       returns a boolean)
      * </ul>
+     *
      * @param file file or directory to delete.
      * @throws IOException in case deletion is unsuccessful
      */
@@ -198,22 +234,19 @@ public class Utils {
                 throw new FileNotFoundException("File does not exist: " + file);
             }
             if (!file.delete()) {
-                String message =
-                    "Unable to delete file: " + file;
+                String message = "Unable to delete file: " + file;
                 throw new IOException(message);
             }
         }
     }
 
-	public static String[] convertToMavenUrlsIfNeeded(String location,
-			boolean convertToMavenUrls) {
-		String[] parts = location.split("\\|");
-		if (convertToMavenUrls) {
+    public static String[] convertToMavenUrlsIfNeeded(String location, boolean convertToMavenUrls) {
+        String[] parts = location.split("\\|");
+        if (convertToMavenUrls) {
             if (!parts[1].startsWith("mvn:")) {
                 String[] p = parts[1].split("/");
                 if (p.length >= 4
-                        && p[p.length - 1].startsWith(p[p.length - 3] + "-"
-                                + p[p.length - 2])) {
+                        && p[p.length - 1].startsWith(p[p.length - 3] + "-" + p[p.length - 2])) {
                     String artifactId = p[p.length - 3];
                     String version = p[p.length - 2];
                     String classifier;
@@ -221,14 +254,14 @@ public class Utils {
                     String artifactIdVersion = artifactId + "-" + version;
                     StringBuffer sb = new StringBuffer();
                     if (p[p.length - 1].charAt(artifactIdVersion.length()) == '-') {
-                        classifier = p[p.length - 1].substring(
-                                artifactIdVersion.length() + 1,
-                                p[p.length - 1].lastIndexOf('.'));
+                        classifier =
+                                p[p.length - 1].substring(
+                                        artifactIdVersion.length() + 1,
+                                        p[p.length - 1].lastIndexOf('.'));
                     } else {
                         classifier = null;
                     }
-                    type = p[p.length - 1].substring(p[p.length - 1]
-                            .lastIndexOf('.') + 1);
+                    type = p[p.length - 1].substring(p[p.length - 1].lastIndexOf('.') + 1);
                     sb.append("mvn:");
                     for (int j = 0; j < p.length - 3; j++) {
                         if (j > 0) {
@@ -251,20 +284,20 @@ public class Utils {
                 } else {
                     parts[1] = parts[0];
                 }
-			} else {
+            } else {
                 String tmp = parts[0];
                 parts[0] = parts[1];
                 parts[1] = tmp;
             }
-		} else {
-			parts[1] = parts[0];
-		}
-		return parts;
-	}
+        } else {
+            parts[1] = parts[0];
+        }
+        return parts;
+    }
 
     public static String nextLocation(StringTokenizer st) {
         String retVal = null;
-    
+
         if (st.countTokens() > 0) {
             String tokenList = "\" ";
             StringBuffer tokBuf = new StringBuffer(10);
@@ -281,7 +314,7 @@ public class Utils {
                     } else {
                         tokenList = "\" ";
                     }
-    
+
                 } else if (tok.equals(" ")) {
                     if (tokStarted) {
                         retVal = tokBuf.toString();
@@ -294,17 +327,14 @@ public class Utils {
                     tokBuf.append(tok.trim());
                 }
             }
-    
+
             // Handle case where end of token stream and
             // still got data
             if ((!exit) && (tokStarted)) {
                 retVal = tokBuf.toString();
             }
         }
-    
+
         return retVal;
     }
-
-
-
 }

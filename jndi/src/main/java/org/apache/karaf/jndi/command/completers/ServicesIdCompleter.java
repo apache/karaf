@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.jndi.command.completers;
 
+import java.util.List;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.CommandLine;
@@ -27,16 +28,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
-import java.util.List;
-
-/**
- * Completer on the OSGi services ID.
- */
+/** Completer on the OSGi services ID. */
 @Service
 public class ServicesIdCompleter implements Completer {
 
-    @Reference
-    private BundleContext bundleContext;
+    @Reference private BundleContext bundleContext;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -47,7 +43,8 @@ public class ServicesIdCompleter implements Completer {
             if (references != null) {
                 for (ServiceReference reference : references) {
                     if (reference.getProperty(Constants.SERVICE_ID) != null) {
-                        delegate.getStrings().add(reference.getProperty(Constants.SERVICE_ID).toString());
+                        delegate.getStrings()
+                                .add(reference.getProperty(Constants.SERVICE_ID).toString());
                     }
                 }
             }
@@ -62,5 +59,4 @@ public class ServicesIdCompleter implements Completer {
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
-
 }

@@ -23,13 +23,13 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraphVisitor;
 import org.eclipse.equinox.region.RegionFilter;
 
 /**
- * {@link AbstractRegionDigraphVisitor} is an abstract base class for {@link RegionDigraphVisitor} implementations
+ * {@link AbstractRegionDigraphVisitor} is an abstract base class for {@link RegionDigraphVisitor}
+ * implementations
  */
 public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVisitor {
 
@@ -46,9 +46,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
         return allowed;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean visit(Region region) {
         Collection<C> candidates = filteredDeque.isEmpty() ? allCandidates : filteredDeque.peek();
@@ -62,9 +60,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
         return !allowed.containsAll(candidates);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean preEdgeTraverse(RegionFilter regionFilter) {
         // Find the candidates filtered by the previous edge
@@ -91,9 +87,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void postEdgeTraverse(RegionFilter regionFilter) {
         filteredDeque.poll();
@@ -105,7 +99,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
     /**
      * Determines whether the given region contains the given candidate.
      *
-     * @param region    the {@link Region}
+     * @param region the {@link Region}
      * @param candidate the candidate
      * @return <code>true</code> if and only if the given region contains the given candidate
      */
@@ -115,7 +109,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
      * Determines whether the given candidate is allowed by the given {@link RegionFilter}.
      *
      * @param candidate the candidate
-     * @param filter    the filter
+     * @param filter the filter
      * @return <code>true</code> if and only if the given candidate is allowed by the given filter
      */
     protected abstract boolean isAllowed(C candidate, RegionFilter filter);

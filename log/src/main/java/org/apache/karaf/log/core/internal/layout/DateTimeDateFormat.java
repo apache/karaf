@@ -23,63 +23,53 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+/** Copied from log4j */
 /**
- * Copied from log4j
+ * Formats a {@link Date} in the format "dd MMM yyyy HH:mm:ss,SSS" for example, "06 Nov 1994
+ * 15:49:37,459".
+ *
+ * @since 0.7.5
  */
-/**
-   Formats a {@link Date} in the format "dd MMM yyyy HH:mm:ss,SSS" for example,
-   "06 Nov 1994 15:49:37,459".
-
-   @since 0.7.5
-*/
 public class DateTimeDateFormat extends AbsoluteTimeDateFormat {
 
-  String[] shortMonths;
+    String[] shortMonths;
 
-  public
-  DateTimeDateFormat() {
-    super();
-    shortMonths = new DateFormatSymbols().getShortMonths();
-  }
+    public DateTimeDateFormat() {
+        super();
+        shortMonths = new DateFormatSymbols().getShortMonths();
+    }
 
-  public
-  DateTimeDateFormat(TimeZone timeZone) {
-    this();
-    setCalendar(Calendar.getInstance(timeZone));
-  }
+    public DateTimeDateFormat(TimeZone timeZone) {
+        this();
+        setCalendar(Calendar.getInstance(timeZone));
+    }
 
-  /**
-     Appends to <code>sbuf</code> the date in the format "dd MMM yyyy
-     HH:mm:ss,SSS" for example, "06 Nov 1994 08:49:37,459".
+    /**
+     * Appends to <code>sbuf</code> the date in the format "dd MMM yyyy HH:mm:ss,SSS" for example,
+     * "06 Nov 1994 08:49:37,459".
+     *
+     * @param sbuf the string buffer to write to
+     */
+    public StringBuffer format(Date date, StringBuffer sbuf, FieldPosition fieldPosition) {
 
-     @param sbuf the string buffer to write to
-  */
-  public
-  StringBuffer format(Date date, StringBuffer sbuf,
-		      FieldPosition fieldPosition) {
+        calendar.setTime(date);
 
-    calendar.setTime(date);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        if (day < 10) sbuf.append('0');
+        sbuf.append(day);
+        sbuf.append(' ');
+        sbuf.append(shortMonths[calendar.get(Calendar.MONTH)]);
+        sbuf.append(' ');
 
-    int day = calendar.get(Calendar.DAY_OF_MONTH);
-    if(day < 10)
-      sbuf.append('0');
-    sbuf.append(day);
-    sbuf.append(' ');
-    sbuf.append(shortMonths[calendar.get(Calendar.MONTH)]);
-    sbuf.append(' ');
+        int year = calendar.get(Calendar.YEAR);
+        sbuf.append(year);
+        sbuf.append(' ');
 
-    int year =  calendar.get(Calendar.YEAR);
-    sbuf.append(year);
-    sbuf.append(' ');
+        return super.format(date, sbuf, fieldPosition);
+    }
 
-    return super.format(date, sbuf, fieldPosition);
-  }
-
-  /**
-     This method does not do anything but return <code>null</code>.
-   */
-  public
-  Date parse(java.lang.String s, ParsePosition pos) {
-    return null;
-  }
+    /** This method does not do anything but return <code>null</code>. */
+    public Date parse(java.lang.String s, ParsePosition pos) {
+        return null;
+    }
 }

@@ -22,9 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import org.apache.felix.utils.properties.Properties;
 import java.util.logging.Logger;
-
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.main.util.BootstrapLogManager;
 
 public class SimpleFileLock implements Lock {
@@ -49,11 +48,14 @@ public class SimpleFileLock implements Lock {
             }
 
             File base = new File(props.getProperty(PROPERTY_LOCK_DIR));
-            lockPath = new File(base, "lock"); 
+            lockPath = new File(base, "lock");
             lockFile = new RandomAccessFile(lockPath, "rw");
-        } catch (IOException ioe){
-            throw new RuntimeException("Karaf can't startup, make sure the log file can be accessed and written by the user starting Karaf : " + ioe.getMessage(), ioe);
-        } catch (Exception e){
+        } catch (IOException ioe) {
+            throw new RuntimeException(
+                    "Karaf can't startup, make sure the log file can be accessed and written by the user starting Karaf : "
+                            + ioe.getMessage(),
+                    ioe);
+        } catch (Exception e) {
             throw new RuntimeException("Could not create file lock: " + e.getMessage(), e);
         }
     }
@@ -79,12 +81,12 @@ public class SimpleFileLock implements Lock {
         }
         lock = null;
     }
- 
+
     public synchronized boolean isAlive() throws Exception {
         return lock != null && lock.isValid() && lockPath.exists();
     }
 
-    private static File getKarafLock(File lock,Properties props) {
+    private static File getKarafLock(File lock, Properties props) {
         File rc = null;
 
         String path = lock.getPath();
@@ -121,5 +123,4 @@ public class SimpleFileLock implements Lock {
         }
         return rc;
     }
-
 }

@@ -16,14 +16,13 @@
  */
 package org.apache.karaf.kar.internal;
 
-import org.apache.karaf.kar.KarService;
-import org.apache.karaf.kar.KarsMBean;
-
+import java.net.URI;
+import java.util.List;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import java.net.URI;
-import java.util.List;
+import org.apache.karaf.kar.KarService;
+import org.apache.karaf.kar.KarsMBean;
 
 public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
 
@@ -77,5 +76,4 @@ public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
     public void setKarService(KarService karService) {
         this.karService = karService;
     }
-
 }

@@ -18,12 +18,13 @@
  */
 package org.apache.karaf.shell.impl.console.parsing;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -40,8 +41,6 @@ import org.apache.karaf.shell.support.parsing.DefaultParser;
 import org.apache.karaf.shell.support.parsing.GogoParser;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-
 public class ParsingTest {
 
     @Test
@@ -55,7 +54,6 @@ public class ParsingTest {
         assertEquals("bar", line.getArguments()[1]);
         assertEquals("(a +  b)", line.getArguments()[2]);
         assertEquals(subCmd, line.getBuffer());
-
     }
 
     @Test
@@ -66,11 +64,17 @@ public class ParsingTest {
         sessionFactory.getRegistry().register(new ActionCommand(manager, FooCommand.class));
         sessionFactory.getRegistry().register(new ActionCommand(manager, AnotherCommand.class));
         sessionFactory.getRegistry().register(new CustomParser());
-        Session session = new HeadlessSessionImpl(sessionFactory, sessionFactory.getCommandProcessor(),
-                new ByteArrayInputStream(new byte[0]), new PrintStream(new ByteArrayOutputStream()), new PrintStream(new ByteArrayOutputStream())
-        );
+        Session session =
+                new HeadlessSessionImpl(
+                        sessionFactory,
+                        sessionFactory.getCommandProcessor(),
+                        new ByteArrayInputStream(new byte[0]),
+                        new PrintStream(new ByteArrayOutputStream()),
+                        new PrintStream(new ByteArrayOutputStream()));
 
-        String parsed = CommandLineParser.parse(session, " foo bar (a + b); another   command with spaces ");
+        String parsed =
+                CommandLineParser.parse(
+                        session, " foo bar (a + b); another   command with spaces ");
         assertEquals("foo bar (a + b) ; another \"command with spaces\"", parsed);
     }
 
@@ -82,9 +86,13 @@ public class ParsingTest {
         sessionFactory.getRegistry().register(new ActionCommand(manager, FooCommand.class));
         sessionFactory.getRegistry().register(new ActionCommand(manager, AnotherCommand.class));
         sessionFactory.getRegistry().register(new CustomParser());
-        Session session = new HeadlessSessionImpl(sessionFactory, sessionFactory.getCommandProcessor(),
-                new ByteArrayInputStream(new byte[0]), new PrintStream(new ByteArrayOutputStream()), new PrintStream(new ByteArrayOutputStream())
-        );
+        Session session =
+                new HeadlessSessionImpl(
+                        sessionFactory,
+                        sessionFactory.getCommandProcessor(),
+                        new ByteArrayInputStream(new byte[0]),
+                        new PrintStream(new ByteArrayOutputStream()),
+                        new PrintStream(new ByteArrayOutputStream()));
 
         String parsed = CommandLineParser.parse(session, "echo a\necho b");
         assertEquals("echo a\necho b", parsed);
@@ -128,15 +136,18 @@ public class ParsingTest {
             if (!arg.isEmpty()) {
                 args.add("\"" + arg + "\"");
             }
-            return new CommandLineImpl(args.toArray(new String[args.size()]), args.size() - 1, sb.length(),
-                            parser.position(),
-                            command.substring(0, parser.position()));
+            return new CommandLineImpl(
+                    args.toArray(new String[args.size()]),
+                    args.size() - 1,
+                    sb.length(),
+                    parser.position(),
+                    command.substring(0, parser.position()));
         }
 
         @Override
         public String preprocess(Session session, CommandLine cmdLine) {
             StringBuilder parsed = new StringBuilder();
-            for (int i = 0 ; i < cmdLine.getArguments().length; i++) {
+            for (int i = 0; i < cmdLine.getArguments().length; i++) {
                 String arg = cmdLine.getArguments()[i];
                 if (i > 0) {
                     parsed.append(" ");
@@ -146,5 +157,4 @@ public class ParsingTest {
             return parsed.toString();
         }
     }
-
 }

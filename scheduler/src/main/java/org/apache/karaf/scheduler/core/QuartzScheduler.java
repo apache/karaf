@@ -17,26 +17,17 @@
 package org.apache.karaf.scheduler.core;
 
 import java.util.*;
-
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.scheduler.SchedulerError;
 import org.quartz.*;
-import org.quartz.impl.DirectSchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.quartz.simpl.CascadingClassLoadHelper;
-import org.quartz.simpl.RAMJobStore;
-import org.quartz.spi.JobStore;
-import org.quartz.spi.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The quartz based implementation of the scheduler.
- *
- */
+/** The quartz based implementation of the scheduler. */
 public class QuartzScheduler implements Scheduler {
 
     /** Default logger. */
@@ -75,10 +66,7 @@ public class QuartzScheduler implements Scheduler {
         }
     }
 
-    /**
-     * Deactivate this component.
-     * Stop the scheduler.
-     */
+    /** Deactivate this component. Stop the scheduler. */
     public void deactivate() {
         final org.quartz.Scheduler s = this.scheduler;
         this.scheduler = null;
@@ -87,27 +75,25 @@ public class QuartzScheduler implements Scheduler {
 
     /**
      * Dispose the quartz scheduler
+     *
      * @param s The scheduler.
      */
     private void dispose(final org.quartz.Scheduler s) {
-        if ( s != null ) {
+        if (s != null) {
             try {
                 s.shutdown();
             } catch (SchedulerException e) {
                 this.logger.debug("Exception during shutdown of scheduler.", e);
             }
-            if ( this.logger.isDebugEnabled() ) {
+            if (this.logger.isDebugEnabled()) {
                 this.logger.debug(PREFIX + "stopped.");
             }
         }
     }
 
-    /**
-     * Initialize the data map for the job executor.
-     */
-    private JobDataMap initDataMap(final String  jobName,
-                                   final Object  job,
-                                   final InternalScheduleOptions options) {
+    /** Initialize the data map for the job executor. */
+    private JobDataMap initDataMap(
+            final String jobName, final Object job, final InternalScheduleOptions options) {
         final JobDataMap jobDataMap = new JobDataMap();
 
         jobDataMap.put(DATA_MAP_OBJECT, job);
@@ -119,25 +105,24 @@ public class QuartzScheduler implements Scheduler {
         return jobDataMap;
     }
 
-    /**
-     * Create the job detail.
-     */
-    private JobDetail createJobDetail(final String name,
-                                      final JobDataMap jobDataMap,
-                                      final boolean concurrent) {
-        return JobBuilder.newJob((concurrent ? QuartzJobExecutor.class : NonParallelQuartzJobExecutor.class))
+    /** Create the job detail. */
+    private JobDetail createJobDetail(
+            final String name, final JobDataMap jobDataMap, final boolean concurrent) {
+        return JobBuilder.newJob(
+                        (concurrent ? QuartzJobExecutor.class : NonParallelQuartzJobExecutor.class))
                 .withIdentity(name)
                 .usingJobData(jobDataMap)
                 .build();
     }
 
-    /**
-     * Check the job object, either runnable or job is allowed
-     */
-    private void checkJob(final Object job)
-            throws IllegalArgumentException {
+    /** Check the job object, either runnable or job is allowed */
+    private void checkJob(final Object job) throws IllegalArgumentException {
         if (!(job instanceof Runnable) && !(job instanceof Job)) {
-            throw new IllegalArgumentException("Job object is neither an instance of " + Runnable.class.getName() + " nor " + Job.class.getName());
+            throw new IllegalArgumentException(
+                    "Job object is neither an instance of "
+                            + Runnable.class.getName()
+                            + " nor "
+                            + Job.class.getName());
         }
     }
 
@@ -146,68 +131,62 @@ public class QuartzScheduler implements Scheduler {
         return this.scheduler;
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.Scheduler#NOW()
-     */
+    /** @see org.apache.karaf.scheduler.Scheduler#NOW() */
     public ScheduleOptions NOW() {
         return AT(new Date());
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.Scheduler#NOW(int, long)
-     */
+    /** @see org.apache.karaf.scheduler.Scheduler#NOW(int, long) */
     public ScheduleOptions NOW(int times, long period) {
         return AT(new Date(), times, period);
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.Scheduler#AT(java.util.Date)
-     */
+    /** @see org.apache.karaf.scheduler.Scheduler#AT(java.util.Date) */
     public ScheduleOptions AT(Date date) {
         return new InternalScheduleOptions(date);
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.Scheduler#AT(java.util.Date, int, long)
-     */
+    /** @see org.apache.karaf.scheduler.Scheduler#AT(java.util.Date, int, long) */
     public ScheduleOptions AT(Date date, int times, long period) {
         return new InternalScheduleOptions(date, times, period);
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.Scheduler#EXPR(java.lang.String)
-     */
+    /** @see org.apache.karaf.scheduler.Scheduler#EXPR(java.lang.String) */
     public ScheduleOptions EXPR(String expression) {
         return new InternalScheduleOptions(expression);
     }
 
     /**
      * Schedule a job
-     * @see org.apache.karaf.scheduler.Scheduler#schedule(java.lang.Object, org.apache.karaf.scheduler.ScheduleOptions)
+     *
+     * @see org.apache.karaf.scheduler.Scheduler#schedule(java.lang.Object,
+     *     org.apache.karaf.scheduler.ScheduleOptions)
      * @throws SchedulerError if the job can't be scheduled
      * @throws IllegalArgumentException If the preconditions are not met
      */
-    public void schedule(final Object job, final ScheduleOptions options) throws IllegalArgumentException, SchedulerError {
+    public void schedule(final Object job, final ScheduleOptions options)
+            throws IllegalArgumentException, SchedulerError {
         this.checkJob(job);
 
-        if ( !(options instanceof InternalScheduleOptions)) {
-            throw new IllegalArgumentException("Options has not been created via schedule or is null.");
+        if (!(options instanceof InternalScheduleOptions)) {
+            throw new IllegalArgumentException(
+                    "Options has not been created via schedule or is null.");
         }
-        final InternalScheduleOptions opts = (InternalScheduleOptions)options;
+        final InternalScheduleOptions opts = (InternalScheduleOptions) options;
 
-        if ( opts.argumentException != null ) {
+        if (opts.argumentException != null) {
             throw opts.argumentException;
         }
 
         // as this method might be called from unbind and during
         // unbind a deactivate could happen, we check the scheduler first
         final org.quartz.Scheduler s = this.scheduler;
-        if ( s == null ) {
+        if (s == null) {
             throw new IllegalStateException("Scheduler is not available anymore.");
         }
 
         final String name;
-        if ( opts.name != null ) {
+        if (opts.name != null) {
             // if there is already a job with the name, remove it first
             try {
                 final JobKey key = JobKey.jobKey(opts.name);
@@ -257,21 +236,20 @@ public class QuartzScheduler implements Scheduler {
 
             s.deleteJob(key);
 
-            final InternalScheduleOptions opts = (InternalScheduleOptions)options;
+            final InternalScheduleOptions opts = (InternalScheduleOptions) options;
             Trigger trigger = opts.trigger.withIdentity(name).build();
             JobDataMap jobDataMap = this.initDataMap(name, job, opts);
             detail = createJobDetail(name, jobDataMap, opts.canRunConcurrently);
 
-            logger.debug("Update job scheduling {} with name {} and trigger {}", job, name, trigger);
+            logger.debug(
+                    "Update job scheduling {} with name {} and trigger {}", job, name, trigger);
             s.scheduleJob(detail, trigger);
         } catch (SchedulerException e) {
             throw new SchedulerError(e);
         }
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.Scheduler#unschedule(java.lang.String)
-     */
+    /** @see org.apache.karaf.scheduler.Scheduler#unschedule(java.lang.String) */
     public boolean unschedule(final String jobName) {
         final org.quartz.Scheduler s = this.scheduler;
         if (jobName != null && s != null) {
@@ -299,7 +277,8 @@ public class QuartzScheduler implements Scheduler {
                 for (String group : s.getJobGroupNames()) {
                     for (JobKey key : s.getJobKeys(GroupMatcher.jobGroupEquals(group))) {
                         JobDetail detail = s.getJobDetail(key);
-                        ScheduleOptions options = (ScheduleOptions) detail.getJobDataMap().get(DATA_MAP_OPTIONS);
+                        ScheduleOptions options =
+                                (ScheduleOptions) detail.getJobDataMap().get(DATA_MAP_OPTIONS);
                         Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
                         jobs.put(job, options);
                     }
@@ -328,5 +307,4 @@ public class QuartzScheduler implements Scheduler {
         }
         return false;
     }
-
 }

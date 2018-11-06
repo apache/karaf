@@ -25,13 +25,28 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class PullCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "image", description = "The Docker image to pull", multiValued = false, required = true)
+    @Argument(
+            index = 0,
+            name = "image",
+            description = "The Docker image to pull",
+            multiValued = false,
+            required = true)
     String image;
 
-    @Option(name = "-t", aliases = "--tag", description = "Tag to use", multiValued = false, required = false)
+    @Option(
+            name = "-t",
+            aliases = "--tag",
+            description = "Tag to use",
+            multiValued = false,
+            required = false)
     String tag = "latest";
 
-    @Option(name = "-v", aliases = "--verbose", description = "Display pulling progress on console", multiValued = false, required = false)
+    @Option(
+            name = "-v",
+            aliases = "--verbose",
+            description = "Display pulling progress on console",
+            multiValued = false,
+            required = false)
     boolean verbose;
 
     @Override
@@ -39,5 +54,4 @@ public class PullCommand extends DockerCommandSupport {
         getDockerService().pull(image, tag, verbose, url);
         return null;
     }
-
 }

@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.profile.command;
 
-
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.profile.command.completers.ProfileCompleter;
 import org.apache.karaf.shell.api.action.Action;
@@ -30,17 +29,19 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ProfileDelete implements Action {
 
-    @Argument(index = 0, required = true, name = "profile", description = "Name of the profile to delete.")
+    @Argument(
+            index = 0,
+            required = true,
+            name = "profile",
+            description = "Name of the profile to delete.")
     @Completion(ProfileCompleter.class)
     private String profileId;
 
-    @Reference
-    private ProfileService profileService;
+    @Reference private ProfileService profileService;
 
     @Override
     public Object execute() throws Exception {
         profileService.deleteProfile(profileId);
         return null;
     }
-
 }

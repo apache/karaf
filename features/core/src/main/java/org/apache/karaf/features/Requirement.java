@@ -19,5 +19,4 @@ package org.apache.karaf.features;
 public interface Requirement {
 
     String getValue();
-
 }

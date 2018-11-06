@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.bundle.core.internal;
 
+import static java.lang.String.format;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundleState;
@@ -45,17 +46,13 @@ import org.osgi.framework.wiring.FrameworkWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.lang.String.format;
-
 public class BundleServiceImpl implements BundleService {
 
     private static final String KARAF_SYSTEM_BUNDLES_START_LEVEL = "karaf.systemBundlesStartLevel";
 
     private static Logger LOG = LoggerFactory.getLogger(BundleService.class);
 
-    /**
-     * The header key where we store the active wires when we enable DynamicImport=*
-     */
+    /** The header key where we store the active wires when we enable DynamicImport=* */
     private static final String ORIGINAL_WIRES = "Original-Wires";
 
     private final BundleContext bundleContext;
@@ -102,7 +99,7 @@ public class BundleServiceImpl implements BundleService {
                 combinedState = extState;
             }
         }
-        return  new BundleInfoImpl(bundle, combinedState);
+        return new BundleInfoImpl(bundle, combinedState);
     }
 
     @Override
@@ -125,7 +122,7 @@ public class BundleServiceImpl implements BundleService {
         }
         return message.toString();
     }
-    
+
     @Override
     public List<BundleRequirement> getUnsatisfiedRequirements(Bundle bundle, String namespace) {
         List<BundleRequirement> result = new ArrayList<>();
@@ -159,9 +156,12 @@ public class BundleServiceImpl implements BundleService {
         if (context == null || context.trim().isEmpty()) {
             return bundleContext;
         } else {
-            List<Bundle> bundles = new BundleSelectorImpl(bundleContext).selectBundles(Collections.singletonList(context), false);
+            List<Bundle> bundles =
+                    new BundleSelectorImpl(bundleContext)
+                            .selectBundles(Collections.singletonList(context), false);
             if (bundles.isEmpty()) {
-                throw new IllegalArgumentException("Context " + context + " does not evaluate to a bundle");
+                throw new IllegalArgumentException(
+                        "Context " + context + " does not evaluate to a bundle");
             } else if (bundles.size() > 1) {
                 throw new IllegalArgumentException("Context " + context + " is ambiguous");
             }
@@ -188,7 +188,8 @@ public class BundleServiceImpl implements BundleService {
         }
     }
 
-    private List<Bundle> doSelectBundles(BundleContext bundleContext, List<String> ids, boolean defaultAllBundles) {
+    private List<Bundle> doSelectBundles(
+            BundleContext bundleContext, List<String> ids, boolean defaultAllBundles) {
         return filter(new BundleSelectorImpl(bundleContext).selectBundles(ids, defaultAllBundles));
     }
 
@@ -206,7 +207,7 @@ public class BundleServiceImpl implements BundleService {
         }
         return filtered;
     }
-    
+
     private boolean canBeSatisfied(BundleRequirement req) {
         Bundle[] bundles = bundleContext.getBundles();
         for (Bundle bundle : bundles) {
@@ -228,11 +229,12 @@ public class BundleServiceImpl implements BundleService {
      */
     public void enableDynamicImports(Bundle bundle) {
         String location =
-                String.format("wrap:%s$" +
-                        "Bundle-UpdateLocation=%s&" +
-                        "DynamicImport-Package=*&" +
-                        "%s=%s&" +
-                        "overwrite=merge",
+                String.format(
+                        "wrap:%s$"
+                                + "Bundle-UpdateLocation=%s&"
+                                + "DynamicImport-Package=*&"
+                                + "%s=%s&"
+                                + "overwrite=merge",
                         bundle.getLocation(),
                         bundle.getLocation(),
                         ORIGINAL_WIRES,
@@ -242,9 +244,13 @@ public class BundleServiceImpl implements BundleService {
         try {
             URL url = new URL(location);
             bundle.update(url.openStream());
-            bundleContext.getBundle(0).adapt(FrameworkWiring.class).refreshBundles(Collections.singleton(bundle));
+            bundleContext
+                    .getBundle(0)
+                    .adapt(FrameworkWiring.class)
+                    .refreshBundles(Collections.singleton(bundle));
         } catch (Exception e) {
-            throw new RuntimeException("Error enabling dynamic imports on bundle" + bundle.getBundleId(), e);
+            throw new RuntimeException(
+                    "Error enabling dynamic imports on bundle" + bundle.getBundleId(), e);
         }
     }
 
@@ -272,10 +278,11 @@ public class BundleServiceImpl implements BundleService {
         try {
             bundle.update();
         } catch (BundleException e) {
-            throw new RuntimeException("Error disabling dynamic imports on bundle" + bundle.getBundleId(), e);
+            throw new RuntimeException(
+                    "Error disabling dynamic imports on bundle" + bundle.getBundleId(), e);
         }
     }
-    
+
     /*
      * Explode a set of string values in to a ,-delimited string
      */
@@ -293,7 +300,7 @@ public class BundleServiceImpl implements BundleService {
         }
         return result.toString();
     }
-    
+
     /*
      * Get the list of bundles from which the given bundle imports packages
      */
@@ -308,8 +315,12 @@ public class BundleServiceImpl implements BundleService {
                 if (wires != null) {
                     for (BundleWire wire : wires) {
                         if (wire.getProviderWiring().getBundle().getBundleId() != 0) {
-                            exporters.put(wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE).toString(),
-                                          wire.getProviderWiring().getBundle());
+                            exporters.put(
+                                    wire.getCapability()
+                                            .getAttributes()
+                                            .get(BundleRevision.PACKAGE_NAMESPACE)
+                                            .toString(),
+                                    wire.getProviderWiring().getBundle());
                         }
                     }
                 }
@@ -353,5 +364,4 @@ public class BundleServiceImpl implements BundleService {
                 return "Unknown";
         }
     }
-
 }

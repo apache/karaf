@@ -14,31 +14,27 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.jaas.modules.ldap.LDAPCache;
-import org.apache.karaf.jaas.modules.ldap.LDAPOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.BackingEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Karaf JAAS backing engine to support basic list funcitonality
- * for the LDAP login module.  Modification is not supported
- * at this time
+ * Karaf JAAS backing engine to support basic list funcitonality for the LDAP login module.
+ * Modification is not supported at this time
  */
 public class LDAPBackingEngine implements BackingEngine {
 
@@ -83,7 +79,8 @@ public class LDAPBackingEngine implements BackingEngine {
             LOGGER.debug("   base DN: {}", options.getUserBaseDn());
             LOGGER.debug("   filter: {}", filter);
 
-            NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
+            NamingEnumeration<SearchResult> namingEnumeration =
+                    context.search(options.getUserBaseDn(), filter, controls);
             if (namingEnumeration.hasMore()) {
                 return new UserPrincipal(username);
             }
@@ -117,32 +114,40 @@ public class LDAPBackingEngine implements BackingEngine {
             LOGGER.debug("  base DN: " + options.getUserBaseDn());
             LOGGER.debug("  filter: " + filter);
 
-            NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
+            NamingEnumeration<SearchResult> namingEnumeration =
+                    context.search(options.getUserBaseDn(), filter, controls);
             try {
                 while (namingEnumeration.hasMore()) {
                     SearchResult result = namingEnumeration.next();
 
-                    // We need to do the following because slashes are handled badly. For example, when searching
+                    // We need to do the following because slashes are handled badly. For example,
+                    // when
+                    // searching
                     // for a user with lots of special characters like cn=admin,=+<>#;\
                     // SearchResult contains 2 different results:
                     //
                     // SearchResult.getName = cn=admin\,\=\+\<\>\#\;\\\\
-                    // SearchResult.getNameInNamespace = cn=admin\,\=\+\<\>#\;\\,ou=people,dc=example,dc=com
+                    // SearchResult.getNameInNamespace =
+                    // cn=admin\,\=\+\<\>#\;\\,ou=people,dc=example,dc=com
                     //
                     // the second escapes the slashes correctly.
                     String userDNNamespace = result.getNameInNamespace();
                     // handle case where cn, ou, dc case doesn't match
-                    int indexOfUserBaseDN = userDNNamespace.toLowerCase().indexOf("," + options.getUserBaseDn().toLowerCase());
-                    String userDN = (indexOfUserBaseDN > 0) ?
-                            userDNNamespace.substring(0, indexOfUserBaseDN) :
-                            result.getName();
+                    int indexOfUserBaseDN =
+                            userDNNamespace
+                                    .toLowerCase()
+                                    .indexOf("," + options.getUserBaseDn().toLowerCase());
+                    String userDN =
+                            (indexOfUserBaseDN > 0)
+                                    ? userDNNamespace.substring(0, indexOfUserBaseDN)
+                                    : result.getName();
 
-                    // we need to pull out the cn=, uid=, ect.. from the user name to get the actual user name
+                    // we need to pull out the cn=, uid=, ect.. from the user name to get the actual
+                    // user name
                     String userName = userDN;
                     if (userDN.contains("=")) userName = userDN.split("=")[1];
-                  
-                    users.add(new UserPrincipal(userName));
 
+                    users.add(new UserPrincipal(userName));
                 }
             } finally {
                 if (namingEnumeration != null) {
@@ -153,7 +158,7 @@ public class LDAPBackingEngine implements BackingEngine {
                     }
                 }
             }
-            
+
             return users;
 
         } catch (NamingException e) {
@@ -192,10 +197,13 @@ public class LDAPBackingEngine implements BackingEngine {
     public List<RolePrincipal> listRoles(Principal principal) {
         try {
             String[] userAndNameSpace = cache.getUserDnAndNamespace(principal.getName());
-            if (userAndNameSpace == null || userAndNameSpace.length < 2) return Collections.emptyList();
+            if (userAndNameSpace == null || userAndNameSpace.length < 2)
+                return Collections.emptyList();
 
             ArrayList<RolePrincipal> roles = new ArrayList<>();
-            for (String role : cache.getUserRoles(principal.getName(), userAndNameSpace[0], userAndNameSpace[1])) {
+            for (String role :
+                    cache.getUserRoles(
+                            principal.getName(), userAndNameSpace[0], userAndNameSpace[1])) {
                 roles.add(new RolePrincipal(role));
             }
             return roles;

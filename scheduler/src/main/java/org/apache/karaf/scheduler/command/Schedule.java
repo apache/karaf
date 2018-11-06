@@ -17,9 +17,7 @@
 package org.apache.karaf.scheduler.command;
 
 import java.util.Date;
-
 import javax.xml.bind.DatatypeConverter;
-
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.scheduler.command.support.ScriptJob;
@@ -40,7 +38,9 @@ public class Schedule implements Action {
     @Option(name = "--name", description = "Name of this job")
     String name;
 
-    @Option(name = "--concurrent", description = "Should jobs run concurrently or not (defaults to false)")
+    @Option(
+            name = "--concurrent",
+            description = "Should jobs run concurrently or not (defaults to false)")
     boolean concurrent;
 
     @Option(name = "--cron", description = "The cron expression")
@@ -58,19 +58,17 @@ public class Schedule implements Action {
     @Argument(name = "script", required = true, description = "The script to schedule")
     Function script;
 
-    @Reference
-    Scheduler scheduler;
+    @Reference Scheduler scheduler;
 
-    @Reference
-    Session session;
+    @Reference Session session;
 
-    @Reference
-    SessionFactory sessionFactory;
+    @Reference SessionFactory sessionFactory;
 
     @Override
     public Object execute() throws Exception {
         if (cron != null && (at != null || times != -1 || period != 0)) {
-            throw new IllegalArgumentException("Both cron expression and explicit execution time can not be specified");
+            throw new IllegalArgumentException(
+                    "Both cron expression and explicit execution time can not be specified");
         }
         ScheduleOptions options;
         if (cron != null) {

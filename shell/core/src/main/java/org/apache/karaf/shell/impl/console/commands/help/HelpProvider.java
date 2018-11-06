@@ -23,5 +23,4 @@ import org.apache.karaf.shell.api.console.Session;
 public interface HelpProvider {
 
     String getHelp(Session session, String path);
-
 }

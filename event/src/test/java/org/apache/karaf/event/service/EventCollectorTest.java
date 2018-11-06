@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
-
 import org.junit.Test;
 import org.osgi.service.event.Event;
 
@@ -37,9 +36,8 @@ public class EventCollectorTest {
         collector.handleEvent(event("myTopic"));
         assertThat(collector.getEvents().count(), equalTo(1l));
         assertThat(collector.getEvents().findFirst().get().getTopic(), equalTo("myTopic"));
-        
     }
-    
+
     @Test
     public void testLimit() {
         EventCollector collector = new EventCollector();
@@ -72,5 +70,4 @@ public class EventCollectorTest {
     private Event event(String topic) {
         return new Event(topic, new HashMap<>());
     }
-
 }

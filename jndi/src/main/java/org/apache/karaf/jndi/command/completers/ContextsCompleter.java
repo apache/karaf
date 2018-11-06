@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.jndi.command.completers;
 
+import java.util.List;
 import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -24,16 +25,11 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-import java.util.List;
-
-/**
- * Completers on the JNDI contexts.
- */
+/** Completers on the JNDI contexts. */
 @Service
 public class ContextsCompleter implements Completer {
 
-    @Reference
-    private JndiService jndiService;
+    @Reference private JndiService jndiService;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -56,5 +52,4 @@ public class ContextsCompleter implements Completer {
     public void setJndiService(JndiService jndiService) {
         this.jndiService = jndiService;
     }
-
 }

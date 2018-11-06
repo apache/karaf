@@ -24,11 +24,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;
 import org.osgi.framework.Constants;
@@ -92,7 +89,8 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         configuration.delete();
     }
 
-    private File getCfgFileFromProperties(Dictionary<String, Object> properties) throws URISyntaxException, MalformedURLException {
+    private File getCfgFileFromProperties(Dictionary<String, Object> properties)
+            throws URISyntaxException, MalformedURLException {
         if (properties != null) {
             Object val = properties.get(FILEINSTALL_FILE_NAME);
             return getCfgFileFromProperty(val);
@@ -100,7 +98,8 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         return null;
     }
 
-    private File getCfgFileFromProperty(Object val) throws URISyntaxException, MalformedURLException {
+    private File getCfgFileFromProperty(Object val)
+            throws URISyntaxException, MalformedURLException {
         if (val instanceof URL) {
             return new File(((URL) val).toURI());
         }
@@ -130,13 +129,13 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                     if (file != null) {
                         tp.load(file);
                     } else {
-                        for (Enumeration<String> e = props.keys(); e.hasMoreElements();) {
+                        for (Enumeration<String> e = props.keys(); e.hasMoreElements(); ) {
                             String key = e.nextElement();
                             Object val = props.get(key);
                             tp.put(key, val);
                         }
-                        tp.remove( Constants.SERVICE_PID );
-                        tp.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+                        tp.remove(Constants.SERVICE_PID);
+                        tp.remove(ConfigurationAdmin.SERVICE_FACTORYPID);
                     }
                 }
                 return tp;
@@ -146,19 +145,26 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     }
 
     @Override
-    public String createFactoryConfiguration(String factoryPid, Map<String, Object> properties) throws IOException {
+    public String createFactoryConfiguration(String factoryPid, Map<String, Object> properties)
+            throws IOException {
         return createFactoryConfiguration(factoryPid, null, properties);
     }
 
     @Override
-    public String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties) throws IOException {
+    public String createFactoryConfiguration(
+            String factoryPid, String alias, Map<String, Object> properties) throws IOException {
         Configuration config = configAdmin.createFactoryConfiguration(factoryPid, "?");
         TypedProperties props = new TypedProperties();
         File file = null;
         if (alias != null && !"".equals(alias.trim())) {
-            file = new File(new File(System.getProperty("karaf.etc")), factoryPid + "-" + alias + ".cfg");
+            file =
+                    new File(
+                            new File(System.getProperty("karaf.etc")),
+                            factoryPid + "-" + alias + ".cfg");
         } else {
-            file = File.createTempFile(factoryPid + "-", ".cfg", new File(System.getProperty("karaf.etc")));
+            file =
+                    File.createTempFile(
+                            factoryPid + "-", ".cfg", new File(System.getProperty("karaf.etc")));
         }
         props.putAll(properties);
         props.save(file);
@@ -171,5 +177,4 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public ConfigurationAdmin getConfigAdmin() {
         return configAdmin;
     }
-
 }

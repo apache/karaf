@@ -13,12 +13,10 @@
  */
 package org.apache.karaf.itests;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.osgi.service.cm.Configuration;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+import static org.junit.Assert.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -26,11 +24,12 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.nio.file.StandardOpenOption.WRITE;
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.osgi.service.cm.Configuration;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -40,18 +39,20 @@ public class ExternalConfigTest extends KarafTestSupport {
     public void externalConfigTest() throws Exception {
         Path dir = Paths.get(System.getProperty("karaf.base"), "system/org/foo/bar/1.0-SNAPSHOT");
         Files.createDirectories(dir);
-        
-        writeTo(dir.resolve("bar-1.0-SNAPSHOT.properties"), //
+
+        writeTo(
+                dir.resolve("bar-1.0-SNAPSHOT.properties"), //
                 "key=value");
 
-        writeTo(dir.resolve("bar-1.0-SNAPSHOT-features.xml"), // 
-                "<features name='org.foo'>\n" +
-                "  <feature name='bar' version='1.0-SNAPSHOT'>\n" +
-                "    <config name='org.foo' external='true'>\n" +
-                "      mvn:org.foo/bar/1.0-SNAPSHOT/properties" +
-                "    </config>\n" +
-                "  </feature>\n" +
-                "</features>\n");
+        writeTo(
+                dir.resolve("bar-1.0-SNAPSHOT-features.xml"), //
+                "<features name='org.foo'>\n"
+                        + "  <feature name='bar' version='1.0-SNAPSHOT'>\n"
+                        + "    <config name='org.foo' external='true'>\n"
+                        + "      mvn:org.foo/bar/1.0-SNAPSHOT/properties"
+                        + "    </config>\n"
+                        + "  </feature>\n"
+                        + "</features>\n");
 
         Configuration[] cfgs = configurationAdmin.listConfigurations("(service.pid=org.foo)");
         assertNull(cfgs);
@@ -69,5 +70,4 @@ public class ExternalConfigTest extends KarafTestSupport {
             w.write(content);
         }
     }
-
 }

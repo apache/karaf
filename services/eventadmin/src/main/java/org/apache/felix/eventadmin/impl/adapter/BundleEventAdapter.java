@@ -18,35 +18,30 @@
  */
 package org.apache.felix.eventadmin.impl.adapter;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 /**
- * This class registers itself as a listener for bundle events and posts them via
- * the EventAdmin as specified in 113.6.4 OSGi R4 compendium.
+ * This class registers itself as a listener for bundle events and posts them via the EventAdmin as
+ * specified in 113.6.4 OSGi R4 compendium.
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class BundleEventAdapter extends AbstractAdapter implements SynchronousBundleListener
-{
+public class BundleEventAdapter extends AbstractAdapter implements SynchronousBundleListener {
     /**
-     * The constructor of the adapter. This will register the adapter with the given
-     * context as a <tt>BundleListener</tt> and subsequently, will post received
-     * events via the given EventAdmin.
+     * The constructor of the adapter. This will register the adapter with the given context as a
+     * <tt>BundleListener</tt> and subsequently, will post received events via the given EventAdmin.
      *
      * @param context The bundle context with which to register as a listener.
      * @param admin The <tt>EventAdmin</tt> to use for posting events.
      */
-    public BundleEventAdapter(final BundleContext context, final EventAdmin admin)
-    {
+    public BundleEventAdapter(final BundleContext context, final EventAdmin admin) {
         super(admin);
         context.addBundleListener(this);
     }
@@ -57,36 +52,31 @@ public class BundleEventAdapter extends AbstractAdapter implements SynchronousBu
     }
 
     /**
-     * Once a bundle event is received this method assembles and posts an event via
-     * the <tt>EventAdmin</tt> as specified in 113.6.4 OSGi R4 compendium.
+     * Once a bundle event is received this method assembles and posts an event via the
+     * <tt>EventAdmin</tt> as specified in 113.6.4 OSGi R4 compendium.
      *
      * @param event The event to adapt.
      */
     @Override
-    public void bundleChanged(final BundleEvent event)
-    {
+    public void bundleChanged(final BundleEvent event) {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>();
 
         properties.put(EventConstants.EVENT, event);
 
-        properties.put("bundle.id", new Long(event.getBundle()
-            .getBundleId()));
+        properties.put("bundle.id", new Long(event.getBundle().getBundleId()));
 
         final String symbolicName = event.getBundle().getSymbolicName();
 
-        if (null != symbolicName)
-        {
-            properties.put(EventConstants.BUNDLE_SYMBOLICNAME,
-                symbolicName);
+        if (null != symbolicName) {
+            properties.put(EventConstants.BUNDLE_SYMBOLICNAME, symbolicName);
         }
 
         properties.put("bundle", event.getBundle());
 
-        final StringBuffer topic = new StringBuffer(BundleEvent.class
-            .getName().replace('.', '/')).append('/');
+        final StringBuffer topic =
+                new StringBuffer(BundleEvent.class.getName().replace('.', '/')).append('/');
 
-        switch (event.getType())
-        {
+        switch (event.getType()) {
             case BundleEvent.INSTALLED:
                 topic.append("INSTALLED");
                 break;

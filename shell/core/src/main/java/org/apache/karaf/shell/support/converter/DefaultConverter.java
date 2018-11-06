@@ -53,8 +53,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class DefaultConverter
-{
+public class DefaultConverter {
 
     private Object loader;
 
@@ -63,7 +62,7 @@ public class DefaultConverter
     }
 
     public Object convert(Object source, Type target) throws Exception {
-        return convert( source, new GenericType(target));
+        return convert(source, new GenericType(target));
     }
 
     public Object convert(Object fromValue, ReifiedType type) throws Exception {
@@ -79,17 +78,22 @@ public class DefaultConverter
         if (value == null) {
             if (String.class.isAssignableFrom(toClass(type))) {
                 return fromValue.toString();
-            } else if (fromValue instanceof Number && Number.class.isAssignableFrom(unwrap(toClass(type)))) {
+            } else if (fromValue instanceof Number
+                    && Number.class.isAssignableFrom(unwrap(toClass(type)))) {
                 return convertToNumber((Number) fromValue, toClass(type));
             } else if (fromValue instanceof String) {
                 return convertFromString((String) fromValue, toClass(type), loader);
-            } else if (toClass(type).isArray() && (fromValue instanceof Collection || fromValue.getClass().isArray())) {
+            } else if (toClass(type).isArray()
+                    && (fromValue instanceof Collection || fromValue.getClass().isArray())) {
                 return convertToArray(fromValue, type);
-            } else if (Map.class.isAssignableFrom(toClass(type)) && (fromValue instanceof Map || fromValue instanceof Dictionary)) {
+            } else if (Map.class.isAssignableFrom(toClass(type))
+                    && (fromValue instanceof Map || fromValue instanceof Dictionary)) {
                 return convertToMap(fromValue, type);
-            } else if (Dictionary.class.isAssignableFrom(toClass(type)) && (fromValue instanceof Map || fromValue instanceof Dictionary)) {
+            } else if (Dictionary.class.isAssignableFrom(toClass(type))
+                    && (fromValue instanceof Map || fromValue instanceof Dictionary)) {
                 return convertToDictionary(fromValue, type);
-            } else if (Collection.class.isAssignableFrom(toClass(type)) && (fromValue instanceof Collection || fromValue.getClass().isArray())) {
+            } else if (Collection.class.isAssignableFrom(toClass(type))
+                    && (fromValue instanceof Collection || fromValue.getClass().isArray())) {
                 return convertToCollection(fromValue, type);
             } else {
                 throw new Exception("Unable to convert value " + fromValue + " to type " + type);
@@ -100,14 +104,14 @@ public class DefaultConverter
 
     private Object convertWithConverters(Object source, ReifiedType type) throws Exception {
         Object value = null;
-//        for (Converter converter : converters) {
-//            if (converter.canConvert(source, type)) {
-//                value = converter.convert(source, type);
-//                if (value != null) {
-//                    return value;
-//                }
-//            }
-//        }
+        //        for (Converter converter : converters) {
+        //            if (converter.canConvert(source, type)) {
+        //                value = converter.convert(source, type);
+        //                if (value != null) {
+        //                    return value;
+        //                }
+        //            }
+        //        }
         return value;
     }
 
@@ -171,9 +175,13 @@ public class DefaultConverter
             props.load(in);
             return props;
         } else if (Boolean.class == toType) {
-            if ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value) || "on".equalsIgnoreCase(value)) {
+            if ("yes".equalsIgnoreCase(value)
+                    || "true".equalsIgnoreCase(value)
+                    || "on".equalsIgnoreCase(value)) {
                 return Boolean.TRUE;
-            } else if ("no".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value) || "off".equalsIgnoreCase(value)) {
+            } else if ("no".equalsIgnoreCase(value)
+                    || "false".equalsIgnoreCase(value)
+                    || "off".equalsIgnoreCase(value)) {
                 return Boolean.FALSE;
             } else {
                 throw new RuntimeException("Invalid boolean value: " + value);
@@ -191,7 +199,7 @@ public class DefaultConverter
         } else if (Character.class == toType) {
             if (value.length() == 6 && value.startsWith("\\u")) {
                 int code = Integer.parseInt(value.substring(2), 16);
-                return (char)code;
+                return (char) code;
             } else if (value.length() == 1) {
                 return value.charAt(0);
             } else {
@@ -210,7 +218,8 @@ public class DefaultConverter
 
     /**
      * Escape quote marks in order to allow bnd instructions that require it.
-     * <p>See jira issue KARAF-4964</p>
+     *
+     * <p>See jira issue KARAF-4964
      */
     private static URI createUri(String value) throws Exception {
         return URI.create(value.replaceAll("\"", "%22"));
@@ -218,7 +227,14 @@ public class DefaultConverter
 
     private static Object createObject(String value, Class type) throws Exception {
         if (type.isInterface() || Modifier.isAbstract(type.getModifiers())) {
-            throw new Exception("Unable to convert value " + value + " to type " + type + ". Type " + type + " is an interface or an abstract class");
+            throw new Exception(
+                    "Unable to convert value "
+                            + value
+                            + " to type "
+                            + type
+                            + ". Type "
+                            + type
+                            + " is an interface or an abstract class");
         }
         Constructor constructor = null;
         try {
@@ -248,7 +264,13 @@ public class DefaultConverter
                 try {
                     newCol.add(convert(Array.get(obj, i), valueType));
                 } catch (Exception t) {
-                    throw new Exception("Unable to convert from " + obj + " to " + type + "(error converting array element)", t);
+                    throw new Exception(
+                            "Unable to convert from "
+                                    + obj
+                                    + " to "
+                                    + type
+                                    + "(error converting array element)",
+                            t);
                 }
             }
         } else {
@@ -256,7 +278,13 @@ public class DefaultConverter
                 try {
                     newCol.add(convert(item, valueType));
                 } catch (Exception t) {
-                    throw new Exception("Unable to convert from " + obj + " to " + type + "(error converting collection entry)", t);
+                    throw new Exception(
+                            "Unable to convert from "
+                                    + obj
+                                    + " to "
+                                    + type
+                                    + "(error converting collection entry)",
+                            t);
                 }
             }
         }
@@ -269,20 +297,32 @@ public class DefaultConverter
         Dictionary newDic = new Hashtable();
         if (obj instanceof Dictionary) {
             Dictionary dic = (Dictionary) obj;
-            for (Enumeration keyEnum = dic.keys(); keyEnum.hasMoreElements();) {
+            for (Enumeration keyEnum = dic.keys(); keyEnum.hasMoreElements(); ) {
                 Object key = keyEnum.nextElement();
                 try {
                     newDic.put(convert(key, keyType), convert(dic.get(key), valueType));
                 } catch (Exception t) {
-                    throw new Exception("Unable to convert from " + obj + " to " + type + "(error converting map entry)", t);
+                    throw new Exception(
+                            "Unable to convert from "
+                                    + obj
+                                    + " to "
+                                    + type
+                                    + "(error converting map entry)",
+                            t);
                 }
             }
         } else {
-            for (Map.Entry e : ((Map<Object,Object>) obj).entrySet()) {
+            for (Map.Entry e : ((Map<Object, Object>) obj).entrySet()) {
                 try {
                     newDic.put(convert(e.getKey(), keyType), convert(e.getValue(), valueType));
                 } catch (Exception t) {
-                    throw new Exception("Unable to convert from " + obj + " to " + type + "(error converting map entry)", t);
+                    throw new Exception(
+                            "Unable to convert from "
+                                    + obj
+                                    + " to "
+                                    + type
+                                    + "(error converting map entry)",
+                            t);
                 }
             }
         }
@@ -295,20 +335,32 @@ public class DefaultConverter
         Map newMap = (Map) getMap(toClass(type)).newInstance();
         if (obj instanceof Dictionary) {
             Dictionary dic = (Dictionary) obj;
-            for (Enumeration keyEnum = dic.keys(); keyEnum.hasMoreElements();) {
+            for (Enumeration keyEnum = dic.keys(); keyEnum.hasMoreElements(); ) {
                 Object key = keyEnum.nextElement();
                 try {
                     newMap.put(convert(key, keyType), convert(dic.get(key), valueType));
                 } catch (Exception t) {
-                    throw new Exception("Unable to convert from " + obj + " to " + type + "(error converting map entry)", t);
+                    throw new Exception(
+                            "Unable to convert from "
+                                    + obj
+                                    + " to "
+                                    + type
+                                    + "(error converting map entry)",
+                            t);
                 }
             }
         } else {
-            for (Map.Entry e : ((Map<Object,Object>) obj).entrySet()) {
+            for (Map.Entry e : ((Map<Object, Object>) obj).entrySet()) {
                 try {
                     newMap.put(convert(e.getKey(), keyType), convert(e.getValue(), valueType));
                 } catch (Exception t) {
-                    throw new Exception("Unable to convert from " + obj + " to " + type + "(error converting map entry)", t);
+                    throw new Exception(
+                            "Unable to convert from "
+                                    + obj
+                                    + " to "
+                                    + type
+                                    + "(error converting map entry)",
+                            t);
                 }
             }
         }
@@ -333,7 +385,13 @@ public class DefaultConverter
             try {
                 Array.set(array, i, convert(Array.get(obj, i), componentType));
             } catch (Exception t) {
-                throw new Exception("Unable to convert from " + obj + " to " + type + "(error converting array element)", t);
+                throw new Exception(
+                        "Unable to convert from "
+                                + obj
+                                + " to "
+                                + type
+                                + "(error converting array element)",
+                        t);
             }
         }
         return array;
@@ -342,7 +400,8 @@ public class DefaultConverter
     public static boolean isAssignable(Object source, ReifiedType target) {
         return source == null
                 || (target.size() == 0
-                    && unwrap(target.getRawClass()).isAssignableFrom(unwrap(source.getClass())));
+                        && unwrap(target.getRawClass())
+                                .isAssignableFrom(unwrap(source.getClass())));
     }
 
     private static Class unwrap(Class c) {
@@ -387,8 +446,8 @@ public class DefaultConverter
         }
         Constructor[] constructors = type.getConstructors();
         for (Constructor constructor : constructors) {
-            if (Modifier.isPublic(constructor.getModifiers()) &&
-                    constructor.getParameterTypes().length == 0) {
+            if (Modifier.isPublic(constructor.getModifiers())
+                    && constructor.getParameterTypes().length == 0) {
                 return true;
             }
         }
@@ -396,6 +455,7 @@ public class DefaultConverter
     }
 
     private static final Map<Class, Class> primitives;
+
     static {
         primitives = new HashMap<>();
         primitives.put(byte.class, Byte.class);
@@ -411,5 +471,4 @@ public class DefaultConverter
     private Class toClass(ReifiedType type) {
         return type.getRawClass();
     }
-
 }

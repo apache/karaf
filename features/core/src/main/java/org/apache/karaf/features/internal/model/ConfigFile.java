@@ -21,14 +21,15 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-
 import org.apache.karaf.features.ConfigFileInfo;
 
-
 /**
- * <p>Additional configuration files which should be created during feature installation.</p>
- * <p>Java class for configFile complex type.</p>
- * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ * Additional configuration files which should be created during feature installation.
+ *
+ * <p>Java class for configFile complex type.
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ *
  * <pre>
  * &lt;complexType name="configFile"&gt;
  *   &lt;simpleContent&gt;
@@ -41,21 +42,22 @@ import org.apache.karaf.features.ConfigFileInfo;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "configFile", propOrder = {"value"})
+@XmlType(
+        name = "configFile",
+        propOrder = {"value"})
 public class ConfigFile implements ConfigFileInfo {
 
-    @XmlValue
-    protected String value;
+    @XmlValue protected String value;
+
     @XmlAttribute(required = true)
     protected String finalname;
-    @XmlAttribute
-    protected Boolean override;
+
+    @XmlAttribute protected Boolean override;
 
     /**
      * Gets the value of the value property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String }
      */
     public String getLocation() {
         return value;
@@ -64,8 +66,7 @@ public class ConfigFile implements ConfigFileInfo {
     /**
      * Sets the value of the value property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String }
      */
     public void setLocation(String value) {
         this.value = value;
@@ -74,8 +75,7 @@ public class ConfigFile implements ConfigFileInfo {
     /**
      * Gets the value of the finalname property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String }
      */
     public String getFinalname() {
         return finalname;
@@ -84,8 +84,7 @@ public class ConfigFile implements ConfigFileInfo {
     /**
      * Sets the value of the finalname property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String }
      */
     public void setFinalname(String value) {
         this.finalname = value;
@@ -94,8 +93,7 @@ public class ConfigFile implements ConfigFileInfo {
     /**
      * Gets the value of the override property.
      *
-     * @return possible object is
-     * {@link Boolean }
+     * @return possible object is {@link Boolean }
      */
     public boolean isOverride() {
         return override == null ? false : override;
@@ -104,8 +102,7 @@ public class ConfigFile implements ConfigFileInfo {
     /**
      * Sets the value of the override property.
      *
-     * @param value allowed object is
-     *              {@link Boolean }
+     * @param value allowed object is {@link Boolean }
      */
     public void setOverride(Boolean value) {
         this.override = value;

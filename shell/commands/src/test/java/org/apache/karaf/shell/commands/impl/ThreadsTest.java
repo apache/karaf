@@ -19,7 +19,8 @@ package org.apache.karaf.shell.commands.impl;
 import org.junit.Test;
 
 /**
- * These are not real tests as they do no assertions. They simply help to see how the layout will look like.
+ * These are not real tests as they do no assertions. They simply help to see how the layout will
+ * look like.
  */
 public class ThreadsTest {
     @Test
@@ -28,7 +29,7 @@ public class ThreadsTest {
         action.list = true;
         action.execute();
     }
-    
+
     @Test
     public void testThreadInfo() throws Exception {
         ThreadsAction action = new ThreadsAction();

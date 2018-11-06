@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.osgi.framework.Bundle;
@@ -39,7 +38,7 @@ import org.springframework.osgi.service.importer.OsgiServiceDependency;
 import org.springframework.osgi.service.importer.event.OsgiServiceDependencyEvent;
 
 public class SpringStateService
-    implements OsgiBundleApplicationContextListener, BundleListener, BundleStateService {
+        implements OsgiBundleApplicationContextListener, BundleListener, BundleStateService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SpringStateService.class);
 
@@ -70,7 +69,7 @@ public class SpringStateService
         SimpleDateFormat df = new SimpleDateFormat();
         message.append(df.format(date) + "\n");
         if (event instanceof BootstrappingDependencyEvent) {
-            message.append(getServiceInfo((BootstrappingDependencyEvent)event));
+            message.append(getServiceInfo((BootstrappingDependencyEvent) event));
         }
         Throwable ex = getException(event);
         if (ex != null) {
@@ -81,14 +80,14 @@ public class SpringStateService
     }
 
     private String getServiceInfo(BootstrappingDependencyEvent event) {
-        OsgiServiceDependencyEvent depEvent = event.getDependencyEvent(); 
+        OsgiServiceDependencyEvent depEvent = event.getDependencyEvent();
         if (depEvent == null || depEvent.getServiceDependency() == null) {
             return "";
         }
         OsgiServiceDependency dep = depEvent.getServiceDependency();
-        return String.format("Bean %s is wating for OSGi service with filter %s", 
-                             dep.getBeanName(), 
-                             dep.getServiceFilter());
+        return String.format(
+                "Bean %s is wating for OSGi service with filter %s",
+                dep.getBeanName(), dep.getServiceFilter());
     }
 
     private void addMessages(StringBuilder message, Throwable ex) {
@@ -106,14 +105,18 @@ public class SpringStateService
         if (!(event instanceof OsgiBundleContextFailedEvent)) {
             return null;
         }
-        OsgiBundleContextFailedEvent failureEvent = (OsgiBundleContextFailedEvent)event;
+        OsgiBundleContextFailedEvent failureEvent = (OsgiBundleContextFailedEvent) event;
         return failureEvent.getFailureCause();
     }
 
     public void onOsgiApplicationEvent(OsgiBundleApplicationContextEvent event) {
         if (LOG.isDebugEnabled()) {
             BundleState state = mapEventToState(event);
-            LOG.debug("Spring app state changed to " + state + " for bundle " + event.getBundle().getBundleId());
+            LOG.debug(
+                    "Spring app state changed to "
+                            + state
+                            + " for bundle "
+                            + event.getBundle().getBundleId());
         }
         states.put(event.getBundle().getBundleId(), event);
     }
@@ -137,5 +140,4 @@ public class SpringStateService
             states.remove(event.getBundle().getBundleId());
         }
     }
-
 }

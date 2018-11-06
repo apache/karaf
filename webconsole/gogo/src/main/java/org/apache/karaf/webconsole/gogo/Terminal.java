@@ -15,23 +15,20 @@
  * limitations under the License.
  */
 
-/**
- * Based on http://antony.lesuisse.org/software/ajaxterm/
- *  Public Domain License
- */
+/** Based on http://antony.lesuisse.org/software/ajaxterm/ Public Domain License */
 
 /**
- * See http://www.ecma-international.org/publications/standards/Ecma-048.htm
- *       and http://vt100.net/docs/vt510-rm/
+ * See http://www.ecma-international.org/publications/standards/Ecma-048.htm and
+ * http://vt100.net/docs/vt510-rm/
  */
 package org.apache.karaf.webconsole.gogo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Terminal {
@@ -69,16 +66,17 @@ public class Terminal {
     private boolean vt100_mode_backspace;
     private boolean vt100_mode_column_switch;
     private boolean vt100_keyfilter_escape;
-    private int[] vt100_charset_graph = new int[]{
-            0x25ca, 0x2026, 0x2022, 0x3f,
-            0xb6, 0x3f, 0xb0, 0xb1,
-            0x3f, 0x3f, 0x2b, 0x2b,
-            0x2b, 0x2b, 0x2b, 0xaf,
-            0x2014, 0x2014, 0x2014, 0x5f,
-            0x2b, 0x2b, 0x2b, 0x2b,
-            0x7c, 0x2264, 0x2265, 0xb6,
-            0x2260, 0xa3, 0xb7, 0x7f
-    };
+    private int[] vt100_charset_graph =
+            new int[] {
+                0x25ca, 0x2026, 0x2022, 0x3f,
+                0xb6, 0x3f, 0xb0, 0xb1,
+                0x3f, 0x3f, 0x2b, 0x2b,
+                0x2b, 0x2b, 0x2b, 0xaf,
+                0x2014, 0x2014, 0x2014, 0x5f,
+                0x2b, 0x2b, 0x2b, 0x2b,
+                0x7c, 0x2264, 0x2265, 0xb6,
+                0x2260, 0xa3, 0xb7, 0x7f
+            };
     private int vt100_charset_g_sel;
     private int[] vt100_charset_g = {0, 0};
     private Map<String, Object> vt100_saved;
@@ -151,7 +149,7 @@ public class Terminal {
         vt100_charset_is_single_shift = false;
         vt100_charset_is_graphical = false;
         vt100_charset_g_sel = 0;
-        vt100_charset_g = new int[]{0, 0};
+        vt100_charset_g = new int[] {0, 0};
         // Modes
         vt100_mode_insert = false;
         vt100_mode_lfnewline = false;
@@ -227,7 +225,6 @@ public class Terminal {
                 } else {
                     o.append('?');
                 }
-
             }
         }
         return o.toString();
@@ -249,11 +246,9 @@ public class Terminal {
         int from = width * y0 + x0;
         int to = width * (y1 - 1) + x1;
         int newLength = to - from;
-        if (newLength < 0)
-            throw new IllegalArgumentException(from + " > " + to);
+        if (newLength < 0) throw new IllegalArgumentException(from + " > " + to);
         int[] copy = new int[newLength];
-        System.arraycopy(screen, from, copy, 0,
-                Math.min(screen.length - from, newLength));
+        System.arraycopy(screen, from, copy, 0, Math.min(screen.length - from, newLength));
         return copy;
     }
 
@@ -344,7 +339,7 @@ public class Terminal {
             wx += utf8_charwidth(c);
             lx += 1;
         }
-        return new int[]{wx, lx};
+        return new int[] {wx, lx};
     }
 
     private void cursor_up() {
@@ -483,7 +478,7 @@ public class Terminal {
         } else if (vt100_charset_is_graphical && ((c & 0xffe0) == 0x0060)) {
             c = vt100_charset_graph[c - 0x60];
         }
-        poke(cy, cx, new int[]{attr | c});
+        poke(cy, cx, new int[] {attr | c});
         cursor_right();
     }
 
@@ -716,8 +711,7 @@ public class Terminal {
         csi_DA("0");
     }
 
-    private void esc_ST() {
-    }
+    private void esc_ST() {}
 
     private void esc_OSC() {
         vt100_parse_reset(State.Str);
@@ -736,27 +730,27 @@ public class Terminal {
     }
 
     private void csi_ICH(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         scroll_line_right(cy, cx, ps[0]);
     }
 
     private void csi_CUU(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         cursor_up(Math.max(1, ps[0]));
     }
 
     private void csi_CUD(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         cursor_down(Math.max(1, ps[0]));
     }
 
     private void csi_CUF(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         cursor_right(Math.max(1, ps[0]));
     }
 
     private void csi_CUB(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         cursor_left(Math.max(1, ps[0]));
     }
 
@@ -771,12 +765,12 @@ public class Terminal {
     }
 
     private void csi_CHA(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         cursor_set_x(ps[0] - 1);
     }
 
     private void csi_CUP(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1, 1});
+        int[] ps = vt100_parse_params(p, new int[] {1, 1});
         if (vt100_mode_origin) {
             cursor_set(scroll_area_y0 + ps[0] - 1, ps[1] - 1);
         } else {
@@ -785,12 +779,12 @@ public class Terminal {
     }
 
     private void csi_CHT(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         ctrl_HT(Math.max(1, ps[0]));
     }
 
     private void csi_ED(String p) {
-        String[] ps = vt100_parse_params(p, new String[]{"0"});
+        String[] ps = vt100_parse_params(p, new String[] {"0"});
         if ("0".equals(ps[0])) {
             clear(cy, cx, height, width);
         } else if ("1".equals(ps[0])) {
@@ -801,7 +795,7 @@ public class Terminal {
     }
 
     private void csi_EL(String p) {
-        String[] ps = vt100_parse_params(p, new String[]{"0"});
+        String[] ps = vt100_parse_params(p, new String[] {"0"});
         if ("0".equals(ps[0])) {
             clear(cy, cx, cy + 1, width);
         } else if ("1".equals(ps[0])) {
@@ -812,36 +806,36 @@ public class Terminal {
     }
 
     private void csi_IL(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         if (cy >= scroll_area_y0 && cy < scroll_area_y1) {
             scroll_area_down(cy, scroll_area_y1, Math.max(1, ps[0]));
         }
     }
 
     private void csi_DL(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         if (cy >= scroll_area_y0 && cy < scroll_area_y1) {
             scroll_area_up(cy, scroll_area_y1, Math.max(1, ps[0]));
         }
     }
 
     private void csi_DCH(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         scroll_line_left(cy, cx, Math.max(1, ps[0]));
     }
 
     private void csi_SU(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         scroll_area_up(scroll_area_y0, scroll_area_y1, Math.max(1, ps[0]));
     }
 
     private void csi_SD(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         scroll_area_down(scroll_area_y0, scroll_area_y1, Math.max(1, ps[0]));
     }
 
     private void csi_CTC(String p) {
-        String[] ps = vt100_parse_params(p, new String[]{"0"});
+        String[] ps = vt100_parse_params(p, new String[] {"0"});
         for (String m : ps) {
             if ("0".equals(m)) {
                 if (tab_stops.indexOf(cx) < 0) {
@@ -857,18 +851,18 @@ public class Terminal {
     }
 
     private void csi_ECH(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         int n = Math.min(width - cx, Math.max(1, ps[0]));
         clear(cy, cx, cy + 1, cx + n);
     }
 
     private void csi_CBT(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         ctrl_HT(1 - Math.max(1, ps[0]));
     }
 
     private void csi_HPA(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         cursor_set_x(ps[0] - 1);
     }
 
@@ -877,7 +871,7 @@ public class Terminal {
     }
 
     private void csi_REP(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         if (vt100_lastchar < 32) {
             return;
         }
@@ -889,7 +883,7 @@ public class Terminal {
     }
 
     private void csi_DA(String p) {
-        String[] ps = vt100_parse_params(p, new String[]{"0"});
+        String[] ps = vt100_parse_params(p, new String[] {"0"});
         if ("0".equals(ps[0])) {
             vt100_out = "\u001b[?1;2c";
         } else if (">0".equals(ps[0]) || ">".equals(ps[0])) {
@@ -898,7 +892,7 @@ public class Terminal {
     }
 
     private void csi_VPA(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1});
+        int[] ps = vt100_parse_params(p, new int[] {1});
         cursor_set_y(ps[0] - 1);
     }
 
@@ -911,7 +905,7 @@ public class Terminal {
     }
 
     private void csi_TBC(String p) {
-        String[] ps = vt100_parse_params(p, new String[]{"0"});
+        String[] ps = vt100_parse_params(p, new String[] {"0"});
         if ("0".equals(ps[0])) {
             csi_CTC("2");
         } else if ("3".equals(ps[0])) {
@@ -928,7 +922,7 @@ public class Terminal {
     }
 
     private void csi_SGR(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{0});
+        int[] ps = vt100_parse_params(p, new int[] {0});
         for (int m : ps) {
             if (m == 0) {
                 attr = 0x00fe0000;
@@ -959,7 +953,7 @@ public class Terminal {
     }
 
     private void csi_DSR(String p) {
-        String[] ps = vt100_parse_params(p, new String[]{"0"});
+        String[] ps = vt100_parse_params(p, new String[] {"0"});
         if ("5".equals(ps[0])) {
             vt100_out = "\u001b[0n";
         } else if ("6".equals(ps[0])) {
@@ -985,7 +979,7 @@ public class Terminal {
     }
 
     private void csi_DECSTBM(String p) {
-        int[] ps = vt100_parse_params(p, new int[]{1, height});
+        int[] ps = vt100_parse_params(p, new int[] {1, height});
         scroll_area_set(ps[0] - 1, ps[1]);
         if (vt100_mode_origin) {
             cursor_set(scroll_area_y0, 0);
@@ -1512,7 +1506,7 @@ public class Terminal {
                             vt100_parse_func <<= 8;
                             vt100_parse_func += (char) c;
                         } else if (msb == 0x30 && vt100_parse_state == State.Csi) {
-                            vt100_parse_param += new String(new char[]{(char) c});
+                            vt100_parse_param += new String(new char[] {(char) c});
                         } else {
                             vt100_parse_func <<= 8;
                             vt100_parse_func += (char) c;
@@ -1787,7 +1781,13 @@ public class Terminal {
                         } else {
                             b = "";
                         }
-                        sb.append("<span class='f").append(fg).append(" b").append(bg).append(ul).append(b).append("'>");
+                        sb.append("<span class='f")
+                                .append(fg)
+                                .append(" b")
+                                .append(bg)
+                                .append(ul)
+                                .append(b)
+                                .append("'>");
                         prev_attr = a;
                     }
                     switch (c) {

@@ -20,49 +20,50 @@ package org.apache.karaf.main.util;
 
 import java.io.File;
 import java.util.logging.Handler;
-
 import org.apache.felix.utils.properties.Properties;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class BootstrapLogManagerTest {
-	
-	private Properties getConfigProperties() {
-		Properties configProps = new Properties();
-		configProps.put("karaf.data", "target");
-		return configProps;
-	}
-	
-	@Test
-	public void testGetLogManagerNoProperties() {
-		BootstrapLogManager.setProperties(getConfigProperties());
-		try {
-			BootstrapLogManager.getDefaultHandler();
-		} catch (IllegalStateException e) {
-			Assert.assertEquals("Properties must be set before calling getDefaultHandler", e.getMessage());
-		}
-	}
-	
-	@Test
-	public void testGetLogManager() {
-		new File("target/log/karaf.log").delete();
-		BootstrapLogManager.setProperties(getConfigProperties());
-		Handler handler = BootstrapLogManager.getDefaultHandler();
-		Assert.assertNotNull(handler);
-		assertExists("target/log/karaf.log");
-	}
-	
-	@Test
-	public void testGetLogManagerFromPaxLoggingConfig() {
-		new File("target/test.log").delete();
-		Properties configProps = getConfigProperties();
-		BootstrapLogManager.setProperties(configProps, "src/test/resources/org.ops4j.pax.logging.cfg");
-		Handler handler = BootstrapLogManager.getDefaultHandler();
-		Assert.assertNotNull(handler);
-		assertExists("target/test.log");
-	}
-	
-	private void assertExists(String path) {
-		Assert.assertTrue("File should exist at " + path, new File(path).exists());
-	}
+
+    private Properties getConfigProperties() {
+        Properties configProps = new Properties();
+        configProps.put("karaf.data", "target");
+        return configProps;
+    }
+
+    @Test
+    public void testGetLogManagerNoProperties() {
+        BootstrapLogManager.setProperties(getConfigProperties());
+        try {
+            BootstrapLogManager.getDefaultHandler();
+        } catch (IllegalStateException e) {
+            Assert.assertEquals(
+                    "Properties must be set before calling getDefaultHandler", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetLogManager() {
+        new File("target/log/karaf.log").delete();
+        BootstrapLogManager.setProperties(getConfigProperties());
+        Handler handler = BootstrapLogManager.getDefaultHandler();
+        Assert.assertNotNull(handler);
+        assertExists("target/log/karaf.log");
+    }
+
+    @Test
+    public void testGetLogManagerFromPaxLoggingConfig() {
+        new File("target/test.log").delete();
+        Properties configProps = getConfigProperties();
+        BootstrapLogManager.setProperties(
+                configProps, "src/test/resources/org.ops4j.pax.logging.cfg");
+        Handler handler = BootstrapLogManager.getDefaultHandler();
+        Assert.assertNotNull(handler);
+        assertExists("target/test.log");
+    }
+
+    private void assertExists(String path) {
+        Assert.assertTrue("File should exist at " + path, new File(path).exists());
+    }
 }

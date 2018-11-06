@@ -39,21 +39,20 @@ public class GogoParser {
     int c1;
     int c2;
     int c3;
-    
-    public GogoParser(String text, int cursor) {
-    	this.text = text;
-        this.cursor = cursor;
-	}
 
-	public void ws() {
+    public GogoParser(String text, int cursor) {
+        this.text = text;
+        this.cursor = cursor;
+    }
+
+    public void ws() {
         // derek: BUGFIX: loop if comment  at beginning of input
-        //while (!eof() && isWhitespace(peek())) {
+        // while (!eof() && isWhitespace(peek())) {
         while (!eof() && (!escaped && isWhitespace(peek()) || current == 0)) {
             if (current != 0 || !escaped && isWhitespace(peek())) {
                 current++;
             }
-            if (peek() == '/' && current < text.length() - 2
-                && text.charAt(current + 1) == '/') {
+            if (peek() == '/' && current < text.length() - 2 && text.charAt(current + 1) == '/') {
                 comment();
             }
             if (current == 0) {
@@ -159,8 +158,7 @@ public class GogoParser {
     }
 
     CharSequence context(int around) {
-        return text.subSequence(Math.max(0, current - 20), Math.min(text.length(),
-            current + 4));
+        return text.subSequence(Math.max(0, current - 20), Math.min(text.length(), current + 4));
     }
 
     public List<List<String>> pipeline() {
@@ -171,8 +169,7 @@ public class GogoParser {
             ws();
             if (!eof()) {
                 statements.add(statement());
-            }
-            else {
+            } else {
                 statements.add(new ArrayList<>());
                 break;
             }
@@ -200,8 +197,7 @@ public class GogoParser {
         return s;
     }
 
-    public String messy()
-    {
+    public String messy() {
         start = current;
         char c = peek();
         if (c > 0 && SPECIAL.indexOf(c) < 0) {
@@ -218,8 +214,7 @@ public class GogoParser {
             } finally {
                 start = -1;
             }
-        }
-        else {
+        } else {
             return value();
         }
     }
@@ -267,33 +262,26 @@ public class GogoParser {
                 if (!escaped) {
                     if (isWhitespace(c) || c == ';' || c == '|' || c == '=') {
                         break;
-                    }
-                    else if (c == '{') {
+                    } else if (c == '{') {
                         next();
                         find('}', '{');
-                    }
-                    else if (c == '(') {
+                    } else if (c == '(') {
                         next();
                         find(')', '(');
-                    }
-                    else if (c == '<') {
+                    } else if (c == '<') {
                         next();
                         find('>', '<');
-                    }
-                    else if (c == '[') {
+                    } else if (c == '[') {
                         next();
                         find(']', '[');
-                    }
-                    else if (c == '\'' || c == '"') {
+                    } else if (c == '\'' || c == '"') {
                         next();
                         quote(c);
                         next();
-                    }
-                    else {
+                    } else {
                         next();
                     }
-                }
-                else {
+                } else {
                     next();
                 }
             }
@@ -313,8 +301,8 @@ public class GogoParser {
 
     char unicode() {
         if (current + 4 > text.length()) {
-            throw new IllegalArgumentException("Unicode \\u escape at eof at pos ..."
-                + context(current) + "...");
+            throw new IllegalArgumentException(
+                    "Unicode \\u escape at eof at pos ..." + context(current) + "...");
         }
 
         String s = text.subSequence(current, current + 4).toString();
@@ -328,8 +316,12 @@ public class GogoParser {
 
         while (level != 0) {
             if (eof()) {
-                throw new RuntimeException("Eof found in the middle of a compound for '"
-                    + target + deeper + "', begins at " + context(start));
+                throw new RuntimeException(
+                        "Eof found in the middle of a compound for '"
+                                + target
+                                + deeper
+                                + "', begins at "
+                                + context(start));
             }
 
             char c = next();
@@ -345,8 +337,7 @@ public class GogoParser {
                         } else {
                             if (c == '\'') {
                                 quote('\'');
-                            }
-                            else {
+                            } else {
                                 if (c == '`') {
                                     quote('`');
                                 }
@@ -393,8 +384,7 @@ public class GogoParser {
             return text.subSequence(start, current);
         }
         throw new IllegalArgumentException(
-            "Reference to variable does not match syntax of a variable: "
-                + context(start));
+                "Reference to variable does not match syntax of a variable: " + context(start));
     }
 
     public String toString() {
@@ -408,5 +398,4 @@ public class GogoParser {
         }
         return sb.toString();
     }
-
 }

@@ -21,14 +21,28 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "feature", name = "refresh", description = "Reloads features processing instructions and reprovisions existing features.")
+@Command(
+        scope = "feature",
+        name = "refresh",
+        description =
+                "Reloads features processing instructions and reprovisions existing features.")
 @Service
 public class RefreshFeaturesCommand extends FeaturesCommandSupport {
 
-    @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
+    @Option(
+            name = "-v",
+            aliases = "--verbose",
+            description = "Explain what is being done",
+            required = false,
+            multiValued = false)
     boolean verbose;
 
-    @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only", required = false, multiValued = false)
+    @Option(
+            name = "-t",
+            aliases = "--simulate",
+            description = "Perform a simulation only",
+            required = false,
+            multiValued = false)
     boolean simulate;
 
     @Option(name = "--features-wiring", description = "Print the wiring between features")
@@ -48,5 +62,4 @@ public class RefreshFeaturesCommand extends FeaturesCommandSupport {
             System.err.println("Error refreshing features: " + e.getMessage());
         }
     }
-
 }

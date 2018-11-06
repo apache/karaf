@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -37,13 +36,13 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.sshd.agent.SshAgent;
-import org.apache.sshd.client.channel.ClientChannelEvent;
-import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.auth.keyboard.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.channel.PtyMode;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
@@ -63,33 +62,71 @@ import org.slf4j.LoggerFactory;
 public class SshAction implements Action {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(name = "-l", aliases = {"--username"}, description = "The user name for remote login", required = false, multiValued = false)
+    @Option(
+            name = "-l",
+            aliases = {"--username"},
+            description = "The user name for remote login",
+            required = false,
+            multiValued = false)
     private String username;
 
-    @Option(name = "-P", aliases = {"--password"}, description = "The password for remote login", required = false, multiValued = false)
+    @Option(
+            name = "-P",
+            aliases = {"--password"},
+            description = "The password for remote login",
+            required = false,
+            multiValued = false)
     private String password;
 
-    @Option(name = "-p", aliases = {"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
+    @Option(
+            name = "-p",
+            aliases = {"--port"},
+            description = "The port to use for SSH connection",
+            required = false,
+            multiValued = false)
     private int port = 22;
 
-    @Option(name = "-k", aliases = {"--keyfile"}, description = "The private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag", required = false, multiValued = false)
+    @Option(
+            name = "-k",
+            aliases = {"--keyfile"},
+            description =
+                    "The private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag",
+            required = false,
+            multiValued = false)
     private String keyFile;
 
-    @Option(name = "-q", description = "Quiet Mode. Do not ask for confirmations", required = false, multiValued = false)
+    @Option(
+            name = "-q",
+            description = "Quiet Mode. Do not ask for confirmations",
+            required = false,
+            multiValued = false)
     private boolean quiet;
 
-    @Option(name = "-r", aliases = {"--retries"}, description = "retry connection establishment (up to attempts times)", required = false, multiValued = false)
+    @Option(
+            name = "-r",
+            aliases = {"--retries"},
+            description = "retry connection establishment (up to attempts times)",
+            required = false,
+            multiValued = false)
     private int retries = 0;
 
-    @Argument(index = 0, name = "hostname", description = "The host name to connect to via SSH", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "hostname",
+            description = "The host name to connect to via SSH",
+            required = true,
+            multiValued = false)
     private String hostname;
 
-    @Argument(index = 1, name = "command", description = "Optional command to execute", required = false, multiValued = true)
+    @Argument(
+            index = 1,
+            name = "command",
+            description = "Optional command to execute",
+            required = false,
+            multiValued = true)
     private List<String> command;
 
-    @Reference
-    private Session session;
-
+    @Reference private Session session;
 
     @Override
     public Object execute() throws Exception {
@@ -120,44 +157,58 @@ public class SshAction implements Action {
             String agentSocket = this.session.get(SshAgent.SSH_AUTHSOCKET_ENV_NAME).toString();
             client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, agentSocket);
         }
-        KnownHostsManager knownHostsManager = new KnownHostsManager(new File(System.getProperty("user.home"), ".sshkaraf/known_hosts"));
+        KnownHostsManager knownHostsManager =
+                new KnownHostsManager(
+                        new File(System.getProperty("user.home"), ".sshkaraf/known_hosts"));
         ServerKeyVerifier serverKeyVerifier = new ServerKeyVerifierImpl(knownHostsManager, quiet);
         client.setServerKeyVerifier(serverKeyVerifier);
         client.setKeyPairProvider(new FileKeyPairProvider());
         log.debug("Created client: {}", client);
-        client.setUserInteraction(new UserInteraction() {
-            @Override
-            public void welcome(ClientSession session, String banner, String lang) {
-                System.out.println(banner);
-            }
-
-            @Override
-            public String[] interactive(ClientSession s, String name, String instruction, String lang, String[] prompt, boolean[] echo) {
-                String[] answers = new String[prompt.length];
-                try {
-                    for (int i = 0; i < prompt.length; i++) {
-                        answers[i] = session.readLine(prompt[i] + " ", echo[i] ? null : '*');
+        client.setUserInteraction(
+                new UserInteraction() {
+                    @Override
+                    public void welcome(ClientSession session, String banner, String lang) {
+                        System.out.println(banner);
                     }
-                } catch (IOException e) {
-                }
-                return answers;
-            }
-            @Override
-            public boolean isInteractionAllowed(ClientSession session) {
-                return true;
-            }
-            @Override
-            public void serverVersionInfo(ClientSession session, List<String> lines) {
-            }
-            @Override
-            public String getUpdatedPassword(ClientSession session, String prompt, String lang) {
-                return null;
-            }
-        });
+
+                    @Override
+                    public String[] interactive(
+                            ClientSession s,
+                            String name,
+                            String instruction,
+                            String lang,
+                            String[] prompt,
+                            boolean[] echo) {
+                        String[] answers = new String[prompt.length];
+                        try {
+                            for (int i = 0; i < prompt.length; i++) {
+                                answers[i] =
+                                        session.readLine(prompt[i] + " ", echo[i] ? null : '*');
+                            }
+                        } catch (IOException e) {
+                        }
+                        return answers;
+                    }
+
+                    @Override
+                    public boolean isInteractionAllowed(ClientSession session) {
+                        return true;
+                    }
+
+                    @Override
+                    public void serverVersionInfo(ClientSession session, List<String> lines) {}
+
+                    @Override
+                    public String getUpdatedPassword(
+                            ClientSession session, String prompt, String lang) {
+                        return null;
+                    }
+                });
         client.start();
 
         try {
-            ClientSession sshSession = connectWithRetries(client, username, hostname, port, retries);
+            ClientSession sshSession =
+                    connectWithRetries(client, username, hostname, port, retries);
             Object oldIgnoreInterrupts = this.session.get(Session.IGNORE_INTERRUPTS);
 
             try {
@@ -180,7 +231,8 @@ public class SshAction implements Action {
                     }
                 }
                 if (sb.length() > 0) {
-                    ClientChannel channel = sshSession.createChannel("exec", sb.append("\n").toString());
+                    ClientChannel channel =
+                            sshSession.createChannel("exec", sb.append("\n").toString());
                     channel.setIn(new ByteArrayInputStream(new byte[0]));
                     channel.setOut(new NoCloseOutputStream(System.out));
                     channel.setErr(new NoCloseOutputStream(System.err));
@@ -188,7 +240,8 @@ public class SshAction implements Action {
                     channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                 } else if (session.getTerminal() != null) {
                     final ChannelShell channel = sshSession.createShellChannel();
-                    final org.jline.terminal.Terminal terminal = (org.jline.terminal.Terminal) session.get(".jline.terminal");
+                    final org.jline.terminal.Terminal terminal =
+                            (org.jline.terminal.Terminal) session.get(".jline.terminal");
                     Attributes attributes = terminal.enterRawMode();
                     try {
                         Map<PtyMode, Integer> modes = new HashMap<>();
@@ -204,11 +257,13 @@ public class SshAction implements Action {
                         modes.put(PtyMode.VSTOP, attributes.getControlChar(ControlChar.VSTOP));
                         modes.put(PtyMode.VSUSP, attributes.getControlChar(ControlChar.VSUSP));
                         modes.put(PtyMode.VDSUSP, attributes.getControlChar(ControlChar.VDSUSP));
-                        modes.put(PtyMode.VREPRINT, attributes.getControlChar(ControlChar.VREPRINT));
+                        modes.put(
+                                PtyMode.VREPRINT, attributes.getControlChar(ControlChar.VREPRINT));
                         modes.put(PtyMode.VWERASE, attributes.getControlChar(ControlChar.VWERASE));
                         modes.put(PtyMode.VLNEXT, attributes.getControlChar(ControlChar.VLNEXT));
                         modes.put(PtyMode.VSTATUS, attributes.getControlChar(ControlChar.VSTATUS));
-                        modes.put(PtyMode.VDISCARD, attributes.getControlChar(ControlChar.VDISCARD));
+                        modes.put(
+                                PtyMode.VDISCARD, attributes.getControlChar(ControlChar.VDISCARD));
                         // Input flags
                         modes.put(PtyMode.IGNPAR, getFlag(attributes, InputFlag.IGNPAR));
                         modes.put(PtyMode.PARMRK, getFlag(attributes, InputFlag.PARMRK));
@@ -243,53 +298,85 @@ public class SshAction implements Action {
                         channel.setEnv("TERM", session.getTerminal().getType());
                         String ctype = (String) session.get("LC_CTYPE");
                         if (ctype == null) {
-                            ctype = Locale.getDefault().toString() + "."
-                                    + System.getProperty("input.encoding", Charset.defaultCharset().name());
+                            ctype =
+                                    Locale.getDefault().toString()
+                                            + "."
+                                            + System.getProperty(
+                                                    "input.encoding",
+                                                    Charset.defaultCharset().name());
                         }
                         channel.setEnv("LC_CTYPE", ctype);
                         channel.setIn(new NoCloseInputStream(terminal.input()));
                         channel.setOut(new NoCloseOutputStream(terminal.output()));
                         channel.setErr(new NoCloseOutputStream(terminal.output()));
                         channel.open().verify();
-                        org.jline.terminal.Terminal.SignalHandler prevWinchHandler = terminal.handle(org.jline.terminal.Terminal.Signal.WINCH, signal -> {
-                            try {
-                                Size size = terminal.getSize();
-                                channel.sendWindowChange(size.getColumns(), size.getRows());
-                            } catch (IOException e) {
-                                // Ignore
-                            }
-                        });
-                        org.jline.terminal.Terminal.SignalHandler prevQuitHandler = terminal.handle(org.jline.terminal.Terminal.Signal.QUIT, signal -> {
-                            try {
-                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VQUIT));
-                                channel.getInvertedIn().flush();
-                            } catch (IOException e) {
-                                // Ignore
-                            }
-                        });
-                        org.jline.terminal.Terminal.SignalHandler prevIntHandler = terminal.handle(org.jline.terminal.Terminal.Signal.INT, signal -> {
-                            try {
-                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VINTR));
-                                channel.getInvertedIn().flush();
-                            } catch (IOException e) {
-                                // Ignore
-                            }
-                        });
-                        org.jline.terminal.Terminal.SignalHandler prevStopHandler = terminal.handle(org.jline.terminal.Terminal.Signal.TSTP, signal -> {
-                            try {
-                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VDSUSP));
-                                channel.getInvertedIn().flush();
-                            } catch (IOException e) {
-                                // Ignore
-                            }
-                        });
+                        org.jline.terminal.Terminal.SignalHandler prevWinchHandler =
+                                terminal.handle(
+                                        org.jline.terminal.Terminal.Signal.WINCH,
+                                        signal -> {
+                                            try {
+                                                Size size = terminal.getSize();
+                                                channel.sendWindowChange(
+                                                        size.getColumns(), size.getRows());
+                                            } catch (IOException e) {
+                                                // Ignore
+                                            }
+                                        });
+                        org.jline.terminal.Terminal.SignalHandler prevQuitHandler =
+                                terminal.handle(
+                                        org.jline.terminal.Terminal.Signal.QUIT,
+                                        signal -> {
+                                            try {
+                                                channel.getInvertedIn()
+                                                        .write(
+                                                                attributes.getControlChar(
+                                                                        Attributes.ControlChar
+                                                                                .VQUIT));
+                                                channel.getInvertedIn().flush();
+                                            } catch (IOException e) {
+                                                // Ignore
+                                            }
+                                        });
+                        org.jline.terminal.Terminal.SignalHandler prevIntHandler =
+                                terminal.handle(
+                                        org.jline.terminal.Terminal.Signal.INT,
+                                        signal -> {
+                                            try {
+                                                channel.getInvertedIn()
+                                                        .write(
+                                                                attributes.getControlChar(
+                                                                        Attributes.ControlChar
+                                                                                .VINTR));
+                                                channel.getInvertedIn().flush();
+                                            } catch (IOException e) {
+                                                // Ignore
+                                            }
+                                        });
+                        org.jline.terminal.Terminal.SignalHandler prevStopHandler =
+                                terminal.handle(
+                                        org.jline.terminal.Terminal.Signal.TSTP,
+                                        signal -> {
+                                            try {
+                                                channel.getInvertedIn()
+                                                        .write(
+                                                                attributes.getControlChar(
+                                                                        Attributes.ControlChar
+                                                                                .VDSUSP));
+                                                channel.getInvertedIn().flush();
+                                            } catch (IOException e) {
+                                                // Ignore
+                                            }
+                                        });
                         try {
                             channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                         } finally {
-                            terminal.handle(org.jline.terminal.Terminal.Signal.WINCH, prevWinchHandler);
+                            terminal.handle(
+                                    org.jline.terminal.Terminal.Signal.WINCH, prevWinchHandler);
                             terminal.handle(org.jline.terminal.Terminal.Signal.INT, prevIntHandler);
-                            terminal.handle(org.jline.terminal.Terminal.Signal.TSTP, prevStopHandler);
-                            terminal.handle(org.jline.terminal.Terminal.Signal.QUIT, prevQuitHandler);
+                            terminal.handle(
+                                    org.jline.terminal.Terminal.Signal.TSTP, prevStopHandler);
+                            terminal.handle(
+                                    org.jline.terminal.Terminal.Signal.QUIT, prevQuitHandler);
                         }
                     } finally {
                         terminal.setAttributes(attributes);
@@ -320,7 +407,6 @@ public class SshAction implements Action {
         return attributes.getLocalFlag(flag) ? 1 : 0;
     }
 
-
     private int getTermWidth() {
         Terminal term = session.getTerminal();
         return term != null ? term.getWidth() : 80;
@@ -331,7 +417,9 @@ public class SshAction implements Action {
         return term != null ? term.getHeight() : 25;
     }
 
-    private static ClientSession connectWithRetries(SshClient client, String username, String host, int port, int maxAttempts) throws Exception {
+    private static ClientSession connectWithRetries(
+            SshClient client, String username, String host, int port, int maxAttempts)
+            throws Exception {
         ClientSession session = null;
         int retries = 0;
         do {
@@ -350,5 +438,4 @@ public class SshAction implements Action {
         } while (session == null);
         return session;
     }
-
 }

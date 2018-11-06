@@ -21,17 +21,12 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-
 import org.apache.karaf.diagnostic.core.common.TextDumpProvider;
 
-/**
- * Provider which dumps thread info to file named threads.txt.
- */
+/** Provider which dumps thread info to file named threads.txt. */
 public class ThreadDumpProvider extends TextDumpProvider {
 
-    /**
-     * Creates new dump entry which contains information about threads.
-     */
+    /** Creates new dump entry which contains information about threads. */
     public ThreadDumpProvider() {
         super("threads.txt");
     }
@@ -42,20 +37,31 @@ public class ThreadDumpProvider extends TextDumpProvider {
 
         outputStream.write("Number of threads: " + threadMXBean.getThreadCount() + "\n");
 
-        for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), Integer.MAX_VALUE)) {
+        for (ThreadInfo threadInfo :
+                threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), Integer.MAX_VALUE)) {
             outputStream.write(getDumpThreadString(threadInfo) + "\n\n");
         }
-
     }
 
     protected String getDumpThreadString(ThreadInfo threadInfo) {
-        StringBuilder sb = new StringBuilder("\"" + threadInfo.getThreadName() + "\"" + " Id=" + threadInfo.getThreadId() + " "
-                                             + threadInfo.getThreadState());
+        StringBuilder sb =
+                new StringBuilder(
+                        "\""
+                                + threadInfo.getThreadName()
+                                + "\""
+                                + " Id="
+                                + threadInfo.getThreadId()
+                                + " "
+                                + threadInfo.getThreadState());
         if (threadInfo.getLockName() != null) {
             sb.append(" on " + threadInfo.getLockName());
         }
         if (threadInfo.getLockOwnerName() != null) {
-            sb.append(" owned by \"" + threadInfo.getLockOwnerName() + "\" Id=" + threadInfo.getLockOwnerId());
+            sb.append(
+                    " owned by \""
+                            + threadInfo.getLockOwnerName()
+                            + "\" Id="
+                            + threadInfo.getLockOwnerId());
         }
         if (threadInfo.isSuspended()) {
             sb.append(" (suspended)");
@@ -73,19 +79,19 @@ public class ThreadDumpProvider extends TextDumpProvider {
             if (i == 0 && threadInfo.getLockInfo() != null) {
                 Thread.State ts = threadInfo.getThreadState();
                 switch (ts) {
-                case BLOCKED:
-                    sb.append("\t-  blocked on " + threadInfo.getLockInfo());
-                    sb.append('\n');
-                    break;
-                case WAITING:
-                    sb.append("\t-  waiting on " + threadInfo.getLockInfo());
-                    sb.append('\n');
-                    break;
-                case TIMED_WAITING:
-                    sb.append("\t-  waiting on " + threadInfo.getLockInfo());
-                    sb.append('\n');
-                    break;
-                default:
+                    case BLOCKED:
+                        sb.append("\t-  blocked on " + threadInfo.getLockInfo());
+                        sb.append('\n');
+                        break;
+                    case WAITING:
+                        sb.append("\t-  waiting on " + threadInfo.getLockInfo());
+                        sb.append('\n');
+                        break;
+                    case TIMED_WAITING:
+                        sb.append("\t-  waiting on " + threadInfo.getLockInfo());
+                        sb.append('\n');
+                        break;
+                    default:
                 }
             }
 
@@ -113,6 +119,4 @@ public class ThreadDumpProvider extends TextDumpProvider {
         sb.append('\n');
         return sb.toString();
     }
-
-
 }

@@ -17,9 +17,7 @@
 
 package org.apache.karaf.tools.utils;
 
-/**
- * General definition of an object that specifies a value for Join.
- */
+/** General definition of an object that specifies a value for Join. */
 public interface JoinableValue<T> {
     T getValue();
 }

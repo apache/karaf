@@ -15,6 +15,10 @@
  */
 package org.apache.karaf.jaas.modules.syncope;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.felix.utils.json.JSONParser;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -33,11 +37,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 public class SyncopeBackingEngine implements BackingEngine {
 
     private final Logger logger = LoggerFactory.getLogger(SyncopeBackingEngine.class);
@@ -47,7 +46,8 @@ public class SyncopeBackingEngine implements BackingEngine {
 
     private DefaultHttpClient client;
 
-    public SyncopeBackingEngine(String address, String version, String adminUser, String adminPassword) {
+    public SyncopeBackingEngine(
+            String address, String version, String adminUser, String adminPassword) {
         this.address = address;
         version2 = version != null && (version.equals("2.x") || version.equals("2"));
 
@@ -58,7 +58,8 @@ public class SyncopeBackingEngine implements BackingEngine {
 
     public void addUser(String username, String password) {
         if (username.startsWith(GROUP_PREFIX)) {
-            throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
+            throw new IllegalArgumentException(
+                    "Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
         }
         if (version2) {
             addUserSyncope2(username, password);
@@ -70,16 +71,27 @@ public class SyncopeBackingEngine implements BackingEngine {
     private void addUserSyncope1(String username, String password) {
         HttpPost request = new HttpPost(address + "/users");
         request.setHeader("Content-Type", "application/xml");
-        String userTO = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
-                "<user>" +
-                "<attributes>" +
-                "<attribute><readonly>false</readonly><schema>fullname</schema><value>" + username + "</value></attribute>" +
-                "<attribute><readonly>false</readonly><schema>surname</schema><value>" + username + "</value></attribute>" +
-                "<attribute><readonly>false</readonly><schema>userId</schema><value>" + username + "@karaf.apache.org</value></attribute>" +
-                "</attributes>" +
-                "<password>" + password + "</password>" +
-                "<username>" + username + "</username>" +
-                "</user>";
+        String userTO =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+                        + "<user>"
+                        + "<attributes>"
+                        + "<attribute><readonly>false</readonly><schema>fullname</schema><value>"
+                        + username
+                        + "</value></attribute>"
+                        + "<attribute><readonly>false</readonly><schema>surname</schema><value>"
+                        + username
+                        + "</value></attribute>"
+                        + "<attribute><readonly>false</readonly><schema>userId</schema><value>"
+                        + username
+                        + "@karaf.apache.org</value></attribute>"
+                        + "</attributes>"
+                        + "<password>"
+                        + password
+                        + "</password>"
+                        + "<username>"
+                        + username
+                        + "</username>"
+                        + "</user>";
         try {
             StringEntity entity = new StringEntity(userTO);
             request.setEntity(entity);
@@ -93,17 +105,28 @@ public class SyncopeBackingEngine implements BackingEngine {
     private void addUserSyncope2(String username, String password) {
         HttpPost request = new HttpPost(address + "/users");
         request.setHeader("Content-Type", "application/json");
-        String userTO = "{" +
-                  "\"@class\": \"org.apache.syncope.common.lib.to.UserTO\"," +
-                  "\"type\": \"USER\"," +
-                  "\"realm\": \"/\"," +
-                  "\"username\": \"" + username + "\"," +
-                  "\"password\": \"" + password + "\"," +
-                  "\"plainAttrs\": [" +
-                    "{ \"schema\": \"surname\", \"values\": [\"" + username + "\"] }," +
-                    "{ \"schema\": \"fullname\", \"values\": [\"" + username + "\"] }," +
-                    "{ \"schema\": \"userId\", \"value\": [\"" + username + "@karaf.apache.org\"] }" +
-                "}";
+        String userTO =
+                "{"
+                        + "\"@class\": \"org.apache.syncope.common.lib.to.UserTO\","
+                        + "\"type\": \"USER\","
+                        + "\"realm\": \"/\","
+                        + "\"username\": \""
+                        + username
+                        + "\","
+                        + "\"password\": \""
+                        + password
+                        + "\","
+                        + "\"plainAttrs\": ["
+                        + "{ \"schema\": \"surname\", \"values\": [\""
+                        + username
+                        + "\"] },"
+                        + "{ \"schema\": \"fullname\", \"values\": [\""
+                        + username
+                        + "\"] },"
+                        + "{ \"schema\": \"userId\", \"value\": [\""
+                        + username
+                        + "@karaf.apache.org\"] }"
+                        + "}";
         try {
             StringEntity entity = new StringEntity(userTO);
             request.setEntity(entity);
@@ -116,7 +139,8 @@ public class SyncopeBackingEngine implements BackingEngine {
 
     public void deleteUser(String username) {
         if (username.startsWith(GROUP_PREFIX)) {
-            throw new IllegalArgumentException("Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
+            throw new IllegalArgumentException(
+                    "Group prefix " + GROUP_PREFIX + " not permitted with Syncope backend");
         }
         HttpDelete request = new HttpDelete(address + "/users/" + username);
         if (version2) {
@@ -176,7 +200,8 @@ public class SyncopeBackingEngine implements BackingEngine {
             HttpResponse httpResponse = client.execute(request);
             String response = EntityUtils.toString(httpResponse.getEntity());
             JSONParser parser = new JSONParser(response);
-            List<Map<String, Object>> results = (List<Map<String, Object>>) parser.getParsed().get("result");
+            List<Map<String, Object>> results =
+                    (List<Map<String, Object>>) parser.getParsed().get("result");
             for (Map<String, Object> result : results) {
                 users.add(new UserPrincipal((String) result.get("username")));
             }
@@ -238,7 +263,7 @@ public class SyncopeBackingEngine implements BackingEngine {
         HttpGet request = new HttpGet(address + "/users?username=" + principal.getName());
         request.setHeader("Content-Type", "application/xml");
         try {
-            HttpResponse response  = client.execute(request);
+            HttpResponse response = client.execute(request);
             String responseTO = EntityUtils.toString(response.getEntity());
             if (responseTO != null && !responseTO.isEmpty()) {
                 int index = responseTO.indexOf("<roleName>");
@@ -314,7 +339,6 @@ public class SyncopeBackingEngine implements BackingEngine {
     }
 
     public void createGroup(String group) {
-            throw new RuntimeException("Group management is not supported by Syncope backend");
+        throw new RuntimeException("Group management is not supported by Syncope backend");
     }
-
 }

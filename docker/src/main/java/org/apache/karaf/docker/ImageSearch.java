@@ -19,9 +19,7 @@ package org.apache.karaf.docker;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Represents a Docker image search result.
- */
+/** Represents a Docker image search result. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ImageSearch {
 
@@ -59,5 +57,4 @@ public class ImageSearch {
     public String getDescription() {
         return description;
     }
-
 }

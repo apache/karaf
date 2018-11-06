@@ -20,13 +20,11 @@ package org.apache.karaf.shell.console;
 
 import org.apache.karaf.shell.commands.Command;
 
-/**
- * Exit from the current sub-shell and get back to the previous one.
- */
+/** Exit from the current sub-shell and get back to the previous one. */
 @Command(scope = "*", name = "exit", description = "Exit from the current shell")
 @Deprecated
 public class ExitAction extends AbstractAction {
-    
+
     public Object doExecute() throws Exception {
         // get the current sub-shell
         String currentSubShell = (String) session.get("SUBSHELL");
@@ -43,5 +41,4 @@ public class ExitAction extends AbstractAction {
         }
         return null;
     }
-    
 }

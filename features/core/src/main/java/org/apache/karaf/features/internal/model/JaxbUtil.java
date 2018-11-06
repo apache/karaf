@@ -24,7 +24,6 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -35,7 +34,6 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-
 import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.util.XmlUtils;
 import org.slf4j.Logger;
@@ -63,8 +61,7 @@ public final class JaxbUtil {
         }
     }
 
-    private JaxbUtil() {
-    }
+    private JaxbUtil() {}
 
     public static void marshal(Features features, OutputStream out) throws JAXBException {
         Marshaller marshaller = FEATURES_CONTEXT.createMarshaller();
@@ -82,11 +79,10 @@ public final class JaxbUtil {
         marshaller.marshal(features, out);
     }
 
-
     /**
      * Read in a Features from the input stream.
      *
-     * @param uri      uri to read
+     * @param uri uri to read
      * @param validate whether to validate the input.
      * @return a Features read from the input stream
      */
@@ -117,7 +113,9 @@ public final class JaxbUtil {
 
             String nsuri = doc.getDocumentElement().getNamespaceURI();
             if (nsuri == null) {
-                LOGGER.warn("Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed", uri);
+                LOGGER.warn(
+                        "Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed",
+                        uri);
             } else {
                 Schema schema = getSchema(nsuri);
                 try {
@@ -145,29 +143,29 @@ public final class JaxbUtil {
         if (schema == null) {
             String schemaLocation;
             switch (namespace) {
-            case FeaturesNamespaces.URI_1_0_0:
-                schemaLocation = "/org/apache/karaf/features/karaf-features-1.0.0.xsd";
-                break;
-            case FeaturesNamespaces.URI_1_1_0:
-                schemaLocation = "/org/apache/karaf/features/karaf-features-1.1.0.xsd";
-                break;
-            case FeaturesNamespaces.URI_1_2_0:
-                schemaLocation = "/org/apache/karaf/features/karaf-features-1.2.0.xsd";
-                break;
-            case FeaturesNamespaces.URI_1_2_1:
-                schemaLocation = "/org/apache/karaf/features/karaf-features-1.2.1.xsd";
-                break;
-            case FeaturesNamespaces.URI_1_3_0:
-                schemaLocation = "/org/apache/karaf/features/karaf-features-1.3.0.xsd";
-                break;
-            case FeaturesNamespaces.URI_1_4_0:
-                schemaLocation = "/org/apache/karaf/features/karaf-features-1.4.0.xsd";
-                break;
-            case FeaturesNamespaces.URI_1_5_0:
-                schemaLocation = "/org/apache/karaf/features/karaf-features-1.5.0.xsd";
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported namespace: " + namespace);
+                case FeaturesNamespaces.URI_1_0_0:
+                    schemaLocation = "/org/apache/karaf/features/karaf-features-1.0.0.xsd";
+                    break;
+                case FeaturesNamespaces.URI_1_1_0:
+                    schemaLocation = "/org/apache/karaf/features/karaf-features-1.1.0.xsd";
+                    break;
+                case FeaturesNamespaces.URI_1_2_0:
+                    schemaLocation = "/org/apache/karaf/features/karaf-features-1.2.0.xsd";
+                    break;
+                case FeaturesNamespaces.URI_1_2_1:
+                    schemaLocation = "/org/apache/karaf/features/karaf-features-1.2.1.xsd";
+                    break;
+                case FeaturesNamespaces.URI_1_3_0:
+                    schemaLocation = "/org/apache/karaf/features/karaf-features-1.3.0.xsd";
+                    break;
+                case FeaturesNamespaces.URI_1_4_0:
+                    schemaLocation = "/org/apache/karaf/features/karaf-features-1.4.0.xsd";
+                    break;
+                case FeaturesNamespaces.URI_1_5_0:
+                    schemaLocation = "/org/apache/karaf/features/karaf-features-1.5.0.xsd";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported namespace: " + namespace);
             }
 
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -181,7 +179,6 @@ public final class JaxbUtil {
         }
         return schema;
     }
-
 
     private static void fixDom(Document doc, Node node) {
         if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -198,7 +195,8 @@ public final class JaxbUtil {
     private static Features unmarshalNoValidate(String uri, InputStream stream) {
         try {
             Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
-            NoSourceAndNamespaceFilter xmlFilter = new NoSourceAndNamespaceFilter(XmlUtils.xmlReader());
+            NoSourceAndNamespaceFilter xmlFilter =
+                    new NoSourceAndNamespaceFilter(XmlUtils.xmlReader());
             xmlFilter.setContentHandler(unmarshaller.getUnmarshallerHandler());
 
             InputSource is = new InputSource(uri);
@@ -218,12 +216,12 @@ public final class JaxbUtil {
     }
 
     /**
-     * Provides an empty inputsource for the entity resolver.
-     * Converts all elements to the features namespace to make old feature files
-     * compatible to the new format
+     * Provides an empty inputsource for the entity resolver. Converts all elements to the features
+     * namespace to make old feature files compatible to the new format
      */
     public static class NoSourceAndNamespaceFilter extends XMLFilterImpl {
-        private static final InputSource EMPTY_INPUT_SOURCE = new InputSource(new ByteArrayInputStream(new byte[0]));
+        private static final InputSource EMPTY_INPUT_SOURCE =
+                new InputSource(new ByteArrayInputStream(new byte[0]));
 
         private String namespace;
 
@@ -232,12 +230,14 @@ public final class JaxbUtil {
         }
 
         @Override
-        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+        public InputSource resolveEntity(String publicId, String systemId)
+                throws SAXException, IOException {
             return EMPTY_INPUT_SOURCE;
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+        public void startElement(String uri, String localName, String qName, Attributes atts)
+                throws SAXException {
             if ("features".equals(localName)) {
                 namespace = uri;
             }
@@ -253,5 +253,4 @@ public final class JaxbUtil {
             return namespace;
         }
     }
-
 }

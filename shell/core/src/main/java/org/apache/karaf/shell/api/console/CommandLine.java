@@ -19,10 +19,9 @@
 package org.apache.karaf.shell.api.console;
 
 /**
- * A <code>CommandLine</code> object will be created and
- * given the {@link org.apache.karaf.shell.api.console.Completer}s to ease
- * their work.  Arguments are separated and the cursor position within the
- * current argument is given.
+ * A <code>CommandLine</code> object will be created and given the {@link
+ * org.apache.karaf.shell.api.console.Completer}s to ease their work. Arguments are separated and
+ * the cursor position within the current argument is given.
  */
 public interface CommandLine {
 
@@ -48,9 +47,8 @@ public interface CommandLine {
     int getArgumentPosition();
 
     /**
-     * List of arguments on the current command.
-     * If the command line contains multiple commands, only the command corresponding
-     * to the cursor position is available.
+     * List of arguments on the current command. If the command line contains multiple commands,
+     * only the command corresponding to the cursor position is available.
      *
      * @return array of arguments
      */
@@ -69,5 +67,4 @@ public interface CommandLine {
      * @return the buffer
      */
     String getBuffer();
-
 }

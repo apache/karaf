@@ -30,7 +30,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
-
 import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
@@ -38,24 +37,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Representation of a Karaf Kar archive
- * 
- * A Kar archive is a jar file with a special structure that can be used
- * to deploy feature repositories, maven repo contents and resources for the
- * karaf installation.
- * 
- * meta-inf/Manifest: 
- *   Karaf-Feature-Start: (true|false) Controls if the features in the feature repos should be started on deploy
- *   Karaf-Feature-Repos: (uri)* If present then only the given feature repo urls are added to karaf if it is not
- *      present then the karaf file is scanned for repo files
- *      
- * repository/
- *   Everything below this directory is treated as a maven repository. On deploy the contents
- *   will be copied to a directory below data. This directory will then be added to the 
- *   maven repos of pax url maven
- *   
- * resource/
- *   Everything below this directory will be copied to the karaf base dir on deploy
- * 
+ *
+ * <p>A Kar archive is a jar file with a special structure that can be used to deploy feature
+ * repositories, maven repo contents and resources for the karaf installation.
+ *
+ * <p>meta-inf/Manifest: Karaf-Feature-Start: (true|false) Controls if the features in the feature
+ * repos should be started on deploy Karaf-Feature-Repos: (uri)* If present then only the given
+ * feature repo urls are added to karaf if it is not present then the karaf file is scanned for repo
+ * files
+ *
+ * <p>repository/ Everything below this directory is treated as a maven repository. On deploy the
+ * contents will be copied to a directory below data. This directory will then be added to the maven
+ * repos of pax url maven
+ *
+ * <p>resource/ Everything below this directory will be copied to the karaf base dir on deploy
  */
 public class Kar {
 
@@ -71,8 +66,8 @@ public class Kar {
     }
 
     /**
-     * Extract a kar from a given URI into a repository dir and resource dir
-     * and populate shouldInstallFeatures and featureRepos
+     * Extract a kar from a given URI into a repository dir and resource dir and populate
+     * shouldInstallFeatures and featureRepos
      *
      * @param repoDir directory to write the repository contents of the kar to
      * @param resourceDir directory to write the resource contents of the kar to
@@ -99,13 +94,13 @@ public class Kar {
             Manifest manifest = zipIs.getManifest();
             if (manifest != null) {
                 Attributes attr = manifest.getMainAttributes();
-                String featureStartSt = (String)attr
-                    .get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_START));
+                String featureStartSt =
+                        (String) attr.get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_START));
                 if ("false".equals(featureStartSt)) {
                     shouldInstallFeatures = false;
                 }
-                String featureReposAttr = (String)attr
-                    .get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_REPOS));
+                String featureReposAttr =
+                        (String) attr.get(new Attributes.Name(MANIFEST_ATTR_KARAF_FEATURE_REPOS));
                 if (featureReposAttr != null) {
                     featureRepos.add(new URI(featureReposAttr));
                     scanForRepos = false;
@@ -121,7 +116,8 @@ public class Kar {
                     if (scanForRepos && featureDetector.isFeaturesRepository(destFile)) {
                         Map map = new HashMap<>();
                         String uri = Parser.pathToMaven(path, map);
-                        if (map.get("classifier") != null && ((String) map.get("classifier")).equalsIgnoreCase("features"))
+                        if (map.get("classifier") != null
+                                && ((String) map.get("classifier")).equalsIgnoreCase("features"))
                             featureRepos.add(URI.create(uri));
                         else featureRepos.add(destFile.toURI());
                     }
@@ -135,7 +131,14 @@ public class Kar {
                 entry = zipIs.getNextEntry();
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error extracting kar file " + karUri + " into dir " + repoDir + ": " + e.getMessage(), e);
+            throw new RuntimeException(
+                    "Error extracting kar file "
+                            + karUri
+                            + " into dir "
+                            + repoDir
+                            + ": "
+                            + e.getMessage(),
+                    e);
         } finally {
             closeStream(zipIs);
             closeStream(is);
@@ -144,7 +147,7 @@ public class Kar {
 
     /**
      * Extract an entry from a KAR file
-     * 
+     *
      * @param is
      * @param zipEntry
      * @param dest
@@ -192,7 +195,7 @@ public class Kar {
             throw new RuntimeException("Invalid kar URI " + karUri, e);
         }
     }
-    
+
     public URI getKarUri() {
         return karUri;
     }
@@ -203,6 +206,5 @@ public class Kar {
 
     public List<URI> getFeatureRepos() {
         return featureRepos;
-    } 
-
+    }
 }

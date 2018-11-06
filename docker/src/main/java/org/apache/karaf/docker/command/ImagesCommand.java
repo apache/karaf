@@ -35,15 +35,16 @@ public class ImagesCommand extends DockerCommandSupport {
         table.column("Size");
         table.column("Virtual Size");
         for (Image image : getDockerService().images(url)) {
-            table.addRow().addContent(image.getId(),
-                    image.getRepoTags(),
-                    image.getCreated(),
-                    image.getLabels(),
-                    image.getSize(),
-                    image.getVirtualSize());
+            table.addRow()
+                    .addContent(
+                            image.getId(),
+                            image.getRepoTags(),
+                            image.getCreated(),
+                            image.getLabels(),
+                            image.getSize(),
+                            image.getVirtualSize());
         }
         table.print(System.out);
         return null;
     }
-
 }

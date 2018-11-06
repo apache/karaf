@@ -18,12 +18,12 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.karaf.features.FeaturePattern;
 import org.junit.Test;
 import org.osgi.framework.Version;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class FeaturePatternTest {
 
@@ -42,7 +42,9 @@ public class FeaturePatternTest {
         assertTrue(new FeaturePattern("space/[3,4]").matches("space", "3.1"));
         assertFalse(new FeaturePattern("space/[3,4]").matches("x-space", "3.1"));
         assertTrue(new FeaturePattern("space/[3,4]").matches("space", "4.0.0"));
-        assertFalse(new FeaturePattern("space/[3,4]").matches("space", "4.0.0.0")); // last ".0" is qualifier
+        assertFalse(
+                new FeaturePattern("space/[3,4]")
+                        .matches("space", "4.0.0.0")); // last ".0" is qualifier
         assertFalse(new FeaturePattern("space/[3,4]").matches("space", "4.0.1"));
         assertTrue(new FeaturePattern("special;range=1").matches("special", "1"));
         assertTrue(new FeaturePattern("special;range=1").matches("special", "1.0"));
@@ -66,8 +68,11 @@ public class FeaturePatternTest {
         assertFalse(new FeaturePattern("*b/[3,4)").matches("cb", "4.0.0"));
         assertFalse(new FeaturePattern("*b/[3,4)").matches("cb", null));
         assertFalse(new FeaturePattern("*b/[3,4)").matches("cb", "0"));
-        assertFalse(new FeaturePattern("*b/[3,4)").matches("cb", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertFalse(
+                new FeaturePattern("*b/[3,4)")
+                        .matches(
+                                "cb",
+                                org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
         assertFalse(new FeaturePattern("*b/[3,4)").matches("cb", Version.emptyVersion.toString()));
     }
-
 }

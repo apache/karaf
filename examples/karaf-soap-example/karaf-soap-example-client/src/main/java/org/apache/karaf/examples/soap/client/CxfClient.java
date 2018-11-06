@@ -16,11 +16,10 @@
  */
 package org.apache.karaf.examples.soap.client;
 
+import java.util.Collection;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.karaf.examples.soap.api.Booking;
 import org.apache.karaf.examples.soap.provider.BookingServiceSoap;
-
-import java.util.Collection;
 
 public class CxfClient {
 
@@ -40,5 +39,4 @@ public class CxfClient {
     public Collection<Booking> list() {
         return bookingService.list();
     }
-
 }

@@ -17,8 +17,7 @@ package org.apache.karaf.scheduler;
 
 public class SchedulerError extends Exception {
 
-    public SchedulerError() {
-    }
+    public SchedulerError() {}
 
     public SchedulerError(String msg) {
         super(msg);
@@ -31,5 +30,4 @@ public class SchedulerError extends Exception {
     public SchedulerError(String msg, Throwable cause) {
         super(msg, cause);
     }
-
 }

@@ -19,7 +19,6 @@ package org.apache.karaf.obr.core.internal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -31,7 +30,6 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resolver;
@@ -42,9 +40,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 
-/**
- * Implementation of the OBR MBean.
- */
+/** Implementation of the OBR MBean. */
 public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
 
     private static final char VERSION_DELIM = ',';
@@ -52,7 +48,8 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
     private BundleContext bundleContext;
     private RepositoryAdmin repositoryAdmin;
 
-    public ObrMBeanImpl(BundleContext bundleContext, RepositoryAdmin repositoryAdmin) throws NotCompliantMBeanException {
+    public ObrMBeanImpl(BundleContext bundleContext, RepositoryAdmin repositoryAdmin)
+            throws NotCompliantMBeanException {
         super(ObrMBean.class);
         this.bundleContext = bundleContext;
         this.repositoryAdmin = repositoryAdmin;
@@ -66,20 +63,36 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
 
     public TabularData getBundles() throws MBeanException {
         try {
-            CompositeType bundleType = new CompositeType("OBR Resource", "Bundle available in the OBR",
-                    new String[]{"presentationname", "symbolicname", "version"},
-                    new String[]{"Presentation Name", "Symbolic Name", "Version"},
-                    new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("OBR Resources", "Table of all resources/bundles available in the OBR",
-                    bundleType, new String[]{"symbolicname", "version"});
+            CompositeType bundleType =
+                    new CompositeType(
+                            "OBR Resource",
+                            "Bundle available in the OBR",
+                            new String[] {"presentationname", "symbolicname", "version"},
+                            new String[] {"Presentation Name", "Symbolic Name", "Version"},
+                            new OpenType[] {
+                                SimpleType.STRING, SimpleType.STRING, SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType(
+                            "OBR Resources",
+                            "Table of all resources/bundles available in the OBR",
+                            bundleType,
+                            new String[] {"symbolicname", "version"});
             TabularData table = new TabularDataSupport(tableType);
 
-            Resource[] resources = repositoryAdmin.discoverResources("(|(presentationname=*)(symbolicname=*))");
+            Resource[] resources =
+                    repositoryAdmin.discoverResources("(|(presentationname=*)(symbolicname=*))");
             for (Resource resource : resources) {
                 try {
-                    CompositeData data = new CompositeDataSupport(bundleType,
-                            new String[]{"presentationname", "symbolicname", "version"},
-                            new Object[]{resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString()});
+                    CompositeData data =
+                            new CompositeDataSupport(
+                                    bundleType,
+                                    new String[] {"presentationname", "symbolicname", "version"},
+                                    new Object[] {
+                                        resource.getPresentationName(),
+                                        resource.getSymbolicName(),
+                                        resource.getVersion().toString()
+                                    });
                     table.put(data);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -120,17 +133,19 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         }
     }
 
-    public void deployBundle(String bundle, boolean start, boolean deployOptional) throws MBeanException {
+    public void deployBundle(String bundle, boolean start, boolean deployOptional)
+            throws MBeanException {
         try {
             Resolver resolver = repositoryAdmin.resolver();
             String[] target = getTarget(bundle);
-            Resource resource = selectNewestVersion(searchRepository(repositoryAdmin, target[0], target[1]));
+            Resource resource =
+                    selectNewestVersion(searchRepository(repositoryAdmin, target[0], target[1]));
             if (resource == null) {
                 throw new IllegalArgumentException("Unknown bundle " + target[0]);
             }
             resolver.add(resource);
-            if ((resolver.getAddedResources() != null) &&
-                    (resolver.getAddedResources().length > 0)) {
+            if ((resolver.getAddedResources() != null)
+                    && (resolver.getAddedResources().length > 0)) {
                 if (resolver.resolve(deployOptional ? 0 : Resolver.NO_OPTIONAL_RESOURCES)) {
                     try {
                         resolver.deploy(start ? Resolver.START : 0);
@@ -144,7 +159,9 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         }
     }
 
-    private Resource[] searchRepository(RepositoryAdmin admin, String targetId, String targetVersion) throws InvalidSyntaxException {
+    private Resource[] searchRepository(
+            RepositoryAdmin admin, String targetId, String targetVersion)
+            throws InvalidSyntaxException {
         // Try to see if the targetId is a bundle ID.
         try {
             Bundle bundle = bundleContext.getBundle(Long.parseLong(targetId));
@@ -191,11 +208,10 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         String[] target;
         int idx = bundle.indexOf(VERSION_DELIM);
         if (idx > 0) {
-            target = new String[]{bundle.substring(0, idx), bundle.substring(idx + 1)};
+            target = new String[] {bundle.substring(0, idx), bundle.substring(idx + 1)};
         } else {
-            target = new String[]{bundle, null};
+            target = new String[] {bundle, null};
         }
         return target;
     }
-
 }

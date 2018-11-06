@@ -19,9 +19,7 @@ package org.apache.karaf.jdbc;
 import java.util.List;
 import java.util.Map;
 
-/**
- * JDBC Service.
- */
+/** JDBC Service. */
 public interface JdbcService {
 
     /**
@@ -37,17 +35,26 @@ public interface JdbcService {
      * @param databaseType The database type (ConnectionPoolDataSource, XADataSource or DataSource).
      * @throws Exception If the service fails.
      */
-    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws Exception;
+    void create(
+            String name,
+            String driverName,
+            String driverClass,
+            String databaseName,
+            String url,
+            String user,
+            String password,
+            String databaseType)
+            throws Exception;
 
     /**
-     * Delete a JDBC datasource identified by a name. Works only
-     * for datasources that have a corresponding configuration
+     * Delete a JDBC datasource identified by a name. Works only for datasources that have a
+     * corresponding configuration
      *
      * @param name The datasource name to delete.
      * @throws Exception If the service fails.
      */
     void delete(String name) throws Exception;
-    
+
     /**
      * List the JDBC DataSourceFactories available.
      *
@@ -100,5 +107,4 @@ public interface JdbcService {
      * @throws Exception If the service fails.
      */
     Map<String, String> info(String datasource) throws Exception;
-
 }

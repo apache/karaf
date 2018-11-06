@@ -22,7 +22,6 @@ import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.karaf.main.util.Utils;
 import org.junit.After;
 import org.junit.Assert;
@@ -41,7 +40,8 @@ public class MainLockingTest {
 
     @Before
     public void setUp() throws IOException {
-        File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
+        File basedir =
+                new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         home = new File(basedir, "test-karaf-home");
         data = new File(home, "data");
 
@@ -49,7 +49,8 @@ public class MainLockingTest {
 
         System.setProperty("karaf.home", home.toString());
         System.setProperty("karaf.data", data.toString());
-        System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
+        System.setProperty(
+                "karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
 
         System.setProperty("karaf.lock", "true");
         System.setProperty("karaf.lock.delay", "1000");
@@ -68,42 +69,51 @@ public class MainLockingTest {
         Main main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
-        String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
-        Bundle bundle = framework.getBundleContext().installBundle("foo",
-                TinyBundles.bundle()
-                    .set( Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName() )
-                    .add( activatorName, getClass().getClassLoader().getResourceAsStream( activatorName ) )
-                    .build( withBnd() )
-        );
-        
-        bundle.start();       
-        
+        String activatorName =
+                TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
+        Bundle bundle =
+                framework
+                        .getBundleContext()
+                        .installBundle(
+                                "foo",
+                                TinyBundles.bundle()
+                                        .set(
+                                                Constants.BUNDLE_ACTIVATOR,
+                                                TimeoutShutdownActivator.class.getName())
+                                        .add(
+                                                activatorName,
+                                                getClass()
+                                                        .getClassLoader()
+                                                        .getResourceAsStream(activatorName))
+                                        .build(withBnd()));
+
+        bundle.start();
+
         FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
-        
+
         MockLock lock = (MockLock) main.getLock();
 
-        Assert.assertEquals(100, sl.getStartLevel());       
+        Assert.assertEquals(100, sl.getStartLevel());
 
         // simulate losing a lock
         lock.setIsAlive(false);
         lock.setLock(false);
-        
+
         // lets wait until the start level change is complete
         lock.waitForLock();
         Assert.assertEquals(1, sl.getStartLevel());
 
         Thread.sleep(1000);
-        
+
         // get lock back
         lock.setIsAlive(true);
         lock.setLock(true);
 
-        
         Thread.sleep(1000);
-        
+
         // exit framework + lock loop
         main.destroy();
-    }    
+    }
 
     @Test
     public void testMasterWritesPid() throws Exception {

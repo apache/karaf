@@ -17,7 +17,6 @@
 package org.apache.karaf.log.core.internal.osgi;
 
 import java.util.Hashtable;
-
 import org.apache.karaf.log.core.LogEventFormatter;
 import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.log.core.internal.LogEventFormatterImpl;
@@ -35,8 +34,7 @@ import org.osgi.service.cm.ManagedService;
 
 @Services(
         requires = @RequireService(ConfigurationAdmin.class),
-        provides = @ProvideService(LogService.class)
-)
+        provides = @ProvideService(LogService.class))
 @Managed("org.apache.karaf.log")
 public class Activator extends BaseActivator implements ManagedService {
 
@@ -47,7 +45,10 @@ public class Activator extends BaseActivator implements ManagedService {
         }
 
         int size = getInt("size", 500);
-        String pattern = getString("pattern", "%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n");
+        String pattern =
+                getString(
+                        "pattern",
+                        "%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n");
         String errorColor = getString("errorColor", "31");
         String warnColor = getString("warnColor", "35");
         String infoColor = getString("infoColor", "36");
@@ -72,5 +73,4 @@ public class Activator extends BaseActivator implements ManagedService {
         LogMBeanImpl securityMBean = new LogMBeanImpl(logService);
         registerMBean(securityMBean, "type=log");
     }
-
 }

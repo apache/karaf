@@ -18,10 +18,10 @@ package javax.xml.parsers;
 
 import javax.xml.validation.Schema;
 
-
 public abstract class DocumentBuilderFactory {
 
-    private static final String DEFAULT_IMPL = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
+    private static final String DEFAULT_IMPL =
+            "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
 
     private boolean validating = false;
     private boolean namespaceAware = false;
@@ -30,19 +30,21 @@ public abstract class DocumentBuilderFactory {
     private boolean ignoreComments = false;
     private boolean coalescing = false;
 
-    protected DocumentBuilderFactory() {
-    }
+    protected DocumentBuilderFactory() {}
 
     public static DocumentBuilderFactory newDefaultInstance() {
-        return $FactoryFinder.newInstance(DocumentBuilderFactory.class, DEFAULT_IMPL, null, false, true);
+        return $FactoryFinder.newInstance(
+                DocumentBuilderFactory.class, DEFAULT_IMPL, null, false, true);
     }
 
     public static DocumentBuilderFactory newInstance() {
         return $FactoryFinder.find(DocumentBuilderFactory.class, DEFAULT_IMPL);
     }
 
-    public static DocumentBuilderFactory newInstance(String factoryClassName, ClassLoader classLoader) {
-        return $FactoryFinder.newInstance(DocumentBuilderFactory.class, factoryClassName, classLoader, false);
+    public static DocumentBuilderFactory newInstance(
+            String factoryClassName, ClassLoader classLoader) {
+        return $FactoryFinder.newInstance(
+                DocumentBuilderFactory.class, factoryClassName, classLoader, false);
     }
 
     public abstract DocumentBuilder newDocumentBuilder() throws ParserConfigurationException;
@@ -103,16 +105,13 @@ public abstract class DocumentBuilderFactory {
 
     public abstract boolean getFeature(String name) throws ParserConfigurationException;
 
-
     public Schema getSchema() {
         throw new UnsupportedOperationException(
                 "This parser does not support specification \""
                         + this.getClass().getPackage().getSpecificationTitle()
                         + "\" version \""
                         + this.getClass().getPackage().getSpecificationVersion()
-                        + "\""
-        );
-
+                        + "\"");
     }
 
     public void setSchema(Schema schema) {
@@ -121,8 +120,7 @@ public abstract class DocumentBuilderFactory {
                         + this.getClass().getPackage().getSpecificationTitle()
                         + "\" version \""
                         + this.getClass().getPackage().getSpecificationVersion()
-                        + "\""
-        );
+                        + "\"");
     }
 
     public boolean isXIncludeAware() {
@@ -131,15 +129,16 @@ public abstract class DocumentBuilderFactory {
                         + this.getClass().getPackage().getSpecificationTitle()
                         + "\" version \""
                         + this.getClass().getPackage().getSpecificationVersion()
-                        + "\""
-        );
+                        + "\"");
     }
 
     public void setXIncludeAware(final boolean state) {
         if (state) {
-            throw new UnsupportedOperationException(" setXIncludeAware " +
-                    "is not supported on this JAXP" +
-                    " implementation or earlier: " + this.getClass());
+            throw new UnsupportedOperationException(
+                    " setXIncludeAware "
+                            + "is not supported on this JAXP"
+                            + " implementation or earlier: "
+                            + this.getClass());
         }
     }
 }

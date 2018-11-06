@@ -27,43 +27,42 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class KnownHostsManagerTest {
 
-	private static String ALGORITHM;
-	private static int KEY_SIZE;
+    private static String ALGORITHM;
+    private static int KEY_SIZE;
 
-	@BeforeClass
-	public static void init() throws IOException {
-		// test key algorithm and size as configured...
-		ALGORITHM = "RSA";
-		KEY_SIZE = 4096;
-	}
+    @BeforeClass
+    public static void init() throws IOException {
+        // test key algorithm and size as configured...
+        ALGORITHM = "RSA";
+        KEY_SIZE = 4096;
+    }
 
-	private PublicKey createPubKey() throws NoSuchAlgorithmException {
-		KeyPairGenerator gen = KeyPairGenerator.getInstance(ALGORITHM);
-		gen.initialize(KEY_SIZE);
-		KeyPair keyPair = gen.generateKeyPair();
-		return keyPair.getPublic();
-	}
-	
-	@Test
-	public void testStoreAndRetrieve() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-		SocketAddress address = new InetSocketAddress("localhost", 1001);
-		File hostsFile = File.createTempFile("hosts", "");
-		KnownHostsManager manager = new KnownHostsManager(hostsFile);
+    private PublicKey createPubKey() throws NoSuchAlgorithmException {
+        KeyPairGenerator gen = KeyPairGenerator.getInstance(ALGORITHM);
+        gen.initialize(KEY_SIZE);
+        KeyPair keyPair = gen.generateKeyPair();
+        return keyPair.getPublic();
+    }
 
-		PublicKey foundKey1 = manager.getKnownKey(address, ALGORITHM);
-		Assert.assertNull(foundKey1);
-		
-		PublicKey serverKey = createPubKey();
-		manager.storeKeyForHost(address, serverKey);
-		PublicKey foundKey2 = manager.getKnownKey(address, ALGORITHM);
-		Assert.assertEquals(serverKey, foundKey2);
-	}
-	
+    @Test
+    public void testStoreAndRetrieve()
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        SocketAddress address = new InetSocketAddress("localhost", 1001);
+        File hostsFile = File.createTempFile("hosts", "");
+        KnownHostsManager manager = new KnownHostsManager(hostsFile);
+
+        PublicKey foundKey1 = manager.getKnownKey(address, ALGORITHM);
+        Assert.assertNull(foundKey1);
+
+        PublicKey serverKey = createPubKey();
+        manager.storeKeyForHost(address, serverKey);
+        PublicKey foundKey2 = manager.getKnownKey(address, ALGORITHM);
+        Assert.assertEquals(serverKey, foundKey2);
+    }
 }

@@ -27,19 +27,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.security.auth.Subject;
-
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * <p>Class to optimize ConfigAdmin access with the lifecycle of single
- * {@link org.apache.karaf.management.JMXSecurityMBean#canInvoke(Map) bulk query invocation}. This prevents countless
- * {@link org.osgi.service.cm.ConfigurationAdmin#listConfigurations(String) listings of ConfigAdmin configurations}
- * for each checked MBean/method.</p>
- * <p>Access to this object doesn't have to be synchronized, as it is passed down the <code>canInvoke</code> chain.</p>
+ * Class to optimize ConfigAdmin access with the lifecycle of single {@link
+ * org.apache.karaf.management.JMXSecurityMBean#canInvoke(Map) bulk query invocation}. This prevents
+ * countless {@link org.osgi.service.cm.ConfigurationAdmin#listConfigurations(String) listings of
+ * ConfigAdmin configurations} for each checked MBean/method.
+ *
+ * <p>Access to this object doesn't have to be synchronized, as it is passed down the <code>
+ * canInvoke</code> chain.
  */
 public class BulkRequestContext {
 
@@ -79,7 +79,8 @@ public class BulkRequestContext {
                 context.allPids.add(config.getPid());
             }
             // list available ACT whitelist configs
-            Configuration[] configs = configAdmin.listConfigurations("(service.pid=jmx.acl.whitelist)");
+            Configuration[] configs =
+                    configAdmin.listConfigurations("(service.pid=jmx.acl.whitelist)");
             if (configs != null) {
                 for (Configuration config : configs) {
                     context.whiteListProperties.add(config.getProperties());
@@ -106,7 +107,7 @@ public class BulkRequestContext {
      *
      * @return The list of configurations.
      */
-    public List<Dictionary<String,Object>> getWhitelistProperties() {
+    public List<Dictionary<String, Object>> getWhitelistProperties() {
         return whiteListProperties;
     }
 
@@ -120,7 +121,8 @@ public class BulkRequestContext {
      */
     public Dictionary<String, Object> getConfiguration(String generalPid) throws IOException {
         if (!cachedConfigurations.containsKey(generalPid)) {
-            cachedConfigurations.put(generalPid, configAdmin.getConfiguration(generalPid, null).getProperties());
+            cachedConfigurations.put(
+                    generalPid, configAdmin.getConfiguration(generalPid, null).getProperties());
         }
         return cachedConfigurations.get(generalPid);
     }
@@ -132,5 +134,4 @@ public class BulkRequestContext {
     public Set<Principal> getPrincipals() {
         return principals;
     }
-
 }

@@ -17,19 +17,16 @@
 package org.apache.karaf.features.internal.download.impl;
 
 /**
- * Something interested in being notified when the completion
- * of an asynchronous download operation : {@link DefaultFuture}.
- *
+ * Something interested in being notified when the completion of an asynchronous download operation
+ * : {@link DefaultFuture}.
  */
 public interface FutureListener<T extends DefaultFuture<?>> {
 
     /**
-     * Invoked when the operation associated with the {@link DefaultFuture}
-     * has been completed even if you add the listener after the completion.
+     * Invoked when the operation associated with the {@link DefaultFuture} has been completed even
+     * if you add the listener after the completion.
      *
-     * @param future The source {@link DefaultFuture} which called this
-     *               callback.
+     * @param future The source {@link DefaultFuture} which called this callback.
      */
     void operationComplete(T future);
-
 }

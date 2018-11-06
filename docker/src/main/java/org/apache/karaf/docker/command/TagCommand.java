@@ -22,18 +22,31 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "docker", name = "tag", description = "Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE")
+@Command(
+        scope = "docker",
+        name = "tag",
+        description = "Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE")
 @Service
 public class TagCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "image", description = "ID or name of the image to tag", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "image",
+            description = "ID or name of the image to tag",
+            required = true,
+            multiValued = false)
     @Completion(ImagesRepoTagsCompleter.class)
     String image;
 
     @Argument(index = 1, name = "tag", description = "Tag", required = true, multiValued = false)
     String tag;
 
-    @Argument(index = 2, name = "repo", description = "Repository where to tag", required = false, multiValued = false)
+    @Argument(
+            index = 2,
+            name = "repo",
+            description = "Repository where to tag",
+            required = false,
+            multiValued = false)
     String repo;
 
     @Override
@@ -41,5 +54,4 @@ public class TagCommand extends DockerCommandSupport {
         getDockerService().tag(image, repo, tag, url);
         return null;
     }
-
 }

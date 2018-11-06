@@ -22,7 +22,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import java.io.File;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -34,31 +33,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Test shows that without <code>org.ops4j.pax.url.mvn.requireConfigAdminConfig=true</code>,
- * there are two instances of MavenResolver service being published.
+ * Test shows that without <code>org.ops4j.pax.url.mvn.requireConfigAdminConfig=true</code>, there
+ * are two instances of MavenResolver service being published.
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-public class MavenResolverRegisteredOnlyAfterConfigAdminTest extends KarafMinimalMonitoredTestSupport {
+public class MavenResolverRegisteredOnlyAfterConfigAdminTest
+        extends KarafMinimalMonitoredTestSupport {
 
-    public static Logger LOG = LoggerFactory.getLogger(MavenResolverRegisteredOnlyAfterConfigAdminTest.class);
+    public static Logger LOG =
+            LoggerFactory.getLogger(MavenResolverRegisteredOnlyAfterConfigAdminTest.class);
 
     @Configuration
     public Option[] config() throws Exception {
         return new Option[] //
         {
-         composite(super.baseConfig()),
-         composite(editConfigurationFilePut("etc/org.apache.karaf.features.cfg",
-                                            new File("target/test-classes/etc/org.apache.karaf.features.cfg"))),
-         // etc/config.properties which have org.ops4j.pax.url.mvn.requireConfigAdminConfig=true
-         editConfigurationFileExtend("etc/config.properties", "etc/org.apache.karaf.features.cfg", "true")
+            composite(super.baseConfig()),
+            composite(
+                    editConfigurationFilePut(
+                            "etc/org.apache.karaf.features.cfg",
+                            new File("target/test-classes/etc/org.apache.karaf.features.cfg"))),
+            // etc/config.properties which have org.ops4j.pax.url.mvn.requireConfigAdminConfig=true
+            editConfigurationFileExtend(
+                    "etc/config.properties", "etc/org.apache.karaf.features.cfg", "true")
         };
     }
 
     @Test
     public void mavenResolverAvailable() throws Exception {
         long count = numberOfServiceEventsFor("org.ops4j.pax.url.mvn.MavenResolver");
-        assertEquals("There should be only one MavenResolver registration - after non-INITIAL ConfigAdmin update", 1l, count);
+        assertEquals(
+                "There should be only one MavenResolver registration - after non-INITIAL ConfigAdmin update",
+                1l,
+                count);
     }
-
 }

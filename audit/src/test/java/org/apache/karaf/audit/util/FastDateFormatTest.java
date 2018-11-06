@@ -16,14 +16,13 @@
  */
 package org.apache.karaf.audit.util;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 public class FastDateFormatTest {
 

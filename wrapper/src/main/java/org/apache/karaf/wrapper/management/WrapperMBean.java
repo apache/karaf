@@ -16,12 +16,10 @@
  */
 package org.apache.karaf.wrapper.management;
 
-import javax.management.MBeanException;
 import java.io.File;
+import javax.management.MBeanException;
 
-/**
- * Describe the WrapperMBean.
- */
+/** Describe the WrapperMBean. */
 public interface WrapperMBean {
 
     /**
@@ -41,8 +39,9 @@ public interface WrapperMBean {
      * @return the wrapper configuration (index 0) and service files (index 1).
      * @throws MBeanException in case of installation failure.
      */
-    File[] install(String name, String displayName, String description, String startType) throws MBeanException;
-    
+    File[] install(String name, String displayName, String description, String startType)
+            throws MBeanException;
+
     /**
      * Install the service wrapper.
      *
@@ -55,6 +54,12 @@ public interface WrapperMBean {
      * @return the wrapper configuration (index 0) and service files (index 1).
      * @throws MBeanException in case of installation failure.
      */
-    File[] install(String name, String displayName, String description, String startType, String[] envs, String[] includes) throws MBeanException;
-
+    File[] install(
+            String name,
+            String displayName,
+            String description,
+            String startType,
+            String[] envs,
+            String[] includes)
+            throws MBeanException;
 }

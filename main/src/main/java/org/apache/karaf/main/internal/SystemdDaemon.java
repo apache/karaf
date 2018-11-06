@@ -21,11 +21,12 @@ package org.apache.karaf.main.internal;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 
-
 public interface SystemdDaemon extends Library {
-    SystemdDaemon INSTANCE = (SystemdDaemon) Native.loadLibrary("systemd-daemon", SystemdDaemon.class);
+    SystemdDaemon INSTANCE =
+            (SystemdDaemon) Native.loadLibrary("systemd-daemon", SystemdDaemon.class);
 
     int sd_notify(int unset_environment, String state);
+
     int sd_notifyf(int unset_environment, String format, Object... args);
 
     // Not available in all systemd version, should replace used of MAINPID

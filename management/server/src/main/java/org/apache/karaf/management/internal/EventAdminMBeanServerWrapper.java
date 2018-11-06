@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.management.internal;
 
+import java.io.ObjectInputStream;
+import java.util.Objects;
+import java.util.Set;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -37,9 +40,6 @@ import javax.management.OperationsException;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.loading.ClassLoaderRepository;
-import java.io.ObjectInputStream;
-import java.util.Objects;
-import java.util.Set;
 
 public class EventAdminMBeanServerWrapper implements MBeanServer {
 
@@ -47,14 +47,28 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     private static final String[] OBJECT_NAME_ONLY_SIG = new String[] {ObjectName.class.getName()};
 
     private static final String CREATE_MBEAN = "createMBean";
-    private static final String[] CREATE_MBEAN_SIG_1 = new String[] {String.class.getName(), ObjectName.class.getName()};
-    private static final String[] CREATE_MBEAN_SIG_2 = new String[] {String.class.getName(), ObjectName.class.getName(), ObjectName.class.getName()};
-    private static final String[] CREATE_MBEAN_SIG_3 = new String[] {String.class.getName(), Object[].class.getName(), String[].class.getName()};
-    private static final String[] CREATE_MBEAN_SIG_4 = new String[] {String.class.getName(), ObjectName.class.getName(), ObjectName.class.getName(), Object[].class.getName(), String[].class.getName()};
+    private static final String[] CREATE_MBEAN_SIG_1 =
+            new String[] {String.class.getName(), ObjectName.class.getName()};
+    private static final String[] CREATE_MBEAN_SIG_2 =
+            new String[] {
+                String.class.getName(), ObjectName.class.getName(), ObjectName.class.getName()
+            };
+    private static final String[] CREATE_MBEAN_SIG_3 =
+            new String[] {
+                String.class.getName(), Object[].class.getName(), String[].class.getName()
+            };
+    private static final String[] CREATE_MBEAN_SIG_4 =
+            new String[] {
+                String.class.getName(),
+                ObjectName.class.getName(),
+                ObjectName.class.getName(),
+                Object[].class.getName(),
+                String[].class.getName()
+            };
 
     private static final String REGISTER_MBEAN = "registerMBean";
-    private static final String[] REGISTER_MBEAN_SIG = new String[] {Object.class.getName(), ObjectName.class.getName()};
-
+    private static final String[] REGISTER_MBEAN_SIG =
+            new String[] {Object.class.getName(), ObjectName.class.getName()};
 
     private static final String UNREGISTER_MBEAN = "unregisterMBean";
     private static final String[] UNREGISTER_MBEAN_SIG = OBJECT_NAME_ONLY_SIG;
@@ -63,7 +77,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     private static final String[] GET_OBJECT_INSTANCE_SIG = OBJECT_NAME_ONLY_SIG;
 
     private static final String QUERY_MBEANS = "queryMBeans";
-    private static final String[] QUERY_MBEANS_SIG = new String[] {ObjectName.class.getName(), QueryExp.class.getName()};
+    private static final String[] QUERY_MBEANS_SIG =
+            new String[] {ObjectName.class.getName(), QueryExp.class.getName()};
 
     private static final String QUERY_NAMES = "queryMBeans";
     private static final String[] QUERY_NAMES_SIG = QUERY_MBEANS_SIG;
@@ -75,19 +90,29 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     private static final String[] GET_MBEAN_COUNT_SIG = NO_ARGS_SIG;
 
     private static final String GET_ATTRIBUTE = "getAttribute";
-    private static final String[] GET_ATTRIBUTE_SIG = new String[] {ObjectName.class.getName(), String.class.getName()};
+    private static final String[] GET_ATTRIBUTE_SIG =
+            new String[] {ObjectName.class.getName(), String.class.getName()};
 
     private static final String GET_ATTRIBUTES = "getAttributes";
-    private static final String[] GET_ATTRIBUTES_SIG = new String[] {ObjectName.class.getName(), String[].class.getName()};
+    private static final String[] GET_ATTRIBUTES_SIG =
+            new String[] {ObjectName.class.getName(), String[].class.getName()};
 
     private static final String SET_ATTRIBUTE = "setAttribute";
-    private static final String[] SET_ATTRIBUTE_SIG = new String[] {ObjectName.class.getName(), Attribute.class.getName()};
+    private static final String[] SET_ATTRIBUTE_SIG =
+            new String[] {ObjectName.class.getName(), Attribute.class.getName()};
 
     private static final String SET_ATTRIBUTES = "setAttributes";
-    private static final String[] SET_ATTRIBUTES_SIG = new String[] {ObjectName.class.getName(), AttributeList.class.getName()};
+    private static final String[] SET_ATTRIBUTES_SIG =
+            new String[] {ObjectName.class.getName(), AttributeList.class.getName()};
 
     private static final String INVOKE = "invoke";
-    private static final String[] INVOKE_SIG = new String[] {ObjectName.class.getName(), String.class.getName(), Object[].class.getName(), String[].class.getName()};
+    private static final String[] INVOKE_SIG =
+            new String[] {
+                ObjectName.class.getName(),
+                String.class.getName(),
+                Object[].class.getName(),
+                String[].class.getName()
+            };
 
     private static final String GET_DEFAULT_DOMAIN = "getDefaultDomain";
     private static final String[] GET_DEFAULT_DOMAIN_SIG = NO_ARGS_SIG;
@@ -95,32 +120,74 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     private static final String GET_DOMAINS = "getDomains";
     private static final String[] GET_DOMAINS_SIG = NO_ARGS_SIG;
 
-    private static final String ADD_NOTIFICATION_LISTENER  = "addNotificationListener";
-    private static final String[] ADD_NOTIFICATION_LISTENER_SIG_1 = new String[] {ObjectName.class.getName(), NotificationListener.class.getName(), NotificationFilter.class.getName(), Object.class.getName()};
-    private static final String[] ADD_NOTIFICATION_LISTENER_SIG_2 = new String[] {ObjectName.class.getName(), ObjectName.class.getName(), NotificationFilter.class.getName(), Object.class.getName()};
+    private static final String ADD_NOTIFICATION_LISTENER = "addNotificationListener";
+    private static final String[] ADD_NOTIFICATION_LISTENER_SIG_1 =
+            new String[] {
+                ObjectName.class.getName(),
+                NotificationListener.class.getName(),
+                NotificationFilter.class.getName(),
+                Object.class.getName()
+            };
+    private static final String[] ADD_NOTIFICATION_LISTENER_SIG_2 =
+            new String[] {
+                ObjectName.class.getName(),
+                ObjectName.class.getName(),
+                NotificationFilter.class.getName(),
+                Object.class.getName()
+            };
 
-    private static final String REMOVE_NOTIFICATION_LISTENER  = "addNotificationListener";
-    private static final String[] REMOVE_NOTIFICATION_LISTENER_SIG_1 = new String[] {ObjectName.class.getName(), ObjectName.class.getName()};
-    private static final String[] REMOVE_NOTIFICATION_LISTENER_SIG_2 = new String[] {ObjectName.class.getName(), ObjectName.class.getName(), NotificationFilter.class.getName(), Object.class.getName()};
-    private static final String[] REMOVE_NOTIFICATION_LISTENER_SIG_3 = new String[] {ObjectName.class.getName(), NotificationListener.class.getName()};
-    private static final String[] REMOVE_NOTIFICATION_LISTENER_SIG_4 = new String[] {ObjectName.class.getName(), NotificationListener.class.getName(), NotificationFilter.class.getName(), Object.class.getName()};
+    private static final String REMOVE_NOTIFICATION_LISTENER = "addNotificationListener";
+    private static final String[] REMOVE_NOTIFICATION_LISTENER_SIG_1 =
+            new String[] {ObjectName.class.getName(), ObjectName.class.getName()};
+    private static final String[] REMOVE_NOTIFICATION_LISTENER_SIG_2 =
+            new String[] {
+                ObjectName.class.getName(),
+                ObjectName.class.getName(),
+                NotificationFilter.class.getName(),
+                Object.class.getName()
+            };
+    private static final String[] REMOVE_NOTIFICATION_LISTENER_SIG_3 =
+            new String[] {ObjectName.class.getName(), NotificationListener.class.getName()};
+    private static final String[] REMOVE_NOTIFICATION_LISTENER_SIG_4 =
+            new String[] {
+                ObjectName.class.getName(),
+                NotificationListener.class.getName(),
+                NotificationFilter.class.getName(),
+                Object.class.getName()
+            };
 
     private static final String GET_MBEAN_INFO = "getMBeanInfo";
     private static final String[] GET_MBEAN_INFO_SIG = OBJECT_NAME_ONLY_SIG;
 
     private static final String IS_INSTANCE_OF = "isInstanceOf";
-    private static final String[] IS_INSTANCE_OF_SIG = new String[] {ObjectName.class.getName(), String.class.getName()};
+    private static final String[] IS_INSTANCE_OF_SIG =
+            new String[] {ObjectName.class.getName(), String.class.getName()};
 
     private static final String INSTANTIATE = "instantiate";
     private static final String[] INSTANTIATE_SIG1 = new String[] {String.class.getName()};
-    private static final String[] INSTANTIATE_SIG2 = new String[] {String.class.getName(), ObjectName.class.getName()};
-    private static final String[] INSTANTIATE_SIG3 = new String[] {String.class.getName(), Object[].class.getName(), String[].class.getName()};
-    private static final String[] INSTANTIATE_SIG4 = new String[] {String.class.getName(), ObjectName.class.getName(), Object[].class.getName(), String[].class.getName()};
+    private static final String[] INSTANTIATE_SIG2 =
+            new String[] {String.class.getName(), ObjectName.class.getName()};
+    private static final String[] INSTANTIATE_SIG3 =
+            new String[] {
+                String.class.getName(), Object[].class.getName(), String[].class.getName()
+            };
+    private static final String[] INSTANTIATE_SIG4 =
+            new String[] {
+                String.class.getName(),
+                ObjectName.class.getName(),
+                Object[].class.getName(),
+                String[].class.getName()
+            };
 
     private static final String DESERIALIZE = "deserialize";
-    private static final String[] DESERIALIZE_SIG1 = new String[] {ObjectName.class.getName(), byte[].class.getName()};
-    private static final String[] DESERIALIZE_SIG2 = new String[] {String.class.getName(), byte[].class.getName()};
-    private static final String[] DESERIALIZE_SIG3 = new String[] {String.class.getName(), ObjectName.class.getName(), byte[].class.getName()};
+    private static final String[] DESERIALIZE_SIG1 =
+            new String[] {ObjectName.class.getName(), byte[].class.getName()};
+    private static final String[] DESERIALIZE_SIG2 =
+            new String[] {String.class.getName(), byte[].class.getName()};
+    private static final String[] DESERIALIZE_SIG3 =
+            new String[] {
+                String.class.getName(), ObjectName.class.getName(), byte[].class.getName()
+            };
 
     private static final String GET_CLASSLOADER_FOR = "getClassLoaderFor";
     private static final String[] GET_CLASSLOADER_FOR_SIG = OBJECT_NAME_ONLY_SIG;
@@ -139,12 +206,19 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
         this.logger = Objects.requireNonNull(logger);
     }
 
-    private void log(String methodName, String[] signature, Object result, Throwable error, Object... params) {
+    private void log(
+            String methodName,
+            String[] signature,
+            Object result,
+            Throwable error,
+            Object... params) {
         logger.log(methodName, signature, result, error, params);
     }
 
     @Override
-    public ObjectInstance createMBean(String className, ObjectName name) throws ReflectionException, InstanceAlreadyExistsException, MBeanException, NotCompliantMBeanException {
+    public ObjectInstance createMBean(String className, ObjectName name)
+            throws ReflectionException, InstanceAlreadyExistsException, MBeanException,
+                    NotCompliantMBeanException {
         Throwable error = null;
         ObjectInstance result = null;
         try {
@@ -158,7 +232,9 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName) throws ReflectionException, InstanceAlreadyExistsException, MBeanException, NotCompliantMBeanException, InstanceNotFoundException {
+    public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName)
+            throws ReflectionException, InstanceAlreadyExistsException, MBeanException,
+                    NotCompliantMBeanException, InstanceNotFoundException {
         Throwable error = null;
         ObjectInstance result = null;
         try {
@@ -172,7 +248,10 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public ObjectInstance createMBean(String className, ObjectName name, Object[] params, String[] signature) throws ReflectionException, InstanceAlreadyExistsException, MBeanException, NotCompliantMBeanException {
+    public ObjectInstance createMBean(
+            String className, ObjectName name, Object[] params, String[] signature)
+            throws ReflectionException, InstanceAlreadyExistsException, MBeanException,
+                    NotCompliantMBeanException {
         Throwable error = null;
         ObjectInstance result = null;
         try {
@@ -181,12 +260,27 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(CREATE_MBEAN, CREATE_MBEAN_SIG_3, result, error, className, name, params, signature);
+            log(
+                    CREATE_MBEAN,
+                    CREATE_MBEAN_SIG_3,
+                    result,
+                    error,
+                    className,
+                    name,
+                    params,
+                    signature);
         }
     }
 
     @Override
-    public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName, Object[] params, String[] signature) throws ReflectionException, InstanceAlreadyExistsException, MBeanException, NotCompliantMBeanException, InstanceNotFoundException {
+    public ObjectInstance createMBean(
+            String className,
+            ObjectName name,
+            ObjectName loaderName,
+            Object[] params,
+            String[] signature)
+            throws ReflectionException, InstanceAlreadyExistsException, MBeanException,
+                    NotCompliantMBeanException, InstanceNotFoundException {
         Throwable error = null;
         ObjectInstance result = null;
         try {
@@ -195,12 +289,23 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(CREATE_MBEAN, CREATE_MBEAN_SIG_4, result, error, className, name, loaderName, params, signature);
+            log(
+                    CREATE_MBEAN,
+                    CREATE_MBEAN_SIG_4,
+                    result,
+                    error,
+                    className,
+                    name,
+                    loaderName,
+                    params,
+                    signature);
         }
     }
 
     @Override
-    public ObjectInstance registerMBean(Object object, ObjectName name) throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+    public ObjectInstance registerMBean(Object object, ObjectName name)
+            throws InstanceAlreadyExistsException, MBeanRegistrationException,
+                    NotCompliantMBeanException {
         Throwable error = null;
         ObjectInstance result = null;
         try {
@@ -214,7 +319,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public void unregisterMBean(ObjectName name) throws InstanceNotFoundException, MBeanRegistrationException {
+    public void unregisterMBean(ObjectName name)
+            throws InstanceNotFoundException, MBeanRegistrationException {
         Throwable error = null;
         try {
             delegate.unregisterMBean(name);
@@ -297,7 +403,9 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public Object getAttribute(ObjectName name, String attribute) throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
+    public Object getAttribute(ObjectName name, String attribute)
+            throws MBeanException, AttributeNotFoundException, InstanceNotFoundException,
+                    ReflectionException {
         Throwable error = null;
         Object result = null;
         try {
@@ -311,7 +419,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public AttributeList getAttributes(ObjectName name, String[] attributes) throws InstanceNotFoundException, ReflectionException {
+    public AttributeList getAttributes(ObjectName name, String[] attributes)
+            throws InstanceNotFoundException, ReflectionException {
         Throwable error = null;
         AttributeList result = null;
         try {
@@ -325,7 +434,9 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public void setAttribute(ObjectName name, Attribute attribute) throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+    public void setAttribute(ObjectName name, Attribute attribute)
+            throws InstanceNotFoundException, AttributeNotFoundException,
+                    InvalidAttributeValueException, MBeanException, ReflectionException {
         Throwable error = null;
         try {
             delegate.setAttribute(name, attribute);
@@ -338,7 +449,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public AttributeList setAttributes(ObjectName name, AttributeList attributes) throws InstanceNotFoundException, ReflectionException {
+    public AttributeList setAttributes(ObjectName name, AttributeList attributes)
+            throws InstanceNotFoundException, ReflectionException {
         Throwable error = null;
         AttributeList result = null;
         try {
@@ -352,7 +464,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature) throws InstanceNotFoundException, MBeanException, ReflectionException {
+    public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
+            throws InstanceNotFoundException, MBeanException, ReflectionException {
         Throwable error = null;
         Object result = null;
         try {
@@ -394,7 +507,12 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public void addNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) throws InstanceNotFoundException {
+    public void addNotificationListener(
+            ObjectName name,
+            NotificationListener listener,
+            NotificationFilter filter,
+            Object handback)
+            throws InstanceNotFoundException {
         Throwable error = null;
         try {
             delegate.addNotificationListener(name, listener, filter, handback);
@@ -402,12 +520,22 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(ADD_NOTIFICATION_LISTENER, ADD_NOTIFICATION_LISTENER_SIG_1, null, error, name, listener, filter, handback);
+            log(
+                    ADD_NOTIFICATION_LISTENER,
+                    ADD_NOTIFICATION_LISTENER_SIG_1,
+                    null,
+                    error,
+                    name,
+                    listener,
+                    filter,
+                    handback);
         }
     }
 
     @Override
-    public void addNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) throws InstanceNotFoundException {
+    public void addNotificationListener(
+            ObjectName name, ObjectName listener, NotificationFilter filter, Object handback)
+            throws InstanceNotFoundException {
         Throwable error = null;
         try {
             delegate.addNotificationListener(name, listener, filter, handback);
@@ -415,12 +543,21 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(ADD_NOTIFICATION_LISTENER, ADD_NOTIFICATION_LISTENER_SIG_2, null, error, name, listener, filter, handback);
+            log(
+                    ADD_NOTIFICATION_LISTENER,
+                    ADD_NOTIFICATION_LISTENER_SIG_2,
+                    null,
+                    error,
+                    name,
+                    listener,
+                    filter,
+                    handback);
         }
     }
 
     @Override
-    public void removeNotificationListener(ObjectName name, ObjectName listener) throws InstanceNotFoundException, ListenerNotFoundException {
+    public void removeNotificationListener(ObjectName name, ObjectName listener)
+            throws InstanceNotFoundException, ListenerNotFoundException {
         Throwable error = null;
         try {
             delegate.removeNotificationListener(name, listener);
@@ -428,12 +565,20 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(REMOVE_NOTIFICATION_LISTENER, REMOVE_NOTIFICATION_LISTENER_SIG_1, null, error, name, listener);
+            log(
+                    REMOVE_NOTIFICATION_LISTENER,
+                    REMOVE_NOTIFICATION_LISTENER_SIG_1,
+                    null,
+                    error,
+                    name,
+                    listener);
         }
     }
 
     @Override
-    public void removeNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) throws InstanceNotFoundException, ListenerNotFoundException {
+    public void removeNotificationListener(
+            ObjectName name, ObjectName listener, NotificationFilter filter, Object handback)
+            throws InstanceNotFoundException, ListenerNotFoundException {
         Throwable error = null;
         try {
             delegate.removeNotificationListener(name, listener, filter, handback);
@@ -441,12 +586,21 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(REMOVE_NOTIFICATION_LISTENER, REMOVE_NOTIFICATION_LISTENER_SIG_2, null, error, name, listener, filter, handback);
+            log(
+                    REMOVE_NOTIFICATION_LISTENER,
+                    REMOVE_NOTIFICATION_LISTENER_SIG_2,
+                    null,
+                    error,
+                    name,
+                    listener,
+                    filter,
+                    handback);
         }
     }
 
     @Override
-    public void removeNotificationListener(ObjectName name, NotificationListener listener) throws InstanceNotFoundException, ListenerNotFoundException {
+    public void removeNotificationListener(ObjectName name, NotificationListener listener)
+            throws InstanceNotFoundException, ListenerNotFoundException {
         Throwable error = null;
         try {
             delegate.removeNotificationListener(name, listener);
@@ -454,12 +608,23 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(REMOVE_NOTIFICATION_LISTENER, REMOVE_NOTIFICATION_LISTENER_SIG_3, null, error, name, listener);
+            log(
+                    REMOVE_NOTIFICATION_LISTENER,
+                    REMOVE_NOTIFICATION_LISTENER_SIG_3,
+                    null,
+                    error,
+                    name,
+                    listener);
         }
     }
 
     @Override
-    public void removeNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) throws InstanceNotFoundException, ListenerNotFoundException {
+    public void removeNotificationListener(
+            ObjectName name,
+            NotificationListener listener,
+            NotificationFilter filter,
+            Object handback)
+            throws InstanceNotFoundException, ListenerNotFoundException {
         Throwable error = null;
         try {
             delegate.removeNotificationListener(name, listener, filter, handback);
@@ -467,12 +632,21 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(REMOVE_NOTIFICATION_LISTENER, REMOVE_NOTIFICATION_LISTENER_SIG_4, null, error, name, listener, filter, handback);
+            log(
+                    REMOVE_NOTIFICATION_LISTENER,
+                    REMOVE_NOTIFICATION_LISTENER_SIG_4,
+                    null,
+                    error,
+                    name,
+                    listener,
+                    filter,
+                    handback);
         }
     }
 
     @Override
-    public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IntrospectionException, ReflectionException {
+    public MBeanInfo getMBeanInfo(ObjectName name)
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException {
         Throwable error = null;
         MBeanInfo result = null;
         try {
@@ -486,7 +660,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public boolean isInstanceOf(ObjectName name, String className) throws InstanceNotFoundException {
+    public boolean isInstanceOf(ObjectName name, String className)
+            throws InstanceNotFoundException {
         Throwable error = null;
         Boolean result = null;
         try {
@@ -514,7 +689,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public Object instantiate(String className, ObjectName loaderName) throws ReflectionException, MBeanException, InstanceNotFoundException {
+    public Object instantiate(String className, ObjectName loaderName)
+            throws ReflectionException, MBeanException, InstanceNotFoundException {
         Throwable error = null;
         Object result = null;
         try {
@@ -528,7 +704,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public Object instantiate(String className, Object[] params, String[] signature) throws ReflectionException, MBeanException {
+    public Object instantiate(String className, Object[] params, String[] signature)
+            throws ReflectionException, MBeanException {
         Throwable error = null;
         Object result = null;
         try {
@@ -542,7 +719,9 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
     }
 
     @Override
-    public Object instantiate(String className, ObjectName loaderName, Object[] params, String[] signature) throws ReflectionException, MBeanException, InstanceNotFoundException {
+    public Object instantiate(
+            String className, ObjectName loaderName, Object[] params, String[] signature)
+            throws ReflectionException, MBeanException, InstanceNotFoundException {
         Throwable error = null;
         Object result = null;
         try {
@@ -551,7 +730,15 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
             error = e;
             throw e;
         } finally {
-            log(INSTANTIATE, INSTANTIATE_SIG4, result, error, className, loaderName, params, signature);
+            log(
+                    INSTANTIATE,
+                    INSTANTIATE_SIG4,
+                    result,
+                    error,
+                    className,
+                    loaderName,
+                    params,
+                    signature);
         }
     }
 
@@ -572,7 +759,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
 
     @Override
     @Deprecated
-    public ObjectInputStream deserialize(String className, byte[] data) throws OperationsException, ReflectionException {
+    public ObjectInputStream deserialize(String className, byte[] data)
+            throws OperationsException, ReflectionException {
         Throwable error = null;
         ObjectInputStream result = null;
         try {
@@ -587,7 +775,8 @@ public class EventAdminMBeanServerWrapper implements MBeanServer {
 
     @Override
     @Deprecated
-    public ObjectInputStream deserialize(String className, ObjectName loaderName, byte[] data) throws OperationsException, ReflectionException {
+    public ObjectInputStream deserialize(String className, ObjectName loaderName, byte[] data)
+            throws OperationsException, ReflectionException {
         Throwable error = null;
         ObjectInputStream result = null;
         try {

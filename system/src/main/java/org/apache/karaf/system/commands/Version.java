@@ -26,13 +26,11 @@ import org.apache.karaf.system.SystemService;
 @Service
 public class Version implements Action {
 
-    @Reference
-    SystemService systemService;
+    @Reference SystemService systemService;
 
     @Override
     public Object execute() throws Exception {
         System.out.println(systemService.getVersion());
         return null;
     }
-
 }

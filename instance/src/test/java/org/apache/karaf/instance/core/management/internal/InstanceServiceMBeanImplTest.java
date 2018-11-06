@@ -18,12 +18,9 @@ package org.apache.karaf.instance.core.management.internal;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
-
 import junit.framework.TestCase;
-
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
@@ -35,34 +32,56 @@ import org.junit.Assert;
 public class InstanceServiceMBeanImplTest extends TestCase {
 
     public void testCreateInstance() throws Exception {
-        final InstanceSettings instanceSettings = new InstanceSettings(123, 456,789, "somewhere", "someopts",
-                Collections.emptyList(), Arrays.asList("webconsole", "funfeat"), "localhost");
-        
+        final InstanceSettings instanceSettings =
+                new InstanceSettings(
+                        123,
+                        456,
+                        789,
+                        "somewhere",
+                        "someopts",
+                        Collections.emptyList(),
+                        Arrays.asList("webconsole", "funfeat"),
+                        "localhost");
+
         final Instance inst = EasyMock.createMock(Instance.class);
         EasyMock.expect(inst.getPid()).andReturn(42);
         EasyMock.replay(inst);
 
-        org.apache.karaf.instance.core.InstanceService instanceService = EasyMock.createMock(org.apache.karaf.instance.core.InstanceService.class);
-        EasyMock.expect(instanceService.createInstance("t1", instanceSettings, false)).andReturn(inst);
+        org.apache.karaf.instance.core.InstanceService instanceService =
+                EasyMock.createMock(org.apache.karaf.instance.core.InstanceService.class);
+        EasyMock.expect(instanceService.createInstance("t1", instanceSettings, false))
+                .andReturn(inst);
         EasyMock.replay(instanceService);
-        
+
         InstancesMBeanImpl ab = new InstancesMBeanImpl(instanceService);
-        assertEquals(42, ab.createInstance("t1", 123, 456, 789, "somewhere", "someopts", " webconsole,  funfeat", ""));
+        assertEquals(
+                42,
+                ab.createInstance(
+                        "t1", 123, 456, 789, "somewhere", "someopts", " webconsole,  funfeat", ""));
     }
-    
+
     public void testCreateInstance2() throws Exception {
-        final InstanceSettings instanceSettings = new InstanceSettings(0, 0, 0, null, null,
-                Collections.emptyList(), Collections.emptyList(), "localhost");
-        
+        final InstanceSettings instanceSettings =
+                new InstanceSettings(
+                        0,
+                        0,
+                        0,
+                        null,
+                        null,
+                        Collections.emptyList(),
+                        Collections.emptyList(),
+                        "localhost");
+
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
-        EasyMock.expect(instanceService.createInstance("t1", instanceSettings, false)).andReturn(null);
+        EasyMock.expect(instanceService.createInstance("t1", instanceSettings, false))
+                .andReturn(null);
         EasyMock.replay(instanceService);
-        
+
         InstancesMBean ab = new InstancesMBeanImpl(instanceService);
         assertEquals(-1, ab.createInstance("t1", 0, 0, 0, "", "", "", ""));
     }
-    
-    public void testGetInstances() throws Exception {       
+
+    public void testGetInstances() throws Exception {
         Instance i1 = EasyMock.createMock(Instance.class);
         EasyMock.expect(i1.getPid()).andReturn(1234);
         EasyMock.expect(i1.getSshPort()).andReturn(8818);
@@ -80,15 +99,15 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         Instance i2 = EasyMock.createNiceMock(Instance.class);
         EasyMock.expect(i2.getName()).andReturn("i2");
         EasyMock.replay(i2);
-        
+
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
-        EasyMock.expect(instanceService.getInstances()).andReturn(new Instance[]{i1, i2});
+        EasyMock.expect(instanceService.getInstances()).andReturn(new Instance[] {i1, i2});
         EasyMock.replay(instanceService);
 
         InstancesMBeanImpl instanceServiceMBean = new InstancesMBeanImpl(instanceService);
         TabularData tabularData = instanceServiceMBean.getInstances();
         Assert.assertEquals(2, tabularData.size());
-        CompositeData cd1 = tabularData.get(new Object[]{"i1"});
+        CompositeData cd1 = tabularData.get(new Object[] {"i1"});
         Assert.assertTrue(cd1.containsValue("i1"));
         Assert.assertTrue(cd1.containsValue(true));
         Assert.assertTrue(cd1.containsValue(1234));
@@ -100,10 +119,10 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         Assert.assertTrue(cd1.containsValue("someopts"));
         Assert.assertTrue(cd1.containsValue("Stopped"));
 
-        CompositeData cd2 = tabularData.get(new Object [] {"i2"});
+        CompositeData cd2 = tabularData.get(new Object[] {"i2"});
         Assert.assertTrue(cd2.containsValue("i2"));
     }
-    
+
     public void testStartInstanceWithJavaOpts() throws Exception {
         Instance inst = EasyMock.createMock(Instance.class);
         inst.start("-x -y -z");
@@ -147,7 +166,7 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
         EasyMock.expect(instanceService.getInstance("test instance")).andReturn(inst);
         EasyMock.replay(instanceService);
-        
+
         InstancesMBean instanceServiceMBean = new InstancesMBeanImpl(instanceService);
 
         instanceServiceMBean.stopInstance("test instance");
@@ -164,7 +183,7 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
         EasyMock.expect(instanceService.getInstance("test instance")).andReturn(inst);
         EasyMock.replay(instanceService);
-        
+
         InstancesMBean instanceServiceMBean = new InstancesMBeanImpl(instanceService);
 
         instanceServiceMBean.destroyInstance("test instance");
@@ -181,26 +200,26 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
         EasyMock.expect(instanceService.getInstance("test instance")).andReturn(inst);
         EasyMock.replay(instanceService);
-        
+
         InstancesMBean instanceServiceMBean = new InstancesMBeanImpl(instanceService);
 
         instanceServiceMBean.changeSshPort("test instance", 7788);
         EasyMock.verify(instanceService);
         EasyMock.verify(inst);
     }
-    
+
     public void testRmiRegistryChangePort() throws Exception {
         Instance inst = EasyMock.createMock(Instance.class);
         inst.changeRmiRegistryPort(1123);
         EasyMock.expectLastCall();
         EasyMock.replay(inst);
-        
+
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
         EasyMock.expect(instanceService.getInstance("test instance")).andReturn(inst);
         EasyMock.replay(instanceService);
-        
+
         InstancesMBean instanceServiceMBean = new InstancesMBeanImpl(instanceService);
-        
+
         instanceServiceMBean.changeRmiRegistryPort("test instance", 1123);
         EasyMock.verify(instanceService);
         EasyMock.verify(inst);
@@ -239,5 +258,4 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         EasyMock.verify(instanceService);
         EasyMock.verify(inst);
     }
-
 }

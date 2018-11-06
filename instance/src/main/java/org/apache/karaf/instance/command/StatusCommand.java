@@ -23,11 +23,19 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "instance", name = "status", description = "Check the current status of an instance.")
+@Command(
+        scope = "instance",
+        name = "status",
+        description = "Check the current status of an instance.")
 @Service
 public class StatusCommand extends InstanceCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The name of the instance", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The name of the instance",
+            required = true,
+            multiValued = false)
     @Completion(InstanceCompleter.class)
     private String name;
 
@@ -36,5 +44,4 @@ public class StatusCommand extends InstanceCommandSupport {
         System.out.println(instance.getState());
         return null;
     }
-
 }

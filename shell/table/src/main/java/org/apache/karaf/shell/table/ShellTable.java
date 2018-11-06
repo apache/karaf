@@ -21,9 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @deprecated use {@link org.apache.karaf.shell.support.table.ShellTable} instead
- */
+/** @deprecated use {@link org.apache.karaf.shell.support.table.ShellTable} instead */
 @Deprecated
 public class ShellTable {
 
@@ -33,43 +31,41 @@ public class ShellTable {
     private String separator = " | ";
     private int size;
     private String emptyTableText;
-    
-    public ShellTable() {
-        
-    }
-    
+
+    public ShellTable() {}
+
     public ShellTable noHeaders() {
         this.showHeaders = false;
         return this;
     }
-    
+
     public ShellTable separator(String separator) {
         this.separator = separator;
         return this;
     }
-    
+
     public ShellTable size(int size) {
         this.size = size;
         return this;
     }
-    
+
     public ShellTable column(Col colunmn) {
         cols.add(colunmn);
         return this;
     }
-    
+
     public Col column(String header) {
         Col col = new Col(header);
         cols.add(col);
         return col;
     }
-    
+
     public Row addRow() {
         Row row = new Row();
         rows.add(row);
         return row;
     }
-    
+
     /**
      * Set text to display if there are no rows in the table.
      *
@@ -85,7 +81,7 @@ public class ShellTable {
         print(out, true);
     }
 
-    public void print(PrintStream out, boolean format)  {
+    public void print(PrintStream out, boolean format) {
 
         // "normal" table rendering, with borders
         Row headerRow = new Row(cols);
@@ -93,7 +89,7 @@ public class ShellTable {
         for (Row row : rows) {
             row.formatContent(cols);
         }
-        
+
         if (size > 0) {
             tryGrowToMaxSize();
         }
@@ -136,7 +132,6 @@ public class ShellTable {
                 return;
             }
         }
-
     }
 
     private String underline(int length) {
@@ -144,5 +139,4 @@ public class ShellTable {
         Arrays.fill(exmarks, '-');
         return new String(exmarks);
     }
-
 }

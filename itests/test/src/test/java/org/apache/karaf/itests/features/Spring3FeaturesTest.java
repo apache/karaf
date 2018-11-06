@@ -13,24 +13,21 @@
  */
 package org.apache.karaf.itests.features;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import org.apache.karaf.itests.KarafTestSupport;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -42,13 +39,28 @@ public class Spring3FeaturesTest extends KarafTestSupport {
     public Option[] config() {
         String version = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
         List<Option> result = new LinkedList<>(Arrays.asList(super.config()));
-        result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresRepositories",
-                        "mvn:org.apache.karaf.features/framework/" + version + "/xml/features, " +
-                        "mvn:org.apache.karaf.features/spring/" + version + "/xml/features, " +
-                        "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
-                        "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
-                        "mvn:org.apache.karaf.features/enterprise-legacy/" + version + "/xml/features, " +
-                        "mvn:org.apache.karaf.features/standard/" + version + "/xml/features"));
+        result.add(
+                editConfigurationFilePut(
+                        "etc/org.apache.karaf.features.cfg",
+                        "featuresRepositories",
+                        "mvn:org.apache.karaf.features/framework/"
+                                + version
+                                + "/xml/features, "
+                                + "mvn:org.apache.karaf.features/spring/"
+                                + version
+                                + "/xml/features, "
+                                + "mvn:org.apache.karaf.features/spring-legacy/"
+                                + version
+                                + "/xml/features, "
+                                + "mvn:org.apache.karaf.features/enterprise/"
+                                + version
+                                + "/xml/features, "
+                                + "mvn:org.apache.karaf.features/enterprise-legacy/"
+                                + version
+                                + "/xml/features, "
+                                + "mvn:org.apache.karaf.features/standard/"
+                                + version
+                                + "/xml/features"));
         return result.toArray(new Option[result.size()]);
     }
 
@@ -76,7 +88,8 @@ public class Spring3FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringInstrument31Feature() throws Exception {
-        installAssertAndUninstallFeature("spring-instrument", System.getProperty("spring31.version"));
+        installAssertAndUninstallFeature(
+                "spring-instrument", System.getProperty("spring31.version"));
     }
 
     @Test
@@ -122,7 +135,8 @@ public class Spring3FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringWebPortlet31Feature() throws Exception {
-        installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring31.version"));
+        installAssertAndUninstallFeature(
+                "spring-web-portlet", System.getProperty("spring31.version"));
     }
 
     // Spring 3.2.x
@@ -139,7 +153,8 @@ public class Spring3FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringInstrumentFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-instrument", System.getProperty("spring32.version"));
+        installAssertAndUninstallFeature(
+                "spring-instrument", System.getProperty("spring32.version"));
     }
 
     @Test
@@ -184,14 +199,15 @@ public class Spring3FeaturesTest extends KarafTestSupport {
 
     @Test
     public void installSpringWebPortletFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring32.version"));
+        installAssertAndUninstallFeature(
+                "spring-web-portlet", System.getProperty("spring32.version"));
     }
 
     // Spring Security
 
     @Test
     public void installSpringSecurityFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-security", System.getProperty("spring.security31.version"));
+        installAssertAndUninstallFeature(
+                "spring-security", System.getProperty("spring.security31.version"));
     }
-
 }

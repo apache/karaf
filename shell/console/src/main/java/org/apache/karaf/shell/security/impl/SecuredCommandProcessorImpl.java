@@ -16,6 +16,12 @@
  */
 package org.apache.karaf.shell.security.impl;
 
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import javax.security.auth.Subject;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.activator.Activator;
@@ -31,14 +37,6 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-
-import javax.security.auth.Subject;
-
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @Deprecated
 public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
@@ -65,7 +63,8 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
 
         Set<RolePrincipal> rolePrincipals = sub.getPrincipals(RolePrincipal.class);
         if (rolePrincipals.size() == 0)
-            throw new SecurityException("Current user " + ShellUtil.getCurrentUserName() + " has no associated roles.");
+            throw new SecurityException(
+                    "Current user " + ShellUtil.getCurrentUserName() + " has no associated roles.");
 
         // TODO cater for custom roles
         StringBuilder sb = new StringBuilder();
@@ -107,9 +106,15 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         bundleContext.ungetService(threadIOServiceReference);
     }
 
-    private ServiceTracker<Object, Object> trackCommands(final BundleContext context, String roleClause) throws InvalidSyntaxException {
-        Filter filter = context.createFilter(String.format("(&(%s=*)(%s=*)%s)",
-                CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION, roleClause));
+    private ServiceTracker<Object, Object> trackCommands(
+            final BundleContext context, String roleClause) throws InvalidSyntaxException {
+        Filter filter =
+                context.createFilter(
+                        String.format(
+                                "(&(%s=*)(%s=*)%s)",
+                                CommandProcessor.COMMAND_SCOPE,
+                                CommandProcessor.COMMAND_FUNCTION,
+                                roleClause));
 
         return new ServiceTracker<Object, Object>(context, filter, null) {
             @Override
@@ -121,14 +126,12 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
                 if (scope != null && function != null) {
                     if (function.getClass().isArray()) {
                         for (Object f : ((Object[]) function)) {
-                            Function target = new CommandProxy(context, reference,
-                                    f.toString());
+                            Function target = new CommandProxy(context, reference, f.toString());
                             addCommand(scope.toString(), target, f.toString());
                             commands.add(target);
                         }
                     } else {
-                        Function target = new CommandProxy(context, reference,
-                                function.toString());
+                        Function target = new CommandProxy(context, reference, function.toString());
                         addCommand(scope.toString(), target, function.toString());
                         commands.add(target);
                     }
@@ -173,17 +176,22 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         };
     }
 
-    private ServiceTracker<CommandSessionListener, CommandSessionListener> trackListeners(BundleContext context) {
-        return new ServiceTracker<CommandSessionListener, CommandSessionListener>(context, CommandSessionListener.class, null) {
+    private ServiceTracker<CommandSessionListener, CommandSessionListener> trackListeners(
+            BundleContext context) {
+        return new ServiceTracker<CommandSessionListener, CommandSessionListener>(
+                context, CommandSessionListener.class, null) {
             @Override
-            public CommandSessionListener addingService(ServiceReference<CommandSessionListener> reference) {
+            public CommandSessionListener addingService(
+                    ServiceReference<CommandSessionListener> reference) {
                 CommandSessionListener listener = context.getService(reference);
                 addListener(listener);
                 return listener;
             }
 
             @Override
-            public void removedService(ServiceReference<CommandSessionListener> reference, CommandSessionListener service) {
+            public void removedService(
+                    ServiceReference<CommandSessionListener> reference,
+                    CommandSessionListener service) {
                 removeListener(service);
                 context.ungetService(reference);
             }
@@ -191,8 +199,8 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
     }
 
     private String escapeforFilterString(String original) {
-        //the filter string follow the LDAP rule
-        //where we need escape the special char
+        // the filter string follow the LDAP rule
+        // where we need escape the special char
         String ret = original;
         ret = ret.replace("\\", "\\\\");
         ret = ret.replace("*", "\\*");
@@ -200,5 +208,4 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         ret = ret.replace(")", "\\)");
         return ret;
     }
-
 }

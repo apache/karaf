@@ -28,8 +28,7 @@ public class ConsoleClient {
 
     private boolean running;
 
-    @Reference
-    private BookingService bookingService;
+    @Reference private BookingService bookingService;
 
     @Activate
     public void start() throws Exception {
@@ -45,23 +44,30 @@ public class ConsoleClient {
         bookingService.add(booking);
 
         running = true;
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (running) {
-                    try {
-                        Thread.sleep(5000);
-                        for (Booking booking : bookingService.list()) {
-                            System.out.println();
-                            System.out.println("-----------");
-                            System.out.println(booking.getId() + " - " + booking.getFlight() + " - " + booking.getCustomer());
-                        }
-                    } catch (Exception e) {
-                        // nothing to do
-                    }
-                }
-            }
-        });
+        Thread thread =
+                new Thread(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                while (running) {
+                                    try {
+                                        Thread.sleep(5000);
+                                        for (Booking booking : bookingService.list()) {
+                                            System.out.println();
+                                            System.out.println("-----------");
+                                            System.out.println(
+                                                    booking.getId()
+                                                            + " - "
+                                                            + booking.getFlight()
+                                                            + " - "
+                                                            + booking.getCustomer());
+                                        }
+                                    } catch (Exception e) {
+                                        // nothing to do
+                                    }
+                                }
+                            }
+                        });
         thread.start();
     }
 
@@ -69,5 +75,4 @@ public class ConsoleClient {
     public void deactivate() throws Exception {
         running = false;
     }
-
 }

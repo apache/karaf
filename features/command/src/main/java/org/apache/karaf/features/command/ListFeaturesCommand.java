@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -30,31 +29,63 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "feature", name = "list", description = "Lists all existing features available from the defined repositories.")
+@Command(
+        scope = "feature",
+        name = "list",
+        description = "Lists all existing features available from the defined repositories.")
 @Service
 public class ListFeaturesCommand extends FeaturesCommandSupport {
 
-    @Option(name = "-i", aliases = {"--installed"}, description = "Display a list of all installed features only", required = false, multiValued = false)
+    @Option(
+            name = "-i",
+            aliases = {"--installed"},
+            description = "Display a list of all installed features only",
+            required = false,
+            multiValued = false)
     boolean onlyInstalled;
 
-    @Option(name = "-r", aliases = {"--required"}, description = "Display a list of all required features only", required = false, multiValued = false)
+    @Option(
+            name = "-r",
+            aliases = {"--required"},
+            description = "Display a list of all required features only",
+            required = false,
+            multiValued = false)
     boolean onlyRequired;
 
-    @Option(name = "-s", aliases = {"--show-hidden"}, description = "Display hidden features", required = false, multiValued = false)
+    @Option(
+            name = "-s",
+            aliases = {"--show-hidden"},
+            description = "Display hidden features",
+            required = false,
+            multiValued = false)
     boolean showHidden;
 
-    @Option(name = "-b", aliases = {"--show-blacklisted"}, description = "Display blacklisted features", required = false, multiValued = false)
+    @Option(
+            name = "-b",
+            aliases = {"--show-blacklisted"},
+            description = "Display blacklisted features",
+            required = false,
+            multiValued = false)
     boolean showBlacklisted;
 
-    @Option(name = "-o", aliases = {"--ordered"}, description = "Display a list using alphabetical order ", required = false, multiValued = false)
+    @Option(
+            name = "-o",
+            aliases = {"--ordered"},
+            description = "Display a list using alphabetical order ",
+            required = false,
+            multiValued = false)
     boolean ordered;
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
     protected void doExecute(FeaturesService featuresService) throws Exception {
         boolean needsLegend = false;
-        
+
         ShellTable table = new ShellTable();
         table.column("Name");
         table.column("Version");
@@ -112,7 +143,6 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         if (needsLegend) {
             System.out.println("* Installed via deploy directory");
         }
-
     }
 
     private boolean isInstalledViaDeployDir(String st) {
@@ -121,8 +151,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
     class FeatureComparator implements Comparator<Feature> {
         public int compare(Feature o1, Feature o2) {
-            return o1.getName().toLowerCase().compareTo( o2.getName().toLowerCase() );
+            return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
         }
     }
-
 }

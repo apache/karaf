@@ -16,7 +16,6 @@ package org.apache.karaf.itests.util;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 import org.apache.karaf.itests.util.RunIfRule.RunIf;
 import org.apache.karaf.itests.util.RunIfRule.RunIfCondition;
 
@@ -25,9 +24,7 @@ public class RunIfRules {
     @RunIf(condition = RunIfNotOnJdk8Condition.class)
     @Retention(RetentionPolicy.RUNTIME)
     @Inherited
-    public @interface RunIfNotOnJdk8 {
-
-    }
+    public @interface RunIfNotOnJdk8 {}
 
     public static class RunIfNotOnJdk8Condition implements RunIfCondition {
         @Override
@@ -36,5 +33,4 @@ public class RunIfRules {
             return jdk.equals("1.5") || jdk.equals("1.6") || jdk.equals("1.7");
         }
     }
-
 }

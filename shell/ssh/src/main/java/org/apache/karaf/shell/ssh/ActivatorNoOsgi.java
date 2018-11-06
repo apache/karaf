@@ -26,8 +26,7 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 
 public class ActivatorNoOsgi {
 
-    @Reference
-    SessionFactory sessionFactory;
+    @Reference SessionFactory sessionFactory;
 
     @Init
     public void init() {
@@ -38,5 +37,4 @@ public class ActivatorNoOsgi {
     public void destroy() {
         sessionFactory.getRegistry().getService(Manager.class).register(SshAction.class);
     }
-
 }

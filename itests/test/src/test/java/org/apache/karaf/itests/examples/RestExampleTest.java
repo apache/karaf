@@ -28,7 +28,10 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 public class RestExampleTest extends KarafTestSupport {
 
     private void setup() throws Exception {
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-rest-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-rest-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
         installAndAssertFeature("karaf-rest-example-provider");
     }
 
@@ -58,5 +61,4 @@ public class RestExampleTest extends KarafTestSupport {
 
         verify();
     }
-
 }

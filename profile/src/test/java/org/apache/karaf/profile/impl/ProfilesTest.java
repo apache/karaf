@@ -16,6 +16,12 @@
  */
 package org.apache.karaf.profile.impl;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -24,18 +30,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class ProfilesTest {
 
@@ -73,18 +72,22 @@ public class ProfilesTest {
         profiles.put("x", profile);
         Profile overlayProfile = Profiles.getOverlay(profile, profiles);
         Profiles.writeProfile(Paths.get("target/p-" + UUID.randomUUID().toString()), profile);
-        Profiles.writeProfile(Paths.get("target/ep1-" + UUID.randomUUID().toString()), effectiveProfile1);
-        Profiles.writeProfile(Paths.get("target/ep2-" + UUID.randomUUID().toString()), effectiveProfile2);
-        Profiles.writeProfile(Paths.get("target/op-" + UUID.randomUUID().toString()), overlayProfile);
+        Profiles.writeProfile(
+                Paths.get("target/ep1-" + UUID.randomUUID().toString()), effectiveProfile1);
+        Profiles.writeProfile(
+                Paths.get("target/ep2-" + UUID.randomUUID().toString()), effectiveProfile2);
+        Profiles.writeProfile(
+                Paths.get("target/op-" + UUID.randomUUID().toString()), overlayProfile);
     }
 
     @Test
     public void testProfilePlaceholderResolver() {
-        Profile profile = ProfileBuilder.Factory.create("test")
-                .addConfiguration("pid1", "foo", "b${profile:pid2/bar}")
-                .addConfiguration("pid2", "bar", "a${rep}")
-                .addConfiguration("pid2", "rep", "h")
-                .getProfile();
+        Profile profile =
+                ProfileBuilder.Factory.create("test")
+                        .addConfiguration("pid1", "foo", "b${profile:pid2/bar}")
+                        .addConfiguration("pid2", "bar", "a${rep}")
+                        .addConfiguration("pid2", "rep", "h")
+                        .getProfile();
 
         Profile effective = Profiles.getEffective(profile);
 
@@ -93,11 +96,12 @@ public class ProfilesTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testProfilePlaceholderResolverWithCycle() {
-        Profile profile = ProfileBuilder.Factory.create("test")
-                .addConfiguration("pid1", "foo", "b${profile:pid2/bar}")
-                .addConfiguration("pid2", "bar", "a${rep}")
-                .addConfiguration("pid2", "rep", "h${profile:pid1/foo}")
-                .getProfile();
+        Profile profile =
+                ProfileBuilder.Factory.create("test")
+                        .addConfiguration("pid1", "foo", "b${profile:pid2/bar}")
+                        .addConfiguration("pid2", "bar", "a${rep}")
+                        .addConfiguration("pid2", "rep", "h${profile:pid1/foo}")
+                        .getProfile();
 
         Profile effective = Profiles.getEffective(profile);
 
@@ -107,9 +111,10 @@ public class ProfilesTest {
 
     @Test
     public void testNonSubstitution() {
-        Profile profile = ProfileBuilder.Factory.create("test")
-                .addConfiguration("pid1", "key", "${foo}/${bar}")
-                .getProfile();
+        Profile profile =
+                ProfileBuilder.Factory.create("test")
+                        .addConfiguration("pid1", "key", "${foo}/${bar}")
+                        .getProfile();
 
         Profile effective = Profiles.getEffective(profile, false);
 
@@ -120,14 +125,16 @@ public class ProfilesTest {
     public void testProfilesOverlayComments() {
         String pid1 = "# My comment\nfoo = bar\n";
 
-        Profile parent = ProfileBuilder.Factory.create("parent")
-                .addFileConfiguration("pid1.cfg", pid1.getBytes())
-                .getProfile();
+        Profile parent =
+                ProfileBuilder.Factory.create("parent")
+                        .addFileConfiguration("pid1.cfg", pid1.getBytes())
+                        .getProfile();
 
-        Profile profile = ProfileBuilder.Factory.create("test")
-                .addConfiguration("pid1", "foo", "bar2")
-                .addParent("parent")
-                .getProfile();
+        Profile profile =
+                ProfileBuilder.Factory.create("test")
+                        .addConfiguration("pid1", "foo", "bar2")
+                        .addParent("parent")
+                        .getProfile();
 
         Map<String, Profile> profiles = new HashMap<>();
         profiles.put(parent.getId(), parent);
@@ -136,25 +143,28 @@ public class ProfilesTest {
         Profile overlay = Profiles.getOverlay(profile, profiles);
 
         String outPid1 = new String(overlay.getFileConfiguration("pid1.cfg"));
-        assertEquals(String.format("%1$s%n%2$s%n","# My comment","foo = bar2"), outPid1);
+        assertEquals(String.format("%1$s%n%2$s%n", "# My comment", "foo = bar2"), outPid1);
     }
 
     @Test
     public void overlayProfiles() {
-        Profile p1 = ProfileBuilder.Factory.create("p1")
-                .addAttribute("p1a1", "p1v1")
-                .addConfiguration("p1p1", "p1p1p1", "p1p1v1")
-                .addConfiguration("pp1", "pp1p1", "p1p1v1")
-                .getProfile();
-        Profile p2 = ProfileBuilder.Factory.create("p2")
-                .addAttribute("p2a1", "p2v1")
-                .addConfiguration("p2p1", "p2p1p1", "p2p1v1")
-                .addConfiguration("pp1", "pp1p1", "p2p1v1")
-                .getProfile();
+        Profile p1 =
+                ProfileBuilder.Factory.create("p1")
+                        .addAttribute("p1a1", "p1v1")
+                        .addConfiguration("p1p1", "p1p1p1", "p1p1v1")
+                        .addConfiguration("pp1", "pp1p1", "p1p1v1")
+                        .getProfile();
+        Profile p2 =
+                ProfileBuilder.Factory.create("p2")
+                        .addAttribute("p2a1", "p2v1")
+                        .addConfiguration("p2p1", "p2p1p1", "p2p1v1")
+                        .addConfiguration("pp1", "pp1p1", "p2p1v1")
+                        .getProfile();
 
-        Profile c1 = ProfileBuilder.Factory.create("c2")
-                .addParents(Arrays.asList("p1", "p2"))
-                .getProfile();
+        Profile c1 =
+                ProfileBuilder.Factory.create("c2")
+                        .addParents(Arrays.asList("p1", "p2"))
+                        .getProfile();
 
         assertThat(c1.getAttributes().get("p1a1"), nullValue());
         assertThat(c1.getAttributes().get("p2a1"), nullValue());
@@ -176,38 +186,43 @@ public class ProfilesTest {
 
     @Test
     public void inheritanceOrder() {
-        Profile gp1 = ProfileBuilder.Factory.create("gp1")
-                .addAttribute("a", "1")
-                .addFileConfiguration("f", new byte[] { 0x01 })
-                .addAttribute("b", "1")
-                .addAttribute("c", "1")
-                .addConfiguration("p", "p", "1")
-                .addConfiguration("p", "px", "1")
-                .getProfile();
-        Profile gp2 = ProfileBuilder.Factory.create("gp2")
-                .addAttribute("a", "2")
-                .addAttribute("c", "2")
-                .addFileConfiguration("f", new byte[] { 0x02 })
-                .addConfiguration("p", "p", "2")
-                .getProfile();
-        Profile p1 = ProfileBuilder.Factory.create("p1")
-                .addParents(Arrays.asList("gp1", "gp2"))
-                .addAttribute("a", "3")
-                .addFileConfiguration("f", new byte[] { 0x03 })
-                .addConfiguration("p", "p", "3")
-                .getProfile();
-        Profile p2 = ProfileBuilder.Factory.create("p2")
-                .addAttribute("a", "4")
-                .addAttribute("b", "4")
-                .addFileConfiguration("f", new byte[] { 0x04 })
-                .addConfiguration("p", "p", "4")
-                .getProfile();
-        Profile c = ProfileBuilder.Factory.create("p2")
-                .addParents(Arrays.asList("p1", "p2"))
-                .addAttribute("a", "5")
-                .addFileConfiguration("f", new byte[] { 0x05 })
-                .addConfiguration("p", "p", "5")
-                .getProfile();
+        Profile gp1 =
+                ProfileBuilder.Factory.create("gp1")
+                        .addAttribute("a", "1")
+                        .addFileConfiguration("f", new byte[] {0x01})
+                        .addAttribute("b", "1")
+                        .addAttribute("c", "1")
+                        .addConfiguration("p", "p", "1")
+                        .addConfiguration("p", "px", "1")
+                        .getProfile();
+        Profile gp2 =
+                ProfileBuilder.Factory.create("gp2")
+                        .addAttribute("a", "2")
+                        .addAttribute("c", "2")
+                        .addFileConfiguration("f", new byte[] {0x02})
+                        .addConfiguration("p", "p", "2")
+                        .getProfile();
+        Profile p1 =
+                ProfileBuilder.Factory.create("p1")
+                        .addParents(Arrays.asList("gp1", "gp2"))
+                        .addAttribute("a", "3")
+                        .addFileConfiguration("f", new byte[] {0x03})
+                        .addConfiguration("p", "p", "3")
+                        .getProfile();
+        Profile p2 =
+                ProfileBuilder.Factory.create("p2")
+                        .addAttribute("a", "4")
+                        .addAttribute("b", "4")
+                        .addFileConfiguration("f", new byte[] {0x04})
+                        .addConfiguration("p", "p", "4")
+                        .getProfile();
+        Profile c =
+                ProfileBuilder.Factory.create("p2")
+                        .addParents(Arrays.asList("p1", "p2"))
+                        .addAttribute("a", "5")
+                        .addFileConfiguration("f", new byte[] {0x05})
+                        .addConfiguration("p", "p", "5")
+                        .getProfile();
 
         Map<String, Profile> parents = new LinkedHashMap<>();
         parents.put("gp1", gp1);
@@ -221,16 +236,16 @@ public class ProfilesTest {
         assertThat(overlay.getAttributes().get("c"), equalTo("2"));
         assertThat(overlay.getConfiguration("p").get("p"), equalTo("5"));
         assertThat(overlay.getConfiguration("p").get("px"), equalTo("1"));
-        assertThat(overlay.getFileConfiguration("f"), equalTo(new byte[] { 0x05 }));
+        assertThat(overlay.getFileConfiguration("f"), equalTo(new byte[] {0x05}));
     }
 
     @Test
     public void overrides() {
-        Profile p = ProfileBuilder.Factory.create("p")
-                .setOverrides(Arrays.asList("a", "b"))
-                .getProfile();
+        Profile p =
+                ProfileBuilder.Factory.create("p")
+                        .setOverrides(Arrays.asList("a", "b"))
+                        .getProfile();
 
         assertThat(p.getConfiguration("profile").size(), equalTo(2));
     }
-
 }

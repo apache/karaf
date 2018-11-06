@@ -18,43 +18,43 @@ package org.apache.karaf.features.internal.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.felix.utils.version.VersionTable;
 import org.osgi.framework.Version;
 
 public final class Macro {
 
     static final String MASK_STRING = "[\\-+=~0123456789]{0,3}[=~]?";
-    static final Pattern RANGE_MASK = Pattern.compile("(\\[|\\()(" + MASK_STRING + "),(" + MASK_STRING + ")(\\]|\\))");
+    static final Pattern RANGE_MASK =
+            Pattern.compile("(\\[|\\()(" + MASK_STRING + "),(" + MASK_STRING + ")(\\]|\\))");
 
-    private Macro() {
-    }
+    private Macro() {}
 
     public static String transform(String macro, String value) {
         if (macro.startsWith("${") && macro.endsWith("}")) {
             String[] args = macro.substring(2, macro.length() - 1).split(";");
             switch (args[0]) {
-            case "version":
-                if (args.length != 2) {
-                    throw new IllegalArgumentException("Invalid syntax for macro: " + macro);
-                }
-                return version(args[1], VersionTable.getVersion(value));
-            case "range":
-                if (args.length != 2) {
-                    throw new IllegalArgumentException("Invalid syntax for macro: " + macro);
-                }
-                return range(args[1], VersionTable.getVersion(value));
-            default:
-                throw new IllegalArgumentException("Unknown macro: " + macro);
+                case "version":
+                    if (args.length != 2) {
+                        throw new IllegalArgumentException("Invalid syntax for macro: " + macro);
+                    }
+                    return version(args[1], VersionTable.getVersion(value));
+                case "range":
+                    if (args.length != 2) {
+                        throw new IllegalArgumentException("Invalid syntax for macro: " + macro);
+                    }
+                    return range(args[1], VersionTable.getVersion(value));
+                default:
+                    throw new IllegalArgumentException("Unknown macro: " + macro);
             }
         }
         return value;
     }
 
     /**
-     * Modify a version to set a version policy. Thed policy is a mask that is
-     * mapped to a version.
-     * <p/>
+     * Modify a version to set a version policy. Thed policy is a mask that is mapped to a version.
+     *
+     * <p>
+     *
      * <pre>
      * +           increment
      * -           decrement
@@ -65,7 +65,6 @@ public final class Macro {
      * &tilde;&tilde;&tilde;=     = just get the qualifier
      * version=&quot;[${version;==;${{@literal @}}},${version;=+;${{@literal @}}})&quot;
      * </pre>
-     *
      */
     static String version(String mask, Version version) {
         StringBuilder sb = new StringBuilder();
@@ -88,29 +87,29 @@ public final class Macro {
                 } else {
                     int x = 0;
                     switch (i) {
-                    case 0:
-                        x = version.getMajor();
-                        break;
-                    case 1:
-                        x = version.getMinor();
-                        break;
-                    case 2:
-                        x = version.getMicro();
-                        break;
-                    default:
-                        throw new IllegalStateException();
+                        case 0:
+                            x = version.getMajor();
+                            break;
+                        case 1:
+                            x = version.getMinor();
+                            break;
+                        case 2:
+                            x = version.getMicro();
+                            break;
+                        default:
+                            throw new IllegalStateException();
                     }
                     switch (c) {
-                    case '+':
-                        x++;
-                        break;
-                    case '-':
-                        x--;
-                        break;
-                    case '=':
-                        break;
-                    default:
-                        throw new IllegalStateException();
+                        case '+':
+                            x++;
+                            break;
+                        case '-':
+                            x--;
+                            break;
+                        case '=':
+                            break;
+                        default:
+                            throw new IllegalStateException();
                     }
                     result = Integer.toString(x);
                 }
@@ -126,14 +125,14 @@ public final class Macro {
 
     /**
      * Schortcut for version policy
-     * <p/>
+     *
+     * <p>
+     *
      * <pre>
      * -provide-policy : ${policy;[==,=+)}
      * -consume-policy : ${policy;[==,+)}
      * </pre>
-     *
      */
-
     static String range(String spec, Version version) {
         Matcher m = RANGE_MASK.matcher(spec);
         m.matches();
@@ -147,5 +146,4 @@ public final class Macro {
 
         return floor + left + "," + right + ceiling;
     }
-
 }

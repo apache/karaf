@@ -19,7 +19,6 @@ package org.apache.karaf.features.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -28,15 +27,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-
 import org.apache.karaf.features.Blacklisting;
 
 /**
- * <p>Root element of Feature definition. It contains optional attribute which allow
- * name of repository. This name will be used in shell to display source repository
- * of given feature.</p>
- * <p>Java class for featuresRoot complex type.</p>
- * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ * Root element of Feature definition. It contains optional attribute which allow name of
+ * repository. This name will be used in shell to display source repository of given feature.
+ *
+ * <p>Java class for featuresRoot complex type.
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ *
  * <pre>
  * &lt;complexType name="features"&gt;
  *   &lt;complexContent&gt;
@@ -52,42 +52,50 @@ import org.apache.karaf.features.Blacklisting;
  * &lt;/complexType&gt;
  * </pre>
  */
-@XmlRootElement(name = "features", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+@XmlRootElement(
+        name = "features",
+        namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "features", propOrder = {"repository", "resourceRepository", "feature"})
+@XmlType(
+        name = "features",
+        propOrder = {"repository", "resourceRepository", "feature"})
 public class Features implements Blacklisting {
 
     @XmlSchemaType(name = "anyURI")
-    @XmlElement(name = "repository", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+    @XmlElement(
+            name = "repository",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> repository;
-    @XmlSchemaType(name = "anyURI") 
-    @XmlElement(name = "resource-repository", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+
+    @XmlSchemaType(name = "anyURI")
+    @XmlElement(
+            name = "resource-repository",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<String> resourceRepository;
-    @XmlElement(name = "feature", namespace=org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
+
+    @XmlElement(
+            name = "feature",
+            namespace = org.apache.karaf.features.FeaturesNamespaces.URI_CURRENT)
     protected List<Feature> feature;
-    @XmlAttribute
-    protected String name;
-    @XmlTransient
-    private String namespace;
-    @XmlTransient
-    private boolean blacklisted;
+
+    @XmlAttribute protected String name;
+    @XmlTransient private String namespace;
+    @XmlTransient private boolean blacklisted;
 
     /**
-     * <p>Get the value of the repository property.</p>
+     * Get the value of the repository property.
      *
-     * <p>This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the repository property.</p>
+     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the repository property.
      *
-     * <p>For example, to add a new item, do as follows:</p>
+     * <p>For example, to add a new item, do as follows:
      *
      * <pre>
      *    getRepository().add(newItem);
      * </pre>
      *
-     * <p>Objects of the following type(s) are allowed in the list
-     * {@link String}.</p>
+     * <p>Objects of the following type(s) are allowed in the list {@link String}.
      *
      * @return the list of inner repositories.
      */
@@ -99,23 +107,20 @@ public class Features implements Blacklisting {
     }
 
     /**
-     * <p>Get the value of the resource repository property.</p>
+     * Get the value of the resource repository property.
      *
-     * <p>This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.</p>
+     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object.
      *
-     * <p>This is why there is not a <CODE>set</CODE> method for
-     * the resource repository property.</p>
+     * <p>This is why there is not a <CODE>set</CODE> method for the resource repository property.
      *
-     * <p>For example, to add a new item, do as follows:</p>
+     * <p>For example, to add a new item, do as follows:
      *
      * <pre>
      *    getResourceRepository().add(newItem);
      * </pre>
      *
-     * <p>Objects of the following type(s) are allowed in the list
-     * {@link String}</p>
+     * <p>Objects of the following type(s) are allowed in the list {@link String}
      *
      * @return the list of inner resource repositories.
      */
@@ -127,23 +132,20 @@ public class Features implements Blacklisting {
     }
 
     /**
-     * <p>Get the value of the feature property.</p>
+     * Get the value of the feature property.
      *
-     * <p>This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.</p>
+     * <p>This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object.
      *
-     * <p>This is why there is not a <CODE>set</CODE> method
-     * for the feature property.</p>
+     * <p>This is why there is not a <CODE>set</CODE> method for the feature property.
      *
-     * <p>For example, to add a new item, do as follows:</p>
+     * <p>For example, to add a new item, do as follows:
      *
      * <pre>
      *    getFeatures().add(newItem);
      * </pre>
      *
-     * <p>Objects of the following type(s) are allowed in the list
-     * {@link Feature}.</p>
+     * <p>Objects of the following type(s) are allowed in the list {@link Feature}.
      *
      * @return the list of inner features.
      */
@@ -187,7 +189,7 @@ public class Features implements Blacklisting {
 
     private static void trim(List<String> list) {
         if (list != null) {
-            for (ListIterator<String> it = list.listIterator(); it.hasNext();) {
+            for (ListIterator<String> it = list.listIterator(); it.hasNext(); ) {
                 it.set(it.next().trim());
             }
         }
@@ -209,5 +211,4 @@ public class Features implements Blacklisting {
     public void setBlacklisted(boolean blacklisted) {
         this.blacklisted = blacklisted;
     }
-
 }

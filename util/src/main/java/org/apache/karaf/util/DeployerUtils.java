@@ -19,18 +19,20 @@ package org.apache.karaf.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Contain various methods that are useful for deploying artifacts.
- */
+/** Contain various methods that are useful for deploying artifacts. */
 public final class DeployerUtils {
 
     /** Private constructors to avoid instantiation */
-    private DeployerUtils() { }
+    private DeployerUtils() {}
 
     private static final String DEFAULT_VERSION = "0.0.0";
 
-    private static final Pattern ARTIFACT_MATCHER = Pattern.compile("(.+)(?:-(\\d+)(?:\\.(\\d+)(?:\\.(\\d+))?)?(?:[^a-zA-Z0-9](.*))?)(?:\\.([^\\.]+))", Pattern.DOTALL);
-    private static final Pattern FUZZY_MODIFIDER = Pattern.compile("(?:\\d+[.-])*(.*)", Pattern.DOTALL);
+    private static final Pattern ARTIFACT_MATCHER =
+            Pattern.compile(
+                    "(.+)(?:-(\\d+)(?:\\.(\\d+)(?:\\.(\\d+))?)?(?:[^a-zA-Z0-9](.*))?)(?:\\.([^\\.]+))",
+                    Pattern.DOTALL);
+    private static final Pattern FUZZY_MODIFIDER =
+            Pattern.compile("(?:\\d+[.-])*(.*)", Pattern.DOTALL);
 
     /**
      * Heuristic to compute the name and version of a file given it's name on disk
@@ -41,9 +43,8 @@ public final class DeployerUtils {
     public static String[] extractNameVersionType(String url) {
         Matcher m = ARTIFACT_MATCHER.matcher(url);
         if (!m.matches()) {
-            return new String[] { url, DEFAULT_VERSION };
-        }
-        else {
+            return new String[] {url, DEFAULT_VERSION};
+        } else {
             StringBuffer v = new StringBuffer();
             String d1 = m.group(1);
             String d2 = m.group(2);
@@ -72,7 +73,7 @@ public final class DeployerUtils {
                     cleanupModifier(v, d5);
                 }
             }
-            return new String[] { d1, v.toString(), d6 };
+            return new String[] {d1, v.toString(), d6};
         }
     }
 
@@ -83,11 +84,13 @@ public final class DeployerUtils {
         }
         for (int i = 0; i < modifier.length(); i++) {
             char c = modifier.charAt(i);
-            if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-') {
+            if ((c >= '0' && c <= '9')
+                    || (c >= 'a' && c <= 'z')
+                    || (c >= 'A' && c <= 'Z')
+                    || c == '_'
+                    || c == '-') {
                 result.append(c);
             }
         }
     }
-
-
 }

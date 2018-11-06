@@ -23,12 +23,11 @@ import java.util.zip.CRC32;
 
 public final class ChecksumUtils {
 
-    private ChecksumUtils() {
-    }
+    private ChecksumUtils() {}
 
     /**
-     * Compute a checksum for the file or directory that consists of the name, length and the last modified date
-     * for a file and its children in case of a directory
+     * Compute a checksum for the file or directory that consists of the name, length and the last
+     * modified date for a file and its children in case of a directory
      *
      * @param is the input stream
      * @return a checksum identifying any change
@@ -72,5 +71,4 @@ public final class ChecksumUtils {
             return nb;
         }
     }
-
 }

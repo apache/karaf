@@ -21,13 +21,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
 /**
  * Based on http://svn.apache.org/repos/asf/geronimo/trunk/modules/management/
- *              src/java/org/apache/geronimo/management/geronimo/KeystoreInstance.java
+ * src/java/org/apache/geronimo/management/geronimo/KeystoreInstance.java
  */
 public interface KeystoreInstance {
 
@@ -51,9 +50,10 @@ public interface KeystoreInstance {
 
     boolean isKeyLocked(String keyAlias);
 
-    KeyManager[] getKeyManager(String algorithm, String keyAlias) throws NoSuchAlgorithmException,
-                                UnrecoverableKeyException, KeyStoreException, KeystoreIsLocked;
+    KeyManager[] getKeyManager(String algorithm, String keyAlias)
+            throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException,
+                    KeystoreIsLocked;
 
-    TrustManager[] getTrustManager(String algorithm) throws KeyStoreException, NoSuchAlgorithmException, KeystoreIsLocked;
-
+    TrustManager[] getTrustManager(String algorithm)
+            throws KeyStoreException, NoSuchAlgorithmException, KeystoreIsLocked;
 }

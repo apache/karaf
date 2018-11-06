@@ -29,5 +29,4 @@ public class ImportDetailsTest {
         Assert.assertEquals("1.9.0", details.minVersion);
         Assert.assertEquals("2.0.0", details.maxVersion);
     }
-
 }

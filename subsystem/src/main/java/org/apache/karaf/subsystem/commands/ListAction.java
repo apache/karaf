@@ -35,15 +35,15 @@ public class ListAction extends SubsystemSupport implements Action {
         table.column("Children");
 
         for (Subsystem ss : getSubsystems()) {
-            table.addRow().addContent(
-                    ss.getSubsystemId(),
-                    ss.getSymbolicName(),
-                    ss.getVersion(),
-                    ss.getState().toString(),
-                    getType(ss),
-                    getSubsytemIds(ss.getParents()),
-                    getSubsytemIds(ss.getChildren())
-            );
+            table.addRow()
+                    .addContent(
+                            ss.getSubsystemId(),
+                            ss.getSymbolicName(),
+                            ss.getVersion(),
+                            ss.getState().toString(),
+                            getType(ss),
+                            getSubsytemIds(ss.getParents()),
+                            getSubsytemIds(ss.getChildren()));
         }
         table.print(System.out);
         return null;
@@ -56,5 +56,4 @@ public class ListAction extends SubsystemSupport implements Action {
         }
         return type;
     }
-
 }

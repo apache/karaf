@@ -18,20 +18,17 @@
  */
 package org.apache.karaf.main.lock;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.logging.Level;
-
-import org.apache.felix.utils.properties.Properties;
-
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import org.apache.felix.utils.properties.Properties;
+import org.junit.Before;
+import org.junit.Test;
 
 public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
 
@@ -48,7 +45,8 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
     DefaultJDBCLock createLock(Properties props) {
         return new PostgreSQLJDBCLock(props) {
             @Override
-            Connection doCreateConnection(String driver, String url, String username, String password) {
+            Connection doCreateConnection(
+                    String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
                 assertEquals(this.url, url);
                 assertEquals(this.user, username);
@@ -72,26 +70,28 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
     public void createConnectionShouldConcatinateOptionsCorrect() {
         props.put("karaf.lock.jdbc.url", this.url + ";dataEncryption=false");
 
-        lock = new PostgreSQLJDBCLock(props) {
-            @Override
-            boolean schemaExists() {
-                return true;
-            }
+        lock =
+                new PostgreSQLJDBCLock(props) {
+                    @Override
+                    boolean schemaExists() {
+                        return true;
+                    }
 
-            @Override
-            Connection doCreateConnection(String driver, String url, String username, String password) {
-                assertEquals(this.driver, driver);
-                assertEquals(this.url, url);
-                assertEquals(this.user, username);
-                assertEquals(this.password, password);
-                return connection;
-            }
+                    @Override
+                    Connection doCreateConnection(
+                            String driver, String url, String username, String password) {
+                        assertEquals(this.driver, driver);
+                        assertEquals(this.url, url);
+                        assertEquals(this.user, username);
+                        assertEquals(this.password, password);
+                        return connection;
+                    }
 
-            @Override
-            long getCurrentTimeMillis() {
-                return 1;
-            }
-        };
+                    @Override
+                    long getCurrentTimeMillis() {
+                        return 1;
+                    }
+                };
     }
 
     @Test
@@ -101,12 +101,14 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(0);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(0);
         expect(preparedStatement.executeUpdate()).andReturn(1);
         preparedStatement.close();
@@ -126,12 +128,14 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(0);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(0);
         expect(preparedStatement.executeUpdate()).andThrow(new SQLException());
         preparedStatement.close();
@@ -151,12 +155,14 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(0);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(0);
         expect(preparedStatement.executeUpdate()).andThrow(new SQLException());
         preparedStatement.close();
@@ -176,12 +182,14 @@ public class PostgreSQLJDBCLockTest extends BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(0);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(0);
         expect(preparedStatement.executeUpdate()).andReturn(0);
         preparedStatement.close();

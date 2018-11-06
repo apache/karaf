@@ -22,12 +22,14 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 
 /**
- * Service that can process (enhance, modify, trim, ...) a set of features read from {@link Repository}.
+ * Service that can process (enhance, modify, trim, ...) a set of features read from {@link
+ * Repository}.
  */
 public interface FeaturesProcessor {
 
     /**
      * Checks whether given repository URI is <em>blacklisted</em>
+     *
      * @param uri
      * @return
      */
@@ -35,6 +37,7 @@ public interface FeaturesProcessor {
 
     /**
      * Checks whether given bundle URI is <em>blacklisted</em>
+     *
      * @param uri
      * @return
      */
@@ -42,8 +45,8 @@ public interface FeaturesProcessor {
 
     /**
      * Processes original {@link Features JAXB model of features}
+     *
      * @param features
      */
     void process(Features features);
-
 }

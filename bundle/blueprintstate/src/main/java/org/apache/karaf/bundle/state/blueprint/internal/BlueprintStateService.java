@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.karaf.bundle.core.BundleState;
 import org.apache.karaf.bundle.core.BundleStateService;
 import org.osgi.framework.Bundle;
@@ -32,12 +31,11 @@ import org.osgi.service.blueprint.container.BlueprintEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * TODO: use event instance to receive WAIT topics notifications from blueprint
- * extender
- */
-public class BlueprintStateService implements org.osgi.service.blueprint.container.BlueprintListener, BundleListener,
-    BundleStateService {
+/** TODO: use event instance to receive WAIT topics notifications from blueprint extender */
+public class BlueprintStateService
+        implements org.osgi.service.blueprint.container.BlueprintListener,
+                BundleListener,
+                BundleStateService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BlueprintStateService.class);
 
@@ -58,8 +56,9 @@ public class BlueprintStateService implements org.osgi.service.blueprint.contain
         if (event == null) {
             return null;
         }
-        if (event.getType() != BlueprintEvent.FAILURE && event.getType() != BlueprintEvent.GRACE_PERIOD
-            && event.getType() != BlueprintEvent.WAITING) {
+        if (event.getType() != BlueprintEvent.FAILURE
+                && event.getType() != BlueprintEvent.GRACE_PERIOD
+                && event.getType() != BlueprintEvent.WAITING) {
             return null;
         }
         StringBuilder message = new StringBuilder();
@@ -100,8 +99,11 @@ public class BlueprintStateService implements org.osgi.service.blueprint.contain
     public void blueprintEvent(BlueprintEvent blueprintEvent) {
         if (LOG.isDebugEnabled()) {
             BundleState state = getState(blueprintEvent);
-            LOG.debug("Blueprint app state changed to " + state + " for bundle "
-                      + blueprintEvent.getBundle().getBundleId());
+            LOG.debug(
+                    "Blueprint app state changed to "
+                            + state
+                            + " for bundle "
+                            + blueprintEvent.getBundle().getBundleId());
         }
         states.put(blueprintEvent.getBundle().getBundleId(), blueprintEvent);
     }
@@ -118,23 +120,22 @@ public class BlueprintStateService implements org.osgi.service.blueprint.contain
             return BundleState.Unknown;
         }
         switch (blueprintEvent.getType()) {
-        case BlueprintEvent.CREATING:
-            return BundleState.Starting;
-        case BlueprintEvent.CREATED:
-            return BundleState.Active;
-        case BlueprintEvent.DESTROYING:
-            return BundleState.Stopping;
-        case BlueprintEvent.DESTROYED:
-            return BundleState.Resolved;
-        case BlueprintEvent.FAILURE:
-            return BundleState.Failure;
-        case BlueprintEvent.GRACE_PERIOD:
-            return BundleState.GracePeriod;
-        case BlueprintEvent.WAITING:
-            return BundleState.Waiting;
-        default:
-            return BundleState.Unknown;
+            case BlueprintEvent.CREATING:
+                return BundleState.Starting;
+            case BlueprintEvent.CREATED:
+                return BundleState.Active;
+            case BlueprintEvent.DESTROYING:
+                return BundleState.Stopping;
+            case BlueprintEvent.DESTROYED:
+                return BundleState.Resolved;
+            case BlueprintEvent.FAILURE:
+                return BundleState.Failure;
+            case BlueprintEvent.GRACE_PERIOD:
+                return BundleState.GracePeriod;
+            case BlueprintEvent.WAITING:
+                return BundleState.Waiting;
+            default:
+                return BundleState.Unknown;
         }
     }
-
 }

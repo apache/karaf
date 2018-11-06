@@ -18,9 +18,7 @@ package org.apache.karaf.examples.bundle.common;
 
 import java.util.Random;
 
-/**
- * A simple POJO describing a booking.
- */
+/** A simple POJO describing a booking. */
 public class Booking {
 
     private Long id;
@@ -57,5 +55,4 @@ public class Booking {
     public void setFlight(String flight) {
         this.flight = flight;
     }
-
 }

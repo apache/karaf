@@ -17,9 +17,7 @@ package org.apache.karaf.jaas.command;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.security.auth.login.AppConfigurationEntry;
-
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
@@ -30,11 +28,18 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "jaas", name = "user-list", description = "List the users of the selected JAAS realm/login module")
+@Command(
+        scope = "jaas",
+        name = "user-list",
+        description = "List the users of the selected JAAS realm/login module")
 @Service
 public class ListUsersCommand extends JaasCommandSupport {
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
     @Override
@@ -86,7 +91,6 @@ public class ListUsersCommand extends JaasCommandSupport {
             if (reportedRoles.size() == 0) {
                 table.addRow().addContent(userName, "", "");
             }
-
         }
 
         table.print(System.out, !noFormat);
@@ -94,7 +98,8 @@ public class ListUsersCommand extends JaasCommandSupport {
         return null;
     }
 
-    private List<String> displayGroupRoles(BackingEngine engine, String userName, GroupPrincipal group, ShellTable table) {
+    private List<String> displayGroupRoles(
+            BackingEngine engine, String userName, GroupPrincipal group, ShellTable table) {
         List<String> names = new ArrayList<>();
         List<RolePrincipal> roles = engine.listRoles(group);
 
@@ -107,5 +112,4 @@ public class ListUsersCommand extends JaasCommandSupport {
         }
         return names;
     }
-
 }

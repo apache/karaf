@@ -26,59 +26,62 @@ import java.io.File;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.karaf.kar.KarService;
 import org.junit.Before;
 import org.junit.Test;
 
 public class KarArtifactInstallerTest {
-	private KarArtifactInstaller karArtifactInstaller;
-	private KarService karService;
+    private KarArtifactInstaller karArtifactInstaller;
+    private KarService karService;
 
-	private URI goodKarFile;
-	private URI zipFileWithKarafManifest;
-	private URI zipFileWithoutKarafManifest;
-	private URI badZipFile;
-	
-	@Before
-	public void setUp() throws Exception {
-		karService = createMock(KarService.class);
+    private URI goodKarFile;
+    private URI zipFileWithKarafManifest;
+    private URI zipFileWithoutKarafManifest;
+    private URI badZipFile;
 
-		karArtifactInstaller = new KarArtifactInstaller();
+    @Before
+    public void setUp() throws Exception {
+        karService = createMock(KarService.class);
 
-		karArtifactInstaller.setKarService(karService);
-		
-		goodKarFile = getClass().getClassLoader().getResource("goodKarFile.kar").toURI();
-		zipFileWithKarafManifest = getClass().getClassLoader().getResource("karFileAsZip.zip").toURI();
-		zipFileWithoutKarafManifest = getClass().getClassLoader().getResource("karFileAsZipNoManifest.zip").toURI();
-		badZipFile = getClass().getClassLoader().getResource("badZipFile.zip").toURI();
-	}
+        karArtifactInstaller = new KarArtifactInstaller();
 
-	@Test
-	public void shouldHandleKarFile() throws Exception {
-		assertTrue(karArtifactInstaller.canHandle(new File(goodKarFile)));
-	}
-	
-	@Test
-	public void shouldHandleZipFileWithKarafManifest() throws Exception {
-		assertTrue(karArtifactInstaller.canHandle(new File(zipFileWithKarafManifest)));
-	}
+        karArtifactInstaller.setKarService(karService);
 
-	@Test
-	public void shouldIgnoreZipFileWithoutKarafManifest() throws Exception { 		
-		assertFalse(karArtifactInstaller.canHandle(new File(zipFileWithoutKarafManifest)));
-	}
+        goodKarFile = getClass().getClassLoader().getResource("goodKarFile.kar").toURI();
+        zipFileWithKarafManifest =
+                getClass().getClassLoader().getResource("karFileAsZip.zip").toURI();
+        zipFileWithoutKarafManifest =
+                getClass().getClassLoader().getResource("karFileAsZipNoManifest.zip").toURI();
+        badZipFile = getClass().getClassLoader().getResource("badZipFile.zip").toURI();
+    }
 
-	@Test
-	public void shouldIgnoreBadZipFile() throws Exception { 		
-		assertFalse(karArtifactInstaller.canHandle(new File(badZipFile)));
-	}
+    @Test
+    public void shouldHandleKarFile() throws Exception {
+        assertTrue(karArtifactInstaller.canHandle(new File(goodKarFile)));
+    }
+
+    @Test
+    public void shouldHandleZipFileWithKarafManifest() throws Exception {
+        assertTrue(karArtifactInstaller.canHandle(new File(zipFileWithKarafManifest)));
+    }
+
+    @Test
+    public void shouldIgnoreZipFileWithoutKarafManifest() throws Exception {
+        assertFalse(karArtifactInstaller.canHandle(new File(zipFileWithoutKarafManifest)));
+    }
+
+    @Test
+    public void shouldIgnoreBadZipFile() throws Exception {
+        assertFalse(karArtifactInstaller.canHandle(new File(badZipFile)));
+    }
 
     /**
-     * This is test for KARAF-5533. Issue comes from fact that internally KAR service process file in it's own way.
+     * This is test for KARAF-5533. Issue comes from fact that internally KAR service process file
+     * in it's own way.
      *
-     * Because of that artifact installer must follow the same logic of service it calls, as returned list of installed.
-     * KAR files is not list of full file names, but files with stripped extensions.
+     * <p>Because of that artifact installer must follow the same logic of service it calls, as
+     * returned list of installed. KAR files is not list of full file names, but files with stripped
+     * extensions.
      *
      * @throws Exception Any exception causes test failure.
      */

@@ -16,18 +16,15 @@
  */
 package org.apache.karaf.webconsole.gogo;
 
-import javax.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
+import javax.servlet.Servlet;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 
-@Services(
-        requires = @RequireService(SessionFactory.class)
-)
+@Services(requires = @RequireService(SessionFactory.class))
 public class Activator extends BaseActivator {
 
     private GogoPlugin gogoPlugin;
@@ -52,5 +49,4 @@ public class Activator extends BaseActivator {
             gogoPlugin = null;
         }
     }
-
 }

@@ -18,12 +18,9 @@ package org.apache.karaf.docker;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
-/**
- * Represent a Docker Container.
- */
+/** Represent a Docker Container. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Container {
 
@@ -107,5 +104,4 @@ public class Container {
     public String getState() {
         return state;
     }
-
 }

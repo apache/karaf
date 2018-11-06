@@ -17,7 +17,6 @@
 package org.apache.karaf.config.command;
 
 import java.util.Collection;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter;
 import org.apache.karaf.shell.api.action.Argument;
@@ -25,15 +24,29 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "config", name = "property-append", description = "Appends the given value to an existing property or creates the property with the specified name and value.")
+@Command(
+        scope = "config",
+        name = "property-append",
+        description =
+                "Appends the given value to an existing property or creates the property with the specified name and value.")
 @Service
 public class PropAppendCommand extends ConfigPropertyCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The name of the property", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The name of the property",
+            required = true,
+            multiValued = false)
     @Completion(ConfigurationPropertyCompleter.class)
     String prop;
 
-    @Argument(index = 1, name = "value", description = "The value to append to the property", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "value",
+            description = "The value to append to the property",
+            required = true,
+            multiValued = false)
     String value;
 
     @SuppressWarnings({"unchecked", "rawtypes"})

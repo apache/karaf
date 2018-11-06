@@ -21,10 +21,13 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
 
 /**
- * Command for enabling/disabling debug logging on a bundle and calculating the difference in
- * wired imports.
+ * Command for enabling/disabling debug logging on a bundle and calculating the difference in wired
+ * imports.
  */
-@Command(scope = "bundle", name = "dynamic-import", description = "Enables/disables dynamic-import for a given bundle.")
+@Command(
+        scope = "bundle",
+        name = "dynamic-import",
+        description = "Enables/disables dynamic-import for a given bundle.")
 @Service
 public class DynamicImport extends BundleCommand {
 
@@ -39,5 +42,4 @@ public class DynamicImport extends BundleCommand {
         }
         return null;
     }
-
 }

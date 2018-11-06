@@ -18,20 +18,17 @@
  */
 package org.apache.karaf.main;
 
-import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
-
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
+import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 
-/**
- * Main class used to check the status of the root Karaf instance.
- */
+/** Main class used to check the status of the root Karaf instance. */
 public class Status {
 
     /**
-     * Checks if the shutdown port is bound. The shutdown port can be configured in config.properties
-     * or in the shutdown port file.
+     * Checks if the shutdown port is bound. The shutdown port can be configured in
+     * config.properties or in the shutdown port file.
      *
      * @param args The arguments to the status main method.
      * @throws Exception If an error occurs while checking the status.
@@ -42,10 +39,13 @@ public class Status {
             try {
                 config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
             } catch (FileNotFoundException fnfe) {
-                System.err.println(config.portFile + " shutdown port file doesn't exist. The container is not running.");
+                System.err.println(
+                        config.portFile
+                                + " shutdown port file doesn't exist. The container is not running.");
                 System.exit(3);
             } catch (IOException ioe) {
-                System.err.println("Can't read " + config.portFile + " port file: " + ioe.getMessage());
+                System.err.println(
+                        "Can't read " + config.portFile + " port file: " + ioe.getMessage());
                 System.exit(4);
             }
         }
@@ -71,7 +71,8 @@ public class Status {
         } else {
             // using the pid file
             int pid = getPidFromPidFile(config.pidFile);
-            org.apache.karaf.jpm.Process process = new ProcessBuilderFactoryImpl().newBuilder().attach(pid);
+            org.apache.karaf.jpm.Process process =
+                    new ProcessBuilderFactoryImpl().newBuilder().attach(pid);
             if (process.isRunning()) {
                 System.out.println("Running ... (pid " + pid + ")");
                 System.exit(0);
@@ -99,5 +100,4 @@ public class Status {
         r.close();
         return pid;
     }
-
 }

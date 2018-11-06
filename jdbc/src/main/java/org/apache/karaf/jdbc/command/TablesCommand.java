@@ -18,7 +18,6 @@ package org.apache.karaf.jdbc.command;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -27,11 +26,19 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "jdbc", name = "tables", description = "List the tables on a given JDBC datasource")
+@Command(
+        scope = "jdbc",
+        name = "tables",
+        description = "List the tables on a given JDBC datasource")
 @Service
 public class TablesCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "datasource", description = "The JDBC datasource to use", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "datasource",
+            description = "The JDBC datasource to use",
+            required = true,
+            multiValued = false)
     @Completion(DataSourcesNameCompleter.class)
     String datasource;
 
@@ -57,5 +64,4 @@ public class TablesCommand extends JdbcCommandSupport {
 
         return null;
     }
-
 }

@@ -17,24 +17,16 @@
 package org.apache.karaf.features;
 
 /**
- * Enumeration of deployment events. Each deployment is an operation potentially involving multiple features and its
- * bundles. Deployments cannot overlap.
+ * Enumeration of deployment events. Each deployment is an operation potentially involving multiple
+ * features and its bundles. Deployments cannot overlap.
  */
 public enum DeploymentEvent {
-    /**
-     * A new deployment operation has started.
-     */
+    /** A new deployment operation has started. */
     DEPLOYMENT_STARTED,
-    /**
-     * Bundle install/uninstall operations within this deployment have completed.
-     */
+    /** Bundle install/uninstall operations within this deployment have completed. */
     BUNDLES_INSTALLED,
-    /**
-     * Bundle resolution has completed, but the bundles have not yet been started.
-     */
+    /** Bundle resolution has completed, but the bundles have not yet been started. */
     BUNDLES_RESOLVED,
-    /**
-     * The deployment has completed.
-     */
+    /** The deployment has completed. */
     DEPLOYMENT_FINISHED,
 }

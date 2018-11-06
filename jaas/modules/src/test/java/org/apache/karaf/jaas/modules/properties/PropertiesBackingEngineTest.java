@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
@@ -53,7 +52,7 @@ public class PropertiesBackingEngineTest {
 
         engine.addRole("a", "role1");
         engine.addRole("a", "role2");
-        
+
         UserPrincipal upa = getUser(engine, "a");
         Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2"));
 
@@ -65,7 +64,8 @@ public class PropertiesBackingEngineTest {
         engine.addGroupRole("g2", "role4");
 
         Assert.assertThat(names(engine.listUsers()), containsInAnyOrder("a", "b"));
-        Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
+        Assert.assertThat(
+                names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
 
         checkLoading();
 
@@ -82,7 +82,8 @@ public class PropertiesBackingEngineTest {
         Assert.assertThat(names(engine.listRoles(gp)), containsInAnyOrder("role3"));
 
         // role2 should still be there as it was added to the user directly too
-        Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
+        Assert.assertThat(
+                names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
         Assert.assertThat(names(engine.listRoles(upb)), containsInAnyOrder("role3", "role4"));
 
         engine.deleteGroup("b", "g");
@@ -99,17 +100,22 @@ public class PropertiesBackingEngineTest {
         assertEquals(2, engine.listUsers().size());
         UserPrincipal upa_2 = getUser(engine, "a");
         UserPrincipal upb_2 = getUser(engine, "b");
- 
+
         assertEquals(3, engine.listRoles(upa_2).size());
-        Assert.assertThat(names(engine.listRoles(upa_2)), containsInAnyOrder("role1", "role2", "role3"));
+        Assert.assertThat(
+                names(engine.listRoles(upa_2)), containsInAnyOrder("role1", "role2", "role3"));
 
         assertEquals(3, engine.listRoles(upb_2).size());
-        Assert.assertThat(names(engine.listRoles(upb_2)), containsInAnyOrder("role2", "role3", "role4"));
+        Assert.assertThat(
+                names(engine.listRoles(upb_2)), containsInAnyOrder("role2", "role3", "role4"));
     }
-    
+
     private UserPrincipal getUser(PropertiesBackingEngine engine, String name) {
-        List<UserPrincipal> matchingUsers = engine.listUsers().stream()
-            .filter(user->name.equals(user.getName())).collect(Collectors.toList());
+        List<UserPrincipal> matchingUsers =
+                engine.listUsers()
+                        .stream()
+                        .filter(user -> name.equals(user.getName()))
+                        .collect(Collectors.toList());
         Assert.assertFalse("User with name " + name + " was not found", matchingUsers.isEmpty());
         return matchingUsers.iterator().next();
     }
@@ -120,5 +126,4 @@ public class PropertiesBackingEngineTest {
             fail("Could not delete temporary file: " + f);
         }
     }
-
 }

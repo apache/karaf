@@ -64,5 +64,4 @@ public interface Instance {
     String getState() throws Exception;
 
     void changeSshHost(String host) throws Exception;
-
 }

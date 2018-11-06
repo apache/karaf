@@ -30,5 +30,4 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext bundleContext) {
         // nothing to do
     }
-
 }

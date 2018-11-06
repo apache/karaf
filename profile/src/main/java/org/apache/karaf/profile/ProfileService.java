@@ -18,11 +18,8 @@ package org.apache.karaf.profile;
 
 import java.util.Collection;
 
-/**
- * The profile service
- */
+/** The profile service */
 public interface ProfileService {
-
 
     /**
      * Acquire a write lock for the profile.
@@ -32,8 +29,7 @@ public interface ProfileService {
     LockHandle acquireWriteLock();
 
     /**
-     * Acquire a read lock for the profile.
-     * A read lock cannot be upgraded to a write lock.
+     * Acquire a read lock for the profile. A read lock cannot be upgraded to a write lock.
      *
      * @return The read lock handler.
      */
@@ -59,7 +55,7 @@ public interface ProfileService {
      * @param profile The profile to create.
      */
     void createProfile(Profile profile);
-    
+
     /**
      * Create the given profile in the data store.
      *
@@ -91,7 +87,7 @@ public interface ProfileService {
      */
     Profile getRequiredProfile(String profileId);
 
-    /** 
+    /**
      * Get the list of profiles associated with the given version.
      *
      * @return The collection of all profiles.
@@ -108,8 +104,8 @@ public interface ProfileService {
     /**
      * Compute the overlay profile.
      *
-     * The overlay profile is computed by getting all the parent profiles
-     * and overriding the settings by children profiles.
+     * <p>The overlay profile is computed by getting all the parent profiles and overriding the
+     * settings by children profiles.
      *
      * @param profile The profile.
      * @return The overlay profile.
@@ -119,8 +115,8 @@ public interface ProfileService {
     /**
      * Compute the overlay profile.
      *
-     * The overlay profile is computed by getting all the parent profiles
-     * and overriding the settings by children profiles.
+     * <p>The overlay profile is computed by getting all the parent profiles and overriding the
+     * settings by children profiles.
      *
      * @param profile The profile.
      * @param environment The environment.
@@ -131,8 +127,8 @@ public interface ProfileService {
     /**
      * Compute the effective profile.
      *
-     * The effective profile is computed by performing all substitutions
-     * in the given profile configurations.
+     * <p>The effective profile is computed by performing all substitutions in the given profile
+     * configurations.
      *
      * @param profile The profile to compute.
      * @return The effective profile.
@@ -142,13 +138,12 @@ public interface ProfileService {
     /**
      * Compute the effective profile.
      *
-     * The effective profile is computed by performing all substitutions
-     * in the given profile configurations.
+     * <p>The effective profile is computed by performing all substitutions in the given profile
+     * configurations.
      *
      * @param profile The profile to compute.
      * @param defaultsToEmptyString if no substitution is valid, defaults to an empty string.
      * @return The effective profile.
      */
     Profile getEffectiveProfile(Profile profile, boolean defaultsToEmptyString);
-
 }

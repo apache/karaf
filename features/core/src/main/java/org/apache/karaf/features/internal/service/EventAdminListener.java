@@ -18,7 +18,6 @@ package org.apache.karaf.features.internal.service;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import org.apache.karaf.features.EventConstants;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
@@ -30,9 +29,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A listener to publish events to EventAdmin
- */
+/** A listener to publish events to EventAdmin */
 public class EventAdminListener implements FeaturesListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventAdminListener.class);
@@ -57,14 +54,15 @@ public class EventAdminListener implements FeaturesListener {
             props.put(EventConstants.FEATURE_VERSION, event.getFeature().getVersion());
             String topic;
             switch (event.getType()) {
-            case FeatureInstalled:
-                topic = EventConstants.TOPIC_FEATURES_INSTALLED;
-                break;
-            case FeatureUninstalled:
-                topic = EventConstants.TOPIC_FEATURES_UNINSTALLED;
-                break;
-            default:
-                throw new IllegalStateException("Unknown features event type: " + event.getType());
+                case FeatureInstalled:
+                    topic = EventConstants.TOPIC_FEATURES_INSTALLED;
+                    break;
+                case FeatureUninstalled:
+                    topic = EventConstants.TOPIC_FEATURES_UNINSTALLED;
+                    break;
+                default:
+                    throw new IllegalStateException(
+                            "Unknown features event type: " + event.getType());
             }
             eventAdmin.postEvent(new Event(topic, props));
         } catch (IllegalStateException e) {
@@ -85,14 +83,15 @@ public class EventAdminListener implements FeaturesListener {
             props.put(EventConstants.REPOSITORY_URI, event.getRepository().getURI().toString());
             String topic;
             switch (event.getType()) {
-            case RepositoryAdded:
-                topic = EventConstants.TOPIC_REPOSITORY_ADDED;
-                break;
-            case RepositoryRemoved:
-                topic = EventConstants.TOPIC_REPOSITORY_REMOVED;
-                break;
-            default:
-                throw new IllegalStateException("Unknown repository event type: " + event.getType());
+                case RepositoryAdded:
+                    topic = EventConstants.TOPIC_REPOSITORY_ADDED;
+                    break;
+                case RepositoryRemoved:
+                    topic = EventConstants.TOPIC_REPOSITORY_REMOVED;
+                    break;
+                default:
+                    throw new IllegalStateException(
+                            "Unknown repository event type: " + event.getType());
             }
             eventAdmin.postEvent(new Event(topic, props));
         } catch (IllegalStateException e) {

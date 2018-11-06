@@ -18,6 +18,12 @@
  */
 package org.apache.karaf.shell.impl.action.command;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.command.CommandProcessor;
@@ -32,18 +38,9 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.console.HeadlessSessionImpl;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
 import org.apache.karaf.shell.impl.console.parsing.KarafParser;
-import org.jline.reader.ParsedLine;
 import org.jline.reader.Parser;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class ActionMaskingCallbackTest {
 
@@ -70,17 +67,24 @@ public class ActionMaskingCallbackTest {
         check("user-add --help user password ", "user-add --help user ######## ");
         check("user-add --help user password foo", "user-add --help user ######## foo");
         check("user-add --opt1 user password foo", "user-add --opt1 user ######## foo");
-        check("user-add --opt2 valOpt2 user password foo", "user-add --opt2 valOpt2 user ######## foo");
-        check("user-add --opt2=valOpt2 user password foo", "user-add --opt2=valOpt2 user ######## foo");
-        check("user-add --opt1 --opt2 valOpt2 --opt3=valOpt3 user password foo", "user-add --opt1 --opt2 valOpt2 --opt3=@@@@@@@ user ######## foo");
-        check("user-add --opt1 --opt2 valOpt2 --opt3 valOpt3 user password foo", "user-add --opt1 --opt2 valOpt2 --opt3 @@@@@@@ user ######## foo");
+        check(
+                "user-add --opt2 valOpt2 user password foo",
+                "user-add --opt2 valOpt2 user ######## foo");
+        check(
+                "user-add --opt2=valOpt2 user password foo",
+                "user-add --opt2=valOpt2 user ######## foo");
+        check(
+                "user-add --opt1 --opt2 valOpt2 --opt3=valOpt3 user password foo",
+                "user-add --opt1 --opt2 valOpt2 --opt3=@@@@@@@ user ######## foo");
+        check(
+                "user-add --opt1 --opt2 valOpt2 --opt3 valOpt3 user password foo",
+                "user-add --opt1 --opt2 valOpt2 --opt3 @@@@@@@ user ######## foo");
     }
 
     private void check(String input, String expected) {
         String output = cb.filter(input, parser.parse(input, input.length()));
         assertEquals(expected, output);
     }
-
 
     @Command(scope = "jaas", name = "user-add", description = "Add a user")
     @Service
@@ -109,5 +113,4 @@ public class ActionMaskingCallbackTest {
             return null;
         }
     }
-
 }

@@ -21,5 +21,4 @@ public interface ScopeFilter {
     String getNamespace();
 
     String getFilter();
-
 }

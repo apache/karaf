@@ -18,7 +18,7 @@ package org.apache.karaf.packages.core.internal.filter;
 
 public class NotExpression implements Expression {
     public Expression expression;
-    
+
     public NotExpression(Expression expression) {
         this.expression = expression;
     }

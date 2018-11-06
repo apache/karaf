@@ -17,7 +17,6 @@
 package org.apache.karaf.kar.command.completers;
 
 import java.util.List;
-
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -26,15 +25,12 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-/**
- * Completer on all installed KAR files.
- */
+/** Completer on all installed KAR files. */
 @Service
 public class KarCompleter implements Completer {
 
-    @Reference
-    private KarService karService;
-    
+    @Reference private KarService karService;
+
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
@@ -46,5 +42,4 @@ public class KarCompleter implements Completer {
         }
         return delegate.complete(session, commandLine, candidates);
     }
-    
 }

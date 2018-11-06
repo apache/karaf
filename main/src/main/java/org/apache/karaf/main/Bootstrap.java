@@ -19,9 +19,9 @@
 package org.apache.karaf.main;
 
 /**
- * The Bootstrap class is used by the wrapper shell to bootstrap Karaf.
- * Given JSW is using introspection to launch the main method, it would cause
- * a CNFE on the OSGi related classes.  Using an indirection solves this problem.
+ * The Bootstrap class is used by the wrapper shell to bootstrap Karaf. Given JSW is using
+ * introspection to launch the main method, it would cause a CNFE on the OSGi related classes. Using
+ * an indirection solves this problem.
  */
 public class Bootstrap {
 

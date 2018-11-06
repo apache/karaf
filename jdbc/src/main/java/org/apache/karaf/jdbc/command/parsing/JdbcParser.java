@@ -16,9 +16,9 @@ package org.apache.karaf.jdbc.command.parsing;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Parser;
@@ -26,9 +26,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.parsing.CommandLineImpl;
 import org.apache.karaf.shell.support.parsing.GogoParser;
 
-/**
- * A parser for JDBC commands using SQL.
- */
+/** A parser for JDBC commands using SQL. */
 @Service
 public class JdbcParser implements Parser {
 
@@ -40,27 +38,27 @@ public class JdbcParser implements Parser {
         int state = 0;
         for (String arg : args) {
             switch (state) {
-            // command
-            case 0:
-                nargs.add(arg);
-                state = 1;
-                break;
-            // option or target
-            case 1:
-                nargs.add(arg);
-                if (!arg.startsWith("-")) {
-                    state = 2;
-                }
-                break;
-            // first sql fragment
-            case 2:
-                nargs.add(arg);
-                state = 3;
-                break;
-            // addtional sql
-            case 3:
-                nargs.set(nargs.size() - 1, nargs.get(nargs.size() - 1) + " " + arg);
-                break;
+                    // command
+                case 0:
+                    nargs.add(arg);
+                    state = 1;
+                    break;
+                    // option or target
+                case 1:
+                    nargs.add(arg);
+                    if (!arg.startsWith("-")) {
+                        state = 2;
+                    }
+                    break;
+                    // first sql fragment
+                case 2:
+                    nargs.add(arg);
+                    state = 3;
+                    break;
+                    // addtional sql
+                case 3:
+                    nargs.set(nargs.size() - 1, nargs.get(nargs.size() - 1) + " " + arg);
+                    break;
             }
         }
         nargs.set(nargs.size() - 1, "\"" + nargs.get(nargs.size() - 1) + "\"");
@@ -75,7 +73,7 @@ public class JdbcParser implements Parser {
     @Override
     public String preprocess(Session session, CommandLine cmdLine) {
         StringBuilder parsed = new StringBuilder();
-        for (int i = 0 ; i < cmdLine.getArguments().length; i++) {
+        for (int i = 0; i < cmdLine.getArguments().length; i++) {
             String arg = cmdLine.getArguments()[i];
             if (i > 0) {
                 parsed.append(" ");

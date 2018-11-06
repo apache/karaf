@@ -16,23 +16,21 @@
  */
 package org.apache.karaf.config.core.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
-
-/**
- * Allows to use the MetaTypeService as an optional dependency
- */
+/** Allows to use the MetaTypeService as an optional dependency */
 public class MetaServiceCaller {
 
-    public static <T> T withMetaTypeService(BundleContext context, Function<MetaTypeService, T> callable) {
+    public static <T> T withMetaTypeService(
+            BundleContext context, Function<MetaTypeService, T> callable) {
         ServiceReference<MetaTypeService> ref = context.getServiceReference(MetaTypeService.class);
         try {
             MetaTypeService metaService = context.getService(ref);
@@ -43,23 +41,25 @@ public class MetaServiceCaller {
     }
 
     public static List<String> getPidsWithMetaInfo(BundleContext context) {
-        return withMetaTypeService(context, metatypeService -> {
-            List<String> pids1 = new ArrayList<>();
-            Bundle[] bundles = context.getBundles();
-            for (Bundle bundle : bundles) {
+        return withMetaTypeService(
+                context,
+                metatypeService -> {
+                    List<String> pids1 = new ArrayList<>();
+                    Bundle[] bundles = context.getBundles();
+                    for (Bundle bundle : bundles) {
 
-                MetaTypeInformation info = metatypeService.getMetaTypeInformation(bundle);
-                if (info == null) {
-                    continue;
-                }
-                if (info.getFactoryPids() != null) {
-                    pids1.addAll(Arrays.asList(info.getFactoryPids()));
-                }
-                if (info.getPids() != null) {
-                    pids1.addAll(Arrays.asList(info.getPids()));
-                }
-            }
-            return pids1;
-        });
+                        MetaTypeInformation info = metatypeService.getMetaTypeInformation(bundle);
+                        if (info == null) {
+                            continue;
+                        }
+                        if (info.getFactoryPids() != null) {
+                            pids1.addAll(Arrays.asList(info.getFactoryPids()));
+                        }
+                        if (info.getPids() != null) {
+                            pids1.addAll(Arrays.asList(info.getPids()));
+                        }
+                    }
+                    return pids1;
+                });
     }
 }

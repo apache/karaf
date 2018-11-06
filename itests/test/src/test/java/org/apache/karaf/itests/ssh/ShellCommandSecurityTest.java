@@ -13,13 +13,13 @@
  */
 package org.apache.karaf.itests.ssh;
 
+import static org.jline.keymap.KeyMap.ctrl;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
-import static org.jline.keymap.KeyMap.ctrl;
 
 /**
  * This test exercises the Shell Command ACL for the shell scope commands as defined in
@@ -29,7 +29,7 @@ import static org.jline.keymap.KeyMap.ctrl;
 @ExamReactorStrategy(PerClass.class)
 public class ShellCommandSecurityTest extends SshCommandTestBase {
     private static int counter = 0;
-        
+
     @Test
     public void testShellCommandSecurityViaSsh() throws Exception {
         String vieweruser = "view" + System.nanoTime() + "_" + counter++;

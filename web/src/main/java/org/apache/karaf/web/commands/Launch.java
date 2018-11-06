@@ -18,7 +18,6 @@ package org.apache.karaf.web.commands;
 
 import java.awt.Desktop;
 import java.net.URI;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -27,18 +26,29 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.web.WebContainerService;
 
-@Command(scope = "web", name = "launch", description = "Start the web application in a browser of the given bundle ID.")
+@Command(
+        scope = "web",
+        name = "launch",
+        description = "Start the web application in a browser of the given bundle ID.")
 @Service
 public class Launch implements Action {
 
-    @Argument(index = 0, name = "id", description = "The bundle ID to start the browser with", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "id",
+            description = "The bundle ID to start the browser with",
+            required = true,
+            multiValued = false)
     Long id;
 
-    @Option(name = "--base", description = "The base URL to browse to, otherwise default localhost:8181 will be used.", required = false)
-    String baseUrl = null; 
-    
-    @Reference
-    private WebContainerService webContainerService;
+    @Option(
+            name = "--base",
+            description =
+                    "The base URL to browse to, otherwise default localhost:8181 will be used.",
+            required = false)
+    String baseUrl = null;
+
+    @Reference private WebContainerService webContainerService;
 
     public void setWebContainerService(WebContainerService webContainerService) {
         this.webContainerService = webContainerService;
@@ -47,18 +57,15 @@ public class Launch implements Action {
     @Override
     public Object execute() throws Exception {
         String webContextPath = webContainerService.getWebContextPath(id);
-        
-        if (baseUrl == null)
-        	baseUrl = "http://localhost:8181";
-        
-        if (!webContextPath.startsWith("/"))
-        	webContextPath = "/"+webContextPath;
-        
+
+        if (baseUrl == null) baseUrl = "http://localhost:8181";
+
+        if (!webContextPath.startsWith("/")) webContextPath = "/" + webContextPath;
+
         String uri = baseUrl + webContextPath;
-        
+
         Desktop.getDesktop().browse(new URI(uri));
-        
+
         return null;
     }
-    
 }

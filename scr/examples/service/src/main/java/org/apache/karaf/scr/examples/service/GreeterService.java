@@ -16,11 +16,8 @@
  */
 package org.apache.karaf.scr.examples.service;
 
-/**
- * The SCR Service interface we are going to publish
- */
+/** The SCR Service interface we are going to publish */
 public interface GreeterService {
 
     void printGreetings();
-
 }

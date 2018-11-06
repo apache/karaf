@@ -16,11 +16,6 @@
  */
 package org.apache.karaf.scr.management.codec;
 
-import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
-import org.osgi.framework.dto.ServiceReferenceDTO;
-import org.osgi.service.component.runtime.dto.SatisfiedReferenceDTO;
-import org.osgi.service.component.runtime.dto.UnsatisfiedReferenceDTO;
-
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
@@ -31,21 +26,22 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
+import org.osgi.framework.dto.ServiceReferenceDTO;
+import org.osgi.service.component.runtime.dto.SatisfiedReferenceDTO;
+import org.osgi.service.component.runtime.dto.UnsatisfiedReferenceDTO;
 
 public class JmxSvcReference {
 
-    /**
-     * The CompositeType which represents a single reference
-     */
-    public final static CompositeType SVC_REFERENCE = createReferenceType();
+    /** The CompositeType which represents a single reference */
+    public static final CompositeType SVC_REFERENCE = createReferenceType();
 
-    /**
-     * The TabularType which represents a list of references
-     */
-    public final static TabularType SVC_REFERENCE_TABLE = createReferenceTableType();
+    /** The TabularType which represents a list of references */
+    public static final TabularType SVC_REFERENCE_TABLE = createReferenceTableType();
 
     private final CompositeData data;
-    //String[] COMPONENT_CONFIGURATION = { REFERENCE_NAME, REFERENCE_STATE, REFERENCE_CARDINALITY, REFERENCE_AVAILABILITY, REFERENCE_POLICY, REFERENCE_BOUND_SERVICES};
+    // String[] COMPONENT_CONFIGURATION = { REFERENCE_NAME, REFERENCE_STATE, REFERENCE_CARDINALITY,
+    // REFERENCE_AVAILABILITY, REFERENCE_POLICY, REFERENCE_BOUND_SERVICES};
 
     public JmxSvcReference(SatisfiedReferenceDTO reference) {
         try {
@@ -111,8 +107,8 @@ public class JmxSvcReference {
             itemDescriptions[1] = "The target of the reference";
             itemDescriptions[2] = "The bound services";
 
-            return new CompositeType("Reference", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "Reference", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build reference type", e);
         }
@@ -120,17 +116,20 @@ public class JmxSvcReference {
 
     private static TabularType createReferenceTableType() {
         try {
-            return new TabularType("References", "The table of all references",
-                    SVC_REFERENCE,  new String[] {ServiceComponentRuntimeMBean.REFERENCE_NAME});
+            return new TabularType(
+                    "References",
+                    "The table of all references",
+                    SVC_REFERENCE,
+                    new String[] {ServiceComponentRuntimeMBean.REFERENCE_NAME});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build references table type", e);
         }
     }
 
-
     /**
      * Returns The bound service ids.
-     * @param references     The target {@link ServiceReferenceDTO}[].
+     *
+     * @param references The target {@link ServiceReferenceDTO}[].
      * @return
      */
     private static Long[] getBoundServices(ServiceReferenceDTO[] references) {
@@ -138,7 +137,7 @@ public class JmxSvcReference {
             return new Long[0];
         } else {
             Long[] ids = new Long[references.length];
-            for (int i=0; i < references.length; i++) {
+            for (int i = 0; i < references.length; i++) {
                 ids[i] = references[i].id;
             }
             return ids;

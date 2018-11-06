@@ -18,14 +18,12 @@
  */
 package org.apache.karaf.main.lock;
 
+import static org.junit.Assert.assertTrue;
+
+import org.apache.felix.utils.properties.Properties;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import org.apache.felix.utils.properties.Properties;
-
-import static org.junit.Assert.assertTrue;
-
 
 @Ignore
 public class PostgreSQLJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
@@ -36,15 +34,15 @@ public class PostgreSQLJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTe
         password = "secret";
         driver = "org.postgresql.Driver";
         url = "jdbc:postgresql://127.0.0.1:5432/test";
-        
+
         super.setUp();
     }
-    
+
     @Override
     PostgreSQLJDBCLock createLock(Properties props) {
         return new PostgreSQLJDBCLock(props);
     }
-    
+
     @Test
     public void initShouldCreateTheDatabaseIfItNotExists() throws Exception {
         String database = "test" + System.currentTimeMillis();
@@ -52,7 +50,7 @@ public class PostgreSQLJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTe
         props.put("karaf.lock.jdbc.url", url);
         lock = createLock(props);
         lock.lock();
-        
+
         assertTrue(lock.lockConnection.getMetaData().getURL().contains(database));
     }
 }

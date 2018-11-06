@@ -18,8 +18,8 @@ package org.apache.karaf.packages.core.internal.filter;
 
 public class AndExpression implements Expression {
     public Expression[] expressions;
-    
-    public AndExpression(Expression ... expressions) {
+
+    public AndExpression(Expression... expressions) {
         this.expressions = expressions;
     }
 }

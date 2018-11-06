@@ -21,7 +21,5 @@ import org.junit.Test;
 public class PackageImportTest {
 
     @Test
-    public void testImportString() {
-
-    }
+    public void testImportString() {}
 }

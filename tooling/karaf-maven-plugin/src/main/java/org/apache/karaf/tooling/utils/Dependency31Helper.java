@@ -18,6 +18,14 @@
  */
 package org.apache.karaf.tooling.utils;
 
+import static java.lang.String.*;
+import static org.apache.commons.lang3.reflect.MethodUtils.invokeMethod;
+import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
+
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -41,34 +49,20 @@ import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector;
 import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
 import org.eclipse.aether.util.graph.transformer.*;
 
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import static java.lang.String.*;
-import static org.apache.commons.lang3.reflect.MethodUtils.invokeMethod;
-import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
-
 /**
- * <p>{@link DependencyHelper} for accessing Eclipse Aether system used in Maven 3.1+. It uses reflection to access
- * these methods of {@code maven-core} APIs which directly references Eclipse Aether classes.</p>
+ * {@link DependencyHelper} for accessing Eclipse Aether system used in Maven 3.1+. It uses
+ * reflection to access these methods of {@code maven-core} APIs which directly references Eclipse
+ * Aether classes.
  */
 public class Dependency31Helper implements DependencyHelper {
 
-    /**
-     * The entry point to Aether, i.e. the component doing all the work.
-     */
+    /** The entry point to Aether, i.e. the component doing all the work. */
     private final RepositorySystem repositorySystem;
 
-    /**
-     * The current repository/network configuration of Maven.
-     */
+    /** The current repository/network configuration of Maven. */
     private final RepositorySystemSession repositorySystemSession;
 
-    /**
-     * The project's remote repositories to use for the resolution of project dependencies.
-     */
+    /** The project's remote repositories to use for the resolution of project dependencies. */
     private final List<RemoteRepository> projectRepositories;
 
     private final SimpleLRUCache<Artifact, ArtifactResult> artifactCache;
@@ -79,22 +73,29 @@ public class Dependency31Helper implements DependencyHelper {
     protected String treeListing;
 
     @SuppressWarnings("unchecked")
-    public Dependency31Helper(List<?> repositories, Object session, RepositorySystem repositorySystem, int cacheSize) {
+    public Dependency31Helper(
+            List<?> repositories,
+            Object session,
+            RepositorySystem repositorySystem,
+            int cacheSize) {
         this.projectRepositories = (List<RemoteRepository>) repositories;
         this.repositorySystemSession = (RepositorySystemSession) session;
         this.repositorySystem = repositorySystem;
         this.artifactCache = new SimpleLRUCache<>(cacheSize);
     }
 
-    public Dependency31Helper(List<?> repositories, Object session, RepositorySystem repositorySystem) {
+    public Dependency31Helper(
+            List<?> repositories, Object session, RepositorySystem repositorySystem) {
         this(repositories, session, repositorySystem, 32);
     }
 
-    public void setRepositorySession(final ProjectBuildingRequest request) throws MojoExecutionException {
+    public void setRepositorySession(final ProjectBuildingRequest request)
+            throws MojoExecutionException {
         try {
             invokeMethod(request, "setRepositorySession", repositorySystemSession);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new MojoExecutionException("Cannot set repository session on project building request", e);
+            throw new MojoExecutionException(
+                    "Cannot set repository session on project building request", e);
         }
     }
 
@@ -109,7 +110,8 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     @Override
-    public void getDependencies(MavenProject project, boolean useTransitiveDependencies) throws MojoExecutionException {
+    public void getDependencies(MavenProject project, boolean useTransitiveDependencies)
+            throws MojoExecutionException {
         DependencyNode rootNode = getDependencyTree(toArtifact(project.getArtifact()));
 
         Scanner scanner = new Scanner();
@@ -120,16 +122,27 @@ public class Dependency31Helper implements DependencyHelper {
 
     private DependencyNode getDependencyTree(Artifact artifact) throws MojoExecutionException {
         try {
-            CollectRequest collectRequest = new CollectRequest(new Dependency(artifact, "compile"), null, projectRepositories);
-            DefaultRepositorySystemSession session = new DefaultRepositorySystemSession(repositorySystemSession);
-            session.setDependencySelector(new AndDependencySelector(new OptionalDependencySelector(),
-                    new ScopeDependencySelector1(),
-                    new ExclusionDependencySelector()));
+            CollectRequest collectRequest =
+                    new CollectRequest(
+                            new Dependency(artifact, "compile"), null, projectRepositories);
+            DefaultRepositorySystemSession session =
+                    new DefaultRepositorySystemSession(repositorySystemSession);
+            session.setDependencySelector(
+                    new AndDependencySelector(
+                            new OptionalDependencySelector(),
+                            new ScopeDependencySelector1(),
+                            new ExclusionDependencySelector()));
             // between aether-util 0.9.0.M1 and M2, JavaEffectiveScopeCalculator was removed
             // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=397241
-            DependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(new ConflictMarker(),
-                    new ConflictResolver(new NearestVersionSelector(), new JavaScopeSelector(), new SimpleOptionalitySelector(), new JavaScopeDeriver()),
-                    new JavaDependencyContextRefiner());
+            DependencyGraphTransformer transformer =
+                    new ChainedDependencyGraphTransformer(
+                            new ConflictMarker(),
+                            new ConflictResolver(
+                                    new NearestVersionSelector(),
+                                    new JavaScopeSelector(),
+                                    new SimpleOptionalitySelector(),
+                                    new JavaScopeDeriver()),
+                            new JavaDependencyContextRefiner());
             session.setDependencyGraphTransformer(transformer);
             CollectResult result = repositorySystem.collectDependencies(session, collectRequest);
             return result.getRoot();
@@ -139,9 +152,11 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     /**
-     * Aether's ScopeDependencySelector appears to always exclude the configured scopes (test and provided) and there is no way to configure it to
-     * accept the top level provided scope dependencies. We need this 3 layers cake since Aether never actually uses the top level selector you give it,
-     * it always starts by getting the child to apply to the project's dependencies.
+     * Aether's ScopeDependencySelector appears to always exclude the configured scopes (test and
+     * provided) and there is no way to configure it to accept the top level provided scope
+     * dependencies. We need this 3 layers cake since Aether never actually uses the top level
+     * selector you give it, it always starts by getting the child to apply to the project's
+     * dependencies.
      */
     private static class ScopeDependencySelector1 implements DependencySelector {
 
@@ -154,7 +169,6 @@ public class Dependency31Helper implements DependencyHelper {
         public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
             return child;
         }
-
     }
 
     public static class ScopeDependencySelector2 implements DependencySelector {
@@ -169,7 +183,6 @@ public class Dependency31Helper implements DependencyHelper {
         public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
             return child;
         }
-
     }
 
     private static class ScopeDependencySelector3 implements DependencySelector {
@@ -182,7 +195,6 @@ public class Dependency31Helper implements DependencyHelper {
         public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
             return this;
         }
-
     }
 
     private static class Scanner {
@@ -217,7 +229,8 @@ public class Dependency31Helper implements DependencyHelper {
 
         private final StringBuilder log = new StringBuilder();
 
-        public void scan(DependencyNode rootNode, boolean useTransitiveDependencies) throws MojoExecutionException {
+        public void scan(DependencyNode rootNode, boolean useTransitiveDependencies)
+                throws MojoExecutionException {
             for (DependencyNode child : rootNode.getChildren()) {
                 scan(rootNode, child, Accept.ACCEPT, useTransitiveDependencies, false, "");
             }
@@ -226,25 +239,47 @@ public class Dependency31Helper implements DependencyHelper {
             }
         }
 
-        private void scan(DependencyNode parentNode, DependencyNode dependencyNode, Accept parentAccept, boolean useTransitiveDependencies, boolean isFromFeature, String indent) throws MojoExecutionException {
+        private void scan(
+                DependencyNode parentNode,
+                DependencyNode dependencyNode,
+                Accept parentAccept,
+                boolean useTransitiveDependencies,
+                boolean isFromFeature,
+                String indent)
+                throws MojoExecutionException {
             Accept accept = accept(dependencyNode, parentAccept);
             if (accept.isLocal()) {
                 if (isFromFeature) {
                     if (!isFeature(dependencyNode)) {
-                        log.append(indent).append("from feature:").append(dependencyNode).append("\n");
+                        log.append(indent)
+                                .append("from feature:")
+                                .append(dependencyNode)
+                                .append("\n");
                         dependencies.add(dependencyNode.getDependency().getArtifact());
                     } else {
-                        log.append(indent).append("is feature:").append(dependencyNode).append("\n");
+                        log.append(indent)
+                                .append("is feature:")
+                                .append(dependencyNode)
+                                .append("\n");
                     }
                 } else {
                     log.append(indent).append("local:").append(dependencyNode).append("\n");
-                    if (localDependencies.keySet().contains(dependencyNode.getDependency().getArtifact())) {
-                        log.append(indent).append("already in feature, returning:").append(dependencyNode).append("\n");
+                    if (localDependencies
+                            .keySet()
+                            .contains(dependencyNode.getDependency().getArtifact())) {
+                        log.append(indent)
+                                .append("already in feature, returning:")
+                                .append(dependencyNode)
+                                .append("\n");
                         return;
                     }
                     // TODO resolve scope conflicts
-                    localDependencies.put(dependencyNode.getDependency().getArtifact(),
-                            new LocalDependency(dependencyNode.getDependency().getScope(), dependencyNode.getDependency().getArtifact(), parentNode.getDependency().getArtifact()));
+                    localDependencies.put(
+                            dependencyNode.getDependency().getArtifact(),
+                            new LocalDependency(
+                                    dependencyNode.getDependency().getScope(),
+                                    dependencyNode.getDependency().getArtifact(),
+                                    parentNode.getDependency().getArtifact()));
                     if (isFeature(dependencyNode) || !useTransitiveDependencies) {
                         isFromFeature = true;
                     }
@@ -252,7 +287,13 @@ public class Dependency31Helper implements DependencyHelper {
                 if (useTransitiveDependencies && accept.isContinue()) {
                     List<DependencyNode> children = dependencyNode.getChildren();
                     for (DependencyNode child : children) {
-                        scan(dependencyNode, child, accept, useTransitiveDependencies, isFromFeature, indent + " ");
+                        scan(
+                                dependencyNode,
+                                child,
+                                accept,
+                                useTransitiveDependencies,
+                                isFromFeature,
+                                indent + " ");
                     }
                 }
             }
@@ -264,7 +305,9 @@ public class Dependency31Helper implements DependencyHelper {
 
         private Accept accept(DependencyNode dependency, Accept previous) {
             String scope = dependency.getDependency().getScope();
-            if (scope == null || "runtime".equalsIgnoreCase(scope) || "compile".equalsIgnoreCase(scope)) {
+            if (scope == null
+                    || "runtime".equalsIgnoreCase(scope)
+                    || "compile".equalsIgnoreCase(scope)) {
                 return previous;
             }
             if ("provided".equalsIgnoreCase(scope)) {
@@ -272,8 +315,6 @@ public class Dependency31Helper implements DependencyHelper {
             }
             return Accept.STOP;
         }
-
-
     }
 
     public static boolean isFeature(DependencyNode dependencyNode) {
@@ -281,7 +322,8 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     public static boolean isFeature(Artifact artifact) {
-        return artifact.getExtension().equals("kar") || FEATURE_CLASSIFIER.equals(artifact.getClassifier());
+        return artifact.getExtension().equals("kar")
+                || FEATURE_CLASSIFIER.equals(artifact.getClassifier());
     }
 
     @Override
@@ -289,15 +331,15 @@ public class Dependency31Helper implements DependencyHelper {
         return Dependency31Helper.isFeature((Artifact) artifact);
     }
 
-	@Override
-	public String getBaseVersion(Object artifact) {
-		return ((Artifact) artifact).getBaseVersion();
-	}
+    @Override
+    public String getBaseVersion(Object artifact) {
+        return ((Artifact) artifact).getBaseVersion();
+    }
 
-	@Override
-	public String getGroupId(Object artifact) {
-		return ((Artifact) artifact).getGroupId();
-	}
+    @Override
+    public String getGroupId(Object artifact) {
+        return ((Artifact) artifact).getGroupId();
+    }
 
     @Override
     public String getArtifactId(Object artifact) {
@@ -341,8 +383,13 @@ public class Dependency31Helper implements DependencyHelper {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Resolved artifact " + artifact + " to " + result.getArtifact().getFile() + " from "
-                    + result.getRepository());
+            log.debug(
+                    "Resolved artifact "
+                            + artifact
+                            + " to "
+                            + result.getArtifact().getFile()
+                            + " from "
+                            + result.getRepository());
         }
 
         return result.getArtifact().getFile();
@@ -373,15 +420,21 @@ public class Dependency31Helper implements DependencyHelper {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Resolved artifact " + id + " to " + result.getArtifact().getFile() + " from "
-                    + result.getRepository());
+            log.debug(
+                    "Resolved artifact "
+                            + id
+                            + " to "
+                            + result.getArtifact().getFile()
+                            + " from "
+                            + result.getRepository());
         }
 
         return result.getArtifact().getFile();
     }
 
     @Override
-    public String artifactToMvn(org.apache.maven.artifact.Artifact artifact, String versionOrRange) throws MojoExecutionException {
+    public String artifactToMvn(org.apache.maven.artifact.Artifact artifact, String versionOrRange)
+            throws MojoExecutionException {
         return this.artifactToMvn(toArtifact(artifact), versionOrRange);
     }
 
@@ -390,27 +443,47 @@ public class Dependency31Helper implements DependencyHelper {
         Artifact artifact = (Artifact) _artifact;
         String bundleName;
         if (artifact.getExtension().equals("jar") && MavenUtil.isEmpty(artifact.getClassifier())) {
-            bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), versionOrRange);
+            bundleName =
+                    String.format(
+                            "mvn:%s/%s/%s",
+                            artifact.getGroupId(), artifact.getArtifactId(), versionOrRange);
         } else {
             if (MavenUtil.isEmpty(artifact.getClassifier())) {
-                bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), versionOrRange, artifact.getExtension());
+                bundleName =
+                        String.format(
+                                "mvn:%s/%s/%s/%s",
+                                artifact.getGroupId(),
+                                artifact.getArtifactId(),
+                                versionOrRange,
+                                artifact.getExtension());
             } else {
-                bundleName = String.format("mvn:%s/%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), versionOrRange, artifact.getExtension(), artifact.getClassifier());
+                bundleName =
+                        String.format(
+                                "mvn:%s/%s/%s/%s/%s",
+                                artifact.getGroupId(),
+                                artifact.getArtifactId(),
+                                versionOrRange,
+                                artifact.getExtension(),
+                                artifact.getClassifier());
             }
         }
         return bundleName;
     }
 
-    private static Artifact toArtifact(org.apache.maven.artifact.Artifact artifact) throws MojoExecutionException {
+    private static Artifact toArtifact(org.apache.maven.artifact.Artifact artifact)
+            throws MojoExecutionException {
         try {
-            Method toArtifact = RepositoryUtils.class.getMethod("toArtifact", org.apache.maven.artifact.Artifact.class);
+            Method toArtifact =
+                    RepositoryUtils.class.getMethod(
+                            "toArtifact", org.apache.maven.artifact.Artifact.class);
             return (Artifact) toArtifact.invoke(null, artifact);
         } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 
-    private static org.apache.maven.artifact.Artifact toArtifact(Artifact artifact) throws MojoExecutionException {
+    private static org.apache.maven.artifact.Artifact toArtifact(Artifact artifact)
+            throws MojoExecutionException {
         try {
             Method toArtifact = RepositoryUtils.class.getMethod("toArtifact", Artifact.class);
             return (org.apache.maven.artifact.Artifact) toArtifact.invoke(null, artifact);
@@ -420,7 +493,8 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     @Override
-    public org.apache.maven.artifact.Artifact mvnToArtifact(String name) throws MojoExecutionException {
+    public org.apache.maven.artifact.Artifact mvnToArtifact(String name)
+            throws MojoExecutionException {
         DefaultArtifact artifact = MavenUtil.mvnToArtifact(name);
         org.apache.maven.artifact.Artifact mavenArtifact = toArtifact(artifact);
         return mavenArtifact;
@@ -444,5 +518,4 @@ public class Dependency31Helper implements DependencyHelper {
         org.apache.maven.artifact.Artifact mavenArtifact = toArtifact(artifact);
         return MavenUtil.layout.pathOf(mavenArtifact);
     }
-
 }

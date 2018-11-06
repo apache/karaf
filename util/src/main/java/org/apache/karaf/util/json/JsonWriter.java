@@ -24,12 +24,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-/**
- */
+/** */
 public final class JsonWriter {
 
-    private JsonWriter() {
-    }
+    private JsonWriter() {}
 
     public static void write(OutputStream stream, Object value) throws IOException {
         write(stream, value, false);
@@ -103,40 +101,42 @@ public final class JsonWriter {
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             switch (c) {
-            case '\"':
-                writer.append("\\\"");
-                break;
-            case '\\':
-                writer.append("\\\\");
-                break;
-            case '\b':
-                writer.append("\\b");
-                break;
-            case '\f':
-                writer.append("\\f");
-                break;
-            case '\n':
-                writer.append("\\n");
-                break;
-            case '\r':
-                writer.append("\\r");
-                break;
-            case '\t':
-                writer.append("\\t");
-                break;
-            default:
-                if (c < ' ' || (c >= '\u0080' && c < '\u00a0') || (c >= '\u2000' && c < '\u2100')) {
-                    String s = Integer.toHexString(c);
-                    writer.append('\\');
-                    writer.append('u');
-                    for (int j = s.length(); j < 4; j++) {
-                        writer.append('0');
+                case '\"':
+                    writer.append("\\\"");
+                    break;
+                case '\\':
+                    writer.append("\\\\");
+                    break;
+                case '\b':
+                    writer.append("\\b");
+                    break;
+                case '\f':
+                    writer.append("\\f");
+                    break;
+                case '\n':
+                    writer.append("\\n");
+                    break;
+                case '\r':
+                    writer.append("\\r");
+                    break;
+                case '\t':
+                    writer.append("\\t");
+                    break;
+                default:
+                    if (c < ' '
+                            || (c >= '\u0080' && c < '\u00a0')
+                            || (c >= '\u2000' && c < '\u2100')) {
+                        String s = Integer.toHexString(c);
+                        writer.append('\\');
+                        writer.append('u');
+                        for (int j = s.length(); j < 4; j++) {
+                            writer.append('0');
+                        }
+                        writer.append(s);
+                    } else {
+                        writer.append(c);
                     }
-                    writer.append(s);
-                } else {
-                    writer.append(c);
-                }
-                break;
+                    break;
             }
         }
         writer.append('"');
@@ -150,7 +150,8 @@ public final class JsonWriter {
         writer.append(Boolean.toString(value));
     }
 
-    private static void writeArray(Writer writer, Collection<?> value, int indent) throws IOException {
+    private static void writeArray(Writer writer, Collection<?> value, int indent)
+            throws IOException {
         writer.append('[');
         boolean first = true;
         for (Object obj : value) {
@@ -175,6 +176,7 @@ public final class JsonWriter {
     }
 
     static char[] INDENT;
+
     static {
         INDENT = new char[1];
         Arrays.fill(INDENT, '\t');

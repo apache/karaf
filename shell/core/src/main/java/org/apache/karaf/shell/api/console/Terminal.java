@@ -20,9 +20,7 @@ package org.apache.karaf.shell.api.console;
 
 import java.util.EnumSet;
 
-/**
- * Session terminal.
- */
+/** Session terminal. */
 public interface Terminal {
 
     /**
@@ -96,5 +94,4 @@ public interface Terminal {
      * @param listener the listener to remove.
      */
     void removeSignalListener(SignalListener listener);
-
 }

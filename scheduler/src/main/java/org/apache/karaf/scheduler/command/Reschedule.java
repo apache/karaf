@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.scheduler.command;
 
+import java.util.Date;
+import javax.xml.bind.DatatypeConverter;
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.scheduler.command.completers.JobNameCompleter;
@@ -23,10 +25,10 @@ import org.apache.karaf.shell.api.action.*;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import javax.xml.bind.DatatypeConverter;
-import java.util.Date;
-
-@Command(scope = "scheduler", name = "reschedule", description = "Update scheduling of an existing job")
+@Command(
+        scope = "scheduler",
+        name = "reschedule",
+        description = "Update scheduling of an existing job")
 @Service
 public class Reschedule implements Action {
 
@@ -34,7 +36,9 @@ public class Reschedule implements Action {
     @Completion(JobNameCompleter.class)
     String name;
 
-    @Option(name = "--concurrent", description = "Should jobs run concurrently or not (defaults to false)")
+    @Option(
+            name = "--concurrent",
+            description = "Should jobs run concurrently or not (defaults to false)")
     boolean concurrent;
 
     @Option(name = "--cron", description = "The cron expression")
@@ -49,13 +53,13 @@ public class Reschedule implements Action {
     @Option(name = "--period", description = "Time during executions (in seconds)")
     long period;
 
-    @Reference
-    Scheduler scheduler;
+    @Reference Scheduler scheduler;
 
     @Override
     public Object execute() throws Exception {
         if (cron != null && (at != null || times != -1 || period != 0)) {
-            throw new IllegalArgumentException("Both cron expression and explicit execution time can not be specified");
+            throw new IllegalArgumentException(
+                    "Both cron expression and explicit execution time can not be specified");
         }
         ScheduleOptions options;
         if (cron != null) {
@@ -80,5 +84,4 @@ public class Reschedule implements Action {
         scheduler.reschedule(name, options);
         return null;
     }
-
 }

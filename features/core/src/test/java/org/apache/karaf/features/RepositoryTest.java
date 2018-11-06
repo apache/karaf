@@ -17,12 +17,10 @@
 package org.apache.karaf.features;
 
 import java.net.URI;
-
 import junit.framework.TestCase;
 import org.apache.karaf.features.internal.resolver.FeatureResource;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.osgi.resource.Resource;
-
 
 public class RepositoryTest extends TestCase {
 
@@ -58,7 +56,11 @@ public class RepositoryTest extends TestCase {
         assertEquals(0, features[1].getConfigurations().size());
         assertNotNull(features[1].getDependencies());
         assertEquals(1, features[1].getDependencies().size());
-        assertEquals("f1" + org.apache.karaf.features.internal.model.Feature.VERSION_SEPARATOR + org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, features[1].getDependencies().get(0).toString());
+        assertEquals(
+                "f1"
+                        + org.apache.karaf.features.internal.model.Feature.VERSION_SEPARATOR
+                        + org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION,
+                features[1].getDependencies().get(0).toString());
         assertNotNull(features[1].getBundles());
         assertEquals(1, features[1].getBundles().size());
         assertEquals("b3", features[1].getBundles().get(0).getLocation());
@@ -101,7 +103,11 @@ public class RepositoryTest extends TestCase {
         assertEquals(0, features[1].getConfigurations().size());
         assertNotNull(features[1].getDependencies());
         assertEquals(1, features[1].getDependencies().size());
-        assertEquals("f1" + org.apache.karaf.features.internal.model.Feature.VERSION_SEPARATOR + org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, features[1].getDependencies().get(0).toString());
+        assertEquals(
+                "f1"
+                        + org.apache.karaf.features.internal.model.Feature.VERSION_SEPARATOR
+                        + org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION,
+                features[1].getDependencies().get(0).toString());
         assertNotNull(features[1].getBundles());
         assertEquals(1, features[1].getBundles().size());
         assertEquals("b3", features[1].getBundles().get(0).getLocation());
@@ -112,7 +118,7 @@ public class RepositoryTest extends TestCase {
         assertEquals(true, features[2].getConfigurationFiles().get(0).isOverride());
         assertEquals("cfloc", features[2].getConfigurationFiles().get(0).getLocation());
     }
-    
+
     public void testLoadConfigAppend() throws Exception {
         RepositoryImpl r = new RepositoryImpl(getClass().getResource("repo4.xml").toURI());
         // Check repo
@@ -129,7 +135,7 @@ public class RepositoryTest extends TestCase {
         assertNotNull(features[0].getConfigurations());
         assertEquals(1, features[0].getConfigurations().size());
         assertNotNull(features[0].getConfigurations().get(0).getName());
-		assertEquals("c1", features[0].getConfigurations().get(0).getName());
+        assertEquals("c1", features[0].getConfigurations().get(0).getName());
         assertEquals(1, features[0].getConfigurations().get(0).getProperties().size());
         assertEquals("v", features[0].getConfigurations().get(0).getProperties().get("k"));
         assertTrue(features[0].getConfigurations().get(0).isAppend());
@@ -145,7 +151,11 @@ public class RepositoryTest extends TestCase {
         assertEquals(0, features[1].getConfigurations().size());
         assertNotNull(features[1].getDependencies());
         assertEquals(1, features[1].getDependencies().size());
-        assertEquals("f1" + org.apache.karaf.features.internal.model.Feature.VERSION_SEPARATOR + org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, features[1].getDependencies().get(0).toString());
+        assertEquals(
+                "f1"
+                        + org.apache.karaf.features.internal.model.Feature.VERSION_SEPARATOR
+                        + org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION,
+                features[1].getDependencies().get(0).toString());
         assertNotNull(features[1].getBundles());
         assertEquals(1, features[1].getBundles().size());
         assertEquals("b3", features[1].getBundles().get(0).getLocation());

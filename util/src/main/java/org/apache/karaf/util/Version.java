@@ -39,5 +39,4 @@ public class Version {
     public static String karafVersion() {
         return version;
     }
-
 }

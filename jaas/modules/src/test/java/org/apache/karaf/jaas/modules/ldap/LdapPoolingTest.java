@@ -15,6 +15,9 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -25,7 +28,6 @@ import javax.naming.directory.InitialDirContext;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
@@ -37,33 +39,36 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
-@RunWith ( FrameworkRunner.class )
-@CreateLdapServer(transports = {@CreateTransport(protocol = "LDAPS", ssl = true)},
- keyStore = "src/test/resources/org/apache/karaf/jaas/modules/ldap/ldaps.jks", certificatePassword = "123456")
-@CreateDS(name = "LdapPoolingTest-class",
- partitions = { @CreatePartition(name = "example", suffix = "dc=example,dc=com") })
-@ApplyLdifFiles(
-   "org/apache/karaf/jaas/modules/ldap/example.com.ldif"
-)
+@RunWith(FrameworkRunner.class)
+@CreateLdapServer(
+        transports = {@CreateTransport(protocol = "LDAPS", ssl = true)},
+        keyStore = "src/test/resources/org/apache/karaf/jaas/modules/ldap/ldaps.jks",
+        certificatePassword = "123456")
+@CreateDS(
+        name = "LdapPoolingTest-class",
+        partitions = {@CreatePartition(name = "example", suffix = "dc=example,dc=com")})
+@ApplyLdifFiles("org/apache/karaf/jaas/modules/ldap/example.com.ldif")
 public class LdapPoolingTest extends AbstractLdapTestUnit {
 
     private SSLContext sslContext;
 
     @Before
     public void keystore() throws Exception {
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        KeyManagerFactory kmf =
+                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        TrustManagerFactory tmf =
+                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(new FileInputStream("src/test/resources/org/apache/karaf/jaas/modules/ldap/ldaps.jks"), "123456".toCharArray());
+        ks.load(
+                new FileInputStream(
+                        "src/test/resources/org/apache/karaf/jaas/modules/ldap/ldaps.jks"),
+                "123456".toCharArray());
         kmf.init(ks, "123456".toCharArray());
         tmf.init(ks);
 
         String javaVendor = System.getProperty("java.vendor");
         if (javaVendor.contains("IBM")) {
-        	sslContext = SSLContext.getInstance("SSL_TLSv2","IBMJSSE2");
+            sslContext = SSLContext.getInstance("SSL_TLSv2", "IBMJSSE2");
         } else {
             sslContext = SSLContext.getInstance("TLSv1.2");
         }
@@ -71,7 +76,8 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
     }
 
     /**
-     * @see <a href="http://docs.oracle.com/javase/jndi/tutorial/ldap/connect/config.html">LDAP connection pool</a>
+     * @see <a href="http://docs.oracle.com/javase/jndi/tutorial/ldap/connect/config.html">LDAP
+     *     connection pool</a>
      * @throws Exception
      */
     @Test
@@ -82,21 +88,24 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
         Hashtable<String, String> env = new Hashtable<>();
         env.put("com.sun.jndi.ldap.connect.pool", "true");
         env.put("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put("java.naming.provider.url", "ldaps://localhost:" + getLdapServer().getPortSSL() + "/ou=system");
+        env.put(
+                "java.naming.provider.url",
+                "ldaps://localhost:" + getLdapServer().getPortSSL() + "/ou=system");
         env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
         env.put("java.naming.security.protocol", "ssl");
         env.put("java.naming.security.principal", "uid=admin,ou=system");
         env.put("java.naming.security.credentials", "secret");
         env.put("java.naming.security.authentication", "simple");
 
-        final int[] socketsCreated = new int[] { 0 };
-        ManagedSSLSocketFactory.setSocketFactory(new ManagedSSLSocketFactory(sslContext.getSocketFactory()) {
-            @Override
-            public Socket createSocket(String host, int port) throws IOException {
-                socketsCreated[0]++;
-                return super.createSocket(host, port);
-            }
-        });
+        final int[] socketsCreated = new int[] {0};
+        ManagedSSLSocketFactory.setSocketFactory(
+                new ManagedSSLSocketFactory(sslContext.getSocketFactory()) {
+                    @Override
+                    public Socket createSocket(String host, int port) throws IOException {
+                        socketsCreated[0]++;
+                        return super.createSocket(host, port);
+                    }
+                });
         InitialDirContext context = new InitialDirContext(env);
         context.close();
         new InitialDirContext(env);
@@ -114,21 +123,24 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
         Hashtable<String, String> env = new Hashtable<>();
         env.put("com.sun.jndi.ldap.connect.pool", "false");
         env.put("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put("java.naming.provider.url", "ldaps://localhost:" + getLdapServer().getPortSSL() + "/ou=system");
+        env.put(
+                "java.naming.provider.url",
+                "ldaps://localhost:" + getLdapServer().getPortSSL() + "/ou=system");
         env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
         env.put("java.naming.security.protocol", "ssl");
         env.put("java.naming.security.principal", "uid=admin,ou=system");
         env.put("java.naming.security.credentials", "secret");
         env.put("java.naming.security.authentication", "simple");
 
-        final int[] socketsCreated = new int[] { 0 };
-        ManagedSSLSocketFactory.setSocketFactory(new ManagedSSLSocketFactory(sslContext.getSocketFactory()) {
-            @Override
-            public Socket createSocket(String host, int port) throws IOException {
-                socketsCreated[0]++;
-                return super.createSocket(host, port);
-            }
-        });
+        final int[] socketsCreated = new int[] {0};
+        ManagedSSLSocketFactory.setSocketFactory(
+                new ManagedSSLSocketFactory(sslContext.getSocketFactory()) {
+                    @Override
+                    public Socket createSocket(String host, int port) throws IOException {
+                        socketsCreated[0]++;
+                        return super.createSocket(host, port);
+                    }
+                });
         InitialDirContext context = new InitialDirContext(env);
         context.close();
         new InitialDirContext(env);
@@ -137,5 +149,4 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
 
         assertThat(socketsCreated[0], equalTo(2));
     }
-
 }

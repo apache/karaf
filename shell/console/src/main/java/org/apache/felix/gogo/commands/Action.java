@@ -24,6 +24,4 @@ import org.apache.felix.service.command.CommandSession;
 public interface Action {
 
     Object execute(CommandSession session) throws Exception;
-
 }
-

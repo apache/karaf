@@ -16,13 +16,14 @@
  */
 package org.apache.karaf.bundle.command;
 
+import static java.lang.String.format;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
@@ -42,19 +43,20 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.lang.String.format;
-
-/**
- * Command for showing the full tree of bundles that have been used to resolve
- * a given bundle.
- */
-@Command(scope = "bundle", name = "tree-show", description = "Shows the tree of bundles based on the wiring information.")
+/** Command for showing the full tree of bundles that have been used to resolve a given bundle. */
+@Command(
+        scope = "bundle",
+        name = "tree-show",
+        description = "Shows the tree of bundles based on the wiring information.")
 @Service
 public class ShowBundleTree extends BundleCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowBundleTree.class);
 
-    @Option(name = "-v", aliases = { "--version" }, description = "Show bundle versions")
+    @Option(
+            name = "-v",
+            aliases = {"--version"},
+            description = "Show bundle versions")
     private boolean versions;
 
     private Tree<Bundle> tree;
@@ -68,23 +70,28 @@ public class ShowBundleTree extends BundleCommand {
         createTree(bundle);
         printTree(tree);
         printDuplicatePackages(tree);
-        LOGGER.debug(format("Dependency tree calculated in %d ms",
-                            System.currentTimeMillis() - start));
+        LOGGER.debug(
+                format("Dependency tree calculated in %d ms", System.currentTimeMillis() - start));
         return null;
     }
-    
-    /**
-     * Return a String representation of a bundle state
-     */
+
+    /** Return a String representation of a bundle state */
     private String getState(Bundle bundle) {
         switch (bundle.getState()) {
-            case Bundle.UNINSTALLED : return "UNINSTALLED";
-            case Bundle.INSTALLED : return "INSTALLED";
-            case Bundle.RESOLVED: return "RESOLVED";
-            case Bundle.STARTING : return "STARTING";
-            case Bundle.STOPPING : return "STOPPING";
-            case Bundle.ACTIVE : return "ACTIVE";
-            default : return "UNKNOWN";
+            case Bundle.UNINSTALLED:
+                return "UNINSTALLED";
+            case Bundle.INSTALLED:
+                return "INSTALLED";
+            case Bundle.RESOLVED:
+                return "RESOLVED";
+            case Bundle.STARTING:
+                return "STARTING";
+            case Bundle.STOPPING:
+                return "STOPPING";
+            case Bundle.ACTIVE:
+                return "ACTIVE";
+            default:
+                return "UNKNOWN";
         }
     }
 
@@ -92,10 +99,9 @@ public class ShowBundleTree extends BundleCommand {
      * Print the header
      */
     private void printHeader(Bundle bundle) {
-        System.out.printf("Bundle %s [%s] is currently %s%n",
-                bundle.getSymbolicName(),
-                bundle.getBundleId(),
-                getState(bundle));
+        System.out.printf(
+                "Bundle %s [%s] is currently %s%n",
+                bundle.getSymbolicName(), bundle.getBundleId(), getState(bundle));
     }
 
     /*
@@ -103,18 +109,21 @@ public class ShowBundleTree extends BundleCommand {
      */
     private void printTree(Tree<Bundle> tree) {
         System.out.printf("%n");
-        tree.write(System.out, node -> {
-            if (versions) {
-                return String.format("%s / [%s] [%s]",
-                        node.getValue().getSymbolicName(),
-                        node.getValue().getVersion().toString(),
-                        node.getValue().getBundleId());
-            } else {
-                return String.format("%s [%s]",
-                        node.getValue().getSymbolicName(),
-                        node.getValue().getBundleId());
-            }
-        });
+        tree.write(
+                System.out,
+                node -> {
+                    if (versions) {
+                        return String.format(
+                                "%s / [%s] [%s]",
+                                node.getValue().getSymbolicName(),
+                                node.getValue().getVersion().toString(),
+                                node.getValue().getBundleId());
+                    } else {
+                        return String.format(
+                                "%s [%s]",
+                                node.getValue().getSymbolicName(), node.getValue().getBundleId());
+                    }
+                });
     }
 
     /*
@@ -129,26 +138,32 @@ public class ShowBundleTree extends BundleCommand {
             for (BundleRevision revision : bundle.adapt(BundleRevisions.class).getRevisions()) {
                 BundleWiring wiring = revision.getWiring();
                 if (wiring != null) {
-                    List<BundleWire> wires = wiring.getProvidedWires(BundleRevision.PACKAGE_NAMESPACE);
+                    List<BundleWire> wires =
+                            wiring.getProvidedWires(BundleRevision.PACKAGE_NAMESPACE);
                     if (wires != null) {
                         for (BundleWire wire : wires) {
-                            String name = wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE).toString();
+                            String name =
+                                    wire.getCapability()
+                                            .getAttributes()
+                                            .get(BundleRevision.PACKAGE_NAMESPACE)
+                                            .toString();
                             exports.computeIfAbsent(name, k -> new HashSet<>()).add(bundle);
                         }
                     }
                 }
             }
         }
-        
-        for(Map.Entry<String, Set<Bundle>> entry : exports.entrySet()) {
-        	Set<Bundle> bundlesExportingPkg = entry.getValue();
-        	if(bundlesExportingPkg.size() > 1) {
-        		System.out.printf("%n");
-                System.out.printf("WARNING: multiple bundles are exporting package %s%n", entry.getKey());
+
+        for (Map.Entry<String, Set<Bundle>> entry : exports.entrySet()) {
+            Set<Bundle> bundlesExportingPkg = entry.getValue();
+            if (bundlesExportingPkg.size() > 1) {
+                System.out.printf("%n");
+                System.out.printf(
+                        "WARNING: multiple bundles are exporting package %s%n", entry.getKey());
                 for (Bundle bundle : bundlesExportingPkg) {
                     System.out.printf("- %s%n", bundle);
                 }
-        	}
+            }
         }
     }
 
@@ -160,7 +175,8 @@ public class ShowBundleTree extends BundleCommand {
             createNode(tree);
         } else {
             createNodesForImports(tree, bundle);
-            System.out.print("\nWarning: the below tree is a rough approximation of a possible resolution");
+            System.out.print(
+                    "\nWarning: the below tree is a rough approximation of a possible resolution");
         }
     }
 
@@ -188,12 +204,14 @@ public class ShowBundleTree extends BundleCommand {
      * Create a child node for a given import (by finding a matching export in the currently installed bundles)
      */
     private void createNodeForImport(Node<Bundle> node, Bundle bundle, Clause i) {
-        VersionRange range = VersionRange.parseVersionRange(i.getAttribute(Constants.VERSION_ATTRIBUTE));
+        VersionRange range =
+                VersionRange.parseVersionRange(i.getAttribute(Constants.VERSION_ATTRIBUTE));
         boolean foundMatch = false;
         for (Bundle b : bundleContext.getBundles()) {
             BundleWiring wiring = b.adapt(BundleWiring.class);
             if (wiring != null) {
-                List<BundleCapability> caps = wiring.getCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+                List<BundleCapability> caps =
+                        wiring.getCapabilities(BundleRevision.PACKAGE_NAMESPACE);
                 if (caps != null) {
                     for (BundleCapability cap : caps) {
                         String n = getAttribute(cap, BundleRevision.PACKAGE_NAMESPACE);
@@ -224,22 +242,26 @@ public class ShowBundleTree extends BundleCommand {
     }
 
     /*
-    * Creates a node in the bundle tree
-    */
+     * Creates a node in the bundle tree
+     */
     private void createNode(Node<Bundle> node) {
         Bundle bundle = node.getValue();
         Collection<Bundle> exporters = new HashSet<>();
         exporters.addAll(bundleService.getWiredBundles(bundle).values());
 
         for (Bundle exporter : exporters) {
-            if (node.hasAncestor(exporter)) {                
-                LOGGER.debug(format("Skipping %s (already exists in the current branch)", exporter));
+            if (node.hasAncestor(exporter)) {
+                LOGGER.debug(
+                        format("Skipping %s (already exists in the current branch)", exporter));
             } else {
                 boolean existing = tree.flatten().contains(exporter);
                 LOGGER.debug(format("Adding %s as a dependency for %s", exporter, bundle));
                 Node<Bundle> child = node.addChild(exporter);
                 if (existing) {
-                    LOGGER.debug(format("Skipping children of %s (already exists in another branch)", exporter));
+                    LOGGER.debug(
+                            format(
+                                    "Skipping children of %s (already exists in another branch)",
+                                    exporter));
                 } else {
                     createNode(child);
                 }

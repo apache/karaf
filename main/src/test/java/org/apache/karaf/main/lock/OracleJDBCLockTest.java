@@ -27,12 +27,9 @@ import static org.junit.Assert.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
-
 import org.apache.felix.utils.properties.Properties;
-
 import org.junit.Before;
 import org.junit.Test;
-
 
 public class OracleJDBCLockTest extends BaseJDBCLockTest {
 
@@ -50,7 +47,8 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
     OracleJDBCLock createLock(Properties props) {
         return new OracleJDBCLock(props) {
             @Override
-            Connection doCreateConnection(String driver, String url, String username, String password) {
+            Connection doCreateConnection(
+                    String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
                 assertEquals(this.url, url);
                 assertEquals(this.user, username);
@@ -77,12 +75,14 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT COUNT(*) FROM " + tableName)).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT COUNT(*) FROM " + tableName))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeQuery()).andReturn(resultSet);
         expect(resultSet.next()).andReturn(Boolean.TRUE);
@@ -104,7 +104,8 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andThrow(new SQLException());
         preparedStatement.close();
@@ -124,7 +125,8 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andThrow(new SQLException());
         preparedStatement.close();
@@ -144,12 +146,14 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
 
         expect(connection.isClosed()).andReturn(false);
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT COUNT(*) FROM " + tableName)).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT COUNT(*) FROM " + tableName))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeQuery()).andReturn(resultSet);
         expect(resultSet.next()).andReturn(Boolean.TRUE);
@@ -171,7 +175,8 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
 
         expect(connection.isClosed()).andReturn(false);
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andThrow(new SQLException());
         preparedStatement.close();
@@ -190,12 +195,14 @@ public class OracleJDBCLockTest extends BaseJDBCLockTest {
         reset(connection, metaData, statement, preparedStatement, resultSet);
 
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE"))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.execute()).andReturn(true);
         preparedStatement.close();
         expect(connection.isClosed()).andReturn(false);
-        expect(connection.prepareStatement("SELECT COUNT(*) FROM " + tableName)).andReturn(preparedStatement);
+        expect(connection.prepareStatement("SELECT COUNT(*) FROM " + tableName))
+                .andReturn(preparedStatement);
         preparedStatement.setQueryTimeout(10);
         expect(preparedStatement.executeQuery()).andReturn(resultSet);
         expect(resultSet.next()).andReturn(Boolean.TRUE);

@@ -23,15 +23,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.osgi.framework.Bundle;
 
-@Command(scope = "bundle", name = "diag", description = "Displays diagnostic information why a bundle is not Active")
+@Command(
+        scope = "bundle",
+        name = "diag",
+        description = "Displays diagnostic information why a bundle is not Active")
 @Service
 public class Diag extends BundlesCommand {
 
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
         BundleInfo info = bundleService.getInfo(bundle);
-        if (info.getState() == BundleState.Failure || info.getState() == BundleState.Waiting
-            || info.getState() == BundleState.GracePeriod || info.getState() == BundleState.Installed) {
+        if (info.getState() == BundleState.Failure
+                || info.getState() == BundleState.Waiting
+                || info.getState() == BundleState.GracePeriod
+                || info.getState() == BundleState.Installed) {
             String title = ShellUtil.getBundleName(bundle);
             System.out.println(title);
             System.out.println(ShellUtil.getUnderlineString(title));
@@ -40,5 +45,4 @@ public class Diag extends BundlesCommand {
             System.out.println();
         }
     }
-
 }

@@ -18,7 +18,6 @@ package org.apache.karaf.jdbc.command.ds;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.jdbc.command.JdbcCommandSupport;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -38,10 +37,16 @@ public class ListCommand extends JdbcCommandSupport {
         table.column("Status");
 
         List<String> datasources = this.getJdbcService().datasources();
-        for (String dsName: datasources) {
+        for (String dsName : datasources) {
             try {
                 Map<String, String> info = this.getJdbcService().info(dsName);
-                table.addRow().addContent(dsName, info.get("db.product"), info.get("db.version"), info.get("url"), "OK");
+                table.addRow()
+                        .addContent(
+                                dsName,
+                                info.get("db.product"),
+                                info.get("db.version"),
+                                info.get("url"),
+                                "OK");
             } catch (Exception e) {
                 table.addRow().addContent(dsName, "", "", "", "Error " + e.getMessage());
             }
@@ -50,5 +55,4 @@ public class ListCommand extends JdbcCommandSupport {
         table.print(System.out);
         return null;
     }
-
 }

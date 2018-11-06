@@ -24,10 +24,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class GroupDeleteCommand extends JaasCommandSupport {
 
-    @Argument(index = 0, name = "username", description = "Username", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "username",
+            description = "Username",
+            required = true,
+            multiValued = false)
     private String username;
 
-    @Argument(index = 1, name = "group", description = "Group", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "group",
+            description = "Group",
+            required = true,
+            multiValued = false)
     private String group;
 
     @Override
@@ -56,5 +66,4 @@ public class GroupDeleteCommand extends JaasCommandSupport {
     public String toString() {
         return "GroupDeleteCommand {username='" + username + "', group='" + group + "'}";
     }
-
 }

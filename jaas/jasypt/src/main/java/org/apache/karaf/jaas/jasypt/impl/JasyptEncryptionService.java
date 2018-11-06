@@ -15,7 +15,6 @@
 package org.apache.karaf.jaas.jasypt.impl;
 
 import java.util.Map;
-
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.EncryptionService;
 

@@ -17,9 +17,7 @@ package org.apache.karaf.shell.support.table;
 
 import org.jline.utils.AttributedStringBuilder;
 
-/**
- * Colored support for column.
- */
+/** Colored support for column. */
 public class AnsiColumn extends Col {
 
     private int color;
@@ -38,17 +36,14 @@ public class AnsiColumn extends Col {
         AttributedStringBuilder sb = new AttributedStringBuilder();
         sb.style(sb.style().foreground(color));
 
-        if (bold)
-            sb.style(sb.style().bold());
+        if (bold) sb.style(sb.style().bold());
 
         sb.append(in);
 
-        if (bold)
-            sb.style(sb.style().boldOff());
+        if (bold) sb.style(sb.style().boldOff());
 
         sb.style(sb.style().foregroundOff());
 
         return sb.toAnsi();
     }
-
 }

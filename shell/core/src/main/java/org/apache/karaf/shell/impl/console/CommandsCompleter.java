@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
@@ -43,21 +42,21 @@ import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 
-/**
- * Overall command line completer.
- */
-public class CommandsCompleter extends org.apache.karaf.shell.support.completers.CommandsCompleter implements org.jline.reader.Completer {
+/** Overall command line completer. */
+public class CommandsCompleter extends org.apache.karaf.shell.support.completers.CommandsCompleter
+        implements org.jline.reader.Completer {
 
     private final SessionFactory factory;
     private final Session session;
     private final Map<String, Completer> globalCompleters = new HashMap<>();
     private final Map<String, Completer> localCompleters = new HashMap<>();
-    private final Completer aliasesCompleter = new SimpleCommandCompleter() {
-        @Override
-        protected Collection<String> getNames(Session session) {
-            return getAliases(session);
-        }
-    };
+    private final Completer aliasesCompleter =
+            new SimpleCommandCompleter() {
+                @Override
+                protected Collection<String> getNames(Session session) {
+                    return getAliases(session);
+                }
+            };
     private final List<Command> commands = new ArrayList<>();
 
     public CommandsCompleter(SessionFactory factory, Session session) {
@@ -66,19 +65,26 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
     }
 
     @Override
-    public void complete(LineReader reader, ParsedLine line, List<org.jline.reader.Candidate> candidates) {
+    public void complete(
+            LineReader reader, ParsedLine line, List<org.jline.reader.Candidate> candidates) {
         CommandLine commandLine = new CommandLineImpl(line);
         List<Candidate> cands = new ArrayList<>();
         completeCandidates(session, commandLine, cands);
         for (Candidate cand : cands) {
-            candidates.add(new org.jline.reader.Candidate(
-                    cand.value(), cand.displ(), cand.group(),
-                    cand.descr(), cand.suffix(), cand.key(),
-                    cand.complete()));
+            candidates.add(
+                    new org.jline.reader.Candidate(
+                            cand.value(),
+                            cand.displ(),
+                            cand.group(),
+                            cand.descr(),
+                            cand.suffix(),
+                            cand.key(),
+                            cand.complete()));
         }
     }
 
-    public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
+    public void completeCandidates(
+            Session session, CommandLine commandLine, List<Candidate> candidates) {
         Map<String, Completer>[] allCompleters = checkData();
 
         List<String> scopes = getCurrentScopes(session);
@@ -152,9 +158,11 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
 
     protected static class ScopeComparator implements Comparator<String> {
         private final List<String> scopes;
+
         public ScopeComparator(List<String> scopes) {
             this.scopes = scopes;
         }
+
         @Override
         public int compare(String o1, String o2) {
             String[] p1 = o1.split(":");
@@ -231,13 +239,17 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
                 Completer cl = command.getCompleter(true);
                 if (cg == null) {
                     if (Session.SCOPE_GLOBAL.equals(command.getScope())) {
-                        cg = new FixedSimpleCommandCompleter(Collections.singletonList(command.getName()));
+                        cg =
+                                new FixedSimpleCommandCompleter(
+                                        Collections.singletonList(command.getName()));
                     } else {
                         cg = new FixedSimpleCommandCompleter(Arrays.asList(key, command.getName()));
                     }
                 }
                 if (cl == null) {
-                    cl = new FixedSimpleCommandCompleter(Collections.singletonList(command.getName()));
+                    cl =
+                            new FixedSimpleCommandCompleter(
+                                    Collections.singletonList(command.getName()));
                 }
                 global.put(key, cg);
                 local.put(key, cl);
@@ -254,8 +266,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         }
         synchronized (this) {
             return new Map[] {
-                    new HashMap<>(this.globalCompleters),
-                    new HashMap<>(this.localCompleters)
+                new HashMap<>(this.globalCompleters), new HashMap<>(this.localCompleters)
             };
         }
     }
@@ -271,9 +282,11 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         Set<String> aliases = new HashSet<>();
         for (String var : vars) {
             Object content = session.get(var);
-            if (content != null && "org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName())) {
+            if (content != null
+                    && "org.apache.felix.gogo.runtime.Closure"
+                            .equals(content.getClass().getName())) {
 
-                //check both acl for alias and original cmd to determine if it should be visible
+                // check both acl for alias and original cmd to determine if it should be visible
                 int index = var.indexOf(":");
                 if (index > 0 && (factory instanceof SecuredSessionFactoryImpl)) {
                     String scope = var.substring(0, index);
@@ -282,21 +295,24 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
                     index = originalCmd.indexOf(" ");
                     Object securityCmd = null;
                     if (index > 0) {
-                        securityCmd = ((org.apache.felix.gogo.runtime.Closure)content).
-                            get(originalCmd.substring(0, index));
+                        securityCmd =
+                                ((org.apache.felix.gogo.runtime.Closure) content)
+                                        .get(originalCmd.substring(0, index));
                     }
                     if (securityCmd instanceof SecuredCommand) {
-                        if (((SecuredSessionFactoryImpl)factory).isAliasVisible(scope, command)
-                            && ((SecuredSessionFactoryImpl)factory).isVisible(((SecuredCommand)securityCmd).getScope(),
-                                                                              ((SecuredCommand)securityCmd).getName())) {
+                        if (((SecuredSessionFactoryImpl) factory).isAliasVisible(scope, command)
+                                && ((SecuredSessionFactoryImpl) factory)
+                                        .isVisible(
+                                                ((SecuredCommand) securityCmd).getScope(),
+                                                ((SecuredCommand) securityCmd).getName())) {
                             aliases.add(var);
                         }
                     } else {
-                        if (((SecuredSessionFactoryImpl)factory).isVisible(scope, command)) {
+                        if (((SecuredSessionFactoryImpl) factory).isVisible(scope, command)) {
                             aliases.add(var);
                         }
                     }
-                    
+
                 } else {
                     aliases.add(var);
                 }
@@ -305,7 +321,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         return aliases;
     }
 
-    static abstract class SimpleCommandCompleter implements Completer {
+    abstract static class SimpleCommandCompleter implements Completer {
 
         @Override
         public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -313,7 +329,12 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
             int argIndex = commandLine.getCursorArgumentIndex();
             StringsCompleter completer = new StringsCompleter(getNames(session));
             if (argIndex == 0) {
-                int res = completer.complete(session, new ArgumentCommandLine(args[argIndex], commandLine.getArgumentPosition()), candidates);
+                int res =
+                        completer.complete(
+                                session,
+                                new ArgumentCommandLine(
+                                        args[argIndex], commandLine.getArgumentPosition()),
+                                candidates);
                 if (res > -1) {
                     res += commandLine.getBufferPosition() - commandLine.getArgumentPosition();
                 }
@@ -328,9 +349,13 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
 
         private boolean verifyCompleter(Session session, Completer completer, String argument) {
             List<String> candidates = new ArrayList<>();
-            return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
+            return completer.complete(
+                                    session,
+                                    new ArgumentCommandLine(argument, argument.length()),
+                                    candidates)
+                            != -1
+                    && !candidates.isEmpty();
         }
-
     }
 
     static class FixedSimpleCommandCompleter extends SimpleCommandCompleter {
@@ -384,6 +409,4 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
             return line.line();
         }
     }
-
 }
-

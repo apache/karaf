@@ -18,7 +18,6 @@ package org.apache.karaf.jdbc.command;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.jdbc.command.completers.SqlCompleter;
 import org.apache.karaf.jdbc.command.parsing.JdbcParser;
@@ -35,11 +34,21 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class QueryCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "datasource", description = "The JDBC datasource to use", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "datasource",
+            description = "The JDBC datasource to use",
+            required = true,
+            multiValued = false)
     @Completion(DataSourcesNameCompleter.class)
     String datasource;
 
-    @Argument(index = 1, name = "query", description = "The SQL query to execute", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "query",
+            description = "The SQL query to execute",
+            required = true,
+            multiValued = false)
     @Completion(SqlCompleter.class)
     String query;
 
@@ -65,5 +74,4 @@ public class QueryCommand extends JdbcCommandSupport {
 
         return null;
     }
-
 }

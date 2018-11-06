@@ -18,11 +18,8 @@
  */
 package org.apache.karaf.shell.api.console;
 
-/**
- * Used to filter a command before it gets logged.
- */
+/** Used to filter a command before it gets logged. */
 public interface CommandLoggingFilter {
 
     CharSequence filter(CharSequence command);
-
 }

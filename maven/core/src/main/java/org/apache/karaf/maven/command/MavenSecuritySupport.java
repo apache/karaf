@@ -20,12 +20,16 @@ import org.apache.karaf.shell.api.action.Option;
 
 public abstract class MavenSecuritySupport extends MavenConfigurationSupport {
 
-    @Option(name = "-x", aliases = { "--show-passwords" }, description = "Do not hide passwords related to Maven encryption", required = false, multiValued = false)
+    @Option(
+            name = "-x",
+            aliases = {"--show-passwords"},
+            description = "Do not hide passwords related to Maven encryption",
+            required = false,
+            multiValued = false)
     boolean showPasswords;
 
     @Override
     protected boolean showPasswords() {
         return showPasswords;
     }
-
 }

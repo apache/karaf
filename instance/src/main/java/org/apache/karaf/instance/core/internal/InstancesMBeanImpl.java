@@ -19,41 +19,60 @@ package org.apache.karaf.instance.core.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.TabularData;
-
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceSettings;
 import org.apache.karaf.instance.core.InstancesMBean;
 
 public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean {
 
-    static final String DEBUG_OPTS = " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005";
+    static final String DEBUG_OPTS =
+            " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005";
     static final String DEFAULT_OPTS = "-server -Xmx512M -Dcom.sun.management.jmxremote";
 
     private org.apache.karaf.instance.core.InstanceService instanceService;
 
-    public InstancesMBeanImpl(org.apache.karaf.instance.core.InstanceService instanceService) throws NotCompliantMBeanException {
+    public InstancesMBeanImpl(org.apache.karaf.instance.core.InstanceService instanceService)
+            throws NotCompliantMBeanException {
         super(InstancesMBean.class);
         this.instanceService = instanceService;
     }
 
-    public int createInstance(String name,
-                              int sshPort,
-                              int rmiRegistryPort,
-                              int rmiServerPort,
-                              String location,
-                              String javaOpts,
-                              String features,
-                              String featuresURLs)
-        throws MBeanException {
-        return this.createInstance(name, sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, features, featuresURLs, "localhost");
+    public int createInstance(
+            String name,
+            int sshPort,
+            int rmiRegistryPort,
+            int rmiServerPort,
+            String location,
+            String javaOpts,
+            String features,
+            String featuresURLs)
+            throws MBeanException {
+        return this.createInstance(
+                name,
+                sshPort,
+                rmiRegistryPort,
+                rmiServerPort,
+                location,
+                javaOpts,
+                features,
+                featuresURLs,
+                "localhost");
     }
 
-    public int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs, String address)
+    public int createInstance(
+            String name,
+            int sshPort,
+            int rmiRegistryPort,
+            int rmiServerPort,
+            String location,
+            String javaOpts,
+            String features,
+            String featureURLs,
+            String address)
             throws MBeanException {
         try {
             if ("".equals(location)) {
@@ -63,8 +82,16 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
                 javaOpts = null;
             }
 
-            InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts,
-                    parseStringList(featureURLs), parseStringList(features), address);
+            InstanceSettings settings =
+                    new InstanceSettings(
+                            sshPort,
+                            rmiRegistryPort,
+                            rmiServerPort,
+                            location,
+                            javaOpts,
+                            parseStringList(featureURLs),
+                            parseStringList(features),
+                            address);
 
             Instance inst = instanceService.createInstance(name, settings, false);
             if (inst != null) {
@@ -141,7 +168,8 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         }
     }
 
-    public void startInstance(String name, String opts, boolean wait, boolean debug) throws MBeanException {
+    public void startInstance(String name, String opts, boolean wait, boolean debug)
+            throws MBeanException {
         try {
             Instance child = getExistingInstance(name);
             String options = opts;
@@ -189,7 +217,8 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         }
     }
 
-    public void renameInstance(String originalName, String newName, boolean verbose) throws MBeanException {
+    public void renameInstance(String originalName, String newName, boolean verbose)
+            throws MBeanException {
         try {
             instanceService.renameInstance(originalName, newName, verbose);
         } catch (Exception e) {
@@ -197,7 +226,15 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         }
     }
 
-    public void cloneInstance(String name, String cloneName, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts) throws MBeanException {
+    public void cloneInstance(
+            String name,
+            String cloneName,
+            int sshPort,
+            int rmiRegistryPort,
+            int rmiServerPort,
+            String location,
+            String javaOpts)
+            throws MBeanException {
         try {
             if ("".equals(location)) {
                 location = null;
@@ -206,7 +243,15 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
                 javaOpts = null;
             }
 
-            InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null);
+            InstanceSettings settings =
+                    new InstanceSettings(
+                            sshPort,
+                            rmiRegistryPort,
+                            rmiServerPort,
+                            location,
+                            javaOpts,
+                            null,
+                            null);
 
             instanceService.cloneInstance(name, cloneName, settings, false);
         } catch (Exception e) {

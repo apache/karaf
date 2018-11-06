@@ -15,27 +15,18 @@
  */
 package org.apache.karaf.shell.table;
 
-/**
- * Column definition.
- */
+/** Column definition. */
 public class Col {
 
-    /**
-     * Column header.
-     */
+    /** Column header. */
     private String header;
 
-    /**
-     * Maximum size of this column. The default -1 means the column
-     * may grow indefinitely
-     */
+    /** Maximum size of this column. The default -1 means the column may grow indefinitely */
     int maxSize = -1;
-    
+
     int size = 0;
-    
-    /**
-     * Alignment
-     */
+
+    /** Alignment */
     private HAlign align = HAlign.left;
 
     public Col(String header) {
@@ -46,22 +37,22 @@ public class Col {
         this.align = align;
         return this;
     }
-    
+
     public Col alignLeft() {
         this.align = HAlign.left;
         return this;
     }
-    
+
     public Col alignRight() {
         this.align = HAlign.right;
         return this;
     }
-    
+
     public Col alignCenter() {
         this.align = HAlign.center;
         return this;
     }
-    
+
     public Col maxSize(int maxSize) {
         this.maxSize = maxSize;
         return this;
@@ -70,13 +61,13 @@ public class Col {
     public int getSize() {
         return size;
     }
-    
+
     protected void updateSize(int cellSize) {
         if (this.size <= cellSize) {
             this.size = getClippedSize(cellSize);
         }
     }
-    
+
     private int getClippedSize(int cellSize) {
         return this.maxSize == -1 ? cellSize : Math.min(cellSize, this.maxSize);
     }
@@ -109,5 +100,4 @@ public class Col {
             return content.substring(0, Math.max(0, size - 1));
         }
     }
-
 }

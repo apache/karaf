@@ -18,49 +18,48 @@
  */
 package org.apache.karaf.deployer.kar;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.util.zip.ZipFile;
-
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.karaf.kar.KarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KarArtifactInstaller implements ArtifactInstaller {
-    
+
     public static final String FEATURE_CLASSIFIER = "features";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KarArtifactInstaller.class);
-    
-    private final static String KAR_SUFFIX = ".kar";
-    private final static String ZIP_SUFFIX = ".zip";
 
-	private KarService karService;
+    private static final String KAR_SUFFIX = ".kar";
+    private static final String ZIP_SUFFIX = ".zip";
 
-	public void install(File file) throws Exception {
+    private KarService karService;
+
+    public void install(File file) throws Exception {
         // check if the KAR is not already installed
         if (karService.list().contains(getKarName(file))) {
             LOGGER.info("KAR {} is already installed. Please uninstall it first.", file.getName());
             return;
         }
-        
+
         LOGGER.info("Installing KAR file {}", file);
-        
+
         karService.install(file.toURI());
-	}
+    }
 
     public void uninstall(File file) throws Exception {
         String karName = getKarName(file);
         LOGGER.info("Uninstalling KAR {}", karName);
         karService.uninstall(karName);
-	}
+    }
 
-	public void update(File file) throws Exception {
+    public void update(File file) throws Exception {
         LOGGER.warn("Karaf archive {}' has been updated; redeploying.", file);
         karService.uninstall(getKarName(file));
         karService.install(file.toURI());
-	}
+    }
 
     String getKarName(File karFile) {
         String karName = karFile.getName();
@@ -69,26 +68,27 @@ public class KarArtifactInstaller implements ArtifactInstaller {
     }
 
     public boolean canHandle(File file) {
-		// If the file or directory ends with .kar, then we can handle it!
+        // If the file or directory ends with .kar, then we can handle it!
         //
         if (file.getName().endsWith(KAR_SUFFIX)) {
-			LOGGER.info("Found a .kar file to deploy.");
-			return true;
-		}
-		// Otherwise, check to see if it's a zip file containing a META-INF/KARAF.MF manifest.
+            LOGGER.info("Found a .kar file to deploy.");
+            return true;
+        }
+        // Otherwise, check to see if it's a zip file containing a META-INF/KARAF.MF manifest.
         //
         else if (file.isFile() && file.getName().endsWith(ZIP_SUFFIX)) {
-			LOGGER.debug("Found a .zip file to deploy; checking contents to see if it's a Karaf archive.");
+            LOGGER.debug(
+                    "Found a .zip file to deploy; checking contents to see if it's a Karaf archive.");
             ZipFile zipFile = null;
             try {
                 zipFile = new ZipFile(file);
                 if (zipFile.getEntry("META-INF/KARAF.MF") != null) {
-					LOGGER.info("Found a Karaf archive with .zip prefix; will deploy.");
+                    LOGGER.info("Found a Karaf archive with .zip prefix; will deploy.");
                     return true;
                 }
-	    } catch (Exception e) {
-		    LOGGER.warn("Problem extracting zip file '{}'; ignoring.", file.getName(), e);
-	    } finally {
+            } catch (Exception e) {
+                LOGGER.warn("Problem extracting zip file '{}'; ignoring.", file.getName(), e);
+            } finally {
                 try {
                     if (zipFile != null) {
                         zipFile.close();
@@ -97,9 +97,9 @@ public class KarArtifactInstaller implements ArtifactInstaller {
                     LOGGER.warn("Problem closing zip file '{}'; ignoring.", file.getName(), e);
                 }
             }
-	}
+        }
 
-	return false;
+        return false;
     }
 
     public KarService getKarService() {
@@ -109,5 +109,4 @@ public class KarArtifactInstaller implements ArtifactInstaller {
     public void setKarService(KarService karService) {
         this.karService = karService;
     }
-
 }

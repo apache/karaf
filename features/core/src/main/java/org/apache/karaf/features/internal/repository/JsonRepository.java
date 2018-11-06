@@ -20,10 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Repository using a JSON representation of resource metadata.
- * The json should be a map: the key is the resource uri and the
- * value is a map of resource headers.
- * The content of the URL can be gzipped.
+ * Repository using a JSON representation of resource metadata. The json should be a map: the key is
+ * the resource uri and the value is a map of resource headers. The content of the URL can be
+ * gzipped.
  */
 public class JsonRepository extends org.apache.felix.utils.repository.JsonRepository {
 
@@ -47,5 +46,4 @@ public class JsonRepository extends org.apache.felix.utils.repository.JsonReposi
             }
         }
     }
-
 }

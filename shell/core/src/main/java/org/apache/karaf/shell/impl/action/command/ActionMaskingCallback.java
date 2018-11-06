@@ -18,10 +18,6 @@
  */
 package org.apache.karaf.shell.impl.action.command;
 
-import org.apache.karaf.shell.api.action.Argument;
-import org.apache.karaf.shell.api.action.Option;
-import org.jline.reader.ParsedLine;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +27,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Option;
+import org.jline.reader.ParsedLine;
 
 public class ActionMaskingCallback {
 
@@ -53,7 +52,8 @@ public class ActionMaskingCallback {
                         booleanOptions.addAll(Arrays.asList(option.aliases()));
                     } else {
                         typedOptions.put(option.name(), option);
-                        Arrays.asList(option.aliases()).forEach(action -> typedOptions.put(option.name(), option));
+                        Arrays.asList(option.aliases())
+                                .forEach(action -> typedOptions.put(option.name(), option));
                         censor |= option.censor();
                     }
                 }
@@ -65,10 +65,16 @@ public class ActionMaskingCallback {
             }
         }
         arguments.sort(Comparator.comparing(Argument::index));
-        return censor ? new ActionMaskingCallback(command, booleanOptions, typedOptions, arguments) : null;
+        return censor
+                ? new ActionMaskingCallback(command, booleanOptions, typedOptions, arguments)
+                : null;
     }
 
-    private ActionMaskingCallback(ActionCommand command, Set<String> booleanOptions, Map<String, Option> typedOptions, List<Argument> arguments) {
+    private ActionMaskingCallback(
+            ActionCommand command,
+            Set<String> booleanOptions,
+            Map<String, Option> typedOptions,
+            List<Argument> arguments) {
         this.command = command;
         this.booleanOptions = booleanOptions;
         this.typedOptions = typedOptions;
@@ -85,12 +91,12 @@ public class ActionMaskingCallback {
         for (int word = 0; word < words.size(); word++) {
             String wordStr = words.get(word);
             switch (state) {
-                // command
+                    // command
                 case 0:
                     cur = line.indexOf(wordStr, cur) + wordStr.length();
                     state++;
                     break;
-                // option
+                    // option
                 case 1:
                     if (wordStr.startsWith("-")) {
                         int idxEq = wordStr.indexOf('=');
@@ -133,7 +139,7 @@ public class ActionMaskingCallback {
                         state = 2;
                         // fall through
                     }
-                // argument
+                    // argument
                 case 2:
                     if (arg < arguments.size()) {
                         Argument argument = arguments.get(arg);
@@ -157,5 +163,4 @@ public class ActionMaskingCallback {
         }
         return sb.toString();
     }
-
 }

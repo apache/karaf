@@ -20,16 +20,14 @@ import org.osgi.service.component.annotations.Component;
 
 @Component(
         property = {
-                "scheduler.name=example",
-                "scheduler.period:Long=10",
-                "scheduler.concurrent:Boolean=false"
-        }
-)
+            "scheduler.name=example",
+            "scheduler.period:Long=10",
+            "scheduler.concurrent:Boolean=false"
+        })
 public class RunnableService implements Runnable {
 
     @Override
     public void run() {
         System.out.print("Hello Karaf user !");
     }
-
 }

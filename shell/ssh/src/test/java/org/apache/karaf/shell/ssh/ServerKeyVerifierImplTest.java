@@ -26,7 +26,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -34,66 +33,71 @@ import org.junit.Test;
 
 public class ServerKeyVerifierImplTest {
 
-	private static final InetSocketAddress LOCALHOST = new InetSocketAddress("localhost", 1001);
-	private static String ALGORITHM;
-	private static int KEY_SIZE;
+    private static final InetSocketAddress LOCALHOST = new InetSocketAddress("localhost", 1001);
+    private static String ALGORITHM;
+    private static int KEY_SIZE;
 
-	@BeforeClass
-	public static void init() throws IOException {
-		// test key algorithm and size as configured...
-		ALGORITHM = "RSA";
-		KEY_SIZE = 4096;
-	}
+    @BeforeClass
+    public static void init() throws IOException {
+        // test key algorithm and size as configured...
+        ALGORITHM = "RSA";
+        KEY_SIZE = 4096;
+    }
 
-	private PublicKey createPubKey() throws NoSuchAlgorithmException {
-		KeyPairGenerator gen = KeyPairGenerator.getInstance(ALGORITHM);
-		gen.initialize(KEY_SIZE);
-		KeyPair keyPair = gen.generateKeyPair();
-		return keyPair.getPublic();
-	}
-	
-	@Test
-	public void testNewKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-		SocketAddress address = LOCALHOST;
-		PublicKey validServerKey = createPubKey();
-		
-		KnownHostsManager knowHostsManager = EasyMock.createMock(KnownHostsManager.class);
-		EasyMock.expect(knowHostsManager.getKnownKey(address, ALGORITHM)).andReturn(null);
-		knowHostsManager.storeKeyForHost(address, validServerKey);
-		EasyMock.expectLastCall();
-		EasyMock.replay(knowHostsManager);
+    private PublicKey createPubKey() throws NoSuchAlgorithmException {
+        KeyPairGenerator gen = KeyPairGenerator.getInstance(ALGORITHM);
+        gen.initialize(KEY_SIZE);
+        KeyPair keyPair = gen.generateKeyPair();
+        return keyPair.getPublic();
+    }
 
-		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);		
-		boolean verified = verifier.verifyServerKey(null, address, validServerKey);
-		Assert.assertTrue("Key should be verified as the key is new", verified);
-	}
-	
-	@Test
-	public void testKnownAndCorrectKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-		SocketAddress address = LOCALHOST;
-		PublicKey validServerKey = createPubKey();
-		
-		KnownHostsManager knowHostsManager = EasyMock.createMock(KnownHostsManager.class);
-		EasyMock.expect(knowHostsManager.getKnownKey(address, ALGORITHM)).andReturn(validServerKey);
-		EasyMock.replay(knowHostsManager);
+    @Test
+    public void testNewKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        SocketAddress address = LOCALHOST;
+        PublicKey validServerKey = createPubKey();
 
-		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);		
-		boolean verified = verifier.verifyServerKey(null, address, validServerKey);
-		Assert.assertTrue("Key should be verified as the key is known and matches the key we verify", verified);
-	}
-	
-	@Test
-	public void testKnownAndIncorrectKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-		SocketAddress address = LOCALHOST;
-		PublicKey validServerKey = createPubKey();
-		PublicKey otherServerKey = createPubKey();
-		
-		KnownHostsManager knowHostsManager = EasyMock.createMock(KnownHostsManager.class);
-		EasyMock.expect(knowHostsManager.getKnownKey(address, ALGORITHM)).andReturn(otherServerKey);
-		EasyMock.replay(knowHostsManager);
+        KnownHostsManager knowHostsManager = EasyMock.createMock(KnownHostsManager.class);
+        EasyMock.expect(knowHostsManager.getKnownKey(address, ALGORITHM)).andReturn(null);
+        knowHostsManager.storeKeyForHost(address, validServerKey);
+        EasyMock.expectLastCall();
+        EasyMock.replay(knowHostsManager);
 
-		ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);		
-		boolean verified = verifier.verifyServerKey(null, address, validServerKey);
-		Assert.assertFalse("Key should not be verified as the key is known and does not match the key we verify", verified);
-	}
+        ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);
+        boolean verified = verifier.verifyServerKey(null, address, validServerKey);
+        Assert.assertTrue("Key should be verified as the key is new", verified);
+    }
+
+    @Test
+    public void testKnownAndCorrectKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        SocketAddress address = LOCALHOST;
+        PublicKey validServerKey = createPubKey();
+
+        KnownHostsManager knowHostsManager = EasyMock.createMock(KnownHostsManager.class);
+        EasyMock.expect(knowHostsManager.getKnownKey(address, ALGORITHM)).andReturn(validServerKey);
+        EasyMock.replay(knowHostsManager);
+
+        ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);
+        boolean verified = verifier.verifyServerKey(null, address, validServerKey);
+        Assert.assertTrue(
+                "Key should be verified as the key is known and matches the key we verify",
+                verified);
+    }
+
+    @Test
+    public void testKnownAndIncorrectKey()
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        SocketAddress address = LOCALHOST;
+        PublicKey validServerKey = createPubKey();
+        PublicKey otherServerKey = createPubKey();
+
+        KnownHostsManager knowHostsManager = EasyMock.createMock(KnownHostsManager.class);
+        EasyMock.expect(knowHostsManager.getKnownKey(address, ALGORITHM)).andReturn(otherServerKey);
+        EasyMock.replay(knowHostsManager);
+
+        ServerKeyVerifierImpl verifier = new ServerKeyVerifierImpl(knowHostsManager, true);
+        boolean verified = verifier.verifyServerKey(null, address, validServerKey);
+        Assert.assertFalse(
+                "Key should not be verified as the key is known and does not match the key we verify",
+                verified);
+    }
 }

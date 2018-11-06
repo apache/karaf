@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.jms.command;
 
-
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
@@ -26,13 +25,28 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class SendCommand extends JmsConnectionCommandSupport {
 
-    @Argument(index = 1, name = "queue", description = "The JMS queue name", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "queue",
+            description = "The JMS queue name",
+            required = true,
+            multiValued = false)
     String queue;
 
-    @Argument(index = 2, name = "message", description = "The JMS message content", required = true, multiValued = false)
+    @Argument(
+            index = 2,
+            name = "message",
+            description = "The JMS message content",
+            required = true,
+            multiValued = false)
     String message;
 
-    @Option(name = "-r", aliases = { "--replyTo" }, description = "Set the message ReplyTo", required = false, multiValued = false)
+    @Option(
+            name = "-r",
+            aliases = {"--replyTo"},
+            description = "Set the message ReplyTo",
+            required = false,
+            multiValued = false)
     String replyTo;
 
     @Override
@@ -40,5 +54,4 @@ public class SendCommand extends JmsConnectionCommandSupport {
         getJmsService().send(connectionFactory, queue, message, replyTo, username, password);
         return null;
     }
-
 }

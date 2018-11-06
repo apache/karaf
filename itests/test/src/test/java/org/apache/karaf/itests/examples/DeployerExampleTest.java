@@ -32,11 +32,19 @@ public class DeployerExampleTest extends KarafTestSupport {
         installAndAssertFeature("scr");
 
         // install deployer bundle
-        installBundle("mvn:org.apache.karaf.examples/karaf-deployer-example/" + System.getProperty("karaf.version"), true);
+        installBundle(
+                "mvn:org.apache.karaf.examples/karaf-deployer-example/"
+                        + System.getProperty("karaf.version"),
+                true);
 
         assertBundleInstalled("org.apache.karaf.examples.karaf-deployer-example");
-        assertServiceAvailable(ArtifactInstaller.class, "(component.name=org.apache.karaf.examples.deployer.ExampleDeployer)", 10);
-        assertServiceAvailable(ArtifactListener.class, "(component.name=org.apache.karaf.examples.deployer.ExampleDeployer)", 10);
+        assertServiceAvailable(
+                ArtifactInstaller.class,
+                "(component.name=org.apache.karaf.examples.deployer.ExampleDeployer)",
+                10);
+        assertServiceAvailable(
+                ArtifactListener.class,
+                "(component.name=org.apache.karaf.examples.deployer.ExampleDeployer)",
+                10);
     }
-
 }

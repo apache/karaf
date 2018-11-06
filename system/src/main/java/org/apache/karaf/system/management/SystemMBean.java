@@ -16,12 +16,10 @@
  */
 package org.apache.karaf.system.management;
 
-import javax.management.MBeanException;
 import java.util.Map;
+import javax.management.MBeanException;
 
-/**
- * Describe the system MBean.
- */
+/** Describe the system MBean. */
 public interface SystemMBean {
 
     /**
@@ -99,7 +97,7 @@ public interface SystemMBean {
      * @param framework The framework to use.
      */
     void setFramework(String framework);
-    
+
     /**
      * Enable or disable debugging
      *
@@ -131,7 +129,8 @@ public interface SystemMBean {
     /**
      * Get all system properties.
      *
-     * @param unset if true, display the OSGi properties even if they are not defined (with "undef" value).
+     * @param unset if true, display the OSGi properties even if they are not defined (with "undef"
+     *     value).
      * @param dumpToFile if true, dump the properties into a file in the data folder.
      * @return the list of system properties.
      * @throws MBeanException If a failure occurs.
@@ -154,5 +153,4 @@ public interface SystemMBean {
      * @param persistent if true, persist the new value to the etc/system.properties file.
      */
     void setProperty(String key, String value, boolean persistent);
-
 }

@@ -18,7 +18,6 @@ package org.apache.karaf.features.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -26,13 +25,16 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "scoping", propOrder = {"imports", "exports"})
+@XmlType(
+        name = "scoping",
+        propOrder = {"imports", "exports"})
 public class Scoping implements org.apache.karaf.features.Scoping {
 
-    @XmlAttribute
-    boolean acceptDependencies;
+    @XmlAttribute boolean acceptDependencies;
+
     @XmlElement(name = "import")
     List<ScopeFilter> imports;
+
     @XmlElement(name = "export")
     List<ScopeFilter> exports;
 

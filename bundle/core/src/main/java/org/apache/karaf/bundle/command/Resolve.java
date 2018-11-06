@@ -17,7 +17,6 @@
 package org.apache.karaf.bundle.command;
 
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.Bundle;
@@ -34,7 +33,5 @@ public class Resolve extends BundlesCommand {
     }
 
     @Override
-    protected void executeOnBundle(Bundle bundle) throws Exception {
-    }
-
+    protected void executeOnBundle(Bundle bundle) throws Exception {}
 }

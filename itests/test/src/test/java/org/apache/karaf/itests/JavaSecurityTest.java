@@ -13,6 +13,18 @@
  */
 package org.apache.karaf.itests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundleState;
@@ -26,30 +38,22 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.Bundle;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class JavaSecurityTest extends KarafTestSupport {
 
     @Configuration
     public Option[] config() {
-        String version = MavenUtils.getArtifactVersion("org.apache.felix", "org.apache.felix.framework.security");
-        String url = maven("org.apache.felix", "org.apache.felix.framework.security", version).getURL();
+        String version =
+                MavenUtils.getArtifactVersion(
+                        "org.apache.felix", "org.apache.felix.framework.security");
+        String url =
+                maven("org.apache.felix", "org.apache.felix.framework.security", version).getURL();
         Path temp;
         try {
-            temp = Files.createTempFile("org.apache.felix.framework.security-" + version + "-", ".jar");
+            temp =
+                    Files.createTempFile(
+                            "org.apache.felix.framework.security-" + version + "-", ".jar");
             System.setProperty("java.protocol.handler.pkgs", "org.ops4j.pax.url");
             try (InputStream is = new URL(url).openStream()) {
                 Files.copy(is, temp, StandardCopyOption.REPLACE_EXISTING);
@@ -58,15 +62,32 @@ public class JavaSecurityTest extends KarafTestSupport {
             throw new RuntimeException(e);
         }
 
-
         List<Option> options = new ArrayList<>(Arrays.asList(super.config()));
         // Add some extra options used by this test...
-        options.addAll(Arrays.asList(
-            editConfigurationFilePut("etc/system.properties", "java.security.policy", "${karaf.etc}/all.policy"),
-            editConfigurationFilePut("etc/system.properties", "org.osgi.framework.security", "osgi"),
-            editConfigurationFilePut("etc/system.properties", "org.osgi.framework.trust.repositories", "${karaf.etc}/trustStore.ks"),
-            editConfigurationFilePut("etc/startup.properties", "mvn:org.apache.felix/org.apache.felix.framework.security/" + version, "1"),
-            replaceConfigurationFile("system/org/apache/felix/org.apache.felix.framework.security/" + version + "/org.apache.felix.framework.security-" + version + ".jar", temp.toFile())));
+        options.addAll(
+                Arrays.asList(
+                        editConfigurationFilePut(
+                                "etc/system.properties",
+                                "java.security.policy",
+                                "${karaf.etc}/all.policy"),
+                        editConfigurationFilePut(
+                                "etc/system.properties", "org.osgi.framework.security", "osgi"),
+                        editConfigurationFilePut(
+                                "etc/system.properties",
+                                "org.osgi.framework.trust.repositories",
+                                "${karaf.etc}/trustStore.ks"),
+                        editConfigurationFilePut(
+                                "etc/startup.properties",
+                                "mvn:org.apache.felix/org.apache.felix.framework.security/"
+                                        + version,
+                                "1"),
+                        replaceConfigurationFile(
+                                "system/org/apache/felix/org.apache.felix.framework.security/"
+                                        + version
+                                        + "/org.apache.felix.framework.security-"
+                                        + version
+                                        + ".jar",
+                                temp.toFile())));
         return options.toArray(new Option[] {});
     }
 
@@ -95,5 +116,4 @@ public class JavaSecurityTest extends KarafTestSupport {
             }
         }
     }
-
 }

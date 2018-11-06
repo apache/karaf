@@ -17,7 +17,6 @@
 package org.apache.karaf.scheduler.command;
 
 import java.util.Map;
-
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.shell.api.action.Action;
@@ -30,8 +29,7 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class List implements Action {
 
-    @Reference
-    Scheduler scheduler;
+    @Reference Scheduler scheduler;
 
     @Override
     public Object execute() throws Exception {

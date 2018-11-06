@@ -34,8 +34,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 @Services(
         requires = @RequireService(ConfigurationAdmin.class),
-        provides = @ProvideService(BundleService.class)
-)
+        provides = @ProvideService(BundleService.class))
 public class Activator extends BaseActivator {
 
     private ServiceTracker<BundleStateService, BundleStateService> bundleStateServicesTracker;
@@ -50,27 +49,37 @@ public class Activator extends BaseActivator {
 
         final BundleServiceImpl bundleService = new BundleServiceImpl(bundleContext);
         register(BundleService.class, bundleService);
-        bundleStateServicesTracker = new ServiceTracker<>(
-                bundleContext, BundleStateService.class, new ServiceTrackerCustomizer<BundleStateService, BundleStateService>() {
-            @Override
-            public BundleStateService addingService(ServiceReference<BundleStateService> reference) {
-                BundleStateService service = bundleContext.getService(reference);
-                bundleService.registerBundleStateService(service);
-                return service;
-            }
-            @Override
-            public void modifiedService(ServiceReference<BundleStateService> reference, BundleStateService service) {
-            }
-            @Override
-            public void removedService(ServiceReference<BundleStateService> reference, BundleStateService service) {
-                bundleService.unregisterBundleStateService(service);
-                bundleContext.ungetService(reference);
-            }
-        }
-        );
+        bundleStateServicesTracker =
+                new ServiceTracker<>(
+                        bundleContext,
+                        BundleStateService.class,
+                        new ServiceTrackerCustomizer<BundleStateService, BundleStateService>() {
+                            @Override
+                            public BundleStateService addingService(
+                                    ServiceReference<BundleStateService> reference) {
+                                BundleStateService service = bundleContext.getService(reference);
+                                bundleService.registerBundleStateService(service);
+                                return service;
+                            }
+
+                            @Override
+                            public void modifiedService(
+                                    ServiceReference<BundleStateService> reference,
+                                    BundleStateService service) {}
+
+                            @Override
+                            public void removedService(
+                                    ServiceReference<BundleStateService> reference,
+                                    BundleStateService service) {
+                                bundleService.unregisterBundleStateService(service);
+                                bundleContext.ungetService(reference);
+                            }
+                        });
         bundleStateServicesTracker.open();
 
-        bundleWatcher = new BundleWatcherImpl(bundleContext, new MavenConfigService(configurationAdmin), bundleService);
+        bundleWatcher =
+                new BundleWatcherImpl(
+                        bundleContext, new MavenConfigService(configurationAdmin), bundleService);
         bundleWatcher.start();
         register(BundleWatcher.class, bundleWatcher);
 
@@ -90,5 +99,4 @@ public class Activator extends BaseActivator {
             bundleWatcher = null;
         }
     }
-
 }

@@ -19,7 +19,6 @@ package org.apache.karaf.diagnostic.command;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import org.apache.karaf.diagnostic.core.Dump;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.shell.api.action.Action;
@@ -30,38 +29,37 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.osgi.framework.BundleContext;
 
-/**
- * Command to create dump from shell.
- */
-@Command(scope = "dev", name = "dump-create", description = "Creates zip archive with diagnostic info.")
+/** Command to create dump from shell. */
+@Command(
+        scope = "dev",
+        name = "dump-create",
+        description = "Creates zip archive with diagnostic info.")
 @Service
 public class DumpCommand implements Action {
 
-    /**
-     * Output format of the filename if not defined otherwise
-     */
+    /** Output format of the filename if not defined otherwise */
     private SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
 
-    /**
-     * Directory switch.
-     */
-    @Option(name = "-d", aliases = "--directory", description = "Creates dump in a directory in place of a ZIP archive")
+    /** Directory switch. */
+    @Option(
+            name = "-d",
+            aliases = "--directory",
+            description = "Creates dump in a directory in place of a ZIP archive")
     boolean directory;
 
-    @Option(name = "--no-thread-dump", description = "Include or not the thread dump in ZIP archive")
+    @Option(
+            name = "--no-thread-dump",
+            description = "Include or not the thread dump in ZIP archive")
     boolean noThreadDump = false;
-    
+
     @Option(name = "--no-heap-dump", description = "Include or not the heap dump in ZIP archive")
     boolean noHeapDump = false;
-    
-    /**
-     * Name of created directory or archive.
-     */
+
+    /** Name of created directory or archive. */
     @Argument(name = "name", description = "Name of created zip or directory", required = false)
     String fileName;
 
-    @Reference
-    BundleContext bundleContext;
+    @Reference BundleContext bundleContext;
 
     @Override
     public Object execute() throws Exception {
@@ -88,5 +86,4 @@ public class DumpCommand implements Action {
 
         return null;
     }
-
 }

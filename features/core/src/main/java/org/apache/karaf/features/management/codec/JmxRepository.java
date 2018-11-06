@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
@@ -31,7 +30,6 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
@@ -85,9 +83,13 @@ public class JmxRepository {
     static TabularData getFeatureIdentifierTable(List<Feature> features) throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(JmxFeature.FEATURE_IDENTIFIER_TABLE);
         for (Feature feature : features) {
-            String[] itemNames = new String[]{FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION};
-            Object[] itemValues = new Object[]{feature.getName(), feature.getVersion()};
-            CompositeData ident = new CompositeDataSupport(JmxFeature.FEATURE_IDENTIFIER, itemNames, itemValues);
+            String[] itemNames =
+                    new String[] {
+                        FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION
+                    };
+            Object[] itemValues = new Object[] {feature.getName(), feature.getVersion()};
+            CompositeData ident =
+                    new CompositeDataSupport(JmxFeature.FEATURE_IDENTIFIER, itemNames, itemValues);
             table.put(ident);
         }
         return table;
@@ -116,8 +118,8 @@ public class JmxRepository {
             itemDescriptions[3] = "The list of included features";
             itemDescriptions[4] = "Whether the repository is blacklisted";
 
-            return new CompositeType("Repository", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "Repository", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build repository type", e);
         }
@@ -125,11 +127,13 @@ public class JmxRepository {
 
     private static TabularType createRepositoryTableType() {
         try {
-            return new TabularType("Features", "The table of repositories",
-                    REPOSITORY, new String[]{FeaturesServiceMBean.REPOSITORY_URI});
+            return new TabularType(
+                    "Features",
+                    "The table of repositories",
+                    REPOSITORY,
+                    new String[] {FeaturesServiceMBean.REPOSITORY_URI});
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build repository table type", e);
         }
     }
-
 }

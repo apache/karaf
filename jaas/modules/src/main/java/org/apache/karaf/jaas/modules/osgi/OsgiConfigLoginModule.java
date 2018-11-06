@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Map;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -29,11 +28,9 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
-
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
-
 import org.osgi.service.cm.Configuration;
 
 public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
@@ -41,7 +38,11 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
     public static final String PID = "pid";
     public static final String USER_PREFIX = "user.";
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
     }
 
@@ -60,29 +61,30 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
             } catch (IOException ioe) {
                 throw new LoginException(ioe.getMessage());
             } catch (UnsupportedCallbackException uce) {
-                throw new LoginException(uce.getMessage() + " not available to obtain information from user");
+                throw new LoginException(
+                        uce.getMessage() + " not available to obtain information from user");
             }
             String user = ((NameCallback) callbacks[0]).getName();
             String password = new String(((PasswordCallback) callbacks[1]).getPassword());
 
             String userInfos = (String) properties.get(USER_PREFIX + user);
             if (userInfos == null) {
-            	if (!this.detailedLoginExcepion) {
-            		throw new FailedLoginException("login failed");
-            	} else {
-            		throw new FailedLoginException("User does not exist");
-            	}
+                if (!this.detailedLoginExcepion) {
+                    throw new FailedLoginException("login failed");
+                } else {
+                    throw new FailedLoginException("User does not exist");
+                }
             }
             String[] infos = userInfos.split(",");
             String storedPassword = infos[0];
 
             // check the provided password
             if (!checkPassword(password, storedPassword)) {
-            	if (!this.detailedLoginExcepion) {
-            		throw new FailedLoginException("login failed");
-            	} else {
-            		throw new FailedLoginException("Password for " + user + " does not match");
-            	}
+                if (!this.detailedLoginExcepion) {
+                    throw new FailedLoginException("login failed");
+                } else {
+                    throw new FailedLoginException("Password for " + user + " does not match");
+                }
             }
 
             principals = new HashSet<>();
@@ -102,7 +104,6 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
         }
     }
 
-
     public boolean abort() throws LoginException {
         subject = null;
         principals = null;
@@ -119,5 +120,4 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
             principals = null;
         }
     }
-
 }

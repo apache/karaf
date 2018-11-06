@@ -20,18 +20,14 @@ package org.apache.karaf.shell.commands;
 
 import org.apache.karaf.shell.commands.ansi.SimpleAnsi;
 
-
-/**
- * Base class for exceptions thrown when executing commands.
- */
+/** Base class for exceptions thrown when executing commands. */
 @SuppressWarnings("serial")
 @Deprecated
 public class CommandException extends Exception {
 
     private String help;
 
-    public CommandException() {
-    }
+    public CommandException() {}
 
     public CommandException(String message) {
         super(message);
@@ -56,10 +52,10 @@ public class CommandException extends Exception {
     }
 
     public String getNiceHelp() {
-        return  help != null ? help
-                    : SimpleAnsi.COLOR_RED + "Error executing command: " 
-                    + getMessage() != null ? getMessage() : getClass().getName()
-                    + SimpleAnsi.COLOR_DEFAULT;
+        return help != null
+                ? help
+                : SimpleAnsi.COLOR_RED + "Error executing command: " + getMessage() != null
+                        ? getMessage()
+                        : getClass().getName() + SimpleAnsi.COLOR_DEFAULT;
     }
-
 }

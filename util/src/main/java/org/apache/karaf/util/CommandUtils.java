@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,27 +16,24 @@
  */
 package org.apache.karaf.util;
 
-/**
- * Contains various methods for helping with layout no commands
- */
+/** Contains various methods for helping with layout no commands */
 public class CommandUtils {
 
-	/**
-	 * The message is either enlarged or trimmed to the given size. 
-	 * 
-	 * @param message - the message to be trimmed or enlarged
-	 * @param length - the length of the message text
-	 * @return the optimized message
-	 */
-	public static String trimToSize(String message, int length) {
-		while (message.length() < length) {
-			message += " ";
-		} 
-		if (message.length() > length) {
-			message = message.substring(0, length);
-		}
-		
-		return message;
-	}
-	
+    /**
+     * The message is either enlarged or trimmed to the given size.
+     *
+     * @param message - the message to be trimmed or enlarged
+     * @param length - the length of the message text
+     * @return the optimized message
+     */
+    public static String trimToSize(String message, int length) {
+        while (message.length() < length) {
+            message += " ";
+        }
+        if (message.length() > length) {
+            message = message.substring(0, length);
+        }
+
+        return message;
+    }
 }

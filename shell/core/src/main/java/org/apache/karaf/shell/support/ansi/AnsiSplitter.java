@@ -26,7 +26,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 
@@ -56,22 +55,23 @@ public class AnsiSplitter {
         return sb.columnLength();
     }
 
-    public static String cut(String text, int maxLength, int tabs)  throws IOException {
+    public static String cut(String text, int maxLength, int tabs) throws IOException {
         return splitLines(text, maxLength, tabs).get(0);
     }
 
-    public static AnsiBufferedReader window(InputStream is, int begin, int end, int tabs) throws IOException {
+    public static AnsiBufferedReader window(InputStream is, int begin, int end, int tabs)
+            throws IOException {
         AnsiBufferedReader reader = new AnsiBufferedReader(is, begin, end, Integer.MAX_VALUE);
         reader.setTabs(tabs);
         return reader;
     }
 
-    public static AnsiBufferedReader splitter(InputStream is, int maxLength, int tabs) throws IOException {
+    public static AnsiBufferedReader splitter(InputStream is, int maxLength, int tabs)
+            throws IOException {
         AnsiBufferedReader reader = new AnsiBufferedReader(is, 0, Integer.MAX_VALUE, maxLength);
         reader.setTabs(tabs);
         return reader;
     }
-
 
     public static class AnsiBufferedReader implements Closeable {
 
@@ -116,12 +116,10 @@ public class AnsiSplitter {
         }
 
         @Override
-        public void close() throws IOException {
-        }
+        public void close() throws IOException {}
 
         public void setTabs(int tabs) {
             this.builder.tabs(tabs);
         }
     }
-
 }

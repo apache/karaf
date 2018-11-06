@@ -22,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-
 import org.apache.karaf.shell.api.console.Candidate;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
@@ -36,7 +35,8 @@ public class UriCompleter implements Completer {
     }
 
     @Override
-    public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
+    public void completeCandidates(
+            Session session, CommandLine commandLine, List<Candidate> candidates) {
         String arg = commandLine.getCursorArgument();
         if (arg != null) {
             if (arg.startsWith("mvn:")) {
@@ -108,7 +108,7 @@ public class UriCompleter implements Completer {
             if (parts.length == 0 || parts.length == 1 && !mvn.endsWith("/")) {
                 String known = "";
                 String group = "";
-                String[] dirs = parts.length > 0 ? parts[0].split("\\.") : new String[] { "" };
+                String[] dirs = parts.length > 0 ? parts[0].split("\\.") : new String[] {""};
                 if (parts.length > 0 && parts[0].endsWith(".")) {
                     for (String dir : dirs) {
                         known += dir + "/";
@@ -150,7 +150,9 @@ public class UriCompleter implements Completer {
                     for (Path path : paths) {
                         if (Files.isDirectory(path)) {
                             String name = path.getFileName().toString();
-                            candidates.add(new Candidate("mvn:" + parts[0] + "/" + parts[1] + "/" + name, true));
+                            candidates.add(
+                                    new Candidate(
+                                            "mvn:" + parts[0] + "/" + parts[1] + "/" + name, true));
                         }
                     }
                 }
@@ -159,5 +161,4 @@ public class UriCompleter implements Completer {
             // Ignore
         }
     }
-
 }

@@ -35,5 +35,4 @@ public class KeystoreIsLocked extends GeneralSecurityException {
     public KeystoreIsLocked(Throwable cause) {
         super(cause);
     }
-
 }

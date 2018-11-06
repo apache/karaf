@@ -23,11 +23,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigMBean;
 import org.apache.karaf.config.core.ConfigRepository;
@@ -35,9 +33,7 @@ import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 
-/**
- * Implementation of the ConfigMBean.
- */
+/** Implementation of the ConfigMBean. */
 public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
 
     private ConfigRepository configRepo;
@@ -54,14 +50,13 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         return configuration;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private TypedProperties getConfigProperties(String pid) throws IOException, InvalidSyntaxException {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private TypedProperties getConfigProperties(String pid)
+            throws IOException, InvalidSyntaxException {
         return configRepo.getConfig(pid);
     }
 
-    /**
-     * Get all config pids
-     */
+    /** Get all config pids */
     @Override
     public List<String> getConfigs() throws MBeanException {
         try {
@@ -89,7 +84,8 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             File file = new File(etcFolder, finalname);
             if (file.exists()) {
                 if (!override) {
-                    throw new IllegalArgumentException("Configuration file {} already exists " + finalname);
+                    throw new IllegalArgumentException(
+                            "Configuration file {} already exists " + finalname);
                 }
             }
 
@@ -211,22 +207,21 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
-	private Dictionary<String, Object> toDictionary(
-			Map<String, String> properties) {
-		Dictionary<String, Object> dictionary = new Hashtable<>();
-		for (String key : properties.keySet()) {
-		    dictionary.put(key, properties.get(key));
-		}
-		return dictionary;
-	}
-
+    private Dictionary<String, Object> toDictionary(Map<String, String> properties) {
+        Dictionary<String, Object> dictionary = new Hashtable<>();
+        for (String key : properties.keySet()) {
+            dictionary.put(key, properties.get(key));
+        }
+        return dictionary;
+    }
 
     public void setConfigRepo(ConfigRepository configRepo) {
         this.configRepo = configRepo;
     }
 
-	@Override
-	public String createFactoryConfiguration(String factoryPid, Map<String, String> properties) throws MBeanException {
+    @Override
+    public String createFactoryConfiguration(String factoryPid, Map<String, String> properties)
+            throws MBeanException {
         try {
             TypedProperties props = new TypedProperties();
             props.putAll(properties);
@@ -234,6 +229,5 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
-	}
-
+    }
 }

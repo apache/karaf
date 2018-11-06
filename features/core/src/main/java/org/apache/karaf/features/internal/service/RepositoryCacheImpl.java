@@ -26,13 +26,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
 
 /**
- * Implementation of {@link RepositoryCache} that makes use of {@link FeaturesProcessor} to alter feature
- * definitions after reading them from XML file.
+ * Implementation of {@link RepositoryCache} that makes use of {@link FeaturesProcessor} to alter
+ * feature definitions after reading them from XML file.
  */
 public class RepositoryCacheImpl implements RepositoryCache {
 
@@ -45,14 +44,17 @@ public class RepositoryCacheImpl implements RepositoryCache {
 
     @Override
     public Repository create(URI uri, boolean validate) {
-        if (featuresProcessor != null && featuresProcessor.isRepositoryBlacklisted(uri.toString())) {
+        if (featuresProcessor != null
+                && featuresProcessor.isRepositoryBlacklisted(uri.toString())) {
             return new RepositoryImpl(uri, new Features(), true);
         }
         RepositoryImpl repository = new RepositoryImpl(uri, validate);
         if (featuresProcessor != null) {
             // maybe it could be done better - first we have to set if entire repo is blacklisted
             repository.setBlacklisted(featuresProcessor.isRepositoryBlacklisted(uri.toString()));
-            // processing features will take the above flag into account to blacklist (if needed) the features
+            // processing features will take the above flag into account to blacklist (if needed)
+            // the
+            // features
             repository.processFeatures(featuresProcessor);
         }
         return repository;
@@ -85,7 +87,9 @@ public class RepositoryCacheImpl implements RepositoryCache {
 
     @Override
     public Repository[] listMatchingRepositories(Set<String> uris) {
-        return repositoryCache.values().stream()
+        return repositoryCache
+                .values()
+                .stream()
                 .filter(r -> uris.contains(r.getURI().toString()))
                 .toArray(Repository[]::new);
     }
@@ -105,9 +109,7 @@ public class RepositoryCacheImpl implements RepositoryCache {
         return repositoryCache.get(uri);
     }
 
-    /**
-     * Returns a set containing the given repository and all its dependencies recursively
-     */
+    /** Returns a set containing the given repository and all its dependencies recursively */
     @Override
     public Set<Repository> getRepositoryClosure(Repository repo) {
         Set<Repository> closure = new HashSet<>();
@@ -122,5 +124,4 @@ public class RepositoryCacheImpl implements RepositoryCache {
         }
         return closure;
     }
-
 }

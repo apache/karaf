@@ -16,17 +16,16 @@
  */
 package org.apache.karaf.examples.scr.provider;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.karaf.examples.scr.api.Booking;
 import org.apache.karaf.examples.scr.api.BookingService;
 import org.osgi.service.component.annotations.Component;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Simple implementation of the {@link BookingService} storing the {@link Booking}
- * instances in a list in memory.
+ * Simple implementation of the {@link BookingService} storing the {@link Booking} instances in a
+ * list in memory.
  */
 @Component
 public class BookingServiceMemoryImpl implements BookingService {

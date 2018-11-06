@@ -27,16 +27,35 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Command(scope = "booking", name = "add", description = "Add a booking")
 public class AddCommand implements Action {
 
-    @Argument(index = 0, name = "ID", description = "Booking ID", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "ID",
+            description = "Booking ID",
+            required = true,
+            multiValued = false)
     long id;
 
-    @Argument(index = 1, name = "customer", description = "Booking customer", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "customer",
+            description = "Booking customer",
+            required = true,
+            multiValued = false)
     String customer;
 
-    @Argument(index = 2, name = "flight", description = "Booking flight", required = true, multiValued = false)
+    @Argument(
+            index = 2,
+            name = "flight",
+            description = "Booking flight",
+            required = true,
+            multiValued = false)
     String flight;
 
-    @Option(name = "--url", description = "Location of the SOAP service", required = false, multiValued = false)
+    @Option(
+            name = "--url",
+            description = "Location of the SOAP service",
+            required = false,
+            multiValued = false)
     String url = "http://localhost:8181/cxf/example";
 
     @Override
@@ -49,5 +68,4 @@ public class AddCommand implements Action {
         client.add(booking);
         return null;
     }
-
 }

@@ -1,8 +1,7 @@
 package org.apache.karaf.main;
 
-import org.apache.felix.utils.properties.Properties;
 import java.util.logging.Logger;
-
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.main.lock.Lock;
 
 /*
@@ -26,18 +25,18 @@ import org.apache.karaf.main.lock.Lock;
 public class MockLock implements Lock {
 
     private boolean lock = true;
-    private boolean isAlive = true; 
+    private boolean isAlive = true;
     private static final Logger LOG = Logger.getLogger(MockLock.class.getName());
     private Object lockLock = new Object();
-    
+
     public MockLock(Properties props) {
         /* KARAF-5798: allow tests to simulate slave instances */
         lock = Boolean.valueOf(System.getProperty("test.karaf.mocklock.initiallyLocked", "true"));
     }
-    
+
     public boolean lock() throws Exception {
         synchronized (lockLock) {
-            LOG.fine("lock = " + lock);        
+            LOG.fine("lock = " + lock);
             lockLock.notifyAll();
         }
         return lock;
@@ -59,7 +58,7 @@ public class MockLock implements Lock {
     public void setIsAlive(boolean isAlive) {
         this.isAlive = isAlive;
     }
-    
+
     public void waitForLock() throws InterruptedException {
         synchronized (lockLock) {
             lockLock.wait(1000 * 60 * 5);

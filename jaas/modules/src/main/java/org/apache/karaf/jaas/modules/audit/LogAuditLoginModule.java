@@ -14,12 +14,11 @@
  */
 package org.apache.karaf.jaas.modules.audit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LogAuditLoginModule extends AbstractAuditLoginModule {
 
@@ -29,8 +28,11 @@ public class LogAuditLoginModule extends AbstractAuditLoginModule {
     private String level = "INFO";
     private Logger logger;
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler,
-                           Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         super.initialize(subject, callbackHandler, sharedState, options);
         level = (String) options.get(LOG_LEVEL_OPTION);
         logger = LoggerFactory.getLogger((String) options.get(LOG_LOGGER_OPTION));
@@ -39,11 +41,21 @@ public class LogAuditLoginModule extends AbstractAuditLoginModule {
     protected synchronized void audit(Action action, String username) {
         String actionStr;
         switch (action) {
-            case ATTEMPT: actionStr = "Authentication attempt"; break;
-            case SUCCESS: actionStr = "Authentication succeeded"; break;
-            case FAILURE: actionStr = "Authentication failed"; break;
-            case LOGOUT: actionStr = "Explicit logout"; break;
-            default: actionStr = action.toString(); break;
+            case ATTEMPT:
+                actionStr = "Authentication attempt";
+                break;
+            case SUCCESS:
+                actionStr = "Authentication succeeded";
+                break;
+            case FAILURE:
+                actionStr = "Authentication failed";
+                break;
+            case LOGOUT:
+                actionStr = "Explicit logout";
+                break;
+            default:
+                actionStr = action.toString();
+                break;
         }
         if (level.equalsIgnoreCase("debug")) {
             logger.debug("{} - {}", actionStr, username);
@@ -57,5 +69,4 @@ public class LogAuditLoginModule extends AbstractAuditLoginModule {
             logger.info("{} - {}", actionStr, username);
         }
     }
-
 }

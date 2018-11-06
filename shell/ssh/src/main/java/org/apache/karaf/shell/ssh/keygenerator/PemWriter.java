@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.commons.ssl.PEMItem;
 import org.apache.commons.ssl.PEMUtil;
 
@@ -35,8 +34,9 @@ public class PemWriter {
     public PemWriter(File keyFile) {
         this.keyFile = keyFile;
     }
-    
-    public void writeKeyPair(String resource, KeyPair kp) throws IOException, FileNotFoundException {
+
+    public void writeKeyPair(String resource, KeyPair kp)
+            throws IOException, FileNotFoundException {
         Collection<Object> items = new ArrayList<>();
         items.add(new PEMItem(kp.getPrivate().getEncoded(), "PRIVATE KEY"));
         byte[] bytes = PEMUtil.encode(items);

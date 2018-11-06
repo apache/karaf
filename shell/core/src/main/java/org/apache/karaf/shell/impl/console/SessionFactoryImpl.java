@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import org.apache.felix.gogo.jline.Builtin;
 import org.apache.felix.gogo.jline.Posix;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
@@ -56,40 +55,77 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
     public SessionFactoryImpl(ThreadIO threadIO) {
         super(null);
         this.threadIO = threadIO;
-        commandProcessor = new CommandProcessorImpl(threadIO) {
-            @Override
-            public Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
-                return SessionFactoryImpl.this.invoke(session, target, name, args);
-            }
+        commandProcessor =
+                new CommandProcessorImpl(threadIO) {
+                    @Override
+                    public Object invoke(
+                            CommandSessionImpl session,
+                            Object target,
+                            String name,
+                            List<Object> args)
+                            throws Exception {
+                        return SessionFactoryImpl.this.invoke(session, target, name, args);
+                    }
 
-            @Override
-            public Path redirect(CommandSessionImpl session, Path path, int mode) {
-                return SessionFactoryImpl.this.redirect(session, path, mode);
-            }
-        };
+                    @Override
+                    public Path redirect(CommandSessionImpl session, Path path, int mode) {
+                        return SessionFactoryImpl.this.redirect(session, path, mode);
+                    }
+                };
         register(new ExitCommand());
         new HelpCommand(this);
         register(new ShellCommand("addCommand", "Add a command", commandProcessor, "addCommand"));
-        register(new ShellCommand("removeCommand", "Remove a command", commandProcessor, "removeCommand"));
+        register(
+                new ShellCommand(
+                        "removeCommand", "Remove a command", commandProcessor, "removeCommand"));
         register(new ShellCommand("eval", "Evaluate", commandProcessor, "eval"));
 
         Builtin builtin = new Builtin();
-        for (String name : new String[]{"format", "getopt", "new", "set", "tac", "type", "jobs", "fg", "bg", "keymap", "setopt", "unsetopt", "complete", "history", "widget", "__files", "__directories", "__usage_completion"}) {
+        for (String name :
+                new String[] {
+                    "format",
+                    "getopt",
+                    "new",
+                    "set",
+                    "tac",
+                    "type",
+                    "jobs",
+                    "fg",
+                    "bg",
+                    "keymap",
+                    "setopt",
+                    "unsetopt",
+                    "complete",
+                    "history",
+                    "widget",
+                    "__files",
+                    "__directories",
+                    "__usage_completion"
+                }) {
             register(new ShellCommand(name, null, builtin, name));
         }
 
         Procedural procedural = new Procedural();
-        for (String name : new String[]{"each", "if", "not", "throw", "try", "until", "while", "break", "continue"}) {
+        for (String name :
+                new String[] {
+                    "each", "if", "not", "throw", "try", "until", "while", "break", "continue"
+                }) {
             register(new ShellCommand(name, null, procedural, name));
         }
 
         Posix posix = new Posix(commandProcessor);
-        for (String name : new String[]{"cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "nano", "head", "tail", "clear", "wc", "date", "tmux", "ttop"}) {
+        for (String name :
+                new String[] {
+                    "cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "nano",
+                    "head", "tail", "clear", "wc", "date", "tmux", "ttop"
+                }) {
             register(new ShellCommand(name, null, posix, name));
         }
     }
 
-    protected Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
+    protected Object invoke(
+            CommandSessionImpl session, Object target, String name, List<Object> args)
+            throws Exception {
         return Reflective.invoke(session, target, name, args);
     }
 
@@ -151,12 +187,28 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
     }
 
     @Override
-    public Session create(InputStream in, PrintStream out, PrintStream err, Terminal term, String encoding, Runnable closeCallback) {
+    public Session create(
+            InputStream in,
+            PrintStream out,
+            PrintStream err,
+            Terminal term,
+            String encoding,
+            Runnable closeCallback) {
         synchronized (commandProcessor) {
             if (closed) {
                 throw new IllegalStateException("SessionFactory has been closed");
             }
-            final Session session = new ConsoleSessionImpl(this, commandProcessor, threadIO, in, out, err, term, encoding, closeCallback);
+            final Session session =
+                    new ConsoleSessionImpl(
+                            this,
+                            commandProcessor,
+                            threadIO,
+                            in,
+                            out,
+                            err,
+                            term,
+                            encoding,
+                            closeCallback);
             if (this.session == null) {
                 this.session = session;
             }
@@ -175,7 +227,8 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
             if (closed) {
                 throw new IllegalStateException("SessionFactory has been closed");
             }
-            final Session session = new HeadlessSessionImpl(this, commandProcessor, in, out, err, parent);
+            final Session session =
+                    new HeadlessSessionImpl(this, commandProcessor, in, out, err, parent);
             return session;
         }
     }
@@ -264,5 +317,4 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
             return consumer.execute(cmdSession, arguments);
         }
     }
-
 }

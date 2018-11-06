@@ -19,11 +19,10 @@ package org.apache.karaf.diagnostic.internal;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-
-import org.apache.karaf.diagnostic.core.DumpProvider;
-import org.apache.karaf.diagnostic.management.internal.DiagnosticDumpMBeanImpl;
 import org.apache.karaf.diagnostic.common.FeaturesDumpProvider;
 import org.apache.karaf.diagnostic.common.LogDumpProvider;
+import org.apache.karaf.diagnostic.core.DumpProvider;
+import org.apache.karaf.diagnostic.management.internal.DiagnosticDumpMBeanImpl;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleActivator;
@@ -42,32 +41,37 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         registrations = new ArrayList<>();
-        registrations.add(context.registerService(DumpProvider.class, new LogDumpProvider(context), null));
+        registrations.add(
+                context.registerService(DumpProvider.class, new LogDumpProvider(context), null));
 
-        featuresServiceTracker = new SingleServiceTracker<>(context, FeaturesService.class, (oldFs, newFs) -> {
-            if (featuresProviderRegistration != null) {
-                featuresProviderRegistration.unregister();
-                featuresProviderRegistration = null;
-            }
-            if (newFs != null) {
-                featuresProviderRegistration = context.registerService(
-                        DumpProvider.class,
-                        new FeaturesDumpProvider(newFs),
-                        null);
-            }
-        });
+        featuresServiceTracker =
+                new SingleServiceTracker<>(
+                        context,
+                        FeaturesService.class,
+                        (oldFs, newFs) -> {
+                            if (featuresProviderRegistration != null) {
+                                featuresProviderRegistration.unregister();
+                                featuresProviderRegistration = null;
+                            }
+                            if (newFs != null) {
+                                featuresProviderRegistration =
+                                        context.registerService(
+                                                DumpProvider.class,
+                                                new FeaturesDumpProvider(newFs),
+                                                null);
+                            }
+                        });
         featuresServiceTracker.open();
 
         final DiagnosticDumpMBeanImpl diagnostic = new DiagnosticDumpMBeanImpl();
         diagnostic.setBundleContext(context);
 
         Hashtable<String, Object> props = new Hashtable<>();
-        props.put("jmx.objectname", "org.apache.karaf:type=diagnostic,name=" + System.getProperty("karaf.name"));
-        mbeanRegistration = context.registerService(
-                getInterfaceNames(diagnostic),
-                diagnostic,
-                props
-        );
+        props.put(
+                "jmx.objectname",
+                "org.apache.karaf:type=diagnostic,name=" + System.getProperty("karaf.name"));
+        mbeanRegistration =
+                context.registerService(getInterfaceNames(diagnostic), diagnostic, props);
     }
 
     @Override
@@ -93,5 +97,4 @@ public class Activator implements BundleActivator {
             addSuperInterfaces(names, cl);
         }
     }
-
 }

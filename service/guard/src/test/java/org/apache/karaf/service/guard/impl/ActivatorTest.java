@@ -19,6 +19,8 @@ package org.apache.karaf.service.guard.impl;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.util.Dictionary;
+import java.util.Properties;
 import org.easymock.EasyMock;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -27,15 +29,13 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.hooks.service.EventListenerHook;
 import org.osgi.framework.hooks.service.FindHook;
 
-import java.util.Dictionary;
-import java.util.Properties;
-
 public class ActivatorTest {
 
     @SuppressWarnings("unchecked")
     @Test
     public void testStartActivator() throws Exception {
-        // keep the old properties. Note that the Properties 'copy constructor' new Properties(props)
+        // keep the old properties. Note that the Properties 'copy constructor' new
+        // Properties(props)
         // doesn't actually copy, hence the awkward setup here...
         Properties oldProps = new Properties();
         oldProps.putAll(System.getProperties());
@@ -48,14 +48,24 @@ public class ActivatorTest {
 
             BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
             EasyMock.expect(bc.getBundle()).andReturn(b).anyTimes();
-            EasyMock.expect(bc.createFilter(EasyMock.anyObject(String.class))).andAnswer(
-                    () -> FrameworkUtil.createFilter((String) EasyMock.getCurrentArguments()[0])).anyTimes();
+            EasyMock.expect(bc.createFilter(EasyMock.anyObject(String.class)))
+                    .andAnswer(
+                            () ->
+                                    FrameworkUtil.createFilter(
+                                            (String) EasyMock.getCurrentArguments()[0]))
+                    .anyTimes();
 
-            EasyMock.expect(bc.registerService(
-                    EasyMock.eq(EventListenerHook.class), EasyMock.isA(EventListenerHook.class), EasyMock.isNull(Dictionary.class)))
+            EasyMock.expect(
+                            bc.registerService(
+                                    EasyMock.eq(EventListenerHook.class),
+                                    EasyMock.isA(EventListenerHook.class),
+                                    EasyMock.isNull(Dictionary.class)))
                     .andReturn(null);
-            EasyMock.expect(bc.registerService(
-                    EasyMock.eq(FindHook.class), EasyMock.isA(FindHook.class), EasyMock.isNull(Dictionary.class)))
+            EasyMock.expect(
+                            bc.registerService(
+                                    EasyMock.eq(FindHook.class),
+                                    EasyMock.isA(FindHook.class),
+                                    EasyMock.isNull(Dictionary.class)))
                     .andReturn(null);
 
             EasyMock.replay(bc);
@@ -75,13 +85,17 @@ public class ActivatorTest {
 
     @Test
     public void testStartActivatorNoServicesSecured() throws Exception {
-        // keep the old properties. Note that the Properties 'copy constructor' new Properties(props)
+        // keep the old properties. Note that the Properties 'copy constructor' new
+        // Properties(props)
         // doesn't actually copy, hence the awkward setup here...
         Properties oldProps = new Properties();
         oldProps.putAll(System.getProperties());
 
         try {
-            Properties newProps = removeProperties(System.getProperties(), GuardProxyCatalog.KARAF_SECURED_SERVICES_SYSPROP);
+            Properties newProps =
+                    removeProperties(
+                            System.getProperties(),
+                            GuardProxyCatalog.KARAF_SECURED_SERVICES_SYSPROP);
             System.setProperties(newProps);
 
             BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
@@ -110,7 +124,7 @@ public class ActivatorTest {
         EasyMock.verify(a.guardProxyCatalog);
     }
 
-    private Properties removeProperties(Properties props, String ... keys) {
+    private Properties removeProperties(Properties props, String... keys) {
         Properties p = new Properties();
         p.putAll(props);
         for (String key : keys) {
@@ -118,5 +132,4 @@ public class ActivatorTest {
         }
         return p;
     }
-
 }

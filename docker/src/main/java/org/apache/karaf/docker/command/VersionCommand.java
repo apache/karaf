@@ -32,11 +32,10 @@ public class VersionCommand extends DockerCommandSupport {
         System.out.println("Kernel version: " + version.getKernelVersion());
         System.out.println("Go version: " + version.getGoVersion());
         System.out.println("Git commit: " + version.getGitCommit());
-        System.out.println("Arch: "  + version.getArch());
+        System.out.println("Arch: " + version.getArch());
         System.out.println("API version: " + version.getApiVersion());
         System.out.println("Build time: " + version.getBuildTime());
         System.out.println("Experimental: " + version.getExperimental());
         return null;
     }
-
 }

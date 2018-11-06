@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.profile.impl;
 
+import static org.apache.karaf.profile.impl.Utils.assertFalse;
+import static org.apache.karaf.profile.impl.Utils.assertNotNull;
+import static org.apache.karaf.profile.impl.Utils.join;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,15 +33,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.apache.karaf.profile.LockHandle;
 import org.apache.karaf.profile.PlaceholderResolver;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileService;
-
-import static org.apache.karaf.profile.impl.Utils.assertFalse;
-import static org.apache.karaf.profile.impl.Utils.assertNotNull;
-import static org.apache.karaf.profile.impl.Utils.join;
 
 public class ProfileServiceImpl implements ProfileService {
 
@@ -187,7 +186,8 @@ public class ProfileServiceImpl implements ProfileService {
             loadCache();
             for (String parentId : profile.getParentIds()) {
                 if (!cache.containsKey(parentId)) {
-                    throw new IllegalStateException("Parent profile " + parentId + " does not exist");
+                    throw new IllegalStateException(
+                            "Parent profile " + parentId + " does not exist");
                 }
             }
             Profiles.writeProfile(profilesDirectory, profile);
@@ -216,7 +216,8 @@ public class ProfileServiceImpl implements ProfileService {
             }
         }
         if (!children.isEmpty()) {
-            throw new IllegalStateException("Profile " + lastProfile.getId() + " is a parent of " + join(", ", children));
+            throw new IllegalStateException(
+                    "Profile " + lastProfile.getId() + " is a parent of " + join(", ", children));
         }
         try {
             Profiles.deleteProfile(profilesDirectory, lastProfile.getId());
@@ -237,5 +238,4 @@ public class ProfileServiceImpl implements ProfileService {
         }
         return cache;
     }
-
 }

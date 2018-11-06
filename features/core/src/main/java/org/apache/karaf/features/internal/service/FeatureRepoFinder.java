@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -61,9 +60,9 @@ public class FeatureRepoFinder implements ManagedService {
             nameToArtifactMap.clear();
             Enumeration keys = properties.keys();
             while (keys.hasMoreElements()) {
-                String key = (String)keys.nextElement();
+                String key = (String) keys.nextElement();
                 if (!isSystemKey(key)) {
-                    nameToArtifactMap.put(key, (String)properties.get(key));
+                    nameToArtifactMap.put(key, (String) properties.get(key));
                 }
             }
         }
@@ -74,9 +73,9 @@ public class FeatureRepoFinder implements ManagedService {
     }
 
     /**
-     * Replace the version in the URL with the provided one. 
-     * Only processes mvn urls like mvn:groupId/artifactId/version... 
-     * 
+     * Replace the version in the URL with the provided one. Only processes mvn urls like
+     * mvn:groupId/artifactId/version...
+     *
      * @param url
      * @param version
      * @return
@@ -94,5 +93,4 @@ public class FeatureRepoFinder implements ManagedService {
         }
         return url;
     }
-
 }

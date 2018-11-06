@@ -16,35 +16,34 @@
  */
 package org.apache.karaf.wrapper.internal;
 
-import org.apache.karaf.shell.support.ansi.SimpleAnsi;
-import org.apache.karaf.wrapper.WrapperService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
+import org.apache.karaf.shell.support.ansi.SimpleAnsi;
+import org.apache.karaf.wrapper.WrapperService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Default implementation of the wrapper service.
- */
+/** Default implementation of the wrapper service. */
 public class WrapperServiceImpl implements WrapperService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(WrapperServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WrapperServiceImpl.class);
 
     public void install() throws Exception {
         install("karaf", "karaf", "", "AUTO_START");
     }
 
-    public File[] install(String name, 
-                          String displayName, 
-                          String description, 
-                          String startType,
-                          String[] envs,
-                          String[] includes) throws Exception {
+    public File[] install(
+            String name,
+            String displayName,
+            String description,
+            String startType,
+            String[] envs,
+            String[] includes)
+            throws Exception {
 
         File base = new File(System.getProperty("karaf.base"));
         File etc = new File(System.getProperty("karaf.etc"));
@@ -75,26 +74,32 @@ public class WrapperServiceImpl implements WrapperService {
             if (arch.equalsIgnoreCase("amd64") || arch.equalsIgnoreCase("x86_64")) {
                 mkdir(bin);
 
-                copyResourceTo(new File(bin, name + "-wrapper.exe"), "windows64/karaf-wrapper.exe", false);
+                copyResourceTo(
+                        new File(bin, name + "-wrapper.exe"), "windows64/karaf-wrapper.exe", false);
 
                 serviceFile = new File(bin, name + "-service.bat");
                 wrapperConf = new File(etc, name + "-wrapper.conf");
 
-                copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper.conf", props, envs, includes);
-                copyFilteredResourceTo(serviceFile, "windows64/karaf-service.bat", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "windows64/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        serviceFile, "windows64/karaf-service.bat", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "wrapper.dll"), "windows64/wrapper.dll", false);
             } else {
                 mkdir(bin);
 
-                copyResourceTo(new File(bin, name + "-wrapper.exe"), "windows/karaf-wrapper.exe", false);
+                copyResourceTo(
+                        new File(bin, name + "-wrapper.exe"), "windows/karaf-wrapper.exe", false);
 
                 serviceFile = new File(bin, name + "-service.bat");
                 wrapperConf = new File(etc, name + "-wrapper.conf");
 
-                copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props, envs, includes);
-                copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "windows/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        serviceFile, "windows/karaf-service.bat", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "wrapper.dll"), "windows/wrapper.dll", false);
@@ -113,9 +118,10 @@ public class WrapperServiceImpl implements WrapperService {
             wrapperConf = new File(etc, name + "-wrapper.conf");
             copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
-            File plistConf = new File(bin, "org.apache.karaf."+ name + ".plist");
-            copyFilteredResourceTo(plistConf, "macosx/org.apache.karaf.KARAF.plist", props, envs, includes);
-            
+            File plistConf = new File(bin, "org.apache.karaf." + name + ".plist");
+            copyFilteredResourceTo(
+                    plistConf, "macosx/org.apache.karaf.KARAF.plist", props, envs, includes);
+
             mkdir(lib);
 
             copyResourceTo(new File(lib, "libwrapper.jnilib"), "macosx/libwrapper.jnilib", false);
@@ -137,7 +143,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(systemdFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "linux64/libwrapper.so", false);
@@ -157,7 +164,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(systemdFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
@@ -176,7 +184,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc64/libwrapper.a", false);
@@ -192,7 +201,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc32/libwrapper.a", false);
@@ -211,10 +221,12 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
-                copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc64/libwrapper.so", false);
+                copyResourceTo(
+                        new File(lib, "libwrapper.so"), "solaris/sparc64/libwrapper.so", false);
             } else if (arch.equalsIgnoreCase("x86")) {
                 mkdir(bin);
 
@@ -227,7 +239,8 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86/libwrapper.so", false);
@@ -243,10 +256,12 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
-                copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86_64/libwrapper.so", false);
+                copyResourceTo(
+                        new File(lib, "libwrapper.so"), "solaris/x86_64/libwrapper.so", false);
             } else {
                 mkdir(bin);
 
@@ -259,10 +274,12 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                copyFilteredResourceTo(
+                        wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
 
                 mkdir(lib);
-                copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc32/libwrapper.so", false);
+                copyResourceTo(
+                        new File(lib, "libwrapper.so"), "solaris/sparc32/libwrapper.so", false);
             }
         } else if (os.startsWith("HP-UX") || os.startsWith("HPUX")) {
             mkdir(bin);
@@ -281,7 +298,8 @@ public class WrapperServiceImpl implements WrapperService {
             mkdir(lib);
             copyResourceTo(new File(lib, "libwrapper.sl"), "hpux/parisc64/libwrapper.sl", false);
         } else {
-            throw new IllegalStateException("Your operating system '" + os + "' is not currently supported.");
+            throw new IllegalStateException(
+                    "Your operating system '" + os + "' is not currently supported.");
         }
 
         // install the wrapper jar to the lib directory
@@ -289,7 +307,9 @@ public class WrapperServiceImpl implements WrapperService {
         copyResourceTo(new File(lib, "karaf-wrapper.jar"), "all/karaf-wrapper.jar", false);
         mkdir(etc);
 
-        createJar(new File(lib, "karaf-wrapper-main.jar"), "org/apache/karaf/wrapper/internal/service/Main.class");
+        createJar(
+                new File(lib, "karaf-wrapper-main.jar"),
+                "org/apache/karaf/wrapper/internal/service/Main.class");
 
         File[] wrapperPaths = new File[3];
         wrapperPaths[0] = wrapperConf;
@@ -302,8 +322,11 @@ public class WrapperServiceImpl implements WrapperService {
     private void mkdir(File file) {
         if (!file.exists()) {
             LOGGER.info("Creating missing directory: {}", file.getPath());
-            System.out.println("Creating missing directory: "
-                    + SimpleAnsi.INTENSITY_BOLD + file.getPath() + SimpleAnsi.INTENSITY_NORMAL);
+            System.out.println(
+                    "Creating missing directory: "
+                            + SimpleAnsi.INTENSITY_BOLD
+                            + file.getPath()
+                            + SimpleAnsi.INTENSITY_NORMAL);
             file.mkdirs();
         }
     }
@@ -311,15 +334,19 @@ public class WrapperServiceImpl implements WrapperService {
     private void copyResourceTo(File outFile, String resource, boolean text) throws Exception {
         if (!outFile.exists()) {
             LOGGER.info("Creating file: {}", outFile.getPath());
-            System.out.println("Creating file: "
-                    + SimpleAnsi.INTENSITY_BOLD + outFile.getPath() + SimpleAnsi.INTENSITY_NORMAL);
+            System.out.println(
+                    "Creating file: "
+                            + SimpleAnsi.INTENSITY_BOLD
+                            + outFile.getPath()
+                            + SimpleAnsi.INTENSITY_NORMAL);
             InputStream is = WrapperServiceImpl.class.getResourceAsStream(resource);
             if (is == null) {
                 throw new IllegalArgumentException("Resource " + resource + " doesn't exist");
             }
             try {
                 if (text) {
-                    // read it line at a time so what we can use the platform line ending when we write it out
+                    // read it line at a time so what we can use the platform line ending when we
+                    // write it out
                     PrintStream out = new PrintStream(new FileOutputStream(outFile));
                     try {
                         Scanner scanner = new Scanner(is);
@@ -347,24 +374,39 @@ public class WrapperServiceImpl implements WrapperService {
                 safeClose(is);
             }
         } else {
-            LOGGER.warn("File already exists. Move it out of the way if you wish to recreate it: {}", outFile.getPath());
+            LOGGER.warn(
+                    "File already exists. Move it out of the way if you wish to recreate it: {}",
+                    outFile.getPath());
             System.out.println(
-                    SimpleAnsi.COLOR_RED + "File already exists" + SimpleAnsi.COLOR_DEFAULT
-                            + ". Move it out of the way if you wish to recreate it: " + outFile.getPath());
+                    SimpleAnsi.COLOR_RED
+                            + "File already exists"
+                            + SimpleAnsi.COLOR_DEFAULT
+                            + ". Move it out of the way if you wish to recreate it: "
+                            + outFile.getPath());
         }
     }
 
-    private void copyFilteredResourceTo(File outFile, String resource, HashMap<String, String> props, String[] envs, String[] includes) throws Exception {
+    private void copyFilteredResourceTo(
+            File outFile,
+            String resource,
+            HashMap<String, String> props,
+            String[] envs,
+            String[] includes)
+            throws Exception {
         if (!outFile.exists()) {
             LOGGER.info("Creating file: {}", outFile.getPath());
-            System.out.println("Creating file: "
-                    + SimpleAnsi.INTENSITY_BOLD + outFile.getPath() + SimpleAnsi.INTENSITY_NORMAL);
+            System.out.println(
+                    "Creating file: "
+                            + SimpleAnsi.INTENSITY_BOLD
+                            + outFile.getPath()
+                            + SimpleAnsi.INTENSITY_NORMAL);
             InputStream is = WrapperServiceImpl.class.getResourceAsStream(resource);
             if (is == null) {
                 throw new IllegalArgumentException("Resource " + resource + " doesn't exist");
             }
             try {
-                // read it line at a time so that we can use the platform line ending when we write it out
+                // read it line at a time so that we can use the platform line ending when we write
+                // it out
                 PrintStream out = new PrintStream(new FileOutputStream(outFile));
                 try {
                     Scanner scanner = new Scanner(is);
@@ -392,16 +434,20 @@ public class WrapperServiceImpl implements WrapperService {
                 safeClose(is);
             }
         } else {
-            LOGGER.warn("File already exists. Move it out of the way if you wish to recreate it: {}", outFile.getPath());
+            LOGGER.warn(
+                    "File already exists. Move it out of the way if you wish to recreate it: {}",
+                    outFile.getPath());
             System.out.println(
-                    SimpleAnsi.COLOR_RED + "File already exists" + SimpleAnsi.COLOR_DEFAULT
-                            + ". Move it out of the way if you wish to recreate it: " + outFile.getPath());
+                    SimpleAnsi.COLOR_RED
+                            + "File already exists"
+                            + SimpleAnsi.COLOR_DEFAULT
+                            + ". Move it out of the way if you wish to recreate it: "
+                            + outFile.getPath());
         }
     }
 
     private void safeClose(Closeable c) throws IOException {
-        if (c == null)
-            return;
+        if (c == null) return;
         try {
             c.close();
         } catch (Throwable ignore) {
@@ -431,8 +477,11 @@ public class WrapperServiceImpl implements WrapperService {
     private void createJar(File outFile, String resource) throws Exception {
         if (!outFile.exists()) {
             LOGGER.info("Creating file: {}", outFile.getPath());
-            System.out.println("Creating file: "
-                    + SimpleAnsi.INTENSITY_BOLD + outFile.getPath() + SimpleAnsi.INTENSITY_NORMAL);
+            System.out.println(
+                    "Creating file: "
+                            + SimpleAnsi.INTENSITY_BOLD
+                            + outFile.getPath()
+                            + SimpleAnsi.INTENSITY_NORMAL);
             InputStream is = getClass().getClassLoader().getResourceAsStream(resource);
             if (is == null) {
                 throw new IllegalStateException("Resource " + resource + " not found!");
@@ -461,8 +510,8 @@ public class WrapperServiceImpl implements WrapperService {
     }
 
     @Override
-    public File[] install(String name, String displayName, String description, String startType) throws Exception {
+    public File[] install(String name, String displayName, String description, String startType)
+            throws Exception {
         return install(name, displayName, description, startType, null, null);
     }
-
 }

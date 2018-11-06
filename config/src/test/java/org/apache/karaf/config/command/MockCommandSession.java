@@ -22,7 +22,6 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.karaf.shell.api.console.History;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
@@ -94,8 +93,7 @@ class MockCommandSession implements Session {
     }
 
     @Override
-    public void currentDir(Path path) {
-    }
+    public void currentDir(Path path) {}
 
     @Override
     public String resolveCommand(String name) {
@@ -103,7 +101,5 @@ class MockCommandSession implements Session {
     }
 
     @Override
-    public void run() {
-
-    }
+    public void run() {}
 }

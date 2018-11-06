@@ -29,17 +29,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class UninstallKarCommand implements Action {
 
-    @Argument(index = 0, name = "name", description = "The name of the KAR file to uninstall.", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The name of the KAR file to uninstall.",
+            required = true,
+            multiValued = false)
     @Completion(KarCompleter.class)
     private String name;
 
-    @Reference
-    private KarService karService;
+    @Reference private KarService karService;
 
     @Override
     public Object execute() throws Exception {
         karService.uninstall(name);
         return null;
     }
-    
 }

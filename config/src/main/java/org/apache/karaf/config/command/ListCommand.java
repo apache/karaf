@@ -20,7 +20,6 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
@@ -31,10 +30,20 @@ import org.osgi.service.cm.Configuration;
 @Service
 public class ListCommand extends ConfigCommandSupport {
 
-    @Option(name = "-s", aliases = "--short", description = "Only list the PIDs, not the properties", required = false, multiValued = false)
+    @Option(
+            name = "-s",
+            aliases = "--short",
+            description = "Only list the PIDs, not the properties",
+            required = false,
+            multiValued = false)
     boolean shortOutput;
 
-    @Argument(index = 0, name = "query", description = "Query in LDAP syntax. Example: \"(service.pid=org.apache.karaf.log)\"", required = false, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "query",
+            description = "Query in LDAP syntax. Example: \"(service.pid=org.apache.karaf.log)\"",
+            required = false,
+            multiValued = false)
     String query;
 
     @SuppressWarnings("rawtypes")
@@ -51,7 +60,8 @@ public class ListCommand extends ConfigCommandSupport {
                 }
             } else {
                 for (Configuration config : sortedConfigs.values()) {
-                    System.out.println("----------------------------------------------------------------");
+                    System.out.println(
+                            "----------------------------------------------------------------");
                     System.out.println("Pid:            " + config.getPid());
                     if (config.getFactoryPid() != null) {
                         System.out.println("FactoryPid:     " + config.getFactoryPid());
@@ -66,7 +76,11 @@ public class ListCommand extends ConfigCommandSupport {
                             sortedProps.put(key.toString(), props.get(key));
                         }
                         for (Map.Entry<String, Object> entry : sortedProps.entrySet()) {
-                            System.out.println("   " + entry.getKey() + " = " + displayValue(entry.getValue()));
+                            System.out.println(
+                                    "   "
+                                            + entry.getKey()
+                                            + " = "
+                                            + displayValue(entry.getValue()));
                         }
                     }
                 }

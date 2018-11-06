@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.profile.command.completers.ProfileCompleter;
@@ -33,25 +32,42 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(name = "display", scope = "profile", description = "Displays information about the specified profile")
+@Command(
+        name = "display",
+        scope = "profile",
+        description = "Displays information about the specified profile")
 @Service
 public class ProfileDisplay implements Action {
 
-    @Option(name = "--overlay", aliases = "-o", description = "Shows the overlay profile settings, taking into account the settings inherited from parent profiles.")
+    @Option(
+            name = "--overlay",
+            aliases = "-o",
+            description =
+                    "Shows the overlay profile settings, taking into account the settings inherited from parent profiles.")
     private Boolean overlay = false;
 
-    @Option(name = "--effective", aliases = "-e", description = "Shows the effective profile settings, taking into account properties substitution.")
+    @Option(
+            name = "--effective",
+            aliases = "-e",
+            description =
+                    "Shows the effective profile settings, taking into account properties substitution.")
     private Boolean effective = false;
 
-    @Option(name = "--display-resources", aliases = "-r", description = "Displays the content of additional profile resources.")
+    @Option(
+            name = "--display-resources",
+            aliases = "-r",
+            description = "Displays the content of additional profile resources.")
     private Boolean displayResources = false;
 
-    @Argument(index = 0, required = true, name = "profile", description = "The name of the profile.")
+    @Argument(
+            index = 0,
+            required = true,
+            name = "profile",
+            description = "The name of the profile.")
     @Completion(ProfileCompleter.class)
     private String profileId;
 
-    @Reference
-    private ProfileService profileService;
+    @Reference private ProfileService profileService;
 
     @Override
     public Object execute() {
@@ -87,7 +103,7 @@ public class ProfileDisplay implements Action {
 
         Map<String, Map<String, Object>> configuration = new HashMap<>(profile.getConfigurations());
         Map<String, byte[]> resources = profile.getFileConfigurations();
-        Map<String,Object> profileConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
+        Map<String, Object> profileConfiguration = profile.getConfiguration(Profile.INTERNAL_PID);
         List<String> profileProperties = new ArrayList<>();
         List<String> systemProperties = new ArrayList<>();
         List<String> configProperties = new ArrayList<>();
@@ -100,13 +116,14 @@ public class ProfileDisplay implements Action {
 
             if (key.startsWith("system.")) {
                 systemProperties.add("  " + key.substring("system.".length()) + " = " + value);
-            }
-            else if (key.startsWith("config.")) {
+            } else if (key.startsWith("config.")) {
                 configProperties.add("  " + key.substring("config.".length()) + " = " + value);
-            }
-            else if (!key.startsWith("feature.") && !key.startsWith("repository") &&
-                        !key.startsWith("bundle.") && !key.startsWith("fab.") &&
-                        !key.startsWith("override.") && !key.startsWith("attribute.")) {
+            } else if (!key.startsWith("feature.")
+                    && !key.startsWith("repository")
+                    && !key.startsWith("bundle.")
+                    && !key.startsWith("fab.")
+                    && !key.startsWith("override.")
+                    && !key.startsWith("attribute.")) {
                 profileProperties.add("  " + key + " = " + value);
             }
         }
@@ -159,7 +176,7 @@ public class ProfileDisplay implements Action {
 
         output.println("\nOther resources");
         output.println("----------------------------");
-        for (Map.Entry<String,byte[]> resource : resources.entrySet()) {
+        for (Map.Entry<String, byte[]> resource : resources.entrySet()) {
             String name = resource.getKey();
             if (!name.endsWith(".properties")) {
                 output.println("Resource: " + resource.getKey());
@@ -170,5 +187,4 @@ public class ProfileDisplay implements Action {
             }
         }
     }
-
 }

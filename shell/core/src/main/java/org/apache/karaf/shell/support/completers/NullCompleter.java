@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.support.completers;
 
 import java.util.List;
-
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;

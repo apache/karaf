@@ -21,11 +21,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
-
 /**
- * <p>Additional requirement for a feature.</p>
- * <p>Java class for bundle complex type.</p>
- * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ * Additional requirement for a feature.
+ *
+ * <p>Java class for bundle complex type.
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ *
  * <pre>
  * &lt;complexType name="capability"&gt;
  *   &lt;simpleContent&gt;
@@ -36,15 +38,14 @@ import javax.xml.bind.annotation.XmlValue;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "requirement", propOrder = {"value"})
+@XmlType(
+        name = "requirement",
+        propOrder = {"value"})
 public class Requirement implements org.apache.karaf.features.Requirement {
 
-    @XmlValue
-    protected String value;
+    @XmlValue protected String value;
 
-
-    public Requirement() {
-    }
+    public Requirement() {}
 
     public Requirement(String value) {
         this.value = value;

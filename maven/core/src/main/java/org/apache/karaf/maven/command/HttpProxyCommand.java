@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
@@ -29,32 +28,72 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.maven.settings.Proxy;
 import org.osgi.service.cm.Configuration;
 
-@Command(scope = "maven", name = "http-proxy", description = "Manage HTTP proxy configuration for Maven remote repositories")
+@Command(
+        scope = "maven",
+        name = "http-proxy",
+        description = "Manage HTTP proxy configuration for Maven remote repositories")
 @Service
 public class HttpProxyCommand extends MavenSecuritySupport {
 
-    @Option(name = "--add", description = "Adds HTTP proxy configuration to Maven settings", required = false, multiValued = false)
+    @Option(
+            name = "--add",
+            description = "Adds HTTP proxy configuration to Maven settings",
+            required = false,
+            multiValued = false)
     boolean add;
 
-    @Option(name = "--change", description = "Changes HTTP proxy configuration in Maven settings", required = false, multiValued = false)
+    @Option(
+            name = "--change",
+            description = "Changes HTTP proxy configuration in Maven settings",
+            required = false,
+            multiValued = false)
     boolean change;
 
-    @Option(name = "--remove", description = "Removes HTTP proxy configuration from Maven settings", required = false, multiValued = false)
+    @Option(
+            name = "--remove",
+            description = "Removes HTTP proxy configuration from Maven settings",
+            required = false,
+            multiValued = false)
     boolean remove;
 
-    @Option(name = "-id", description = "Identifier of HTTP proxy", required = true, multiValued = false)
+    @Option(
+            name = "-id",
+            description = "Identifier of HTTP proxy",
+            required = true,
+            multiValued = false)
     String id;
 
-    @Option(name = "-f", aliases = { "--force" }, description = "Do not ask for confirmation", required = false, multiValued = false)
+    @Option(
+            name = "-f",
+            aliases = {"--force"},
+            description = "Do not ask for confirmation",
+            required = false,
+            multiValued = false)
     boolean force = false;
 
-    @Option(name = "-u", aliases = { "--username" }, description = "Username for remote repository", required = false, multiValued = false)
+    @Option(
+            name = "-u",
+            aliases = {"--username"},
+            description = "Username for remote repository",
+            required = false,
+            multiValued = false)
     String username;
 
-    @Option(name = "-p", aliases = { "--password" }, description = "Password for remote repository (may be encrypted, see \"maven:password -ep\")", required = false, multiValued = false)
+    @Option(
+            name = "-p",
+            aliases = {"--password"},
+            description =
+                    "Password for remote repository (may be encrypted, see \"maven:password -ep\")",
+            required = false,
+            multiValued = false)
     String password;
 
-    @Option(name = "-n", aliases = { "--non-proxy-hosts" }, description = "Non-proxied hosts (in the format '192.168.*|localhost|...')", required = false, multiValued = false)
+    @Option(
+            name = "-n",
+            aliases = {"--non-proxy-hosts"},
+            description = "Non-proxied hosts (in the format '192.168.*|localhost|...')",
+            required = false,
+            multiValued = false)
     String nonProxyHosts;
 
     @Argument(description = "host:port of HTTP proxy", required = false, multiValued = false)
@@ -75,8 +114,8 @@ public class HttpProxyCommand extends MavenSecuritySupport {
         if (mavenSettings.getProxies() == null) {
             mavenSettings.setProxies(new LinkedList<>());
         }
-        Optional<Proxy> existingProxy = mavenSettings.getProxies().stream()
-                .filter((p) -> id.equals(p.getId())).findAny();
+        Optional<Proxy> existingProxy =
+                mavenSettings.getProxies().stream().filter((p) -> id.equals(p.getId())).findAny();
 
         if (add) {
             if (hostPort == null || "".equals(hostPort.trim())) {
@@ -110,8 +149,12 @@ public class HttpProxyCommand extends MavenSecuritySupport {
             proxy = existingProxy.get(); // should be there
         } else /*if (remove)*/ {
             // remove
-            List<Proxy> newProxies = mavenSettings.getProxies().stream()
-                    .filter((p) -> !id.equals(p.getId())).collect(Collectors.toList());
+            List<Proxy> newProxies =
+                    mavenSettings
+                            .getProxies()
+                            .stream()
+                            .filter((p) -> !id.equals(p.getId()))
+                            .collect(Collectors.toList());
             mavenSettings.setProxies(newProxies);
         }
 
@@ -148,5 +191,4 @@ public class HttpProxyCommand extends MavenSecuritySupport {
             session.execute("maven:http-proxy-list");
         }
     }
-
 }

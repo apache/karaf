@@ -31,13 +31,17 @@ import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 class $FactoryFinder {
 
     private static final Logger LOGGER = Logger.getLogger("javax.xml.soap");
 
     @SuppressWarnings("unchecked")
-    static <T> T find(Class<T> factoryClass, String defaultClassName, boolean tryFallback, String deprecatedFactoryId) throws SOAPException {
+    static <T> T find(
+            Class<T> factoryClass,
+            String defaultClassName,
+            boolean tryFallback,
+            String deprecatedFactoryId)
+            throws SOAPException {
         ClassLoader tccl = contextClassLoader();
 
         String factoryId = factoryClass.getName();
@@ -45,7 +49,7 @@ class $FactoryFinder {
         if (className != null) {
             Object result = newInstance(className, defaultClassName, tccl);
             return (T) result;
-         }
+        }
 
         className = fromJDKProperties(factoryId, deprecatedFactoryId);
         if (className != null) {
@@ -68,16 +72,16 @@ class $FactoryFinder {
 
         className = fromMetaInfServices(deprecatedFactoryId, tccl);
         if (className != null) {
-            LOGGER.log(Level.WARNING,
-                    "Using deprecated META-INF/services mechanism with non-standard property: {0}. " +
-                            "Property {1} should be used instead.",
-                    new Object[]{deprecatedFactoryId, factoryId});
+            LOGGER.log(
+                    Level.WARNING,
+                    "Using deprecated META-INF/services mechanism with non-standard property: {0}. "
+                            + "Property {1} should be used instead.",
+                    new Object[] {deprecatedFactoryId, factoryId});
             Object result = newInstance(className, defaultClassName, tccl);
             return (T) result;
         }
 
-        if (!tryFallback)
-            return null;
+        if (!tryFallback) return null;
 
         if (defaultClassName == null) {
             throw new SOAPException("Provider for " + factoryId + " cannot be found", null);
@@ -85,7 +89,8 @@ class $FactoryFinder {
         return (T) newInstance(defaultClassName, defaultClassName, tccl);
     }
 
-    static <T> T find(Class<T> factoryClass, String defaultClassName, boolean tryFallback) throws SOAPException {
+    static <T> T find(Class<T> factoryClass, String defaultClassName, boolean tryFallback)
+            throws SOAPException {
         return find(factoryClass, defaultClassName, tryFallback, null);
     }
 
@@ -94,14 +99,14 @@ class $FactoryFinder {
         LOGGER.log(Level.FINE, "Checking deprecated {0} resource", serviceId);
 
         try (InputStream is =
-                     tccl == null
-                             ? ClassLoader.getSystemResourceAsStream(serviceId)
-                             : tccl.getResourceAsStream(serviceId)) {
+                tccl == null
+                        ? ClassLoader.getSystemResourceAsStream(serviceId)
+                        : tccl.getResourceAsStream(serviceId)) {
 
             if (is != null) {
                 String factoryClassName;
                 try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-                     BufferedReader rd = new BufferedReader(isr)) {
+                        BufferedReader rd = new BufferedReader(isr)) {
                     factoryClassName = rd.readLine();
                 }
 
@@ -145,16 +150,21 @@ class $FactoryFinder {
                     factoryClassName = props.getProperty(deprecatedFactoryId);
                     logFound(factoryClassName);
                     if (factoryClassName != null) {
-                        LOGGER.log(Level.WARNING,
+                        LOGGER.log(
+                                Level.WARNING,
                                 "Using non-standard property: {0}. Property {1} should be used instead.",
-                                new Object[]{deprecatedFactoryId, factoryId});
+                                new Object[] {deprecatedFactoryId, factoryId});
                         return factoryClassName;
                     }
                 }
             }
         } catch (Exception ignored) {
-            LOGGER.log(Level.SEVERE, "Error reading SAAJ configuration from ["  + path +
-                    "] file. Check it is accessible and has correct format.", ignored);
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error reading SAAJ configuration from ["
+                            + path
+                            + "] file. Check it is accessible and has correct format.",
+                    ignored);
         }
         return null;
     }
@@ -167,7 +177,8 @@ class $FactoryFinder {
         if (deprecatedFactoryId != null) {
             systemProp = getSystemProperty(deprecatedFactoryId);
             if (systemProp != null) {
-                LOGGER.log(Level.WARNING,
+                LOGGER.log(
+                        Level.WARNING,
                         "Using non-standard property: {0}. Property {1} should be used instead.",
                         new Object[] {deprecatedFactoryId, factoryId});
                 return systemProp;
@@ -178,7 +189,9 @@ class $FactoryFinder {
 
     private static String getSystemProperty(final String property) {
         LOGGER.log(Level.FINE, "Checking system property {0}", property);
-        String value = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(property));
+        String value =
+                AccessController.doPrivileged(
+                        (PrivilegedAction<String>) () -> System.getProperty(property));
         logFound(value);
         return value;
     }
@@ -196,11 +209,15 @@ class $FactoryFinder {
         try {
             ServiceLoader<T> serviceLoader = ServiceLoader.load(spiClass);
             for (T impl : serviceLoader) {
-                LOGGER.fine("ServiceProvider loading Facility used; returning object [" + impl.getClass().getName() + "]");
+                LOGGER.fine(
+                        "ServiceProvider loading Facility used; returning object ["
+                                + impl.getClass().getName()
+                                + "]");
                 return impl;
             }
         } catch (Throwable t) {
-            throw new SOAPException("Error while searching for service [" + spiClass.getName() + "]", t);
+            throw new SOAPException(
+                    "Error while searching for service [" + spiClass.getName() + "]", t);
         }
         return null;
     }
@@ -215,7 +232,8 @@ class $FactoryFinder {
         }
     }
 
-    private static Class nullSafeLoadClass(String className, ClassLoader classLoader) throws ClassNotFoundException {
+    private static Class nullSafeLoadClass(String className, ClassLoader classLoader)
+            throws ClassNotFoundException {
         if (classLoader == null) {
             return Class.forName(className);
         } else {
@@ -223,17 +241,24 @@ class $FactoryFinder {
         }
     }
 
-    static Object newInstance(String className, String defaultImplClassName, ClassLoader classLoader) throws SOAPException {
+    static Object newInstance(
+            String className, String defaultImplClassName, ClassLoader classLoader)
+            throws SOAPException {
         try {
-            return safeLoadClass(className, defaultImplClassName, classLoader).getConstructor().newInstance();
+            return safeLoadClass(className, defaultImplClassName, classLoader)
+                    .getConstructor()
+                    .newInstance();
         } catch (ClassNotFoundException x) {
             throw new SOAPException("Provider " + className + " not found", x);
         } catch (Exception x) {
-            throw new SOAPException("Provider " + className + " could not be instantiated: " + x, x);
+            throw new SOAPException(
+                    "Provider " + className + " could not be instantiated: " + x, x);
         }
     }
 
-    private static Class<?> safeLoadClass(String className, String defaultImplClassName, ClassLoader classLoader) throws ClassNotFoundException {
+    private static Class<?> safeLoadClass(
+            String className, String defaultImplClassName, ClassLoader classLoader)
+            throws ClassNotFoundException {
         try {
             checkPackageAccess(className);
         } catch (SecurityException se) {
@@ -252,5 +277,4 @@ class $FactoryFinder {
             throw new SOAPException(x.toString(), x);
         }
     }
-
 }

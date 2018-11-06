@@ -27,14 +27,16 @@ import java.nio.file.Path;
 /**
  * A <code>Session</code> can be used to execute commands.
  *
- * The {@link org.apache.karaf.shell.api.console.Registry} associated
- * with this <code>Session</code> will contain: <ul>
- *     <li>{@link SessionFactory}</li>
- *     <li>{@link Command}s</li>
- *     <li>{@link Session}</li>
- *     <li>{@link Registry}</li>
- *     <li>{@link History}</li>
- *     <li>{@link Terminal}</li>
+ * <p>The {@link org.apache.karaf.shell.api.console.Registry} associated with this <code>Session
+ * </code> will contain:
+ *
+ * <ul>
+ *   <li>{@link SessionFactory}
+ *   <li>{@link Command}s
+ *   <li>{@link Session}
+ *   <li>{@link Registry}
+ *   <li>{@link History}
+ *   <li>{@link Terminal}
  * </ul>
  */
 public interface Session extends Runnable, Closeable {
@@ -80,27 +82,24 @@ public interface Session extends Runnable, Closeable {
     /**
      * Set the value of a variable.
      *
-     * @param name  Name of the variable.
+     * @param name Name of the variable.
      * @param value Value of the variable
      */
     void put(String name, Object value);
 
     /**
-     * Return the input stream that is the first of the pipeline. This stream is
-     * sometimes necessary to communicate directly to the end user. For example,
-     * a "less" or "more" command needs direct input from the keyboard to
-     * control the paging.
+     * Return the input stream that is the first of the pipeline. This stream is sometimes necessary
+     * to communicate directly to the end user. For example, a "less" or "more" command needs direct
+     * input from the keyboard to control the paging.
      *
-     * @return InputStream used closest to the user or null if input is from a
-     *         file.
+     * @return InputStream used closest to the user or null if input is from a file.
      */
     InputStream getKeyboard();
 
     /**
-     * Return the PrintStream for the console. This must always be the stream
-     * "closest" to the user. This stream can be used to post messages that
-     * bypass the piping. If the output is piped to a file, then the object
-     * returned must be null.
+     * Return the PrintStream for the console. This must always be the stream "closest" to the user.
+     * This stream can be used to post messages that bypass the piping. If the output is piped to a
+     * file, then the object returned must be null.
      *
      * @return the console stream
      */
@@ -117,43 +116,40 @@ public interface Session extends Runnable, Closeable {
     String readLine(String prompt, final Character mask) throws IOException;
 
     /**
-     * Retrieve the {@link org.apache.karaf.shell.api.console.Terminal} associated
-     * with this <code>Session</code> or <code>null</code> if this <code>Session</code>
-     * is headless.
+     * Retrieve the {@link org.apache.karaf.shell.api.console.Terminal} associated with this <code>
+     * Session</code> or <code>null</code> if this <code>Session</code> is headless.
      *
      * @return the session terminal
      */
     Terminal getTerminal();
 
     /**
-     * Retrieve the {@link org.apache.karaf.shell.api.console.History} associated
-     * with this <code>Session</code> or <code>null</code> if this <code>Session</code>
-     * is headless.
+     * Retrieve the {@link org.apache.karaf.shell.api.console.History} associated with this <code>
+     * Session</code> or <code>null</code> if this <code>Session</code> is headless.
      *
      * @return the session history
      */
     History getHistory();
 
     /**
-     * Retrieve the {@link org.apache.karaf.shell.api.console.Registry} associated
-     * with this <code>Session</code>.
+     * Retrieve the {@link org.apache.karaf.shell.api.console.Registry} associated with this <code>
+     * Session</code>.
      *
      * @return the session registry
      */
     Registry getRegistry();
 
     /**
-     * Retrieve the {@link org.apache.karaf.shell.api.console.SessionFactory} associated
-     * with this <code>Session</code>.
+     * Retrieve the {@link org.apache.karaf.shell.api.console.SessionFactory} associated with this
+     * <code>Session</code>.
      *
      * @return the session factory
      */
     SessionFactory getFactory();
 
     /**
-     * Resolve a command name.  If the command name has no specified scope, the fully
-     * qualified command name will be returned, depending on the scopes and current
-     * subshell.
+     * Resolve a command name. If the command name has no specified scope, the fully qualified
+     * command name will be returned, depending on the scopes and current subshell.
      *
      * @param name the command name
      * @return the full qualified command name
@@ -165,8 +161,8 @@ public interface Session extends Runnable, Closeable {
     void currentDir(Path path);
 
     /**
-     * Close this session. After the session is closed, it will throw
-     * IllegalStateException when it is used.
+     * Close this session. After the session is closed, it will throw IllegalStateException when it
+     * is used.
      */
     void close();
 }

@@ -18,24 +18,21 @@ package org.apache.karaf.util;
 
 import java.util.Locale;
 
-/**
- * Util class to manipulate String, especially around escape/unescape.
- */
+/** Util class to manipulate String, especially around escape/unescape. */
 public class StringEscapeUtils {
 
-    /** Constant for the radix of hex numbers.*/
+    /** Constant for the radix of hex numbers. */
     private static final int HEX_RADIX = 16;
 
-    /** Constant for the length of a unicode literal.*/
+    /** Constant for the length of a unicode literal. */
     private static final int UNICODE_LEN = 4;
 
     /**
-     * <p>Unescapes any Java literals found in the <code>String</code> to a
-     * <code>Writer</code>.</p> This is a slightly modified version of the
-     * StringEscapeUtils.unescapeJava() function in commons-lang that doesn't
-     * drop escaped separators (i.e '\,').
+     * Unescapes any Java literals found in the <code>String</code> to a <code>Writer</code>. This
+     * is a slightly modified version of the StringEscapeUtils.unescapeJava() function in
+     * commons-lang that doesn't drop escaped separators (i.e '\,').
      *
-     * @param str  the <code>String</code> to unescape, may be null
+     * @param str the <code>String</code> to unescape, may be null
      * @return the processed string
      * @throws IllegalArgumentException if the Writer is <code>null</code>
      */
@@ -64,7 +61,8 @@ public class StringEscapeUtils {
                         inUnicode = false;
                         hadSlash = false;
                     } catch (NumberFormatException nfe) {
-                        throw new IllegalArgumentException("Unable to parse unicode value: " + unicode, nfe);
+                        throw new IllegalArgumentException(
+                                "Unable to parse unicode value: " + unicode, nfe);
                     }
                 }
                 continue;
@@ -74,35 +72,35 @@ public class StringEscapeUtils {
                 // handle an escaped value
                 hadSlash = false;
                 switch (ch) {
-                    case '\\' :
+                    case '\\':
                         out.append('\\');
                         break;
-                    case '\'' :
+                    case '\'':
                         out.append('\'');
                         break;
-                    case '\"' :
+                    case '\"':
                         out.append('"');
                         break;
-                    case 'r' :
+                    case 'r':
                         out.append('\r');
                         break;
-                    case 'f' :
+                    case 'f':
                         out.append('\f');
                         break;
-                    case 't' :
+                    case 't':
                         out.append('\t');
                         break;
-                    case 'n' :
+                    case 'n':
                         out.append('\n');
                         break;
-                    case 'b' :
+                    case 'b':
                         out.append('\b');
                         break;
-                    case 'u' :
+                    case 'u':
                         // uh-oh, we're in unicode country....
                         inUnicode = true;
                         break;
-                    default :
+                    default:
                         out.append(ch);
                         break;
                 }
@@ -124,23 +122,21 @@ public class StringEscapeUtils {
     }
 
     /**
-     * <p>Escapes the characters in a <code>String</code> using Java String rules.</p>
+     * Escapes the characters in a <code>String</code> using Java String rules.
      *
-     * <p>Deals correctly with quotes and control-chars (tab, backslash, cr, ff, etc.) </p>
+     * <p>Deals correctly with quotes and control-chars (tab, backslash, cr, ff, etc.)
      *
-     * <p>So a tab becomes the characters <code>'\\'</code> and
-     * <code>'t'</code>.</p>
+     * <p>So a tab becomes the characters <code>'\\'</code> and <code>'t'</code>.
      *
-     * <p>The only difference between Java strings and JavaScript strings
-     * is that in JavaScript, a single quote must be escaped.</p>
+     * <p>The only difference between Java strings and JavaScript strings is that in JavaScript, a
+     * single quote must be escaped. Example:
      *
-     * Example:
      * <pre>
      * input string: He didn't say, "Stop!"
      * output string: He didn't say, \"Stop!\"
      * </pre>
      *
-     * @param str  String to escape values in, may be null
+     * @param str String to escape values in, may be null
      * @return String with escaped values, <code>null</code> if null string input
      */
     public static String escapeJava(String str) {
@@ -160,27 +156,27 @@ public class StringEscapeUtils {
                 out.append("\\u00").append(hex(ch));
             } else if (ch < 32) {
                 switch (ch) {
-                    case '\b' :
+                    case '\b':
                         out.append('\\');
                         out.append('b');
                         break;
-                    case '\n' :
+                    case '\n':
                         out.append('\\');
                         out.append('n');
                         break;
-                    case '\t' :
+                    case '\t':
                         out.append('\\');
                         out.append('t');
                         break;
-                    case '\f' :
+                    case '\f':
                         out.append('\\');
                         out.append('f');
                         break;
-                    case '\r' :
+                    case '\r':
                         out.append('\\');
                         out.append('r');
                         break;
-                    default :
+                    default:
                         if (ch > 0xf) {
                             out.append("\\u00").append(hex(ch));
                         } else {
@@ -190,15 +186,15 @@ public class StringEscapeUtils {
                 }
             } else {
                 switch (ch) {
-                    case '"' :
+                    case '"':
                         out.append('\\');
                         out.append('"');
                         break;
-                    case '\\' :
+                    case '\\':
                         out.append('\\');
                         out.append('\\');
                         break;
-                    default :
+                    default:
                         out.append(ch);
                         break;
                 }
@@ -208,8 +204,7 @@ public class StringEscapeUtils {
     }
 
     /**
-     * <p>Returns an upper case hexadecimal <code>String</code> for the given
-     * character.</p>
+     * Returns an upper case hexadecimal <code>String</code> for the given character.
      *
      * @param ch The character to convert.
      * @return An upper case hexadecimal <code>String</code>
@@ -217,5 +212,4 @@ public class StringEscapeUtils {
     public static String hex(char ch) {
         return Integer.toHexString(ch).toUpperCase(Locale.ENGLISH);
     }
-
 }

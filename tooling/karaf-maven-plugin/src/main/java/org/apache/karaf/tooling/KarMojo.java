@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
@@ -55,74 +54,62 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
-/**
- * Assemble a kar archive from a features.xml file
- */
-@Mojo(name = "kar", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+/** Assemble a kar archive from a features.xml file */
+@Mojo(
+        name = "kar",
+        defaultPhase = LifecyclePhase.PACKAGE,
+        requiresDependencyResolution = ResolutionScope.RUNTIME,
+        threadSafe = true)
 public class KarMojo extends MojoSupport {
 
     /**
      * The maven archive configuration to use.
-     * <p/>
-     * See <a href="http://maven.apache.org/ref/current/maven-archiver/apidocs/org/apache/maven/archiver/MavenArchiveConfiguration.html">the Javadocs for MavenArchiveConfiguration</a>.
+     *
+     * <p>See <a
+     * href="http://maven.apache.org/ref/current/maven-archiver/apidocs/org/apache/maven/archiver/MavenArchiveConfiguration.html">the
+     * Javadocs for MavenArchiveConfiguration</a>.
      */
-    @Parameter
-    private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
+    @Parameter private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
 
-    /**
-     * The Jar archiver.
-     */
-    @Component(role = Archiver.class, hint="jar")
+    /** The Jar archiver. */
+    @Component(role = Archiver.class, hint = "jar")
     private JarArchiver jarArchiver = null;
 
-    /**
-     * Directory containing the generated archive.
-     */
+    /** Directory containing the generated archive. */
     @Parameter(defaultValue = "${project.build.directory}")
     private File outputDirectory = null;
 
-    /**
-     * Name of the generated archive.
-     */
+    /** Name of the generated archive. */
     @Parameter(defaultValue = "${project.build.finalName}")
     private String finalName = null;
 
-    /**
-     * Ignore the dependency flag on the bundles in the features XML
-     */
+    /** Ignore the dependency flag on the bundles in the features XML */
     @Parameter(defaultValue = "false")
     private boolean ignoreDependencyFlag;
 
     /**
-     * Classifier to add to the artifact generated. If given, the artifact will be attached.
-     * If it's not given, it will merely be written to the output directory according to the finalName.
+     * Classifier to add to the artifact generated. If given, the artifact will be attached. If it's
+     * not given, it will merely be written to the output directory according to the finalName.
      */
-    @Parameter
-    protected String classifier;
+    @Parameter protected String classifier;
 
     /**
-     * Location of resources directory for additional content to include in the kar.
-     * Note that it includes everything under classes so as to include maven-remote-resources
+     * Location of resources directory for additional content to include in the kar. Note that it
+     * includes everything under classes so as to include maven-remote-resources
      */
     @Parameter(defaultValue = "${project.build.directory}/classes")
     private File resourcesDir;
 
-
-    /**
-     * The features file to use as instructions
-     */
+    /** The features file to use as instructions */
     @Parameter(defaultValue = "${project.build.directory}/feature/feature.xml")
     private String featuresFile;
 
-
-    /**
-     * The wrapper repository in the kar.
-     */
+    /** The wrapper repository in the kar. */
     @Parameter(defaultValue = "${repositoryPath}")
     private String repositoryPath = "repository/";
 
-    private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
-
+    private static final Pattern mvnPattern =
+            Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     //
     // Mojo
@@ -136,12 +123,10 @@ public class KarMojo extends MojoSupport {
 
         if (isMavenUrl(featuresFile)) {
             Artifact artifactTemp = resourceToArtifact(featuresFile, false);
-            if (artifactTemp.getGroupId() != null)
-                groupId = artifactTemp.getGroupId();
+            if (artifactTemp.getGroupId() != null) groupId = artifactTemp.getGroupId();
             if (artifactTemp.getArtifactHandler() != null)
                 artifactId = artifactTemp.getArtifactId();
-            if (artifactTemp.getVersion() != null)
-                version = artifactTemp.getVersion();
+            if (artifactTemp.getVersion() != null) version = artifactTemp.getVersion();
         }
 
         List<Artifact> resources = readResources(featuresFileResolved);
@@ -152,7 +137,9 @@ public class KarMojo extends MojoSupport {
         // if no classifier is specified and packaging is not kar, display a warning
         // and attach artifact
         if (classifier == null && !this.getProject().getPackaging().equals("kar")) {
-            this.getLog().warn("Your project should use the \"kar\" packaging or configure a \"classifier\" for kar attachment");
+            this.getLog()
+                    .warn(
+                            "Your project should use the \"kar\" packaging or configure a \"classifier\" for kar attachment");
             projectHelper.attachArtifact(getProject(), "kar", null, archive);
             return;
         }
@@ -226,7 +213,13 @@ public class KarMojo extends MojoSupport {
      * @param bundles
      */
     @SuppressWarnings("deprecation")
-	private File createArchive(List<Artifact> bundles, File featuresFile, String groupId, String artifactId, String version) throws MojoExecutionException {
+    private File createArchive(
+            List<Artifact> bundles,
+            File featuresFile,
+            String groupId,
+            String artifactId,
+            String version)
+            throws MojoExecutionException {
         ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
         File archiveFile = getArchiveFile(outputDirectory, finalName, classifier);
 
@@ -237,31 +230,44 @@ public class KarMojo extends MojoSupport {
         archiver.setOutputFile(archiveFile);
 
         try {
-            //TODO should .kar be a bundle?
-//            archive.addManifestEntry(Constants.BUNDLE_NAME, project.getName());
-//            archive.addManifestEntry(Constants.BUNDLE_VENDOR, project.getOrganization().getName());
-//            ArtifactVersion version = project.getArtifact().getSelectedVersion();
-//            String versionString = "" + version.getMajorVersion() + "." + version.getMinorVersion() + "." + version.getIncrementalVersion();
-//            if (version.getQualifier() != null) {
-//                versionString += "." + version.getQualifier();
-//            }
-//            archive.addManifestEntry(Constants.BUNDLE_VERSION, versionString);
-//            archive.addManifestEntry(Constants.BUNDLE_MANIFESTVERSION, "2");
-//            archive.addManifestEntry(Constants.BUNDLE_DESCRIPTION, project.getDescription());
-//            // NB, no constant for this one
-//            archive.addManifestEntry("Bundle-License", ((License) project.getLicenses().get(0)).getUrl());
-//            archive.addManifestEntry(Constants.BUNDLE_DOCURL, project.getUrl());
-//            //TODO this might need some help
-//            archive.addManifestEntry(Constants.BUNDLE_SYMBOLICNAME, project.getArtifactId());
+            // TODO should .kar be a bundle?
+            //            archive.addManifestEntry(Constants.BUNDLE_NAME, project.getName());
+            //            archive.addManifestEntry(Constants.BUNDLE_VENDOR,
+            // project.getOrganization().getName());
+            //            ArtifactVersion version = project.getArtifact().getSelectedVersion();
+            //            String versionString = "" + version.getMajorVersion() + "." +
+            // version.getMinorVersion() + "." + version.getIncrementalVersion();
+            //            if (version.getQualifier() != null) {
+            //                versionString += "." + version.getQualifier();
+            //            }
+            //            archive.addManifestEntry(Constants.BUNDLE_VERSION, versionString);
+            //            archive.addManifestEntry(Constants.BUNDLE_MANIFESTVERSION, "2");
+            //            archive.addManifestEntry(Constants.BUNDLE_DESCRIPTION,
+            // project.getDescription());
+            //            // NB, no constant for this one
+            //            archive.addManifestEntry("Bundle-License", ((License)
+            // project.getLicenses().get(0)).getUrl());
+            //            archive.addManifestEntry(Constants.BUNDLE_DOCURL, project.getUrl());
+            //            //TODO this might need some help
+            //            archive.addManifestEntry(Constants.BUNDLE_SYMBOLICNAME,
+            // project.getArtifactId());
 
-            //include the feature.xml
-			Artifact featureArtifact = factory.createArtifactWithClassifier(groupId, artifactId, version, "xml", KarArtifactInstaller.FEATURE_CLASSIFIER);
+            // include the feature.xml
+            Artifact featureArtifact =
+                    factory.createArtifactWithClassifier(
+                            groupId,
+                            artifactId,
+                            version,
+                            "xml",
+                            KarArtifactInstaller.FEATURE_CLASSIFIER);
             jarArchiver.addFile(featuresFile, repositoryPath + layout.pathOf(featureArtifact));
 
             if (featureArtifact.isSnapshot()) {
                 // the artifact is a snapshot, create the maven-metadata-local.xml
-                getLog().debug("Feature artifact is a SNAPSHOT, handling the maven-metadata-local.xml");
-                File metadataTarget = new File(featuresFile.getParentFile(), "maven-metadata-local.xml");
+                getLog().debug(
+                                "Feature artifact is a SNAPSHOT, handling the maven-metadata-local.xml");
+                File metadataTarget =
+                        new File(featuresFile.getParentFile(), "maven-metadata-local.xml");
                 getLog().debug("Looking for " + metadataTarget.getAbsolutePath());
                 if (!metadataTarget.exists()) {
                     // the maven-metadata-local.xml doesn't exist, create it
@@ -292,32 +298,58 @@ public class KarMojo extends MojoSupport {
                         metadataWriter.write(writer, metadata);
                     } catch (Exception e) {
                         getLog().warn("Could not create maven-metadata-local.xml", e);
-                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                        getLog().warn(
+                                        "It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
                     }
                 }
-                getLog().debug("Adding file " + metadataTarget.getAbsolutePath() + " in the jar path " + repositoryPath + layout.pathOf(featureArtifact).substring(0, layout.pathOf(featureArtifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
-                jarArchiver.addFile(metadataTarget, repositoryPath + layout.pathOf(featureArtifact).substring(0, layout.pathOf(featureArtifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
+                getLog().debug(
+                                "Adding file "
+                                        + metadataTarget.getAbsolutePath()
+                                        + " in the jar path "
+                                        + repositoryPath
+                                        + layout.pathOf(featureArtifact)
+                                                .substring(
+                                                        0,
+                                                        layout.pathOf(featureArtifact)
+                                                                .lastIndexOf('/'))
+                                        + "/maven-metadata-local.xml");
+                jarArchiver.addFile(
+                        metadataTarget,
+                        repositoryPath
+                                + layout.pathOf(featureArtifact)
+                                        .substring(
+                                                0, layout.pathOf(featureArtifact).lastIndexOf('/'))
+                                + "/maven-metadata-local.xml");
             }
 
             for (Artifact artifact : bundles) {
                 artifactResolver.resolve(artifact, remoteRepos, localRepo);
 
-                //TODO this may not be reasonable, but... resolved snapshot artifacts have timestamped versions
-                //which do not work in startup.properties.
+                // TODO this may not be reasonable, but... resolved snapshot artifacts have
+                // timestamped
+                // versions
+                // which do not work in startup.properties.
                 artifact.setVersion(artifact.getBaseVersion());
 
                 if (artifact.isSnapshot()) {
                     // the artifact is a snapshot, create the maven-metadata-local.xml
-                    final File metadataTmp = File.createTempFile("maven-metadata-local.xml", ".tmp");
+                    final File metadataTmp =
+                            File.createTempFile("maven-metadata-local.xml", ".tmp");
 
                     try {
                         MavenUtil.generateMavenMetadata(artifact, metadataTmp);
                     } catch (Exception e) {
                         getLog().warn("Could not create maven-metadata-local.xml", e);
-                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                        getLog().warn(
+                                        "It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
                     }
 
-                    jarArchiver.addFile(metadataTmp, repositoryPath + layout.pathOf(artifact).substring(0, layout.pathOf(artifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
+                    jarArchiver.addFile(
+                            metadataTmp,
+                            repositoryPath
+                                    + layout.pathOf(artifact)
+                                            .substring(0, layout.pathOf(artifact).lastIndexOf('/'))
+                                    + "/maven-metadata-local.xml");
 
                     try {
                         metadataTmp.delete();
@@ -347,10 +379,9 @@ public class KarMojo extends MojoSupport {
     }
 
     /**
-     * Return a path for an artifact:
-     * - if the input is already a path (doesn't contain ':'), the same path is returned.
-     * - if the input is a Maven URL, the input is converted to a default repository location path, type and classifier
-     *   are optional.
+     * Return a path for an artifact: - if the input is already a path (doesn't contain ':'), the
+     * same path is returned. - if the input is a Maven URL, the input is converted to a default
+     * repository location path, type and classifier are optional.
      *
      * @param name artifact data
      * @return path as supplied or a default Maven repository path
@@ -391,7 +422,8 @@ public class KarMojo extends MojoSupport {
         return part != null && !part.isEmpty();
     }
 
-    protected static File getArchiveFile(final File basedir, final String finalName, String classifier) {
+    protected static File getArchiveFile(
+            final File basedir, final String finalName, String classifier) {
         if (classifier == null) {
             classifier = "";
         } else if (classifier.trim().length() > 0 && !classifier.startsWith("-")) {
@@ -400,6 +432,4 @@ public class KarMojo extends MojoSupport {
 
         return new File(basedir, finalName + classifier + ".kar");
     }
-
-
 }

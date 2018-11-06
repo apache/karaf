@@ -13,21 +13,18 @@
  */
 package org.apache.karaf.itests;
 
+import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
-import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -36,9 +33,9 @@ public class InstanceTest extends KarafTestSupport {
     @Test
     public void createDestroyCommand() throws Exception {
         System.out.println(executeCommand("instance:create itest1"));
-        assertContains("itest1" ,executeCommand("instance:list"));
+        assertContains("itest1", executeCommand("instance:list"));
         System.out.println(executeCommand("instance:destroy itest1"));
-        assertContainsNot("itest1" ,executeCommand("instance:list"));
+        assertContainsNot("itest1", executeCommand("instance:list"));
     }
 
     @Test
@@ -46,10 +43,26 @@ public class InstanceTest extends KarafTestSupport {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
         int oldNum = getInstancesNum(mbeanServer, name);
-        mbeanServer.invoke(name, "createInstance", new Object[]{"itest2", 0, 0, 0, null, null, null, null},
-                new String[]{"java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
+        mbeanServer.invoke(
+                name,
+                "createInstance",
+                new Object[] {"itest2", 0, 0, 0, null, null, null, null},
+                new String[] {
+                    "java.lang.String",
+                    "int",
+                    "int",
+                    "int",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String"
+                });
         Assert.assertEquals(oldNum + 1, getInstancesNum(mbeanServer, name));
-        mbeanServer.invoke(name, "destroyInstance", new Object[]{"itest2"}, new String[]{"java.lang.String"});
+        mbeanServer.invoke(
+                name,
+                "destroyInstance",
+                new Object[] {"itest2"},
+                new String[] {"java.lang.String"});
         Assert.assertEquals(oldNum, getInstancesNum(mbeanServer, name));
     }
 
@@ -85,7 +98,8 @@ public class InstanceTest extends KarafTestSupport {
         assertContains("Stopped", output);
     }
 
-    private int getInstancesNum(MBeanServerConnection connection, ObjectName name) throws Exception {
+    private int getInstancesNum(MBeanServerConnection connection, ObjectName name)
+            throws Exception {
         TabularData instances = (TabularData) connection.getAttribute(name, "Instances");
         return instances.size();
     }
@@ -101,8 +115,19 @@ public class InstanceTest extends KarafTestSupport {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
         int oldNum = getInstancesNum(mbeanServer, name);
-        mbeanServer.invoke(name, "cloneInstance", new Object[]{"root", "itest4", 0, 0, 0, null, null},
-                new String[]{"java.lang.String", "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String"});
+        mbeanServer.invoke(
+                name,
+                "cloneInstance",
+                new Object[] {"root", "itest4", 0, 0, 0, null, null},
+                new String[] {
+                    "java.lang.String",
+                    "java.lang.String",
+                    "int",
+                    "int",
+                    "int",
+                    "java.lang.String",
+                    "java.lang.String"
+                });
         Assert.assertEquals(oldNum + 1, getInstancesNum(mbeanServer, name));
     }
 
@@ -117,9 +142,24 @@ public class InstanceTest extends KarafTestSupport {
     public void renameViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
-        mbeanServer.invoke(name, "createInstance", new Object[]{"itest5", 0, 0, 0, null, null, null, null},
-                new String[]{"java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
-        mbeanServer.invoke(name, "renameInstance", new Object[]{"itest5", "new_itest5"}, new String[]{"java.lang.String", "java.lang.String"});
+        mbeanServer.invoke(
+                name,
+                "createInstance",
+                new Object[] {"itest5", 0, 0, 0, null, null, null, null},
+                new String[] {
+                    "java.lang.String",
+                    "int",
+                    "int",
+                    "int",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String"
+                });
+        mbeanServer.invoke(
+                name,
+                "renameInstance",
+                new Object[] {"itest5", "new_itest5"},
+                new String[] {"java.lang.String", "java.lang.String"});
     }
-
 }

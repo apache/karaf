@@ -19,19 +19,19 @@ package org.apache.karaf.scheduler;
 import java.io.Serializable;
 import java.util.Map;
 
-/**
- * The context for a {@link Job}.
- */
+/** The context for a {@link Job}. */
 public interface JobContext {
 
     /**
      * Get the name of the scheduled job.
+     *
      * @return The name of the job.
      */
     String getName();
 
     /**
      * Get the configuration provided when the job was scheduled.
+     *
      * @return A non-null map of values.
      */
     Map<String, Serializable> getConfiguration();

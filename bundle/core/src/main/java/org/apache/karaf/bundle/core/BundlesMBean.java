@@ -19,30 +19,35 @@ package org.apache.karaf.bundle.core;
 import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
 
-/**
- * Bundles MBean.
- */
+/** Bundles MBean. */
 public interface BundlesMBean {
 
     TabularData getBundles() throws MBeanException;
 
     int getStartLevel(String bundleId) throws MBeanException;
+
     void setStartLevel(String bundleId, int bundleStartLevel) throws MBeanException;
 
     void refresh() throws MBeanException;
+
     void refresh(String bundleId) throws MBeanException;
 
     void update(String bundleId) throws MBeanException;
+
     void update(String bundleId, boolean refresh) throws MBeanException;
+
     void update(String bundleId, String location) throws MBeanException;
+
     void update(String bundleId, String location, boolean refresh) throws MBeanException;
 
     void resolve() throws MBeanException;
+
     void resolve(String bundleId) throws MBeanException;
 
     void restart(String bundleId) throws MBeanException;
 
     long install(String url) throws MBeanException;
+
     long install(String url, boolean start) throws MBeanException;
 
     void start(String bundleId) throws MBeanException;
@@ -56,5 +61,4 @@ public interface BundlesMBean {
     String getDiag(long bundleId);
 
     String getStatus(String bundleId) throws MBeanException;
-
 }

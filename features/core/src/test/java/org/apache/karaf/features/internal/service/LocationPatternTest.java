@@ -18,13 +18,12 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.net.MalformedURLException;
-
-import org.apache.karaf.features.LocationPattern;
-import org.junit.Test;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.net.MalformedURLException;
+import org.apache.karaf.features.LocationPattern;
+import org.junit.Test;
 
 public class LocationPatternTest {
 
@@ -33,7 +32,9 @@ public class LocationPatternTest {
         assertTrue(new LocationPattern("file:1").matches("file:1"));
         assertFalse(new LocationPattern("file:1").matches("file:2"));
         assertFalse(new LocationPattern("file:*").matches(null));
-        assertTrue(new LocationPattern("http://*").matches("http://a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q.txt"));
+        assertTrue(
+                new LocationPattern("http://*")
+                        .matches("http://a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q.txt"));
         assertTrue(new LocationPattern("file:/tmp/x*.txt").matches("file:/tmp/x1.txt"));
         assertTrue(new LocationPattern("file:/tmp/x$2*.txt").matches("file:/tmp/x$24.txt"));
         assertTrue(new LocationPattern("file:/tmp/x^2*.txt").matches("file:/tmp/x^24.txt"));
@@ -42,20 +43,21 @@ public class LocationPatternTest {
     @Test
     public void correctMvnLocationPatterns() {
         boolean exception = false;
-        for (String p : new String[] {
-                "mvn:groupId/artifactId",
-                "mvn:groupId/artifactId/1",
-                "mvn:groupId/artifactId/1/t",
-                "mvn:groupId/artifactId/1/t/c",
-                "mvn:groupId/*",
-                "mvn:*/*",
-                "mvn:*/*/[0,*)/*/*",
-                "mvn:g/a/[1,2)",
-                "mvn:g/a/[1,*)",
-                "mvn:groupId/artifactId/[1.0.0,1.0.0.0)",
-                "mvn:groupId/artifactId/[1.0,1.0.0.0)",
-                "mvn:groupId/artifactId/[1,1.0.0.0)",
-        }) {
+        for (String p :
+                new String[] {
+                    "mvn:groupId/artifactId",
+                    "mvn:groupId/artifactId/1",
+                    "mvn:groupId/artifactId/1/t",
+                    "mvn:groupId/artifactId/1/t/c",
+                    "mvn:groupId/*",
+                    "mvn:*/*",
+                    "mvn:*/*/[0,*)/*/*",
+                    "mvn:g/a/[1,2)",
+                    "mvn:g/a/[1,*)",
+                    "mvn:groupId/artifactId/[1.0.0,1.0.0.0)",
+                    "mvn:groupId/artifactId/[1.0,1.0.0.0)",
+                    "mvn:groupId/artifactId/[1,1.0.0.0)",
+                }) {
             try {
                 new LocationPattern(p);
             } catch (IllegalArgumentException ignored) {
@@ -68,29 +70,30 @@ public class LocationPatternTest {
     @Test
     public void incorrectMvnLocationPatterns() {
         boolean exception = true;
-        for (String p : new String[] {
-                "mvn:onlyGroupId",
-//                "mvn:groupId/artifactId/wrongVersion",
-                "mvn:groupId/artifactId/[1.2,2",
-                "mvn:groupId/artifactId/[1.2,",
-                "mvn:groupId/artifactId/[1.2",
-                "mvn:groupId/artifactId/[",
-//                "mvn:groupId/artifactId/*",
-                "mvn:groupId/artifactId/[wrongRange,wrongRange]",
-                "mvn:groupId/artifactId/(wrongRange,wrongRange]",
-                "mvn:groupId/artifactId/(wrongRange,3]",
-                "mvn:groupId/artifactId/[1,wrongRange)",
-                "mvn:groupId/artifactId/[1,1.2.3.4.5)",
-                "mvn:groupId/artifactId/[1,1.2.a)",
-                "mvn:groupId/artifactId/[1,1.a)",
-                "mvn:groupId/artifactId/[1,1)",
-                "mvn:groupId/artifactId/[1.0,1)",
-                "mvn:groupId/artifactId/[1.0.0,1)",
-                "mvn:groupId/artifactId/[1.0.0.0,1)",
-                "mvn:groupId/artifactId/[1.0.0.0,1.0)",
-                "mvn:groupId/artifactId/[1.0.0.0,1.0.0)",
-                "mvn:groupId/artifactId/[1.0.0.0,1.0.0.0)"
-        }) {
+        for (String p :
+                new String[] {
+                    "mvn:onlyGroupId",
+                    //                "mvn:groupId/artifactId/wrongVersion",
+                    "mvn:groupId/artifactId/[1.2,2",
+                    "mvn:groupId/artifactId/[1.2,",
+                    "mvn:groupId/artifactId/[1.2",
+                    "mvn:groupId/artifactId/[",
+                    //                "mvn:groupId/artifactId/*",
+                    "mvn:groupId/artifactId/[wrongRange,wrongRange]",
+                    "mvn:groupId/artifactId/(wrongRange,wrongRange]",
+                    "mvn:groupId/artifactId/(wrongRange,3]",
+                    "mvn:groupId/artifactId/[1,wrongRange)",
+                    "mvn:groupId/artifactId/[1,1.2.3.4.5)",
+                    "mvn:groupId/artifactId/[1,1.2.a)",
+                    "mvn:groupId/artifactId/[1,1.a)",
+                    "mvn:groupId/artifactId/[1,1)",
+                    "mvn:groupId/artifactId/[1.0,1)",
+                    "mvn:groupId/artifactId/[1.0.0,1)",
+                    "mvn:groupId/artifactId/[1.0.0.0,1)",
+                    "mvn:groupId/artifactId/[1.0.0.0,1.0)",
+                    "mvn:groupId/artifactId/[1.0.0.0,1.0.0)",
+                    "mvn:groupId/artifactId/[1.0.0.0,1.0.0.0)"
+                }) {
             try {
                 new LocationPattern(p);
                 exception &= false;
@@ -107,7 +110,8 @@ public class LocationPatternTest {
         assertTrue(new LocationPattern("mvn:g/a/1").matches("mvn:g/a/1"));
         assertTrue(new LocationPattern("mvn:g/a").matches("mvn:g/a/1"));
         assertTrue(new LocationPattern("mvn:g/a").matches("mvn:g/a/1/jar"));
-        assertTrue("Special case - when there's no version, we don't match to \"jar\" type, but to all types",
+        assertTrue(
+                "Special case - when there's no version, we don't match to \"jar\" type, but to all types",
                 new LocationPattern("mvn:g/a").matches("mvn:g/a/1/j"));
         assertTrue(new LocationPattern("mvn:g/a").matches("mvn:g/a/1/t/c"));
         assertTrue(new LocationPattern("mvn:g/a/1").matches("mvn:g/a/1/jar"));
@@ -159,5 +163,4 @@ public class LocationPatternTest {
     public void matchingMavenUrisWithVersionRangesInUri() throws MalformedURLException {
         assertFalse(new LocationPattern("mvn:g/a/[1,1]").matches("mvn:g/a/[1,1]"));
     }
-
 }

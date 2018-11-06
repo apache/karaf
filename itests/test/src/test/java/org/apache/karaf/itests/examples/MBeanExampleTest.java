@@ -13,6 +13,10 @@
  */
 package org.apache.karaf.itests.examples;
 
+import java.lang.management.ManagementFactory;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import org.apache.karaf.itests.KarafTestSupport;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,17 +25,15 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 
-import javax.management.MBeanInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class MBeanExampleTest extends KarafTestSupport {
 
     private void setup() throws Exception {
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-mbean-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-mbean-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
         installAndAssertFeature("karaf-mbean-example-provider");
     }
 
@@ -62,5 +64,4 @@ public class MBeanExampleTest extends KarafTestSupport {
         installAndAssertFeature("karaf-mbean-example-scr");
         checkMBean();
     }
-
 }

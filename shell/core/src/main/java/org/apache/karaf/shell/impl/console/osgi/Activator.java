@@ -20,7 +20,6 @@ package org.apache.karaf.shell.impl.console.osgi;
 
 import java.io.Closeable;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 import org.apache.karaf.shell.api.console.SessionFactory;
@@ -68,30 +67,40 @@ public class Activator implements BundleActivator {
 
         sessionFactory = new SecuredSessionFactoryImpl(context, threadIO);
         sessionFactory.getCommandProcessor().addConverter(new Converters(context));
-        sessionFactory.getCommandProcessor().addConstant(".context", context.getBundle(0).getBundleContext());
+        sessionFactory
+                .getCommandProcessor()
+                .addConstant(".context", context.getBundle(0).getBundleContext());
 
         final CopyOnWriteArraySet<CommandLoggingFilter> listeners = new CopyOnWriteArraySet<>();
-        filterTracker = new ServiceTracker<>(
-                context, CommandLoggingFilter.class, new ServiceTrackerCustomizer<CommandLoggingFilter, CommandLoggingFilter>() {
-            @Override
-            public CommandLoggingFilter addingService(ServiceReference<CommandLoggingFilter> reference) {
-                CommandLoggingFilter service = context.getService(reference);
-                listeners.add(service);
-                return service;
-            }
+        filterTracker =
+                new ServiceTracker<>(
+                        context,
+                        CommandLoggingFilter.class,
+                        new ServiceTrackerCustomizer<CommandLoggingFilter, CommandLoggingFilter>() {
+                            @Override
+                            public CommandLoggingFilter addingService(
+                                    ServiceReference<CommandLoggingFilter> reference) {
+                                CommandLoggingFilter service = context.getService(reference);
+                                listeners.add(service);
+                                return service;
+                            }
 
-            @Override
-            public void modifiedService(ServiceReference<CommandLoggingFilter> reference, CommandLoggingFilter service) {
-            }
+                            @Override
+                            public void modifiedService(
+                                    ServiceReference<CommandLoggingFilter> reference,
+                                    CommandLoggingFilter service) {}
 
-            @Override
-            public void removedService(ServiceReference<CommandLoggingFilter> reference, CommandLoggingFilter service) {
-                listeners.remove(service);
-                context.ungetService(reference);
-            }
-        });
+                            @Override
+                            public void removedService(
+                                    ServiceReference<CommandLoggingFilter> reference,
+                                    CommandLoggingFilter service) {
+                                listeners.remove(service);
+                                context.ungetService(reference);
+                            }
+                        });
         filterTracker.open();
-        LoggingCommandSessionListener loggingCommandSessionListener = new LoggingCommandSessionListener();
+        LoggingCommandSessionListener loggingCommandSessionListener =
+                new LoggingCommandSessionListener();
         loggingCommandSessionListener.setFilters(listeners);
         sessionFactory.getCommandProcessor().addListener(loggingCommandSessionListener);
 
@@ -105,7 +114,8 @@ public class Activator implements BundleActivator {
 
         sessionFactory.register(new ManagerImpl(sessionFactory, sessionFactory));
 
-        sessionFactoryRegistration = context.registerService(SessionFactory.class, sessionFactory, null);
+        sessionFactoryRegistration =
+                context.registerService(SessionFactory.class, sessionFactory, null);
 
         actionExtender = new CommandExtender(sessionFactory);
         actionExtender.start(context);
@@ -144,5 +154,4 @@ public class Activator implements BundleActivator {
             eventAdminListener.close();
         }
     }
-
 }

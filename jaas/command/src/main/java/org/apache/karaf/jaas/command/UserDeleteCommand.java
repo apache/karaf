@@ -24,7 +24,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class UserDeleteCommand extends JaasCommandSupport {
 
-    @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "username",
+            description = "User Name",
+            required = true,
+            multiValued = false)
     private String username;
 
     @Override
@@ -43,9 +48,6 @@ public class UserDeleteCommand extends JaasCommandSupport {
 
     @Override
     public String toString() {
-        return "UserDeleteCommand{" +
-                "username='" + username + '\'' +
-                '}';
+        return "UserDeleteCommand{" + "username='" + username + '\'' + '}';
     }
-
 }

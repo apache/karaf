@@ -18,22 +18,18 @@ package org.apache.karaf.jaas.boot;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
- * An OSGi proxy login module that should be used instead of a plain reference to
- * a given login module.  Two properties must be set, the name of the login module
- * class and the bundle to be used to load it.
- * This class must be available from all modules, so it has to be either in a fragment
- * bundle attached to the system bundle or be made available through the boot delegation
- * class path.
+ * An OSGi proxy login module that should be used instead of a plain reference to a given login
+ * module. Two properties must be set, the name of the login module class and the bundle to be used
+ * to load it. This class must be available from all modules, so it has to be either in a fragment
+ * bundle attached to the system bundle or be made available through the boot delegation class path.
  */
 public class ProxyLoginModule implements LoginModule {
 
@@ -41,7 +37,7 @@ public class ProxyLoginModule implements LoginModule {
     public static final String PROPERTY_BUNDLE = "org.apache.karaf.jaas.bundle";
 
     private static BundleContext bundleContext = null;
-    
+
     private LoginModule target = null;
 
     public static void init(BundleContext context) {
@@ -51,18 +47,29 @@ public class ProxyLoginModule implements LoginModule {
     /* (non-Javadoc)
      * @see javax.security.auth.spi.LoginModule#initialize(javax.security.auth.Subject, javax.security.auth.callback.CallbackHandler, java.util.Map, java.util.Map)
      */
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         if (bundleContext == null) {
-            throw new IllegalStateException("ProxyLoginModule not initialized. Init must be called prior any invocation.");
+            throw new IllegalStateException(
+                    "ProxyLoginModule not initialized. Init must be called prior any invocation.");
         }
-        Map<String,?> newOptions = new HashMap<String,Object>(options);
+        Map<String, ?> newOptions = new HashMap<String, Object>(options);
         String module = (String) newOptions.remove(PROPERTY_MODULE);
         if (module == null) {
-            throw new IllegalStateException("Option " + PROPERTY_MODULE + " must be set to the name of the factory service");
+            throw new IllegalStateException(
+                    "Option "
+                            + PROPERTY_MODULE
+                            + " must be set to the name of the factory service");
         }
         String bundleId = (String) newOptions.remove(PROPERTY_BUNDLE);
         if (bundleId == null) {
-            throw new IllegalStateException("Option " + PROPERTY_BUNDLE + " must be set to the name of the factory service");
+            throw new IllegalStateException(
+                    "Option "
+                            + PROPERTY_BUNDLE
+                            + " must be set to the name of the factory service");
         }
         Bundle bundle = bundleContext.getBundle(Long.parseLong(bundleId));
         if (bundle == null) {
@@ -71,7 +78,8 @@ public class ProxyLoginModule implements LoginModule {
         try {
             target = (LoginModule) bundle.loadClass(module).newInstance();
         } catch (Exception e) {
-            throw new IllegalStateException("Can not load or create login module " + module + " for bundle " + bundleId, e);
+            throw new IllegalStateException(
+                    "Can not load or create login module " + module + " for bundle " + bundleId, e);
         }
         target.initialize(subject, callbackHandler, sharedState, newOptions);
     }
@@ -103,5 +111,4 @@ public class ProxyLoginModule implements LoginModule {
     public boolean logout() throws LoginException {
         return target.logout();
     }
-
 }

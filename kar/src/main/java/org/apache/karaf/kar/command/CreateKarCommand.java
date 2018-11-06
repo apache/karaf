@@ -17,7 +17,6 @@
 package org.apache.karaf.kar.command;
 
 import java.util.List;
-
 import org.apache.karaf.features.command.completers.InstalledRepoNameCompleter;
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.shell.api.action.Action;
@@ -27,24 +26,37 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "kar", name = "create", description = "Create a kar file for a list of feature repos")
+@Command(
+        scope = "kar",
+        name = "create",
+        description = "Create a kar file for a list of feature repos")
 @Service
 public class CreateKarCommand implements Action {
-    
-    @Argument(index = 0, name = "repoName", description = "Repository name. The kar will contain all features of the named repository by default", required = true, multiValued = false)
+
+    @Argument(
+            index = 0,
+            name = "repoName",
+            description =
+                    "Repository name. The kar will contain all features of the named repository by default",
+            required = true,
+            multiValued = false)
     @Completion(InstalledRepoNameCompleter.class)
     private String repoName;
-    
-    @Argument(index = 1, name = "features", description = "Names of the features to include. If set then only these features will be added", required = false, multiValued = true)
+
+    @Argument(
+            index = 1,
+            name = "features",
+            description =
+                    "Names of the features to include. If set then only these features will be added",
+            required = false,
+            multiValued = true)
     private List<String> features;
 
-    @Reference
-    private KarService karService;
+    @Reference private KarService karService;
 
     @Override
     public Object execute() throws Exception {
         karService.create(repoName, features, System.out);
         return null;
     }
-    
 }

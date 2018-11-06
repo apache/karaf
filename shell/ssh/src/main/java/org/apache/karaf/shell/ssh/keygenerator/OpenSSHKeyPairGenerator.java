@@ -21,7 +21,6 @@ package org.apache.karaf.shell.ssh.keygenerator;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-
 import org.apache.sshd.common.cipher.ECCurves;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.util.security.SecurityUtils;
@@ -32,7 +31,7 @@ public class OpenSSHKeyPairGenerator {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private int keySize;
     private String algorithm;
-    
+
     public OpenSSHKeyPairGenerator(String algorithm, int keySize) {
         this.algorithm = algorithm;
         this.keySize = keySize;

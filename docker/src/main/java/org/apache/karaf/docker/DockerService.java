@@ -32,7 +32,15 @@ public interface DockerService {
 
     void create(String name, String url, ContainerConfig config) throws Exception;
 
-    void provision(String name, String sshPort, String jmxRmiPort, String jmxRmiRegistryPort, String httpPort, boolean copy, String url) throws Exception;
+    void provision(
+            String name,
+            String sshPort,
+            String jmxRmiPort,
+            String jmxRmiRegistryPort,
+            String httpPort,
+            boolean copy,
+            String url)
+            throws Exception;
 
     void rm(String name, boolean removeVolumes, boolean force, String url) throws Exception;
 
@@ -50,7 +58,14 @@ public interface DockerService {
 
     void rename(String name, String newName, String url) throws Exception;
 
-    String logs(String name, boolean stdout, boolean stderr, boolean timestamps, boolean details, String url) throws Exception;
+    String logs(
+            String name,
+            boolean stdout,
+            boolean stderr,
+            boolean timestamps,
+            boolean details,
+            String url)
+            throws Exception;
 
     Top top(String name, String url) throws Exception;
 
@@ -69,5 +84,4 @@ public interface DockerService {
     void tag(String image, String repo, String tag, String url) throws Exception;
 
     void rmi(String image, boolean force, boolean noprune, String url) throws Exception;
-
 }

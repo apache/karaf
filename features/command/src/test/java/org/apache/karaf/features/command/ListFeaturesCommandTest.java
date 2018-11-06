@@ -16,18 +16,17 @@
  */
 package org.apache.karaf.features.command;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.easymock.EasyMock;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 public class ListFeaturesCommandTest {
 
@@ -38,8 +37,8 @@ public class ListFeaturesCommandTest {
         Repository repo = EasyMock.createMock(Repository.class);
         Feature feature = EasyMock.createMock(Feature.class);
 
-        EasyMock.expect(service.listRepositories()).andReturn(new Repository[] { repo });
-        EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] { feature });
+        EasyMock.expect(service.listRepositories()).andReturn(new Repository[] {repo});
+        EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] {feature});
         EasyMock.expect(feature.isHidden()).andReturn(true);
         EasyMock.expect(feature.isBlacklisted()).andReturn(false);
 
@@ -67,13 +66,14 @@ public class ListFeaturesCommandTest {
         Repository repo = EasyMock.createMock(Repository.class);
         Feature feature = EasyMock.createMock(Feature.class);
 
-        EasyMock.expect(service.listRepositories()).andReturn(new Repository[] { repo });
-        EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] { feature });
+        EasyMock.expect(service.listRepositories()).andReturn(new Repository[] {repo});
+        EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] {feature});
         EasyMock.expect(feature.isHidden()).andReturn(true).anyTimes();
         EasyMock.expect(feature.isBlacklisted()).andReturn(false).anyTimes();
         EasyMock.expect(feature.getName()).andReturn("feature");
         EasyMock.expect(feature.getId()).andReturn("feature/1.0.0");
-        EasyMock.expect(service.getState(EasyMock.eq("feature/1.0.0"))).andReturn(FeatureState.Started);
+        EasyMock.expect(service.getState(EasyMock.eq("feature/1.0.0")))
+                .andReturn(FeatureState.Started);
         EasyMock.expect(feature.getDescription()).andReturn("description");
         EasyMock.expect(feature.getVersion()).andReturn("1.0.0");
         EasyMock.expect(service.isRequired(feature)).andReturn(true);
@@ -96,5 +96,4 @@ public class ListFeaturesCommandTest {
         assertTrue(baos.toString().contains("feature"));
         EasyMock.verify(service, repo, feature);
     }
-
 }

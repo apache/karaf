@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.FeaturePattern;
 import org.apache.karaf.features.internal.model.Dependency;
@@ -42,24 +41,28 @@ public class FeatureSelector {
         allFeatures = features;
         featuresCache = new HashMap<>();
         for (Feature feature : features) {
-            featuresCache.computeIfAbsent(feature.getName(), fn -> new HashSet<>())
-                .add(feature);
+            featuresCache.computeIfAbsent(feature.getName(), fn -> new HashSet<>()).add(feature);
         }
     }
 
     /**
-     * Assuming <code>idOrPattern</code> may be a pattern (with glob and version range), get all matching features
+     * Assuming <code>idOrPattern</code> may be a pattern (with glob and version range), get all
+     * matching features
+     *
      * @param idOrPattern
      * @param repositories
      * @return
      */
-    public static Collection<String> getMatchingFeatures(String idOrPattern, Collection<Features> repositories) {
+    public static Collection<String> getMatchingFeatures(
+            String idOrPattern, Collection<Features> repositories) {
         List<String> result = new LinkedList<>();
         FeaturePattern pattern = new FeaturePattern(idOrPattern);
         for (Features features : repositories) {
             for (Feature feature : features.getFeature()) {
                 // blacklisting will be applied anyway, so no need to do it here
-                if (/*!feature.isBlacklisted() && */pattern.matches(feature.getName(), feature.getVersion())) {
+                if (
+                /*!feature.isBlacklisted() && */ pattern.matches(
+                        feature.getName(), feature.getVersion())) {
                     result.add(feature.getId());
                 }
             }
@@ -69,15 +72,19 @@ public class FeatureSelector {
 
     /**
      * Get all matching features
+     *
      * @param idOrPattern
      * @param features
      * @return
      */
-    public static Collection<String> getMatchingFeatures(FeaturePattern idOrPattern, Collection<Feature> features) {
+    public static Collection<String> getMatchingFeatures(
+            FeaturePattern idOrPattern, Collection<Feature> features) {
         List<String> result = new LinkedList<>();
         for (Feature feature : features) {
             // blacklisting will be applied anyway, so no need to do it here
-            if (/*!feature.isBlacklisted() && */idOrPattern.matches(feature.getName(), feature.getVersion())) {
+            if (
+            /*!feature.isBlacklisted() && */ idOrPattern.matches(
+                    feature.getName(), feature.getVersion())) {
                 result.add(feature.getId());
             }
         }
@@ -88,7 +95,6 @@ public class FeatureSelector {
      * Features matching the given feature selectors including dependent features
      *
      * @param features feature selector name, name/version, name/version-range
-     *
      * @return matching features
      */
     public Set<Feature> getMatching(List<String> features) {
@@ -127,8 +133,13 @@ public class FeatureSelector {
         if (versionToFeatures == null) {
             return Collections.emptySet();
         }
-        return versionToFeatures.stream()
-            .filter(f -> f.getName().equals(req.getName()) && req.getVersionRange().contains(VersionTable.getVersion(f.getVersion())))
-            .collect(Collectors.toSet());  
+        return versionToFeatures
+                .stream()
+                .filter(
+                        f ->
+                                f.getName().equals(req.getName())
+                                        && req.getVersionRange()
+                                                .contains(VersionTable.getVersion(f.getVersion())))
+                .collect(Collectors.toSet());
     }
 }

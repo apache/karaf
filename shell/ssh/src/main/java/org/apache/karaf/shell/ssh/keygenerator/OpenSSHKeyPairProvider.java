@@ -27,7 +27,6 @@ import java.io.ObjectInputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.spec.InvalidKeySpecException;
-
 import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
 import org.slf4j.Logger;
@@ -60,14 +59,16 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
             cachedKey = kp;
             return singleton(kp);
         } catch (Exception e) {
-            LOGGER.warn("Failed to parse keypair in {}. Attempting to parse it as a legacy 'simple' key", keyFile);
+            LOGGER.warn(
+                    "Failed to parse keypair in {}. Attempting to parse it as a legacy 'simple' key",
+                    keyFile);
             try {
                 KeyPair kp = convertLegacyKey(keyFile);
                 LOGGER.info("Successfully loaded legacy simple key. Converted to PEM format");
                 cachedKey = kp;
                 return singleton(kp);
             } catch (Exception nested) {
-                LOGGER.warn(keyFile+" is not a 'simple' key either",nested);
+                LOGGER.warn(keyFile + " is not a 'simple' key either", nested);
             }
             throw new RuntimeException(e);
         }
@@ -79,13 +80,11 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
         return kp;
     }
 
-
     private KeyPair convertLegacyKey(File keyFile) throws GeneralSecurityException, IOException {
         KeyPair keypair = null;
         try (ObjectInputStream r = new ObjectInputStream(new FileInputStream(keyFile))) {
-            keypair = (KeyPair)r.readObject();
-        }
-        catch (ClassNotFoundException e) {
+            keypair = (KeyPair) r.readObject();
+        } catch (ClassNotFoundException e) {
             throw new InvalidKeySpecException("Missing classes: " + e.getMessage(), e);
         }
         new PemWriter(keyFile).writeKeyPair(algorithm, keypair);

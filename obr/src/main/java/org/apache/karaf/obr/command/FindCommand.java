@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.obr.command;
 
+import java.io.PrintStream;
+import java.lang.reflect.Array;
+import java.util.List;
+import java.util.Map;
 import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
@@ -24,30 +28,25 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.io.PrintStream;
-import java.lang.reflect.Array;
-import java.util.List;
-import java.util.Map;
-
 @Command(scope = "obr", name = "find", description = "Find OBR bundles for a given filter.")
 @Service
 public class FindCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "requirements", description = "Requirement", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "requirements",
+            description = "Requirement",
+            required = true,
+            multiValued = true)
     List<String> requirements;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
         Resource[] resources = admin.discoverResources(parseRequirements(admin, requirements));
-        if (resources == null)
-        {
+        if (resources == null) {
             System.err.println("No matching resources.");
-        }
-        else
-        {
-            for (int resIdx = 0; resIdx < resources.length; resIdx++)
-            {
-                if (resIdx > 0)
-                {
+        } else {
+            for (int resIdx = 0; resIdx < resources.length; resIdx++) {
+                if (resIdx > 0) {
                     System.out.println("");
                 }
                 printResource(System.out, resources[resIdx]);
@@ -55,8 +54,7 @@ public class FindCommand extends ObrCommandSupport {
         }
     }
 
-    private void printResource(PrintStream out, Resource resource)
-    {
+    private void printResource(PrintStream out, Resource resource) {
         String name = resource.getPresentationName();
         if (name == null) {
             name = resource.getSymbolicName();
@@ -64,7 +62,7 @@ public class FindCommand extends ObrCommandSupport {
 
         printUnderline(out, name.length());
         out.println(name);
-        printUnderline(out, name    .length());
+        printUnderline(out, name.length());
 
         Map map = resource.getProperties();
         for (Object o : map.entrySet()) {
@@ -80,8 +78,7 @@ public class FindCommand extends ObrCommandSupport {
         }
 
         Requirement[] reqs = resource.getRequirements();
-        if ((reqs != null) && (reqs.length > 0))
-        {
+        if ((reqs != null) && (reqs.length > 0)) {
             boolean hdr = false;
             for (Requirement req : reqs) {
                 if (!req.isOptional()) {
@@ -105,13 +102,11 @@ public class FindCommand extends ObrCommandSupport {
         }
 
         Capability[] caps = resource.getCapabilities();
-        if ((caps != null) && (caps.length > 0))
-        {
+        if ((caps != null) && (caps.length > 0)) {
             out.println("Capabilities:");
             for (Capability cap : caps) {
                 out.println("   " + cap.getName() + ":" + cap.getPropertiesAsMap());
             }
         }
     }
-
 }

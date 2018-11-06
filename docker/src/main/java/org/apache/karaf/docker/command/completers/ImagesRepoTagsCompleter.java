@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.docker.command.completers;
 
+import java.util.List;
 import org.apache.karaf.docker.DockerService;
 import org.apache.karaf.docker.Image;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -25,13 +26,10 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-import java.util.List;
-
 @Service
 public class ImagesRepoTagsCompleter implements Completer {
 
-    @Reference
-    private DockerService dockerService;
+    @Reference private DockerService dockerService;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -55,5 +53,4 @@ public class ImagesRepoTagsCompleter implements Completer {
     public DockerService getDockerService() {
         return this.dockerService;
     }
-
 }

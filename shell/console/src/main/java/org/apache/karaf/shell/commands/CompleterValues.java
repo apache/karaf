@@ -24,15 +24,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Represents a method which can return a List or Array of values used for a
- * {@link org.apache.karaf.shell.console.Completer}
- * which is associated with the index of an
- * {@link Argument}
+ * Represents a method which can return a List or Array of values used for a {@link
+ * org.apache.karaf.shell.console.Completer} which is associated with the index of an {@link
+ * Argument}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Deprecated
-public @interface CompleterValues
-{
+public @interface CompleterValues {
     int index() default 0;
 }

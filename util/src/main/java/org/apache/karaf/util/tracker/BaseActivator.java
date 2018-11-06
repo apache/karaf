@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import org.osgi.framework.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +45,9 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected BundleContext bundleContext;
 
-    protected ExecutorService executor = new ThreadPoolExecutor(0, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(), this);
+    protected ExecutorService executor =
+            new ThreadPoolExecutor(
+                    0, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), this);
     private AtomicBoolean scheduled = new AtomicBoolean();
 
     private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
@@ -83,8 +83,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         doOpen();
         scheduled.set(false);
         if (managedServiceRegistration == null
-                && trackers.values().stream()
-                    .allMatch(t -> t.getService() != null)) {
+                && trackers.values().stream().allMatch(t -> t.getService() != null)) {
             try {
                 doStart();
             } catch (Throwable e) {
@@ -106,7 +105,10 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     }
 
     protected void doOpen() throws Exception {
-        URL data = bundleContext.getBundle().getResource("OSGI-INF/karaf-tracker/" + getClass().getName());
+        URL data =
+                bundleContext
+                        .getBundle()
+                        .getResource("OSGI-INF/karaf-tracker/" + getClass().getName());
         if (data != null) {
             Properties props = new Properties();
             try (InputStream is = data.openStream()) {
@@ -131,8 +133,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         }
     }
 
-    protected void doStart() throws Exception {
-    }
+    protected void doStart() throws Exception {}
 
     protected void doStop() {
         while (true) {
@@ -152,8 +153,8 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     protected void manage(String pid) {
         Hashtable<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_PID, pid);
-        managedServiceRegistration = bundleContext.registerService(
-                "org.osgi.service.cm.ManagedService", this, props);
+        managedServiceRegistration =
+                bundleContext.registerService("org.osgi.service.cm.ManagedService", this, props);
     }
 
     public void updated(Dictionary<String, ?> properties) {
@@ -246,13 +247,14 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         }
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         return Stream.of(stringArray)
-                .map(it -> {
-                    try {
-                        return loader.loadClass(it.trim());
-                    } catch (final ClassNotFoundException e) {
-                        throw new IllegalArgumentException(e);
-                    }
-                })
+                .map(
+                        it -> {
+                            try {
+                                return loader.loadClass(it.trim());
+                            } catch (final ClassNotFoundException e) {
+                                throw new IllegalArgumentException(e);
+                            }
+                        })
                 .toArray(Class[]::new);
     }
 
@@ -272,7 +274,8 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
             return (String[]) val;
         } else if (val instanceof Iterable) {
             return StreamSupport.stream(((Iterable<?>) val).spliterator(), false)
-                    .map(Object::toString).toArray(String[]::new);
+                    .map(Object::toString)
+                    .toArray(String[]::new);
         } else {
             return val.toString().split(",");
         }
@@ -304,7 +307,8 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      */
     protected void trackService(Class<?> clazz) throws InvalidSyntaxException {
         if (!trackers.containsKey(clazz.getName())) {
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, (u, v) -> reconfigure());
+            SingleServiceTracker tracker =
+                    new SingleServiceTracker<>(bundleContext, clazz, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(clazz.getName(), tracker);
         }
@@ -315,14 +319,17 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      *
      * @param clazz The service interface to track.
      * @param filter The filter to use to select the services to track.
-     * @throws InvalidSyntaxException If the tracker syntax is not correct (in the filter especially).
+     * @throws InvalidSyntaxException If the tracker syntax is not correct (in the filter
+     *     especially).
      */
     protected void trackService(Class<?> clazz, String filter) throws InvalidSyntaxException {
         if (!trackers.containsKey(clazz.getName())) {
             if (filter != null && filter.isEmpty()) {
                 filter = null;
             }
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, (u, v) -> reconfigure());
+            SingleServiceTracker tracker =
+                    new SingleServiceTracker<>(
+                            bundleContext, clazz, filter, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(clazz.getName(), tracker);
         }
@@ -330,7 +337,9 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
 
     protected void trackService(String className, String filter) throws InvalidSyntaxException {
         if (!trackers.containsKey(className)) {
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, className, filter, (u, v) -> reconfigure());
+            SingleServiceTracker tracker =
+                    new SingleServiceTracker<>(
+                            bundleContext, className, filter, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(className, tracker);
         }
@@ -452,11 +461,8 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     @Override
     public Thread newThread(Runnable r) {
         Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-        if (t.isDaemon())
-            t.setDaemon(false);
-        if (t.getPriority() != Thread.NORM_PRIORITY)
-            t.setPriority(Thread.NORM_PRIORITY);
+        if (t.isDaemon()) t.setDaemon(false);
+        if (t.getPriority() != Thread.NORM_PRIORITY) t.setPriority(Thread.NORM_PRIORITY);
         return t;
     }
-
 }

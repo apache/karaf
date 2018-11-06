@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.web.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.karaf.web.WebBundle;
 import org.apache.karaf.web.WebContainerService;
 import org.ops4j.pax.web.service.spi.WarManager;
@@ -29,25 +32,19 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-/**
- * Implementation of the WebContainer service.
- */
+/** Implementation of the WebContainer service. */
 public class WebContainerServiceImpl implements WebContainerService, BundleListener {
-    
+
     private BundleContext bundleContext;
     private WebEventHandler webEventHandler;
     private WarManager warManager;
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(WebContainerServiceImpl.class);
-    
+
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
-    
+
     public void setWebEventHandler(WebEventHandler webEventHandler) {
         this.webEventHandler = webEventHandler;
     }
@@ -74,16 +71,19 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
                 // first check if the bundle is a web bundle
                 String contextPath = bundle.getHeaders().get("Web-ContextPath");
                 if (contextPath == null) {
-                    contextPath = bundle.getHeaders().get("Webapp-Context"); // this one used by pax-web but is deprecated
+                    contextPath =
+                            bundle.getHeaders()
+                                    .get("Webapp-Context"); // this one used by pax-web but is
+                    // deprecated
                 }
                 if (contextPath == null) {
                     // the bundle is not a web bundle
                     continue;
                 }
-                
+
                 WebBundle webBundle = new WebBundle();
                 contextPath = contextPath.trim();
-                
+
                 // get the bundle name
                 String name = bundle.getHeaders().get(Constants.BUNDLE_NAME);
                 // if there is no name, then default to symbolic name
@@ -98,21 +98,21 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
                 if (!contextPath.startsWith("/")) {
                     contextPath = "/" + contextPath;
                 }
-                
+
                 webBundle.setBundleId(bundleId);
                 webBundle.setName(name);
                 webBundle.setContextPath(contextPath);
                 webBundle.setLevel(level);
                 webBundle.setState(getStateString(bundle));
                 webBundle.setWebState(state(bundle.getBundleId()));
-                
+
                 webBundles.add(webBundle);
             }
         }
-        
+
         return webBundles;
     }
-    
+
     public void start(List<Long> bundleIds) throws Exception {
         if (bundleIds != null && !bundleIds.isEmpty()) {
             for (long bundleId : bundleIds) {
@@ -157,7 +157,7 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
         if (bundleEvents.containsKey(bundleId)) {
             WebEvent webEvent = bundleEvents.get(bundleId);
 
-            switch(webEvent.getType()) {
+            switch (webEvent.getType()) {
                 case WebEvent.DEPLOYING:
                     topic = "Deploying  ";
                     break;
@@ -190,9 +190,9 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
 
     /**
      * Return a string representation of the bundle state.
-     * 
-     * TODO use an util method provided by bundle core
-     * 
+     *
+     * <p>TODO use an util method provided by bundle core
+     *
      * @param bundle the target bundle.
      * @return the string representation of the state
      */
@@ -213,11 +213,10 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
         }
     }
 
-	@Override
-	public String getWebContextPath(Long id) {
-		Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
-		WebEvent webEvent = bundleEvents.get(id);
-		return webEvent.getContextPath();
-	}
-
+    @Override
+    public String getWebContextPath(Long id) {
+        Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
+        WebEvent webEvent = bundleEvents.get(id);
+        return webEvent.getContextPath();
+    }
 }

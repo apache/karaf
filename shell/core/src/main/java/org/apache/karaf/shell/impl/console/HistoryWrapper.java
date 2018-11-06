@@ -18,10 +18,9 @@
  */
 package org.apache.karaf.shell.impl.console;
 
-import org.apache.karaf.shell.api.console.History;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import org.apache.karaf.shell.api.console.History;
 
 public class HistoryWrapper implements History {
 

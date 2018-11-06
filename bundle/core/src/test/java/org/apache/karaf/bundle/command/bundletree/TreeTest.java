@@ -27,12 +27,11 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Set;
-
 import org.junit.Test;
 
 /**
- * Test cases for {@link org.apache.karaf.bundle.command.bundletree.Tree}
- * and {@link org.apache.karaf.bundle.command.bundletree.Node}
+ * Test cases for {@link org.apache.karaf.bundle.command.bundletree.Tree} and {@link
+ * org.apache.karaf.bundle.command.bundletree.Node}
  */
 public class TreeTest {
 
@@ -43,8 +42,8 @@ public class TreeTest {
 
         BufferedReader reader = read(tree);
 
-        assertEquals("root"     , reader.readLine());
-        assertEquals("+- child" , reader.readLine());
+        assertEquals("root", reader.readLine());
+        assertEquals("+- child", reader.readLine());
     }
 
     @Test
@@ -57,8 +56,8 @@ public class TreeTest {
 
         BufferedReader reader = new BufferedReader(new StringReader(writer.getBuffer().toString()));
 
-        assertEquals("my root"     , reader.readLine());
-        assertEquals("+- my child" , reader.readLine());
+        assertEquals("my root", reader.readLine());
+        assertEquals("+- my child", reader.readLine());
     }
 
     @Test
@@ -69,8 +68,8 @@ public class TreeTest {
 
         BufferedReader reader = read(tree);
 
-        assertEquals("root"            , reader.readLine());
-        assertEquals("+- child"        , reader.readLine());
+        assertEquals("root", reader.readLine());
+        assertEquals("+- child", reader.readLine());
         assertEquals("   +- grandchild", reader.readLine());
     }
 
@@ -83,10 +82,10 @@ public class TreeTest {
 
         BufferedReader reader = read(tree);
 
-        assertEquals("root"            , reader.readLine());
-        assertEquals("+- child1"       , reader.readLine());
+        assertEquals("root", reader.readLine());
+        assertEquals("+- child1", reader.readLine());
         assertEquals("|  +- grandchild", reader.readLine());
-        assertEquals("+- child2"       , reader.readLine());
+        assertEquals("+- child2", reader.readLine());
     }
 
     @Test

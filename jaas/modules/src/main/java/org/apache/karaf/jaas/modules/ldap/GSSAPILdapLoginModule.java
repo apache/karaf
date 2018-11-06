@@ -14,12 +14,12 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
-import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.IOException;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -27,16 +27,13 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Specific LDAPLoginModule to be used with GSSAPI. Uses the specified realm as login context.
- */
+/** Specific LDAPLoginModule to be used with GSSAPI. Uses the specified realm as login context. */
 public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
 
     private static Logger logger = LoggerFactory.getLogger(LDAPLoginModule.class);
@@ -46,7 +43,11 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
     private LoginContext context;
 
     @Override
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
     }
 
@@ -57,11 +58,14 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
             throw new LoginException("cannot authenticate through the delegating realm");
         }
 
-        context = new LoginContext((String) options.get(REALM_PROPERTY), this.subject, this.callbackHandler);
+        context =
+                new LoginContext(
+                        (String) options.get(REALM_PROPERTY), this.subject, this.callbackHandler);
         context.login();
 
         try {
-            return Subject.doAs(context.getSubject(), (PrivilegedExceptionAction<Boolean>) this::doLogin);
+            return Subject.doAs(
+                    context.getSubject(), (PrivilegedExceptionAction<Boolean>) this::doLogin);
         } catch (PrivilegedActionException pExcp) {
             logger.error("error with delegated authentication", pExcp);
             throw new LoginException(pExcp.getMessage());
@@ -70,7 +74,7 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
 
     protected boolean doLogin() throws LoginException {
 
-        //force GSSAPI for login
+        // force GSSAPI for login
         Map<String, Object> opts = new HashMap<>(this.options);
         opts.put(LDAPOptions.AUTHENTICATION, "GSSAPI");
 
@@ -88,7 +92,9 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
                 throw new LoginException(ioException.getMessage());
             } catch (UnsupportedCallbackException unsupportedCallbackException) {
                 logger.error("error with callback handler", unsupportedCallbackException);
-                throw new LoginException(unsupportedCallbackException.getMessage() + " not available to obtain information from user.");
+                throw new LoginException(
+                        unsupportedCallbackException.getMessage()
+                                + " not available to obtain information from user.");
             }
 
             user = callbacks[0].getName();
@@ -114,12 +120,14 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
                 principals.add(new UserPrincipal(user));
 
                 try {
-                    String[] roles = cache.getUserRoles(user, userDnAndNamespace[0], userDnAndNamespace[1]);
+                    String[] roles =
+                            cache.getUserRoles(user, userDnAndNamespace[0], userDnAndNamespace[1]);
                     for (String role : roles) {
                         principals.add(new RolePrincipal(role));
                     }
                 } catch (Exception e) {
-                    throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
+                    throw new LoginException(
+                            "Can't get user " + user + " roles: " + e.getMessage());
                 }
 
                 return true;

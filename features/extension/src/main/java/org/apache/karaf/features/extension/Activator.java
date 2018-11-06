@@ -17,7 +17,6 @@
 package org.apache.karaf.features.extension;
 
 import java.util.Arrays;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -55,11 +54,12 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
     }
 
     private void resolveAll() {
-        ServiceRegistration<ResolverHookFactory> registration = context
-            .registerService(ResolverHookFactory.class, (triggers) -> resolver, null);
+        ServiceRegistration<ResolverHookFactory> registration =
+                context.registerService(ResolverHookFactory.class, (triggers) -> resolver, null);
         try {
-            context.getBundle().adapt(FrameworkWiring.class)
-                .resolveBundles(Arrays.asList(context.getBundles()));
+            context.getBundle()
+                    .adapt(FrameworkWiring.class)
+                    .resolveBundles(Arrays.asList(context.getBundles()));
         } finally {
             registration.unregister();
         }

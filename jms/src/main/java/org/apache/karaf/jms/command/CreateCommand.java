@@ -27,24 +27,57 @@ import org.apache.karaf.shell.support.completers.StringsCompleter;
 @Service
 public class CreateCommand extends JmsCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The JMS connection factory name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The JMS connection factory name",
+            required = true,
+            multiValued = false)
     String name;
 
-    @Option(name = "-t", aliases = { "--type" }, description = "The JMS connection factory type (ActiveMQ, Artemis or WebsphereMQ)", required = false, multiValued = false)
-    @Completion(value = StringsCompleter.class, values = { "activemq", "artemis", "webspheremq" })
+    @Option(
+            name = "-t",
+            aliases = {"--type"},
+            description = "The JMS connection factory type (ActiveMQ, Artemis or WebsphereMQ)",
+            required = false,
+            multiValued = false)
+    @Completion(
+            value = StringsCompleter.class,
+            values = {"activemq", "artemis", "webspheremq"})
     String type = "activemq";
 
-    @Option(name = "--url", description = "URL of the JMS broker. For WebsphereMQ type, the URL is hostname/port/queuemanager/channel", required = false, multiValued = false)
+    @Option(
+            name = "--url",
+            description =
+                    "URL of the JMS broker. For WebsphereMQ type, the URL is hostname/port/queuemanager/channel",
+            required = false,
+            multiValued = false)
     String url = "tcp://localhost:61616";
 
-    @Option(name = "--pool", description = "The pool mechanism to use for this connection factory", required = false, multiValued = false)
-    @Completion(value = StringsCompleter.class, values = { "pooledjms", "narayama", "transx" })
+    @Option(
+            name = "--pool",
+            description = "The pool mechanism to use for this connection factory",
+            required = false,
+            multiValued = false)
+    @Completion(
+            value = StringsCompleter.class,
+            values = {"pooledjms", "narayama", "transx"})
     String pool = "pooledjms";
 
-    @Option(name = "-u", aliases = { "--username" }, description = "Username to connect to the JMS broker", required = false, multiValued = false)
+    @Option(
+            name = "-u",
+            aliases = {"--username"},
+            description = "Username to connect to the JMS broker",
+            required = false,
+            multiValued = false)
     String username = "karaf";
 
-    @Option(name = "-p", aliases = { "--password" }, description = "Password to connect to the JMS broker", required = false, multiValued = false)
+    @Option(
+            name = "-p",
+            aliases = {"--password"},
+            description = "Password to connect to the JMS broker",
+            required = false,
+            multiValued = false)
     String password = "karaf";
 
     @Override
@@ -52,5 +85,4 @@ public class CreateCommand extends JmsCommandSupport {
         getJmsService().create(name, type, url, username, password, pool);
         return null;
     }
-
 }

@@ -22,9 +22,8 @@ import java.sql.Connection;
 import org.apache.felix.utils.properties.Properties;
 
 /**
- * Represents an exclusive lock on a database,
- * used to avoid multiple Karaf instances attempting
- * to become master.
+ * Represents an exclusive lock on a database, used to avoid multiple Karaf instances attempting to
+ * become master.
  */
 public class DerbyJDBCLock extends DefaultJDBCLock {
 
@@ -33,9 +32,10 @@ public class DerbyJDBCLock extends DefaultJDBCLock {
     }
 
     @Override
-    Connection createConnection(String driver, String url, String username, String password) throws Exception {
+    Connection createConnection(String driver, String url, String username, String password)
+            throws Exception {
         url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
-        
+
         return super.createConnection(driver, url, username, password);
     }
 }

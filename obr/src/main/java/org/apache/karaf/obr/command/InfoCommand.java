@@ -20,7 +20,6 @@ import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
@@ -33,24 +32,24 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class InfoCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "bundles", description = "Specify bundles to query for information (separated by whitespaces). The bundles are identified using the following syntax: symbolic_name,version where version is optional.", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "bundles",
+            description =
+                    "Specify bundles to query for information (separated by whitespaces). The bundles are identified using the following syntax: symbolic_name,version where version is optional.",
+            required = true,
+            multiValued = true)
     List<String> bundles;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
         for (String bundle : bundles) {
             String[] target = getTarget(bundle);
             Resource[] resources = searchRepository(admin, target[0], target[1]);
-            if (resources == null)
-            {
-                System.err.println("Unknown bundle and/or version: "
-                    + target[0]);
-            }
-            else
-            {
-                for (int resIdx = 0; resIdx < resources.length; resIdx++)
-                {
-                    if (resIdx > 0)
-                    {
+            if (resources == null) {
+                System.err.println("Unknown bundle and/or version: " + target[0]);
+            } else {
+                for (int resIdx = 0; resIdx < resources.length; resIdx++) {
+                    if (resIdx > 0) {
                         System.out.println("");
                     }
                     printResource(System.out, resources[resIdx]);
@@ -98,5 +97,4 @@ public class InfoCommand extends ObrCommandSupport {
             }
         }
     }
-
 }

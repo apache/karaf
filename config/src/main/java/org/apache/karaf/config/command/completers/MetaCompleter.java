@@ -17,7 +17,6 @@
 package org.apache.karaf.config.command.completers;
 
 import java.util.List;
-
 import org.apache.karaf.config.core.impl.MetaServiceCaller;
 import org.apache.karaf.shell.api.action.lifecycle.Init;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -39,9 +38,8 @@ public class MetaCompleter implements Completer, BundleListener {
 
     private final StringsCompleter delegate = new StringsCompleter();
 
-    @Reference
-    BundleContext context;
-    
+    @Reference BundleContext context;
+
     @Init
     public void init() {
         try {
@@ -52,11 +50,15 @@ public class MetaCompleter implements Completer, BundleListener {
             while (ncdfe != null && !(ncdfe instanceof NoClassDefFoundError)) {
                 ncdfe = ncdfe.getCause();
             }
-            if (ncdfe != null && ncdfe.getMessage().equals("org/osgi/service/metatype/MetaTypeService")) {
+            if (ncdfe != null
+                    && ncdfe.getMessage().equals("org/osgi/service/metatype/MetaTypeService")) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.warn("config:meta disabled because the org.osgi.service.metatype package is not wired", e);
+                    LOG.warn(
+                            "config:meta disabled because the org.osgi.service.metatype package is not wired",
+                            e);
                 } else {
-                    LOG.warn("config:meta disabled because the org.osgi.service.metatype package is not wired (enable debug logging for full stack trace).");
+                    LOG.warn(
+                            "config:meta disabled because the org.osgi.service.metatype package is not wired (enable debug logging for full stack trace).");
                 }
             } else {
                 throw e;
@@ -65,7 +67,8 @@ public class MetaCompleter implements Completer, BundleListener {
     }
 
     @Override
-    public synchronized int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
+    public synchronized int complete(
+            final Session session, final CommandLine commandLine, final List<String> candidates) {
         return delegate.complete(session, commandLine, candidates);
     }
 
@@ -81,5 +84,4 @@ public class MetaCompleter implements Completer, BundleListener {
             delegate.getStrings().addAll(pids);
         }
     }
-
 }

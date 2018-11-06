@@ -16,37 +16,34 @@
  */
 package javax.xml.parsers;
 
+import javax.xml.validation.Schema;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
-import javax.xml.validation.Schema;
-
 public abstract class SAXParserFactory {
 
-    private static final String DEFAULT_IMPL = "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
+    private static final String DEFAULT_IMPL =
+            "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
 
     private boolean validating = false;
 
     private boolean namespaceAware = false;
 
-    protected SAXParserFactory() {
-
-    }
+    protected SAXParserFactory() {}
 
     public static SAXParserFactory newDefaultInstance() {
         return $FactoryFinder.newInstance(SAXParserFactory.class, DEFAULT_IMPL, null, false, true);
     }
-
 
     public static SAXParserFactory newInstance() {
         return $FactoryFinder.find(SAXParserFactory.class, DEFAULT_IMPL);
     }
 
     public static SAXParserFactory newInstance(String factoryClassName, ClassLoader classLoader) {
-        return $FactoryFinder.newInstance(SAXParserFactory.class, factoryClassName, classLoader, false);
+        return $FactoryFinder.newInstance(
+                SAXParserFactory.class, factoryClassName, classLoader, false);
     }
-
 
     public abstract SAXParser newSAXParser() throws ParserConfigurationException, SAXException;
 
@@ -68,12 +65,11 @@ public abstract class SAXParserFactory {
 
     public abstract void setFeature(String name, boolean value)
             throws ParserConfigurationException, SAXNotRecognizedException,
-            SAXNotSupportedException;
+                    SAXNotSupportedException;
 
     public abstract boolean getFeature(String name)
             throws ParserConfigurationException, SAXNotRecognizedException,
-            SAXNotSupportedException;
-
+                    SAXNotSupportedException;
 
     public Schema getSchema() {
         throw new UnsupportedOperationException(
@@ -81,8 +77,7 @@ public abstract class SAXParserFactory {
                         + this.getClass().getPackage().getSpecificationTitle()
                         + "\" version \""
                         + this.getClass().getPackage().getSpecificationVersion()
-                        + "\""
-        );
+                        + "\"");
     }
 
     public void setSchema(Schema schema) {
@@ -91,8 +86,7 @@ public abstract class SAXParserFactory {
                         + this.getClass().getPackage().getSpecificationTitle()
                         + "\" version \""
                         + this.getClass().getPackage().getSpecificationVersion()
-                        + "\""
-        );
+                        + "\"");
     }
 
     public boolean isXIncludeAware() {
@@ -101,15 +95,16 @@ public abstract class SAXParserFactory {
                         + this.getClass().getPackage().getSpecificationTitle()
                         + "\" version \""
                         + this.getClass().getPackage().getSpecificationVersion()
-                        + "\""
-        );
+                        + "\"");
     }
 
     public void setXIncludeAware(final boolean state) {
         if (state) {
-            throw new UnsupportedOperationException(" setXIncludeAware " +
-                    "is not supported on this JAXP" +
-                    " implementation or earlier: " + this.getClass());
+            throw new UnsupportedOperationException(
+                    " setXIncludeAware "
+                            + "is not supported on this JAXP"
+                            + " implementation or earlier: "
+                            + this.getClass());
         }
     }
 }

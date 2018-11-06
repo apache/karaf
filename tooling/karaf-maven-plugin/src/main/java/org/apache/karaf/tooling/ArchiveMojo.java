@@ -25,7 +25,6 @@ import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarConstants;
@@ -42,86 +41,64 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
-/**
- * Package a server archive from an assembled server
- */
-@Mojo(name = "archive", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
+/** Package a server archive from an assembled server */
+@Mojo(
+        name = "archive",
+        defaultPhase = LifecyclePhase.PACKAGE,
+        requiresDependencyResolution = ResolutionScope.RUNTIME,
+        threadSafe = true)
 public class ArchiveMojo extends MojoSupport {
 
-    /**
-     * The target directory of the project.
-     */
-    @Parameter(defaultValue="${project.build.directory}")
+    /** The target directory of the project. */
+    @Parameter(defaultValue = "${project.build.directory}")
     private File destDir;
 
-    /**
-     * The location of the server repository.
-     */
-    @Parameter(defaultValue="${project.build.directory}/assembly")
+    /** The location of the server repository. */
+    @Parameter(defaultValue = "${project.build.directory}/assembly")
     private File targetServerDirectory;
 
-    /**
-     * Path prefix of files in the created archive.
-     */
-    @Parameter(defaultValue="${project.artifactId}-${project.version}")
+    /** Path prefix of files in the created archive. */
+    @Parameter(defaultValue = "${project.artifactId}-${project.version}")
     private String pathPrefix;
 
-    /**
-     * Use a path prefix of files in the created archive
-     */
-    @Parameter
-    private boolean usePathPrefix = true;
+    /** Use a path prefix of files in the created archive */
+    @Parameter private boolean usePathPrefix = true;
 
-    /**
-     * The target file to set as the project's artifact.
-     */
-    @Parameter(defaultValue="${project.artifactId}-${project.version}")
+    /** The target file to set as the project's artifact. */
+    @Parameter(defaultValue = "${project.artifactId}-${project.version}")
     private File targetFile;
 
-    /**
-     * pack a assembly as a tar.gz archive
-     */
-    @Parameter
-    private boolean archiveTarGz = true;
+    /** pack a assembly as a tar.gz archive */
+    @Parameter private boolean archiveTarGz = true;
 
-    /**
-     * pack a assembly as a zip archive
-     */
-    @Parameter
-    private boolean archiveZip = true;
+    /** pack a assembly as a zip archive */
+    @Parameter private boolean archiveZip = true;
 
-    /**
-     * Whether to attach the resulting assembly to the project as an artifact.
-     */
-    @Parameter(defaultValue="true")
+    /** Whether to attach the resulting assembly to the project as an artifact. */
+    @Parameter(defaultValue = "true")
     private boolean attach = true;
 
-    /**
-     * If supplied, the classifer for the artifact when attached.
-     */
-    @Parameter
-    private String classifier;
+    /** If supplied, the classifer for the artifact when attached. */
+    @Parameter private String classifier;
 
     /**
      * use symbolic links in tar.gz or zip archives
      *
-     * Symbolic links are not very well supported by windows Platform.
-     * At least, is does not work on WinXP + NTFS, so do not include them
-     * for now. So the default is false.
+     * <p>Symbolic links are not very well supported by windows Platform. At least, is does not work
+     * on WinXP + NTFS, so do not include them for now. So the default is false.
      */
-    @Parameter
-    private boolean useSymLinks = false;
+    @Parameter private boolean useSymLinks = false;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().debug("Setting artifact file: " + targetFile);
         org.apache.maven.artifact.Artifact artifact = project.getArtifact();
         artifact.setFile(targetFile);
         try {
-            //now pack up the server.
-            if(archiveTarGz){
+            // now pack up the server.
+            if (archiveTarGz) {
                 archive("tar.gz");
             }
-            if(archiveZip) {
+            if (archiveZip) {
                 archive("zip");
             }
         } catch (Exception e) {
@@ -130,13 +107,26 @@ public class ArchiveMojo extends MojoSupport {
     }
 
     @SuppressWarnings("deprecation")
-	private void archive(String type) throws IOException {
-        Artifact artifact1 = factory.createArtifactWithClassifier(project.getArtifact().getGroupId(), project.getArtifact().getArtifactId(), project.getArtifact().getVersion(), type, "bin");
+    private void archive(String type) throws IOException {
+        Artifact artifact1 =
+                factory.createArtifactWithClassifier(
+                        project.getArtifact().getGroupId(),
+                        project.getArtifact().getArtifactId(),
+                        project.getArtifact().getVersion(),
+                        type,
+                        "bin");
         File target1 = archive(targetServerDirectory, destDir, artifact1);
 
-        // artifact1 is created with explicit classifier "bin", which is dropped below when attachArtifact is called
+        // artifact1 is created with explicit classifier "bin", which is dropped below when
+        // attachArtifact is called
         // which means we can't use artifact1.equals(artifact) directly with artifact1
-        Artifact artifact2 = factory.createArtifact(artifact1.getGroupId(), artifact1.getArtifactId(), artifact1.getVersion(), artifact1.getScope(), artifact1.getType());
+        Artifact artifact2 =
+                factory.createArtifact(
+                        artifact1.getGroupId(),
+                        artifact1.getArtifactId(),
+                        artifact1.getVersion(),
+                        artifact1.getScope(),
+                        artifact1.getType());
         for (Artifact artifact : project.getAttachedArtifacts()) {
             if (artifact2.equals(artifact)) {
                 getLog().debug("Artifact " + artifact2 + " already attached");
@@ -148,33 +138,32 @@ public class ArchiveMojo extends MojoSupport {
         }
     }
 
-    public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
-            IOException {
+    public File archive(File source, File dest, Artifact artifact)
+            throws // ArchiverException,
+                    IOException {
         String serverName = null;
         if (targetFile != null) {
             serverName = targetFile.getName();
         } else {
-           serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
+            serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
         }
         dest = new File(dest, serverName + "." + artifact.getType());
-        
+
         String prefix = "";
         if (usePathPrefix) {
-        	prefix = pathPrefix.trim();
-	        if( prefix.length() > 0 && !prefix.endsWith("/") ) {
-	            prefix += "/";
-	        }
+            prefix = pathPrefix.trim();
+            if (prefix.length() > 0 && !prefix.endsWith("/")) {
+                prefix += "/";
+            }
         }
 
         if ("tar.gz".equals(artifact.getType())) {
-            try (
-                    OutputStream fOut = Files.newOutputStream(dest.toPath());
+            try (OutputStream fOut = Files.newOutputStream(dest.toPath());
                     OutputStream bOut = new BufferedOutputStream(fOut);
                     OutputStream gzOut = new GzipCompressorOutputStream(bOut);
                     TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut);
-                    DirectoryStream<Path> children = Files.newDirectoryStream(source.toPath())
+                    DirectoryStream<Path> children = Files.newDirectoryStream(source.toPath())) {
 
-            ) {
                 tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
                 tOut.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
                 for (Path child : children) {
@@ -182,13 +171,11 @@ public class ArchiveMojo extends MojoSupport {
                 }
             }
         } else if ("zip".equals(artifact.getType())) {
-            try (
-                    OutputStream fOut = Files.newOutputStream(dest.toPath());
+            try (OutputStream fOut = Files.newOutputStream(dest.toPath());
                     OutputStream bOut = new BufferedOutputStream(fOut);
                     ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);
-                    DirectoryStream<Path> children = Files.newDirectoryStream(source.toPath())
+                    DirectoryStream<Path> children = Files.newDirectoryStream(source.toPath())) {
 
-            ) {
                 for (Path child : children) {
                     addFileToZip(tOut, child, prefix);
                 }
@@ -200,7 +187,8 @@ public class ArchiveMojo extends MojoSupport {
         return dest;
     }
 
-    private void addFileToTarGz(TarArchiveOutputStream tOut, Path f, String base) throws IOException {
+    private void addFileToTarGz(TarArchiveOutputStream tOut, Path f, String base)
+            throws IOException {
         if (Files.isDirectory(f)) {
             String entryName = base + f.getFileName().toString() + "/";
             TarArchiveEntry tarEntry = new TarArchiveEntry(entryName);
@@ -217,7 +205,7 @@ public class ArchiveMojo extends MojoSupport {
             tarEntry.setLinkName(Files.readSymbolicLink(f).toString());
             tOut.putArchiveEntry(tarEntry);
             tOut.closeArchiveEntry();
-        }  else {
+        } else {
             String entryName = base + f.getFileName().toString();
             TarArchiveEntry tarEntry = new TarArchiveEntry(entryName);
             tarEntry.setSize(Files.size(f));
@@ -252,7 +240,7 @@ public class ArchiveMojo extends MojoSupport {
             tOut.putArchiveEntry(zipEntry);
             tOut.write(Files.readSymbolicLink(f).toString().getBytes());
             tOut.closeArchiveEntry();
-        }  else {
+        } else {
             String entryName = base + f.getFileName().toString();
             ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
             zipEntry.setSize(Files.size(f));
@@ -268,5 +256,4 @@ public class ArchiveMojo extends MojoSupport {
             tOut.closeArchiveEntry();
         }
     }
-
 }

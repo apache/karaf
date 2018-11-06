@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.karaf.event.command.EventTailCommand;
 import org.apache.karaf.event.service.EventCollector;
 import org.apache.karaf.shell.api.console.Session;
 import org.junit.Test;
@@ -46,15 +44,16 @@ public class EventTailCommandTest {
         expect(tail.session.getConsole()).andReturn(out);
         exception = null;
         replay(tail.session);
-        
+
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            try {
-                tail.execute();
-            } catch (Exception e) {
-                exception = e;
-            }
-        });
+        executor.execute(
+                () -> {
+                    try {
+                        tail.execute();
+                    } catch (Exception e) {
+                        exception = e;
+                    }
+                });
         tail.collector.handleEvent(event());
         Thread.sleep(200);
         executor.shutdownNow(); // Will interrupt the tail

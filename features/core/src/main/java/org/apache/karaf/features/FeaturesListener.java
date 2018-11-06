@@ -21,5 +21,4 @@ public interface FeaturesListener {
     void featureEvent(FeatureEvent event);
 
     void repositoryEvent(RepositoryEvent event);
-
 }

@@ -30,9 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.security.auth.Subject;
-
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.Function;
@@ -40,7 +38,6 @@ import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.shell.api.console.Command;
-import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleContext;
@@ -57,7 +54,8 @@ import org.slf4j.LoggerFactory;
 public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements ConfigurationListener {
 
     private static final String PROXY_COMMAND_ACL_PID_PREFIX = "org.apache.karaf.command.acl.";
-    private static final String CONFIGURATION_FILTER = "(" + Constants.SERVICE_PID + "=" + PROXY_COMMAND_ACL_PID_PREFIX + "*)";
+    private static final String CONFIGURATION_FILTER =
+            "(" + Constants.SERVICE_PID + "=" + PROXY_COMMAND_ACL_PID_PREFIX + "*)";
 
     private static final String SHELL_SCOPE = "shell";
     private static final String SHELL_INVOKE = ".invoke";
@@ -71,11 +69,13 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private ServiceRegistration<ConfigurationListener> registration;
     private ThreadLocal<Map<Object, Boolean>> serviceVisibleMap = new ThreadLocal<>();
 
-    public SecuredSessionFactoryImpl(BundleContext bundleContext, ThreadIO threadIO) throws InvalidSyntaxException {
+    public SecuredSessionFactoryImpl(BundleContext bundleContext, ThreadIO threadIO)
+            throws InvalidSyntaxException {
         super(threadIO);
         this.bundleContext = bundleContext;
         this.registration = bundleContext.registerService(ConfigurationListener.class, this, null);
-        this.configAdminTracker = new SingleServiceTracker<>(bundleContext, ConfigurationAdmin.class, this::update);
+        this.configAdminTracker =
+                new SingleServiceTracker<>(bundleContext, ConfigurationAdmin.class, this::update);
         this.configAdminTracker.open();
     }
 
@@ -86,7 +86,9 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     }
 
     @Override
-    protected Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
+    protected Object invoke(
+            CommandSessionImpl session, Object target, String name, List<Object> args)
+            throws Exception {
         checkSecurity(SHELL_SCOPE, SHELL_INVOKE, Arrays.asList(target, name, args));
         return super.invoke(session, target, name, args);
     }
@@ -138,7 +140,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                     }
                 }
             }
-        } 
+        }
         AliasCommand aliasCommand = findAlias(scope, name);
         if (aliasCommand != null) {
             visible = visible && isAliasVisible(aliasCommand.getScope(), aliasCommand.getName());
@@ -161,10 +163,10 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                 }
                 return false;
             }
-        } 
+        }
         return true;
     }
-       
+
     private AliasCommand findAlias(String scope, String name) {
         if (session != null) {
             Set<String> vars = ((Set<String>) session.get(null));
@@ -173,7 +175,9 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
             String aliasName = null;
             for (String var : vars) {
                 Object content = session.get(var);
-                if (content != null && "org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName())) {
+                if (content != null
+                        && "org.apache.felix.gogo.runtime.Closure"
+                                .equals(content.getClass().getName())) {
 
                     int index = var.indexOf(":");
                     if (index > 0) {
@@ -183,26 +187,25 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                         index = originalCmd.indexOf(" ");
                         Object securityCmd = null;
                         if (index > 0) {
-                            securityCmd = ((org.apache.felix.gogo.runtime.Closure)content)
-                                .get(originalCmd.substring(0, index));
+                            securityCmd =
+                                    ((org.apache.felix.gogo.runtime.Closure) content)
+                                            .get(originalCmd.substring(0, index));
                         }
                         if (securityCmd instanceof SecuredCommand) {
-                            if (((SecuredCommand)securityCmd).getScope().equals(scope)
-                               && ((SecuredCommand)securityCmd).getName().equals(name)) {
+                            if (((SecuredCommand) securityCmd).getScope().equals(scope)
+                                    && ((SecuredCommand) securityCmd).getName().equals(name)) {
                                 return new AliasCommand(aliasScope, aliasName);
                             }
                         }
                     }
                 }
-                
             }
         }
         return null;
     }
-    
-    
+
     void checkSecurity(String scope, String name, List<Object> arguments) {
-       
+
         Dictionary<String, Object> config = getScopeConfig(scope);
         boolean passCheck = false;
         if (config != null) {
@@ -210,7 +213,9 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                 throw new CommandNotFoundException(scope + ":" + name);
             }
             List<String> roles = new ArrayList<>();
-            ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocation(name, new Object[] { arguments.toString() }, null, config, roles);
+            ACLConfigurationParser.Specificity s =
+                    ACLConfigurationParser.getRolesForInvocation(
+                            name, new Object[] {arguments.toString()}, null, config, roles);
             if (s == ACLConfigurationParser.Specificity.NO_MATCH) {
                 passCheck = true;
             }
@@ -237,15 +242,22 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                 throw new SecurityException("Insufficient credentials.");
             }
         }
-        AliasCommand aliasCommand = findAlias(scope, name); 
+        AliasCommand aliasCommand = findAlias(scope, name);
         if (aliasCommand != null) {
-            //this is the alias
+            // this is the alias
             if (config != null) {
                 if (!isAliasVisible(aliasCommand.getScope(), aliasCommand.getName())) {
-                    throw new CommandNotFoundException(aliasCommand.getScope() + ":" + aliasCommand.getName());
+                    throw new CommandNotFoundException(
+                            aliasCommand.getScope() + ":" + aliasCommand.getName());
                 }
                 List<String> roles = new ArrayList<>();
-                ACLConfigurationParser.Specificity s = ACLConfigurationParser.getRolesForInvocationForAlias(aliasCommand.getName(), new Object[] { arguments.toString() }, null, config, roles);
+                ACLConfigurationParser.Specificity s =
+                        ACLConfigurationParser.getRolesForInvocationForAlias(
+                                aliasCommand.getName(),
+                                new Object[] {arguments.toString()},
+                                null,
+                                config,
+                                roles);
                 if (s == ACLConfigurationParser.Specificity.NO_MATCH) {
                     return;
                 }
@@ -257,9 +269,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
                 throw new SecurityException("Insufficient credentials.");
             }
         }
-               
     }
-
 
     static boolean currentUserHasRole(String requestedRole) {
         String clazz;
@@ -294,18 +304,18 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
 
     @Override
     public void configurationEvent(ConfigurationEvent event) {
-        if (!event.getPid().startsWith(PROXY_COMMAND_ACL_PID_PREFIX))
-            return;
+        if (!event.getPid().startsWith(PROXY_COMMAND_ACL_PID_PREFIX)) return;
 
         try {
-            synchronized(this.serviceVisibleMap) {
+            synchronized (this.serviceVisibleMap) {
                 if (this.serviceVisibleMap.get() != null) {
                     this.serviceVisibleMap.get().clear();
                 }
             }
             switch (event.getType()) {
                 case ConfigurationEvent.CM_DELETED:
-                    removeScopeConfig(event.getPid().substring(PROXY_COMMAND_ACL_PID_PREFIX.length()));
+                    removeScopeConfig(
+                            event.getPid().substring(PROXY_COMMAND_ACL_PID_PREFIX.length()));
                     break;
                 case ConfigurationEvent.CM_UPDATED:
                     ConfigurationAdmin configAdmin = bundleContext.getService(event.getReference());
@@ -336,7 +346,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
             if (scope.endsWith("*")) {
                 scope = "star";
             }
-            scopes.put(scope, config.getProperties());                
+            scopes.put(scope, config.getProperties());
         }
     }
 

@@ -30,21 +30,29 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class AliasCommand implements Action {
 
-    @Argument(index = 0, name = "name", description = "The JNDI name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The JNDI name",
+            required = true,
+            multiValued = false)
     @Completion(NamesCompleter.class)
     String name;
 
-    @Argument(index = 1, name = "alias", description = "The JNDI alias", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "alias",
+            description = "The JNDI alias",
+            required = true,
+            multiValued = false)
     @Completion(ContextsCompleter.class)
     String alias;
 
-    @Reference
-    JndiService jndiService;
+    @Reference JndiService jndiService;
 
     @Override
     public Object execute() throws Exception {
         jndiService.alias(name, alias);
         return null;
     }
-
 }

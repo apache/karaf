@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.jdbc.command.ds;
 
+import java.util.Map;
 import org.apache.karaf.jdbc.command.JdbcCommandSupport;
 import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.shell.api.action.Argument;
@@ -24,13 +25,16 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-import java.util.Map;
-
 @Command(scope = "jdbc", name = "ds-info", description = "Display details about a JDBC datasource")
 @Service
 public class InfoCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "datasource", description = "The JDBC datasource name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "datasource",
+            description = "The JDBC datasource name",
+            required = true,
+            multiValued = false)
     @Completion(DataSourcesNameCompleter.class)
     String datasource;
 
@@ -50,5 +54,4 @@ public class InfoCommand extends JdbcCommandSupport {
 
         return null;
     }
-
 }

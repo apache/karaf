@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.DeploymentEvent;
@@ -59,9 +58,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Callback through which {@link Deployer} will interact with the distribution that's being assembled.
+ * Callback through which {@link Deployer} will interact with the distribution that's being
+ * assembled.
  */
-public class AssemblyDeployCallback extends StaticInstallSupport implements Deployer.DeployCallback {
+public class AssemblyDeployCallback extends StaticInstallSupport
+        implements Deployer.DeployCallback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
 
@@ -78,16 +79,21 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
     private final Map<String, Bundle> bundles = new HashMap<>();
 
     /**
-     * Create a {@link Deployer.DeployCallback} performing actions on runtime with single system bundle installed
-     * and with access to all non-blacklisted features.
+     * Create a {@link Deployer.DeployCallback} performing actions on runtime with single system
+     * bundle installed and with access to all non-blacklisted features.
+     *
      * @param manager
      * @param builder
      * @param systemBundle
      * @param repositories
      * @param processor
      */
-    public AssemblyDeployCallback(DownloadManager manager, Builder builder, BundleRevision systemBundle, Collection<Features> repositories,
-                                  FeaturesProcessor processor) {
+    public AssemblyDeployCallback(
+            DownloadManager manager,
+            Builder builder,
+            BundleRevision systemBundle,
+            Collection<Features> repositories,
+            FeaturesProcessor processor) {
         this.manager = manager;
         this.builder = builder;
         this.homeDirectory = builder.homeDirectory;
@@ -121,6 +127,7 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
 
     /**
      * Get startup bundles with related start-level
+     *
      * @return
      */
     public Map<String, Integer> getStartupBundles() {
@@ -145,8 +152,7 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
     }
 
     @Override
-    public void persistResolveRequest(Deployer.DeploymentRequest request) {
-    }
+    public void persistResolveRequest(Deployer.DeploymentRequest request) {}
 
     @Override
     public void installConfigs(org.apache.karaf.features.Feature feature) throws IOException {
@@ -156,28 +162,39 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
         for (Config config : ((Feature) feature).getConfig()) {
             Path configFile = etcDirectory.resolve(config.getName() + ".cfg");
             if (Files.exists(configFile) && !config.isAppend()) {
-                LOGGER.info("      not changing existing config file: {}", homeDirectory.relativize(configFile));
+                LOGGER.info(
+                        "      not changing existing config file: {}",
+                        homeDirectory.relativize(configFile));
                 continue;
             }
             if (config.isExternal()) {
-                downloader.download(config.getValue().trim(), provider -> {
-                    Path input = provider.getFile().toPath();
-                    byte[] data = Files.readAllBytes(input);
-                    if (config.isAppend()) {
-                        LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
-                        Files.write(configFile, data, StandardOpenOption.APPEND);
-                    } else {
-                        LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
-                        Files.write(configFile, data);
-                    }
-                });
+                downloader.download(
+                        config.getValue().trim(),
+                        provider -> {
+                            Path input = provider.getFile().toPath();
+                            byte[] data = Files.readAllBytes(input);
+                            if (config.isAppend()) {
+                                LOGGER.info(
+                                        "      appending to config file: {}",
+                                        homeDirectory.relativize(configFile));
+                                Files.write(configFile, data, StandardOpenOption.APPEND);
+                            } else {
+                                LOGGER.info(
+                                        "      adding config file: {}",
+                                        homeDirectory.relativize(configFile));
+                                Files.write(configFile, data);
+                            }
+                        });
             } else {
                 byte[] data = config.getValue().getBytes();
                 if (config.isAppend()) {
-                    LOGGER.info("      appending to config file: {}", homeDirectory.relativize(configFile));
+                    LOGGER.info(
+                            "      appending to config file: {}",
+                            homeDirectory.relativize(configFile));
                     Files.write(configFile, data, StandardOpenOption.APPEND);
                 } else {
-                    LOGGER.info("      adding config file: {}", homeDirectory.relativize(configFile));
+                    LOGGER.info(
+                            "      adding config file: {}", homeDirectory.relativize(configFile));
                     Files.write(configFile, data);
                 }
             }
@@ -191,15 +208,17 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
             final Path output = homeDirectory.resolve(path);
             final String finalPath = path;
             if (configFile.isOverride() || !Files.exists(output)) {
-                downloader.download(configFile.getLocation(), provider -> {
-                    Path input = provider.getFile().toPath();
-                    if (configFile.isOverride()) {
-                        LOGGER.info("      overwriting config file: {}", finalPath);
-                    } else {
-                        LOGGER.info("      adding config file: {}", finalPath);
-                    }
-                    Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
-                });
+                downloader.download(
+                        configFile.getLocation(),
+                        provider -> {
+                            Path input = provider.getFile().toPath();
+                            if (configFile.isOverride()) {
+                                LOGGER.info("      overwriting config file: {}", finalPath);
+                            } else {
+                                LOGGER.info("      adding config file: {}", finalPath);
+                            }
+                            Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
+                        });
             }
         }
     }
@@ -210,10 +229,14 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
         Downloader downloader = manager.createDownloader();
         List<String> libraries = new ArrayList<>();
         for (Library library : ((Feature) feature).getLibraries()) {
-            String lib = library.getLocation() +
-                    ";type:=" + library.getType() +
-                    ";export:=" + library.isExport() +
-                    ";delegate:=" + library.isDelegate();
+            String lib =
+                    library.getLocation()
+                            + ";type:="
+                            + library.getType()
+                            + ";export:="
+                            + library.isExport()
+                            + ";delegate:="
+                            + library.isDelegate();
             libraries.add(lib);
         }
         if (!libraries.isEmpty()) {
@@ -227,7 +250,7 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
             throw new IOException("Error downloading configuration files", e);
         }
     }
-    
+
     private void assertNotBlacklisted(org.apache.karaf.features.Feature feature) {
         if (feature.isBlacklisted()) {
             if (builder.getBlacklistPolicy() == Builder.BlacklistPolicy.Fail) {
@@ -237,12 +260,10 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
     }
 
     @Override
-    public void callListeners(DeploymentEvent deployEvent) {
-    }
+    public void callListeners(DeploymentEvent deployEvent) {}
 
     @Override
-    public void callListeners(FeatureEvent featureEvent) {
-    }
+    public void callListeners(FeatureEvent featureEvent) {}
 
     @Override
     public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
@@ -264,7 +285,7 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
             } else {
                 uri = uri.replaceAll("[^0-9a-zA-Z.\\-_]+", "_");
                 if (uri.length() > 256) {
-                    //to avoid the File name too long exception
+                    // to avoid the File name too long exception
                     uri = uri.substring(0, 255);
                 }
                 path = "generated/" + uri;
@@ -281,7 +302,8 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
                     headers.put(attr.getKey().toString(), attr.getValue().toString());
                 }
             }
-            BundleRevision revision = new FakeBundleRevision(headers, uri, nextBundleId.incrementAndGet());
+            BundleRevision revision =
+                    new FakeBundleRevision(headers, uri, nextBundleId.incrementAndGet());
             Bundle bundle = revision.getBundle();
             MapUtils.addToMapSet(dstate.bundlesPerRegion, region, bundle.getBundleId());
             dstate.bundles.put(bundle.getBundleId(), bundle);
@@ -307,19 +329,24 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
         final String markerVarBeg = "${";
         final String markerVarEnd = "}";
 
-        boolean startsWithVariable = finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
+        boolean startsWithVariable =
+                finalname.startsWith(markerVarBeg) && finalname.contains(markerVarEnd);
         if (startsWithVariable) {
-            String marker = finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd));
+            String marker =
+                    finalname.substring(markerVarBeg.length(), finalname.indexOf(markerVarEnd));
             switch (marker) {
-            case "karaf.base":
-                return this.homeDirectory + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
-            case "karaf.etc":
-                return this.etcDirectory + finalname.substring(finalname.indexOf(markerVarEnd)+markerVarEnd.length());
-            default:
-                break;
+                case "karaf.base":
+                    return this.homeDirectory
+                            + finalname.substring(
+                                    finalname.indexOf(markerVarEnd) + markerVarEnd.length());
+                case "karaf.etc":
+                    return this.etcDirectory
+                            + finalname.substring(
+                                    finalname.indexOf(markerVarEnd) + markerVarEnd.length());
+                default:
+                    break;
             }
         }
         return finalname;
     }
-
 }

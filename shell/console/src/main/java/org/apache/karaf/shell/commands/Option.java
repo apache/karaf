@@ -23,15 +23,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Used to mark an optional named command line option who's name typically starts with "--"
- */
+/** Used to mark an optional named command line option who's name typically starts with "--" */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 @Deprecated
-public @interface Option
-{
-    String DEFAULT_STRING= "DEFAULT";
+public @interface Option {
+    String DEFAULT_STRING = "DEFAULT";
 
     String name();
 

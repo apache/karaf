@@ -21,14 +21,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.osgi.service.subsystem.Subsystem;
 
 public abstract class SubsystemSupport {
 
-    @Reference
-    Subsystem subsystem;
+    @Reference Subsystem subsystem;
 
     protected Subsystem getRoot() {
         Subsystem ss = subsystem;
@@ -92,8 +90,8 @@ public abstract class SubsystemSupport {
             p2 = Pattern.compile(id.substring(index + 1));
         }
         for (Subsystem ss : getSubsystems()) {
-            if (p1.matcher(ss.getSymbolicName()).find() &&
-                    (p2 == null || p2.matcher(ss.getVersion().toString()).find())) {
+            if (p1.matcher(ss.getSymbolicName()).find()
+                    && (p2 == null || p2.matcher(ss.getVersion().toString()).find())) {
                 subsystems.add(ss);
             }
         }
@@ -125,5 +123,4 @@ public abstract class SubsystemSupport {
             }
         }
     }
-
 }

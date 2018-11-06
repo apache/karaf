@@ -16,20 +16,18 @@
  */
 package org.apache.karaf.examples.url;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.url.AbstractURLStreamHandlerService;
+import org.osgi.service.url.URLStreamHandlerService;
 
-@Component(
-        property = { "url.handler.protocol=example" }
-)
-public class ExampleUrlHandler extends AbstractURLStreamHandlerService implements URLStreamHandlerService {
+@Component(property = {"url.handler.protocol=example"})
+public class ExampleUrlHandler extends AbstractURLStreamHandlerService
+        implements URLStreamHandlerService {
 
     @Override
     public URLConnection openConnection(URL url) throws IOException {
@@ -59,6 +57,4 @@ public class ExampleUrlHandler extends AbstractURLStreamHandlerService implement
             return inputStream;
         }
     }
-
-
 }

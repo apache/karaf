@@ -22,15 +22,14 @@ import org.osgi.service.component.annotations.Component;
 
 @Component(
         immediate = true,
-        property = {
-                "org.ops4j.pax.logging.appender.name=Example"
-        }
-)
+        property = {"org.ops4j.pax.logging.appender.name=Example"})
 public class ExampleLogAppender implements PaxAppender {
 
     @Override
     public void doAppend(PaxLoggingEvent paxLoggingEvent) {
-        System.out.println(paxLoggingEvent.getLevel().toString() + " - " + paxLoggingEvent.getRenderedMessage());
+        System.out.println(
+                paxLoggingEvent.getLevel().toString()
+                        + " - "
+                        + paxLoggingEvent.getRenderedMessage());
     }
-
 }

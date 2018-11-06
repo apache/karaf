@@ -18,7 +18,6 @@ package org.apache.karaf.config.core;
 
 import java.io.IOException;
 import java.util.Map;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -33,8 +32,9 @@ public interface ConfigRepository {
 
     void update(String pid, Map<String, Object> properties) throws IOException;
 
-    String createFactoryConfiguration(String factoryPid, Map<String, Object> properties) throws IOException;
+    String createFactoryConfiguration(String factoryPid, Map<String, Object> properties)
+            throws IOException;
 
-    String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties) throws IOException;
-
+    String createFactoryConfiguration(
+            String factoryPid, String alias, Map<String, Object> properties) throws IOException;
 }

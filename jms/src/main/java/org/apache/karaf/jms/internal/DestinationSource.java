@@ -16,13 +16,14 @@
  */
 package org.apache.karaf.jms.internal;
 
-import javax.jms.JMSContext;
 import java.util.List;
+import javax.jms.JMSContext;
 
 interface DestinationSource {
 
     enum DestinationType {
-        Queue, Topic
+        Queue,
+        Topic
     }
 
     interface Factory {

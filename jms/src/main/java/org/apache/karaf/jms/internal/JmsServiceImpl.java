@@ -16,6 +16,14 @@
  */
 package org.apache.karaf.jms.internal;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.jms.*;
+import javax.jms.Queue;
 import org.apache.karaf.jms.JmsMessage;
 import org.apache.karaf.jms.JmsService;
 import org.ops4j.pax.jms.service.ConnectionFactoryFactory;
@@ -26,25 +34,13 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import javax.jms.*;
-import javax.jms.Queue;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
-
-/**
- * Default implementation of the JMS Service.
- */
+/** Default implementation of the JMS Service. */
 public class JmsServiceImpl implements JmsService {
 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
     private Path deployFolder;
-    
+
     public JmsServiceImpl() {
         deployFolder = Paths.get(System.getProperty("karaf.base"), "deploy");
     }
@@ -55,13 +51,16 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public void create(String name, String type, String url, String username, String password, String pool) throws Exception {
+    public void create(
+            String name, String type, String url, String username, String password, String pool)
+            throws Exception {
         if (type == null) {
             throw new IllegalArgumentException("JMS connection factory type not known");
         }
 
         if (connectionFactories().contains(name)) {
-            throw new IllegalArgumentException("There is already a ConnectionFactory with the name " + name);
+            throw new IllegalArgumentException(
+                    "There is already a ConnectionFactory with the name " + name);
         }
 
         Dictionary<String, String> properties = new Hashtable<>();
@@ -77,7 +76,8 @@ public class JmsServiceImpl implements JmsService {
         if (pool.equals("transx") || type.equalsIgnoreCase("activemq")) {
             put(properties, "pool", "transx");
         }
-        Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.connectionfactory", null);
+        Configuration config =
+                configAdmin.createFactoryConfiguration("org.ops4j.connectionfactory", null);
         config.update(properties);
     }
 
@@ -89,7 +89,10 @@ public class JmsServiceImpl implements JmsService {
 
     @Override
     public void delete(String name) throws Exception {
-        String filter = String.format("(&(service.factoryPid=org.ops4j.connectionfactory)(%s=%s))", ConnectionFactoryFactory.JMS_CONNECTIONFACTORY_NAME, name);
+        String filter =
+                String.format(
+                        "(&(service.factoryPid=org.ops4j.connectionfactory)(%s=%s))",
+                        ConnectionFactoryFactory.JMS_CONNECTIONFACTORY_NAME, name);
         Configuration[] configs = configAdmin.listConfigurations(filter);
         for (Configuration config : configs) {
             config.delete();
@@ -98,7 +101,9 @@ public class JmsServiceImpl implements JmsService {
 
     @Override
     public List<String> connectionFactories() throws Exception {
-        return bundleContext.getServiceReferences(ConnectionFactory.class, null).stream()
+        return bundleContext
+                .getServiceReferences(ConnectionFactory.class, null)
+                .stream()
                 .map(this::getConnectionFactoryName)
                 .distinct()
                 .collect(Collectors.toList());
@@ -124,7 +129,8 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public Map<String, String> info(String connectionFactory, String username, String password) throws IOException, JMSException {
+    public Map<String, String> info(String connectionFactory, String username, String password)
+            throws IOException, JMSException {
         try (JMSContext context = createContext(connectionFactory, username, password)) {
             ConnectionMetaData metaData = context.getMetaData();
             Map<String, String> map = new HashMap<>();
@@ -135,7 +141,9 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public int count(String connectionFactory, final String destination, String username, String password) throws IOException, JMSException {
+    public int count(
+            String connectionFactory, final String destination, String username, String password)
+            throws IOException, JMSException {
         try (JMSContext context = createContext(connectionFactory, username, password)) {
             try (QueueBrowser browser = context.createBrowser(context.createQueue(destination))) {
                 @SuppressWarnings("unchecked")
@@ -154,7 +162,8 @@ public class JmsServiceImpl implements JmsService {
         return createContext(name, username, password, JMSContext.AUTO_ACKNOWLEDGE);
     }
 
-    private JMSContext createContext(String name, String username, String password, int sessionMode) {
+    private JMSContext createContext(
+            String name, String username, String password, int sessionMode) {
         ServiceReference<ConnectionFactory> sr = lookupConnectionFactory(name);
         ConnectionFactory cf = bundleContext.getService(sr);
         try {
@@ -166,23 +175,34 @@ public class JmsServiceImpl implements JmsService {
 
     private ServiceReference<ConnectionFactory> lookupConnectionFactory(String name) {
         try {
-            Collection<ServiceReference<ConnectionFactory>> references = bundleContext.getServiceReferences(
-                    ConnectionFactory.class,
-                    "(|(osgi.jndi.service.name=" + name + ")(name=" + name + ")(service.id=" + name + "))");
-            return references.stream()
+            Collection<ServiceReference<ConnectionFactory>> references =
+                    bundleContext.getServiceReferences(
+                            ConnectionFactory.class,
+                            "(|(osgi.jndi.service.name="
+                                    + name
+                                    + ")(name="
+                                    + name
+                                    + ")(service.id="
+                                    + name
+                                    + "))");
+            return references
+                    .stream()
                     .sorted(Comparator.<ServiceReference<?>>naturalOrder().reversed())
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("No JMS connection factory found for " + name));
+                    .orElseThrow(
+                            () ->
+                                    new IllegalArgumentException(
+                                            "No JMS connection factory found for " + name));
         } catch (InvalidSyntaxException e) {
             throw new RuntimeException("Error finding connection factory service " + name, e);
         }
     }
 
     private DestinationSource getDestinationSource(JMSContext context) throws JMSException {
-        List<DestinationSource.Factory> factories = Arrays.asList(
-                new ActiveMQDestinationSourceFactory(),
-                new ArtemisDestinationSourceFactory()
-        );
+        List<DestinationSource.Factory> factories =
+                Arrays.asList(
+                        new ActiveMQDestinationSourceFactory(),
+                        new ArtemisDestinationSourceFactory());
         DestinationSource source = null;
         for (DestinationSource.Factory factory : factories) {
             source = factory.create(context);
@@ -195,24 +215,31 @@ public class JmsServiceImpl implements JmsService {
         }
         return source;
     }
-    
+
     @Override
-    public List<String> queues(String connectionFactory, String username, String password) throws JMSException, IOException {
+    public List<String> queues(String connectionFactory, String username, String password)
+            throws JMSException, IOException {
         try (JMSContext context = createContext(connectionFactory, username, password)) {
             return getDestinationSource(context).getNames(DestinationSource.DestinationType.Queue);
         }
     }
 
     @Override
-    public List<String> topics(String connectionFactory, String username, String password) throws IOException, JMSException {
+    public List<String> topics(String connectionFactory, String username, String password)
+            throws IOException, JMSException {
         try (JMSContext context = createContext(connectionFactory, username, password)) {
             return getDestinationSource(context).getNames(DestinationSource.DestinationType.Topic);
         }
     }
 
     @Override
-    public List<JmsMessage> browse(String connectionFactory, final String queue, final String filter,
-                                   String username, String password) throws JMSException, IOException {
+    public List<JmsMessage> browse(
+            String connectionFactory,
+            final String queue,
+            final String filter,
+            String username,
+            String password)
+            throws JMSException, IOException {
         try (JMSContext context = createContext(connectionFactory, username, password)) {
             try (QueueBrowser browser = context.createBrowser(context.createQueue(queue), filter)) {
                 List<JmsMessage> messages = new ArrayList<>();
@@ -229,8 +256,14 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public void send(String connectionFactory, final String queue, final String body, final String replyTo,
-                     String username, String password) throws IOException, JMSException {
+    public void send(
+            String connectionFactory,
+            final String queue,
+            final String body,
+            final String replyTo,
+            String username,
+            String password)
+            throws IOException, JMSException {
         try (JMSContext context = createContext(connectionFactory, username, password)) {
             JMSProducer producer = context.createProducer();
             if (replyTo != null) {
@@ -241,10 +274,16 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public int consume(String connectionFactory, final String queue, final String selector, String username,
-                       String password) throws Exception {
+    public int consume(
+            String connectionFactory,
+            final String queue,
+            final String selector,
+            String username,
+            String password)
+            throws Exception {
         try (JMSContext context = createContext(connectionFactory, username, password)) {
-            try (JMSConsumer consumer = context.createConsumer(context.createQueue(queue), selector)) {
+            try (JMSConsumer consumer =
+                    context.createConsumer(context.createQueue(queue), selector)) {
                 int count = 0;
                 Message message;
                 do {
@@ -259,9 +298,17 @@ public class JmsServiceImpl implements JmsService {
     }
 
     @Override
-    public int move(String connectionFactory, final String sourceQueue, final String targetQueue,
-                    final String selector, String username, String password) throws IOException, JMSException {
-        try (JMSContext context = createContext(connectionFactory, username, password, JMSContext.SESSION_TRANSACTED)) {
+    public int move(
+            String connectionFactory,
+            final String sourceQueue,
+            final String targetQueue,
+            final String selector,
+            String username,
+            String password)
+            throws IOException, JMSException {
+        try (JMSContext context =
+                createContext(
+                        connectionFactory, username, password, JMSContext.SESSION_TRANSACTED)) {
             Queue source = context.createQueue(sourceQueue);
             Queue target = context.createQueue(targetQueue);
             try (JMSConsumer consumer = context.createConsumer(source, selector)) {
@@ -279,7 +326,7 @@ public class JmsServiceImpl implements JmsService {
                 return count;
             }
         }
-   }
+    }
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;

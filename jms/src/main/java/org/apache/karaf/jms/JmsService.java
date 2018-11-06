@@ -19,9 +19,7 @@ package org.apache.karaf.jms;
 import java.util.List;
 import java.util.Map;
 
-/**
- * JMS Service.
- */
+/** JMS Service. */
 public interface JmsService {
 
     /**
@@ -61,7 +59,8 @@ public interface JmsService {
      * @param pool Kind of pool to use.
      * @throws Exception If the service fails.
      */
-    void create(String name, String type, String url, String username, String password, String pool) throws Exception;
+    void create(String name, String type, String url, String username, String password, String pool)
+            throws Exception;
 
     /**
      * Delete a JMS connection factory.
@@ -80,7 +79,8 @@ public interface JmsService {
      * @return A {@link Map} (property/value) containing details.
      * @throws Exception If the service fails.
      */
-    Map<String, String> info(String connectionFactory, String username, String password) throws Exception;
+    Map<String, String> info(String connectionFactory, String username, String password)
+            throws Exception;
 
     /**
      * Count the number of messages in a JMS queue.
@@ -92,7 +92,8 @@ public interface JmsService {
      * @return The number of messages in a JMS queue.
      * @throws Exception If the service fails.
      */
-    int count(String connectionFactory, String queue, String username, String password) throws Exception;
+    int count(String connectionFactory, String queue, String username, String password)
+            throws Exception;
 
     /**
      * List the queues.
@@ -103,7 +104,8 @@ public interface JmsService {
      * @return The {@link List} of queues.
      * @throws Exception If the service fails.
      */
-    List<String> queues(String connectionFactory, String username, String password) throws Exception;
+    List<String> queues(String connectionFactory, String username, String password)
+            throws Exception;
 
     /**
      * List the topics.
@@ -114,7 +116,8 @@ public interface JmsService {
      * @return The {@link List} of topics.
      * @throws Exception If the service fails.
      */
-    List<String> topics(String connectionFactory, String username, String password) throws Exception;
+    List<String> topics(String connectionFactory, String username, String password)
+            throws Exception;
 
     /**
      * Browse a destination.
@@ -127,7 +130,13 @@ public interface JmsService {
      * @return The {@link List} of messages.
      * @throws Exception If the service fails.
      */
-    List<JmsMessage> browse(String connectionFactory, String queue, String selector, String username, String password) throws Exception;
+    List<JmsMessage> browse(
+            String connectionFactory,
+            String queue,
+            String selector,
+            String username,
+            String password)
+            throws Exception;
 
     /**
      * Send a message on the given queue.
@@ -140,7 +149,14 @@ public interface JmsService {
      * @param password The (optional) password to connect to the JMS broker.
      * @throws Exception If the service fails.
      */
-    void send(String connectionFactory, String queue, String body, String replyTo, String username, String password) throws Exception;
+    void send(
+            String connectionFactory,
+            String queue,
+            String body,
+            String replyTo,
+            String username,
+            String password)
+            throws Exception;
 
     /**
      * Consume messages from a given destination.
@@ -153,7 +169,13 @@ public interface JmsService {
      * @return The number of messages consumed.
      * @throws Exception If the service fails.
      */
-    int consume(String connectionFactory, String queue, String selector, String username, String password) throws Exception;
+    int consume(
+            String connectionFactory,
+            String queue,
+            String selector,
+            String username,
+            String password)
+            throws Exception;
 
     /**
      * Move messages from a destination to another.
@@ -167,6 +189,12 @@ public interface JmsService {
      * @return The number of messages moved.
      * @throws Exception If the service fails.
      */
-    int move(String connectionFactory, String sourceQueue, String targetQueue, String selector, String username, String password) throws Exception;
-
+    int move(
+            String connectionFactory,
+            String sourceQueue,
+            String targetQueue,
+            String selector,
+            String username,
+            String password)
+            throws Exception;
 }

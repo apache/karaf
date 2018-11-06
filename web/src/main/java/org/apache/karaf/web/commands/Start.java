@@ -27,11 +27,15 @@ import org.apache.karaf.web.WebContainerService;
 @Service
 public class Start implements Action {
 
-    @Argument(index = 0, name = "ids", description = "The list of bundle IDs separated by whitespaces", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "ids",
+            description = "The list of bundle IDs separated by whitespaces",
+            required = true,
+            multiValued = true)
     java.util.List<Long> ids;
 
-    @Reference
-    private WebContainerService webContainerService;
+    @Reference private WebContainerService webContainerService;
 
     public void setWebContainerService(WebContainerService webContainerService) {
         this.webContainerService = webContainerService;
@@ -42,5 +46,4 @@ public class Start implements Action {
         webContainerService.start(ids);
         return null;
     }
-    
 }

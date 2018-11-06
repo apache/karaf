@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-
 import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
@@ -62,7 +61,8 @@ public class TestDownloadManager implements DownloadManager, Downloader {
     }
 
     @Override
-    public void download(final String location, final DownloadCallback downloadCallback) throws MalformedURLException {
+    public void download(final String location, final DownloadCallback downloadCallback)
+            throws MalformedURLException {
         if (!providers.containsKey(location)) {
             providers.putIfAbsent(location, createProvider(location));
         }
@@ -112,8 +112,7 @@ public class TestDownloadManager implements DownloadManager, Downloader {
 
         @Override
         public InputStream open() throws IOException {
-            if (exception != null)
-                throw exception;
+            if (exception != null) throw exception;
             return new ByteArrayInputStream(data);
         }
 
@@ -121,6 +120,5 @@ public class TestDownloadManager implements DownloadManager, Downloader {
         public File getFile() throws IOException {
             throw new UnsupportedOperationException();
         }
-
     }
 }

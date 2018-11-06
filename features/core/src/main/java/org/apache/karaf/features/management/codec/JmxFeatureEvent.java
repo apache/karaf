@@ -22,7 +22,6 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
 
@@ -40,14 +39,14 @@ public class JmxFeatureEvent {
             itemValues[1] = event.getFeature().getVersion();
             itemValues[2] = event.getRegion();
             switch (event.getType()) {
-            case FeatureInstalled:
-                itemValues[2] = FeaturesServiceMBean.FEATURE_EVENT_EVENT_TYPE_INSTALLED;
-                break;
-            case FeatureUninstalled:
-                itemValues[2] = FeaturesServiceMBean.FEATURE_EVENT_EVENT_TYPE_UNINSTALLED;
-                break;
-            default:
-                throw new IllegalStateException("Unsupported event type: " + event.getType());
+                case FeatureInstalled:
+                    itemValues[2] = FeaturesServiceMBean.FEATURE_EVENT_EVENT_TYPE_INSTALLED;
+                    break;
+                case FeatureUninstalled:
+                    itemValues[2] = FeaturesServiceMBean.FEATURE_EVENT_EVENT_TYPE_UNINSTALLED;
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported event type: " + event.getType());
             }
             data = new CompositeDataSupport(FEATURE_EVENT, itemNames, itemValues);
         } catch (OpenDataException e) {
@@ -79,8 +78,8 @@ public class JmxFeatureEvent {
             itemDescriptions[2] = "The type of the event";
             itemDescriptions[3] = "The region of this feature";
 
-            return new CompositeType("FeatureEvent", description, itemNames,
-                    itemDescriptions, itemTypes);
+            return new CompositeType(
+                    "FeatureEvent", description, itemNames, itemDescriptions, itemTypes);
         } catch (OpenDataException e) {
             throw new IllegalStateException("Unable to build featureEvent type", e);
         }

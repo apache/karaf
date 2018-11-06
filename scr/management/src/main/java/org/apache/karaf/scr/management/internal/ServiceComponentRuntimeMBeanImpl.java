@@ -16,6 +16,16 @@
  */
 package org.apache.karaf.scr.management.internal;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.management.MBeanServer;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.StandardMBean;
+import javax.management.openmbean.TabularData;
 import org.apache.karaf.scr.management.ServiceComponentRuntimeMBean;
 import org.apache.karaf.scr.management.codec.JmxComponentConfiguration;
 import org.apache.karaf.scr.management.codec.JmxComponentDescription;
@@ -30,31 +40,25 @@ import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.MBeanServer;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-import javax.management.StandardMBean;
-import javax.management.openmbean.TabularData;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 @Component(
         name = ServiceComponentRuntimeMBeanImpl.COMPONENT_NAME,
         enabled = true,
         immediate = true,
-        properties = {"org/apache/karaf/scr/management/internal/ServiceComponentRuntimeMBeanImpl.properties"})
-public class ServiceComponentRuntimeMBeanImpl extends StandardMBean implements ServiceComponentRuntimeMBean {
+        properties = {
+            "org/apache/karaf/scr/management/internal/ServiceComponentRuntimeMBeanImpl.properties"
+        })
+public class ServiceComponentRuntimeMBeanImpl extends StandardMBean
+        implements ServiceComponentRuntimeMBean {
 
-    public static final String OBJECT_NAME = "org.apache.karaf:type=scr,name=" + System.getProperty("karaf.name", "root");
+    public static final String OBJECT_NAME =
+            "org.apache.karaf:type=scr,name=" + System.getProperty("karaf.name", "root");
 
     public static final String COMPONENT_NAME = "ServiceComponentRuntimeMBean";
 
     public static final String COMPONENT_LABEL = "Apache Karaf ServiceComponentRuntime MBean";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceComponentRuntimeMBeanImpl.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ServiceComponentRuntimeMBeanImpl.class);
 
     private MBeanServer mBeanServer;
 
@@ -74,7 +78,7 @@ public class ServiceComponentRuntimeMBeanImpl extends StandardMBean implements S
     }
 
     /**
-     * Service component activation call back.  Called when all dependencies are satisfied.
+     * Service component activation call back. Called when all dependencies are satisfied.
      *
      * @throws Exception If the activation fails.
      */
@@ -90,15 +94,17 @@ public class ServiceComponentRuntimeMBeanImpl extends StandardMBean implements S
                 mBeanServer.registerMBean(this, new ObjectName(OBJECT_NAME));
             }
         } catch (Exception e) {
-            LOGGER.error("Exception registering the SCR Management MBean: " + e.getLocalizedMessage(), e);
+            LOGGER.error(
+                    "Exception registering the SCR Management MBean: " + e.getLocalizedMessage(),
+                    e);
         } finally {
             lock.writeLock().unlock();
         }
     }
 
     /**
-     * Service component deactivation call back.  Called after the component is in an active
-     * state when any dependencies become unsatisfied.
+     * Service component deactivation call back. Called after the component is in an active state
+     * when any dependencies become unsatisfied.
      *
      * @throws Exception If the deactivation fails.
      */
@@ -123,16 +129,17 @@ public class ServiceComponentRuntimeMBeanImpl extends StandardMBean implements S
     @Override
     public TabularData getComponentConfigs() {
         return JmxComponentConfiguration.tableFrom(
-                scrService.getComponentDescriptionDTOs().stream()
-                    .map(c -> scrService.getComponentConfigurationDTOs(c))
-                    .flatMap(Collection::stream));
+                scrService
+                        .getComponentDescriptionDTOs()
+                        .stream()
+                        .map(c -> scrService.getComponentConfigurationDTOs(c))
+                        .flatMap(Collection::stream));
     }
 
     @Override
     public TabularData getComponentConfigs(long bundleId, String componentName) {
         return JmxComponentConfiguration.tableFrom(
-                scrService.getComponentConfigurationDTOs(
-                        findComponent(bundleId, componentName)));
+                scrService.getComponentConfigurationDTOs(findComponent(bundleId, componentName)));
     }
 
     public boolean isComponentEnabled(long bundleId, String componentName) {
@@ -173,5 +180,4 @@ public class ServiceComponentRuntimeMBeanImpl extends StandardMBean implements S
     public void unsetScrService(ServiceComponentRuntime scrService) {
         this.scrService = null;
     }
-
 }

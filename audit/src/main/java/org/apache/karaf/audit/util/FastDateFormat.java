@@ -52,9 +52,7 @@ public class FastDateFormat {
         this.locale = locale;
     }
 
-    /**
-     * Check whether the given instant if in the same day as the previous one.
-     */
+    /** Check whether the given instant if in the same day as the previous one. */
     public boolean sameDay(long now) {
         if (now >= midnightTomorrow || now < midnightToday) {
             updateMidnightMillis(now);
@@ -66,9 +64,7 @@ public class FastDateFormat {
         }
     }
 
-    /**
-     * Get the date formatted with the given pattern.
-     */
+    /** Get the date formatted with the given pattern. */
     public String getDate(long now, String pattern) {
         sameDay(now);
         String date = cache.get(pattern);
@@ -91,9 +87,7 @@ public class FastDateFormat {
         return date;
     }
 
-    /**
-     * Write the time in the HH:MM:SS[.sss] format to the given <code>Appendable</code>.
-     */
+    /** Write the time in the HH:MM:SS[.sss] format to the given <code>Appendable</code>. */
     public void writeTime(long now, boolean writeMillis, Appendable buffer) throws IOException {
         int ms = millisSinceMidnight(now);
 
@@ -110,7 +104,7 @@ public class FastDateFormat {
         // Hour
         int temp = hours / 10;
         buffer.append((char) (temp + '0'));
-        buffer.append ((char) (hours - 10 * temp + '0'));
+        buffer.append((char) (hours - 10 * temp + '0'));
         buffer.append(':');
 
         // Minute
@@ -161,13 +155,16 @@ public class FastDateFormat {
     private void updateDaylightSavingTime() {
         Arrays.fill(dstOffsets, 0);
         final int ONE_HOUR = (int) TimeUnit.HOURS.toMillis(1);
-        if (timeZone.getOffset(midnightToday) != timeZone.getOffset(midnightToday + 23 * ONE_HOUR)) {
+        if (timeZone.getOffset(midnightToday)
+                != timeZone.getOffset(midnightToday + 23 * ONE_HOUR)) {
             for (int i = 0; i < dstOffsets.length; i++) {
                 final long time = midnightToday + i * ONE_HOUR;
                 dstOffsets[i] = timeZone.getOffset(time) - timeZone.getRawOffset();
             }
             if (dstOffsets[0] > dstOffsets[23]) { // clock is moved backwards.
-                // we obtain midnightTonight with Calendar.getInstance(TimeZone), so it already includes raw offset
+                // we obtain midnightTonight with Calendar.getInstance(TimeZone), so it already
+                // includes raw
+                // offset
                 for (int i = dstOffsets.length - 1; i >= 0; i--) {
                     dstOffsets[i] -= dstOffsets[0]; //
                 }

@@ -16,16 +16,15 @@
  */
 package org.apache.karaf.profile.impl;
 
+import static org.apache.karaf.profile.impl.Utils.join;
+
+import java.util.*;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.ProfileMBean;
 import org.apache.karaf.profile.ProfileService;
-
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import java.util.*;
-
-import static org.apache.karaf.profile.impl.Utils.join;
 
 public class ProfileMBeanImpl extends StandardMBean implements ProfileMBean {
 
@@ -52,9 +51,10 @@ public class ProfileMBeanImpl extends StandardMBean implements ProfileMBean {
 
     @Override
     public void rename(String name, String newName) {
-        Profile profile = ProfileBuilder.Factory.createFrom(profileService.getProfile(name))
-                .identity(newName)
-                .getProfile();
+        Profile profile =
+                ProfileBuilder.Factory.createFrom(profileService.getProfile(name))
+                        .identity(newName)
+                        .getProfile();
         profileService.createProfile(profile);
         profileService.deleteProfile(name);
     }
@@ -66,22 +66,20 @@ public class ProfileMBeanImpl extends StandardMBean implements ProfileMBean {
 
     @Override
     public void create(String name, List<String> parents) {
-        Profile profile = ProfileBuilder.Factory.create(name)
-                .setParents(parents)
-                .getProfile();
+        Profile profile = ProfileBuilder.Factory.create(name).setParents(parents).getProfile();
         profileService.createProfile(profile);
     }
 
     @Override
     public void copy(String source, String target) {
-        Profile profile = ProfileBuilder.Factory.createFrom(profileService.getProfile(source))
-                .identity(target)
-                .getProfile();
+        Profile profile =
+                ProfileBuilder.Factory.createFrom(profileService.getProfile(source))
+                        .identity(target)
+                        .getProfile();
         profileService.createProfile(profile);
     }
 
     public void setProfileService(ProfileService profileService) {
         this.profileService = profileService;
     }
-
 }

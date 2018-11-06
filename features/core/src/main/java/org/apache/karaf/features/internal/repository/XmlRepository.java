@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Repository conforming to the OSGi Repository specification.
- * The content of the URL can be gzipped.
+ * Repository conforming to the OSGi Repository specification. The content of the URL can be
+ * gzipped.
  */
 public class XmlRepository extends org.apache.felix.utils.repository.XmlRepository {
 
@@ -45,5 +45,4 @@ public class XmlRepository extends org.apache.felix.utils.repository.XmlReposito
             }
         }
     }
-
 }

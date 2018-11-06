@@ -26,19 +26,19 @@ import org.apache.directory.server.core.integ.FrameworkRunner;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
-@RunWith ( FrameworkRunner.class )
+@RunWith(FrameworkRunner.class)
 @CreateLdapServer(transports = {@CreateTransport(protocol = "LDAP")})
-@CreateDS(name = "LdapLoginModuleWithEscapesTest-class",
- partitions = { @CreatePartition(name = "example", suffix = "dc=example,dc=com") })
-@ApplyLdifFiles(
-   "org/apache/karaf/jaas/modules/ldap/example.com_with_escapes.ldif"
-)
+@CreateDS(
+        name = "LdapLoginModuleWithEscapesTest-class",
+        partitions = {@CreatePartition(name = "example", suffix = "dc=example,dc=com")})
+@ApplyLdifFiles("org/apache/karaf/jaas/modules/ldap/example.com_with_escapes.ldif")
 public class LdapLoginModuleWithEscapesTest extends LdapLoginModuleTest {
-    
+
     @Before
     @Override
     public void updatePort() throws Exception {
-        ldapProps("org/apache/karaf/jaas/modules/ldap/ldap.properties", 
-                  LdapLoginModuleTest::replacePort);
+        ldapProps(
+                "org/apache/karaf/jaas/modules/ldap/ldap.properties",
+                LdapLoginModuleTest::replacePort);
     }
 }

@@ -25,16 +25,29 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Parsing;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "jdbc", name = "execute", description = "Execute a SQL command on a given JDBC datasource")
+@Command(
+        scope = "jdbc",
+        name = "execute",
+        description = "Execute a SQL command on a given JDBC datasource")
 @Parsing(JdbcParser.class)
 @Service
 public class ExecuteCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "datasource", description = "The JDBC datasource", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "datasource",
+            description = "The JDBC datasource",
+            required = true,
+            multiValued = false)
     @Completion(DataSourcesNameCompleter.class)
     String datasource;
 
-    @Argument(index = 1, name = "command", description = "The SQL command to execute", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "command",
+            description = "The SQL command to execute",
+            required = true,
+            multiValued = false)
     @Completion(SqlCompleter.class)
     String command;
 
@@ -43,5 +56,4 @@ public class ExecuteCommand extends JdbcCommandSupport {
         this.getJdbcService().execute(datasource, command);
         return null;
     }
-
 }

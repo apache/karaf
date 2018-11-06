@@ -16,9 +16,9 @@
  */
 package org.apache.karaf.docker;
 
+import java.util.Map;
 import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
-import java.util.Map;
 
 public interface DockerMBean {
 
@@ -28,9 +28,18 @@ public interface DockerMBean {
 
     Map<String, String> version(String url) throws MBeanException;
 
-    void provision(String name, String sshPort, String jmxRmiPort, String jmxRmiRegistryPort, String httpPort, boolean copy, String url) throws MBeanException;
+    void provision(
+            String name,
+            String sshPort,
+            String jmxRmiPort,
+            String jmxRmiRegistryPort,
+            String httpPort,
+            boolean copy,
+            String url)
+            throws MBeanException;
 
-    void rm(String container, boolean removeVolumes, boolean force, String url) throws MBeanException;
+    void rm(String container, boolean removeVolumes, boolean force, String url)
+            throws MBeanException;
 
     void rename(String container, String newName, String url) throws MBeanException;
 
@@ -46,9 +55,17 @@ public interface DockerMBean {
 
     void unpause(String container, String url) throws MBeanException;
 
-    String logs(String container, boolean stdout, boolean stderr, boolean timestamps, boolean details, String url) throws MBeanException;
+    String logs(
+            String container,
+            boolean stdout,
+            boolean stderr,
+            boolean timestamps,
+            boolean details,
+            String url)
+            throws MBeanException;
 
-    void commit(String container, String repo, String tag, String message, String url) throws MBeanException;
+    void commit(String container, String repo, String tag, String message, String url)
+            throws MBeanException;
 
     TabularData images(String url) throws MBeanException;
 
@@ -61,5 +78,4 @@ public interface DockerMBean {
     void pull(String image, String tag, String url) throws MBeanException;
 
     void push(String image, String tag, String url) throws MBeanException;
-
 }

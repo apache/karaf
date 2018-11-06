@@ -34,5 +34,4 @@ public class URIAwareComparator implements Comparator<String> {
         }
         return u1.compareTo(u2);
     }
-
 }

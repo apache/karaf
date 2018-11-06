@@ -17,7 +17,6 @@
 package org.apache.karaf.service.command;
 
 import java.util.concurrent.TimeoutException;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -31,28 +30,36 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 
-/**
- * Command that can be used to wait for an OSGi service.
- */
+/** Command that can be used to wait for an OSGi service. */
 @Command(scope = "service", name = "wait", description = "Wait for a given OSGi service.")
 @Service
 public class Wait implements Action {
 
-    @Option(name = "-e", aliases = { "--exception" }, description = "throw an exception if the service is not found after the timeout")
+    @Option(
+            name = "-e",
+            aliases = {"--exception"},
+            description = "throw an exception if the service is not found after the timeout")
     boolean exception;
 
-    @Option(name = "-t", aliases = { "--timeout" }, description = "timeout to wait for the service (in milliseconds, negative to not wait at all, zero to wait forever)")
+    @Option(
+            name = "-t",
+            aliases = {"--timeout"},
+            description =
+                    "timeout to wait for the service (in milliseconds, negative to not wait at all, zero to wait forever)")
     long timeout = 0;
 
-    @Argument(name = "service", description="The service class or filter", required = true, multiValued = false)
+    @Argument(
+            name = "service",
+            description = "The service class or filter",
+            required = true,
+            multiValued = false)
     String service;
 
-    @Reference
-    BundleContext bundleContext;
+    @Reference BundleContext bundleContext;
 
     @Override
     public Object execute() throws Exception {
-        ServiceTracker<?,?> tracker = null;
+        ServiceTracker<?, ?> tracker = null;
         try {
             String filter = service;
             if (!filter.startsWith("(")) {
@@ -69,7 +76,8 @@ public class Wait implements Action {
                 svc = tracker.waitForService(timeout);
             }
             if (exception && svc == null) {
-                throw new TimeoutException("Can not find service '" + service + "' in the OSGi registry");
+                throw new TimeoutException(
+                        "Can not find service '" + service + "' in the OSGi registry");
             }
             return svc != null;
         } catch (InvalidSyntaxException e) {
@@ -82,5 +90,4 @@ public class Wait implements Action {
             }
         }
     }
-
 }

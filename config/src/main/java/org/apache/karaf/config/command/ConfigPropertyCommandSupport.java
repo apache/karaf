@@ -21,12 +21,15 @@ import org.apache.karaf.config.command.completers.ConfigurationCompleter;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 
-/**
- * Abstract class which commands that are related to property processing should extend.
- */
+/** Abstract class which commands that are related to property processing should extend. */
 public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport {
 
-    @Option(name = "-p", aliases = "--pid", description = "The configuration pid", required = false, multiValued = false)
+    @Option(
+            name = "-p",
+            aliases = "--pid",
+            description = "The configuration pid",
+            required = false,
+            multiValued = false)
     @Completion(ConfigurationCompleter.class)
     protected String pid;
 
@@ -39,7 +42,7 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
                 props = new TypedProperties();
             }
             propertyAction(props);
-            if(requiresUpdate(pid)) {
+            if (requiresUpdate(pid)) {
                 this.configRepository.update(pid, props);
             }
         }
@@ -54,8 +57,8 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     protected abstract void propertyAction(TypedProperties props);
 
     /**
-     * Check if the configuration requires to be updated.
-     * The default behavior is to update if a valid pid has been passed to the method.
+     * Check if the configuration requires to be updated. The default behavior is to update if a
+     * valid pid has been passed to the method.
      *
      * @param pid the PID to check.
      * @return <code>true</code> if the configuration requires an update, <code>false</code> else.
@@ -65,7 +68,8 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     }
 
     /**
-     * Retrieve configuration from the pid, if used or delegates to session from getting the configuration.
+     * Retrieve configuration from the pid, if used or delegates to session from getting the
+     * configuration.
      *
      * @return the edited dictionary.
      * @throws Exception in case of configuration failure.
@@ -74,10 +78,8 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
     protected TypedProperties getEditedProps() throws Exception {
         if (pid != null) {
             return this.configRepository.getConfig(pid);
-        }
-        else {
+        } else {
             return super.getEditedProps();
         }
     }
-
 }

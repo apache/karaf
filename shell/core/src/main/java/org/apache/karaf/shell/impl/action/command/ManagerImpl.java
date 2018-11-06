@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Destroy;
@@ -64,7 +63,8 @@ public class ManagerImpl implements Manager {
         if (!allowCustomServices) {
             Service reg = clazz.getAnnotation(Service.class);
             if (reg == null) {
-                throw new IllegalArgumentException("Class " + clazz.getName() + " is not annotated with @Service");
+                throw new IllegalArgumentException(
+                        "Class " + clazz.getName() + " is not annotated with @Service");
             }
         }
         T instance = clazz.newInstance();
@@ -77,9 +77,12 @@ public class ManagerImpl implements Manager {
                     Object value;
                     if (type.getRawClass() == List.class) {
                         Set<Object> set = new HashSet<>();
-                        set.addAll(registry.getServices(type.getActualTypeArgument(0).getRawClass()));
+                        set.addAll(
+                                registry.getServices(type.getActualTypeArgument(0).getRawClass()));
                         if (registry != this.dependencies) {
-                            set.addAll(this.dependencies.getServices(type.getActualTypeArgument(0).getRawClass()));
+                            set.addAll(
+                                    this.dependencies.getServices(
+                                            type.getActualTypeArgument(0).getRawClass()));
                         }
                         value = new ArrayList<>(set);
                     } else {
@@ -89,7 +92,8 @@ public class ManagerImpl implements Manager {
                         }
                     }
                     if (!allowCustomServices && value == null && !ref.optional()) {
-                        throw new IllegalStateException("No service matching " + field.getType().getName());
+                        throw new IllegalStateException(
+                                "No service matching " + field.getType().getName());
                     }
                     field.setAccessible(true);
                     field.set(instance, value);
@@ -98,7 +102,9 @@ public class ManagerImpl implements Manager {
         }
         for (Method method : clazz.getDeclaredMethods()) {
             Init ann = method.getAnnotation(Init.class);
-            if (ann != null && method.getParameterTypes().length == 0 && method.getReturnType() == void.class) {
+            if (ann != null
+                    && method.getParameterTypes().length == 0
+                    && method.getReturnType() == void.class) {
                 method.setAccessible(true);
                 method.invoke(instance);
             }
@@ -111,12 +117,15 @@ public class ManagerImpl implements Manager {
         if (!allowCustomServices) {
             Service reg = clazz.getAnnotation(Service.class);
             if (reg == null) {
-                throw new IllegalArgumentException("Class " + clazz.getName() + " is not annotated with @Service");
+                throw new IllegalArgumentException(
+                        "Class " + clazz.getName() + " is not annotated with @Service");
             }
         }
         for (Method method : clazz.getDeclaredMethods()) {
             Destroy ann = method.getAnnotation(Destroy.class);
-            if (ann != null && method.getParameterTypes().length == 0 && method.getReturnType() == void.class) {
+            if (ann != null
+                    && method.getParameterTypes().length == 0
+                    && method.getReturnType() == void.class) {
                 method.setAccessible(true);
                 method.invoke(instance);
             }
@@ -128,14 +137,16 @@ public class ManagerImpl implements Manager {
     public void register(Class<?> clazz) {
         if (!allowCustomServices) {
             Service reg = clazz.getAnnotation(Service.class);
-            if (reg == null ) {
-                throw new IllegalArgumentException("Class " + clazz.getName() + " is not annotated with @Service");
+            if (reg == null) {
+                throw new IllegalArgumentException(
+                        "Class " + clazz.getName() + " is not annotated with @Service");
             }
         }
         if (Action.class.isAssignableFrom(clazz)) {
             final Command cmd = clazz.getAnnotation(Command.class);
             if (cmd == null) {
-                throw new IllegalArgumentException("Command " + clazz.getName() + " is not annotated with @Command");
+                throw new IllegalArgumentException(
+                        "Command " + clazz.getName() + " is not annotated with @Command");
             }
             Object command = new ActionCommand(this, (Class<? extends Action>) clazz);
             synchronized (instances) {

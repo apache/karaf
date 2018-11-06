@@ -18,8 +18,7 @@ package org.apache.karaf.features.internal.resolver;
 
 import org.slf4j.Logger;
 
-/**
- */
+/** */
 public class Slf4jResolverLog extends org.apache.felix.resolver.Logger {
 
     private final Logger logger;

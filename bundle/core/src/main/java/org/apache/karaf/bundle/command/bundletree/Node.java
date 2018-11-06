@@ -22,18 +22,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Represent a node in a {@link Tree}
- */
+/** Represent a node in a {@link Tree} */
 public class Node<T> {
-    
+
     private final T value;
     private Node<T> parent;
     private List<Node<T>> children = new LinkedList<>();
 
     /**
-     * Create a new node. Only meant for wrapper use,
-     * new nodes should be added using the {@link #addChild(Object)} method
+     * Create a new node. Only meant for wrapper use, new nodes should be added using the {@link
+     * #addChild(Object)} method
      *
      * @param value the node value
      */
@@ -43,8 +41,8 @@ public class Node<T> {
     }
 
     /**
-     * Create a new node. Only meant for wrapper use,
-     * new nodes should be added using the {@link #addChild(Object)} method.
+     * Create a new node. Only meant for wrapper use, new nodes should be added using the {@link
+     * #addChild(Object)} method.
      *
      * @param value the node value.
      * @param parent the parent node.
@@ -111,7 +109,7 @@ public class Node<T> {
             return value.equals(parent.value) || parent.hasAncestor(value);
         }
     }
-    
+
     public boolean hasChild(T value) {
         for (Node<T> child : getChildren()) {
             if (value.equals(child.getValue())) {
@@ -155,7 +153,7 @@ public class Node<T> {
      */
     private boolean[] concat(boolean[] array, boolean element) {
         boolean[] result = new boolean[array.length + 1];
-        for (int i = 0 ; i < array.length ; i++) {
+        for (int i = 0; i < array.length; i++) {
             result[i] = array[i];
         }
         result[array.length] = element;

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleState;
 import org.osgi.framework.Bundle;
@@ -43,9 +42,9 @@ public class BundleInfoImpl implements BundleInfo {
     private boolean isFragment;
     private List<Bundle> fragments;
     private List<Bundle> fragmentHosts;
-    
+
     private static Map<Integer, BundleState> bundleStateMap;
-    
+
     static {
         bundleStateMap = new HashMap<>();
         bundleStateMap.put(Bundle.ACTIVE, BundleState.Active);
@@ -61,7 +60,8 @@ public class BundleInfoImpl implements BundleInfo {
         this.name = bundle.getHeaders().get(Constants.BUNDLE_NAME);
         this.symbolicName = bundle.getSymbolicName();
         String locationFromHeader = bundle.getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
-        this.updateLocation = locationFromHeader != null ? locationFromHeader : bundle.getLocation();
+        this.updateLocation =
+                locationFromHeader != null ? locationFromHeader : bundle.getLocation();
         this.version = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
         this.revisions = populateRevisions(bundle);
         this.bundleId = bundle.getBundleId();
@@ -84,7 +84,7 @@ public class BundleInfoImpl implements BundleInfo {
             }
         }
     }
-    
+
     private String populateRevisions(Bundle bundle) {
         String ret = "";
         BundleRevisions revisions = bundle.adapt(BundleRevisions.class);
@@ -98,7 +98,8 @@ public class BundleInfoImpl implements BundleInfo {
     }
 
     private void getFragments(BundleRevision revision) {
-        List<BundleWire> wires = revision.getWiring().getProvidedWires(BundleRevision.HOST_NAMESPACE);
+        List<BundleWire> wires =
+                revision.getWiring().getProvidedWires(BundleRevision.HOST_NAMESPACE);
         if (wires != null) {
             for (BundleWire w : wires) {
                 Bundle b = w.getRequirerWiring().getBundle();
@@ -108,7 +109,8 @@ public class BundleInfoImpl implements BundleInfo {
     }
 
     private void getFragmentHosts(BundleRevision revision) {
-        List<BundleWire> wires = revision.getWiring().getRequiredWires(BundleRevision.HOST_NAMESPACE);
+        List<BundleWire> wires =
+                revision.getWiring().getRequiredWires(BundleRevision.HOST_NAMESPACE);
         if (wires != null) {
             for (BundleWire w : wires) {
                 Bundle b = w.getProviderWiring().getBundle();
@@ -153,7 +155,7 @@ public class BundleInfoImpl implements BundleInfo {
     public BundleState getState() {
         return this.state;
     }
-    
+
     @Override
     public int getStartLevel() {
         return this.startLevel;
@@ -163,7 +165,7 @@ public class BundleInfoImpl implements BundleInfo {
     public boolean isFragment() {
         return this.isFragment;
     }
-    
+
     @Override
     public List<Bundle> getFragments() {
         return this.fragments;
@@ -178,5 +180,4 @@ public class BundleInfoImpl implements BundleInfo {
     public String getRevisions() {
         return this.revisions;
     }
-
 }

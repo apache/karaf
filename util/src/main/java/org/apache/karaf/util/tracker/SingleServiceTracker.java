@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -31,7 +30,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
-//This is from aries util
+// This is from aries util
 public final class SingleServiceTracker<T> implements ServiceListener {
 
     private final BundleContext ctx;
@@ -43,15 +42,20 @@ public final class SingleServiceTracker<T> implements ServiceListener {
     private final String filterString;
     private final Filter filter;
 
-    public SingleServiceTracker(BundleContext context, Class<T> clazz, BiConsumer<T, T> sl) throws InvalidSyntaxException {
+    public SingleServiceTracker(BundleContext context, Class<T> clazz, BiConsumer<T, T> sl)
+            throws InvalidSyntaxException {
         this(context, clazz, null, sl);
     }
 
-    public SingleServiceTracker(BundleContext context, Class<T> clazz, String filterString, BiConsumer<T, T> sl) throws InvalidSyntaxException {
+    public SingleServiceTracker(
+            BundleContext context, Class<T> clazz, String filterString, BiConsumer<T, T> sl)
+            throws InvalidSyntaxException {
         this(context, clazz.getName(), filterString, sl);
     }
 
-    public SingleServiceTracker(BundleContext context, String className, String filterString, BiConsumer<T, T> sl) throws InvalidSyntaxException {
+    public SingleServiceTracker(
+            BundleContext context, String className, String filterString, BiConsumer<T, T> sl)
+            throws InvalidSyntaxException {
         this.ctx = context;
         this.className = className;
         this.serviceListener = sl;
@@ -113,7 +117,8 @@ public final class SingleServiceTracker<T> implements ServiceListener {
                 if (service != null) {
                     clear = false;
 
-                    // We do the unget out of the lock so we don't exit this class while holding a lock.
+                    // We do the unget out of the lock so we don't exit this class while holding a
+                    // lock.
                     if (!update(original, r, service)) {
                         ctx.ungetService(r);
                     }

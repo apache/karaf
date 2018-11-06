@@ -23,11 +23,15 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
 public abstract class DockerCommandSupport implements Action {
 
-    @Option(name = "-u", aliases = "--url", description = "The location of the Docker REST API", required = false, multiValued = false)
+    @Option(
+            name = "-u",
+            aliases = "--url",
+            description = "The location of the Docker REST API",
+            required = false,
+            multiValued = false)
     String url;
 
-    @Reference
-    private DockerService dockerService;
+    @Reference private DockerService dockerService;
 
     public DockerService getDockerService() {
         return dockerService;
@@ -36,5 +40,4 @@ public abstract class DockerCommandSupport implements Action {
     public void setDockerService(DockerService dockerService) {
         this.dockerService = dockerService;
     }
-
 }

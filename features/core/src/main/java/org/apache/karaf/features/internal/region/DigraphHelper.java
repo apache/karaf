@@ -33,7 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.util.json.JsonReader;
 import org.apache.karaf.util.json.JsonWriter;
@@ -56,19 +55,17 @@ public final class DigraphHelper {
     private static final String HEAD = "head";
     private static final String POLICY = "policy";
 
-    private DigraphHelper() {
-    }
+    private DigraphHelper() {}
 
-    public static StandardRegionDigraph loadDigraph(BundleContext bundleContext) throws BundleException, IOException, InvalidSyntaxException {
+    public static StandardRegionDigraph loadDigraph(BundleContext bundleContext)
+            throws BundleException, IOException, InvalidSyntaxException {
         StandardRegionDigraph digraph;
         ThreadLocal<Region> threadLocal = new ThreadLocal<>();
         File digraphFile = bundleContext.getDataFile(DIGRAPH_FILE);
         if (digraphFile == null || !digraphFile.exists()) {
             digraph = new StandardRegionDigraph(bundleContext, threadLocal);
         } else {
-            try (
-                    InputStream in = new FileInputStream(digraphFile)
-            ) {
+            try (InputStream in = new FileInputStream(digraphFile)) {
                 digraph = readDigraph(new DataInputStream(in), bundleContext, threadLocal);
             }
         }
@@ -76,22 +73,21 @@ public final class DigraphHelper {
     }
 
     public static void saveDigraph(File outFile, RegionDigraph digraph) {
-        try (
-            FileOutputStream out = new FileOutputStream(outFile)
-        ) {
+        try (FileOutputStream out = new FileOutputStream(outFile)) {
             saveDigraph(digraph, out);
         } catch (Exception e) {
             // Ignore
         }
     }
 
-    @SuppressWarnings({
-     "unchecked", "rawtypes"
-    })
-    static StandardRegionDigraph readDigraph(InputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws IOException, BundleException, InvalidSyntaxException {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static StandardRegionDigraph readDigraph(
+            InputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal)
+            throws IOException, BundleException, InvalidSyntaxException {
         StandardRegionDigraph digraph = new StandardRegionDigraph(bundleContext, threadLocal);
         Map json = (Map) JsonReader.read(in);
-        Map<String, Collection<Number>> regions = (Map<String, Collection<Number>>) json.get(REGIONS);
+        Map<String, Collection<Number>> regions =
+                (Map<String, Collection<Number>>) json.get(REGIONS);
         for (Map.Entry<String, Collection<Number>> rmap : regions.entrySet()) {
             String name = rmap.getKey();
             Region region = digraph.createRegion(name);
@@ -103,7 +99,8 @@ public final class DigraphHelper {
         for (Map<String, Object> e : edges) {
             String tail = (String) e.get(TAIL);
             String head = (String) e.get(HEAD);
-            Map<String, Collection<String>> policy = (Map<String, Collection<String>>) e.get(POLICY);
+            Map<String, Collection<String>> policy =
+                    (Map<String, Collection<String>>) e.get(POLICY);
             RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
             for (Map.Entry<String, Collection<String>> rf : policy.entrySet()) {
                 String ns = rf.getKey();
@@ -132,7 +129,6 @@ public final class DigraphHelper {
                 edge.put(HEAD, fr.getRegion().getName());
                 edge.put(POLICY, fr.getFilter().getSharingPolicy());
                 edges.add(edge);
-
             }
         }
         JsonWriter.write(out, json);
@@ -147,8 +143,9 @@ public final class DigraphHelper {
         }
         return bundlesPerRegion;
     }
-    
-    public static Map<String, Map<String, Map<String, Set<String>>>> getPolicies(RegionDigraph digraph) {
+
+    public static Map<String, Map<String, Map<String, Set<String>>>> getPolicies(
+            RegionDigraph digraph) {
         Map<String, Map<String, Map<String, Set<String>>>> filtersPerRegion = new HashMap<>();
         if (digraph == null) {
             return filtersPerRegion;
@@ -159,9 +156,9 @@ public final class DigraphHelper {
                 Map<String, Set<String>> policy = new HashMap<>();
                 Map<String, Collection<String>> current = fr.getFilter().getSharingPolicy();
                 for (Map.Entry<String, Collection<String>> entry : current.entrySet()) {
-                	for(String f : entry.getValue()) {
-                		 addToMapSet(policy, entry.getKey(), f);
-                	}
+                    for (String f : entry.getValue()) {
+                        addToMapSet(policy, entry.getKey(), f);
+                    }
                 }
                 edges.put(fr.getRegion().getName(), policy);
             }
@@ -170,7 +167,8 @@ public final class DigraphHelper {
         return filtersPerRegion;
     }
 
-    public static void verifyUnmanagedBundles(BundleContext bundleContext, RegionDigraph dg) throws BundleException {
+    public static void verifyUnmanagedBundles(BundleContext bundleContext, RegionDigraph dg)
+            throws BundleException {
         // Create default region is missing
         Region defaultRegion = dg.getRegion(FeaturesServiceImpl.ROOT_REGION);
         if (defaultRegion == null) {

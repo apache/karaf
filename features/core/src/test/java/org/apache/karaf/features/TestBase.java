@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.features;
 
+import static java.util.Arrays.asList;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -23,19 +27,15 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-
 import org.easymock.EasyMock;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.startlevel.BundleStartLevel;
 
-import static java.util.Arrays.asList;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-
 public class TestBase {
-    public Bundle createDummyBundle(long id, final String symbolicName, Dictionary<String,String> headers) {
+    public Bundle createDummyBundle(
+            long id, final String symbolicName, Dictionary<String, String> headers) {
         Bundle bundle = EasyMock.createNiceMock(Bundle.class);
-        
+
         // Be aware that this means all bundles are treated as different
         expect(bundle.compareTo(EasyMock.anyObject())).andReturn(1).anyTimes();
 
@@ -48,10 +48,10 @@ public class TestBase {
         replay(bundle, sl);
         return bundle;
     }
-    
-    public Dictionary<String, String> headers(String ... keyAndHeader) {
+
+    public Dictionary<String, String> headers(String... keyAndHeader) {
         Hashtable<String, String> headersTable = new Hashtable<>();
-        int c=0;
+        int c = 0;
         while (c < keyAndHeader.length) {
             String key = keyAndHeader[c++];
             String value = keyAndHeader[c++];
@@ -59,8 +59,8 @@ public class TestBase {
         }
         return headersTable;
     }
-    
-    public Map<String, Map<String, Feature>> features(Feature ... features) {
+
+    public Map<String, Map<String, Feature>> features(Feature... features) {
         final Map<String, Map<String, Feature>> featuresMap = new HashMap<>();
         for (Feature feature : features) {
             Map<String, Feature> featureVersion = getOrCreate(featuresMap, feature);
@@ -68,8 +68,9 @@ public class TestBase {
         }
         return featuresMap;
     }
-    
-    private Map<String, Feature> getOrCreate(final Map<String, Map<String, Feature>> featuresMap, Feature feature) {
+
+    private Map<String, Feature> getOrCreate(
+            final Map<String, Map<String, Feature>> featuresMap, Feature feature) {
         return featuresMap.computeIfAbsent(feature.getName(), k -> new HashMap<>());
     }
 
@@ -80,21 +81,20 @@ public class TestBase {
     public Feature feature(String name, String version) {
         return new org.apache.karaf.features.internal.model.Feature(name, version);
     }
-    
-    public Set<Bundle> setOf(Bundle ... elements) {
-        return new HashSet<>(Arrays.asList(elements));
-    }
-    
-    public Set<Long> setOf(Long ... elements) {
-        return new HashSet<>(Arrays.asList(elements));
-    }
-    
-    public Set<String> setOf(String ... elements) {
-        return new HashSet<>(asList(elements));
-    }
-    
-    public Set<Feature> setOf(Feature ... elements) {
+
+    public Set<Bundle> setOf(Bundle... elements) {
         return new HashSet<>(Arrays.asList(elements));
     }
 
+    public Set<Long> setOf(Long... elements) {
+        return new HashSet<>(Arrays.asList(elements));
+    }
+
+    public Set<String> setOf(String... elements) {
+        return new HashSet<>(asList(elements));
+    }
+
+    public Set<Feature> setOf(Feature... elements) {
+        return new HashSet<>(Arrays.asList(elements));
+    }
 }

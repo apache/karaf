@@ -20,7 +20,6 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.karaf.log.core.Level;
 
 public class LogServiceLog4j1Impl implements LogServiceInternal {
@@ -55,7 +54,7 @@ public class LogServiceLog4j1Impl implements LogServiceInternal {
 
         String l = logger;
         String val;
-        for (;;) {
+        for (; ; ) {
             String prop;
             if (l == null) {
                 prop = ROOT_LOGGER_PREFIX;
@@ -75,8 +74,7 @@ public class LogServiceLog4j1Impl implements LogServiceInternal {
             }
         }
 
-        if (logger == null)
-            logger = ROOT_LOGGER;
+        if (logger == null) logger = ROOT_LOGGER;
 
         loggers.put(logger, val);
 
@@ -137,5 +135,4 @@ public class LogServiceLog4j1Impl implements LogServiceInternal {
             return val;
         }
     }
-
 }

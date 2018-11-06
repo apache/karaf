@@ -1,18 +1,15 @@
 /**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.apache.karaf.deployer.wrap;
@@ -22,13 +19,10 @@ import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.util.DeployerUtils;
 
-/**
- * A deployment listener that listens for non OSGi jar deployements.
- */
+/** A deployment listener that listens for non OSGi jar deployements. */
 public class WrapDeploymentListener implements ArtifactUrlTransformer {
 
     public boolean canHandle(File artifact) {
@@ -41,8 +35,12 @@ public class WrapDeploymentListener implements ArtifactUrlTransformer {
                 // only handle non OSGi jar
                 Manifest manifest = jar.getManifest();
                 return manifest == null
-                        || manifest.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) == null
-                        || manifest.getMainAttributes().getValue(new Attributes.Name("Bundle-Version")) == null;
+                        || manifest.getMainAttributes()
+                                        .getValue(new Attributes.Name("Bundle-SymbolicName"))
+                                == null
+                        || manifest.getMainAttributes()
+                                        .getValue(new Attributes.Name("Bundle-Version"))
+                                == null;
             }
         } catch (Exception e) {
             return false;
@@ -50,15 +48,20 @@ public class WrapDeploymentListener implements ArtifactUrlTransformer {
     }
 
     public URL transform(URL artifact) throws Exception {
-        try
-        {
+        try {
             String path = artifact.getPath();
-            String name = path.substring( path.lastIndexOf('/') + 1);
-            String[] nv = DeployerUtils.extractNameVersionType( name );
-            return new URL("wrap", null, artifact.toExternalForm() + "$Bundle-SymbolicName=" + nv[0] + "&Bundle-Version=" + nv[1]);
+            String name = path.substring(path.lastIndexOf('/') + 1);
+            String[] nv = DeployerUtils.extractNameVersionType(name);
+            return new URL(
+                    "wrap",
+                    null,
+                    artifact.toExternalForm()
+                            + "$Bundle-SymbolicName="
+                            + nv[0]
+                            + "&Bundle-Version="
+                            + nv[1]);
         } catch (Exception e) {
             return new URL("wrap", null, artifact.toExternalForm());
         }
     }
-
 }

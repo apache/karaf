@@ -16,14 +16,11 @@
  */
 package org.apache.karaf.jdbc;
 
+import java.util.Map;
 import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
 
-import java.util.Map;
-
-/**
- * JDBC MBean
- */
+/** JDBC MBean */
 public interface JdbcMBean {
 
     /**
@@ -47,7 +44,16 @@ public interface JdbcMBean {
      * @param databaseType The database type (ConnectionPoolDataSource, XADataSource or DataSource).
      * @throws MBeanException In case of MBean failure.
      */
-    void create(String name, String driverName, String driverClass, String databaseName, String url, String user, String password, String databaseType) throws MBeanException;
+    void create(
+            String name,
+            String driverName,
+            String driverClass,
+            String databaseName,
+            String url,
+            String user,
+            String password,
+            String databaseType)
+            throws MBeanException;
 
     /**
      * Delete a JDBC datasource.
@@ -93,5 +99,4 @@ public interface JdbcMBean {
      * @throws MBeanException In case of MBean failure.
      */
     TabularData query(String datasource, String query) throws MBeanException;
-
 }

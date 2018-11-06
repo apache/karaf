@@ -18,6 +18,8 @@
  */
 package org.apache.karaf.features.internal.model.processing;
 
+import static org.apache.karaf.features.internal.service.Overrides.OVERRIDE_RANGE;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
@@ -35,42 +37,44 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.FeaturePattern;
-import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.features.LocationPattern;
+import org.apache.karaf.features.internal.service.Blacklist;
 import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.karaf.features.internal.service.Overrides.OVERRIDE_RANGE;
-
 /**
- * A set of instructions to process {@link org.apache.karaf.features.internal.model.Features} model. The actual
- * use of these instructions is moved to {@link org.apache.karaf.features.internal.service.FeaturesProcessorImpl}
+ * A set of instructions to process {@link org.apache.karaf.features.internal.model.Features} model.
+ * The actual use of these instructions is moved to {@link
+ * org.apache.karaf.features.internal.service.FeaturesProcessorImpl}
  */
 @XmlRootElement(name = "featuresProcessing", namespace = FeaturesProcessing.FEATURES_PROCESSING_NS)
-@XmlType(name = "featuresProcessing", propOrder = {
-        "blacklistedRepositories",
-        "blacklistedFeatures",
-        "blacklistedBundles",
-        "overrideBundleDependency",
-        "bundleReplacements",
-        "featureReplacements"
-})
+@XmlType(
+        name = "featuresProcessing",
+        propOrder = {
+            "blacklistedRepositories",
+            "blacklistedFeatures",
+            "blacklistedBundles",
+            "overrideBundleDependency",
+            "bundleReplacements",
+            "featureReplacements"
+        })
 @XmlAccessorType(XmlAccessType.FIELD)
 public class FeaturesProcessing {
 
     public static Logger LOG = LoggerFactory.getLogger(FeaturesProcessing.class);
-    public static final String FEATURES_PROCESSING_NS = "http://karaf.apache.org/xmlns/features-processing/v1.0.0";
+    public static final String FEATURES_PROCESSING_NS =
+            "http://karaf.apache.org/xmlns/features-processing/v1.0.0";
 
     @XmlElementWrapper(name = "blacklistedRepositories")
     @XmlElement(name = "repository")
     private List<String> blacklistedRepositories = new LinkedList<>();
+
     @XmlTransient
     private List<LocationPattern> blacklistedRepositoryLocationPatterns = new LinkedList<>();
 
@@ -82,17 +86,13 @@ public class FeaturesProcessing {
     @XmlElement(name = "bundle")
     private List<String> blacklistedBundles = new LinkedList<>();
 
-    @XmlElement
-    private OverrideBundleDependency overrideBundleDependency;
+    @XmlElement private OverrideBundleDependency overrideBundleDependency;
 
-    @XmlElement
-    private BundleReplacements bundleReplacements;
+    @XmlElement private BundleReplacements bundleReplacements;
 
-    @XmlElement
-    private FeatureReplacements featureReplacements;
+    @XmlElement private FeatureReplacements featureReplacements;
 
-    @XmlTransient
-    private Blacklist blacklist;
+    @XmlTransient private Blacklist blacklist;
 
     public FeaturesProcessing() {
         overrideBundleDependency = new OverrideBundleDependency();
@@ -145,8 +145,9 @@ public class FeaturesProcessing {
     }
 
     /**
-     * <p>Perform <em>compilation</em> of rules declared in feature processing XML file.</p>
-     * <p>Additional blacklist and overrides definitions will be added to this model</p>
+     * Perform <em>compilation</em> of rules declared in feature processing XML file.
+     *
+     * <p>Additional blacklist and overrides definitions will be added to this model
      *
      * @param blacklist additional {@link Blacklist} definition with lower priority
      * @param overrides additional overrides definition with lower priority
@@ -156,43 +157,87 @@ public class FeaturesProcessing {
         List<String> blacklisted = new LinkedList<>();
 
         // compile blacklisted repository URIs (from XML and additional blacklist)
-        blacklist.getRepositoryBlacklist().stream()
+        blacklist
+                .getRepositoryBlacklist()
+                .stream()
                 .map(LocationPattern::getOriginalUri)
                 .forEach(uri -> getBlacklistedRepositories().add(uri));
         for (String repositoryURI : getBlacklistedRepositories()) {
             try {
                 blacklistedRepositoryLocationPatterns.add(new LocationPattern(repositoryURI));
-                blacklisted.add(repositoryURI + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_REPOSITORY);
+                blacklisted.add(
+                        repositoryURI
+                                + ";"
+                                + Blacklist.BLACKLIST_TYPE
+                                + "="
+                                + Blacklist.TYPE_REPOSITORY);
             } catch (IllegalArgumentException e) {
-                LOG.warn("Can't parse blacklisted repository location pattern: " + repositoryURI + ". Ignoring.");
+                LOG.warn(
+                        "Can't parse blacklisted repository location pattern: "
+                                + repositoryURI
+                                + ". Ignoring.");
             }
         }
 
         // add external blacklisted features to this model
-        blacklist.getFeatureBlacklist()
-                .forEach(fb -> getBlacklistedFeatures().add(new BlacklistedFeature(fb.getName(), fb.getVersion())));
-        blacklisted.addAll(getBlacklistedFeatures().stream()
-                .map(bf -> bf.getName() + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_FEATURE + (bf.getVersion() == null ? "" : ";" + FeaturePattern.RANGE + "=\"" + bf.getVersion() + "\""))
-                .collect(Collectors.toList()));
+        blacklist
+                .getFeatureBlacklist()
+                .forEach(
+                        fb ->
+                                getBlacklistedFeatures()
+                                        .add(
+                                                new BlacklistedFeature(
+                                                        fb.getName(), fb.getVersion())));
+        blacklisted.addAll(
+                getBlacklistedFeatures()
+                        .stream()
+                        .map(
+                                bf ->
+                                        bf.getName()
+                                                + ";"
+                                                + Blacklist.BLACKLIST_TYPE
+                                                + "="
+                                                + Blacklist.TYPE_FEATURE
+                                                + (bf.getVersion() == null
+                                                        ? ""
+                                                        : ";"
+                                                                + FeaturePattern.RANGE
+                                                                + "=\""
+                                                                + bf.getVersion()
+                                                                + "\""))
+                        .collect(Collectors.toList()));
 
         // add external blacklisted bundle URIs to this model
-        blacklist.getBundleBlacklist().stream()
+        blacklist
+                .getBundleBlacklist()
+                .stream()
                 .map(LocationPattern::getOriginalUri)
                 .forEach(uri -> getBlacklistedBundles().add(uri));
-        blacklisted.addAll(getBlacklistedBundles().stream()
-                .map(bl -> bl + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_BUNDLE)
-                .collect(Collectors.toList()));
+        blacklisted.addAll(
+                getBlacklistedBundles()
+                        .stream()
+                        .map(
+                                bl ->
+                                        bl
+                                                + ";"
+                                                + Blacklist.BLACKLIST_TYPE
+                                                + "="
+                                                + Blacklist.TYPE_BUNDLE)
+                        .collect(Collectors.toList()));
 
         this.blacklist = new Blacklist(blacklisted);
 
         // verify bundle override definitions (from XML and additional overrides)
         bundleReplacements.getOverrideBundles().addAll(parseOverridesClauses(overrides));
-        for (Iterator<BundleReplacements.OverrideBundle> iterator = bundleReplacements.getOverrideBundles().iterator(); iterator.hasNext(); ) {
+        for (Iterator<BundleReplacements.OverrideBundle> iterator =
+                        bundleReplacements.getOverrideBundles().iterator();
+                iterator.hasNext(); ) {
             BundleReplacements.OverrideBundle overrideBundle = iterator.next();
             if (overrideBundle.getOriginalUri() == null) {
                 // we have to derive it from replacement - as with etc/overrides.properties entry
                 if (overrideBundle.getMode() == BundleReplacements.BundleOverrideMode.MAVEN) {
-                    LOG.warn("Can't override bundle in maven mode without explicit original URL. Switching to osgi mode.");
+                    LOG.warn(
+                            "Can't override bundle in maven mode without explicit original URL. Switching to osgi mode.");
                     overrideBundle.setMode(BundleReplacements.BundleOverrideMode.OSGI);
                 }
                 String originalUri = calculateOverridenURI(overrideBundle.getReplacement(), null);
@@ -206,18 +251,24 @@ public class FeaturesProcessing {
             try {
                 overrideBundle.compile();
             } catch (MalformedURLException e) {
-                LOG.warn("Can't parse override URL location pattern: " + overrideBundle.getOriginalUri() + ". Ignoring.");
+                LOG.warn(
+                        "Can't parse override URL location pattern: "
+                                + overrideBundle.getOriginalUri()
+                                + ". Ignoring.");
                 iterator.remove();
             }
         }
     }
 
     /**
-     * Changes overrides list (old format) into a list of {@link BundleReplacements.OverrideBundle} definitions.
+     * Changes overrides list (old format) into a list of {@link BundleReplacements.OverrideBundle}
+     * definitions.
+     *
      * @param overrides
      * @return
      */
-    public static Collection<? extends BundleReplacements.OverrideBundle> parseOverridesClauses(Set<String> overrides) {
+    public static Collection<? extends BundleReplacements.OverrideBundle> parseOverridesClauses(
+            Set<String> overrides) {
         List<BundleReplacements.OverrideBundle> result = new LinkedList<>();
 
         for (Clause clause : Parser.parseClauses(overrides.toArray(new String[overrides.size()]))) {
@@ -238,7 +289,10 @@ public class FeaturesProcessing {
                     override.compile();
                     result.add(override);
                 } catch (MalformedURLException e) {
-                    LOG.warn("Can't parse override URL location pattern: " + originalUri + ". Ignoring.");
+                    LOG.warn(
+                            "Can't parse override URL location pattern: "
+                                    + originalUri
+                                    + ". Ignoring.");
                 }
             }
         }
@@ -247,17 +301,20 @@ public class FeaturesProcessing {
     }
 
     /**
-     * For <code>etc/overrides.properties</code>, we know what is the target URI for bundles we should use. We need
-     * a pattern of original bundle URIs that are candidates for replacement
+     * For <code>etc/overrides.properties</code>, we know what is the target URI for bundles we
+     * should use. We need a pattern of original bundle URIs that are candidates for replacement
+     *
      * @param replacement
      * @param range
      * @return
      */
     private static String calculateOverridenURI(String replacement, String range) {
         try {
-            org.apache.karaf.util.maven.Parser parser = new org.apache.karaf.util.maven.Parser(replacement);
+            org.apache.karaf.util.maven.Parser parser =
+                    new org.apache.karaf.util.maven.Parser(replacement);
             if (parser.getVersion() != null
-                    && (parser.getVersion().startsWith("[") || parser.getVersion().startsWith("("))) {
+                    && (parser.getVersion().startsWith("[")
+                            || parser.getVersion().startsWith("("))) {
                 // replacement URI should not contain ranges
                 throw new MalformedURLException("Override URI should use single version.");
             }
@@ -266,28 +323,39 @@ public class FeaturesProcessing {
                 VersionRange vr = new VersionRange(range, true);
                 if (vr.isOpenCeiling() && vr.getCeiling() == VersionRange.INFINITE_VERSION) {
                     // toString() will give only floor version
-                    parser.setVersion(String.format("%s%s,*)",
-                            vr.isOpenFloor() ? "(" : "[",
-                            vr.getFloor()));
+                    parser.setVersion(
+                            String.format("%s%s,*)", vr.isOpenFloor() ? "(" : "[", vr.getFloor()));
                 } else {
                     parser.setVersion(vr.toString());
                 }
             } else {
-                // no range: originalUri based on replacemenet URI with range deducted using default rules
+                // no range: originalUri based on replacemenet URI with range deducted using default
+                // rules
                 // assume version in override URI is NOT a range
                 Version v;
                 try {
                     v = new Version(VersionCleaner.clean(parser.getVersion()));
                 } catch (IllegalArgumentException e) {
-                    LOG.warn("Problem parsing override URI \"" + replacement + "\": " + e.getMessage() + ". Version ranges are not handled. Ignoring.");
+                    LOG.warn(
+                            "Problem parsing override URI \""
+                                    + replacement
+                                    + "\": "
+                                    + e.getMessage()
+                                    + ". Version ranges are not handled. Ignoring.");
                     return null;
                 }
                 Version vfloor = new Version(v.getMajor(), v.getMinor(), 0, null);
-                parser.setVersion(new VersionRange(false, vfloor, v, v.compareTo(vfloor) > 0).toString());
+                parser.setVersion(
+                        new VersionRange(false, vfloor, v, v.compareTo(vfloor) > 0).toString());
             }
             return parser.toMvnURI();
         } catch (MalformedURLException e) {
-            LOG.warn("Problem parsing override URI \"" + replacement + "\": " + e.getMessage() + ". Ignoring.");
+            LOG.warn(
+                    "Problem parsing override URI \""
+                            + replacement
+                            + "\": "
+                            + e.getMessage()
+                            + ". Ignoring.");
             return null;
         }
     }
@@ -295,13 +363,10 @@ public class FeaturesProcessing {
     @XmlType(name = "blacklistedFeature")
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class BlacklistedFeature {
-        @XmlValue
-        private String name;
-        @XmlAttribute
-        private String version;
+        @XmlValue private String name;
+        @XmlAttribute private String version;
 
-        public BlacklistedFeature() {
-        }
+        public BlacklistedFeature() {}
 
         public BlacklistedFeature(String name, String version) {
             this.name = name;
@@ -324,5 +389,4 @@ public class FeaturesProcessing {
             this.version = version;
         }
     }
-
 }

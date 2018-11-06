@@ -18,17 +18,12 @@ package org.apache.karaf.jaas.config.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.security.auth.login.AppConfigurationEntry;
-
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.osgi.framework.BundleContext;
 
-/**
- * An implementation of JaasRealm which is created
- * by the spring namespace handler.
- */
+/** An implementation of JaasRealm which is created by the spring namespace handler. */
 public class Config implements JaasRealm {
 
     private String name;
@@ -75,7 +70,7 @@ public class Config implements JaasRealm {
             Module[] modules = this.modules;
             AppConfigurationEntry[] entries = new AppConfigurationEntry[modules.length];
             for (int i = 0; i < modules.length; i++) {
-                Map<String,Object> options = new HashMap<>();
+                Map<String, Object> options = new HashMap<>();
                 // put the bundle context in the options map
                 // it's required to be able to use the encryption service
                 // in the AbstractKarafLoginModule
@@ -86,10 +81,14 @@ public class Config implements JaasRealm {
                     }
                 }
                 options.put(ProxyLoginModule.PROPERTY_MODULE, modules[i].getClassName());
-                options.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
-                entries[i] = new AppConfigurationEntry(ProxyLoginModule.class.getName(),
-                                                       getControlFlag(modules[i].getFlags()),
-                                                       options);
+                options.put(
+                        ProxyLoginModule.PROPERTY_BUNDLE,
+                        Long.toString(bundleContext.getBundle().getBundleId()));
+                entries[i] =
+                        new AppConfigurationEntry(
+                                ProxyLoginModule.class.getName(),
+                                getControlFlag(modules[i].getFlags()),
+                                options);
             }
             this.entries = entries;
         }

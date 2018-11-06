@@ -29,12 +29,11 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-
 import org.apache.karaf.features.LocationPattern;
 
-@XmlType(name = "bundleReplacements", propOrder = {
-        "overrideBundles"
-})
+@XmlType(
+        name = "bundleReplacements",
+        propOrder = {"overrideBundles"})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class BundleReplacements {
 
@@ -57,14 +56,10 @@ public class BundleReplacements {
     @XmlType(name = "overrideBundle")
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class OverrideBundle {
-        @XmlAttribute
-        private String originalUri;
-        @XmlTransient
-        private LocationPattern originalUriPattern;
-        @XmlAttribute
-        private String replacement;
-        @XmlAttribute
-        private BundleOverrideMode mode = BundleOverrideMode.OSGI;
+        @XmlAttribute private String originalUri;
+        @XmlTransient private LocationPattern originalUriPattern;
+        @XmlAttribute private String replacement;
+        @XmlAttribute private BundleOverrideMode mode = BundleOverrideMode.OSGI;
 
         public String getOriginalUri() {
             return originalUri;
@@ -94,12 +89,9 @@ public class BundleReplacements {
             return originalUriPattern;
         }
 
-        /**
-         * Changes String for <code>originalUri</code> into {@link LocationPattern}
-         */
+        /** Changes String for <code>originalUri</code> into {@link LocationPattern} */
         public void compile() throws MalformedURLException {
             originalUriPattern = new LocationPattern(originalUri);
         }
     }
-
 }

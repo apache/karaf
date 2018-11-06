@@ -18,13 +18,16 @@ package org.apache.karaf.instance.core;
 
 public interface InstanceService {
 
-    Instance createInstance(String name, InstanceSettings settings, boolean printOutput) throws Exception;
+    Instance createInstance(String name, InstanceSettings settings, boolean printOutput)
+            throws Exception;
 
     void renameInstance(String name, String newName, boolean printOutput) throws Exception;
 
-    Instance cloneInstance(String name, String cloneName, InstanceSettings settings, boolean printOutput) throws Exception;
+    Instance cloneInstance(
+            String name, String cloneName, InstanceSettings settings, boolean printOutput)
+            throws Exception;
 
     Instance[] getInstances();
 
-    Instance getInstance(String name);    
+    Instance getInstance(String name);
 }

@@ -21,10 +21,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.karaf.features.internal.download.StreamProvider;
 
-public abstract class AbstractDownloadTask extends DefaultFuture<AbstractDownloadTask> implements Runnable, StreamProvider {
+public abstract class AbstractDownloadTask extends DefaultFuture<AbstractDownloadTask>
+        implements Runnable, StreamProvider {
 
     protected final String url;
     protected ScheduledExecutorService executorService;
@@ -67,5 +67,4 @@ public abstract class AbstractDownloadTask extends DefaultFuture<AbstractDownloa
         }
         setValue(exception);
     }
-
 }

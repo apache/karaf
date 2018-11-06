@@ -34,18 +34,14 @@ public class GreeterComponent {
 
     private GreeterService greeterService;
 
-    /**
-     * Called when all of the SCR Components required dependencies have been satisfied.
-     */
+    /** Called when all of the SCR Components required dependencies have been satisfied. */
     @Activate
     public void activate() {
         LOG.info("Activating the {}", COMPONENT_LABEL);
         greeterService.printGreetings();
     }
 
-    /**
-     * Called when any of the SCR Components required dependencies become unsatisfied.
-     */
+    /** Called when any of the SCR Components required dependencies become unsatisfied. */
     @Deactivate
     public void deactivate() {
         LOG.info("Deactivating the {}", COMPONENT_LABEL);
@@ -59,5 +55,4 @@ public class GreeterComponent {
     public void unsetGreeterService(final GreeterService greeterService) {
         this.greeterService = null;
     }
-
 }

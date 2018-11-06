@@ -18,6 +18,9 @@
  */
 package org.apache.karaf.features.internal.resolver;
 
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.Version;
@@ -28,18 +31,11 @@ import org.osgi.resource.Namespace;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
-import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
-
-public class ResolverUtil
-{
-    public static String getSymbolicName(Resource resource)
-    {
+public class ResolverUtil {
+    public static String getSymbolicName(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
-        for (Capability cap : caps)
-        {
-            if (cap.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE))
-            {
+        for (Capability cap : caps) {
+            if (cap.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)) {
                 return cap.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE).toString();
             }
         }
@@ -47,31 +43,27 @@ public class ResolverUtil
     }
 
     /**
-     * Returns name of owning {@link org.apache.karaf.features.internal.region.Subsystem} for given resource
+     * Returns name of owning {@link org.apache.karaf.features.internal.region.Subsystem} for given
+     * resource
+     *
      * @param resource
      * @return
      */
-    public static String getOwnerName(Resource resource)
-    {
+    public static String getOwnerName(Resource resource) {
         List<Requirement> reqs = resource.getRequirements(null);
-        for (Requirement req : reqs)
-        {
+        for (Requirement req : reqs) {
             if (req.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)
-                    && TYPE_SUBSYSTEM.equals(req.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE)))
-            {
+                    && TYPE_SUBSYSTEM.equals(req.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE))) {
                 return req.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE).toString();
             }
         }
         return null;
     }
 
-    public static Version getVersion(Resource resource)
-    {
+    public static Version getVersion(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
-        for (Capability cap : caps)
-        {
-            if (cap.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE))
-            {
+        for (Capability cap : caps) {
+            if (cap.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)) {
                 return (Version)
                         cap.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
             }
@@ -79,51 +71,41 @@ public class ResolverUtil
         return null;
     }
 
-    public static boolean isFragment(Resource resource)
-    {
+    public static boolean isFragment(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
-        for (Capability cap : caps)
-        {
-            if (cap.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE))
-            {
-                String type = (String)
-                        cap.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE);
+        for (Capability cap : caps) {
+            if (cap.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)) {
+                String type = (String) cap.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE);
                 return (type != null) && type.equals(IdentityNamespace.TYPE_FRAGMENT);
             }
         }
         return false;
     }
 
-    public static boolean isOptional(Requirement req)
-    {
+    public static boolean isOptional(Requirement req) {
         String resolution = req.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
         return Namespace.RESOLUTION_OPTIONAL.equalsIgnoreCase(resolution);
     }
 
-    public static boolean isMultiple(Requirement req)
-    {
-        return Namespace.CARDINALITY_MULTIPLE.equals(req.getDirectives()
-                .get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE)) && !isDynamic(req);
+    public static boolean isMultiple(Requirement req) {
+        return Namespace.CARDINALITY_MULTIPLE.equals(
+                        req.getDirectives().get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE))
+                && !isDynamic(req);
     }
 
-    public static boolean isDynamic(Requirement req)
-    {
-        return PackageNamespace.RESOLUTION_DYNAMIC.equals(req.getDirectives()
-                .get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
+    public static boolean isDynamic(Requirement req) {
+        return PackageNamespace.RESOLUTION_DYNAMIC.equals(
+                req.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
     }
 
-    public static List<Requirement> getDynamicRequirements(List<Requirement> reqs)
-    {
+    public static List<Requirement> getDynamicRequirements(List<Requirement> reqs) {
         List<Requirement> result = new ArrayList<>();
-        if (reqs != null)
-        {
-            for (Requirement req : reqs)
-            {
-                String resolution = req.getDirectives()
-                        .get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+        if (reqs != null) {
+            for (Requirement req : reqs) {
+                String resolution =
+                        req.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
                 if ((resolution != null)
-                        && resolution.equals(PackageNamespace.RESOLUTION_DYNAMIC))
-                {
+                        && resolution.equals(PackageNamespace.RESOLUTION_DYNAMIC)) {
                     result.add(req);
                 }
             }

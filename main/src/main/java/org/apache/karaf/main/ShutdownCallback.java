@@ -19,20 +19,16 @@
 package org.apache.karaf.main;
 
 /**
- * <p>
- * This interface is a callback interface for the stopping process.
- * It's main purpose is to give the ServiceWrapper a way of waiting 
- * for the Framework to gracefully stop the Server. 
- * </p>
+ * This interface is a callback interface for the stopping process. It's main purpose is to give the
+ * ServiceWrapper a way of waiting for the Framework to gracefully stop the Server.
  */
 public interface ShutdownCallback {
 
-	/**
-	 * The callback method invoked to inform anyone listening that the 
-	 * Main class is still waiting for the completion of the shutdown.
-	 *
-	 * @param delay The delay to wait for shutdown.
-	 */
-	void waitingForShutdown(int delay);
-
+    /**
+     * The callback method invoked to inform anyone listening that the Main class is still waiting
+     * for the completion of the shutdown.
+     *
+     * @param delay The delay to wait for shutdown.
+     */
+    void waitingForShutdown(int delay);
 }

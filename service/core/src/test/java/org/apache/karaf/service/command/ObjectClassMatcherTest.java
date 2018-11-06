@@ -36,9 +36,10 @@ public class ObjectClassMatcherTest {
 
     @Test
     public void testMatchesAtLeastOneName() {
-        Assert.assertTrue(ObjectClassMatcher.matchesAtLeastOneName(new String[]{"other", "org.apache.TestClass"}, "TestClass"));
-        Assert.assertFalse(ObjectClassMatcher.matchesAtLeastOneName(new String[]{"TestClass2"}, "TestClass"));
+        Assert.assertTrue(
+                ObjectClassMatcher.matchesAtLeastOneName(
+                        new String[] {"other", "org.apache.TestClass"}, "TestClass"));
+        Assert.assertFalse(
+                ObjectClassMatcher.matchesAtLeastOneName(new String[] {"TestClass2"}, "TestClass"));
     }
-
-    
 }

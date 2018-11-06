@@ -24,7 +24,5 @@ public interface DownloadManager extends AutoCloseable {
 
     Map<String, StreamProvider> getProviders();
 
-    default void close() {
-    }
-
+    default void close() {}
 }

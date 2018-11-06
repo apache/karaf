@@ -16,10 +16,9 @@
  */
 package org.apache.karaf.docker.internal;
 
-import org.apache.karaf.docker.*;
-
 import java.io.*;
 import java.util.*;
+import org.apache.karaf.docker.*;
 
 public class DockerServiceImpl implements DockerService {
 
@@ -55,7 +54,8 @@ public class DockerServiceImpl implements DockerService {
     @Override
     public void create(String name, String url) throws Exception {
         // pull the java:8-jre-alpine image
-        // TODO it should be changed to the official karaf image as soon as it's available on Docker HUB
+        // TODO it should be changed to the official karaf image as soon as it's available on Docker
+        // HUB
         pull("java", "8-jre-alpine", true, url);
 
         // create a default Karaf docker container configuration
@@ -64,11 +64,12 @@ public class DockerServiceImpl implements DockerService {
         config.setAttachStdin(true);
         config.setAttachStderr(true);
         config.setAttachStdout(true);
-        // TODO it should be changed to the official karaf image as soon as it's available on Docker HUB
+        // TODO it should be changed to the official karaf image as soon as it's available on Docker
+        // HUB
         config.setImage("java:8-jre-alpine");
         config.setHostname("");
         config.setUser("");
-        config.setCmd(new String[]{ "/opt/apache-karaf/bin/karaf" });
+        config.setCmd(new String[] {"/opt/apache-karaf/bin/karaf"});
         config.setWorkingDir("");
         config.setOpenStdin(true);
         config.setStdinOnce(true);
@@ -86,11 +87,12 @@ public class DockerServiceImpl implements DockerService {
         // getting the container storage
         File containerStorage = new File(storageLocation, name);
         if (containerStorage.exists()) {
-            hostConfig.setBinds(new String[]{ containerStorage.getAbsolutePath() + ":/opt/apache-karaf" });
+            hostConfig.setBinds(
+                    new String[] {containerStorage.getAbsolutePath() + ":/opt/apache-karaf"});
         }
 
         hostConfig.setNetworkMode("bridge");
-        hostConfig.setLxcConf(new String[]{});
+        hostConfig.setLxcConf(new String[] {});
 
         Map<String, List<HostPortBinding>> portBindings = new HashMap<>();
         // ssh
@@ -138,7 +140,15 @@ public class DockerServiceImpl implements DockerService {
     }
 
     @Override
-    public void provision(String name, String sshPort, String jmxRmiPort, String jmxRmiRegistryPort, String httpPort, boolean copy, String url) throws Exception {
+    public void provision(
+            String name,
+            String sshPort,
+            String jmxRmiPort,
+            String jmxRmiRegistryPort,
+            String httpPort,
+            boolean copy,
+            String url)
+            throws Exception {
         // pull the java:8-jre-alpine image
         pull("java", "8-jre-alpine", true, url);
 
@@ -172,7 +182,7 @@ public class DockerServiceImpl implements DockerService {
         config.setImage("java:8-jre-alpine");
         config.setHostname("");
         config.setUser("");
-        config.setCmd(new String[]{ "/opt/apache-karaf/bin/karaf" });
+        config.setCmd(new String[] {"/opt/apache-karaf/bin/karaf"});
         config.setWorkingDir("");
         config.setOpenStdin(true);
         config.setStdinOnce(true);
@@ -188,10 +198,11 @@ public class DockerServiceImpl implements DockerService {
         hostConfig.setPublishAllPorts(false);
 
         // binding filesystem
-        hostConfig.setBinds(new String[]{containerStorage.getAbsolutePath() + ":/opt/apache-karaf"});
+        hostConfig.setBinds(
+                new String[] {containerStorage.getAbsolutePath() + ":/opt/apache-karaf"});
 
         hostConfig.setNetworkMode("bridge");
-        hostConfig.setLxcConf(new String[]{});
+        hostConfig.setLxcConf(new String[] {});
 
         Map<String, List<HostPortBinding>> portBindings = new HashMap<>();
         // ssh
@@ -267,7 +278,7 @@ public class DockerServiceImpl implements DockerService {
     }
 
     @Override
-    public void rename(String name, String newName, String url) throws  Exception {
+    public void rename(String name, String newName, String url) throws Exception {
         DockerClient dockerClient = new DockerClient(url);
         dockerClient.rename(name, newName);
     }
@@ -283,7 +294,14 @@ public class DockerServiceImpl implements DockerService {
     }
 
     @Override
-    public String logs(String name, boolean stdout, boolean stderr, boolean timestamps, boolean details, String url) throws Exception {
+    public String logs(
+            String name,
+            boolean stdout,
+            boolean stderr,
+            boolean timestamps,
+            boolean details,
+            String url)
+            throws Exception {
         DockerClient dockerClient = new DockerClient(url);
         String log = dockerClient.logs(name, stdout, stderr, timestamps, details);
         return log;
@@ -296,7 +314,8 @@ public class DockerServiceImpl implements DockerService {
     }
 
     @Override
-    public void commit(String name, String repo, String tag, String message, String url) throws Exception {
+    public void commit(String name, String repo, String tag, String message, String url)
+            throws Exception {
         DockerClient dockerClient = new DockerClient(url);
         dockerClient.commit(name, null, message, repo, tag);
     }
@@ -375,10 +394,8 @@ public class DockerServiceImpl implements DockerService {
                 copy(new File(source, child), new File(destination, child));
             }
         } else {
-            try (
-                    InputStream in = new FileInputStream(source);
-                    OutputStream out = new FileOutputStream(destination)
-            ) {
+            try (InputStream in = new FileInputStream(source);
+                    OutputStream out = new FileOutputStream(destination)) {
                 new StreamUtils().copy(in, out);
             }
         }
@@ -386,8 +403,7 @@ public class DockerServiceImpl implements DockerService {
 
     class StreamUtils {
 
-        public StreamUtils() {
-        }
+        public StreamUtils() {}
 
         public void close(Closeable... closeables) {
             for (Closeable c : closeables) {
@@ -421,7 +437,6 @@ public class DockerServiceImpl implements DockerService {
             }
             output.flush();
         }
-
     }
 
     private int chmod(File serviceFile, String mode) throws IOException {
@@ -434,5 +449,4 @@ public class DockerServiceImpl implements DockerService {
             throw (IOException) new InterruptedIOException().initCause(e);
         }
     }
-
 }

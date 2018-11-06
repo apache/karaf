@@ -18,13 +18,10 @@ package org.apache.karaf.docker;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 import java.util.Map;
 
-/**
- * Represents a Docker image.
- */
+/** Represents a Docker image. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
@@ -76,5 +73,4 @@ public class Image {
     public long getVirtualSize() {
         return virtualSize;
     }
-
 }

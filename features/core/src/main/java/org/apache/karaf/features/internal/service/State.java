@@ -21,33 +21,40 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.karaf.features.internal.util.MapUtils;
 
 /**
- * Representation of the state of features service from the point of view of <em>logical requirements</em>
- * which are translated into bundles and features installed in {@link org.eclipse.equinox.region.Region regions}.
- * It's a collection of:<ul>
- *     <li>used repositories</li>
- *     <li>region -&gt; requirements (logical feature requirements)</li>
- *     <li>region -&gt; installed features (actual features installed - including conditionals and dependant features)</li>
- *     <li>region -&gt; installed features -&gt; state of feature installation</li>
- *     <li>region -&gt; bundle ids (for bundles installed via features service, a.k.a. <em>managed bundles</em>)</li>
- *     <li>bundle id -&gt; checksum</li>
+ * Representation of the state of features service from the point of view of <em>logical
+ * requirements</em> which are translated into bundles and features installed in {@link
+ * org.eclipse.equinox.region.Region regions}. It's a collection of:
+ *
+ * <ul>
+ *   <li>used repositories
+ *   <li>region -&gt; requirements (logical feature requirements)
+ *   <li>region -&gt; installed features (actual features installed - including conditionals and
+ *       dependant features)
+ *   <li>region -&gt; installed features -&gt; state of feature installation
+ *   <li>region -&gt; bundle ids (for bundles installed via features service, a.k.a. <em>managed
+ *       bundles</em>)
+ *   <li>bundle id -&gt; checksum
  * </ul>
- * State is replaced (swapped) after uninstalling/updating/installing all the bundles as requested, but
- * before resolving/refreshing them. Before State is set, work is done on the instance of Deployer.DeploymentState.
+ *
+ * State is replaced (swapped) after uninstalling/updating/installing all the bundles as requested,
+ * but before resolving/refreshing them. Before State is set, work is done on the instance of
+ * Deployer.DeploymentState.
  */
 public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
     public final Set<String> repositories = new TreeSet<>();
-    
-    /** Map from region name to Set of feature requirements (<code>feature:name/version-range</code>) */
+
+    /**
+     * Map from region name to Set of feature requirements (<code>feature:name/version-range</code>)
+     */
     public final Map<String, Set<String>> requirements = new HashMap<>();
     /** Map from region name to Set of feature id (<code>name/version</code>) */
     public final Map<String, Set<String>> installedFeatures = new HashMap<>();
-    
+
     /** State of features by region and feature id (<code>name/version</code>) */
     public final Map<String, Map<String, String>> stateFeatures = new HashMap<>();
 
@@ -83,5 +90,4 @@ public class State {
         MapUtils.copy(from.managedBundles, to.managedBundles);
         MapUtils.copy(from.bundleChecksums, to.bundleChecksums);
     }
-
 }

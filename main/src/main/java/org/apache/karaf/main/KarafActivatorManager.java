@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.launch.Framework;
@@ -41,7 +40,7 @@ public class KarafActivatorManager {
     private List<BundleActivator> karafActivators = new ArrayList<>();
     private final ClassLoader classLoader;
     private final Framework framework;
-    
+
     public KarafActivatorManager(ClassLoader classLoader, Framework framework) {
         this.classLoader = classLoader;
         this.framework = framework;
@@ -58,14 +57,19 @@ public class KarafActivatorManager {
                 Manifest mf = new Manifest(is);
                 className = mf.getMainAttributes().getValue(KARAF_ACTIVATOR);
                 if (className != null) {
-                    BundleActivator activator = (BundleActivator) classLoader.loadClass(className).newInstance();
+                    BundleActivator activator =
+                            (BundleActivator) classLoader.loadClass(className).newInstance();
                     activator.start(framework.getBundleContext());
                     karafActivators.add(activator);
                 }
             } catch (Throwable e) {
                 if (className != null) {
-                    System.err.println("Error starting karaf activator " + className + ": " + e.getMessage());
-                    LOG.log(Level.WARNING, "Error starting karaf activator " + className + " from url " + url, e);
+                    System.err.println(
+                            "Error starting karaf activator " + className + ": " + e.getMessage());
+                    LOG.log(
+                            Level.WARNING,
+                            "Error starting karaf activator " + className + " from url " + url,
+                            e);
                 }
             } finally {
                 if (is != null) {
@@ -83,9 +87,11 @@ public class KarafActivatorManager {
             try {
                 activator.stop(framework.getBundleContext());
             } catch (Throwable e) {
-                LOG.log(Level.WARNING, "Error stopping karaf activator " + activator.getClass().getName(), e);
+                LOG.log(
+                        Level.WARNING,
+                        "Error stopping karaf activator " + activator.getClass().getName(),
+                        e);
             }
         }
     }
-
 }

@@ -16,6 +16,11 @@
  */
 package org.apache.karaf.jndi.internal;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.naming.*;
 import org.apache.aries.proxy.ProxyManager;
 import org.apache.karaf.jndi.JndiService;
 import org.osgi.framework.Bundle;
@@ -23,22 +28,14 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
-import javax.naming.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-/**
- * Implementation of the JNDI Service.
- */
+/** Implementation of the JNDI Service. */
 public class JndiServiceImpl implements JndiService {
 
     private BundleContext bundleContext;
     private ProxyManager proxyManager;
 
-    private final static String OSGI_JNDI_CONTEXT_PREFIX = "osgi:service";
-    private final static String OSGI_JNDI_SERVICE_PROPERTY = "osgi.jndi.service.name";
+    private static final String OSGI_JNDI_CONTEXT_PREFIX = "osgi:service";
+    private static final String OSGI_JNDI_SERVICE_PROPERTY = "osgi.jndi.service.name";
 
     @Override
     public Map<String, String> names() throws Exception {
@@ -63,9 +60,19 @@ public class JndiServiceImpl implements JndiService {
                             if (proxyManager.isProxy(actualService)) {
                                 actualService = proxyManager.unwrap(actualService).call();
                             }
-                            if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY).toString().startsWith("/"))
-                                map.put(OSGI_JNDI_CONTEXT_PREFIX + service.getProperty(OSGI_JNDI_SERVICE_PROPERTY), actualService.getClass().getName());
-                            else map.put(OSGI_JNDI_CONTEXT_PREFIX + "/" + service.getProperty(OSGI_JNDI_SERVICE_PROPERTY), actualService.getClass().getName());
+                            if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY)
+                                    .toString()
+                                    .startsWith("/"))
+                                map.put(
+                                        OSGI_JNDI_CONTEXT_PREFIX
+                                                + service.getProperty(OSGI_JNDI_SERVICE_PROPERTY),
+                                        actualService.getClass().getName());
+                            else
+                                map.put(
+                                        OSGI_JNDI_CONTEXT_PREFIX
+                                                + "/"
+                                                + service.getProperty(OSGI_JNDI_SERVICE_PROPERTY),
+                                        actualService.getClass().getName());
                             bundleContext.ungetService(service);
                         }
                     }
@@ -85,13 +92,11 @@ public class JndiServiceImpl implements JndiService {
                 }
                 if (o instanceof Context) {
                     StringBuilder sb = new StringBuilder();
-                    if (pair.getName().contains(":"))
-                        sb.append(pair.getName());
+                    if (pair.getName().contains(":")) sb.append(pair.getName());
                     else sb.append("/" + pair.getName());
                     names((Context) o, sb, map);
                 } else {
-                    if (pair.getName().contains(":"))
-                        map.put(pair.getName(), pair.getClassName());
+                    if (pair.getName().contains(":")) map.put(pair.getName(), pair.getClassName());
                     else map.put("/" + pair.getName(), pair.getClassName());
                 }
             }
@@ -124,7 +129,8 @@ public class JndiServiceImpl implements JndiService {
         return contexts;
     }
 
-    private void contexts(Context context, StringBuilder sb, List<String> contexts) throws Exception {
+    private void contexts(Context context, StringBuilder sb, List<String> contexts)
+            throws Exception {
         NamingEnumeration list = context.listBindings("");
         while (list.hasMore()) {
             Binding item = (Binding) list.next();
@@ -149,7 +155,8 @@ public class JndiServiceImpl implements JndiService {
      * @param map the final map containing name/class name pairs.
      * @throws Exception
      */
-    private static final void names(Context ctx, StringBuilder sb, Map<String, String> map) throws Exception {
+    private static final void names(Context ctx, StringBuilder sb, Map<String, String> map)
+            throws Exception {
         NamingEnumeration list = ctx.listBindings("");
         while (list.hasMore()) {
             Binding item = (Binding) list.next();
@@ -200,7 +207,8 @@ public class JndiServiceImpl implements JndiService {
             ServiceReference<?>[] services = bundle.getRegisteredServices();
             if (services != null) {
                 for (ServiceReference service : services) {
-                    if (service.getProperty(Constants.SERVICE_ID) != null && ((Long) service.getProperty(Constants.SERVICE_ID)) == serviceId) {
+                    if (service.getProperty(Constants.SERVICE_ID) != null
+                            && ((Long) service.getProperty(Constants.SERVICE_ID)) == serviceId) {
                         Object actualService = bundleContext.getService(service);
                         if (proxyManager.isProxy(actualService)) {
                             actualService = proxyManager.unwrap(actualService).call();
@@ -212,7 +220,8 @@ public class JndiServiceImpl implements JndiService {
                                     try {
                                         Object o = context.lookup(splitted[i]);
                                         if (!(o instanceof Context)) {
-                                            throw new NamingException("Name " + splitted[i] + " already exists");
+                                            throw new NamingException(
+                                                    "Name " + splitted[i] + " already exists");
                                         }
                                     } catch (NameNotFoundException nnfe) {
                                         context.createSubcontext(splitted[i]);
@@ -241,7 +250,11 @@ public class JndiServiceImpl implements JndiService {
                 ServiceReference<?>[] services = bundle.getRegisteredServices();
                 if (services != null) {
                     for (ServiceReference service : services) {
-                        if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY) != null && service.getProperty(OSGI_JNDI_SERVICE_PROPERTY).equals(name.substring(OSGI_JNDI_CONTEXT_PREFIX.length() + 1))) {
+                        if (service.getProperty(OSGI_JNDI_SERVICE_PROPERTY) != null
+                                && service.getProperty(OSGI_JNDI_SERVICE_PROPERTY)
+                                        .equals(
+                                                name.substring(
+                                                        OSGI_JNDI_CONTEXT_PREFIX.length() + 1))) {
                             Object actualService = bundleContext.getService(service);
                             try {
                                 if (proxyManager.isProxy(actualService)) {
@@ -253,14 +266,15 @@ public class JndiServiceImpl implements JndiService {
                                         try {
                                             Object o = context.lookup(splitted[i]);
                                             if (!(o instanceof Context)) {
-                                                throw new NamingException("Name " + splitted[i] + " already exists");
+                                                throw new NamingException(
+                                                        "Name " + splitted[i] + " already exists");
                                             }
                                         } catch (NameNotFoundException nnfe) {
                                             context.createSubcontext(splitted[i]);
                                         }
                                         context = (Context) context.lookup(splitted[i]);
                                     }
-                                    alias = splitted[splitted.length -1];
+                                    alias = splitted[splitted.length - 1];
                                 }
                                 context.bind(alias, actualService);
                             } finally {
@@ -295,7 +309,10 @@ public class JndiServiceImpl implements JndiService {
     public void unbind(String name) throws Exception {
         InitialContext context = new InitialContext();
         if (name.startsWith(OSGI_JNDI_CONTEXT_PREFIX)) {
-            throw new IllegalArgumentException("You can't unbind a name from the " + OSGI_JNDI_CONTEXT_PREFIX + " JNDI context.");
+            throw new IllegalArgumentException(
+                    "You can't unbind a name from the "
+                            + OSGI_JNDI_CONTEXT_PREFIX
+                            + " JNDI context.");
         }
         context.unbind(name);
     }
@@ -315,5 +332,4 @@ public class JndiServiceImpl implements JndiService {
     public void setProxyManager(ProxyManager proxyManager) {
         this.proxyManager = proxyManager;
     }
-
 }

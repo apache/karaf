@@ -16,21 +16,24 @@
  */
 package org.apache.karaf.examples.rest.client.http;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 @Service
 @Command(scope = "booking", name = "list", description = "List booking")
 public class ListBookingCommand implements Action {
 
-    @Option(name = "--url", description = "Location of the REST service", required = false, multiValued = false)
+    @Option(
+            name = "--url",
+            description = "Location of the REST service",
+            required = false,
+            multiValued = false)
     String restLocation = "http://localhost:8181/cxf/booking/";
 
     @Override
@@ -42,17 +45,18 @@ public class ListBookingCommand implements Action {
         connection.connect();
 
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            BufferedReader buffer =
+                    new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String line;
             StringBuffer sb = new StringBuffer();
-            while ((line = buffer.readLine())!= null) {
+            while ((line = buffer.readLine()) != null) {
                 sb.append(line);
             }
             System.out.println(sb.toString());
         } else {
-            System.err.println("Error when sending GET method : HTTP_CODE = " + connection.getResponseCode());
+            System.err.println(
+                    "Error when sending GET method : HTTP_CODE = " + connection.getResponseCode());
         }
         return null;
     }
-
 }

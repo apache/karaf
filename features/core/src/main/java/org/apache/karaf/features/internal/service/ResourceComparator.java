@@ -17,7 +17,6 @@
 package org.apache.karaf.features.internal.service;
 
 import java.util.Comparator;
-
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.osgi.framework.Version;
 import org.osgi.resource.Resource;
@@ -39,5 +38,4 @@ public class ResourceComparator implements Comparator<Resource> {
         }
         return c;
     }
-
 }

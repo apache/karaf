@@ -22,7 +22,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Service
 public class StoppedInstanceCompleter extends InstanceCompleter {
-    
+
     protected boolean acceptsInstance(Instance instance) {
         try {
             return instance.getState().equals(Instance.STOPPED);
@@ -30,5 +30,4 @@ public class StoppedInstanceCompleter extends InstanceCompleter {
             return false;
         }
     }
-
 }

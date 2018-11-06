@@ -27,7 +27,12 @@ public class KarafTestWatcher extends TestWatcher {
     @Override
     protected void starting(Description description) {
         System.out.println();
-        System.out.println(ANSI_GREEN + description.getTestClass().getSimpleName() + ": " + description.getMethodName() + ANSI_RESET);
+        System.out.println(
+                ANSI_GREEN
+                        + description.getTestClass().getSimpleName()
+                        + ": "
+                        + description.getMethodName()
+                        + ANSI_RESET);
     }
 
     @Override
@@ -37,8 +42,5 @@ public class KarafTestWatcher extends TestWatcher {
     }
 
     @Override
-    protected void succeeded(Description description) {
-    }
-
-
+    protected void succeeded(Description description) {}
 }

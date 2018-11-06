@@ -31,7 +31,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.karaf.deployer.blueprint.BlueprintTransformer;
 import org.apache.karaf.deployer.spring.SpringTransformer;
 import org.apache.karaf.features.internal.download.impl.AbstractRetryableDownloadTask;
@@ -47,7 +46,8 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
 
     private final Profile profile;
 
-    public CustomSimpleDownloadTask(ScheduledExecutorService executorService, Profile profile, String url) {
+    public CustomSimpleDownloadTask(
+            ScheduledExecutorService executorService, Profile profile, String url) {
         super(executorService, url);
         this.profile = profile;
     }
@@ -72,25 +72,25 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
     }
 
     private URLStreamHandler getUrlStreamHandler(String url) throws URISyntaxException {
-        if(url.contains("\\")){
-            url = url.replace("\\","/");
+        if (url.contains("\\")) {
+            url = url.replace("\\", "/");
         }
         String scheme = url.substring(0, url.indexOf(':'));
         switch (scheme) {
-        case WRAP_URI_PREFIX:
-            return new org.ops4j.pax.url.wrap.Handler();
-        case WAR_URI_PREFIX:
-            return new org.ops4j.pax.url.war.Handler();
-        case SPRING_URI_PREFIX:
-            return new SpringURLHandler();
-        case BLUEPRINT_URI_PREFIX:
-            return new BlueprintURLHandler();
-        case PROFILE_URI_PREFIX:
-            if (profile != null) {
-                return new ProfileURLHandler();
-            }
-        default:
-            return null;
+            case WRAP_URI_PREFIX:
+                return new org.ops4j.pax.url.wrap.Handler();
+            case WAR_URI_PREFIX:
+                return new org.ops4j.pax.url.war.Handler();
+            case SPRING_URI_PREFIX:
+                return new SpringURLHandler();
+            case BLUEPRINT_URI_PREFIX:
+                return new BlueprintURLHandler();
+            case PROFILE_URI_PREFIX:
+                if (profile != null) {
+                    return new ProfileURLHandler();
+                }
+            default:
+                return null;
         }
     }
 
@@ -99,8 +99,7 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
         protected URLConnection openConnection(URL u) throws IOException {
             return new URLConnection(u) {
                 @Override
-                public void connect() throws IOException {
-                }
+                public void connect() throws IOException {}
 
                 @Override
                 public InputStream getInputStream() throws IOException {
@@ -122,8 +121,7 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
         protected URLConnection openConnection(URL u) throws IOException {
             return new URLConnection(u) {
                 @Override
-                public void connect() throws IOException {
-                }
+                public void connect() throws IOException {}
 
                 @Override
                 public InputStream getInputStream() throws IOException {
@@ -145,8 +143,7 @@ public class CustomSimpleDownloadTask extends AbstractRetryableDownloadTask {
         protected URLConnection openConnection(URL u) throws IOException {
             return new URLConnection(u) {
                 @Override
-                public void connect() throws IOException {
-                }
+                public void connect() throws IOException {}
 
                 @Override
                 public InputStream getInputStream() throws IOException {

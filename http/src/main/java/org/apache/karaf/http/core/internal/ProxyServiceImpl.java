@@ -16,15 +16,14 @@
  */
 package org.apache.karaf.http.core.internal;
 
+import java.io.IOException;
+import java.util.*;
 import org.apache.karaf.http.core.ProxyService;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
 
 public class ProxyServiceImpl implements ProxyService {
 
@@ -100,10 +99,15 @@ public class ProxyServiceImpl implements ProxyService {
             httpService.registerServlet(url, proxyServlet, new Hashtable(), null);
             proxies.put(url, proxyTo);
         } catch (Exception e) {
-            LOG.error("could not add proxy alias: " + url + ", proxied to: " + proxyTo + ", reason: " + e.getMessage());
+            LOG.error(
+                    "could not add proxy alias: "
+                            + url
+                            + ", proxied to: "
+                            + proxyTo
+                            + ", reason: "
+                            + e.getMessage());
         }
     }
-
 
     private void updateConfiguration() {
 
@@ -118,7 +122,6 @@ public class ProxyServiceImpl implements ProxyService {
         } catch (Exception e) {
             LOG.error("unable to update http proxy from configuration: " + e.getMessage());
         }
-
     }
 
     private Configuration getConfiguration() {
@@ -126,7 +129,8 @@ public class ProxyServiceImpl implements ProxyService {
         try {
             return configurationAdmin.getConfiguration(CONFIGURATION_PID, null);
         } catch (IOException e) {
-            throw new RuntimeException("Error retrieving http proxy information from config admin", e);
+            throw new RuntimeException(
+                    "Error retrieving http proxy information from config admin", e);
         }
     }
 
@@ -160,6 +164,4 @@ public class ProxyServiceImpl implements ProxyService {
         }
         proxies.clear();
     }
-
-
 }

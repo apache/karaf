@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -41,29 +40,46 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 @Service
 public class Install implements Action {
 
-    @Argument(index = 0, name = "urls", description = "Bundle URLs separated by whitespaces", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "urls",
+            description = "Bundle URLs separated by whitespaces",
+            required = true,
+            multiValued = true)
     List<URI> urls;
 
-    @Option(name = "-s", aliases={"--start"}, description="Starts the bundles after installation", required = false, multiValued = false)
+    @Option(
+            name = "-s",
+            aliases = {"--start"},
+            description = "Starts the bundles after installation",
+            required = false,
+            multiValued = false)
     boolean start;
 
-    @Option(name = "-l", aliases={"--start-level"}, description="Sets the start level of the bundles", required = false, multiValued = false)
+    @Option(
+            name = "-l",
+            aliases = {"--start-level"},
+            description = "Sets the start level of the bundles",
+            required = false,
+            multiValued = false)
     Integer level;
-    
-    @Option(name = "--force", aliases = {"-f"}, description = "Forces the command to execute", required = false, multiValued = false)
+
+    @Option(
+            name = "--force",
+            aliases = {"-f"},
+            description = "Forces the command to execute",
+            required = false,
+            multiValued = false)
     boolean force;
 
     @Option(name = "--r3-bundles", description = "Allow OSGi R3 bundles")
     boolean allowR3;
-    
-    @Reference
-    Session session;
 
-    @Reference
-    BundleService bundleService;
+    @Reference Session session;
 
-    @Reference
-    BundleContext bundleContext;
+    @Reference BundleService bundleService;
+
+    @Reference BundleContext bundleContext;
 
     @Override
     public Object execute() throws Exception {
@@ -95,7 +111,8 @@ public class Install implements Action {
                 }
                 bundles.add(bundle);
             } catch (Exception e) {
-                exceptions.add(new Exception("Unable to install bundle " + url + ": " + e.toString(), e));
+                exceptions.add(
+                        new Exception("Unable to install bundle " + url + ": " + e.toString(), e));
             }
         }
         // optionally set start level
@@ -104,7 +121,13 @@ public class Install implements Action {
                 try {
                     bundle.adapt(BundleStartLevel.class).setStartLevel(level);
                 } catch (Exception e) {
-                    exceptions.add(new Exception("Unable to set bundle start level " + bundle.getLocation() + ": " + e.toString(), e));
+                    exceptions.add(
+                            new Exception(
+                                    "Unable to set bundle start level "
+                                            + bundle.getLocation()
+                                            + ": "
+                                            + e.toString(),
+                                    e));
                 }
             }
         }
@@ -114,22 +137,28 @@ public class Install implements Action {
                 try {
                     bundle.start();
                 } catch (Exception e) {
-                    exceptions.add(new Exception("Unable to start bundle " + bundle.getLocation() + ": " + e.toString(), e));
+                    exceptions.add(
+                            new Exception(
+                                    "Unable to start bundle "
+                                            + bundle.getLocation()
+                                            + ": "
+                                            + e.toString(),
+                                    e));
                 }
             }
         }
-        
+
         // print the installed bundles
         if (bundles.size() == 1) {
             System.out.println("Bundle ID: " + bundles.get(0).getBundleId());
         } else {
-            String msg = bundles.stream()
-                    .map(b -> Long.toString(b.getBundleId()))
-                    .collect(Collectors.joining(", ", "Bundle IDs: ", ""));
+            String msg =
+                    bundles.stream()
+                            .map(b -> Long.toString(b.getBundleId()))
+                            .collect(Collectors.joining(", ", "Bundle IDs: ", ""));
             System.out.println(msg);
         }
         MultiException.throwIf("Error installing bundles", exceptions);
         return null;
     }
-
 }

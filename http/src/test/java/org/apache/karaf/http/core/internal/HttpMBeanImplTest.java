@@ -17,21 +17,23 @@
 package org.apache.karaf.http.core.internal;
 
 import java.lang.management.ManagementFactory;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-
 import org.junit.Test;
 
 public class HttpMBeanImplTest {
 
     @Test
     public void testRegisterMBean() throws Exception {
-        HttpMBeanImpl httpMBean = new HttpMBeanImpl(new ServletServiceImpl(new ServletEventHandler()), new ProxyServiceImpl(null, null));
+        HttpMBeanImpl httpMBean =
+                new HttpMBeanImpl(
+                        new ServletServiceImpl(new ServletEventHandler()),
+                        new ProxyServiceImpl(null, null));
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
-        mbeanServer.registerMBean(httpMBean, new ObjectName("org.apache.karaf:type=http,name=root"));
-        
+        mbeanServer.registerMBean(
+                httpMBean, new ObjectName("org.apache.karaf:type=http,name=root"));
+
         TabularData data = httpMBean.getServlets();
     }
 }

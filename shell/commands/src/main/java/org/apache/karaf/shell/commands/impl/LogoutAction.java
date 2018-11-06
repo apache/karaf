@@ -30,8 +30,7 @@ public class LogoutAction implements Action {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Reference
-    Session session;
+    @Reference Session session;
 
     @Override
     public Object execute() throws Exception {
@@ -39,5 +38,4 @@ public class LogoutAction implements Action {
         session.close();
         return null;
     }
-
 }

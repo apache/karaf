@@ -16,16 +16,15 @@
  */
 package org.apache.karaf.examples.mbean.provider;
 
-import org.apache.karaf.examples.mbean.api.Booking;
-import org.apache.karaf.examples.mbean.api.BookingService;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.karaf.examples.mbean.api.Booking;
+import org.apache.karaf.examples.mbean.api.BookingService;
 
 /**
- * Simple implementation of the {@link BookingService} storing the {@link Booking}
- * instances in a list in memory.
+ * Simple implementation of the {@link BookingService} storing the {@link Booking} instances in a
+ * list in memory.
  */
 public class BookingServiceMemoryImpl implements BookingService {
 

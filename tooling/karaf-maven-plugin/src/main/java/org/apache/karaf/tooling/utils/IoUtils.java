@@ -1,17 +1,15 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.apache.karaf.tooling.utils;
@@ -38,18 +36,20 @@ public class IoUtils {
     }
 
     public static void copyDirectory(final File srcDir, final File destDir) throws IOException {
-        if (srcDir == null || !srcDir.exists())
-            return;
-        if (destDir == null || !destDir.exists())
-            destDir.mkdirs();
+        if (srcDir == null || !srcDir.exists()) return;
+        if (destDir == null || !destDir.exists()) destDir.mkdirs();
         // recurse
         final File[] srcFiles = srcDir.listFiles();
-        if (srcFiles == null) {  // null if abstract pathname does not denote a directory, or if an I/O error occurs
+        if (srcFiles
+                == null) { // null if abstract pathname does not denote a directory, or if an I/O
+            // error
+            // occurs
             throw new IOException("Failed to list contents of " + srcDir);
         }
         if (destDir.exists()) {
             if (destDir.isDirectory() == false) {
-                throw new IOException("Destination '" + destDir + "' exists but is not a directory");
+                throw new IOException(
+                        "Destination '" + destDir + "' exists but is not a directory");
             }
         } else {
             if (!destDir.mkdirs() && !destDir.isDirectory()) {
@@ -81,7 +81,7 @@ public class IoUtils {
         try {
             fis = new FileInputStream(srcFile);
             fos = new FileOutputStream(destFile);
-            input  = fis.getChannel();
+            input = fis.getChannel();
             output = fos.getChannel();
             final long size = input.size(); // TODO See IO-386
             long pos = 0;
@@ -90,32 +90,51 @@ public class IoUtils {
                 final long remain = size - pos;
                 count = remain > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : remain;
                 final long bytesCopied = output.transferFrom(input, pos, count);
-                if (bytesCopied == 0) { // IO-385 - can happen if file is truncated after caching the size
+                if (bytesCopied
+                        == 0) { // IO-385 - can happen if file is truncated after caching the size
                     break; // ensure we don't loop forever
                 }
                 pos += bytesCopied;
             }
         } finally {
             if (output != null) {
-                try { output.close(); } catch (Exception e) { }
+                try {
+                    output.close();
+                } catch (Exception e) {
+                }
             }
             if (fos != null) {
-                try { fos.close(); } catch (Exception e) { }
+                try {
+                    fos.close();
+                } catch (Exception e) {
+                }
             }
             if (input != null) {
-                try { input.close(); } catch (Exception e) { }
+                try {
+                    input.close();
+                } catch (Exception e) {
+                }
             }
             if (fis != null) {
-                try { fis.close(); } catch (Exception e) { }
+                try {
+                    fis.close();
+                } catch (Exception e) {
+                }
             }
         }
 
         final long srcLen = srcFile.length(); // TODO See IO-386
         final long dstLen = destFile.length(); // TODO See IO-386
         if (srcLen != dstLen) {
-            throw new IOException("Failed to copy full contents from '" +
-                    srcFile + "' to '" + destFile + "' Expected length: " + srcLen +" Actual: " + dstLen);
+            throw new IOException(
+                    "Failed to copy full contents from '"
+                            + srcFile
+                            + "' to '"
+                            + destFile
+                            + "' Expected length: "
+                            + srcLen
+                            + " Actual: "
+                            + dstLen);
         }
     }
-
 }

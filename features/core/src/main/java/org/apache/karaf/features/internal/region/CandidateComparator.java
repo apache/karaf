@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.ToIntFunction;
-
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.BundleNamespace;
@@ -56,19 +55,25 @@ public class CandidateComparator implements Comparator<Capability> {
         if ((c == 0) && cap1.getNamespace().equals(BundleNamespace.BUNDLE_NAMESPACE)) {
             c = compareNames(cap1, cap2, BundleNamespace.BUNDLE_NAMESPACE);
             if (c == 0) {
-                c = compareVersions(cap1, cap2, BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
+                c =
+                        compareVersions(
+                                cap1, cap2, BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
             }
-        // Compare package capabilities.
+            // Compare package capabilities.
         } else if ((c == 0) && cap1.getNamespace().equals(PackageNamespace.PACKAGE_NAMESPACE)) {
             c = compareNames(cap1, cap2, PackageNamespace.PACKAGE_NAMESPACE);
             if (c == 0) {
                 c = compareVersions(cap1, cap2, PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
                 // if same version, rather compare on the bundle version
                 if (c == 0) {
-                    c = compareVersions(cap1, cap2, BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
+                    c =
+                            compareVersions(
+                                    cap1,
+                                    cap2,
+                                    BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
                 }
             }
-        // Compare feature capabilities
+            // Compare feature capabilities
         } else if ((c == 0) && cap1.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)) {
             c = compareNames(cap1, cap2, IdentityNamespace.IDENTITY_NAMESPACE);
             if (c == 0) {
@@ -82,16 +87,18 @@ public class CandidateComparator implements Comparator<Capability> {
             String n1 = ResolverUtil.getSymbolicName(resource1);
             String n2 = ResolverUtil.getSymbolicName(resource2);
             c = n1.compareTo(n2);
-            // Resources looks like identical, but it required by different features/subsystems/regions
+            // Resources looks like identical, but it required by different
+            // features/subsystems/regions
             // so use this difference for deterministic heuristic
             if (c == 0) {
                 String o1 = ResolverUtil.getOwnerName(resource1);
                 String o2 = ResolverUtil.getOwnerName(resource2);
                 if (o1 != null && o2 != null) {
-                    // In case the owners are the same but with different version, prefer the latest one
+                    // In case the owners are the same but with different version, prefer the latest
+                    // one
                     // TODO: this may not be fully correct, as we'd need to separate names/versions
                     // TODO: and do a real version comparison
-                    c = - o1.compareTo(o2);
+                    c = -o1.compareTo(o2);
                 }
             }
         }
@@ -102,8 +109,10 @@ public class CandidateComparator implements Comparator<Capability> {
         Object o1 = cap1.getAttributes().get(attribute);
         Object o2 = cap2.getAttributes().get(attribute);
         if (o1 instanceof List || o2 instanceof List) {
-            List<String> l1 = o1 instanceof List ? (List) o1 : Collections.singletonList((String) o1);
-            List<String> l2 = o2 instanceof List ? (List) o2 : Collections.singletonList((String) o2);
+            List<String> l1 =
+                    o1 instanceof List ? (List) o1 : Collections.singletonList((String) o1);
+            List<String> l2 =
+                    o2 instanceof List ? (List) o2 : Collections.singletonList((String) o2);
             for (String s : l1) {
                 if (l2.contains(s)) {
                     return 0;
@@ -111,20 +120,21 @@ public class CandidateComparator implements Comparator<Capability> {
             }
             return l1.get(0).compareTo(l2.get(0));
         } else {
-            return((String) o1).compareTo((String) o2);
+            return ((String) o1).compareTo((String) o2);
         }
     }
 
     private int compareVersions(Capability cap1, Capability cap2, String attribute) {
-        Version v1 = (!cap1.getAttributes().containsKey(attribute))
-                ? Version.emptyVersion
-                : (Version) cap1.getAttributes().get(attribute);
-        Version v2 = (!cap2.getAttributes().containsKey(attribute))
-                ? Version.emptyVersion
-                : (Version) cap2.getAttributes().get(attribute);
+        Version v1 =
+                (!cap1.getAttributes().containsKey(attribute))
+                        ? Version.emptyVersion
+                        : (Version) cap1.getAttributes().get(attribute);
+        Version v2 =
+                (!cap2.getAttributes().containsKey(attribute))
+                        ? Version.emptyVersion
+                        : (Version) cap2.getAttributes().get(attribute);
         // Compare these in reverse order, since we want
         // highest version to have priority.
         return v2.compareTo(v1);
     }
-
 }

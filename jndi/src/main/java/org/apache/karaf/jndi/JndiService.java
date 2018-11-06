@@ -19,9 +19,7 @@ package org.apache.karaf.jndi;
 import java.util.List;
 import java.util.Map;
 
-/**
- * JNDI Service.
- */
+/** JNDI Service. */
 public interface JndiService {
 
     /**
@@ -99,5 +97,4 @@ public interface JndiService {
      * @throws Exception If the service fails.
      */
     void unbind(String name) throws Exception;
-
 }

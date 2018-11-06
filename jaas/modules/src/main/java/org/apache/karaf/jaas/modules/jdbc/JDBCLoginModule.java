@@ -1,11 +1,11 @@
 /*
- * 
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,15 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.*;
+import javax.security.auth.login.LoginException;
+import javax.sql.DataSource;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
@@ -24,19 +33,10 @@ import org.apache.karaf.jaas.modules.properties.PropertiesLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.auth.Subject;
-import javax.security.auth.callback.*;
-import javax.security.auth.login.LoginException;
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.sql.Connection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 public class JDBCLoginModule extends AbstractKarafLoginModule {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesLoginModule.class);
+    private static final transient Logger LOGGER =
+            LoggerFactory.getLogger(PropertiesLoginModule.class);
 
     public static final String PASSWORD_QUERY = "query.password";
     public static final String USER_QUERY = "query.user";
@@ -51,12 +51,17 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
     protected String passwordQuery = "SELECT PASSWORD FROM USERS WHERE USERNAME=?";
     protected String roleQuery = "SELECT ROLE FROM ROLES WHERE USERNAME=?";
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         datasourceURL = (String) options.get(JDBCUtils.DATASOURCE);
         if (datasourceURL == null || datasourceURL.trim().length() == 0) {
             LOGGER.error("No datasource was specified ");
-        } else if (!datasourceURL.startsWith(JDBCUtils.JNDI) && !datasourceURL.startsWith(JDBCUtils.OSGI)) {
+        } else if (!datasourceURL.startsWith(JDBCUtils.JNDI)
+                && !datasourceURL.startsWith(JDBCUtils.OSGI)) {
             LOGGER.error("Invalid datasource lookup protocol");
         }
         if (options.containsKey(PASSWORD_QUERY)) {
@@ -77,7 +82,8 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         } catch (IOException ioe) {
             throw new LoginException(ioe.getMessage());
         } catch (UnsupportedCallbackException uce) {
-            throw new LoginException(uce.getMessage() + " not available to obtain information from user");
+            throw new LoginException(
+                    uce.getMessage() + " not available to obtain information from user");
         }
 
         user = ((NameCallback) callbacks[0]).getName();
@@ -114,7 +120,9 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
                     List<String> roles = JDBCUtils.rawSelect(connection, roleQuery, user);
                     for (String role : roles) {
                         if (role.startsWith(BackingEngine.GROUP_PREFIX)) {
-                            principals.add(new GroupPrincipal(role.substring(BackingEngine.GROUP_PREFIX.length())));
+                            principals.add(
+                                    new GroupPrincipal(
+                                            role.substring(BackingEngine.GROUP_PREFIX.length())));
                             for (String r : JDBCUtils.rawSelect(connection, roleQuery, role)) {
                                 principals.add(new RolePrincipal(r));
                             }
@@ -123,11 +131,14 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
                         }
                     }
                 } else {
-                    LOGGER.debug("No roleQuery specified so no roles have been retrieved for the authenticated user");
+                    LOGGER.debug(
+                            "No roleQuery specified so no roles have been retrieved for the authenticated user");
                 }
             }
         } catch (Exception ex) {
-            throw new LoginException("Error has occurred while retrieving credentials from database:" + ex.getMessage());
+            throw new LoginException(
+                    "Error has occurred while retrieving credentials from database:"
+                            + ex.getMessage());
         }
         return true;
     }
@@ -144,5 +155,4 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         }
         return true;
     }
-
 }

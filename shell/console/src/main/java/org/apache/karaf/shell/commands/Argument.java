@@ -18,20 +18,20 @@
  */
 package org.apache.karaf.shell.commands;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
 
 /**
- * Represents a positional argument on a command line (as opposed to an optional named {@link Option}
+ * Represents a positional argument on a command line (as opposed to an optional named {@link
+ * Option}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 @Deprecated
-public @interface Argument
-{
-    String DEFAULT_STRING= "DEFAULT";
+public @interface Argument {
+    String DEFAULT_STRING = "DEFAULT";
 
     String DEFAULT = "##default";
 

@@ -24,9 +24,12 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 /**
- * <p>Dependency of feature.</p>
- * <p>Java class for dependency complex type.</p>
- * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ * Dependency of feature.
+ *
+ * <p>Java class for dependency complex type.
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ *
  * <pre>
  * &lt;complexType name="dependency"&gt;
  *   &lt;simpleContent&gt;
@@ -38,20 +41,17 @@ import javax.xml.bind.annotation.XmlValue;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "dependency", propOrder = {"name"})
+@XmlType(
+        name = "dependency",
+        propOrder = {"name"})
 public class Dependency implements org.apache.karaf.features.Dependency {
 
-    @XmlValue
-    protected String name;
-    @XmlAttribute
-    protected String version;
-    @XmlAttribute
-    protected Boolean prerequisite;
-    @XmlAttribute
-    protected Boolean dependency;
+    @XmlValue protected String name;
+    @XmlAttribute protected String version;
+    @XmlAttribute protected Boolean prerequisite;
+    @XmlAttribute protected Boolean dependency;
 
-    @XmlTransient
-    private boolean blacklisted;
+    @XmlTransient private boolean blacklisted;
 
     public Dependency() {
         // Nothing to do
@@ -65,8 +65,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     /**
      * Feature name should be non empty string.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String }
      */
     @Override
     public String getName() {
@@ -76,8 +75,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     /**
      * Sets the value of the value property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String }
      */
     public void setName(String value) {
         this.name = value;
@@ -86,8 +84,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     /**
      * Gets the value of the version property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String }
      */
     @Override
     public String getVersion() {
@@ -101,8 +98,7 @@ public class Dependency implements org.apache.karaf.features.Dependency {
     /**
      * Sets the value of the version property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String }
      */
     public void setVersion(String value) {
         this.version = value;
@@ -154,8 +150,11 @@ public class Dependency implements org.apache.karaf.features.Dependency {
 
         Dependency that = (Dependency) o;
 
-        if (prerequisite != null ? !prerequisite.equals(that.prerequisite) : that.prerequisite != null) return false;
-        if (dependency != null ? !dependency.equals(that.dependency) : that.dependency != null) return false;
+        if (prerequisite != null
+                ? !prerequisite.equals(that.prerequisite)
+                : that.prerequisite != null) return false;
+        if (dependency != null ? !dependency.equals(that.dependency) : that.dependency != null)
+            return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         return version != null ? version.equals(that.version) : that.version == null;
     }

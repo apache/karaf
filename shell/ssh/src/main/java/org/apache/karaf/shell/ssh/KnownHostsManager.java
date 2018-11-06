@@ -32,10 +32,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-
+import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Base64;
 
 public class KnownHostsManager {
     Logger LOG = LoggerFactory.getLogger(KnownHostsManager.class);
@@ -55,7 +54,7 @@ public class KnownHostsManager {
     }
 
     public PublicKey getKnownKey(SocketAddress remoteAddress, String checkAlgorithm)
-        throws InvalidKeySpecException {
+            throws InvalidKeySpecException {
         FileReader fr = null;
         BufferedReader reader = null;
         try {
@@ -72,9 +71,9 @@ public class KnownHostsManager {
         }
     }
 
-    private PublicKey getKnownKeyInternal(SocketAddress remoteAddress, String checkAlgorithm,
-                                          BufferedReader reader)
-        throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private PublicKey getKnownKeyInternal(
+            SocketAddress remoteAddress, String checkAlgorithm, BufferedReader reader)
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         String checkServerAddress = getAddressString(remoteAddress);
 
         String line = reader.readLine();
@@ -109,7 +108,7 @@ public class KnownHostsManager {
     }
 
     private void writeKey(BufferedWriter bw, SocketAddress remoteAddress, PublicKey serverKey)
-        throws IOException {
+            throws IOException {
         bw.append(getAddressString(remoteAddress));
         bw.append(" ");
         bw.append(serverKey.getAlgorithm());
@@ -121,9 +120,12 @@ public class KnownHostsManager {
 
     String getAddressString(SocketAddress address) {
         if (address instanceof InetSocketAddress) {
-            InetSocketAddress inetAddress = (InetSocketAddress)address;
-            return String.format("%s,%s:%s", inetAddress.getHostName(),
-                                 inetAddress.getAddress().getHostAddress(), inetAddress.getPort());
+            InetSocketAddress inetAddress = (InetSocketAddress) address;
+            return String.format(
+                    "%s,%s:%s",
+                    inetAddress.getHostName(),
+                    inetAddress.getAddress().getHostAddress(),
+                    inetAddress.getPort());
         }
         return "";
     }
@@ -137,5 +139,4 @@ public class KnownHostsManager {
             }
         }
     }
-
 }

@@ -17,7 +17,6 @@ package org.apache.karaf.jaas.modules.krb5;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-
 import org.apache.directory.api.util.Strings;
 import org.apache.directory.server.kerberos.kdc.AbstractKerberosITest;
 import org.apache.directory.shared.kerberos.codec.types.EncryptionType;
@@ -25,7 +24,9 @@ import org.apache.directory.shared.kerberos.crypto.checksum.ChecksumType;
 
 public class KarafKerberosITest extends AbstractKerberosITest {
 
-    protected String createKrb5Conf(ChecksumType checksumType, EncryptionType encryptionType, boolean isTcp) throws IOException {
+    protected String createKrb5Conf(
+            ChecksumType checksumType, EncryptionType encryptionType, boolean isTcp)
+            throws IOException {
         File file = folder.newFile("krb5.conf");
         PrintStream out = new PrintStream(file);
         out.println("[libdefaults]");
@@ -47,5 +48,4 @@ public class KarafKerberosITest extends AbstractKerberosITest {
         out.close();
         return file.getAbsolutePath();
     }
-
 }

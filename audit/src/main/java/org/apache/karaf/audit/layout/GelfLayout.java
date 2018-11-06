@@ -16,10 +16,9 @@
  */
 package org.apache.karaf.audit.layout;
 
+import java.io.IOException;
 import org.apache.karaf.audit.Event;
 import org.apache.karaf.audit.util.Buffer;
-
-import java.io.IOException;
 
 public class GelfLayout extends AbstractLayout {
 
@@ -39,7 +38,7 @@ public class GelfLayout extends AbstractLayout {
     private void datetime(long timestamp) throws IOException {
         buffer.append(" timestamp=");
         long secs = timestamp / 1000;
-        int ms = (int)(timestamp - secs * 1000);
+        int ms = (int) (timestamp - secs * 1000);
         buffer.format(secs);
         buffer.append('.');
         int temp = ms / 100;
@@ -85,5 +84,4 @@ public class GelfLayout extends AbstractLayout {
             }
         }
     }
-
 }

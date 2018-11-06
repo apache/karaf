@@ -19,9 +19,7 @@ package org.apache.karaf.jpm;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Interface used to create new processes.
- */
+/** Interface used to create new processes. */
 public interface ProcessBuilder {
 
     /**
@@ -56,5 +54,4 @@ public interface ProcessBuilder {
      * @throws IOException if the process can not be attached to.
      */
     org.apache.karaf.jpm.Process attach(int pid) throws IOException;
-
 }

@@ -17,7 +17,6 @@
 package org.apache.karaf.obr.command;
 
 import java.util.List;
-
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.shell.api.action.Argument;
@@ -25,14 +24,27 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "obr", name = "url-remove", description = "Removes a list of repository URLs from the OBR service.")
+@Command(
+        scope = "obr",
+        name = "url-remove",
+        description = "Removes a list of repository URLs from the OBR service.")
 @Service
 public class RemoveUrlCommand extends ObrCommandSupport {
 
-    @Option(name = "-i", aliases = { "--index" }, description = "Use index to identify URL", required = false, multiValued = false)
+    @Option(
+            name = "-i",
+            aliases = {"--index"},
+            description = "Use index to identify URL",
+            required = false,
+            multiValued = false)
     boolean useIndex;
 
-    @Argument(index = 0, name = "ids", description = "Repository URLs (or indexes if you use -i) to remove from OBR service", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "ids",
+            description = "Repository URLs (or indexes if you use -i) to remove from OBR service",
+            required = true,
+            multiValued = true)
     List<String> ids;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

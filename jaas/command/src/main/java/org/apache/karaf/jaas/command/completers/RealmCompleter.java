@@ -17,7 +17,6 @@
 package org.apache.karaf.jaas.command.completers;
 
 import java.util.List;
-
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -29,8 +28,7 @@ import org.apache.karaf.shell.support.completers.StringsCompleter;
 @Service
 public class RealmCompleter implements Completer {
 
-    @Reference
-    private List<JaasRealm> realms;
+    @Reference private List<JaasRealm> realms;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -45,5 +43,4 @@ public class RealmCompleter implements Completer {
         }
         return delegate.complete(session, commandLine, candidates);
     }
-
 }

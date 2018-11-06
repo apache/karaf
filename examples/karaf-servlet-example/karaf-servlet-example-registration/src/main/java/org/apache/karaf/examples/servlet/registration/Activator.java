@@ -28,26 +28,28 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
-        httpServiceTracker = new ServiceTracker(bundleContext, HttpService.class.getName(), null) {
-            @Override
-            public Object addingService(ServiceReference ref) {
-                HttpService httpService = (HttpService) bundleContext.getService(ref);
-                try {
-                    httpService.registerServlet("/servlet-example", new ExampleServlet(), null, null);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                return httpService;
-            }
+        httpServiceTracker =
+                new ServiceTracker(bundleContext, HttpService.class.getName(), null) {
+                    @Override
+                    public Object addingService(ServiceReference ref) {
+                        HttpService httpService = (HttpService) bundleContext.getService(ref);
+                        try {
+                            httpService.registerServlet(
+                                    "/servlet-example", new ExampleServlet(), null, null);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                        return httpService;
+                    }
 
-            public void removedService(ServiceReference ref, Object service) {
-                try {
-                    ((HttpService) service).unregister("/servlet-example");
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
+                    public void removedService(ServiceReference ref, Object service) {
+                        try {
+                            ((HttpService) service).unregister("/servlet-example");
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                };
         httpServiceTracker.open();
     }
 
@@ -55,5 +57,4 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext bundleContext) throws Exception {
         httpServiceTracker.close();
     }
-
 }

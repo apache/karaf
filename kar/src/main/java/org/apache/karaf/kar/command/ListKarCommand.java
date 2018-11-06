@@ -28,11 +28,14 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class ListKarCommand implements Action {
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
-    @Reference
-    private KarService karService;
+    @Reference private KarService karService;
 
     @Override
     public Object execute() throws Exception {
@@ -48,5 +51,4 @@ public class ListKarCommand implements Action {
 
         return null;
     }
-    
 }

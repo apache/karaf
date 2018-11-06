@@ -51,5 +51,4 @@ public class UserPrincipal implements Principal, Serializable {
     public String toString() {
         return "UserPrincipal[" + name + "]";
     }
-
 }

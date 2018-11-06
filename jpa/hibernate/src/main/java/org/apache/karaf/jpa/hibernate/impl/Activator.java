@@ -17,17 +17,15 @@
 package org.apache.karaf.jpa.hibernate.impl;
 
 import javax.management.MBeanServer;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-/**
- * Track MBeanServer service and manage one StatisticsPublisher for each MBeanServer
- */
-public class Activator implements BundleActivator, ServiceTrackerCustomizer<MBeanServer, MBeanServer> {
+/** Track MBeanServer service and manage one StatisticsPublisher for each MBeanServer */
+public class Activator
+        implements BundleActivator, ServiceTrackerCustomizer<MBeanServer, MBeanServer> {
 
     private ServiceTracker<MBeanServer, MBeanServer> mbeanServerTracker;
     private StatisticsPublisher publisher;
@@ -54,8 +52,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<MBea
     }
 
     @Override
-    public void modifiedService(ServiceReference<MBeanServer> reference, MBeanServer service) {
-    }
+    public void modifiedService(ServiceReference<MBeanServer> reference, MBeanServer service) {}
 
     @Override
     public void removedService(ServiceReference<MBeanServer> reference, MBeanServer service) {
@@ -64,5 +61,4 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<MBea
             publisher = null;
         }
     }
-
 }

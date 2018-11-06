@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.karaf.config.command.ConfigCommandSupport;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -41,8 +40,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * {@link Completer} for Configuration Admin properties.
  *
- * Displays a list of existing properties based on the current configuration being edited.
- *
+ * <p>Displays a list of existing properties based on the current configuration being edited.
  */
 @Service
 public class ConfigurationPropertyCompleter implements Completer {
@@ -50,10 +48,10 @@ public class ConfigurationPropertyCompleter implements Completer {
     private static final String OPTION = "-p";
     private static final String ALIAS = "--pid";
 
-    @Reference
-    private ConfigurationAdmin configAdmin;
+    @Reference private ConfigurationAdmin configAdmin;
 
-    public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
+    public int complete(
+            final Session session, final CommandLine commandLine, final List<String> candidates) {
         StringsCompleter strings = new StringsCompleter();
         if (session != null) {
             String pid = getPid(session, commandLine);
@@ -66,8 +64,8 @@ public class ConfigurationPropertyCompleter implements Completer {
     }
 
     /**
-     * Retrieves the pid stored in the {@link Session} or passed as an argument.
-     * Argument takes precedence from pid stored in the {@link Session}.
+     * Retrieves the pid stored in the {@link Session} or passed as an argument. Argument takes
+     * precedence from pid stored in the {@link Session}.
      */
     private String getPid(Session session, CommandLine commandLine) {
         String pid = (String) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID);
@@ -92,6 +90,7 @@ public class ConfigurationPropertyCompleter implements Completer {
 
     /**
      * Returns the property names for the given pid.
+     *
      * @param pid
      * @return
      */
@@ -101,7 +100,8 @@ public class ConfigurationPropertyCompleter implements Completer {
         if (pid != null) {
             Configuration configuration = null;
             try {
-                Configuration[] configs = configAdmin.listConfigurations("(service.pid="+pid+")");
+                Configuration[] configs =
+                        configAdmin.listConfigurations("(service.pid=" + pid + ")");
                 if (configs != null && configs.length > 0) {
                     configuration = configs[0];
                     if (configuration != null) {
@@ -115,9 +115,9 @@ public class ConfigurationPropertyCompleter implements Completer {
                     }
                 }
             } catch (IOException e) {
-              //Ignore
+                // Ignore
             } catch (InvalidSyntaxException e) {
-                //Ignore
+                // Ignore
             }
         }
         return propertyNames;

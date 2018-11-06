@@ -18,6 +18,8 @@
  */
 package org.apache.karaf.shell.impl.console;
 
+import static org.apache.felix.gogo.jline.Shell.VAR_SCOPE;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,7 +41,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.apache.felix.gogo.jline.ParsedLineImpl;
 import org.apache.felix.gogo.jline.Shell;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
@@ -70,11 +71,8 @@ import org.jline.reader.*;
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
-import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.felix.gogo.jline.Shell.VAR_SCOPE;
 
 public class ConsoleSessionImpl implements Session {
 
@@ -83,7 +81,8 @@ public class ConsoleSessionImpl implements Session {
     public static final String SHELL_HISTORY_MAXSIZE = "karaf.shell.history.maxSize";
     public static final String SHELL_HISTORY_FILE_MAXSIZE = "karaf.shell.history.file.maxSize";
     public static final String PROMPT = "PROMPT";
-    public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}(${SUBSHELL})> ";
+    public static final String DEFAULT_PROMPT =
+            "\u001B[1m${USER}\u001B[0m@${APPLICATION}(${SUBSHELL})> ";
     public static final String RPROMPT = "RPROMPT";
     public static final String DEFAULT_RPROMPT = null;
 
@@ -112,15 +111,16 @@ public class ConsoleSessionImpl implements Session {
     private Thread thread;
     private Properties brandingProps;
 
-    public ConsoleSessionImpl(SessionFactory factory,
-                              CommandProcessor processor,
-                              ThreadIO threadIO,
-                              InputStream in,
-                              PrintStream out,
-                              PrintStream err,
-                              Terminal term,
-                              String encoding,
-                              Runnable closeCallback) {
+    public ConsoleSessionImpl(
+            SessionFactory factory,
+            CommandProcessor processor,
+            ThreadIO threadIO,
+            InputStream in,
+            PrintStream out,
+            PrintStream err,
+            Terminal term,
+            String encoding,
+            Runnable closeCallback) {
         // Arguments
         this.factory = factory;
         this.threadIO = threadIO;
@@ -135,7 +135,7 @@ public class ConsoleSessionImpl implements Session {
             jlineTerminal = (org.jline.terminal.Terminal) term;
         } else if (term != null) {
             terminal = term;
-//            jlineTerminal = new KarafTerminal(term);
+            //            jlineTerminal = new KarafTerminal(term);
             // TODO:JLINE
             throw new UnsupportedOperationException();
         } else {
@@ -151,13 +151,17 @@ public class ConsoleSessionImpl implements Session {
             jlineTerminal.setSize(new Size(80, 24));
         }
 
-        brandingProps = Branding.loadBrandingProperties(terminal.getClass().getName().endsWith("SshTerminal"));
+        brandingProps =
+                Branding.loadBrandingProperties(
+                        terminal.getClass().getName().endsWith("SshTerminal"));
 
         // Create session
         if (in == null || out == null || err == null) {
-            session = processor.createSession(((org.jline.terminal.Terminal) terminal).input(),
-                    ((org.jline.terminal.Terminal) terminal).output(),
-                    ((org.jline.terminal.Terminal) terminal).output());
+            session =
+                    processor.createSession(
+                            ((org.jline.terminal.Terminal) terminal).input(),
+                            ((org.jline.terminal.Terminal) terminal).output(),
+                            ((org.jline.terminal.Terminal) terminal).output());
         } else {
             session = processor.createSession(in, out, err);
         }
@@ -165,24 +169,26 @@ public class ConsoleSessionImpl implements Session {
         // Completers
         Completer builtinCompleter = createBuiltinCompleter();
         CommandsCompleter commandsCompleter = new CommandsCompleter(factory, this);
-        Completer completer =  (rdr, line, candidates) -> {
-            builtinCompleter.complete(rdr, line, candidates);
-            commandsCompleter.complete(rdr, line, candidates);
-            merge(candidates);
-        };
+        Completer completer =
+                (rdr, line, candidates) -> {
+                    builtinCompleter.complete(rdr, line, candidates);
+                    commandsCompleter.complete(rdr, line, candidates);
+                    merge(candidates);
+                };
 
         // Masking
         maskingCallback = new AggregateMaskingCallback();
 
         // Console reader
-        reader = LineReaderBuilder.builder()
-                    .terminal(jlineTerminal)
-                    .appName("karaf")
-                    .variables(((CommandSessionImpl) session).getVariables())
-                    .highlighter(new org.apache.felix.gogo.jline.Highlighter(session))
-                    .parser(new KarafParser(this))
-                    .completer(completer)
-                    .build();
+        reader =
+                LineReaderBuilder.builder()
+                        .terminal(jlineTerminal)
+                        .appName("karaf")
+                        .variables(((CommandSessionImpl) session).getVariables())
+                        .highlighter(new org.apache.felix.gogo.jline.Highlighter(session))
+                        .parser(new KarafParser(this))
+                        .completer(completer)
+                        .build();
 
         // History
         final Path file = getHistoryFile();
@@ -228,16 +234,18 @@ public class ConsoleSessionImpl implements Session {
         session.put("USER", ShellUtil.getCurrentUserName());
         session.put("TERM", terminal.getType());
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-        session.put("#LINES", (Function) (session, arguments) -> Integer.toString(terminal.getHeight()));
-        session.put("#COLUMNS", (Function) (session, arguments) -> Integer.toString(terminal.getWidth()));
+        session.put(
+                "#LINES",
+                (Function) (session, arguments) -> Integer.toString(terminal.getHeight()));
+        session.put(
+                "#COLUMNS",
+                (Function) (session, arguments) -> Integer.toString(terminal.getWidth()));
         session.put("pid", getPid());
         session.put(Shell.VAR_COMPLETIONS, new HashMap<>());
         session.put(Shell.VAR_READER, reader);
         session.put(Shell.VAR_TERMINAL, reader.getTerminal());
         session.put(CommandSession.OPTION_NO_GLOB, Boolean.TRUE);
         session.currentDir(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
-
-
     }
 
     private void merge(List<Candidate> candidates) {
@@ -250,47 +258,55 @@ public class ConsoleSessionImpl implements Session {
     }
 
     private Completer createBuiltinCompleter() {
-        Completers.CompletionEnvironment env = new Completers.CompletionEnvironment() {
-            @Override
-            public Map<String, List<Completers.CompletionData>> getCompletions() {
-                return Shell.getCompletions(session);
-            }
-            @Override
-            public Set<String> getCommands() {
-                return factory.getRegistry().getCommands().stream()
-                        .map(c -> c.getScope() + ":" + c.getName())
-                        .collect(Collectors.toSet());
-            }
-            @Override
-            public String resolveCommand(String command) {
-                String resolved = command;
-                if (command.indexOf(':') < 0) {
-                    Set<String> commands = getCommands();
-                    Object path = session.get(VAR_SCOPE);
-                    String scopePath = (null == path ? "*" : path.toString());
-                    for (String scope : scopePath.split(":")) {
-                        for (String entry : commands) {
-                            if ("*".equals(scope) && entry.endsWith(":" + command)
-                                    || entry.equals(scope + ":" + command)) {
-                                resolved = entry;
-                                break;
+        Completers.CompletionEnvironment env =
+                new Completers.CompletionEnvironment() {
+                    @Override
+                    public Map<String, List<Completers.CompletionData>> getCompletions() {
+                        return Shell.getCompletions(session);
+                    }
+
+                    @Override
+                    public Set<String> getCommands() {
+                        return factory.getRegistry()
+                                .getCommands()
+                                .stream()
+                                .map(c -> c.getScope() + ":" + c.getName())
+                                .collect(Collectors.toSet());
+                    }
+
+                    @Override
+                    public String resolveCommand(String command) {
+                        String resolved = command;
+                        if (command.indexOf(':') < 0) {
+                            Set<String> commands = getCommands();
+                            Object path = session.get(VAR_SCOPE);
+                            String scopePath = (null == path ? "*" : path.toString());
+                            for (String scope : scopePath.split(":")) {
+                                for (String entry : commands) {
+                                    if ("*".equals(scope) && entry.endsWith(":" + command)
+                                            || entry.equals(scope + ":" + command)) {
+                                        resolved = entry;
+                                        break;
+                                    }
+                                }
                             }
                         }
+                        return resolved;
                     }
-                }
-                return resolved;
-            }
-            @Override
-            public String commandName(String command) {
-                int idx = command.indexOf(':');
-                return idx >= 0 ? command.substring(idx + 1) : command;
-            }
-            @Override
-            public Object evaluate(LineReader reader, ParsedLine line, String func) throws Exception {
-                session.put(Shell.VAR_COMMAND_LINE, line);
-                return session.execute(func);
-            }
-        };
+
+                    @Override
+                    public String commandName(String command) {
+                        int idx = command.indexOf(':');
+                        return idx >= 0 ? command.substring(idx + 1) : command;
+                    }
+
+                    @Override
+                    public Object evaluate(LineReader reader, ParsedLine line, String func)
+                            throws Exception {
+                        session.put(Shell.VAR_COMMAND_LINE, line);
+                        return session.execute(func);
+                    }
+                };
         return new org.jline.builtins.Completers.Completer(env);
     }
 
@@ -300,7 +316,8 @@ public class ConsoleSessionImpl implements Session {
      * @return the history file
      */
     protected Path getHistoryFile() {
-        String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf41.history").toString();
+        String defaultHistoryPath =
+                new File(System.getProperty("user.home"), ".karaf/karaf41.history").toString();
         return Paths.get(System.getProperty("karaf.history", defaultHistoryPath));
     }
 
@@ -357,8 +374,7 @@ public class ConsoleSessionImpl implements Session {
                     // Ignore
                 }
             }
-            if (session != null)
-                session.close();
+            if (session != null) session.close();
         }
     }
 
@@ -371,31 +387,38 @@ public class ConsoleSessionImpl implements Session {
 
             AtomicBoolean reading = new AtomicBoolean();
 
-            session.setJobListener((job, previous, current) -> {
-                if (previous == Status.Background || current == Status.Background
-                        || previous == Status.Suspended || current == Status.Suspended) {
-                    int width = terminal.getWidth();
-                    String status = current.name().toLowerCase();
-                    jlineTerminal.writer().write(getStatusLine(job, width, status));
-                    jlineTerminal.flush();
-                    if (reading.get()) {
-                        reader.callWidget(LineReader.REDRAW_LINE);
-                        reader.callWidget(LineReader.REDISPLAY);
-                    }
-                }
-            });
-            jlineTerminal.handle(Signal.TSTP, s -> {
-                Job current = session.foregroundJob();
-                if (current != null) {
-                    current.suspend();
-                }
-            });
-            jlineTerminal.handle(Signal.INT, s -> {
-                Job current = session.foregroundJob();
-                if (current != null) {
-                    current.interrupt();
-                }
-            });
+            session.setJobListener(
+                    (job, previous, current) -> {
+                        if (previous == Status.Background
+                                || current == Status.Background
+                                || previous == Status.Suspended
+                                || current == Status.Suspended) {
+                            int width = terminal.getWidth();
+                            String status = current.name().toLowerCase();
+                            jlineTerminal.writer().write(getStatusLine(job, width, status));
+                            jlineTerminal.flush();
+                            if (reading.get()) {
+                                reader.callWidget(LineReader.REDRAW_LINE);
+                                reader.callWidget(LineReader.REDISPLAY);
+                            }
+                        }
+                    });
+            jlineTerminal.handle(
+                    Signal.TSTP,
+                    s -> {
+                        Job current = session.foregroundJob();
+                        if (current != null) {
+                            current.suspend();
+                        }
+                    });
+            jlineTerminal.handle(
+                    Signal.INT,
+                    s -> {
+                        Job current = session.foregroundJob();
+                        if (current != null) {
+                            current.interrupt();
+                        }
+                    });
 
             String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
             executeScript(scriptFileName);
@@ -420,8 +443,7 @@ public class ConsoleSessionImpl implements Session {
 
     /**
      * On the local console we only show the welcome banner once. This allows to suppress the banner
-     * on refreshs of the shell core bundle. 
-     * On ssh we show it every time.
+     * on refreshs of the shell core bundle. On ssh we show it every time.
      */
     private void welcomeBanner() {
         if (!isLocal() || System.getProperty(SUPPRESS_WELCOME) == null) {
@@ -434,7 +456,7 @@ public class ConsoleSessionImpl implements Session {
     }
 
     private boolean isLocal() {
-        Boolean isLocal = (Boolean)session.get(Session.IS_LOCAL);
+        Boolean isLocal = (Boolean) session.get(Session.IS_LOCAL);
         return isLocal != null && isLocal;
     }
 
@@ -525,7 +547,8 @@ public class ConsoleSessionImpl implements Session {
             List<Command> commands = registry.getCommands();
             for (String scope : scopes) {
                 for (Command command : commands) {
-                    if ((Session.SCOPE_GLOBAL.equals(scope) || command.getScope().equals(scope)) && command.getName().equals(name)) {
+                    if ((Session.SCOPE_GLOBAL.equals(scope) || command.getScope().equals(scope))
+                            && command.getName().equals(name)) {
                         return command.getScope() + ":" + name;
                     }
                 }
@@ -536,11 +559,12 @@ public class ConsoleSessionImpl implements Session {
 
     @Override
     public String readLine(String prompt, Character mask) throws IOException {
-        LineReader reader = LineReaderBuilder.builder()
-                .terminal(jlineTerminal)
-                .appName("karaf")
-                .parser((line, cursor, context) -> new SimpleParsedLine(line, cursor))
-                .build();
+        LineReader reader =
+                LineReaderBuilder.builder()
+                        .terminal(jlineTerminal)
+                        .appName("karaf")
+                        .parser((line, cursor, context) -> new SimpleParsedLine(line, cursor))
+                        .build();
         reader.setOpt(LineReader.Option.DISABLE_EVENT_EXPANSION);
         reader.setVariable(LineReader.DISABLE_HISTORY, Boolean.TRUE);
         reader.setVariable(LineReader.DISABLE_COMPLETION, Boolean.TRUE);
@@ -550,16 +574,20 @@ public class ConsoleSessionImpl implements Session {
     private String loadCompletionMode() {
         String mode;
         try {
-            File shellCfg = new File(System.getProperty("karaf.etc"), "/org.apache.karaf.shell.cfg");
+            File shellCfg =
+                    new File(System.getProperty("karaf.etc"), "/org.apache.karaf.shell.cfg");
             Properties properties = new Properties();
             properties.load(new FileInputStream(shellCfg));
             mode = (String) properties.get("completionMode");
             if (mode == null) {
-                LOGGER.debug("completionMode property is not defined in etc/org.apache.karaf.shell.cfg file. Using default completion mode.");
+                LOGGER.debug(
+                        "completionMode property is not defined in etc/org.apache.karaf.shell.cfg file. Using default completion mode.");
                 mode = Session.COMPLETION_MODE_GLOBAL;
             }
         } catch (Exception e) {
-            LOGGER.warn("Can't read {}/org.apache.karaf.shell.cfg file. The completion is set to default.", System.getProperty("karaf.etc"));
+            LOGGER.warn(
+                    "Can't read {}/org.apache.karaf.shell.cfg file. The completion is set to default.",
+                    System.getProperty("karaf.etc"));
             mode = Session.COMPLETION_MODE_GLOBAL;
         }
         return mode;
@@ -570,14 +598,17 @@ public class ConsoleSessionImpl implements Session {
     }
 
     private void doExecuteScript(Path scriptFileName) {
-        Object oldScript = session.put("script", Paths.get(System.getProperty("karaf.home")).relativize(scriptFileName));
+        Object oldScript =
+                session.put(
+                        "script",
+                        Paths.get(System.getProperty("karaf.home")).relativize(scriptFileName));
         try {
-            String script = String.join("\n",
-                    Files.readAllLines(scriptFileName));
+            String script = String.join("\n", Files.readAllLines(scriptFileName));
             session.execute(script);
         } catch (Exception e) {
             LOGGER.debug("Error in initialization script {}", scriptFileName, e);
-            System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
+            System.err.println(
+                    "Error in initialization script: " + scriptFileName + ": " + e.getMessage());
         } finally {
             session.put("script", oldScript);
         }
@@ -722,7 +753,8 @@ public class ConsoleSessionImpl implements Session {
                 Map<String, ActionMaskingCallback> regexs = new HashMap<>();
                 for (Command cmd : commands) {
                     if (cmd instanceof ActionCommand) {
-                        ActionMaskingCallback amc = ActionMaskingCallback.build((ActionCommand) cmd);
+                        ActionMaskingCallback amc =
+                                ActionMaskingCallback.build((ActionCommand) cmd);
                         if (amc != null) {
                             regexs.put(cmd.getScope() + ":" + cmd.getName(), amc);
                         }
@@ -749,7 +781,5 @@ public class ConsoleSessionImpl implements Session {
             }
             return line;
         }
-
     }
-
 }

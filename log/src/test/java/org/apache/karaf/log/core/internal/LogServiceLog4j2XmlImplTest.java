@@ -16,125 +16,126 @@
  */
 package org.apache.karaf.log.core.internal;
 
-import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class LogServiceLog4j2XmlImplTest {
 
     @Test
     public void testInsertIndentedTabs() throws Exception {
-        String xml = "<Configuration>\n" +
-                "\t<Loggers>\n" +
-                "\t</Loggers>\n" +
-                "</Configuration>";
+        String xml = "<Configuration>\n" + "\t<Loggers>\n" + "\t</Loggers>\n" + "</Configuration>";
 
         String out = insertIndented(xml, false);
         assertEquals(
-                "<Configuration>\n" +
-                        "\t<Loggers>\n" +
-                        "\t\t<Logger/>\n" +
-                        "\t</Loggers>\n" +
-                        "</Configuration>", out);
+                "<Configuration>\n"
+                        + "\t<Loggers>\n"
+                        + "\t\t<Logger/>\n"
+                        + "\t</Loggers>\n"
+                        + "</Configuration>",
+                out);
         out = insertIndented(xml, true);
         assertEquals(
-                "<Configuration>\n" +
-                        "\t<Loggers>\n" +
-                        "\t\t<Logger/>\n" +
-                        "\t</Loggers>\n" +
-                        "</Configuration>", out);
+                "<Configuration>\n"
+                        + "\t<Loggers>\n"
+                        + "\t\t<Logger/>\n"
+                        + "\t</Loggers>\n"
+                        + "</Configuration>",
+                out);
     }
 
     @Test
     public void testInsertIndentedSpaces() throws Exception {
-        String xml = "<Configuration>\n" +
-                "  <Loggers>\n" +
-                "  </Loggers>\n" +
-                "</Configuration>";
+        String xml = "<Configuration>\n" + "  <Loggers>\n" + "  </Loggers>\n" + "</Configuration>";
 
         String out = insertIndented(xml, false);
         assertEquals(
-                "<Configuration>\n" +
-                        "  <Loggers>\n" +
-                        "    <Logger/>\n" +
-                        "  </Loggers>\n" +
-                        "</Configuration>", out);
+                "<Configuration>\n"
+                        + "  <Loggers>\n"
+                        + "    <Logger/>\n"
+                        + "  </Loggers>\n"
+                        + "</Configuration>",
+                out);
         out = insertIndented(xml, true);
         assertEquals(
-                "<Configuration>\n" +
-                        "  <Loggers>\n" +
-                        "    <Logger/>\n" +
-                        "  </Loggers>\n" +
-                        "</Configuration>", out);
+                "<Configuration>\n"
+                        + "  <Loggers>\n"
+                        + "    <Logger/>\n"
+                        + "  </Loggers>\n"
+                        + "</Configuration>",
+                out);
     }
 
     @Test
     public void testInsertIndentedTabsWithRoot() throws Exception {
-        String xml = "<Configuration>\n" +
-                "\t<Loggers>\n" +
-                "\t\t<Root/>\n" +
-                "\t</Loggers>\n" +
-                "</Configuration>";
+        String xml =
+                "<Configuration>\n"
+                        + "\t<Loggers>\n"
+                        + "\t\t<Root/>\n"
+                        + "\t</Loggers>\n"
+                        + "</Configuration>";
 
         String out = insertIndented(xml, false);
         assertEquals(
-                "<Configuration>\n" +
-                        "\t<Loggers>\n" +
-                        "\t\t<Root/>\n" +
-                        "\t\t<Logger/>\n" +
-                        "\t</Loggers>\n" +
-                        "</Configuration>", out);
+                "<Configuration>\n"
+                        + "\t<Loggers>\n"
+                        + "\t\t<Root/>\n"
+                        + "\t\t<Logger/>\n"
+                        + "\t</Loggers>\n"
+                        + "</Configuration>",
+                out);
         out = insertIndented(xml, true);
         assertEquals(
-                "<Configuration>\n" +
-                        "\t<Loggers>\n" +
-                        "\t\t<Logger/>\n" +
-                        "\t\t<Root/>\n" +
-                        "\t</Loggers>\n" +
-                        "</Configuration>", out);
+                "<Configuration>\n"
+                        + "\t<Loggers>\n"
+                        + "\t\t<Logger/>\n"
+                        + "\t\t<Root/>\n"
+                        + "\t</Loggers>\n"
+                        + "</Configuration>",
+                out);
     }
 
     @Test
     public void testInsertIndentedSpacesWithRoot() throws Exception {
-        String xml = "<Configuration>\n" +
-                "  <Loggers>\n" +
-                "    <Root/>\n" +
-                "  </Loggers>\n" +
-                "</Configuration>";
+        String xml =
+                "<Configuration>\n"
+                        + "  <Loggers>\n"
+                        + "    <Root/>\n"
+                        + "  </Loggers>\n"
+                        + "</Configuration>";
 
         String out = insertIndented(xml, false);
         assertEquals(
-                "<Configuration>\n" +
-                        "  <Loggers>\n" +
-                        "    <Root/>\n" +
-                        "    <Logger/>\n" +
-                        "  </Loggers>\n" +
-                        "</Configuration>", out);
+                "<Configuration>\n"
+                        + "  <Loggers>\n"
+                        + "    <Root/>\n"
+                        + "    <Logger/>\n"
+                        + "  </Loggers>\n"
+                        + "</Configuration>",
+                out);
         out = insertIndented(xml, true);
         assertEquals(
-                "<Configuration>\n" +
-                        "  <Loggers>\n" +
-                        "    <Logger/>\n" +
-                        "    <Root/>\n" +
-                        "  </Loggers>\n" +
-                        "</Configuration>", out);
+                "<Configuration>\n"
+                        + "  <Loggers>\n"
+                        + "    <Logger/>\n"
+                        + "    <Root/>\n"
+                        + "  </Loggers>\n"
+                        + "</Configuration>",
+                out);
     }
 
     private String insertIndented(String xml, boolean atBeginning) throws Exception {
-        Document doc = LogServiceLog4j2XmlImpl.loadConfig(null, new ByteArrayInputStream(xml.getBytes()));
+        Document doc =
+                LogServiceLog4j2XmlImpl.loadConfig(null, new ByteArrayInputStream(xml.getBytes()));
         Element element = doc.createElement("Logger");
         LogServiceLog4j2XmlImpl.insertIndented(
                 (Element) doc.getDocumentElement().getElementsByTagName("Loggers").item(0),

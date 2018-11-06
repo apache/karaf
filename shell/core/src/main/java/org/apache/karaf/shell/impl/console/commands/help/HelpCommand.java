@@ -18,6 +18,11 @@
  */
 package org.apache.karaf.shell.impl.console.commands.help;
 
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_RED;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_BOLD;
+import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_NORMAL;
+
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.io.StringReader;
@@ -26,7 +31,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
@@ -38,11 +42,6 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.CommandException;
 import org.apache.karaf.shell.support.completers.ArgumentCommandLine;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
-
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_DEFAULT;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.COLOR_RED;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_BOLD;
-import static org.apache.karaf.shell.support.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
 public class HelpCommand implements Command {
 
@@ -79,13 +78,21 @@ public class HelpCommand implements Command {
             return null;
         }
         if (arguments.size() > 1) {
-            String msg = COLOR_RED
-                    + "Error executing command "
-                    + INTENSITY_BOLD + getName() + INTENSITY_NORMAL
-                    + COLOR_DEFAULT + ": " + "too many arguments specified";
+            String msg =
+                    COLOR_RED
+                            + "Error executing command "
+                            + INTENSITY_BOLD
+                            + getName()
+                            + INTENSITY_NORMAL
+                            + COLOR_DEFAULT
+                            + ": "
+                            + "too many arguments specified";
             throw new CommandException(msg);
         }
-        String path = arguments.isEmpty() ? null : arguments.get(0) == null ? null : arguments.get(0).toString();
+        String path =
+                arguments.isEmpty()
+                        ? null
+                        : arguments.get(0) == null ? null : arguments.get(0).toString();
         String help = getHelp(session, path);
         if (help != null) {
             try (BufferedReader reader = new BufferedReader(new StringReader(help))) {
@@ -105,9 +112,14 @@ public class HelpCommand implements Command {
             public int complete(Session session, CommandLine commandLine, List<String> candidates) {
                 String[] args = commandLine.getArguments();
                 int argIndex = commandLine.getCursorArgumentIndex();
-                StringsCompleter completer = new StringsCompleter(Collections.singletonList(getName()));
+                StringsCompleter completer =
+                        new StringsCompleter(Collections.singletonList(getName()));
                 if (argIndex == 0) {
-                    return completer.complete(session, new ArgumentCommandLine(args[argIndex], commandLine.getArgumentPosition()), candidates);
+                    return completer.complete(
+                            session,
+                            new ArgumentCommandLine(
+                                    args[argIndex], commandLine.getArgumentPosition()),
+                            candidates);
                 } else if (!verifyCompleter(session, completer, args[0])) {
                     return -1;
                 }
@@ -123,19 +135,34 @@ public class HelpCommand implements Command {
                 if (argIndex == 1) {
                     int res;
                     if (argIndex < args.length) {
-                        res = completer.complete(session, new ArgumentCommandLine(args[argIndex], commandLine.getArgumentPosition()), candidates);
+                        res =
+                                completer.complete(
+                                        session,
+                                        new ArgumentCommandLine(
+                                                args[argIndex], commandLine.getArgumentPosition()),
+                                        candidates);
                     } else {
-                        res = completer.complete(session, new ArgumentCommandLine("", 0), candidates);
+                        res =
+                                completer.complete(
+                                        session, new ArgumentCommandLine("", 0), candidates);
                     }
-                    return res + (commandLine.getBufferPosition() - commandLine.getArgumentPosition());
+                    return res
+                            + (commandLine.getBufferPosition() - commandLine.getArgumentPosition());
                 } else if (!verifyCompleter(session, completer, args[1])) {
                     return -1;
                 }
                 return -1;
             }
-            protected boolean verifyCompleter(Session session, Completer completer, String argument) {
+
+            protected boolean verifyCompleter(
+                    Session session, Completer completer, String argument) {
                 List<String> candidates = new ArrayList<>();
-                return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
+                return completer.complete(
+                                        session,
+                                        new ArgumentCommandLine(argument, argument.length()),
+                                        candidates)
+                                != -1
+                        && !candidates.isEmpty();
             }
         };
     }
@@ -175,18 +202,20 @@ public class HelpCommand implements Command {
         if (path == null) {
             path = "%root%";
         }
-        Map<String,String> props = new HashMap<>();
+        Map<String, String> props = new HashMap<>();
         props.put("data", "${" + path + "}");
         final List<HelpProvider> providers = session.getRegistry().getServices(HelpProvider.class);
-        InterpolationHelper.performSubstitution(props, key -> {
-            for (HelpProvider hp : providers) {
-                String result = hp.getHelp(session, key);
-                if (result != null) {
-                    return removeNewLine(result);
-                }
-            }
-            return null;
-        });
+        InterpolationHelper.performSubstitution(
+                props,
+                key -> {
+                    for (HelpProvider hp : providers) {
+                        String result = hp.getHelp(session, key);
+                        if (result != null) {
+                            return removeNewLine(result);
+                        }
+                    }
+                    return null;
+                });
         return props.get("data");
     }
 
@@ -196,5 +225,4 @@ public class HelpCommand implements Command {
         }
         return help;
     }
-
 }

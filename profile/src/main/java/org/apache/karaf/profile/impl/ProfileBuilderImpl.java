@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.profile.impl;
 
+import static org.apache.karaf.profile.ProfileConstants.*;
+import static org.apache.karaf.profile.impl.ProfileImpl.ConfigListType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,17 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 
-import static org.apache.karaf.profile.ProfileConstants.*;
-import static org.apache.karaf.profile.impl.ProfileImpl.ConfigListType;
-
-/**
- * The default {@link ProfileBuilder}
- */
+/** The default {@link ProfileBuilder} */
 public final class ProfileBuilderImpl implements ProfileBuilder {
 
     private String profileId;
@@ -92,7 +89,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         updateParentsAttribute(currentIds);
         return this;
     }
-    
+
     @Override
     public ProfileBuilder removeParent(String profileId) {
         Set<String> currentIds = new LinkedHashSet<>(getParents());
@@ -113,7 +110,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     private String parentsAttributeValue(Collection<String> parentIds) {
         return parentIds.isEmpty() ? "" : String.join(" ", parentIds);
     }
-    
+
     @Override
     public Set<String> getFileConfigurationKeys() {
         return fileMapping.keySet();
@@ -127,7 +124,8 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     @Override
     public ProfileBuilder setFileConfigurations(Map<String, byte[]> configurations) {
         fileMapping = new HashMap<>();
-        configurations.forEach((name, bytes) -> fileMapping.put(name, new FileContent(bytes, false)));
+        configurations.forEach(
+                (name, bytes) -> fileMapping.put(name, new FileContent(bytes, false)));
         return this;
     }
 
@@ -156,7 +154,8 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     @Override
     public ProfileBuilder addConfiguration(String pid, Map<String, Object> config) {
-        fileMapping.put(pid + Profile.PROPERTIES_SUFFIX, new FileContent(Utils.toBytes(config), true));
+        fileMapping.put(
+                pid + Profile.PROPERTIES_SUFFIX, new FileContent(Utils.toBytes(config), true));
         return this;
     }
 
@@ -188,13 +187,13 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         FileContent content = fileMapping.get(pid + Profile.PROPERTIES_SUFFIX);
         return Utils.toProperties(content == null ? null : content.bytes);
     }
-    
+
     @Override
     public ProfileBuilder deleteConfiguration(String pid) {
         fileMapping.remove(pid + Profile.PROPERTIES_SUFFIX);
         return this;
     }
-    
+
     @Override
     public ProfileBuilder setBundles(List<String> values) {
         addProfileConfiguration(ConfigListType.BUNDLES, values);
@@ -281,7 +280,10 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     public ProfileBuilder setOverlay(boolean overlay) {
         this.isOverlay = overlay;
-        addConfiguration(Profile.INTERNAL_PID, Profile.ATTRIBUTE_PREFIX + Profile.OVERLAY, Boolean.toString(overlay));
+        addConfiguration(
+                Profile.INTERNAL_PID,
+                Profile.ATTRIBUTE_PREFIX + Profile.OVERLAY,
+                Boolean.toString(overlay));
         return this;
     }
 
@@ -329,6 +331,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     /**
      * Returns an immutable implementation of {@link Profile}
+     *
      * @return
      */
     @Override
@@ -340,18 +343,21 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     /**
-     * If some properties file has been marked as {@link FileContent#generated}, then we can add some comment hints.
+     * If some properties file has been marked as {@link FileContent#generated}, then we can add
+     * some comment hints.
+     *
      * @param name
      * @param fileContent
      * @return
      */
     private byte[] reformat(String name, FileContent fileContent) {
-        if (!fileContent.generated || !(isOverlay && name.equals(INTERNAL_PID + PROPERTIES_SUFFIX))) {
+        if (!fileContent.generated
+                || !(isOverlay && name.equals(INTERNAL_PID + PROPERTIES_SUFFIX))) {
             return fileContent.bytes;
         }
 
         TypedProperties properties = Utils.toProperties(fileContent.bytes);
-        TypedProperties result = Utils.toProperties((byte[])null);
+        TypedProperties result = Utils.toProperties((byte[]) null);
 
         String parents = null;
         Map<String, Object> attributes = new LinkedHashMap<>();
@@ -431,11 +437,13 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     /**
      * Puts properties under single comment.
+     *
      * @param comment
      * @param properties
      * @param values
      */
-    private void addGroupOfProperties(String comment, TypedProperties properties, Map<String, Object> values) {
+    private void addGroupOfProperties(
+            String comment, TypedProperties properties, Map<String, Object> values) {
         boolean first = true;
         for (Entry<String, Object> entry : values.entrySet()) {
             if (first) {
@@ -449,6 +457,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
 
     /**
      * Helper method to generate comments above property groups in {@link TypedProperties}
+     *
      * @param comment
      * @return
      */
@@ -457,8 +466,8 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     /**
-     * We can distinguish between bytes read from external file and bytes from serialized
-     * {@link org.apache.felix.utils.properties.TypedProperties}
+     * We can distinguish between bytes read from external file and bytes from serialized {@link
+     * org.apache.felix.utils.properties.TypedProperties}
      */
     static class FileContent {
         byte[] bytes;
@@ -482,5 +491,4 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
             return Arrays.hashCode(bytes);
         }
     }
-
 }

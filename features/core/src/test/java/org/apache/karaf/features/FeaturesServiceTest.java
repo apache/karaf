@@ -16,6 +16,11 @@
  */
 package org.apache.karaf.features;
 
+import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,7 +33,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BundleInstallSupport;
@@ -46,16 +50,12 @@ import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 public class FeaturesServiceTest extends TestBase {
-    private static final String FEATURE_WITH_INVALID_BUNDLE = "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
-            + "  <feature name='f1'><bundle>%s</bundle><bundle>zfs:unknown</bundle></feature>"
-            + "  <feature name='f2'><bundle>%s</bundle></feature>"
-            + "</features>";
+    private static final String FEATURE_WITH_INVALID_BUNDLE =
+            "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                    + "  <feature name='f1'><bundle>%s</bundle><bundle>zfs:unknown</bundle></feature>"
+                    + "  <feature name='f2'><bundle>%s</bundle></feature>"
+                    + "</features>";
 
     File dataFile;
     Logger logger = LoggerFactory.getLogger(FeaturesServiceTest.class);
@@ -65,8 +65,8 @@ public class FeaturesServiceTest extends TestBase {
     public void setUp() throws IOException {
         dataFile = File.createTempFile("features", null, null);
     }
-    
-    private URI createTempRepo(String repoContent, Object ... variables) throws IOException {
+
+    private URI createTempRepo(String repoContent, Object... variables) throws IOException {
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
         pw.printf(repoContent, variables);
@@ -80,23 +80,23 @@ public class FeaturesServiceTest extends TestBase {
     @Test
     public void testInstallFeature() throws Exception {
         URI uri = createTempRepo(
-                "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>" 
+                "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
                 + "  <feature name='f1'><bundle start='true'>bundle-f1</bundle></feature>"
                 + "</features>");
 
         BundleManager bundleManager = EasyMock.createMock(BundleManager.class);
         Bundle installedBundle = createDummyBundle(12345L, "bundle-f1", headers());
         FeaturesServiceImpl svc = testAddRepository("bundle-f1", uri, bundleManager, installedBundle);
-        
+
         reset(bundleManager);
-        
+
         expect(bundleManager.installBundleIfNeeded(eq("bundle-f1"), eq(0), eq((String)null))).andReturn(new BundleInstallerResult(installedBundle, true));
         expect(bundleManager.getDataFile(EasyMock.anyObject(String.class))).andReturn(dataFile);
         ignoreRefreshes(bundleManager);
         replay(bundleManager);
         svc.installFeature("f1", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         verify(bundleManager);
-        
+
         Feature[] installed = svc.listInstalledFeatures();
         assertEquals(1, installed.length);
         assertEquals("f1", installed[0].getName());
@@ -135,7 +135,7 @@ public class FeaturesServiceTest extends TestBase {
     public void testUninstallFeatureWithTwoVersions() throws Exception {
         URI uri  = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
                 + "  <feature name='f1' version='0.1'><bundle>bundle-0.1</bundle></feature>"
-                + "  <feature name='f1' version='0.2'><bundle>bundle-0.1</bundle></feature>" 
+                + "  <feature name='f1' version='0.2'><bundle>bundle-0.1</bundle></feature>"
                 + "</features>");
 
         Bundle bundlef101 = createDummyBundle(12345L, "bundle-0.1", headers());
@@ -149,8 +149,8 @@ public class FeaturesServiceTest extends TestBase {
         ignoreRefreshes(bundleManager);
         bundleManager.uninstall(Collections.EMPTY_LIST, true);
         EasyMock.expectLastCall().times(2);
-        
-        
+
+
         replay(bundleManager);
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
@@ -175,8 +175,8 @@ public class FeaturesServiceTest extends TestBase {
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f1");
         verify(bundleManager);
-    }    
-    
+    }
+
     @Test
     public void testAddAndRemoveRepository() throws Exception {
         URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
@@ -190,7 +190,7 @@ public class FeaturesServiceTest extends TestBase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         EasyMock.verify(bundleManager);
 
-        svc.addRepository(uri);                                                     
+        svc.addRepository(uri);
         svc.removeRepository(uri);
         verify(bundleManager);
     }
@@ -220,10 +220,10 @@ public class FeaturesServiceTest extends TestBase {
         expect(bundleContext.getBundle(12345)).andReturn(bundlef101).anyTimes();
         ignoreRefreshes(bundleManager);
         bundleManager.uninstall(Collections.EMPTY_LIST, true);
-       
+
         EasyMock.expectLastCall().anyTimes();
         replay(bundleManager);
-        
+
         FeaturesServiceImpl svc = new FeaturesServiceImpl(bundleManager);
         svc.addRepository(uri);
         svc.installFeature("f1", "0.1");
@@ -324,7 +324,7 @@ public class FeaturesServiceTest extends TestBase {
                 + "  <feature name='f2' version='0.1'><bundle>%s</bundle></feature>"
                 + "  <feature name='f2' version='0.2'><bundle>%s</bundle></feature>"
                 + "</features>", bundleVer01Uri, bundleVer02Uri);
-        
+
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         replay(bundleContext);
@@ -342,16 +342,20 @@ public class FeaturesServiceTest extends TestBase {
 
     @Test
     public void testGetFeaturesShouldHandleDifferentVersionPatterns() throws Exception {
-        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
-                + "  <feature name='f1' version='0.1'><feature version='[0.1,0.3)'>f2</feature></feature>"
-                + "  <feature name='f2' version='0.1'><bundle>bundle1</bundle></feature>"
-                + "  <feature name='f2' version='0.2'><bundle>bundle2</bundle></feature>"
-                + "</features>");
+        URI uri =
+                createTempRepo(
+                        "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                                + "  <feature name='f1' version='0.1'><feature version='[0.1,0.3)'>f2</feature></feature>"
+                                + "  <feature name='f2' version='0.1'><bundle>bundle1</bundle></feature>"
+                                + "  <feature name='f2' version='0.2'><bundle>bundle2</bundle></feature>"
+                                + "</features>");
 
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         EasyMock.replay(installSupport);
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new Storage(), null, null, resolver, installSupport, null, cfg);
+        FeaturesServiceImpl svc =
+                new FeaturesServiceImpl(
+                        new Storage(), null, null, resolver, installSupport, null, cfg);
         svc.addRepository(uri);
 
         assertEquals(feature("f2", "0.2"), svc.getFeatures("f2", "[0.1,0.3)")[0]);
@@ -367,12 +371,14 @@ public class FeaturesServiceTest extends TestBase {
         String bundle2Uri = "file:bundle2";
 
         URI uri = createTempRepo(FEATURE_WITH_INVALID_BUNDLE, bundle1Uri, bundle2Uri);
-        
+
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         expect(installSupport.getInfo()).andReturn(dummyInfo());
         EasyMock.replay(installSupport);
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new Storage(), null, null, resolver, installSupport, null, cfg);
+        FeaturesServiceImpl svc =
+                new FeaturesServiceImpl(
+                        new Storage(), null, null, resolver, installSupport, null, cfg);
         svc.addRepository(uri);
         try {
             List<String> features = new ArrayList<>();
@@ -380,8 +386,9 @@ public class FeaturesServiceTest extends TestBase {
                 features.add(feature.getId());
             }
             Collections.reverse(features);
-            svc.installFeatures(new CopyOnWriteArraySet<>(features),
-                                EnumSet.noneOf(FeaturesService.Option.class));
+            svc.installFeatures(
+                    new CopyOnWriteArraySet<>(features),
+                    EnumSet.noneOf(FeaturesService.Option.class));
             fail("Call should have thrown an exception");
         } catch (MultiException e) {
             Throwable suppressed = e.getSuppressed()[0];
@@ -396,18 +403,20 @@ public class FeaturesServiceTest extends TestBase {
         return info;
     }
 
-    /**
-     * This test checks schema validation of submited uri.
-     */
+    /** This test checks schema validation of submited uri. */
     @Test
     public void testSchemaValidation() throws Exception {
-        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
-                + "  <featur><bundle>somebundle</bundle></featur></features>");
+        URI uri =
+                createTempRepo(
+                        "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                                + "  <featur><bundle>somebundle</bundle></featur></features>");
 
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         EasyMock.replay(installSupport);
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new Storage(), null, null, resolver, installSupport, null, cfg);
+        FeaturesServiceImpl svc =
+                new FeaturesServiceImpl(
+                        new Storage(), null, null, resolver, installSupport, null, cfg);
         try {
             svc.addRepository(uri);
             fail("exception expected");
@@ -416,24 +425,26 @@ public class FeaturesServiceTest extends TestBase {
         }
     }
 
-    /**
-     * This test checks feature service behavior with old, non namespaced descriptor.
-     */
+    /** This test checks feature service behavior with old, non namespaced descriptor. */
     @Test
     public void testLoadOldFeatureFile() throws Exception {
-        URI uri = createTempRepo("<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
-                + "  <feature name='f1'><bundle>file:bundle1</bundle><bundle>file:bundle2</bundle></feature>"
-                + "</features>");
+        URI uri =
+                createTempRepo(
+                        "<features name='test' xmlns='http://karaf.apache.org/xmlns/features/v1.0.0'>"
+                                + "  <feature name='f1'><bundle>file:bundle1</bundle><bundle>file:bundle2</bundle></feature>"
+                                + "</features>");
 
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         EasyMock.replay(installSupport);
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
-        FeaturesServiceImpl svc = new FeaturesServiceImpl(new Storage(), null, null, resolver, installSupport, null, cfg);
+        FeaturesServiceImpl svc =
+                new FeaturesServiceImpl(
+                        new Storage(), null, null, resolver, installSupport, null, cfg);
         svc.addRepository(uri);
         Feature[] features = svc.getFeatures("f1");
         Assert.assertEquals(1, features.length);
         Feature feature = features[0];
-        Assert.assertNotNull("No feature named fi found", feature);        
+        Assert.assertNotNull("No feature named fi found", feature);
         List<BundleInfo> bundles = feature.getBundles();
         Assert.assertEquals(2, bundles.size());
     }
@@ -443,10 +454,10 @@ public class FeaturesServiceTest extends TestBase {
         protected InputStream getInputStream() throws IOException {
             return null;
         }
+
         @Override
         protected OutputStream getOutputStream() throws IOException {
             return null;
         }
     }
-
 }

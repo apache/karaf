@@ -16,9 +16,12 @@
  */
 package org.apache.karaf.config.command;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import junit.framework.TestCase;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.impl.ConfigRepositoryImpl;
@@ -26,13 +29,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-
-/**
- * Test cases for {@link EditCommand}
- */
+/** Test cases for {@link EditCommand} */
 public class EditCommandTest extends TestCase {
 
     private static final String PID = "my.test.persistent.id";
@@ -51,46 +48,52 @@ public class EditCommandTest extends TestCase {
         session = new MockCommandSession();
         command.setSession(session);
     }
-    
-    public void testExecuteOnExistingPid() throws Exception {        
+
+    public void testExecuteOnExistingPid() throws Exception {
         Configuration config = createMock(Configuration.class);
         expect(admin.getConfiguration(PID, null)).andReturn(config);
         replay(admin);
-        
+
         // the ConfigAdmin service returns a Dictionary for an existing PID
         Dictionary<String, Object> props = new Hashtable<>();
         expect(config.getProperties()).andReturn(props);
         replay(config);
-        
-        command.pid = PID; 
+
+        command.pid = PID;
         command.execute();
-        
+
         // the PID and Dictionary should have been set on the session
-        assertEquals("The PID should be set on the session",
-                     PID, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID));
-        assertEquals("The Dictionary returned by the ConfigAdmin service should be set on the session",
-                   props, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS));
+        assertEquals(
+                "The PID should be set on the session",
+                PID,
+                session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID));
+        assertEquals(
+                "The Dictionary returned by the ConfigAdmin service should be set on the session",
+                props,
+                session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS));
     }
-    
+
     @SuppressWarnings("rawtypes")
-    public void testExecuteOnNewPid() throws Exception {        
+    public void testExecuteOnNewPid() throws Exception {
         Configuration config = createMock(Configuration.class);
         expect(admin.getConfiguration(PID, null)).andReturn(config);
         replay(admin);
-        
+
         // the ConfigAdmin service does not return a Dictionary for a new PID
         expect(config.getProperties()).andReturn(null);
         replay(config);
-        
-        command.pid = PID; 
+
+        command.pid = PID;
         command.execute();
 
-        // the PID and an empty Dictionary should have been set on the session        
-        assertEquals("The PID should be set on the session",
-                     PID, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID));
-        TypedProperties props = (TypedProperties) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS);
+        // the PID and an empty Dictionary should have been set on the session
+        assertEquals(
+                "The PID should be set on the session",
+                PID,
+                session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID));
+        TypedProperties props =
+                (TypedProperties) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS);
         assertNotNull("Should have a Dictionary on the session", props);
         assertTrue("Should have an empty Dictionary on the session", props.isEmpty());
     }
-
 }

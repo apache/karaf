@@ -16,30 +16,33 @@
  */
 package org.apache.karaf.jaas.modules.krb5;
 
-import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.login.LoginException;
+import javax.security.auth.spi.LoginModule;
 
-/**
- * Karaf Kerberos login module.
- */
+/** Karaf Kerberos login module. */
 @SuppressWarnings("restriction")
 public class Krb5LoginModule implements LoginModule {
 
-    private com.sun.security.auth.module.Krb5LoginModule loginModule = new com.sun.security.auth.module.Krb5LoginModule();
+    private com.sun.security.auth.module.Krb5LoginModule loginModule =
+            new com.sun.security.auth.module.Krb5LoginModule();
 
     @Override
-    public void initialize(Subject _subject, CallbackHandler _callbackHandler, Map<String, ?> _sharedState, Map<String, ?> _options) {
+    public void initialize(
+            Subject _subject,
+            CallbackHandler _callbackHandler,
+            Map<String, ?> _sharedState,
+            Map<String, ?> _options) {
         Map<String, Object> options = new HashMap<>(_options);
         // interpolate system properties like ${karaf.etc} in options
         for (Map.Entry<String, ?> entry : _options.entrySet()) {
             if (entry.getValue() instanceof String) {
-                options.put(entry.getKey(), Krb5LoginModule.interpolate((String)entry.getValue()));
+                options.put(entry.getKey(), Krb5LoginModule.interpolate((String) entry.getValue()));
             } else {
                 options.put(entry.getKey(), entry.getValue());
             }

@@ -29,40 +29,51 @@ public class ServletInfo {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public long getBundleId() {
         return bundleId;
     }
+
     public void setBundleId(long bundleId) {
         this.bundleId = bundleId;
     }
+
     public String getClassName() {
         return className;
     }
+
     public void setClassName(String className) {
         this.className = className;
     }
+
     public int getState() {
         return state;
     }
+
     public void setState(int state) {
         this.state = state;
     }
+
     public String getAlias() {
         return alias;
     }
+
     public void setAlias(String alias) {
         this.alias = alias;
     }
+
     public String[] getUrls() {
         return urls;
     }
+
     public void setUrls(String[] urls) {
         this.urls = urls;
     }
-    
+
     public String getStateString() {
         switch (state) {
             case WebEvent.DEPLOYING:

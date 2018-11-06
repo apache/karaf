@@ -21,6 +21,7 @@ import org.apache.xbean.naming.global.GlobalContextManager;
 
 /**
  * A very simple writable initial context factory.
+ *
  * @see org.apache.xbean.naming.context.WritableContext for details.
  */
 public class KarafInitialContextFactory extends GlobalContextManager {
@@ -29,5 +30,4 @@ public class KarafInitialContextFactory extends GlobalContextManager {
         super();
         setGlobalContext(new WritableContext());
     }
-
 }

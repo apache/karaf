@@ -26,7 +26,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.FeaturePattern;
 import org.apache.karaf.features.LocationPattern;
@@ -43,12 +42,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Configurable {@link FeaturesProcessor}, controlled by several files from <code>etc/</code> directory:<ul>
- *     <li><code>etc/overrides.properties</code>: may alter bundle versions in features</li>
- *     <li><code>etc/blacklisted.properties</code>: may filter out some features/bundles</li>
- *     <li><code>etc/org.apache.karaf.features.xml</code> (<strong>new!</strong>): incorporates two above files
- *     and may define additional processing (changing G/A/V, adding bundles to features, changing <code>dependency</code>
- *     attributes, ...)</li>
+ * Configurable {@link FeaturesProcessor}, controlled by several files from <code>etc/</code>
+ * directory:
+ *
+ * <ul>
+ *   <li><code>etc/overrides.properties</code>: may alter bundle versions in features
+ *   <li><code>etc/blacklisted.properties</code>: may filter out some features/bundles
+ *   <li><code>etc/org.apache.karaf.features.xml</code> (<strong>new!</strong>): incorporates two
+ *       above files and may define additional processing (changing G/A/V, adding bundles to
+ *       features, changing <code>dependency</code> attributes, ...)
  * </ul>
  */
 public class FeaturesProcessorImpl implements FeaturesProcessor {
@@ -61,19 +63,24 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     private FeaturesProcessing processing = new FeaturesProcessing();
 
     /**
-     * Creates instance of features processor using 1 external URI, additional {@link Blacklist} instance
-     * and additional set of override clauses.
+     * Creates instance of features processor using 1 external URI, additional {@link Blacklist}
+     * instance and additional set of override clauses.
      */
-    public FeaturesProcessorImpl(String featureModificationsURI, String featureProcessingVersions,
-                                 Blacklist blacklistDefinitions, Set<String> overrides) {
+    public FeaturesProcessorImpl(
+            String featureModificationsURI,
+            String featureProcessingVersions,
+            Blacklist blacklistDefinitions,
+            Set<String> overrides) {
         if (featureModificationsURI != null) {
             try {
                 try (InputStream stream = new URL(featureModificationsURI).openStream()) {
                     Properties versions = new Properties();
                     if (featureProcessingVersions != null) {
-                        File versionsProperties = new File(new URL(featureProcessingVersions).getPath());
+                        File versionsProperties =
+                                new File(new URL(featureProcessingVersions).getPath());
                         if (versionsProperties.isFile()) {
-                            try (InputStream propsStream = new URL(featureProcessingVersions).openStream()) {
+                            try (InputStream propsStream =
+                                    new URL(featureProcessingVersions).openStream()) {
                                 versions.load(propsStream);
                             }
                         }
@@ -81,7 +88,10 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
                     processing = serializer.read(stream, versions);
                 }
             } catch (FileNotFoundException e) {
-                LOG.debug("Can't find feature processing file (" + featureModificationsURI + "), skipping");
+                LOG.debug(
+                        "Can't find feature processing file ("
+                                + featureModificationsURI
+                                + "), skipping");
             } catch (Exception e) {
                 LOG.warn("Can't initialize feature processor: " + e.getMessage());
             }
@@ -90,25 +100,33 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
         processing.postUnmarshall(blacklistDefinitions, overrides);
     }
 
-    /**
-     * Creates instance of features processor using 3 external (optional) URIs.
-     */
-    public FeaturesProcessorImpl(String featureModificationsURI, String featureProcessingVersions,
-                                 String blacklistedURI, String overridesURI) {
-        this(featureModificationsURI, featureProcessingVersions, new Blacklist(blacklistedURI), Overrides.loadOverrides(overridesURI));
+    /** Creates instance of features processor using 3 external (optional) URIs. */
+    public FeaturesProcessorImpl(
+            String featureModificationsURI,
+            String featureProcessingVersions,
+            String blacklistedURI,
+            String overridesURI) {
+        this(
+                featureModificationsURI,
+                featureProcessingVersions,
+                new Blacklist(blacklistedURI),
+                Overrides.loadOverrides(overridesURI));
     }
 
     /**
-     * Creates instance of features processor using {@link FeaturesServiceConfig configuration object} where
-     * three files may be specified: overrides.properties, blacklisted.properties and org.apache.karaf.features.xml.
+     * Creates instance of features processor using {@link FeaturesServiceConfig configuration
+     * object} where three files may be specified: overrides.properties, blacklisted.properties and
+     * org.apache.karaf.features.xml.
      */
     public FeaturesProcessorImpl(FeaturesServiceConfig configuration) {
-        this(configuration.featureModifications, configuration.featureProcessingVersions, configuration.blacklisted, configuration.overrides);
+        this(
+                configuration.featureModifications,
+                configuration.featureProcessingVersions,
+                configuration.blacklisted,
+                configuration.overrides);
     }
 
-    /**
-     * Writes model to output stream.
-     */
+    /** Writes model to output stream. */
     public void writeInstructions(OutputStream output) {
         serializer.write(processing, output);
     }
@@ -118,10 +136,13 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     }
 
     /**
-     * For the purpose of assembly builder, we can configure additional overrides that are read from profiles.
+     * For the purpose of assembly builder, we can configure additional overrides that are read from
+     * profiles.
      */
     public void addOverrides(Set<String> overrides) {
-        processing.getBundleReplacements().getOverrideBundles()
+        processing
+                .getBundleReplacements()
+                .getOverrideBundles()
                 .addAll(FeaturesProcessing.parseOverridesClauses(overrides));
     }
 
@@ -131,7 +152,8 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
         for (int i = 0; i < featureList.size(); i++) {
             Feature f = featureList.get(i);
             // overriding features first, so we can further override their bundles
-            for (FeatureReplacements.OverrideFeature override : getInstructions().getFeatureReplacements().getReplacements()) {
+            for (FeatureReplacements.OverrideFeature override :
+                    getInstructions().getFeatureReplacements().getReplacements()) {
                 if (f.getId().equals(override.getFeature().getId())) {
                     switch (override.getMode()) {
                         case REPLACE:
@@ -163,13 +185,23 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
             }
 
             for (Dependency dep : feature.getFeature()) {
-                dep.setBlacklisted(feature.isBlacklisted() || isFeatureBlacklisted(new Feature(dep.getName(), dep.getVersion())));
+                dep.setBlacklisted(
+                        feature.isBlacklisted()
+                                || isFeatureBlacklisted(
+                                        new Feature(dep.getName(), dep.getVersion())));
             }
 
-            // override dependency flag (null - don't touch, false - change to false, true - change to true)
+            // override dependency flag (null - don't touch, false - change to false, true - change
+            // to
+            // true)
             Boolean dependency = null;
-            for (OverrideBundleDependency.OverrideFeatureDependency overrideFeatureDependency : getInstructions().getOverrideBundleDependency().getFeatures()) {
-                FeaturePattern pattern = new FeaturePattern(overrideFeatureDependency.getName() + "/" + overrideFeatureDependency.getVersion());
+            for (OverrideBundleDependency.OverrideFeatureDependency overrideFeatureDependency :
+                    getInstructions().getOverrideBundleDependency().getFeatures()) {
+                FeaturePattern pattern =
+                        new FeaturePattern(
+                                overrideFeatureDependency.getName()
+                                        + "/"
+                                        + overrideFeatureDependency.getVersion());
                 if (pattern.matches(feature.getName(), feature.getVersion())) {
                     dependency = overrideFeatureDependency.isDependency();
                 }
@@ -182,12 +214,14 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
             }
 
             // TODO: think about overriding at repository level
-//            for (OverrideBundleDependency.OverrideDependency overrideDependency : getInstructions().getOverrideBundleDependency().getRepositories()) {
-//            }
+            //            for (OverrideBundleDependency.OverrideDependency overrideDependency :
+            // getInstructions().getOverrideBundleDependency().getRepositories()) {
+            //            }
         }
     }
 
-    private void processBundles(List<Bundle> bundles, boolean allBlacklisted, Boolean forceDependency) {
+    private void processBundles(
+            List<Bundle> bundles, boolean allBlacklisted, Boolean forceDependency) {
         for (Bundle bundle : bundles) {
             boolean bundleBlacklisted = allBlacklisted || isBundleBlacklisted(bundle.getLocation());
             if (bundleBlacklisted) {
@@ -202,8 +236,10 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
                     bundle.setDependency(forceDependency);
                 } else {
                     // may have dependency overriden at bundle level
-                    for (OverrideBundleDependency.OverrideDependency overrideBundleDependency : getInstructions().getOverrideBundleDependency().getBundles()) {
-                        LocationPattern pattern = new LocationPattern(overrideBundleDependency.getUri());
+                    for (OverrideBundleDependency.OverrideDependency overrideBundleDependency :
+                            getInstructions().getOverrideBundleDependency().getBundles()) {
+                        LocationPattern pattern =
+                                new LocationPattern(overrideBundleDependency.getUri());
                         if (pattern.matches(bundle.getLocation())) {
                             bundle.setDependency(overrideBundleDependency.isDependency());
                         }
@@ -214,16 +250,22 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     }
 
     /**
-     * Processes {@link Bundle bundle definition} and (according to override instructions) maybe sets different target
-     * location and {@link BundleInfo#isOverriden()} flag.
+     * Processes {@link Bundle bundle definition} and (according to override instructions) maybe
+     * sets different target location and {@link BundleInfo#isOverriden()} flag.
      */
     private void staticOverrideBundle(Bundle bundle) {
         bundle.setOverriden(BundleInfo.BundleOverrideMode.NONE);
 
-        for (BundleReplacements.OverrideBundle override : this.getInstructions().getBundleReplacements().getOverrideBundles()) {
+        for (BundleReplacements.OverrideBundle override :
+                this.getInstructions().getBundleReplacements().getOverrideBundles()) {
             String originalLocation = bundle.getLocation();
             if (override.getOriginalUriPattern().matches(originalLocation)) {
-                LOG.debug("Overriding bundle location \"" + originalLocation + "\" with \"" + override.getReplacement() + "\"");
+                LOG.debug(
+                        "Overriding bundle location \""
+                                + originalLocation
+                                + "\" with \""
+                                + override.getReplacement()
+                                + "\"");
                 bundle.setOriginalLocation(originalLocation);
                 if (override.getMode() == BundleReplacements.BundleOverrideMode.MAVEN) {
                     bundle.setOverriden(BundleInfo.BundleOverrideMode.MAVEN);
@@ -232,7 +274,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
                 }
                 bundle.setLocation(override.getReplacement());
                 // TOCHECK: last rule wins - no break!!!
-                //break;
+                // break;
             }
         }
     }
@@ -248,24 +290,22 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
         return false;
     }
 
-    /**
-     * Matching name and version of given feature, checks whether this feature is blacklisted.
-     */
+    /** Matching name and version of given feature, checks whether this feature is blacklisted. */
     private boolean isFeatureBlacklisted(Feature feature) {
-        return getInstructions().getBlacklist().isFeatureBlacklisted(feature.getName(), feature.getVersion());
+        return getInstructions()
+                .getBlacklist()
+                .isFeatureBlacklisted(feature.getName(), feature.getVersion());
     }
 
-    /**
-     * Matching location of the bundle, checks whether this bundle is blacklisted.
-     */
+    /** Matching location of the bundle, checks whether this bundle is blacklisted. */
     @Override
     public boolean isBundleBlacklisted(String location) {
         return getInstructions().getBlacklist().isBundleBlacklisted(location);
     }
 
     /**
-     * Checks whether the configuration in this processor contains any instructions (for bundles, repositories,
-     * overrides, ...).
+     * Checks whether the configuration in this processor contains any instructions (for bundles,
+     * repositories, overrides, ...).
      */
     public boolean hasInstructions() {
         int count = 0;
@@ -280,5 +320,4 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
 
         return count > 0;
     }
-
 }

@@ -1,25 +1,22 @@
 /**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.apache.karaf.tooling.utils;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,7 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.util.StreamUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -56,26 +52,20 @@ import org.codehaus.plexus.PlexusContainer;
 @SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
 public abstract class MojoSupport extends AbstractMojo {
 
-    /**
-     * Maven ProjectHelper
-     */
-    @Component
-    protected MavenProjectHelper projectHelper;
+    /** Maven ProjectHelper */
+    @Component protected MavenProjectHelper projectHelper;
 
-    /**
-     * The Maven project.
-     */
+    /** The Maven project. */
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
-    /**
-     * Directory that resources are copied to during the build.
-     */
-    @Parameter(defaultValue = "${project.build.directory}/${project.artifactId}-${project.version}-installer")
+    /** Directory that resources are copied to during the build. */
+    @Parameter(
+            defaultValue =
+                    "${project.build.directory}/${project.artifactId}-${project.version}-installer")
     protected File workDirectory;
 
-    @Component
-    protected MavenProjectBuilder projectBuilder;
+    @Component protected MavenProjectBuilder projectBuilder;
 
     @Parameter(defaultValue = "${localRepository}")
     protected ArtifactRepository localRepo;
@@ -83,35 +73,29 @@ public abstract class MojoSupport extends AbstractMojo {
     @Parameter(defaultValue = "${project.remoteArtifactRepositories}")
     protected List<ArtifactRepository> remoteRepos;
 
-    @Component
-    protected ArtifactMetadataSource artifactMetadataSource;
+    @Component protected ArtifactMetadataSource artifactMetadataSource;
 
-    @Component
-    protected ArtifactResolver artifactResolver;
+    @Component protected ArtifactResolver artifactResolver;
 
-    @Component
-    protected ArtifactFactory factory;
-    
-    /**
-     * The artifact type of a feature.
-     */
+    @Component protected ArtifactFactory factory;
+
+    /** The artifact type of a feature. */
     @Parameter(defaultValue = "xml")
     private String featureArtifactType = "xml";
-    
-    /**
-     * The Maven session.
-     */
+
+    /** The Maven session. */
     @Parameter(defaultValue = "${session}", readonly = true)
     protected MavenSession mavenSession;
 
     /**
-     * <p>We can't autowire strongly typed RepositorySystem from Aether because it may be Sonatype (Maven 3.0.x)
-     * or Eclipse (Maven 3.1.x/3.2.x) version, so we switch to service locator by autowiring entire {@link PlexusContainer}</p>
+     * We can't autowire strongly typed RepositorySystem from Aether because it may be Sonatype
+     * (Maven 3.0.x) or Eclipse (Maven 3.1.x/3.2.x) version, so we switch to service locator by
+     * autowiring entire {@link PlexusContainer}
      *
-     * <p>It's a bit of a hack but we have not choice when we want to be usable both in Maven 3.0.x and 3.1.x/3.2.x</p>
+     * <p>It's a bit of a hack but we have not choice when we want to be usable both in Maven 3.0.x
+     * and 3.1.x/3.2.x
      */
-    @Component
-    protected PlexusContainer container;
+    @Component protected PlexusContainer container;
 
     protected MavenProject getProject() {
         return project;
@@ -138,26 +122,34 @@ public abstract class MojoSupport extends AbstractMojo {
         }
     }
 
-    protected Map createManagedVersionMap(String projectId,
-            DependencyManagement dependencyManagement) throws ProjectBuildingException {
+    protected Map createManagedVersionMap(
+            String projectId, DependencyManagement dependencyManagement)
+            throws ProjectBuildingException {
         Map map;
-        if (dependencyManagement != null
-                && dependencyManagement.getDependencies() != null) {
+        if (dependencyManagement != null && dependencyManagement.getDependencies() != null) {
             map = new HashMap();
             for (Dependency d : dependencyManagement.getDependencies()) {
                 try {
-                    VersionRange versionRange = VersionRange
-                            .createFromVersionSpec(d.getVersion());
-                    Artifact artifact = factory.createDependencyArtifact(d
-                            .getGroupId(), d.getArtifactId(), versionRange, d
-                            .getType(), d.getClassifier(), d.getScope());
+                    VersionRange versionRange = VersionRange.createFromVersionSpec(d.getVersion());
+                    Artifact artifact =
+                            factory.createDependencyArtifact(
+                                    d.getGroupId(),
+                                    d.getArtifactId(),
+                                    versionRange,
+                                    d.getType(),
+                                    d.getClassifier(),
+                                    d.getScope());
                     map.put(d.getManagementKey(), artifact);
                 } catch (InvalidVersionSpecificationException e) {
-                    throw new ProjectBuildingException(projectId,
-                            "Unable to parse version '" + d.getVersion()
+                    throw new ProjectBuildingException(
+                            projectId,
+                            "Unable to parse version '"
+                                    + d.getVersion()
                                     + "' for dependency '"
-                                    + d.getManagementKey() + "': "
-                                    + e.getMessage(), e);
+                                    + d.getManagementKey()
+                                    + "': "
+                                    + e.getMessage(),
+                            e);
                 }
             }
         } else {
@@ -165,7 +157,7 @@ public abstract class MojoSupport extends AbstractMojo {
         }
         return map;
     }
-    
+
     protected String translateFromMaven(String uri) {
         if (uri.startsWith("mvn:")) {
             String[] parts = uri.substring("mvn:".length()).split("/");
@@ -184,7 +176,13 @@ public abstract class MojoSupport extends AbstractMojo {
                 }
             }
             String dir = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/";
-            String name = artifactId + "-" + version + (classifier != null ? "-" + classifier : "") + "." + type;
+            String name =
+                    artifactId
+                            + "-"
+                            + version
+                            + (classifier != null ? "-" + classifier : "")
+                            + "."
+                            + type;
 
             return getLocalRepoUrl() + "/" + dir + name;
         }
@@ -200,16 +198,17 @@ public abstract class MojoSupport extends AbstractMojo {
     }
 
     protected String getLocalRepoUrl() {
-         if (System.getProperty("os.name").startsWith("Windows")) {
-             String baseDir = localRepo.getBasedir().replace('\\', '/').replaceAll(" ", "%20");
-             return extractProtocolFromLocalMavenRepo()  + ":///" + baseDir;
-         } else {
-             return localRepo.getUrl();
-         }
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            String baseDir = localRepo.getBasedir().replace('\\', '/').replaceAll(" ", "%20");
+            return extractProtocolFromLocalMavenRepo() + ":///" + baseDir;
+        } else {
+            return localRepo.getUrl();
+        }
     }
 
     /**
-     * Required because Maven 3 returns null in {@link ArtifactRepository#getProtocol()} (see KARAF-244).
+     * Required because Maven 3 returns null in {@link ArtifactRepository#getProtocol()} (see
+     * KARAF-244).
      *
      * @return The protocol extracted from the local Maven repository URL.
      */
@@ -221,13 +220,14 @@ public abstract class MojoSupport extends AbstractMojo {
             throw new RuntimeException("Repository URL is not valid", e);
         }
     }
-    
-    private Dependency findDependency(List<Dependency> dependencies, String artifactId, String groupId) {
-        for(Dependency dep : dependencies) {
-            if (artifactId.equals(dep.getArtifactId()) && groupId.equals(dep.getGroupId()) &&
-                    featureArtifactType.equals(dep.getType())) {
-                if (dep.getVersion() != null) 
-                    return dep;
+
+    private Dependency findDependency(
+            List<Dependency> dependencies, String artifactId, String groupId) {
+        for (Dependency dep : dependencies) {
+            if (artifactId.equals(dep.getArtifactId())
+                    && groupId.equals(dep.getGroupId())
+                    && featureArtifactType.equals(dep.getType())) {
+                if (dep.getVersion() != null) return dep;
             }
         }
         return null;
@@ -241,14 +241,21 @@ public abstract class MojoSupport extends AbstractMojo {
      * @return The artifact corresponding to the resource.
      * @throws MojoExecutionException If the plugin execution fails.
      */
-    protected Artifact resourceToArtifact(String resourceLocation, boolean skipNonMavenProtocols) throws MojoExecutionException {
-        resourceLocation = resourceLocation.replace("\r\n", "").replace("\n", "").replace(" ", "").replace("\t", "");
+    protected Artifact resourceToArtifact(String resourceLocation, boolean skipNonMavenProtocols)
+            throws MojoExecutionException {
+        resourceLocation =
+                resourceLocation
+                        .replace("\r\n", "")
+                        .replace("\n", "")
+                        .replace(" ", "")
+                        .replace("\t", "");
         final int index = resourceLocation.indexOf("mvn:");
         if (index < 0) {
             if (skipNonMavenProtocols) {
                 return null;
             }
-            throw new MojoExecutionException("Resource URL is not a Maven URL: " + resourceLocation);
+            throw new MojoExecutionException(
+                    "Resource URL is not a Maven URL: " + resourceLocation);
         } else {
             resourceLocation = resourceLocation.substring(index + "mvn:".length());
         }
@@ -273,7 +280,7 @@ public abstract class MojoSupport extends AbstractMojo {
             resourceLocation = resourceLocation.substring(0, index3);
         }
 
-        //check if the resourceLocation descriptor contains also remote repository information.
+        // check if the resourceLocation descriptor contains also remote repository information.
         ArtifactRepository repo = null;
         if (resourceLocation.startsWith("http://")) {
             final int repoDelimIndex = resourceLocation.indexOf('!');
@@ -282,10 +289,7 @@ public abstract class MojoSupport extends AbstractMojo {
             if (paramIndex >= 0) {
                 repoUrl = repoUrl.substring(0, paramIndex);
             }
-            repo = new DefaultArtifactRepository(
-                    repoUrl,
-                    repoUrl,
-                    new DefaultRepositoryLayout());
+            repo = new DefaultArtifactRepository(repoUrl, repoUrl, new DefaultRepositoryLayout());
             org.apache.maven.repository.Proxy mavenProxy = configureProxyToInlineRepo();
             if (mavenProxy != null) {
                 repo.setProxy(mavenProxy);
@@ -310,7 +314,11 @@ public abstract class MojoSupport extends AbstractMojo {
         } else {
             Dependency dep = findDependency(project.getDependencies(), artifactId, groupId);
             if (dep == null && project.getDependencyManagement() != null) {
-                dep = findDependency(project.getDependencyManagement().getDependencies(), artifactId, groupId);
+                dep =
+                        findDependency(
+                                project.getDependencyManagement().getDependencies(),
+                                artifactId,
+                                groupId);
             }
             if (dep != null) {
                 version = dep.getVersion();
@@ -321,11 +329,13 @@ public abstract class MojoSupport extends AbstractMojo {
         if (version == null || version.isEmpty()) {
             throw new MojoExecutionException("Cannot find version for: " + resourceLocation);
         }
-        Artifact artifact = factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
+        Artifact artifact =
+                factory.createArtifactWithClassifier(
+                        groupId, artifactId, version, type, classifier);
         artifact.setRepository(repo);
         return artifact;
     }
-    
+
     private org.apache.maven.repository.Proxy configureProxyToInlineRepo() {
         if (mavenSession != null && mavenSession.getSettings() != null) {
             Proxy proxy = mavenSession.getSettings().getActiveProxy();
@@ -341,7 +351,7 @@ public abstract class MojoSupport extends AbstractMojo {
             } else {
                 return null;
             }
-            
+
         } else {
             return null;
         }
@@ -359,7 +369,6 @@ public abstract class MojoSupport extends AbstractMojo {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
-    
 
     /**
      * Make sure the target directory exists and that is actually a directory.

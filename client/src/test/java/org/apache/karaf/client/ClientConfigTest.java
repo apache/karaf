@@ -16,10 +16,10 @@
  */
 package org.apache.karaf.client;
 
-import org.junit.Test;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+
+import org.junit.Test;
 
 public class ClientConfigTest {
 
@@ -32,7 +32,7 @@ public class ClientConfigTest {
         ClientConfig cc = new ClientConfig(new String[0]);
         assertThat(cc.getUser(), equalTo("karaf"));
 
-        cc = new ClientConfig(new String[] { "-u", "different-one" });
+        cc = new ClientConfig(new String[] {"-u", "different-one"});
         assertThat(cc.getUser(), equalTo("different-one"));
 
         System.setProperty("karaf.etc", "src/test/resources/etc2");
@@ -43,5 +43,4 @@ public class ClientConfigTest {
             System.setProperty("karaf.etc", etc);
         }
     }
-
 }

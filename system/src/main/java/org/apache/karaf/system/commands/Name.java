@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.system.commands;
 
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -24,18 +23,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.system.SystemService;
 
-/**
- * Command to shut down Karaf container.
- */
+/** Command to shut down Karaf container. */
 @Command(scope = "system", name = "name", description = "Show or change Karaf instance name.")
 @Service
 public class Name implements Action {
 
-    @Argument(name = "name", index = 0, description = "New name for the instance", required = false, multiValued = false)
+    @Argument(
+            name = "name",
+            index = 0,
+            description = "New name for the instance",
+            required = false,
+            multiValued = false)
     String name;
 
-    @Reference
-    SystemService systemService;
+    @Reference SystemService systemService;
 
     @Override
     public Object execute() throws Exception {
@@ -43,9 +44,11 @@ public class Name implements Action {
             System.out.println(systemService.getName());
         } else {
             systemService.setName(name);
-            System.out.println("Instance name changed to " + name + ". Restart needed for this to take effect.");
+            System.out.println(
+                    "Instance name changed to "
+                            + name
+                            + ". Restart needed for this to take effect.");
         }
         return null;
     }
-
 }

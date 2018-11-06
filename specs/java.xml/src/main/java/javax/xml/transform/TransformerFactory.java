@@ -18,36 +18,43 @@ package javax.xml.transform;
 
 public abstract class TransformerFactory {
 
-    private static final String DEFAULT_IMPL = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
+    private static final String DEFAULT_IMPL =
+            "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
 
-    protected TransformerFactory() {
-    }
+    protected TransformerFactory() {}
 
     public static TransformerFactory newDefaultInstance() {
-        return $FactoryFinder.newInstance(TransformerFactory.class, DEFAULT_IMPL, null, false, true);
+        return $FactoryFinder.newInstance(
+                TransformerFactory.class, DEFAULT_IMPL, null, false, true);
     }
 
     public static TransformerFactory newInstance() throws TransformerFactoryConfigurationError {
         return $FactoryFinder.find(TransformerFactory.class, DEFAULT_IMPL);
     }
 
-    public static TransformerFactory newInstance(String factoryClassName, ClassLoader classLoader) throws TransformerFactoryConfigurationError {
-        return $FactoryFinder.newInstance(TransformerFactory.class, factoryClassName, classLoader, false, false);
+    public static TransformerFactory newInstance(String factoryClassName, ClassLoader classLoader)
+            throws TransformerFactoryConfigurationError {
+        return $FactoryFinder.newInstance(
+                TransformerFactory.class, factoryClassName, classLoader, false, false);
     }
 
-    public abstract Transformer newTransformer(Source source) throws TransformerConfigurationException;
+    public abstract Transformer newTransformer(Source source)
+            throws TransformerConfigurationException;
 
     public abstract Transformer newTransformer() throws TransformerConfigurationException;
 
     public abstract Templates newTemplates(Source source) throws TransformerConfigurationException;
 
-    public abstract Source getAssociatedStylesheet(Source source, String media, String title, String charset) throws TransformerConfigurationException;
+    public abstract Source getAssociatedStylesheet(
+            Source source, String media, String title, String charset)
+            throws TransformerConfigurationException;
 
     public abstract void setURIResolver(URIResolver resolver);
 
     public abstract URIResolver getURIResolver();
 
-    public abstract void setFeature(String name, boolean value) throws TransformerConfigurationException;
+    public abstract void setFeature(String name, boolean value)
+            throws TransformerConfigurationException;
 
     public abstract boolean getFeature(String name);
 
@@ -58,5 +65,4 @@ public abstract class TransformerFactory {
     public abstract void setErrorListener(ErrorListener listener);
 
     public abstract ErrorListener getErrorListener();
-
 }

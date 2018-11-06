@@ -26,13 +26,27 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class ListCommand extends InstanceCommandSupport {
 
-    @Option(name = "-l", aliases = { "--location" }, description = "Displays the location of the container instances", required = false, multiValued = false)
+    @Option(
+            name = "-l",
+            aliases = {"--location"},
+            description = "Displays the location of the container instances",
+            required = false,
+            multiValued = false)
     boolean location;
 
-    @Option(name = "-o", aliases = { "--java-opts" }, description = "Displays the Java options used to launch the JVM", required = false, multiValued = false)
+    @Option(
+            name = "-o",
+            aliases = {"--java-opts"},
+            description = "Displays the Java options used to launch the JVM",
+            required = false,
+            multiValued = false)
     boolean javaOpts;
 
-    @Option(name = "--no-color", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-color",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
     protected Object doExecute() throws Exception {
@@ -48,16 +62,17 @@ public class ListCommand extends InstanceCommandSupport {
         table.column("PID");
         table.column(getRightColumnHeader());
         for (Instance instance : instances) {
-            table.addRow().addContent(
-                    instance.getSshPort(),
-                    instance.getSshHost(),
-                    instance.getRmiRegistryPort(),
-                    instance.getRmiRegistryHost(),
-                    instance.getRmiServerPort(),
-                    instance.getRmiServerHost(),
-                    instance.getState(),
-                    instance.getPid(),
-                    getRightColumnValue(instance));
+            table.addRow()
+                    .addContent(
+                            instance.getSshPort(),
+                            instance.getSshHost(),
+                            instance.getRmiRegistryPort(),
+                            instance.getRmiRegistryHost(),
+                            instance.getRmiServerPort(),
+                            instance.getRmiServerHost(),
+                            instance.getState(),
+                            instance.getPid(),
+                            getRightColumnValue(instance));
         }
         table.print(System.out, !noFormat);
         return null;
@@ -82,5 +97,4 @@ public class ListCommand extends InstanceCommandSupport {
             return instance.getName();
         }
     }
-
 }

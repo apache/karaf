@@ -19,7 +19,6 @@ package org.apache.karaf.features.command;
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -27,10 +26,10 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
 public abstract class FeaturesCommandSupport implements Action {
-    protected EnumSet<FeaturesService.Option> options = EnumSet.noneOf(FeaturesService.Option.class);  
+    protected EnumSet<FeaturesService.Option> options =
+            EnumSet.noneOf(FeaturesService.Option.class);
 
-    @Reference
-    private FeaturesService featuresService;
+    @Reference private FeaturesService featuresService;
 
     @Override
     public Object execute() throws Exception {
@@ -46,7 +45,7 @@ public abstract class FeaturesCommandSupport implements Action {
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
     }
-    
+
     protected void addOption(FeaturesService.Option option, boolean shouldAdd) {
         if (shouldAdd) {
             options.add(option);
@@ -80,12 +79,14 @@ public abstract class FeaturesCommandSupport implements Action {
             throw new IllegalArgumentException("No matching feature found for " + nameOrId);
         }
         if (matchingFeatures.length > 1) {
-            throw new IllegalArgumentException("More than one matching feature found for " + nameOrId);
+            throw new IllegalArgumentException(
+                    "More than one matching feature found for " + nameOrId);
         }
         return matchingFeatures[0].getId();
     }
 
-    protected List<String> getFeatureIds(FeaturesService admin, List<String> nameOrIds) throws Exception {
+    protected List<String> getFeatureIds(FeaturesService admin, List<String> nameOrIds)
+            throws Exception {
         List<String> ids = new ArrayList<>();
         for (String nameOrId : nameOrIds) {
             for (Feature f : admin.getFeatures(nameOrId)) {

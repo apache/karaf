@@ -20,15 +20,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-/**
- * A regular JPA entity, using JPA annotations.
- */
+/** A regular JPA entity, using JPA annotations. */
 @Entity
 public class Booking {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+    @Id @GeneratedValue private Long id;
 
     private String customer;
     private String flight;

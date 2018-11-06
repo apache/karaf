@@ -19,7 +19,6 @@
 package org.apache.felix.gogo.commands.basic;
 
 import java.util.List;
-
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 
@@ -27,5 +26,4 @@ import org.apache.felix.service.command.CommandSession;
 public interface ActionPreparator {
 
     boolean prepare(Action action, CommandSession session, List<Object> arguments) throws Exception;
-
 }

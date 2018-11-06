@@ -29,7 +29,10 @@ public class SoapExampleTest extends KarafTestSupport {
 
     @Test
     public void test() throws Exception {
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-soap-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-soap-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         installAndAssertFeature("karaf-soap-example-provider");
         installAndAssertFeature("karaf-soap-example-client");
@@ -41,5 +44,4 @@ public class SoapExampleTest extends KarafTestSupport {
         System.out.println(output);
         assertContains("TST001", output);
     }
-
 }

@@ -16,10 +16,7 @@
  */
 package org.apache.karaf.jpm;
 
-
-/**
- * Factory for process builders.
- */
+/** Factory for process builders. */
 public interface ProcessBuilderFactory {
     ProcessBuilder newBuilder();
 }

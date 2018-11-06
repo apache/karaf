@@ -27,9 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.UUID;
-
 import org.apache.felix.utils.properties.Properties;
-
 import org.apache.karaf.main.lock.SimpleFileLock;
 import org.apache.karaf.main.util.Utils;
 import org.apache.karaf.util.config.PropertiesLoader;
@@ -37,86 +35,76 @@ import org.osgi.framework.Constants;
 
 public class ConfigProperties {
     /**
-     * The system property for specifying the Karaf home directory.  The home directory
-     * hold the binary install of Karaf.
+     * The system property for specifying the Karaf home directory. The home directory hold the
+     * binary install of Karaf.
      */
     public static final String PROP_KARAF_HOME = "karaf.home";
 
     public static final String PROP_KARAF_HOME_URI = "karaf.home.uri";
     /**
-     * The environment variable for specifying the Karaf home directory.  The home directory
-     * hold the binary install of Karaf.
+     * The environment variable for specifying the Karaf home directory. The home directory hold the
+     * binary install of Karaf.
      */
     public static final String ENV_KARAF_HOME = "KARAF_HOME";
     /**
-     * The system property for specifying the Karaf base directory.  The base directory
-     * holds the configuration and data for a Karaf instance.
+     * The system property for specifying the Karaf base directory. The base directory holds the
+     * configuration and data for a Karaf instance.
      */
     public static final String PROP_KARAF_BASE = "karaf.base";
 
     public static final String PROP_KARAF_BASE_URI = "karaf.base.uri";
     /**
-     * The environment variable for specifying the Karaf base directory.  The base directory
-     * holds the configuration and data for a Karaf instance.
+     * The environment variable for specifying the Karaf base directory. The base directory holds
+     * the configuration and data for a Karaf instance.
      */
     public static final String ENV_KARAF_BASE = "KARAF_BASE";
     /**
-     * The system property for specifying the Karaf data directory. The data directory
-     * holds the bundles data and cache for a Karaf instance.
+     * The system property for specifying the Karaf data directory. The data directory holds the
+     * bundles data and cache for a Karaf instance.
      */
     public static final String PROP_KARAF_DATA = "karaf.data";
 
     public static final String PROP_KARAF_DATA_URI = "karaf.data.uri";
     /**
-     * The environment variable for specifying the Karaf data directory. The data directory
-     * holds the bundles data and cache for a Karaf instance.
+     * The environment variable for specifying the Karaf data directory. The data directory holds
+     * the bundles data and cache for a Karaf instance.
      */
     public static final String ENV_KARAF_DATA = "KARAF_DATA";
     /**
-     * The system property for specifying the Karaf etc directory. The etc directory
-     * holds the configuration for a Karaf instance.
+     * The system property for specifying the Karaf etc directory. The etc directory holds the
+     * configuration for a Karaf instance.
      */
     public static final String PROP_KARAF_ETC = "karaf.etc";
 
     public static final String PROP_KARAF_ETC_URI = "karaf.etc.uri";
     /**
-     * The environment variable for specifying the Karaf etc directory. The etc directory
-     * holds the configuration for a Karaf instance.
+     * The environment variable for specifying the Karaf etc directory. The etc directory holds the
+     * configuration for a Karaf instance.
      */
     public static final String ENV_KARAF_ETC = "KARAF_ETC";
     /**
-     * The system property for specifying the Karaf data directory. The data directory
-     * holds the bundles data and cache for a Karaf instance.
+     * The system property for specifying the Karaf data directory. The data directory holds the
+     * bundles data and cache for a Karaf instance.
      */
     public static final String PROP_KARAF_INSTANCES = "karaf.instances";
 
     public static final String PROP_KARAF_INSTANCES_URI = "karaf.instances.uri";
     /**
-     * The system property for specifying the Karaf data directory. The data directory
-     * holds the bundles data and cache for a Karaf instance.
+     * The system property for specifying the Karaf data directory. The data directory holds the
+     * bundles data and cache for a Karaf instance.
      */
     public static final String ENV_KARAF_INSTANCES = "KARAF_INSTANCES";
-    /**
-     * The system property for hosting the current Karaf version.
-     */
+    /** The system property for hosting the current Karaf version. */
     public static final String PROP_KARAF_VERSION = "karaf.version";
-    /**
-     * The default name used for the configuration properties file.
-     */
+    /** The default name used for the configuration properties file. */
     private static final String CONFIG_PROPERTIES_FILE_NAME = "config.properties";
-    /**
-     * The default name used for the system properties file.
-     */
+    /** The default name used for the system properties file. */
     public static final String SYSTEM_PROPERTIES_FILE_NAME = "system.properties";
 
-    /**
-     * Config property which identifies directories which contain bundles to be loaded by SMX
-     */
+    /** Config property which identifies directories which contain bundles to be loaded by SMX */
     private static final String BUNDLE_LOCATIONS = "bundle.locations";
-    
-    /**
-     * The lock implementation
-     */
+
+    /** The lock implementation */
     private static final String PROPERTY_LOCK_CLASS = "karaf.lock.class";
 
     public static final String PROPERTY_LOCK_DELAY = "karaf.lock.delay";
@@ -126,7 +114,7 @@ public class ConfigProperties {
     private static final String PROPERTY_LOCK_SLAVE_BLOCK = "karaf.lock.slave.block";
 
     private static final String DEFAULT_REPO = "karaf.default.repository";
-    
+
     private static final String KARAF_FRAMEWORK = "karaf.framework";
 
     private static final String KARAF_FRAMEWORK_FACTORY = "karaf.framework.factory";
@@ -144,9 +132,9 @@ public class ConfigProperties {
     private static final String KARAF_SHUTDOWN_PID_FILE = "karaf.shutdown.pid.file";
 
     private static final String KARAF_PID_FILE = "karaf.pid.file";
-    
+
     private static final String KARAF_STARTUP_MESSAGE = "karaf.startup.message";
-    
+
     private static final String KARAF_DELAY_CONSOLE = "karaf.delay.console";
 
     private static final String KARAF_THREAD_MONITORING = "karaf.thread.monitoring";
@@ -157,10 +145,7 @@ public class ConfigProperties {
 
     public static final String DEFAULT_LOCK_DELAY = "1000";
 
-
-    /**
-     * If a lock should be used before starting the runtime
-     */
+    /** If a lock should be used before starting the runtime */
     private static final String PROPERTY_USE_LOCK = "karaf.lock";
 
     File karafHome;
@@ -168,7 +153,7 @@ public class ConfigProperties {
     File karafData;
     File karafEtc;
     File karafInstances;
-    
+
     Properties props;
     String[] securityProviders;
     int defaultStartLevel = 100;
@@ -192,14 +177,26 @@ public class ConfigProperties {
     String startupMessage;
     boolean delayConsoleStart;
     boolean threadMonitoring;
-    
-    public ConfigProperties() throws Exception {
-        this.karafHome = Utils.getKarafHome(ConfigProperties.class, PROP_KARAF_HOME, ENV_KARAF_HOME);
-        this.karafBase = Utils.getKarafDirectory(PROP_KARAF_BASE, ENV_KARAF_BASE, karafHome, false, true);
-        this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
-        this.karafEtc = Utils.getKarafDirectory(PROP_KARAF_ETC, ENV_KARAF_ETC, new File(karafBase, "etc"), true, true);
 
-        this.karafInstances = Utils.getKarafDirectory(PROP_KARAF_INSTANCES, ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
+    public ConfigProperties() throws Exception {
+        this.karafHome =
+                Utils.getKarafHome(ConfigProperties.class, PROP_KARAF_HOME, ENV_KARAF_HOME);
+        this.karafBase =
+                Utils.getKarafDirectory(PROP_KARAF_BASE, ENV_KARAF_BASE, karafHome, false, true);
+        this.karafData =
+                Utils.getKarafDirectory(
+                        PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+        this.karafEtc =
+                Utils.getKarafDirectory(
+                        PROP_KARAF_ETC, ENV_KARAF_ETC, new File(karafBase, "etc"), true, true);
+
+        this.karafInstances =
+                Utils.getKarafDirectory(
+                        PROP_KARAF_INSTANCES,
+                        ENV_KARAF_INSTANCES,
+                        new File(karafHome, "instances"),
+                        false,
+                        false);
 
         Package p = Package.getPackage("org.apache.karaf.main");
         if (p != null && p.getImplementationVersion() != null) {
@@ -218,22 +215,35 @@ public class ConfigProperties {
         System.setProperty(PROP_KARAF_INSTANCES_URI, karafInstances.toURI().toASCIIString());
 
         if (!karafEtc.exists()) {
-            throw new FileNotFoundException("Karaf etc folder not found: " + karafEtc.getAbsolutePath());
+            throw new FileNotFoundException(
+                    "Karaf etc folder not found: " + karafEtc.getAbsolutePath());
         }
 
         configureSAAJForIBMJVM();
         PropertiesLoader.loadSystemProperties(new File(karafEtc, SYSTEM_PROPERTIES_FILE_NAME));
 
-        this.props = PropertiesLoader.loadConfigProperties(new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME));
+        this.props =
+                PropertiesLoader.loadConfigProperties(
+                        new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME));
 
         this.securityProviders = getSecurityProviders();
-        this.defaultStartLevel = Integer.parseInt(props.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-        System.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
-        this.lockStartLevel = Integer.parseInt(props.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
-        this.lockDelay = Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, DEFAULT_LOCK_DELAY));
-        this.lockSlaveBlock = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_SLAVE_BLOCK, "false"));
-        this.props.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockDefaultBootLevel));
-        this.shutdownTimeout = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
+        this.defaultStartLevel =
+                Integer.parseInt(props.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+        System.setProperty(
+                Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
+        this.lockStartLevel =
+                Integer.parseInt(
+                        props.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
+        this.lockDelay =
+                Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, DEFAULT_LOCK_DELAY));
+        this.lockSlaveBlock =
+                Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_SLAVE_BLOCK, "false"));
+        this.props.setProperty(
+                Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockDefaultBootLevel));
+        this.shutdownTimeout =
+                Integer.parseInt(
+                        props.getProperty(
+                                KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
         this.useLock = Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"));
         this.lockClass = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
         this.frameworkFactoryClass = props.getProperty(KARAF_FRAMEWORK_FACTORY);
@@ -241,14 +251,20 @@ public class ConfigProperties {
         this.defaultRepo = System.getProperty(DEFAULT_REPO, "system");
         this.bundleLocations = props.getProperty(BUNDLE_LOCATIONS);
         this.defaultBundleStartlevel = getDefaultBundleStartLevel(60);
-        this.pidFile = props.getProperty(KARAF_PID_FILE, props.getProperty(KARAF_SHUTDOWN_PID_FILE));
+        this.pidFile =
+                props.getProperty(KARAF_PID_FILE, props.getProperty(KARAF_SHUTDOWN_PID_FILE));
         this.shutdownPort = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
         this.shutdownHost = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
         this.portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
         this.shutdownCommand = props.getProperty(KARAF_SHUTDOWN_COMMAND);
-        this.startupMessage = props.getProperty(KARAF_STARTUP_MESSAGE, "Apache Karaf starting up. Press Enter to open the shell now...");
-        this.delayConsoleStart = Boolean.parseBoolean(props.getProperty(KARAF_DELAY_CONSOLE, "false"));
-        this.threadMonitoring = Boolean.parseBoolean(props.getProperty(KARAF_THREAD_MONITORING, "false"));
+        this.startupMessage =
+                props.getProperty(
+                        KARAF_STARTUP_MESSAGE,
+                        "Apache Karaf starting up. Press Enter to open the shell now...");
+        this.delayConsoleStart =
+                Boolean.parseBoolean(props.getProperty(KARAF_DELAY_CONSOLE, "false"));
+        this.threadMonitoring =
+                Boolean.parseBoolean(props.getProperty(KARAF_THREAD_MONITORING, "false"));
         System.setProperty(KARAF_DELAY_CONSOLE, Boolean.toString(this.delayConsoleStart));
     }
 
@@ -260,13 +276,24 @@ public class ConfigProperties {
                 cleanAllIndicatorFile.delete();
             }
             Utils.deleteDirectory(this.karafData);
-            this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+            this.karafData =
+                    Utils.getKarafDirectory(
+                            PROP_KARAF_DATA,
+                            ENV_KARAF_DATA,
+                            new File(karafBase, "data"),
+                            true,
+                            true);
         } else {
             if (Boolean.getBoolean("karaf.clean.cache") || cleanCacheIndicatorFile.exists()) {
                 if (cleanCacheIndicatorFile.exists()) {
                     cleanCacheIndicatorFile.delete();
                 }
-                File karafCache = Utils.validateDirectoryExists(new File(karafData, "cache").getPath(), "Invalid cache directory", true, true);
+                File karafCache =
+                        Utils.validateDirectoryExists(
+                                new File(karafData, "cache").getPath(),
+                                "Invalid cache directory",
+                                true,
+                                true);
                 Utils.deleteDirectory(karafCache);
             }
         }
@@ -277,7 +304,7 @@ public class ConfigProperties {
             try {
                 storage.mkdirs();
             } catch (SecurityException se) {
-                throw new Exception(se.getMessage()); 
+                throw new Exception(se.getMessage());
             }
             props.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
         }
@@ -286,10 +313,14 @@ public class ConfigProperties {
             try {
                 shutdownCommand = UUID.randomUUID().toString();
                 Properties temp = new Properties(new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME));
-                temp.put(KARAF_SHUTDOWN_COMMAND, Arrays.asList("", "#", "# Generated command shutdown", "#"), shutdownCommand);
+                temp.put(
+                        KARAF_SHUTDOWN_COMMAND,
+                        Arrays.asList("", "#", "# Generated command shutdown", "#"),
+                        shutdownCommand);
                 temp.save();
             } catch (IOException ioException) {
-                System.err.println("WARN: can't update etc/config.properties with the generated command shutdown. We advise to manually add the karaf.shutdown.command property.");
+                System.err.println(
+                        "WARN: can't update etc/config.properties with the generated command shutdown. We advise to manually add the karaf.shutdown.command property.");
             }
         }
         if (threadMonitoring) {
@@ -302,11 +333,16 @@ public class ConfigProperties {
             }
         }
     }
-    
+
     private String getPropertyOrFail(String propertyName) {
         String value = props.getProperty(propertyName);
         if (value == null) {
-            throw new IllegalArgumentException("Property " + propertyName + " must be set in the etc/" + CONFIG_PROPERTIES_FILE_NAME + " configuration file");
+            throw new IllegalArgumentException(
+                    "Property "
+                            + propertyName
+                            + " must be set in the etc/"
+                            + CONFIG_PROPERTIES_FILE_NAME
+                            + " configuration file");
         }
         return value;
     }
@@ -334,18 +370,19 @@ public class ConfigProperties {
     }
 
     private void configureSAAJForIBMJVM() {
-        if (System.getProperty("java.vendor").equals("IBM Corporation"))  {
-            System.setProperty("javax.xml.soap.MessageFactory",
-                               "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl");
-            System.setProperty("javax.xml.soap.SOAPFactory",
-                               "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPFactory1_1Impl");
-            System.setProperty("javax.xml.soap.SOAPConnectionFactory",
-                               "com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnectionFactory");
-            System.setProperty("javax.xml.soap.MetaFactory",
-                               "com.sun.xml.internal.messaging.saaj.soap.SAAJMetaFactoryImpl");
+        if (System.getProperty("java.vendor").equals("IBM Corporation")) {
+            System.setProperty(
+                    "javax.xml.soap.MessageFactory",
+                    "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl");
+            System.setProperty(
+                    "javax.xml.soap.SOAPFactory",
+                    "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPFactory1_1Impl");
+            System.setProperty(
+                    "javax.xml.soap.SOAPConnectionFactory",
+                    "com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnectionFactory");
+            System.setProperty(
+                    "javax.xml.soap.MetaFactory",
+                    "com.sun.xml.internal.messaging.saaj.soap.SAAJMetaFactoryImpl");
         }
-
     }
-
-    
 }

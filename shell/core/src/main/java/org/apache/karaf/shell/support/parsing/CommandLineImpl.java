@@ -20,9 +20,7 @@ package org.apache.karaf.shell.support.parsing;
 
 import org.apache.karaf.shell.api.console.CommandLine;
 
-/**
- *  The result of a delimited buffer.
- */
+/** The result of a delimited buffer. */
 public class CommandLineImpl implements CommandLine {
 
     private final String[] arguments;
@@ -32,14 +30,18 @@ public class CommandLineImpl implements CommandLine {
     private final String buffer;
 
     /**
-     *  @param  arguments           the array of tokens
-     *  @param  cursorArgumentIndex the token index of the cursor
-     *  @param  argumentPosition    the position of the cursor in the
-     *                              current token
-     *  @param  bufferPosition      the position of the cursor in the whole buffer
-     *  @param buffer               the whole buffer
+     * @param arguments the array of tokens
+     * @param cursorArgumentIndex the token index of the cursor
+     * @param argumentPosition the position of the cursor in the current token
+     * @param bufferPosition the position of the cursor in the whole buffer
+     * @param buffer the whole buffer
      */
-    public CommandLineImpl(String[] arguments, int cursorArgumentIndex, int argumentPosition, int bufferPosition, String buffer) {
+    public CommandLineImpl(
+            String[] arguments,
+            int cursorArgumentIndex,
+            int argumentPosition,
+            int bufferPosition,
+            String buffer) {
         this.arguments = arguments;
         this.cursorArgumentIndex = cursorArgumentIndex;
         this.argumentPosition = argumentPosition;
@@ -52,8 +54,7 @@ public class CommandLineImpl implements CommandLine {
     }
 
     public String getCursorArgument() {
-        if ((cursorArgumentIndex < 0)
-            || (cursorArgumentIndex >= arguments.length)) {
+        if ((cursorArgumentIndex < 0) || (cursorArgumentIndex >= arguments.length)) {
             return null;
         }
 

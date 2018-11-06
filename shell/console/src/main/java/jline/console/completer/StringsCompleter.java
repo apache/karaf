@@ -8,13 +8,13 @@
  */
 package jline.console.completer;
 
+import static jline.internal.Preconditions.checkNotNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import static jline.internal.Preconditions.checkNotNull;
 
 /**
  * Completer for a set of strings.
@@ -22,9 +22,7 @@ import static jline.internal.Preconditions.checkNotNull;
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  * @since 2.3
  */
-public class StringsCompleter
-        implements Completer
-{
+public class StringsCompleter implements Completer {
     private final SortedSet<String> strings = new TreeSet<>();
 
     public StringsCompleter() {
@@ -44,14 +42,14 @@ public class StringsCompleter
         return strings;
     }
 
-    public int complete(final String buffer, final int cursor, final List<CharSequence> candidates) {
+    public int complete(
+            final String buffer, final int cursor, final List<CharSequence> candidates) {
         // buffer could be null
         checkNotNull(candidates);
 
         if (buffer == null) {
             candidates.addAll(strings);
-        }
-        else {
+        } else {
             for (String match : strings.tailSet(buffer)) {
                 if (!match.startsWith(buffer)) {
                     break;

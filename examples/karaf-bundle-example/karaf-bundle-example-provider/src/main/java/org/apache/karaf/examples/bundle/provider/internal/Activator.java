@@ -30,7 +30,8 @@ public class Activator implements BundleActivator {
         // create a booking service impl instance
         BookingServiceImpl bookingService = new BookingServiceImpl();
         // registering the booking service in the service registry
-        serviceRegistration = bundleContext.registerService(BookingService.class, bookingService, null);
+        serviceRegistration =
+                bundleContext.registerService(BookingService.class, bookingService, null);
     }
 
     @Override

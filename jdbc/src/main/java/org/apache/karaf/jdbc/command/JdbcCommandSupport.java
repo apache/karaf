@@ -22,8 +22,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
 public abstract class JdbcCommandSupport implements Action {
 
-    @Reference
-    private JdbcService jdbcService;
+    @Reference private JdbcService jdbcService;
 
     public JdbcService getJdbcService() {
         return jdbcService;
@@ -32,5 +31,4 @@ public abstract class JdbcCommandSupport implements Action {
     public void setJdbcService(JdbcService jdbcService) {
         this.jdbcService = jdbcService;
     }
-
 }

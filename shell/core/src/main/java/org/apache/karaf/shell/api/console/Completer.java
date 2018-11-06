@@ -21,9 +21,7 @@ package org.apache.karaf.shell.api.console;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A <code>Completer</code> is used by the console to complete the command line.
- */
+/** A <code>Completer</code> is used by the console to complete the command line. */
 public interface Completer {
 
     /**
@@ -36,12 +34,19 @@ public interface Completer {
      */
     int complete(Session session, CommandLine commandLine, List<String> candidates);
 
-    default void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
+    default void completeCandidates(
+            Session session, CommandLine commandLine, List<Candidate> candidates) {
         List<String> strings = new ArrayList<>();
         int idx = complete(session, commandLine, strings);
         String word = "";
         if (idx > commandLine.getBufferPosition() - commandLine.getArgumentPosition()) {
-            word = commandLine.getBuffer().substring(commandLine.getBufferPosition() - commandLine.getArgumentPosition(), idx);
+            word =
+                    commandLine
+                            .getBuffer()
+                            .substring(
+                                    commandLine.getBufferPosition()
+                                            - commandLine.getArgumentPosition(),
+                                    idx);
         }
         for (String string : strings) {
             String str = word + string;

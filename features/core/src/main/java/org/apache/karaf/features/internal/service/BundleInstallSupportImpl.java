@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.region.DigraphHelper;
@@ -60,35 +59,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Interaction with OSGi framework, where bundles are installed into it via {@link RegionDigraph}. After a bundle
- * is installed, it may be controlled in standard way via {@link Bundle} interface.
+ * Interaction with OSGi framework, where bundles are installed into it via {@link RegionDigraph}.
+ * After a bundle is installed, it may be controlled in standard way via {@link Bundle} interface.
  */
 public class BundleInstallSupportImpl implements BundleInstallSupport {
     private static final Logger LOGGER = LoggerFactory.getLogger(BundleInstallSupportImpl.class);
-    
+
     private final RegionDigraph digraph;
     private final Bundle ourBundle;
     private final Bundle cmBundle;
     private final BundleContext ourBundleContext;
     private final FeatureConfigInstaller configInstaller;
-    
+
     /**
-     * The system bundle context.
-     * For all bundles related operations, we use the system bundle context
-     * to allow this bundle to be stopped and still allow the deployment to
-     * take place.
+     * The system bundle context. For all bundles related operations, we use the system bundle
+     * context to allow this bundle to be stopped and still allow the deployment to take place.
      */
     private final BundleContext systemBundleContext;
 
     private Map<Thread, ResolverHook> hooks = new ConcurrentHashMap<>();
     private ServiceRegistration<ResolverHookFactory> hookRegistration;
 
-    public BundleInstallSupportImpl(Bundle ourBundle,
-                   BundleContext ourBundleContext,
-                   BundleContext systemBundleContext,
-                   Bundle cmBundle,
-                   FeatureConfigInstaller configInstaller,
-                   RegionDigraph digraph) {
+    public BundleInstallSupportImpl(
+            Bundle ourBundle,
+            BundleContext ourBundleContext,
+            BundleContext systemBundleContext,
+            Bundle cmBundle,
+            FeatureConfigInstaller configInstaller,
+            RegionDigraph digraph) {
         this.ourBundle = ourBundle;
         this.ourBundleContext = ourBundleContext;
         this.systemBundleContext = systemBundleContext;
@@ -96,10 +94,12 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         this.configInstaller = configInstaller;
         this.digraph = digraph;
         if (systemBundleContext != null) {
-            hookRegistration = systemBundleContext.registerService(ResolverHookFactory.class,
-                    triggers -> hooks.get(Thread.currentThread()), null);
+            hookRegistration =
+                    systemBundleContext.registerService(
+                            ResolverHookFactory.class,
+                            triggers -> hooks.get(Thread.currentThread()),
+                            null);
         }
-
     }
 
     public void unregister() {
@@ -108,7 +108,7 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
             hookRegistration = null;
         }
     }
-    
+
     public void print(String message, boolean verbose) {
         LOGGER.info(message);
         if (verbose) {
@@ -120,12 +120,15 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     public void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         FrameworkWiring fw = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
-        fw.refreshBundles(bundles, (FrameworkListener) event -> {
-            if (event.getType() == FrameworkEvent.ERROR) {
-                LOGGER.error("Framework error", event.getThrowable());
-            }
-            latch.countDown();
-        });
+        fw.refreshBundles(
+                bundles,
+                (FrameworkListener)
+                        event -> {
+                            if (event.getType() == FrameworkEvent.ERROR) {
+                                LOGGER.error("Framework error", event.getThrowable());
+                            }
+                            latch.countDown();
+                        });
         latch.await();
     }
 
@@ -173,7 +176,10 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     }
 
     @Override
-    public void resolveBundles(Set<Bundle> bundles, final Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
+    public void resolveBundles(
+            Set<Bundle> bundles,
+            final Map<Resource, List<Wire>> wiring,
+            Map<Resource, Bundle> resToBnd) {
         // Make sure it's only used for us
         final Thread thread = Thread.currentThread();
         // Translate wiring
@@ -182,61 +188,70 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
             bndToRes.put(resToBnd.get(res), res);
         }
         // Hook
-        final ResolverHook hook = new ResolverHook() {
-            @Override
-            public void filterResolvable(Collection<BundleRevision> candidates) {
-            }
-            @Override
-            public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-            }
-            @Override
-            public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-                if (Thread.currentThread() == thread) {
-                    // osgi.ee capabilities are provided by the system bundle, so just ignore those
-                    if (ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE
-                            .equals(requirement.getNamespace())) {
-                        return;
-                    }
-                    Bundle sourceBundle = requirement.getRevision().getBundle();
-                    Resource sourceResource = bndToRes.get(sourceBundle);
-                    List<Wire> wires = wiring.get(sourceResource);
-                    if (sourceBundle == null || wires == null) {
-                        // This could be a bundle external to this resolution which
-                        // is being resolve at the same time, so do not interfere
-                        return;
-                    }
-                    Set<Resource> wired = new HashSet<>();
-                    // Get a list of allowed wired resources
-                    wired.add(sourceResource);
-                    for (Wire wire : wires) {
-                        wired.add(wire.getProvider());
-                        if (HostNamespace.HOST_NAMESPACE.equals(wire.getRequirement().getNamespace())) {
-                            for (Wire hostWire : wiring.get(wire.getProvider())) {
-                                wired.add(hostWire.getProvider());
+        final ResolverHook hook =
+                new ResolverHook() {
+                    @Override
+                    public void filterResolvable(Collection<BundleRevision> candidates) {}
+
+                    @Override
+                    public void filterSingletonCollisions(
+                            BundleCapability singleton,
+                            Collection<BundleCapability> collisionCandidates) {}
+
+                    @Override
+                    public void filterMatches(
+                            BundleRequirement requirement,
+                            Collection<BundleCapability> candidates) {
+                        if (Thread.currentThread() == thread) {
+                            // osgi.ee capabilities are provided by the system bundle, so just
+                            // ignore those
+                            if (ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE
+                                    .equals(requirement.getNamespace())) {
+                                return;
+                            }
+                            Bundle sourceBundle = requirement.getRevision().getBundle();
+                            Resource sourceResource = bndToRes.get(sourceBundle);
+                            List<Wire> wires = wiring.get(sourceResource);
+                            if (sourceBundle == null || wires == null) {
+                                // This could be a bundle external to this resolution which
+                                // is being resolve at the same time, so do not interfere
+                                return;
+                            }
+                            Set<Resource> wired = new HashSet<>();
+                            // Get a list of allowed wired resources
+                            wired.add(sourceResource);
+                            for (Wire wire : wires) {
+                                wired.add(wire.getProvider());
+                                if (HostNamespace.HOST_NAMESPACE.equals(
+                                        wire.getRequirement().getNamespace())) {
+                                    for (Wire hostWire : wiring.get(wire.getProvider())) {
+                                        wired.add(hostWire.getProvider());
+                                    }
+                                }
+                            }
+                            // Remove candidates that are not allowed
+                            for (Iterator<BundleCapability> candIter = candidates.iterator();
+                                    candIter.hasNext(); ) {
+                                BundleCapability cand = candIter.next();
+                                BundleRevision br = cand.getRevision();
+                                if ((br.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+                                    br = br.getWiring().getRequiredWires(null).get(0).getProvider();
+                                }
+                                Resource res = bndToRes.get(br.getBundle());
+                                if (!wired.contains(br) && !wired.contains(res)) {
+                                    candIter.remove();
+                                }
                             }
                         }
                     }
-                    // Remove candidates that are not allowed
-                    for (Iterator<BundleCapability> candIter = candidates.iterator(); candIter.hasNext(); ) {
-                        BundleCapability cand = candIter.next();
-                        BundleRevision br = cand.getRevision();
-                        if ((br.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-                            br = br.getWiring().getRequiredWires(null).get(0).getProvider();
-                        }
-                        Resource res = bndToRes.get(br.getBundle());
-                        if (!wired.contains(br) && !wired.contains(res)) {
-                            candIter.remove();
-                        }
-                    }
-                }
-            }
-            @Override
-            public void end() {
-            }
-        };
+
+                    @Override
+                    public void end() {}
+                };
         hooks.put(Thread.currentThread(), hook);
         try {
-            FrameworkWiring frameworkWiring = systemBundleContext.getBundle().adapt(FrameworkWiring.class);
+            FrameworkWiring frameworkWiring =
+                    systemBundleContext.getBundle().adapt(FrameworkWiring.class);
             frameworkWiring.resolveBundles(bundles);
         } finally {
             hooks.remove(Thread.currentThread());
@@ -244,7 +259,10 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     }
 
     @Override
-    public void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies, Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException {
+    public void replaceDigraph(
+            Map<String, Map<String, Map<String, Set<String>>>> policies,
+            Map<String, Set<Long>> bundles)
+            throws BundleException, InvalidSyntaxException {
         RegionDigraph temp = digraph.copy();
         // Remove everything
         for (Region region : temp.getRegions()) {
@@ -262,9 +280,11 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
             }
         }
         // Add policies
-        for (Map.Entry<String, Map<String, Map<String, Set<String>>>> entry1 : policies.entrySet()) {
+        for (Map.Entry<String, Map<String, Map<String, Set<String>>>> entry1 :
+                policies.entrySet()) {
             Region region1 = temp.getRegion(entry1.getKey());
-            for (Map.Entry<String, Map<String, Set<String>>> entry2 : entry1.getValue().entrySet()) {
+            for (Map.Entry<String, Map<String, Set<String>>> entry2 :
+                    entry1.getValue().entrySet()) {
                 Region region2 = temp.getRegion(entry2.getKey());
                 RegionFilterBuilder rfb = temp.createRegionFilterBuilder();
                 for (Map.Entry<String, Set<String>> entry3 : entry2.getValue().entrySet()) {
@@ -280,12 +300,12 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         // Do replace
         digraph.replace(temp);
     }
-    
+
     @Override
     public void saveDigraph() {
         DigraphHelper.saveDigraph(getDataFile(DigraphHelper.DIGRAPH_FILE), digraph);
     }
-    
+
     @Override
     public RegionDigraph getDiGraphCopy() throws BundleException {
         return digraph.copy();

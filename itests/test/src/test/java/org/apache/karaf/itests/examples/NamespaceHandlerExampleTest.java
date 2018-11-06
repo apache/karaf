@@ -30,20 +30,24 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 public class NamespaceHandlerExampleTest extends KarafTestSupport {
 
     private static final RolePrincipal[] ADMIN_ROLES = {
-            new RolePrincipal(BundleService.SYSTEM_BUNDLES_ROLE),
-            new RolePrincipal("admin"),
-            new RolePrincipal("manager")
+        new RolePrincipal(BundleService.SYSTEM_BUNDLES_ROLE),
+        new RolePrincipal("admin"),
+        new RolePrincipal("manager")
     };
 
     @Test
     public void test() throws Exception {
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-url-namespace-handler-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-url-namespace-handler-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         installAndAssertFeature("karaf-url-namespace-handler-example");
 
-        String output = executeCommand("bundle:install example:mvn:commons-lang/commons-lang/2.6", ADMIN_ROLES);
+        String output =
+                executeCommand(
+                        "bundle:install example:mvn:commons-lang/commons-lang/2.6", ADMIN_ROLES);
         System.out.println(output);
         assertContains("Thanks for using the Example URL !", output);
     }
-
 }

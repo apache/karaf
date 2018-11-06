@@ -39,12 +39,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
-
-import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -54,16 +53,22 @@ import org.osgi.framework.FrameworkUtil;
 @Service
 public class InfoAction implements Action {
 
-    private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
-    private NumberFormat fmtDec = new DecimalFormat("###,###.##", new DecimalFormatSymbols(Locale.ENGLISH));
-    private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
+    private NumberFormat fmtI =
+            new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
+    private NumberFormat fmtDec =
+            new DecimalFormat("###,###.##", new DecimalFormatSymbols(Locale.ENGLISH));
+    private NumberFormat fmtD =
+            new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
     private OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
 
-    @Option(name="--memory-pools", aliases= {"-mp"}, description="Includes detailed information about memory pools")
+    @Option(
+            name = "--memory-pools",
+            aliases = {"-mp"},
+            description = "Includes detailed information about memory pools")
     protected boolean showMemoryPools;
 
-//    @Reference
+    //    @Reference
     List<InfoProvider> infoProviders;
 
     public InfoAction() {
@@ -94,39 +99,75 @@ public class InfoAction implements Action {
         System.out.println();
 
         System.out.println("JVM");
-        printValue("Java Virtual Machine", maxNameLen, runtime.getVmName() + " version " + runtime.getVmVersion());
+        printValue(
+                "Java Virtual Machine",
+                maxNameLen,
+                runtime.getVmName() + " version " + runtime.getVmVersion());
         printValue("Version", maxNameLen, System.getProperty("java.version"));
         printValue("Vendor", maxNameLen, runtime.getVmVendor());
         printValue("Pid", maxNameLen, getPid());
         printValue("Uptime", maxNameLen, printDuration(runtime.getUptime()));
         try {
-            Class< ? > sunOS = Class.forName("com.sun.management.OperatingSystemMXBean");
-            printValue("Process CPU time", maxNameLen, printDuration(getValueAsLong(sunOS, "getProcessCpuTime") / 1000000));
-            printValue("Process CPU load", maxNameLen, fmtDec.format(getValueAsDouble(sunOS, "getProcessCpuLoad")));
-            printValue("System CPU load", maxNameLen, fmtDec.format(getValueAsDouble(sunOS, "getSystemCpuLoad")));
+            Class<?> sunOS = Class.forName("com.sun.management.OperatingSystemMXBean");
+            printValue(
+                    "Process CPU time",
+                    maxNameLen,
+                    printDuration(getValueAsLong(sunOS, "getProcessCpuTime") / 1000000));
+            printValue(
+                    "Process CPU load",
+                    maxNameLen,
+                    fmtDec.format(getValueAsDouble(sunOS, "getProcessCpuLoad")));
+            printValue(
+                    "System CPU load",
+                    maxNameLen,
+                    fmtDec.format(getValueAsDouble(sunOS, "getSystemCpuLoad")));
         } catch (Throwable t) {
         }
         try {
             Class<?> unixOS = Class.forName("com.sun.management.UnixOperatingSystemMXBean");
-            printValue("Open file descriptors", maxNameLen, printLong(getValueAsLong(unixOS, "getOpenFileDescriptorCount")));
-            printValue("Max file descriptors", maxNameLen, printLong(getValueAsLong(unixOS, "getMaxFileDescriptorCount")));
+            printValue(
+                    "Open file descriptors",
+                    maxNameLen,
+                    printLong(getValueAsLong(unixOS, "getOpenFileDescriptorCount")));
+            printValue(
+                    "Max file descriptors",
+                    maxNameLen,
+                    printLong(getValueAsLong(unixOS, "getMaxFileDescriptorCount")));
         } catch (Throwable t) {
         }
-        printValue("Total compile time", maxNameLen, printDuration(ManagementFactory.getCompilationMXBean().getTotalCompilationTime()));
+        printValue(
+                "Total compile time",
+                maxNameLen,
+                printDuration(ManagementFactory.getCompilationMXBean().getTotalCompilationTime()));
 
         System.out.println("Threads");
         printValue("Live threads", maxNameLen, Integer.toString(threads.getThreadCount()));
         printValue("Daemon threads", maxNameLen, Integer.toString(threads.getDaemonThreadCount()));
         printValue("Peak", maxNameLen, Integer.toString(threads.getPeakThreadCount()));
-        printValue("Total started", maxNameLen, Long.toString(threads.getTotalStartedThreadCount()));
+        printValue(
+                "Total started", maxNameLen, Long.toString(threads.getTotalStartedThreadCount()));
 
         System.out.println("Memory");
-        printValue("Current heap size", maxNameLen, printSizeInKb(mem.getHeapMemoryUsage().getUsed()));
-        printValue("Maximum heap size", maxNameLen, printSizeInKb(mem.getHeapMemoryUsage().getMax()));
-        printValue("Committed heap size", maxNameLen, printSizeInKb(mem.getHeapMemoryUsage().getCommitted()));
-        printValue("Pending objects", maxNameLen, Integer.toString(mem.getObjectPendingFinalizationCount()));
+        printValue(
+                "Current heap size", maxNameLen, printSizeInKb(mem.getHeapMemoryUsage().getUsed()));
+        printValue(
+                "Maximum heap size", maxNameLen, printSizeInKb(mem.getHeapMemoryUsage().getMax()));
+        printValue(
+                "Committed heap size",
+                maxNameLen,
+                printSizeInKb(mem.getHeapMemoryUsage().getCommitted()));
+        printValue(
+                "Pending objects",
+                maxNameLen,
+                Integer.toString(mem.getObjectPendingFinalizationCount()));
         for (GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
-            String val = "Name = '" + gc.getName() + "', Collections = " + gc.getCollectionCount() + ", Time = " + printDuration(gc.getCollectionTime());
+            String val =
+                    "Name = '"
+                            + gc.getName()
+                            + "', Collections = "
+                            + gc.getCollectionCount()
+                            + ", Time = "
+                            + printDuration(gc.getCollectionTime());
             printValue("Garbage collector", maxNameLen, val);
         }
 
@@ -135,8 +176,7 @@ public class InfoAction implements Action {
             System.out.println("Memory Pools");
             printValue("Total Memory Pools", maxNameLen, printLong(memoryPools.size()));
             String spaces4 = "   ";
-            for (MemoryPoolMXBean pool : memoryPools)
-            {
+            for (MemoryPoolMXBean pool : memoryPools) {
                 String name = pool.getName();
                 MemoryType type = pool.getType();
                 printValue(spaces4 + "Pool (" + type + ")", maxNameLen, name);
@@ -153,7 +193,10 @@ public class InfoAction implements Action {
                     System.out.println(spaces4 + spaces4 + "Peak Usage");
                     printValue(spaces4 + spaces4 + spaces4 + "init", maxNameLen, printLong(init));
                     printValue(spaces4 + spaces4 + spaces4 + "used", maxNameLen, printLong(used));
-                    printValue(spaces4 + spaces4 + spaces4 + "committed", maxNameLen, printLong(committed));
+                    printValue(
+                            spaces4 + spaces4 + spaces4 + "committed",
+                            maxNameLen,
+                            printLong(committed));
                     printValue(spaces4 + spaces4 + spaces4 + "max", maxNameLen, printLong(max));
 
                     init = usage.getInit();
@@ -163,7 +206,10 @@ public class InfoAction implements Action {
                     System.out.println(spaces4 + spaces4 + "Current Usage");
                     printValue(spaces4 + spaces4 + spaces4 + "init", maxNameLen, printLong(init));
                     printValue(spaces4 + spaces4 + spaces4 + "used", maxNameLen, printLong(used));
-                    printValue(spaces4 + spaces4 + spaces4 + "committed", maxNameLen, printLong(committed));
+                    printValue(
+                            spaces4 + spaces4 + spaces4 + "committed",
+                            maxNameLen,
+                            printLong(committed));
                     printValue(spaces4 + spaces4 + spaces4 + "max", maxNameLen, printLong(max));
                 }
             }
@@ -179,15 +225,30 @@ public class InfoAction implements Action {
         printValue("Architecture", maxNameLen, os.getArch());
         printValue("Processors", maxNameLen, Integer.toString(os.getAvailableProcessors()));
         try {
-            printValue("Total physical memory", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getTotalPhysicalMemorySize")));
-            printValue("Free physical memory", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getFreePhysicalMemorySize")));
-            printValue("Committed virtual memory", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getCommittedVirtualMemorySize")));
-            printValue("Total swap space", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getTotalSwapSpaceSize")));
-            printValue("Free swap space", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getFreeSwapSpaceSize")));
+            printValue(
+                    "Total physical memory",
+                    maxNameLen,
+                    printSizeInKb(getSunOsValueAsLong(os, "getTotalPhysicalMemorySize")));
+            printValue(
+                    "Free physical memory",
+                    maxNameLen,
+                    printSizeInKb(getSunOsValueAsLong(os, "getFreePhysicalMemorySize")));
+            printValue(
+                    "Committed virtual memory",
+                    maxNameLen,
+                    printSizeInKb(getSunOsValueAsLong(os, "getCommittedVirtualMemorySize")));
+            printValue(
+                    "Total swap space",
+                    maxNameLen,
+                    printSizeInKb(getSunOsValueAsLong(os, "getTotalSwapSpaceSize")));
+            printValue(
+                    "Free swap space",
+                    maxNameLen,
+                    printSizeInKb(getSunOsValueAsLong(os, "getFreeSwapSpaceSize")));
         } catch (Throwable t) {
         }
 
-        //Display Information from external information providers.
+        // Display Information from external information providers.
         Map<String, Map<Object, Object>> properties = new HashMap<>();
         if (infoProviders != null) {
             // dump all properties to Map, KARAF-425
@@ -208,7 +269,10 @@ public class InfoAction implements Action {
                     keys.sort(Comparator.comparing(String::valueOf));
 
                     for (Object key : keys) {
-                        printValue(String.valueOf(key), maxNameLen, String.valueOf(properties.get(section).get(key)));
+                        printValue(
+                                String.valueOf(key),
+                                maxNameLen,
+                                String.valueOf(properties.get(section).get(key)));
                     }
                 }
             }
@@ -230,8 +294,7 @@ public class InfoAction implements Action {
     }
 
     private long getValueAsLong(Class<?> osImpl, String name) throws Exception {
-        if (osImpl.isInstance(os))
-        {
+        if (osImpl.isInstance(os)) {
             Method mth = osImpl.getMethod(name);
             return (Long) mth.invoke(os);
         }
@@ -291,8 +354,13 @@ public class InfoAction implements Action {
 
     void printValue(String name, int pad, String value) {
         System.out.println(
-                "  " + SimpleAnsi.INTENSITY_BOLD + name + SimpleAnsi.INTENSITY_NORMAL
-                        + spaces(pad - name.length()) + "   " + value);
+                "  "
+                        + SimpleAnsi.INTENSITY_BOLD
+                        + name
+                        + SimpleAnsi.INTENSITY_NORMAL
+                        + spaces(pad - name.length())
+                        + "   "
+                        + value);
     }
 
     String spaces(int nb) {
@@ -305,19 +373,20 @@ public class InfoAction implements Action {
 
     String getOsgiFramework() {
         try {
-            Callable<String> call = new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
-                    Bundle sysBundle = context.getBundle(0);
-                    return sysBundle.getSymbolicName() + "-" + sysBundle.getVersion();
-                }
-            };
+            Callable<String> call =
+                    new Callable<String>() {
+                        @Override
+                        public String call() throws Exception {
+                            BundleContext context =
+                                    FrameworkUtil.getBundle(getClass()).getBundleContext();
+                            Bundle sysBundle = context.getBundle(0);
+                            return sysBundle.getSymbolicName() + "-" + sysBundle.getVersion();
+                        }
+                    };
             return call.call();
         } catch (Throwable t) {
             // We're not in OSGi, just safely return null
             return null;
         }
     }
-
 }

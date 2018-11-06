@@ -43,7 +43,7 @@ class $XPathFactoryFinder {
 
     private static final Properties cacheProps = new Properties();
 
-    private volatile static boolean firstTime = true;
+    private static volatile boolean firstTime = true;
 
     private static void debugPrintln(Supplier<String> msgGen) {
         if (debug) {
@@ -63,7 +63,8 @@ class $XPathFactoryFinder {
     private void debugDisplayClassLoader() {
         try {
             if (classLoader == getContextClassLoader()) {
-                debugPrintln(() -> "using thread context class loader (" + classLoader + ") for search");
+                debugPrintln(
+                        () -> "using thread context class loader (" + classLoader + ") for search");
                 return;
             }
         } catch (Throwable unused) {
@@ -104,8 +105,7 @@ class $XPathFactoryFinder {
                 if (xpathFactory != null) {
                     return xpathFactory;
                 }
-            } else
-                debugPrintln(() -> "The property is undefined.");
+            } else debugPrintln(() -> "The property is undefined.");
         } catch (Throwable t) {
             if (debug) {
                 debugPrintln(() -> "failed to look up system property '" + propertyName + "'");
@@ -114,8 +114,7 @@ class $XPathFactoryFinder {
         }
 
         String javah = getSystemProperty("java.home");
-        String configFile = javah + File.separator +
-                "conf" + File.separator + "jaxp.properties";
+        String configFile = javah + File.separator + "conf" + File.separator + "jaxp.properties";
 
         try {
             if (firstTime) {
@@ -147,7 +146,6 @@ class $XPathFactoryFinder {
 
         assert xpathFactory == null;
         xpathFactory = findServiceProvider(uri);
-
 
         if (xpathFactory != null) {
             return xpathFactory;
@@ -187,8 +185,7 @@ class $XPathFactoryFinder {
         return clazz;
     }
 
-    XPathFactory createInstance(String className)
-            throws XPathFactoryConfigurationException {
+    XPathFactory createInstance(String className) throws XPathFactoryConfigurationException {
         return createInstance(className, false);
     }
 
@@ -235,17 +232,14 @@ class $XPathFactoryFinder {
         return xPathFactory;
     }
 
-    private static XPathFactory newInstanceNoServiceLoader(
-            Class<?> providerClass
-    ) throws XPathFactoryConfigurationException {
+    private static XPathFactory newInstanceNoServiceLoader(Class<?> providerClass)
+            throws XPathFactoryConfigurationException {
         if (System.getSecurityManager() == null) {
             return null;
         }
         try {
             Method creationMethod =
-                    providerClass.getDeclaredMethod(
-                            "newXPathFactoryNoServiceLoader"
-                    );
+                    providerClass.getDeclaredMethod("newXPathFactoryNoServiceLoader");
             final int modifiers = creationMethod.getModifiers();
 
             // Do not call "newXPathFactoryNoServiceLoader" if it's
@@ -258,8 +252,7 @@ class $XPathFactoryFinder {
             if (SERVICE_CLASS.isAssignableFrom(returnType)) {
                 return SERVICE_CLASS.cast(creationMethod.invoke(null, (Object[]) null));
             } else {
-                throw new ClassCastException(returnType
-                        + " cannot be cast to " + SERVICE_CLASS);
+                throw new ClassCastException(returnType + " cannot be cast to " + SERVICE_CLASS);
             }
         } catch (ClassCastException e) {
             throw new XPathFactoryConfigurationException(e);
@@ -270,14 +263,15 @@ class $XPathFactoryFinder {
         }
     }
 
-    private boolean isObjectModelSupportedBy(final XPathFactory factory,
-                                             final String objectModel,
-                                             AccessControlContext acc) {
-        return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-            public Boolean run() {
-                return factory.isObjectModelSupported(objectModel);
-            }
-        }, acc);
+    private boolean isObjectModelSupportedBy(
+            final XPathFactory factory, final String objectModel, AccessControlContext acc) {
+        return AccessController.doPrivileged(
+                new PrivilegedAction<Boolean>() {
+                    public Boolean run() {
+                        return factory.isObjectModelSupported(objectModel);
+                    }
+                },
+                acc);
     }
 
     private XPathFactory findServiceProvider(final String objectModel)
@@ -286,18 +280,19 @@ class $XPathFactoryFinder {
         assert objectModel != null;
         final AccessControlContext acc = AccessController.getContext();
         try {
-            return AccessController.doPrivileged(new PrivilegedAction<XPathFactory>() {
-                public XPathFactory run() {
-                    final ServiceLoader<XPathFactory> loader =
-                            ServiceLoader.load(SERVICE_CLASS);
-                    for (XPathFactory factory : loader) {
-                        if (isObjectModelSupportedBy(factory, objectModel, acc)) {
-                            return factory;
+            return AccessController.doPrivileged(
+                    new PrivilegedAction<XPathFactory>() {
+                        public XPathFactory run() {
+                            final ServiceLoader<XPathFactory> loader =
+                                    ServiceLoader.load(SERVICE_CLASS);
+                            for (XPathFactory factory : loader) {
+                                if (isObjectModelSupportedBy(factory, objectModel, acc)) {
+                                    return factory;
+                                }
+                            }
+                            return null;
                         }
-                    }
-                    return null;
-                }
-            });
+                    });
         } catch (ServiceConfigurationError error) {
             throw new XPathFactoryConfigurationException(error);
         }
@@ -309,38 +304,45 @@ class $XPathFactoryFinder {
         return getClassSource(clazz);
     }
 
-    static ClassLoader getContextClassLoader() throws SecurityException{
-        return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            if (cl == null) {
-                cl = ClassLoader.getSystemClassLoader();
-            }
-            return cl;
-        });
+    static ClassLoader getContextClassLoader() throws SecurityException {
+        return AccessController.doPrivileged(
+                (PrivilegedAction<ClassLoader>)
+                        () -> {
+                            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                            if (cl == null) {
+                                cl = ClassLoader.getSystemClassLoader();
+                            }
+                            return cl;
+                        });
     }
 
     private static String getSystemProperty(final String propName) {
-        return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(propName));
+        return AccessController.doPrivileged(
+                (PrivilegedAction<String>) () -> System.getProperty(propName));
     }
 
-    private static FileInputStream getFileInputStream(final File file) throws FileNotFoundException {
+    private static FileInputStream getFileInputStream(final File file)
+            throws FileNotFoundException {
         try {
-            return AccessController.doPrivileged((PrivilegedExceptionAction<FileInputStream>) () -> new FileInputStream(file));
+            return AccessController.doPrivileged(
+                    (PrivilegedExceptionAction<FileInputStream>) () -> new FileInputStream(file));
         } catch (PrivilegedActionException e) {
-            throw (FileNotFoundException)e.getException();
+            throw (FileNotFoundException) e.getException();
         }
     }
 
     private static String getClassSource(Class<?> cls) {
-        return AccessController.doPrivileged((PrivilegedAction<String>) () -> {
-            CodeSource cs = cls.getProtectionDomain().getCodeSource();
-            if (cs != null) {
-                URL loc = cs.getLocation();
-                return loc != null ? loc.toString() : "(no location)";
-            } else {
-                return "(no code source)";
-            }
-        });
+        return AccessController.doPrivileged(
+                (PrivilegedAction<String>)
+                        () -> {
+                            CodeSource cs = cls.getProtectionDomain().getCodeSource();
+                            if (cs != null) {
+                                URL loc = cs.getLocation();
+                                return loc != null ? loc.toString() : "(no location)";
+                            } else {
+                                return "(no code source)";
+                            }
+                        });
     }
 
     private static boolean doesFileExist(final File f) {

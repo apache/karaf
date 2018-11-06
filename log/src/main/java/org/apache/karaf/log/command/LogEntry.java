@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.log.command;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -26,24 +28,32 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 import org.osgi.service.log.LogService;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Command(scope = "log", name = "log", description = "Log a message.")
 @Service
 public class LogEntry implements Action {
 
-    @Argument(index = 0, name = "message", description = "The message to log", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "message",
+            description = "The message to log",
+            required = true,
+            multiValued = false)
     private String message;
 
-    @Option(name = "--level", aliases = {"-l"}, description = "The level the message will be logged at", required = false, multiValued = false)
-    @Completion(value = StringsCompleter.class, values = { "DEBUG", "INFO", "WARNING", "ERROR" })
+    @Option(
+            name = "--level",
+            aliases = {"-l"},
+            description = "The level the message will be logged at",
+            required = false,
+            multiValued = false)
+    @Completion(
+            value = StringsCompleter.class,
+            values = {"DEBUG", "INFO", "WARNING", "ERROR"})
     private String level = "INFO";
 
-    @Reference
-    LogService logService;
+    @Reference LogService logService;
 
-    private final Map<String,Integer> mappings = new HashMap<>();
+    private final Map<String, Integer> mappings = new HashMap<>();
 
     public LogEntry() {
         mappings.put("ERROR", 1);
@@ -59,11 +69,10 @@ public class LogEntry implements Action {
     }
 
     private int toLevel(String logLevel) {
-        Integer level =  mappings.get(logLevel);
-        if(level == null) {
+        Integer level = mappings.get(logLevel);
+        if (level == null) {
             level = 3;
         }
         return level;
     }
-
 }

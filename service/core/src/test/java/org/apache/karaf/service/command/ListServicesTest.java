@@ -20,16 +20,12 @@ import org.junit.Test;
 
 public class ListServicesTest {
 
-    public ListServicesTest() {
-        
-    }
-    
+    public ListServicesTest() {}
+
     @Test
     public void listAll() throws Exception {
         ListServices listServices = new ListServices();
         listServices.setBundleContext(new TestBundleFactory().createBundleContext());
         listServices.execute();
     }
-    
-
 }

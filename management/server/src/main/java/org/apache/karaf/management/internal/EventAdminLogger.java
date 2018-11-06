@@ -20,6 +20,10 @@ public interface EventAdminLogger {
 
     void close();
 
-    void log(String methodName, String[] signature, Object result, Throwable error, Object... params);
-
+    void log(
+            String methodName,
+            String[] signature,
+            Object result,
+            Throwable error,
+            Object... params);
 }

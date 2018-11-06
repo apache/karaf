@@ -33,14 +33,12 @@ public interface EncryptionService {
     String ENCODING_BASE64 = "base64";
 
     /**
-     * Create an encryption service with the specified parameters.
-     * If the parameters are not supported, a <code>null</code> should
-     * be returned or an IllegalArgumentException thrown.
+     * Create an encryption service with the specified parameters. If the parameters are not
+     * supported, a <code>null</code> should be returned or an IllegalArgumentException thrown.
      *
      * @param params define the encryption configuration.
      * @return the {@link Encryption}.
      * @throws IllegalArgumentException if the {@link Encryption} can't be created.
      */
-    Encryption createEncryption(Map<String,String> params) throws IllegalArgumentException;
-
+    Encryption createEncryption(Map<String, String> params) throws IllegalArgumentException;
 }

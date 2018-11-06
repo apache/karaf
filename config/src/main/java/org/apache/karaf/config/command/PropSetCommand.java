@@ -16,11 +16,6 @@
  */
 package org.apache.karaf.config.command;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.Dictionary;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.command.completers.ConfigurationPropertyCompleter;
 import org.apache.karaf.shell.api.action.Argument;
@@ -28,20 +23,32 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "config", name = "property-set", description = "Sets a property in the currently edited configuration.")
+@Command(
+        scope = "config",
+        name = "property-set",
+        description = "Sets a property in the currently edited configuration.")
 @Service
 public class PropSetCommand extends ConfigPropertyCommandSupport {
 
-    @Argument(index = 0, name = "property", description = "The name of the property to set", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "property",
+            description = "The name of the property to set",
+            required = true,
+            multiValued = false)
     @Completion(ConfigurationPropertyCompleter.class)
     String prop;
 
-    @Argument(index = 1, name = "value", description = "The value of the property", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "value",
+            description = "The value of the property",
+            required = true,
+            multiValued = false)
     Object value;
 
     @Override
     public void propertyAction(TypedProperties props) {
         props.put(prop, value);
     }
-
 }

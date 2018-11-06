@@ -50,5 +50,4 @@ public class ClientPrincipal implements Principal, Serializable {
     public String toString() {
         return "ClientPrincipal[" + getName() + "]";
     }
-
 }

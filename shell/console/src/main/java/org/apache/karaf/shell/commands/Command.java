@@ -18,10 +18,10 @@
  */
 package org.apache.karaf.shell.commands;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
 
 /**
  * Used to denote a class represents a command which is executable within a shell/scope or as a
@@ -30,8 +30,7 @@ import java.lang.annotation.ElementType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Deprecated
-public @interface Command
-{
+public @interface Command {
     /**
      * Return the scope or sub shell of the command.
      *

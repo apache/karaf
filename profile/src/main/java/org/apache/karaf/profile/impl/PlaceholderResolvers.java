@@ -17,13 +17,12 @@
 package org.apache.karaf.profile.impl;
 
 import java.util.Map;
-
 import org.apache.karaf.profile.PlaceholderResolver;
 import org.osgi.framework.BundleContext;
 
 public final class PlaceholderResolvers {
 
-    private PlaceholderResolvers() { }
+    private PlaceholderResolvers() {}
 
     public static class ProfilePlaceholderResolver implements PlaceholderResolver {
 
@@ -35,7 +34,8 @@ public final class PlaceholderResolvers {
         }
 
         @Override
-        public String resolve(Map<String, Map<String, String>> profile, String pid, String key, String value) {
+        public String resolve(
+                Map<String, Map<String, String>> profile, String pid, String key, String value) {
             int index = value.indexOf("/");
             if (index >= 0) {
                 String propertyPid = value.substring(0, index);
@@ -57,7 +57,8 @@ public final class PlaceholderResolvers {
      * @param configs A {@link Map} of configurations where to perform the substitution.
      * @return The target value or the key as is.
      */
-    public static String substituteProfileProperty(String key, Map<String, Map<String, String>> configs) {
+    public static String substituteProfileProperty(
+            String key, Map<String, Map<String, String>> configs) {
         String pid = key.substring("profile:".length(), key.indexOf("/"));
         String propertyKey = key.substring(key.indexOf("/") + 1);
         Map<String, String> targetProps = configs.get(pid);
@@ -85,5 +86,4 @@ public final class PlaceholderResolvers {
         }
         return value != null ? value : "";
     }
-
 }

@@ -18,8 +18,8 @@
  */
 package org.apache.karaf.shell.console;
 
-import org.apache.karaf.shell.commands.Action;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.commands.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,17 +35,16 @@ public abstract class AbstractAction implements Action {
     }
 
     protected abstract Object doExecute() throws Exception;
-    
+
     /**
      * This is for long running commands to be interrupted by ctrl-c.
-     * 
+     *
      * @throws InterruptedException If the action is interrupted.
      */
     public static void checkInterrupted() throws InterruptedException {
-        Thread.yield(); 
+        Thread.yield();
         if (Thread.currentThread().isInterrupted()) {
             throw new InterruptedException();
         }
     }
-
 }

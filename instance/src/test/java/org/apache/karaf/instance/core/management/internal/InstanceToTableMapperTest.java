@@ -18,12 +18,9 @@ package org.apache.karaf.instance.core.management.internal;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
-
 import junit.framework.TestCase;
-
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.internal.InstanceToTableMapper;
 import org.easymock.EasyMock;
@@ -45,11 +42,11 @@ public class InstanceToTableMapperTest extends TestCase {
         EasyMock.expect(instance.getLocation()).andReturn("somewhere");
         EasyMock.expect(instance.getJavaOpts()).andReturn("someopts");
         EasyMock.replay(instance);
-        
+
         TabularData td = InstanceToTableMapper.tableFrom(Collections.singletonList(instance));
         Collection<?> keys = (Collection<?>) td.keySet().iterator().next();
         Assert.assertEquals("MyInstance", keys.iterator().next());
-        
+
         CompositeData cd = td.get(keys.toArray());
         Assert.assertEquals(1712, cd.get("Pid"));
         Assert.assertEquals("MyInstance", cd.get("Name"));
@@ -80,11 +77,11 @@ public class InstanceToTableMapperTest extends TestCase {
         EasyMock.expect(instance.getLocation()).andReturn(null);
         EasyMock.expect(instance.getJavaOpts()).andReturn(null);
         EasyMock.replay(instance);
-        
-        TabularData td = InstanceToTableMapper.tableFrom(Collections.singletonList(instance));        
+
+        TabularData td = InstanceToTableMapper.tableFrom(Collections.singletonList(instance));
         Collection<?> keys = (Collection<?>) td.keySet().iterator().next();
         Assert.assertEquals("MyInstance", keys.iterator().next());
-        
+
         CompositeData cd = td.get(keys.toArray());
         Assert.assertEquals(1712, cd.get("Pid"));
         Assert.assertEquals("MyInstance", cd.get("Name"));

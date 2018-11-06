@@ -19,7 +19,7 @@ class StringUtil {
 
     /**
      * Returns length of the string.
-     * 
+     *
      * @param string String.
      * @return Length.
      */
@@ -29,7 +29,7 @@ class StringUtil {
 
     /**
      * Utility method to repeat string.
-     * 
+     *
      * @param string String to repeat.
      * @param times Number of times.
      * @return Repeat string.
@@ -37,12 +37,10 @@ class StringUtil {
     public static String repeat(String string, int times) {
         if (times <= 0) {
             return "";
-        }
-        else if (times % 2 == 0) {
-            return repeat(string+string, times/2);
-        }
-        else {
-           return string + repeat(string+string, times/2);
+        } else if (times % 2 == 0) {
+            return repeat(string + string, times / 2);
+        } else {
+            return string + repeat(string + string, times / 2);
         }
     }
 }

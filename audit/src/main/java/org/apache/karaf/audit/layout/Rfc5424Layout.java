@@ -16,13 +16,12 @@
  */
 package org.apache.karaf.audit.layout;
 
-import org.apache.karaf.audit.Event;
-import org.apache.karaf.audit.util.Buffer;
-import org.apache.karaf.audit.util.FastDateFormat;
-
 import java.io.IOException;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.apache.karaf.audit.Event;
+import org.apache.karaf.audit.util.Buffer;
+import org.apache.karaf.audit.util.FastDateFormat;
 
 public class Rfc5424Layout extends AbstractLayout {
 
@@ -69,12 +68,7 @@ public class Rfc5424Layout extends AbstractLayout {
     @Override
     protected void append(String key, Object val) throws IOException {
         if (val != null) {
-            buffer.append(' ')
-                    .append(key)
-                    .append('=')
-                    .append('"')
-                    .format(val)
-                    .append('"');
+            buffer.append(' ').append(key).append('=').append('"').format(val).append('"');
         }
     }
 
@@ -84,5 +78,4 @@ public class Rfc5424Layout extends AbstractLayout {
         fastDateFormat.writeTime(millis, true, buffer);
         buffer.append(fastDateFormat.getDate(millis, FastDateFormat.XXX));
     }
-
 }

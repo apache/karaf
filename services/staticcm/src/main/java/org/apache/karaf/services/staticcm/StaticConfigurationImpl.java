@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-
 import org.osgi.service.cm.Configuration;
 
 public class StaticConfigurationImpl implements Configuration {
@@ -67,8 +66,7 @@ public class StaticConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void setBundleLocation(String location) {
-    }
+    public void setBundleLocation(String location) {}
 
     @Override
     public String getBundleLocation() {
@@ -79,5 +77,4 @@ public class StaticConfigurationImpl implements Configuration {
     public long getChangeCount() {
         return 0;
     }
-
 }

@@ -16,6 +16,11 @@
  */
 package org.apache.karaf.scr.examples.component.factories.impl;
 
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.karaf.scr.examples.component.factories.GreeterServiceComponentFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -23,28 +28,23 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 /**
- * An implementation of the GreeterServiceComponentFactory interface. Component
- * configuration includes setting the name attribute and setting the
- * configuration policy to required. The default is optional and when the
- * component attempts to activate it will throw a RuntimeException.
+ * An implementation of the GreeterServiceComponentFactory interface. Component configuration
+ * includes setting the name attribute and setting the configuration policy to required. The default
+ * is optional and when the component attempts to activate it will throw a RuntimeException.
  */
 // the ConfigAdmin PID of our component
-@Component(name = GreeterServiceComponentFactoryImpl.COMPONENT_NAME,
-    // the Factory ID of the Component Factory
-    factory = "greeter.factory.provider")
+@Component(
+        name = GreeterServiceComponentFactoryImpl.COMPONENT_NAME,
+        // the Factory ID of the Component Factory
+        factory = "greeter.factory.provider")
 public class GreeterServiceComponentFactoryImpl implements GreeterServiceComponentFactory {
 
     public static final String COMPONENT_NAME = "GreeterServiceComponentFactory";
     public static final String COMPONENT_LABEL = "Greeter Service Component Factory";
 
-    private static final Logger LOG = LoggerFactory.getLogger(GreeterServiceComponentFactoryImpl.class);
+    private static final Logger LOG =
+            LoggerFactory.getLogger(GreeterServiceComponentFactoryImpl.class);
 
     private ExecutorService executor = Executors.newCachedThreadPool();
     private Worker worker = new Worker();
@@ -70,7 +70,9 @@ public class GreeterServiceComponentFactoryImpl implements GreeterServiceCompone
                 lock.writeLock().unlock();
             }
         } else {
-            throw new IllegalArgumentException("The salutation property may not be null or empty: " + properties.get("salutation"));
+            throw new IllegalArgumentException(
+                    "The salutation property may not be null or empty: "
+                            + properties.get("salutation"));
         }
 
         // now verify that name is set
@@ -82,13 +84,12 @@ public class GreeterServiceComponentFactoryImpl implements GreeterServiceCompone
                 lock.writeLock().unlock();
             }
         } else {
-            throw new IllegalArgumentException("The name property may not be null or empty: " + properties.get("name"));
+            throw new IllegalArgumentException(
+                    "The name property may not be null or empty: " + properties.get("name"));
         }
     }
 
-    /**
-     * Called when any of the SCR Components required dependencies become unsatisfied.
-     */
+    /** Called when any of the SCR Components required dependencies become unsatisfied. */
     @Deactivate
     public void deactivate() {
         LOG.info("Deactivating the {}", COMPONENT_LABEL);
@@ -114,9 +115,7 @@ public class GreeterServiceComponentFactoryImpl implements GreeterServiceCompone
         }
     }
 
-    /**
-     * Thread worker that continuously prints a message.
-     */
+    /** Thread worker that continuously prints a message. */
     private class Worker implements Runnable {
 
         private String name;
@@ -144,5 +143,4 @@ public class GreeterServiceComponentFactoryImpl implements GreeterServiceCompone
             this.salutation = salutation;
         }
     }
-
 }

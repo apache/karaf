@@ -20,6 +20,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -33,14 +35,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.net.URL;
-import java.net.URI;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-
 import org.apache.karaf.jaas.config.KeystoreInstance;
 import org.apache.karaf.jaas.config.KeystoreIsLocked;
 import org.slf4j.Logger;
@@ -59,43 +57,34 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
     private Map keyPasswords = new HashMap();
     private File keystoreFile; // Only valid after startup and if the resource points to a file
 
-    // The following variables are the state of the keystore, which should be chucked if the file on disk changes
+    // The following variables are the state of the keystore, which should be chucked if the file on
+    // disk changes
     private List privateKeys = new ArrayList();
     private List trustCerts = new ArrayList();
     private KeyStore keystore;
     private long keystoreReadDate = Long.MIN_VALUE;
 
-    /**
-     * @return the keystoreName
-     */
+    /** @return the keystoreName */
     public String getName() {
         return name;
     }
 
-    /**
-     * @param keystoreName the keystoreName to set
-     */
+    /** @param keystoreName the keystoreName to set */
     public void setName(String keystoreName) {
         this.name = keystoreName;
     }
 
-    /**
-     * @return the rank
-     */
+    /** @return the rank */
     public int getRank() {
         return rank;
     }
 
-    /**
-     * @param rank the rank to set
-     */
+    /** @param rank the rank to set */
     public void setRank(int rank) {
         this.rank = rank;
     }
 
-    /**
-     * @return the keystorePath
-     */
+    /** @return the keystorePath */
     public URL getPath() {
         return path;
     }
@@ -112,23 +101,20 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         }
     }
 
-    /**
-     * @param keystorePassword the keystorePassword to set
-     */
+    /** @param keystorePassword the keystorePassword to set */
     public void setKeystorePassword(String keystorePassword) {
         this.keystorePassword = keystorePassword;
     }
 
-    /**
-     * @param keyPasswords the keyPasswords to set
-     */
+    /** @param keyPasswords the keyPasswords to set */
     public void setKeyPasswords(String keyPasswords) {
         if (keyPasswords != null) {
             String[] keys = keyPasswords.split("\\]\\!\\[");
             for (String key : keys) {
                 int pos = key.indexOf('=');
                 if (pos > 0) {
-                    this.keyPasswords.put(key.substring(0, pos), key.substring(pos + 1).toCharArray());
+                    this.keyPasswords.put(
+                            key.substring(0, pos), key.substring(pos + 1).toCharArray());
                 }
             }
         }
@@ -170,8 +156,9 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         return null;
     }
 
-    public KeyManager[] getKeyManager(String algorithm, String keyAlias) throws KeystoreIsLocked,
-                                    NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException {
+    public KeyManager[] getKeyManager(String algorithm, String keyAlias)
+            throws KeystoreIsLocked, NoSuchAlgorithmException, KeyStoreException,
+                    UnrecoverableKeyException {
         if (isKeystoreLocked()) {
             throw new KeystoreIsLocked("Keystore '" + name + "' is locked.");
         }
@@ -205,8 +192,8 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         return null;
     }
 
-    public TrustManager[] getTrustManager(String algorithm) throws KeyStoreException,
-                                            NoSuchAlgorithmException, KeystoreIsLocked {
+    public TrustManager[] getTrustManager(String algorithm)
+            throws KeyStoreException, NoSuchAlgorithmException, KeystoreIsLocked {
         if (isKeystoreLocked()) {
             throw new KeystoreIsLocked("Keystore '" + name + "' is locked.");
         }
@@ -253,7 +240,12 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         }
         // Check if the file is invalid
         if (keystoreFile != null && (!keystoreFile.exists() || !keystoreFile.canRead())) {
-            throw new IllegalArgumentException("Invalid keystore file (" + path + " = " + keystoreFile.getAbsolutePath() + ")");
+            throw new IllegalArgumentException(
+                    "Invalid keystore file ("
+                            + path
+                            + " = "
+                            + keystoreFile.getAbsolutePath()
+                            + ")");
         }
         // Load the keystore data
         try {
@@ -264,7 +256,8 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
                 keystore = KeyStore.getInstance(JKS);
             }
             InputStream in = new BufferedInputStream(path.openStream());
-            keystore.load(in, keystorePassword == null ? new char[0] : keystorePassword.toCharArray());
+            keystore.load(
+                    in, keystorePassword == null ? new char[0] : keystorePassword.toCharArray());
             in.close();
             Enumeration aliases = keystore.aliases();
             while (aliases.hasMoreElements()) {
@@ -287,5 +280,4 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         }
         return false;
     }
-
 }

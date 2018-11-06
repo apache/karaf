@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.jms.internal;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.jms.ConnectionMetaData;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
@@ -23,10 +27,6 @@ import javax.jms.JMSContext;
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.Topic;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
 
@@ -34,7 +34,8 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
     public DestinationSource create(JMSContext context) {
         try {
             ConnectionMetaData cmd = context.getMetaData();
-            if (cmd.getJMSProviderName().equals("ActiveMQ") && cmd.getProviderVersion().startsWith("5.")) {
+            if (cmd.getJMSProviderName().equals("ActiveMQ")
+                    && cmd.getProviderVersion().startsWith("5.")) {
                 return type -> getNames(context, type);
             }
         } catch (Throwable t) {
@@ -47,22 +48,23 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
         try {
             List<String> names = new ArrayList<>();
             context.start();
-            String dest = "ActiveMQ.Advisory." +
-                    (type == DestinationSource.DestinationType.Queue ? "Queue" : "Topic");
+            String dest =
+                    "ActiveMQ.Advisory."
+                            + (type == DestinationSource.DestinationType.Queue ? "Queue" : "Topic");
             try (JMSConsumer consumer = context.createConsumer(context.createTopic(dest))) {
                 while (true) {
                     Message message = consumer.receive(100);
                     if (message == null) {
                         return names;
                     }
-                    Destination destination = (Destination) getField(message, "super.dataStructure", "destination");
+                    Destination destination =
+                            (Destination) getField(message, "super.dataStructure", "destination");
                     if (destination instanceof Queue) {
                         names.add(((Queue) destination).getQueueName());
                     } else {
                         names.add(((Topic) destination).getTopicName());
                     }
                 }
-
             }
         } catch (Exception e) {
             // Ignore
@@ -71,7 +73,8 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
         return Collections.emptyList();
     }
 
-    private static Object getField(Object context, String... fields) throws NoSuchFieldException, IllegalAccessException {
+    private static Object getField(Object context, String... fields)
+            throws NoSuchFieldException, IllegalAccessException {
         Object obj = context;
         for (String field : fields) {
             Class cl = obj.getClass();
@@ -85,5 +88,4 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
         }
         return obj;
     }
-
 }

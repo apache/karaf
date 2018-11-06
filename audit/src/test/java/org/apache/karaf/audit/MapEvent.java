@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.audit;
 
-import javax.security.auth.Subject;
 import java.util.Map;
+import javax.security.auth.Subject;
 
 public class MapEvent implements Event {
 

@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.profile.impl;
 
+import static org.apache.karaf.profile.impl.Utils.assertNotNull;
+import static org.apache.karaf.profile.impl.Utils.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,21 +29,15 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
-
 import org.apache.karaf.features.FeaturePattern;
 import org.apache.karaf.features.LocationPattern;
 import org.apache.karaf.profile.Profile;
 
-import static org.apache.karaf.profile.impl.Utils.assertNotNull;
-import static org.apache.karaf.profile.impl.Utils.assertTrue;
-
-
-/**
- * This immutable profile implementation.
- */
+/** This immutable profile implementation. */
 final class ProfileImpl implements Profile {
 
-    private static final Pattern ALLOWED_PROFILE_NAMES_PATTERN = Pattern.compile("^[A-Za-z0-9]+[.A-Za-z0-9_-]*$");
+    private static final Pattern ALLOWED_PROFILE_NAMES_PATTERN =
+            Pattern.compile("^[A-Za-z0-9]+[.A-Za-z0-9_-]*$");
 
     private final String profileId;
     private final Map<String, String> attributes;
@@ -51,12 +48,20 @@ final class ProfileImpl implements Profile {
     private int hash;
 
     // Only the {@link ProfileBuilder} should construct this
-    ProfileImpl(String profileId, List<String> parents, Map<String, byte[]> fileConfigs, boolean isOverlay) {
+    ProfileImpl(
+            String profileId,
+            List<String> parents,
+            Map<String, byte[]> fileConfigs,
+            boolean isOverlay) {
 
         assertNotNull(profileId, "profileId is null");
         assertNotNull(parents, "parents is null");
         assertNotNull(fileConfigs, "fileConfigs is null");
-        assertTrue(ALLOWED_PROFILE_NAMES_PATTERN.matcher(profileId).matches(), "Profile id '" + profileId + "' is invalid. Profile id must be: upper-case or lower-case letters, numbers, and . _ or - characters");
+        assertTrue(
+                ALLOWED_PROFILE_NAMES_PATTERN.matcher(profileId).matches(),
+                "Profile id '"
+                        + profileId
+                        + "' is invalid. Profile id must be: upper-case or lower-case letters, numbers, and . _ or - characters");
 
         this.profileId = profileId;
         this.isOverlay = isOverlay;
@@ -75,7 +80,8 @@ final class ProfileImpl implements Profile {
             }
         }
 
-        // Attributes are profile configuration properties with prefix "attribute." contained in "profile" PID
+        // Attributes are profile configuration properties with prefix "attribute." contained in
+        // "profile" PID
         attributes = getPrefixedMap(ATTRIBUTE_PREFIX);
     }
 
@@ -136,21 +142,24 @@ final class ProfileImpl implements Profile {
 
     @Override
     public List<LocationPattern> getBlacklistedBundles() {
-        return getContainerConfigList(ConfigListType.BLACKLISTED_BUNDLES).stream()
+        return getContainerConfigList(ConfigListType.BLACKLISTED_BUNDLES)
+                .stream()
                 .map(LocationPattern::new)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<FeaturePattern> getBlacklistedFeatures() {
-        return getContainerConfigList(ConfigListType.BLACKLISTED_FEATURES).stream()
+        return getContainerConfigList(ConfigListType.BLACKLISTED_FEATURES)
+                .stream()
                 .map(FeaturePattern::new)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<LocationPattern> getBlacklistedRepositories() {
-        return getContainerConfigList(ConfigListType.BLACKLISTED_REPOSITORIES).stream()
+        return getContainerConfigList(ConfigListType.BLACKLISTED_REPOSITORIES)
+                .stream()
                 .map(LocationPattern::new)
                 .collect(Collectors.toList());
     }
@@ -201,7 +210,9 @@ final class ProfileImpl implements Profile {
     }
 
     private Boolean parseBoolean(Object obj) {
-        return obj instanceof Boolean ? (Boolean) obj : obj != null && Boolean.parseBoolean(obj.toString());
+        return obj instanceof Boolean
+                ? (Boolean) obj
+                : obj != null && Boolean.parseBoolean(obj.toString());
     }
 
     @Override
@@ -299,5 +310,4 @@ final class ProfileImpl implements Profile {
             return value;
         }
     }
-
 }

@@ -26,9 +26,7 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import org.apache.karaf.jaas.modules.publickey.PublickeyCallback;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 
-/**
- * {@link CallbackHandler} implementation handling a name and public key.
- */
+/** {@link CallbackHandler} implementation handling a name and public key. */
 public class NamePubkeyCallbackHandler implements CallbackHandler {
 
     private final String name;

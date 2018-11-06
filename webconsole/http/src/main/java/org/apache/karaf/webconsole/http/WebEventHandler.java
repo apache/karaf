@@ -18,7 +18,6 @@ package org.apache.karaf.webconsole.http;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 import org.osgi.framework.Bundle;
@@ -64,5 +63,4 @@ public class WebEventHandler implements WebListener, BundleListener {
     public synchronized void removeEventsForBundle(Bundle bundle) {
         bundleEvents.remove(bundle.getBundleId());
     }
-
 }

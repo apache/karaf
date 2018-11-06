@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.features.Feature;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.Bundle;
@@ -34,9 +33,10 @@ import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 
 /**
- * <p>Interface to interact with OSGi framework.</p>
- * <p>Bundles are installed into {@link org.eclipse.equinox.region.Region regions} and {@link Feature features}
- * are used only to get their configs and libraries.</p>
+ * Interface to interact with OSGi framework.
+ *
+ * <p>Bundles are installed into {@link org.eclipse.equinox.region.Region regions} and {@link
+ * Feature features} are used only to get their configs and libraries.
  */
 public interface BundleInstallSupport {
 
@@ -56,31 +56,34 @@ public interface BundleInstallSupport {
 
     void setBundleStartLevel(Bundle bundle, int startLevel);
 
-    void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring,
-                        Map<Resource, Bundle> resToBnd);
+    void resolveBundles(
+            Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd);
 
-    void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies,
-                        Map<String, Set<Long>> bundles)
-        throws BundleException, InvalidSyntaxException;
+    void replaceDigraph(
+            Map<String, Map<String, Map<String, Set<String>>>> policies,
+            Map<String, Set<Long>> bundles)
+            throws BundleException, InvalidSyntaxException;
 
     void saveDigraph();
 
     RegionDigraph getDiGraphCopy() throws BundleException;
-    
+
     void installConfigs(Feature feature) throws IOException, InvalidSyntaxException;
-    
+
     void installLibraries(Feature feature) throws IOException;
 
     File getDataFile(String name);
-    
+
     FrameworkInfo getInfo();
 
     void unregister();
 
     /**
-     * <p>Low-level state of system, provides information about start levels (initial and current), system bundle,
-     * bundle of features service and entire map of bundle IDs to {@link Bundle} instances.</p>
-     * <p>There's no relation to {@link org.eclipse.equinox.region.Region regions}.</p>
+     * Low-level state of system, provides information about start levels (initial and current),
+     * system bundle, bundle of features service and entire map of bundle IDs to {@link Bundle}
+     * instances.
+     *
+     * <p>There's no relation to {@link org.eclipse.equinox.region.Region regions}.
      */
     class FrameworkInfo {
         public Bundle ourBundle;
@@ -90,5 +93,4 @@ public interface BundleInstallSupport {
         public int currentStartLevel;
         public Map<Long, Bundle> bundles = new HashMap<>();
     }
-
 }

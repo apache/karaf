@@ -19,34 +19,21 @@ package org.apache.karaf.profile;
 import java.util.List;
 import java.util.Map;
 
-/**
- * MBean to manipulate profiles.
- */
+/** MBean to manipulate profiles. */
 public interface ProfileMBean {
 
-    /**
-     * List profile IDs with parents.
-     */
+    /** List profile IDs with parents. */
     Map<String, String> getProfiles();
 
-    /**
-     * Rename a profile.
-     */
+    /** Rename a profile. */
     void rename(String name, String newName);
 
-    /**
-     * Delete a profile.
-     */
+    /** Delete a profile. */
     void delete(String name);
 
-    /**
-     * Create a new profile.
-     */
+    /** Create a new profile. */
     void create(String name, List<String> parents);
 
-    /**
-     * Copy a profile definition on another one.
-     */
+    /** Copy a profile definition on another one. */
     void copy(String source, String target);
-
 }

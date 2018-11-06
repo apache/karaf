@@ -23,13 +23,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.apache.karaf.shell.api.console.Signal;
 import org.apache.karaf.shell.api.console.SignalListener;
 
 public class SignalSupport {
 
-    protected final ConcurrentMap<Signal, Set<SignalListener>> listeners = new ConcurrentHashMap<>(3);
+    protected final ConcurrentMap<Signal, Set<SignalListener>> listeners =
+            new ConcurrentHashMap<>(3);
 
     public void addSignalListener(SignalListener listener, Signal... signals) {
         if (signals == null) {
@@ -76,6 +76,8 @@ public class SignalSupport {
     }
 
     protected Set<SignalListener> getSignalListeners(Signal signal, boolean create) {
-        return listeners.compute(signal, (sig, lst) -> lst != null ? lst : create ? new CopyOnWriteArraySet<>() : null);
+        return listeners.compute(
+                signal,
+                (sig, lst) -> lst != null ? lst : create ? new CopyOnWriteArraySet<>() : null);
     }
 }

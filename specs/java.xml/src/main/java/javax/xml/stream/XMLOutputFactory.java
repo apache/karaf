@@ -16,9 +16,9 @@
  */
 package javax.xml.stream;
 
-import javax.xml.transform.Result;
 import java.io.OutputStream;
 import java.io.Writer;
+import javax.xml.transform.Result;
 
 public abstract class XMLOutputFactory {
 
@@ -26,8 +26,7 @@ public abstract class XMLOutputFactory {
 
     private static final String DEFAULT_IMPL = "com.sun.xml.internal.stream.XMLOutputFactoryImpl";
 
-    protected XMLOutputFactory() {
-    }
+    protected XMLOutputFactory() {}
 
     public static XMLOutputFactory newDefaultFactory() {
         return $FactoryFinder.newInstance(XMLOutputFactory.class, DEFAULT_IMPL, null, false, true);
@@ -42,27 +41,33 @@ public abstract class XMLOutputFactory {
     }
 
     @Deprecated
-    public static XMLInputFactory newInstance(String factoryId, ClassLoader classLoader) throws FactoryConfigurationError {
+    public static XMLInputFactory newInstance(String factoryId, ClassLoader classLoader)
+            throws FactoryConfigurationError {
         return $FactoryFinder.find(XMLInputFactory.class, factoryId, classLoader, null);
     }
 
-    public static XMLOutputFactory newFactory(String factoryId, ClassLoader classLoader) throws FactoryConfigurationError {
+    public static XMLOutputFactory newFactory(String factoryId, ClassLoader classLoader)
+            throws FactoryConfigurationError {
         return $FactoryFinder.find(XMLOutputFactory.class, factoryId, classLoader, null);
     }
 
     public abstract XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException;
 
-    public abstract XMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException;
+    public abstract XMLStreamWriter createXMLStreamWriter(OutputStream stream)
+            throws XMLStreamException;
 
-    public abstract XMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) throws XMLStreamException;
+    public abstract XMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding)
+            throws XMLStreamException;
 
     public abstract XMLStreamWriter createXMLStreamWriter(Result result) throws XMLStreamException;
 
     public abstract XMLEventWriter createXMLEventWriter(Result result) throws XMLStreamException;
 
-    public abstract XMLEventWriter createXMLEventWriter(OutputStream stream) throws XMLStreamException;
+    public abstract XMLEventWriter createXMLEventWriter(OutputStream stream)
+            throws XMLStreamException;
 
-    public abstract XMLEventWriter createXMLEventWriter(OutputStream stream, String encoding) throws XMLStreamException;
+    public abstract XMLEventWriter createXMLEventWriter(OutputStream stream, String encoding)
+            throws XMLStreamException;
 
     public abstract XMLEventWriter createXMLEventWriter(Writer stream) throws XMLStreamException;
 

@@ -16,8 +16,7 @@ package jline.internal;
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  * @since 2.7
  */
-public class Preconditions
-{
+public class Preconditions {
     public static <T> T checkNotNull(final T reference) {
         if (reference == null) {
             throw new NullPointerException();

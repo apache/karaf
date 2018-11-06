@@ -17,12 +17,12 @@
 package org.apache.karaf.service.guard.tools;
 
 import java.util.*;
-
 import org.apache.karaf.service.guard.impl.GuardProxyCatalog;
 
 public class ACLConfigurationParser {
 
-    // note that the order of the enums is important. Needs to be from most specific to least specific.
+    // note that the order of the enums is important. Needs to be from most specific to least
+    // specific.
     public enum Specificity {
         ARGUMENT_MATCH,
         SIGNATURE_MATCH,
@@ -32,62 +32,70 @@ public class ACLConfigurationParser {
     }
 
     static String compulsoryRoles;
-    
+
     static {
-        compulsoryRoles = System.getProperty(GuardProxyCatalog.KARAF_SECURED_COMMAND_COMPULSORY_ROLES_PROPERTY);
+        compulsoryRoles =
+                System.getProperty(
+                        GuardProxyCatalog.KARAF_SECURED_COMMAND_COMPULSORY_ROLES_PROPERTY);
     }
-    
+
     /**
-     * <p>Returns the roles that can invoke the given operation. This is determined by matching the
-     * operation details against configuration provided.</p>
+     * Returns the roles that can invoke the given operation. This is determined by matching the
+     * operation details against configuration provided.
      *
-     * <p>The following configuration is supported. Keys are used to match an invocation against. The value can contain
-     * a comma-separated list of roles. Spaces are ignored for the role values. Note that comments are allowed in the
-     * value field after the hash {@code #} character:</p>
+     * <p>The following configuration is supported. Keys are used to match an invocation against.
+     * The value can contain a comma-separated list of roles. Spaces are ignored for the role
+     * values. Note that comments are allowed in the value field after the hash {@code #} character:
      *
-     * <pre>
-     *     {@code
-     *     myMethod = role1, role2
-     *     methodName(int)[/17/] = role1                    # regex match, assume it's surrounded by ^ and $
-     *     methodName(int)[/[01]8/] = role2
-     *     methodName(int)["19"] = role3                    # exact value match
-     *     methodName(int) = role4                          # signature match
-     *     methodName(java.lang.String, int) = role5        # signature match
-     *     methodName =                                     # no roles can invoke this command
-     *     method* = role6                                  # name prefix/wildcard match. The asterisk must appear at the end.
-     *     }
-     * </pre>
+     * <pre>{@code
+     * myMethod = role1, role2
+     * methodName(int)[/17/] = role1                    # regex match, assume it's surrounded by ^ and $
+     * methodName(int)[/[01]8/] = role2
+     * methodName(int)["19"] = role3                    # exact value match
+     * methodName(int) = role4                          # signature match
+     * methodName(java.lang.String, int) = role5        # signature match
+     * methodName =                                     # no roles can invoke this command
+     * method* = role6                                  # name prefix/wildcard match. The asterisk must appear at the end.
      *
-     * <p>The following algorithm is used to find matching roles:</p>
+     * }</pre>
+     *
+     * <p>The following algorithm is used to find matching roles:
+     *
      * <ol>
-     *     <li>Find all regex and exact value matches. For all parameters these matches are found by calling {@code toString()}
-     *         on the parameters passed in. If there are multiple matches in this category all the matching roles are collected.
-     *         If any is found return these roles.
-     *     </li>
-     *     <li>Find a signature match. If found return the associated roles.</li>
-     *     <li>Find a method name match. If found return the associated roles.</li>
-     *     <li>Find a method name prefix/wildcard match. If more than one prefix match, the roles associated with the longest
-     *         prefix is used. So for example, if there are rules for {@code get*} and {@code *} only the roles associated with
-     *         {@code get*} are returned.
-     *     </li>
-     *     <li>If none of the above criteria match, this method returns {@code null}.</li>
+     *   <li>Find all regex and exact value matches. For all parameters these matches are found by
+     *       calling {@code toString()} on the parameters passed in. If there are multiple matches
+     *       in this category all the matching roles are collected. If any is found return these
+     *       roles.
+     *   <li>Find a signature match. If found return the associated roles.
+     *   <li>Find a method name match. If found return the associated roles.
+     *   <li>Find a method name prefix/wildcard match. If more than one prefix match, the roles
+     *       associated with the longest prefix is used. So for example, if there are rules for
+     *       {@code get*} and {@code *} only the roles associated with {@code get*} are returned.
+     *   <li>If none of the above criteria match, this method returns {@code null}.
      * </ol>
      *
      * @param methodName the method name to be invoked.
-     * @param params the parameters provided for the invocation. May be {@code null} for cases there the parameters are not yet
-     *               known. In this case the roles that can <em>potentially</em> invoke the method are returned, although based on
-     *               parameter values the actual invocation may still be denied.
-     * @param signature the signature of the method specified as an array of class name. For simple types, the simple type name
-     *                  is used (e.g. "int").
+     * @param params the parameters provided for the invocation. May be {@code null} for cases there
+     *     the parameters are not yet known. In this case the roles that can <em>potentially</em>
+     *     invoke the method are returned, although based on parameter values the actual invocation
+     *     may still be denied.
+     * @param signature the signature of the method specified as an array of class name. For simple
+     *     types, the simple type name is used (e.g. "int").
      * @param config the configuration to check against.
-     * @param addToRoles the list of roles (which may be empty) if a matching configuration iteam has been found.
+     * @param addToRoles the list of roles (which may be empty) if a matching configuration iteam
+     *     has been found.
      * @return the specificity
      */
-    public static Specificity getRolesForInvocation(String methodName, Object[] params, String[] signature,
-                                                    Dictionary<String, Object> config, List<String> addToRoles) {
+    public static Specificity getRolesForInvocation(
+            String methodName,
+            Object[] params,
+            String[] signature,
+            Dictionary<String, Object> config,
+            List<String> addToRoles) {
         Dictionary<String, Object> properties = trimKeys(config);
-        String pid = (String)properties.get("service.pid");
-        Specificity s = getRolesBasedOnSignature(methodName, params, signature, properties, addToRoles);
+        String pid = (String) properties.get("service.pid");
+        Specificity s =
+                getRolesBasedOnSignature(methodName, params, signature, properties, addToRoles);
         if (s != Specificity.NO_MATCH) {
             return s;
         }
@@ -101,20 +109,24 @@ public class ACLConfigurationParser {
         if (roles != null) {
             addToRoles.addAll(roles);
             return Specificity.WILDCARD_MATCH;
-        } else if (compulsoryRoles != null && !pid.contains("jmx.acl")){
+        } else if (compulsoryRoles != null && !pid.contains("jmx.acl")) {
             addToRoles.addAll(ACLConfigurationParser.parseRoles(compulsoryRoles));
             return Specificity.NAME_MATCH;
         } else {
             return Specificity.NO_MATCH;
         }
-            
     }
-    
-    public static Specificity getRolesForInvocationForAlias(String methodName, Object[] params, String[] signature,
-                                                    Dictionary<String, Object> config, List<String> addToRoles) {
+
+    public static Specificity getRolesForInvocationForAlias(
+            String methodName,
+            Object[] params,
+            String[] signature,
+            Dictionary<String, Object> config,
+            List<String> addToRoles) {
         Dictionary<String, Object> properties = trimKeys(config);
-        String pid = (String)properties.get("service.pid");
-        Specificity s = getRolesBasedOnSignature(methodName, params, signature, properties, addToRoles);
+        String pid = (String) properties.get("service.pid");
+        Specificity s =
+                getRolesBasedOnSignature(methodName, params, signature, properties, addToRoles);
         if (s != Specificity.NO_MATCH) {
             return s;
         }
@@ -131,20 +143,24 @@ public class ACLConfigurationParser {
         } else {
             return Specificity.NO_MATCH;
         }
-            
     }
-    
+
     public static void getCompulsoryRoles(List<String> roles) {
         if (compulsoryRoles != null) {
             roles.addAll(ACLConfigurationParser.parseRoles(compulsoryRoles));
         }
     }
 
-    private static Specificity getRolesBasedOnSignature(String methodName, Object[] params, String[] signature,
-                                                        Dictionary<String, Object> properties, List<String> roles) {
+    private static Specificity getRolesBasedOnSignature(
+            String methodName,
+            Object[] params,
+            String[] signature,
+            Dictionary<String, Object> properties,
+            List<String> roles) {
         if (params != null) {
             boolean foundExactOrRegex = false;
-            Object exactArgMatchRoles = properties.get(getExactArgSignature(methodName, signature, params));
+            Object exactArgMatchRoles =
+                    properties.get(getExactArgSignature(methodName, signature, params));
             if (exactArgMatchRoles instanceof String) {
                 roles.addAll(parseRoles((String) exactArgMatchRoles));
                 foundExactOrRegex = true;
@@ -157,16 +173,19 @@ public class ACLConfigurationParser {
             }
 
             if (foundExactOrRegex) {
-                // since we have the actual parameters we can match them and if they do we won't look for any
+                // since we have the actual parameters we can match them and if they do we won't
+                // look for
+                // any
                 // more generic rules...
                 return Specificity.ARGUMENT_MATCH;
             }
         } else {
-            // this is used in the case where parameters aren't known yet and the system wants to find out
+            // this is used in the case where parameters aren't known yet and the system wants to
+            // find out
             // what roles in principle can invoke this method
             List<String> r = getExactArgOrRegexRoles(properties, methodName, signature);
             if (r != null) {
-               roles.addAll(r);
+                roles.addAll(r);
             }
         }
 
@@ -195,20 +214,21 @@ public class ACLConfigurationParser {
         for (int i = 0; i < key.length(); i++) {
             char c = key.charAt(i);
 
-            if (quoteChar == 0 && c == ' ')
-                continue;
+            if (quoteChar == 0 && c == ' ') continue;
 
-            if (quoteChar == 0 && (c == '\"' || c == '/') && sb.length() > 0 &&
-                    (sb.charAt(sb.length() - 1) == '[' || sb.charAt(sb.length() - 1) == ',')) {
+            if (quoteChar == 0
+                    && (c == '\"' || c == '/')
+                    && sb.length() > 0
+                    && (sb.charAt(sb.length() - 1) == '[' || sb.charAt(sb.length() - 1) == ',')) {
                 // we're in a quoted string
                 quoteChar = c;
             } else if (quoteChar != 0 && c == quoteChar) {
-                // look ahead to see if the next non-space is the closing bracket or a comma, which ends the quoted string
+                // look ahead to see if the next non-space is the closing bracket or a comma, which
+                // ends the
+                // quoted string
                 for (int j = i + 1; j < key.length(); j++) {
-                    if (key.charAt(j) == ' ')
-                        continue;
-                    if (key.charAt(j) == ']' || key.charAt(j) == ',')
-                        quoteChar = 0;
+                    if (key.charAt(j) == ' ') continue;
+                    if (key.charAt(j) == ']' || key.charAt(j) == ',') quoteChar = 0;
                     break;
                 }
             }
@@ -235,18 +255,16 @@ public class ACLConfigurationParser {
         return roles;
     }
 
-    private static Object getExactArgSignature(String methodName, String[] signature, Object[] params) {
+    private static Object getExactArgSignature(
+            String methodName, String[] signature, Object[] params) {
         StringBuilder sb = new StringBuilder(getSignature(methodName, signature));
         sb.append('[');
         boolean first = true;
         for (Object param : params) {
-            if (first)
-                first = false;
-            else
-                sb.append(',');
+            if (first) first = false;
+            else sb.append(',');
             sb.append('"');
-            if (param != null)
-                sb.append(param.toString().trim());
+            if (param != null) sb.append(param.toString().trim());
             sb.append('"');
         }
         sb.append(']');
@@ -255,23 +273,24 @@ public class ACLConfigurationParser {
 
     private static String getSignature(String methodName, String[] signature) {
         StringBuilder sb = new StringBuilder(methodName);
-        if (signature == null)
-            return sb.toString();
+        if (signature == null) return sb.toString();
 
         sb.append('(');
         boolean first = true;
         for (String s : signature) {
-            if (first)
-                first = false;
-            else
-                sb.append(',');
+            if (first) first = false;
+            else sb.append(',');
             sb.append(s);
         }
         sb.append(')');
         return sb.toString();
     }
 
-    private static List<String> getRegexRoles(Dictionary<String, Object> properties, String methodName, String[] signature, Object[] params) {
+    private static List<String> getRegexRoles(
+            Dictionary<String, Object> properties,
+            String methodName,
+            String[] signature,
+            Object[] params) {
         List<String> roles = new ArrayList<>();
         boolean matchFound = false;
         String methodSig = getSignature(methodName, signature);
@@ -292,7 +311,8 @@ public class ACLConfigurationParser {
         return matchFound ? roles : null;
     }
 
-    private static List<String> getExactArgOrRegexRoles(Dictionary<String, Object> properties, String methodName, String[] signature) {
+    private static List<String> getExactArgOrRegexRoles(
+            Dictionary<String, Object> properties, String methodName, String[] signature) {
         List<String> roles = new ArrayList<>();
         boolean matchFound = false;
         String methodSig = getSignature(methodName, signature);
@@ -310,12 +330,15 @@ public class ACLConfigurationParser {
         return matchFound ? roles : null;
     }
 
-    private static List<String> getMethodNameWildcardRoles(Dictionary<String, Object> properties, String methodName) {
-        SortedMap<String, String> wildcardRules = new TreeMap<>((s1, s2) -> {
-            // returns longer entries before shorter ones...
-            return s2.length() - s1.length();
-        });
-        
+    private static List<String> getMethodNameWildcardRoles(
+            Dictionary<String, Object> properties, String methodName) {
+        SortedMap<String, String> wildcardRules =
+                new TreeMap<>(
+                        (s1, s2) -> {
+                            // returns longer entries before shorter ones...
+                            return s2.length() - s1.length();
+                        });
+
         for (Enumeration<String> e = properties.keys(); e.hasMoreElements(); ) {
             String key = e.nextElement();
             if (key.endsWith("*")) {
@@ -346,12 +369,10 @@ public class ACLConfigurationParser {
     }
 
     private static boolean allParamsMatch(List<String> regexArgs, Object[] params) {
-        if (regexArgs.size() != params.length)
-            return false;
+        if (regexArgs.size() != params.length) return false;
 
         for (int i = 0; i < regexArgs.size(); i++) {
-            if (params[i] == null)
-                return false;
+            if (params[i] == null) return false;
             if (!params[i].toString().trim().matches(regexArgs.get(i))) {
                 return false;
             }

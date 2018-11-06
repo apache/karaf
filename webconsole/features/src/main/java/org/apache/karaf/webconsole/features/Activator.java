@@ -16,19 +16,15 @@
  */
 package org.apache.karaf.webconsole.features;
 
-import javax.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
+import javax.servlet.Servlet;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
-import org.apache.karaf.webconsole.features.FeaturesPlugin;
 
-@Services(
-        requires = @RequireService(FeaturesService.class)
-)
+@Services(requires = @RequireService(FeaturesService.class))
 public class Activator extends BaseActivator {
 
     private FeaturesPlugin featuresPlugin;
@@ -53,5 +49,4 @@ public class Activator extends BaseActivator {
             featuresPlugin = null;
         }
     }
-
 }

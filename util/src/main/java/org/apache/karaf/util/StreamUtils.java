@@ -22,9 +22,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class StreamUtils {
-    
-    private StreamUtils() {
-    }
+
+    private StreamUtils() {}
 
     public static void close(Closeable... closeables) {
         for (Closeable c : closeables) {
@@ -58,5 +57,4 @@ public class StreamUtils {
         }
         output.flush();
     }
-
 }

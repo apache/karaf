@@ -1,18 +1,15 @@
 /**
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
 package org.apache.karaf.deployer.spring;
@@ -34,19 +31,17 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
-
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
 import org.apache.karaf.util.DeployerUtils;
 import org.apache.karaf.util.XmlUtils;
+import org.osgi.framework.Constants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.osgi.framework.Constants;
 
 public class SpringTransformer {
 
@@ -66,7 +61,8 @@ public class SpringTransformer {
         m.getMainAttributes().putValue(Constants.BUNDLE_MANIFESTVERSION, "2");
         m.getMainAttributes().putValue(Constants.BUNDLE_SYMBOLICNAME, str[0]);
         m.getMainAttributes().putValue(Constants.BUNDLE_VERSION, str[1]);
-        m.getMainAttributes().putValue("Spring-Context", "*;publish-context:=false;create-asynchronously:=true");
+        m.getMainAttributes()
+                .putValue("Spring-Context", "*;publish-context:=false;create-asynchronously:=true");
         String importPkgs = getImportPackages(analyze(new DOMSource(doc)));
         if (importPkgs != null && importPkgs.length() > 0) {
             m.getMainAttributes().putValue(Constants.IMPORT_PACKAGE, importPkgs);
@@ -121,7 +117,10 @@ public class SpringTransformer {
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         Result r = new StreamResult(bout);
-        XmlUtils.transform(new StreamSource(SpringTransformer.class.getResourceAsStream("extract.xsl")), source, r);
+        XmlUtils.transform(
+                new StreamSource(SpringTransformer.class.getResourceAsStream("extract.xsl")),
+                source,
+                r);
 
         ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
         bout.close();
@@ -168,7 +167,7 @@ public class SpringTransformer {
 
     protected static long getLastModified(URL url) throws IOException {
         URLConnection urlConnection = url.openConnection();
-        try(InputStream is = urlConnection.getInputStream()) {
+        try (InputStream is = urlConnection.getInputStream()) {
             return urlConnection.getLastModified();
         }
     }
@@ -187,12 +186,20 @@ public class SpringTransformer {
             groupId = parts[0];
             artifactId = parts[1];
             version = parts[2];
-            type = (parts.length >= 4) ?  "." + parts[3] : ".jar";
-            qualifier = (parts.length >= 5) ? "-" + parts[4] :  "";
-            return groupId.replace('.', '/') + "/" + artifactId + "/"
-                    + version + "/" + artifactId + "-" + version + qualifier + type;
+            type = (parts.length >= 4) ? "." + parts[3] : ".jar";
+            qualifier = (parts.length >= 5) ? "-" + parts[4] : "";
+            return groupId.replace('.', '/')
+                    + "/"
+                    + artifactId
+                    + "/"
+                    + version
+                    + "/"
+                    + artifactId
+                    + "-"
+                    + version
+                    + qualifier
+                    + type;
         }
         return url.getPath();
     }
-
 }

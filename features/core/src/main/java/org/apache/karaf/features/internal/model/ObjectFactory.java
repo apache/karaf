@@ -22,28 +22,25 @@ import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
 /**
- * <p>This object contains factory methods for each
- * Java content interface and Java element interface
- * generated in the org.apache.karaf.features.wrapper package.</p>
- * <p>An ObjectFactory allows you to programmatically
- * construct new instances of the Java representation
- * for XML content. The Java representation of XML
- * content can consist of schema derived interfaces
- * and classes representing the binding of schema
- * type definitions, element declarations and model
- * groups.  Factory methods for each of these are
- * provided in this class.</p>
+ * This object contains factory methods for each Java content interface and Java element interface
+ * generated in the org.apache.karaf.features.wrapper package.
+ *
+ * <p>An ObjectFactory allows you to programmatically construct new instances of the Java
+ * representation for XML content. The Java representation of XML content can consist of schema
+ * derived interfaces and classes representing the binding of schema type definitions, element
+ * declarations and model groups. Factory methods for each of these are provided in this class.
  */
 @XmlRegistry
 public class ObjectFactory {
 
-    private static final QName FEATURES_QNAME = new QName("http://karaf.apache.org/xmlns/features/v1.0.0", "features");
+    private static final QName FEATURES_QNAME =
+            new QName("http://karaf.apache.org/xmlns/features/v1.0.0", "features");
 
     /**
-     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.apache.karaf.features.wrapper
+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes
+     * for package: org.apache.karaf.features.wrapper
      */
-    public ObjectFactory() {
-    }
+    public ObjectFactory() {}
 
     /**
      * Create an instance of {@link ConfigFile}
@@ -109,5 +106,4 @@ public class ObjectFactory {
     public JAXBElement<Features> createFeatures(Features value) {
         return new JAXBElement<>(FEATURES_QNAME, Features.class, null, value);
     }
-
 }

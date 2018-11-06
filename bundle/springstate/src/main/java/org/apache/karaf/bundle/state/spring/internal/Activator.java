@@ -25,15 +25,15 @@ public class Activator implements BundleActivator {
 
     public void start(BundleContext bundleContext) {
         SpringStateService services = new SpringStateService();
-        String[] classes = new String[] {
-                                         OsgiBundleApplicationContextListener.class.getName(),
-                                         BundleStateService.class.getName()
-        };
+        String[] classes =
+                new String[] {
+                    OsgiBundleApplicationContextListener.class.getName(),
+                    BundleStateService.class.getName()
+                };
         bundleContext.registerService(classes, services, null);
     }
 
     public void stop(BundleContext context) {
         // unregister happens automatically
     }
-
 }

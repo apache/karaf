@@ -18,9 +18,7 @@ package org.apache.karaf.jaas.command.completers;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.security.auth.login.AppConfigurationEntry;
-
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -33,8 +31,7 @@ import org.apache.karaf.shell.support.completers.StringsCompleter;
 @Service
 public class LoginModuleNameCompleter implements Completer {
 
-    @Reference
-    private List<JaasRealm> realms;
+    @Reference private List<JaasRealm> realms;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -44,7 +41,7 @@ public class LoginModuleNameCompleter implements Completer {
                 for (JaasRealm realm : realms) {
                     List<String> moduleClassNames = findLoginModuleClassNames(realm);
                     if (moduleClassNames != null && !moduleClassNames.isEmpty())
-                    delegate.getStrings().addAll(moduleClassNames);
+                        delegate.getStrings().addAll(moduleClassNames);
                 }
         } catch (Exception e) {
             // Ignore
@@ -54,6 +51,7 @@ public class LoginModuleNameCompleter implements Completer {
 
     /**
      * Finds the login module class name in the {@link JaasRealm} entries.
+     *
      * @param realm
      * @return
      */
@@ -64,9 +62,7 @@ public class LoginModuleNameCompleter implements Completer {
             if (moduleClass != null) {
                 moduleClassNames.add(moduleClass);
             }
-
         }
         return moduleClassNames;
     }
-
 }

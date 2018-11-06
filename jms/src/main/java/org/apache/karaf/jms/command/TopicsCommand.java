@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.jms.command;
 
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
@@ -39,5 +38,4 @@ public class TopicsCommand extends JmsConnectionCommandSupport {
 
         return null;
     }
-
 }

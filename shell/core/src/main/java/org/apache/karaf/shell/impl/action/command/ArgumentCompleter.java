@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -67,7 +66,10 @@ public class ArgumentCompleter implements Completer {
         Class<?> actionClass = command.getActionClass();
         // Command name completer
         Command cmd = actionClass.getAnnotation(Command.class);
-        String[] names = scoped || Session.SCOPE_GLOBAL.equals(cmd.scope()) ? new String[] { cmd.name() } : new String[] { cmd.name(), cmd.scope() + ":" + cmd.name() };
+        String[] names =
+                scoped || Session.SCOPE_GLOBAL.equals(cmd.scope())
+                        ? new String[] {cmd.name()}
+                        : new String[] {cmd.name(), cmd.scope() + ":" + cmd.name()};
         commandCompleter = new CandidateCompleter();
         for (String name : names) {
             commandCompleter.addCandidate(name, cmd.description(), actionClass.getName());
@@ -90,7 +92,13 @@ public class ArgumentCompleter implements Completer {
                 if (argument != null) {
                     Integer key = argument.index();
                     if (arguments.containsKey(key)) {
-                        LOGGER.warn("Duplicate @Argument annotations on class " + type.getName() + " for index: " + key + " see: " + field);
+                        LOGGER.warn(
+                                "Duplicate @Argument annotations on class "
+                                        + type.getName()
+                                        + " for index: "
+                                        + key
+                                        + " see: "
+                                        + field);
                     } else {
                         arguments.put(key, field);
                     }
@@ -148,7 +156,8 @@ public class ArgumentCompleter implements Completer {
                         Class clazz = ann.value();
                         String[] value = ann.values();
                         if (value.length > 0) {
-                            completer = new StringsCompleter(Arrays.asList(value), ann.caseSensitive());
+                            completer =
+                                    new StringsCompleter(Arrays.asList(value), ann.caseSensitive());
                         } else {
                             completer = command.getCompleter(clazz);
                         }
@@ -171,9 +180,7 @@ public class ArgumentCompleter implements Completer {
         }
     }
 
-    @SuppressWarnings({
-     "unchecked", "rawtypes"
-    })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private Completer getDefaultCompleter(Field field, boolean multi) {
         Completer completer = null;
         Class<?> type = field.getType();
@@ -197,7 +204,8 @@ public class ArgumentCompleter implements Completer {
         return completer;
     }
 
-    public int complete(Session session, final CommandLine commandLine, final List<String> candidates) {
+    public int complete(
+            Session session, final CommandLine commandLine, final List<String> candidates) {
         List<Candidate> cands = new ArrayList<>();
         completeCandidates(session, commandLine, cands);
         for (Candidate cand : cands) {
@@ -207,7 +215,8 @@ public class ArgumentCompleter implements Completer {
     }
 
     @Override
-    public void completeCandidates(Session session, final CommandLine list, List<Candidate> candidates) {
+    public void completeCandidates(
+            Session session, final CommandLine list, List<Candidate> candidates) {
         int argIndex = list.getCursorArgumentIndex();
 
         Completer comp = null;
@@ -216,7 +225,9 @@ public class ArgumentCompleter implements Completer {
         // First argument is command name
         if (index < argIndex) {
             // Verify scope
-            if (!Session.SCOPE_GLOBAL.equals(command.getScope()) && !session.resolveCommand(args[index]).equals(command.getScope() + ":" + command.getName())) {
+            if (!Session.SCOPE_GLOBAL.equals(command.getScope())
+                    && !session.resolveCommand(args[index])
+                            .equals(command.getScope() + ":" + command.getName())) {
                 return;
             }
             // Verify command name
@@ -238,14 +249,19 @@ public class ArgumentCompleter implements Completer {
                     return;
                 }
                 Field field = fields.get(option);
-                if (field != null && field.getType() != boolean.class && field.getType() != Boolean.class) {
+                if (field != null
+                        && field.getType() != boolean.class
+                        && field.getType() != Boolean.class) {
                     if (++index == argIndex) {
                         comp = NullCompleter.INSTANCE;
                     }
                 }
                 index++;
             }
-            if (comp == null && index >= argIndex && index < args.length && args[index].startsWith("-")) {
+            if (comp == null
+                    && index >= argIndex
+                    && index < args.length
+                    && args[index].startsWith("-")) {
                 comp = optionsCompleter;
             }
         }
@@ -255,7 +271,9 @@ public class ArgumentCompleter implements Completer {
             Option lastOption = options.get(args[lastAgurmentIndex]);
             if (lastOption != null) {
                 Field lastField = fields.get(lastOption);
-                if (lastField != null && lastField.getType() != boolean.class && lastField.getType() != Boolean.class) {
+                if (lastField != null
+                        && lastField.getType() != boolean.class
+                        && lastField.getType() != Boolean.class) {
                     Option option = lastField.getAnnotation(Option.class);
                     if (option != null) {
                         Completer optionValueCompleter = null;
@@ -265,13 +283,16 @@ public class ArgumentCompleter implements Completer {
                             if (optionValueCompleter == null) {
                                 String[] aliases = option.aliases();
                                 if (aliases.length > 0) {
-                                    for (int i = 0; i < aliases.length && optionValueCompleter == null; i++) {
-                                        optionValueCompleter = optionalCompleters.get(option.aliases()[i]);
+                                    for (int i = 0;
+                                            i < aliases.length && optionValueCompleter == null;
+                                            i++) {
+                                        optionValueCompleter =
+                                                optionalCompleters.get(option.aliases()[i]);
                                     }
                                 }
                             }
                         }
-                        if(optionValueCompleter != null) {
+                        if (optionValueCompleter != null) {
                             comp = optionValueCompleter;
                         }
                     }
@@ -283,14 +304,22 @@ public class ArgumentCompleter implements Completer {
         if (comp == null) {
             int indexArg = 0;
             while (index < argIndex) {
-                Completer sub = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
+                Completer sub =
+                        argsCompleters.get(
+                                indexArg >= argsCompleters.size()
+                                        ? argsCompleters.size() - 1
+                                        : indexArg);
                 if (!verifyCompleter(session, sub, args[index])) {
                     return;
                 }
                 index++;
                 indexArg++;
             }
-            comp = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
+            comp =
+                    argsCompleters.get(
+                            indexArg >= argsCompleters.size()
+                                    ? argsCompleters.size() - 1
+                                    : indexArg);
         }
 
         comp.completeCandidates(session, list, candidates);
@@ -302,14 +331,12 @@ public class ArgumentCompleter implements Completer {
         */
 
         /**
-         *  Special case: when completing in the middle of a line, and the
-         *  area under the cursor is a delimiter, then trim any delimiters
-         *  from the candidates, since we do not need to have an extra
-         *  delimiter.
+         * Special case: when completing in the middle of a line, and the area under the cursor is a
+         * delimiter, then trim any delimiters from the candidates, since we do not need to have an
+         * extra delimiter.
          *
-         *  E.g., if we have a completion for "foo", and we
-         *  enter "f bar" into the buffer, and move to after the "f"
-         *  and hit TAB, we want "foo bar" instead of "foo  bar".
+         * <p>E.g., if we have a completion for "foo", and we enter "f bar" into the buffer, and
+         * move to after the "f" and hit TAB, we want "foo bar" instead of "foo bar".
          */
 
         /* TODO:JLINE
@@ -334,15 +361,14 @@ public class ArgumentCompleter implements Completer {
 
     protected boolean verifyCompleter(Session session, Completer completer, String argument) {
         List<Candidate> candidates = new ArrayList<>();
-        completer.completeCandidates(session, new ArgumentCommandLine(argument, argument.length()), candidates);
+        completer.completeCandidates(
+                session, new ArgumentCommandLine(argument, argument.length()), candidates);
         return !candidates.isEmpty();
     }
 
     /**
-     * Returns true if the specified character is a whitespace
-     * parameter. Check to ensure that the character is not
-     * escaped and returns true from
-     * {@link #isDelimiterChar}.
+     * Returns true if the specified character is a whitespace parameter. Check to ensure that the
+     * character is not escaped and returns true from {@link #isDelimiterChar}.
      *
      * @param buffer the complete command buffer.
      * @param pos the index of the character in the buffer.
@@ -357,8 +383,8 @@ public class ArgumentCompleter implements Completer {
     }
 
     /**
-     * The character is a delimiter if it is whitespace, and the
-     * preceding character is not an escape character.
+     * The character is a delimiter if it is whitespace, and the preceding character is not an
+     * escape character.
      *
      * @param buffer the complete command buffer.
      * @param pos the index of the character in the buffer.
@@ -394,9 +420,9 @@ public class ArgumentCompleter implements Completer {
         }
 
         @Override
-        public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
+        public void completeCandidates(
+                Session session, CommandLine commandLine, List<Candidate> candidates) {
             candidates.addAll(this.candidates);
         }
     }
-
 }

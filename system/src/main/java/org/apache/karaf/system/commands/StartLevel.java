@@ -23,18 +23,23 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.system.SystemService;
 
-/**
- * Get/set the system start level.
- */
-@Command(scope = "system", name = "start-level", description = "Gets or sets the system start level.")
+/** Get/set the system start level. */
+@Command(
+        scope = "system",
+        name = "start-level",
+        description = "Gets or sets the system start level.")
 @Service
 public class StartLevel implements Action {
 
-    @Argument(index = 0, name = "level", description = "The new system start level to set", required = false, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "level",
+            description = "The new system start level to set",
+            required = false,
+            multiValued = false)
     Integer level;
 
-    @Reference
-    SystemService systemService;
+    @Reference SystemService systemService;
 
     @Override
     public Object execute() throws Exception {
@@ -45,5 +50,4 @@ public class StartLevel implements Action {
         }
         return null;
     }
-
 }

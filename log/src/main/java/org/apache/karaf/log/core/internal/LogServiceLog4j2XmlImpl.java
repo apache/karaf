@@ -16,21 +16,6 @@
  */
 package org.apache.karaf.log.core.internal;
 
-import org.apache.karaf.log.core.Level;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,6 +26,20 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.apache.karaf.log.core.Level;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
 
@@ -104,8 +103,7 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
                 } else {
                     element.setAttribute(ATTRIBUTE_LEVEL, level);
                 }
-            }
-            else if (!Level.isDefault(level)) {
+            } else if (!Level.isDefault(level)) {
                 Element docE = doc.getDocumentElement();
                 Element docLoggers = (Element) docE.getElementsByTagName(ELEMENT_LOGGERS).item(0);
                 boolean root = ROOT_LOGGER.equals(logger);
@@ -121,7 +119,9 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
             } else {
                 return;
             }
-            try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            try (OutputStream os =
+                    Files.newOutputStream(
+                            path, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
                 TransformerFactory tFactory = TransformerFactory.newInstance();
                 Transformer transformer = tFactory.newTransformer();
                 transformer.transform(new DOMSource(doc), new StreamResult(os));
@@ -131,10 +131,7 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
         }
     }
 
-    /**
-     * Insert the given node at beginning or end of the given node,
-     * indenting it as needed.
-     */
+    /** Insert the given node at beginning or end of the given node, indenting it as needed. */
     static void insertIndented(Element loggers, Element element, boolean atBeginning) {
         NodeList loggerElements = loggers.getElementsByTagName("*");
         if (atBeginning && loggerElements.getLength() > 0) {
@@ -150,9 +147,13 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
                 loggers.appendChild(element);
             }
         } else {
-            Node insertAfter = loggerElements.getLength() > 0 ? loggerElements.item(loggerElements.getLength() - 1) : null;
+            Node insertAfter =
+                    loggerElements.getLength() > 0
+                            ? loggerElements.item(loggerElements.getLength() - 1)
+                            : null;
             if (insertAfter != null) {
-                if (insertAfter.getPreviousSibling() != null && insertAfter.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
+                if (insertAfter.getPreviousSibling() != null
+                        && insertAfter.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
                     String indent = insertAfter.getPreviousSibling().getTextContent();
                     Node node = loggers.getOwnerDocument().createTextNode(indent);
                     if (insertAfter.getNextSibling() != null) {
@@ -168,7 +169,8 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
                     loggers.appendChild(element);
                 }
             } else {
-                if (loggers.getPreviousSibling() != null && loggers.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
+                if (loggers.getPreviousSibling() != null
+                        && loggers.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
                     String indent = loggers.getPreviousSibling().getTextContent();
                     String prev = indent;
                     if (indent.endsWith("\t")) {
@@ -181,7 +183,8 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
                             indent += "\t";
                         }
                     }
-                    if (loggers.getFirstChild() != null && loggers.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
+                    if (loggers.getFirstChild() != null
+                            && loggers.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
                         loggers.removeChild(loggers.getFirstChild());
                     }
                     loggers.appendChild(loggers.getOwnerDocument().createTextNode(indent));
@@ -192,7 +195,6 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
                 }
             }
         }
-
     }
 
     static Document loadConfig(Path path) throws Exception {
@@ -201,7 +203,8 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
         }
     }
 
-    static Document loadConfig(String id, InputStream is) throws ParserConfigurationException, SAXException, IOException {
+    static Document loadConfig(String id, InputStream is)
+            throws ParserConfigurationException, SAXException, IOException {
         final InputSource source = new InputSource(is);
         source.setPublicId(id);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -210,7 +213,8 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
         factory.setExpandEntityReferences(false);
         setFeature(factory, "http://xml.org/sax/features/external-general-entities", false);
         setFeature(factory, "http://xml.org/sax/features/external-parameter-entities", false);
-        setFeature(factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        setFeature(
+                factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         setFeature(factory, "http://apache.org/xml/features/xinclude/fixup-base-uris", true);
         setFeature(factory, "http://apache.org/xml/features/xinclude/fixup-language", true);
         tryCall(() -> factory.setXIncludeAware(true));
@@ -238,7 +242,8 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
         Map<String, Element> loggers = new TreeMap<>();
         Element docE = doc.getDocumentElement();
         if (!ELEMENT_CONFIGURATION.equals(docE.getLocalName())) {
-            throw new IllegalArgumentException("Xml root document should be " + ELEMENT_CONFIGURATION);
+            throw new IllegalArgumentException(
+                    "Xml root document should be " + ELEMENT_CONFIGURATION);
         }
         NodeList children = docE.getElementsByTagName(ELEMENT_LOGGERS);
         if (children.getLength() != 1) {
@@ -261,5 +266,4 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
         }
         return loggers;
     }
-
 }

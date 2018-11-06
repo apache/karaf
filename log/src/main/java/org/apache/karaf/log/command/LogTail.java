@@ -17,7 +17,6 @@
 package org.apache.karaf.log.command;
 
 import java.io.PrintStream;
-
 import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -29,14 +28,15 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-@Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
+@Command(
+        scope = "log",
+        name = "tail",
+        description = "Continuously display log entries. Use ctrl-c to quit this command")
 @Service
 public class LogTail extends DisplayLog {
-    @Reference
-    Session session;
+    @Reference Session session;
 
-    @Reference
-    BundleContext context;
+    @Reference BundleContext context;
 
     @Override
     public Object execute() throws Exception {
@@ -44,13 +44,16 @@ public class LogTail extends DisplayLog {
             entries = 50;
         }
         int minLevel = getMinLevel(level);
-        // Do not use System.out as it may write to the wrong console depending on the thread that calls our log handler
+        // Do not use System.out as it may write to the wrong console depending on the thread that
+        // calls
+        // our log handler
         PrintStream out = session.getConsole();
         display(out, minLevel);
         out.flush();
 
         PaxAppender appender = event -> printEvent(out, event, minLevel);
-        ServiceTracker<LogService, LogService> tracker = new LogServiceTracker(context, LogService.class, null, appender);
+        ServiceTracker<LogService, LogService> tracker =
+                new LogServiceTracker(context, LogService.class, null, appender);
         tracker.open();
         try {
             synchronized (this) {
@@ -65,29 +68,32 @@ public class LogTail extends DisplayLog {
         out.println();
         return null;
     }
-    
+
     private synchronized void stopTail() {
         notifyAll();
     }
 
     /**
-     * Track LogService dynamically so we can react when the log core bundle stops even while we block for the tail
+     * Track LogService dynamically so we can react when the log core bundle stops even while we
+     * block for the tail
      */
     private final class LogServiceTracker extends ServiceTracker<LogService, LogService> {
 
-        private final static String SSHD_LOGGER = "org.apache.sshd";
+        private static final String SSHD_LOGGER = "org.apache.sshd";
 
         private final PaxAppender appender;
 
         private String sshdLoggerLevel;
-    
-        private LogServiceTracker(BundleContext context, Class<LogService> clazz,
-                                  ServiceTrackerCustomizer<LogService, LogService> customizer,
-                                  PaxAppender appender) {
+
+        private LogServiceTracker(
+                BundleContext context,
+                Class<LogService> clazz,
+                ServiceTrackerCustomizer<LogService, LogService> customizer,
+                PaxAppender appender) {
             super(context, clazz, customizer);
             this.appender = appender;
         }
-    
+
         @Override
         public LogService addingService(ServiceReference<LogService> reference) {
             LogService service = super.addingService(reference);
@@ -96,7 +102,7 @@ public class LogTail extends DisplayLog {
             service.addAppender(appender);
             return service;
         }
-    
+
         @Override
         public void removedService(ServiceReference<LogService> reference, LogService service) {
             if (sshdLoggerLevel != null) {
@@ -106,5 +112,4 @@ public class LogTail extends DisplayLog {
             stopTail();
         }
     }
-
 }

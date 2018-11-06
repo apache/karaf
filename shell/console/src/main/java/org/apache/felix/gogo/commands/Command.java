@@ -18,10 +18,10 @@
  */
 package org.apache.felix.gogo.commands;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
 
 /**
  * Used to denote a class represents a command which is executable within a shell/scope or as a

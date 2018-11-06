@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Argument;
@@ -48,7 +47,8 @@ import org.apache.karaf.shell.console.NameScoping;
 @Deprecated
 public class DefaultActionPreparator implements ActionPreparator {
 
-    public boolean prepare(Action action, CommandSession session, List<Object> params) throws Exception {
+    public boolean prepare(Action action, CommandSession session, List<Object> params)
+            throws Exception {
         ActionMetaData actionMetaData = new ActionMetaDataFactory().create(action.getClass());
         Map<Option, Field> options = actionMetaData.getOptions();
         Map<Argument, Field> arguments = actionMetaData.getArguments();
@@ -60,19 +60,28 @@ public class DefaultActionPreparator implements ActionPreparator {
             return true;
         }
 
-        String commandErrorSt = (command2 != null) ? COLOR_RED
-                + "Error executing command " + command2.scope() + ":" 
-                + INTENSITY_BOLD + command2.name() + INTENSITY_NORMAL
-                + COLOR_DEFAULT + ": " : "";
+        String commandErrorSt =
+                (command2 != null)
+                        ? COLOR_RED
+                                + "Error executing command "
+                                + command2.scope()
+                                + ":"
+                                + INTENSITY_BOLD
+                                + command2.name()
+                                + INTENSITY_NORMAL
+                                + COLOR_DEFAULT
+                                + ": "
+                        : "";
         for (Object param : params) {
             if (HelpOption.HELP.name().equals(param)) {
                 int termWidth = getWidth(session);
-                boolean globalScope = NameScoping.isGlobalScope(session, actionMetaData.getCommand().scope());
+                boolean globalScope =
+                        NameScoping.isGlobalScope(session, actionMetaData.getCommand().scope());
                 actionMetaData.printUsage(action, System.out, globalScope, termWidth);
                 return false;
             }
         }
-        
+
         // Populate
         Map<Option, Object> optionValues = new HashMap<Option, Object>();
         Map<Argument, Object> argumentValues = new HashMap<Argument, Object>();
@@ -99,23 +108,32 @@ public class DefaultActionPreparator implements ActionPreparator {
                     }
                 }
                 if (option == null) {
-                    throw new CommandException(commandErrorSt 
-                                + "undefined option " + INTENSITY_BOLD + param + INTENSITY_NORMAL + "\n"
-                                + "Try <command> --help' for more information.",
-                                        "Undefined option: " + param);
+                    throw new CommandException(
+                            commandErrorSt
+                                    + "undefined option "
+                                    + INTENSITY_BOLD
+                                    + param
+                                    + INTENSITY_NORMAL
+                                    + "\n"
+                                    + "Try <command> --help' for more information.",
+                            "Undefined option: " + param);
                 }
                 Field field = options.get(option);
-                if (value == null && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
+                if (value == null
+                        && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
                     value = Boolean.TRUE;
                 }
                 if (value == null && it.hasNext()) {
                     value = it.next();
                 }
                 if (value == null) {
-                        throw new CommandException(commandErrorSt
-                                + "missing value for option " + INTENSITY_BOLD + param + INTENSITY_NORMAL,
-                                "Missing value for option: " + param
-                        );
+                    throw new CommandException(
+                            commandErrorSt
+                                    + "missing value for option "
+                                    + INTENSITY_BOLD
+                                    + param
+                                    + INTENSITY_NORMAL,
+                            "Missing value for option: " + param);
                 }
                 if (option.multiValued()) {
                     @SuppressWarnings("unchecked")
@@ -131,10 +149,9 @@ public class DefaultActionPreparator implements ActionPreparator {
             } else {
                 processOptions = false;
                 if (argIndex >= orderedArguments.size()) {
-                        throw new CommandException(commandErrorSt +
-                                "too many arguments specified",
-                                "Too many arguments specified"
-                        );
+                    throw new CommandException(
+                            commandErrorSt + "too many arguments specified",
+                            "Too many arguments specified");
                 }
                 Argument argument = orderedArguments.get(argIndex);
                 if (!argument.multiValued()) {
@@ -156,21 +173,29 @@ public class DefaultActionPreparator implements ActionPreparator {
         // Check required arguments / options
         for (Option option : options.keySet()) {
             if (option.required() && optionValues.get(option) == null) {
-                    throw new CommandException(commandErrorSt +
-                            "option " + INTENSITY_BOLD + option.name() + INTENSITY_NORMAL + " is required",
-                            "Option " + option.name() + " is required"
-                    );
+                throw new CommandException(
+                        commandErrorSt
+                                + "option "
+                                + INTENSITY_BOLD
+                                + option.name()
+                                + INTENSITY_NORMAL
+                                + " is required",
+                        "Option " + option.name() + " is required");
             }
         }
         for (Argument argument : orderedArguments) {
             if (argument.required() && argumentValues.get(argument) == null) {
-                    throw new CommandException(commandErrorSt +
-                            "argument " + INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL + " is required",
-                            "Argument " + argument.name() + " is required"
-                    );
+                throw new CommandException(
+                        commandErrorSt
+                                + "argument "
+                                + INTENSITY_BOLD
+                                + argument.name()
+                                + INTENSITY_NORMAL
+                                + " is required",
+                        "Argument " + argument.name() + " is required");
             }
         }
-            
+
         // Convert and inject values
         for (Map.Entry<Option, Object> entry : optionValues.entrySet()) {
             Field field = options.get(entry.getKey());
@@ -178,13 +203,23 @@ public class DefaultActionPreparator implements ActionPreparator {
             try {
                 value = convert(action, session, entry.getValue(), field.getGenericType());
             } catch (Exception e) {
-                    throw new CommandException(commandErrorSt +
-                            "unable to convert option " + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL + " with value '"
-                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            "Unable to convert option " + entry.getKey().name() + " with value '"
-                                    + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            e
-                    );
+                throw new CommandException(
+                        commandErrorSt
+                                + "unable to convert option "
+                                + INTENSITY_BOLD
+                                + entry.getKey().name()
+                                + INTENSITY_NORMAL
+                                + " with value '"
+                                + entry.getValue()
+                                + "' to type "
+                                + new GenericType(field.getGenericType()).toString(),
+                        "Unable to convert option "
+                                + entry.getKey().name()
+                                + " with value '"
+                                + entry.getValue()
+                                + "' to type "
+                                + new GenericType(field.getGenericType()).toString(),
+                        e);
             }
             field.setAccessible(true);
             field.set(action, value);
@@ -195,13 +230,23 @@ public class DefaultActionPreparator implements ActionPreparator {
             try {
                 value = convert(action, session, entry.getValue(), field.getGenericType());
             } catch (Exception e) {
-                    throw new CommandException(commandErrorSt +
-                            "unable to convert argument " + INTENSITY_BOLD + entry.getKey().name() + INTENSITY_NORMAL + " with value '"
-                            + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            "Unable to convert argument " + entry.getKey().name() + " with value '"
-                                    + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
-                            e
-                    );
+                throw new CommandException(
+                        commandErrorSt
+                                + "unable to convert argument "
+                                + INTENSITY_BOLD
+                                + entry.getKey().name()
+                                + INTENSITY_NORMAL
+                                + " with value '"
+                                + entry.getValue()
+                                + "' to type "
+                                + new GenericType(field.getGenericType()).toString(),
+                        "Unable to convert argument "
+                                + entry.getKey().name()
+                                + " with value '"
+                                + entry.getValue()
+                                + "' to type "
+                                + new GenericType(field.getGenericType()).toString(),
+                        e);
             }
             field.setAccessible(true);
             field.set(action, value);
@@ -209,7 +254,8 @@ public class DefaultActionPreparator implements ActionPreparator {
         return true;
     }
 
-    protected Object convert(Action action, CommandSession session, Object value, Type toType) throws Exception {
+    protected Object convert(Action action, CommandSession session, Object value, Type toType)
+            throws Exception {
         if (toType == String.class) {
             return value != null ? value.toString() : null;
         }
@@ -218,6 +264,6 @@ public class DefaultActionPreparator implements ActionPreparator {
 
     private int getWidth(CommandSession session) {
         Object cols = session.get("COLUMNS");
-        return  (cols != null && cols instanceof Integer) ? (Integer)cols : 80;
+        return (cols != null && cols instanceof Integer) ? (Integer) cols : 80;
     }
 }

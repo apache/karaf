@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.deployer.features;
 
+import static org.apache.karaf.features.FeaturesService.ROOT_REGION;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,14 +36,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.features.Feature;
@@ -52,12 +49,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.apache.karaf.features.FeaturesService.ROOT_REGION;
-
-/**
- * A deployment listener able to hot deploy a feature descriptor
- */
+/** A deployment listener able to hot deploy a feature descriptor */
 public class FeatureDeploymentListener implements ArtifactUrlTransformer, BundleListener {
 
     public static final String FEATURE_PATH = "org.apache.karaf.shell.features";
@@ -90,9 +85,10 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         loadProperties();
         // Scan bundles
         for (Bundle bundle : bundleContext.getBundles()) {
-            if (bundle.getState() == Bundle.RESOLVED || bundle.getState() == Bundle.STARTING
+            if (bundle.getState() == Bundle.RESOLVED
+                    || bundle.getState() == Bundle.STARTING
                     || bundle.getState() == Bundle.ACTIVE)
-            bundleChanged(new BundleEvent(BundleEvent.RESOLVED, bundle));
+                bundleChanged(new BundleEvent(BundleEvent.RESOLVED, bundle));
         }
     }
 
@@ -100,12 +96,12 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         bundleContext.removeBundleListener(this);
     }
 
-    private boolean isKnownFeaturesURI(String uri){
-    	if(uri == null){
-    		return false;
-    	}
-    	for (String ns : FeaturesNamespaces.SUPPORTED_URIS) {
-            if (ns.equalsIgnoreCase(uri)){
+    private boolean isKnownFeaturesURI(String uri) {
+        if (uri == null) {
+            return false;
+        }
+        for (String ns : FeaturesNamespaces.SUPPORTED_URIS) {
+            if (ns.equalsIgnoreCase(uri)) {
                 return true;
             }
         }
@@ -136,7 +132,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     private File getPropertiesFile() {
         try {
             return bundleContext.getDataFile("FeatureDeploymentListener.cfg");
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.debug("Unable to get FeatureDeploymentListener.cfg", e);
             return null;
         }
@@ -147,13 +143,13 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             if (artifact.isFile() && artifact.getName().endsWith(".xml")) {
                 QName qname = getRootElementName(artifact);
                 String name = qname.getLocalPart();
-                String uri  = qname.getNamespaceURI();
-                if ("features".equals(name) ) {
-                	if(isKnownFeaturesURI(uri)){
+                String uri = qname.getNamespaceURI();
+                if ("features".equals(name)) {
+                    if (isKnownFeaturesURI(uri)) {
                         return true;
-                	} else {
-                		logger.error("unknown features uri", new Exception("" + uri));
-                	}
+                    } else {
+                        logger.error("unknown features uri", new Exception("" + uri));
+                    }
                 }
             }
         } catch (Exception e) {
@@ -212,15 +208,25 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             List<URI> repsToAdd = new ArrayList<>();
             List<String> reqsToAdd = new ArrayList<>();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
-                Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
+                Enumeration featuresUrlEnumeration =
+                        bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                 while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                     URL url = (URL) featuresUrlEnumeration.nextElement();
                     URI uri = url.toURI();
                     repsToAdd.add(uri);
                     Repository rep = featuresService.createRepository(uri);
                     Stream.of(rep.getFeatures())
-                            .filter(f -> f.getInstall() == null || Feature.DEFAULT_INSTALL_MODE.equals(f.getInstall()))
-                            .map(f -> "feature:" + f.getName() + "/" + new VersionRange(f.getVersion(), true))
+                            .filter(
+                                    f ->
+                                            f.getInstall() == null
+                                                    || Feature.DEFAULT_INSTALL_MODE.equals(
+                                                            f.getInstall()))
+                            .map(
+                                    f ->
+                                            "feature:"
+                                                    + f.getName()
+                                                    + "/"
+                                                    + new VersionRange(f.getVersion(), true))
                             .forEach(reqsToAdd::add);
                 }
                 if (!repsToAdd.isEmpty()) {
@@ -237,9 +243,10 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             saveProperties();
 
             // Call features service
-            List<Repository> requiredRepos = Arrays.asList(featuresService.listRequiredRepositories());
-            Set<URI> requiredReposUris = requiredRepos.stream()
-                    .map(Repository::getURI).collect(Collectors.toSet());
+            List<Repository> requiredRepos =
+                    Arrays.asList(featuresService.listRequiredRepositories());
+            Set<URI> requiredReposUris =
+                    requiredRepos.stream().map(Repository::getURI).collect(Collectors.toSet());
             requiredReposUris.removeAll(repsToRemove);
             requiredReposUris.addAll(repsToAdd);
 
@@ -248,10 +255,18 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             requirements.get(ROOT_REGION).addAll(reqsToAdd);
 
             if (!reqsToRemove.isEmpty() || !reqsToAdd.isEmpty()) {
-                featuresService.updateReposAndRequirements(requiredReposUris, requirements, EnumSet.noneOf(FeaturesService.Option.class));
+                featuresService.updateReposAndRequirements(
+                        requiredReposUris,
+                        requirements,
+                        EnumSet.noneOf(FeaturesService.Option.class));
             }
         } catch (Exception e) {
-            logger.error("Unable to update deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
+            logger.error(
+                    "Unable to update deployed features for bundle: "
+                            + bundle.getSymbolicName()
+                            + " - "
+                            + bundle.getVersion(),
+                    e);
         }
     }
 
@@ -266,5 +281,4 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             return sr.getName();
         }
     }
-
 }

@@ -17,9 +17,7 @@
 package org.apache.karaf.jndi.internal.osgi;
 
 import java.util.Hashtable;
-
 import javax.naming.spi.InitialContextFactory;
-
 import org.apache.aries.proxy.ProxyManager;
 import org.apache.karaf.jndi.JndiService;
 import org.apache.karaf.jndi.KarafInitialContextFactory;
@@ -32,8 +30,7 @@ import org.apache.karaf.util.tracker.annotation.Services;
 
 @Services(
         requires = @RequireService(ProxyManager.class),
-        provides = @ProvideService(JndiService.class)
-)
+        provides = @ProvideService(JndiService.class))
 public class Activator extends BaseActivator {
 
     @Override

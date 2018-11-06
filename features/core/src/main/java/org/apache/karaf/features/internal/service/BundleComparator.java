@@ -17,7 +17,6 @@
 package org.apache.karaf.features.internal.service;
 
 import java.util.Comparator;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -41,5 +40,4 @@ public class BundleComparator implements Comparator<Bundle> {
         }
         return c;
     }
-
 }

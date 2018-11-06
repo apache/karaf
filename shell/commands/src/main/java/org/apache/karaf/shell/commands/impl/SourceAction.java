@@ -28,36 +28,42 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * TODO
- */
+/** TODO */
 @Command(scope = "shell", name = "source", description = "Run a script")
 @Service
 public class SourceAction implements Action {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Argument(index = 0, name = "script", description = "A URI pointing to the script", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "script",
+            description = "A URI pointing to the script",
+            required = true,
+            multiValued = false)
     @Completion(FileOrUriCompleter.class)
     private String script;
 
-    @Argument(index = 1, name = "args", description = "Arguments for the script", required = false, multiValued = true)
+    @Argument(
+            index = 1,
+            name = "args",
+            description = "Arguments for the script",
+            required = false,
+            multiValued = true)
     private List<Object> args;
 
-    @Reference
-    Session session;
+    @Reference Session session;
 
     @Override
     public Object execute() throws Exception {
@@ -68,8 +74,7 @@ public class SourceAction implements Action {
                 URL url = new URI(script).toURL();
                 log.info("Printing URL: " + url);
                 reader = new BufferedReader(new InputStreamReader(url.openStream()));
-            }
-            catch (MalformedURLException | IllegalArgumentException ignore) {
+            } catch (MalformedURLException | IllegalArgumentException ignore) {
                 // fallback to a file
                 Path file = session.currentDir().resolve(script);
                 log.info("Printing file: " + file);
@@ -84,13 +89,13 @@ public class SourceAction implements Action {
             }
 
             for (int i = 0; args != null && i < args.size(); i++) {
-                session.put( Integer.toString(i+1), args.get(i) );
+                session.put(Integer.toString(i + 1), args.get(i));
             }
 
             session.execute(w.toString());
         } finally {
             for (int i = 0; args != null && i < args.size(); i++) {
-                session.put( Integer.toString(i+1), null );
+                session.put(Integer.toString(i + 1), null);
             }
             session.put("0", arg0);
             if (reader != null) {

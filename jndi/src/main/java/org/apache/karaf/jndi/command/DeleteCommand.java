@@ -29,17 +29,20 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class DeleteCommand implements Action {
 
-    @Argument(index = 0, name = "context", description = "The JNDI sub-context name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "context",
+            description = "The JNDI sub-context name",
+            required = true,
+            multiValued = false)
     @Completion(ContextsCompleter.class)
     String context;
 
-    @Reference
-    JndiService jndiService;
+    @Reference JndiService jndiService;
 
     @Override
     public Object execute() throws Exception {
         jndiService.delete(context);
         return null;
     }
-
 }

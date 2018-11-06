@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.jaas.modules.properties;
 
-import javax.security.auth.callback.*;
 import java.io.IOException;
+import javax.security.auth.callback.*;
 
 public class NullHandler implements CallbackHandler {
 
@@ -33,5 +33,4 @@ public class NullHandler implements CallbackHandler {
             }
         }
     }
-
 }

@@ -16,12 +16,11 @@
  */
 package org.apache.karaf.maven.core;
 
-import java.net.MalformedURLException;
-
-import org.junit.Test;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.net.MalformedURLException;
+import org.junit.Test;
 
 public class MavenRepositoryURLTest {
 
@@ -30,27 +29,37 @@ public class MavenRepositoryURLTest {
         String uri1, uri2;
         MavenRepositoryURL mavenURI;
 
-        uri1 = "http://localhost/@id=id1@snapshots@update=interval:42@_from=" + MavenRepositoryURL.FROM.SETTINGS;
+        uri1 =
+                "http://localhost/@id=id1@snapshots@update=interval:42@_from="
+                        + MavenRepositoryURL.FROM.SETTINGS;
         uri2 = "http://localhost/@id=id1@snapshots@update=interval:42";
         mavenURI = new MavenRepositoryURL(uri1);
         assertThat(mavenURI.asRepositorySpec(), equalTo(uri2));
 
-        uri1 = "http://localhost/@id=id1@snapshots@checksum=fail@_from=" + MavenRepositoryURL.FROM.SETTINGS;
+        uri1 =
+                "http://localhost/@id=id1@snapshots@checksum=fail@_from="
+                        + MavenRepositoryURL.FROM.SETTINGS;
         uri2 = "http://localhost/@id=id1@snapshots@checksum=fail";
         mavenURI = new MavenRepositoryURL(uri1);
         assertThat(mavenURI.asRepositorySpec(), equalTo(uri2));
 
-        uri1 = "http://localhost/@id=id1@snapshots@noreleases@update=interval:42@_from=" + MavenRepositoryURL.FROM.SETTINGS;
+        uri1 =
+                "http://localhost/@id=id1@snapshots@noreleases@update=interval:42@_from="
+                        + MavenRepositoryURL.FROM.SETTINGS;
         uri2 = "http://localhost/@id=id1@noreleases@snapshots@snapshotsUpdate=interval:42";
         mavenURI = new MavenRepositoryURL(uri1);
         assertThat(mavenURI.asRepositorySpec(), equalTo(uri2));
 
-        uri1 = "http://localhost/@id=id1@update=interval:42@_from=" + MavenRepositoryURL.FROM.SETTINGS;
+        uri1 =
+                "http://localhost/@id=id1@update=interval:42@_from="
+                        + MavenRepositoryURL.FROM.SETTINGS;
         uri2 = "http://localhost/@id=id1@releasesUpdate=interval:42";
         mavenURI = new MavenRepositoryURL(uri1);
         assertThat(mavenURI.asRepositorySpec(), equalTo(uri2));
 
-        uri1 = "http://localhost/@id=id1@snapshots@noreleases@checksum=fail@_from=" + MavenRepositoryURL.FROM.SETTINGS;
+        uri1 =
+                "http://localhost/@id=id1@snapshots@noreleases@checksum=fail@_from="
+                        + MavenRepositoryURL.FROM.SETTINGS;
         uri2 = "http://localhost/@id=id1@noreleases@snapshots@snapshotsChecksum=fail";
         mavenURI = new MavenRepositoryURL(uri1);
         assertThat(mavenURI.asRepositorySpec(), equalTo(uri2));
@@ -60,5 +69,4 @@ public class MavenRepositoryURLTest {
         mavenURI = new MavenRepositoryURL(uri1);
         assertThat(mavenURI.asRepositorySpec(), equalTo(uri2));
     }
-
 }

@@ -46,7 +46,7 @@ public class ArgumentCommandLine implements CommandLine {
 
     @Override
     public String[] getArguments() {
-        return new String[] { argument };
+        return new String[] {argument};
     }
 
     @Override

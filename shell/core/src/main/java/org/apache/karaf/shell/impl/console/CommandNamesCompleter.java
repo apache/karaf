@@ -22,13 +22,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-public class CommandNamesCompleter extends org.apache.karaf.shell.support.completers.CommandNamesCompleter {
+public class CommandNamesCompleter
+        extends org.apache.karaf.shell.support.completers.CommandNamesCompleter {
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -43,5 +43,4 @@ public class CommandNamesCompleter extends org.apache.karaf.shell.support.comple
         Collections.sort(candidates);
         return res;
     }
-
 }

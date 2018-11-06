@@ -28,7 +28,7 @@ import org.apache.felix.utils.properties.TypedProperties;
 
 public final class FileLockUtils {
 
-    private FileLockUtils() { }
+    private FileLockUtils() {}
 
     public interface Runnable<T> {
         void run(T file) throws IOException;
@@ -38,7 +38,8 @@ public final class FileLockUtils {
         U call(T file) throws IOException;
     }
 
-    public static void execute(File file, Runnable<? super RandomAccessFile> callback) throws IOException {
+    public static void execute(File file, Runnable<? super RandomAccessFile> callback)
+            throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
             FileLock lock = raf.getChannel().lock();
             try {
@@ -49,7 +50,8 @@ public final class FileLockUtils {
         }
     }
 
-    public static <T> T execute(File file, Callable<? super RandomAccessFile, T> callback) throws IOException {
+    public static <T> T execute(File file, Callable<? super RandomAccessFile, T> callback)
+            throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
             FileLock lock = raf.getChannel().lock();
             try {
@@ -60,25 +62,33 @@ public final class FileLockUtils {
         }
     }
 
-    public static void execute(File file, Runnable<? super TypedProperties> callback, boolean writeToFile) throws IOException {
-        execute(file, raf -> {
-            TypedProperties props = load(raf);
-            callback.run(props);
-            if (writeToFile) {
-                save(props, raf);
-            }
-        });
+    public static void execute(
+            File file, Runnable<? super TypedProperties> callback, boolean writeToFile)
+            throws IOException {
+        execute(
+                file,
+                raf -> {
+                    TypedProperties props = load(raf);
+                    callback.run(props);
+                    if (writeToFile) {
+                        save(props, raf);
+                    }
+                });
     }
 
-    public static <T> T execute(File file, Callable<? super TypedProperties, T> callback, boolean writeToFile) throws IOException {
-        return execute(file, raf -> {
-            TypedProperties props = load(raf);
-            T result = callback.call(props);
-            if (writeToFile) {
-                save(props, raf);
-            }
-            return result;
-        });
+    public static <T> T execute(
+            File file, Callable<? super TypedProperties, T> callback, boolean writeToFile)
+            throws IOException {
+        return execute(
+                file,
+                raf -> {
+                    TypedProperties props = load(raf);
+                    T result = callback.call(props);
+                    if (writeToFile) {
+                        save(props, raf);
+                    }
+                    return result;
+                });
     }
 
     private static TypedProperties load(RandomAccessFile raf) throws IOException {
@@ -95,5 +105,4 @@ public final class FileLockUtils {
         raf.setLength(0);
         raf.write(baos.toByteArray());
     }
-
 }

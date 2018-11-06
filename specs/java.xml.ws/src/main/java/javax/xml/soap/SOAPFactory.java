@@ -16,28 +16,30 @@
  */
 package javax.xml.soap;
 
-import org.w3c.dom.Element;
-
 import javax.xml.namespace.QName;
+import org.w3c.dom.Element;
 
 public abstract class SOAPFactory {
 
-    private static final String DEFAULT_SOAP_FACTORY = "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPFactory1_1Impl";
+    private static final String DEFAULT_SOAP_FACTORY =
+            "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPFactory1_1Impl";
 
     public SOAPElement createElement(Element domElement) throws SOAPException {
-        throw new UnsupportedOperationException("createElement(org.w3c.dom.Element) must be overridden by all subclasses of SOAPFactory.");
+        throw new UnsupportedOperationException(
+                "createElement(org.w3c.dom.Element) must be overridden by all subclasses of SOAPFactory.");
     }
 
     public abstract SOAPElement createElement(Name name) throws SOAPException;
 
     public SOAPElement createElement(QName qname) throws SOAPException {
-        throw new UnsupportedOperationException("createElement(QName) must be overridden by all subclasses of SOAPFactory.");
+        throw new UnsupportedOperationException(
+                "createElement(QName) must be overridden by all subclasses of SOAPFactory.");
     }
 
     public abstract SOAPElement createElement(String localName) throws SOAPException;
 
-
-    public abstract SOAPElement createElement(String localName, String prefix, String uri) throws SOAPException;
+    public abstract SOAPElement createElement(String localName, String prefix, String uri)
+            throws SOAPException;
 
     public abstract Detail createDetail() throws SOAPException;
 
@@ -45,13 +47,15 @@ public abstract class SOAPFactory {
 
     public abstract SOAPFault createFault() throws SOAPException;
 
-    public abstract Name createName(String localName, String prefix, String uri) throws SOAPException;
+    public abstract Name createName(String localName, String prefix, String uri)
+            throws SOAPException;
 
     public abstract Name createName(String localName) throws SOAPException;
 
     public static SOAPFactory newInstance() throws SOAPException {
         try {
-            SOAPFactory factory = $FactoryFinder.find(SOAPFactory.class, DEFAULT_SOAP_FACTORY, false);
+            SOAPFactory factory =
+                    $FactoryFinder.find(SOAPFactory.class, DEFAULT_SOAP_FACTORY, false);
             if (factory != null) {
                 return factory;
             }
@@ -59,7 +63,6 @@ public abstract class SOAPFactory {
         } catch (Exception ex) {
             throw new SOAPException("Unable to create SOAP Factory: " + ex.getMessage(), ex);
         }
-
     }
 
     public static SOAPFactory newInstance(String protocol) throws SOAPException {

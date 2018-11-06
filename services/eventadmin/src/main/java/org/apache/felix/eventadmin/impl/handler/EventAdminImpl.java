@@ -20,9 +20,7 @@ package org.apache.felix.eventadmin.impl.handler;
 
 import java.security.AccessController;
 import java.util.HashMap;
-
 import javax.security.auth.Subject;
-
 import org.apache.felix.eventadmin.impl.tasks.AsyncDeliverTasks;
 import org.apache.felix.eventadmin.impl.tasks.DefaultThreadPool;
 import org.apache.felix.eventadmin.impl.tasks.SyncDeliverTasks;
@@ -33,20 +31,18 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 
 /**
- * This is the actual implementation of the OSGi R4 Event Admin Service (see the
- * Compendium 113 for details). The implementation uses a <tt>HandlerTasks</tt>
- * in order to determine applicable <tt>EventHandler</tt> for a specific event and
- * subsequently dispatches the event to the handlers via <tt>DeliverTasks</tt>.
- * To do this, it uses two different <tt>DeliverTasks</tt> one for asynchronous and
- * one for synchronous event delivery depending on whether its <tt>post()</tt> or
- * its <tt>send()</tt> method is called. Note that the actual work is done in the
- * implementations of the <tt>DeliverTasks</tt>. Additionally, a stop method is
- * provided that prevents subsequent events to be delivered.
+ * This is the actual implementation of the OSGi R4 Event Admin Service (see the Compendium 113 for
+ * details). The implementation uses a <tt>HandlerTasks</tt> in order to determine applicable
+ * <tt>EventHandler</tt> for a specific event and subsequently dispatches the event to the handlers
+ * via <tt>DeliverTasks</tt>. To do this, it uses two different <tt>DeliverTasks</tt> one for
+ * asynchronous and one for synchronous event delivery depending on whether its <tt>post()</tt> or
+ * its <tt>send()</tt> method is called. Note that the actual work is done in the implementations of
+ * the <tt>DeliverTasks</tt>. Additionally, a stop method is provided that prevents subsequent
+ * events to be delivered.
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class EventAdminImpl implements EventAdmin
-{
+public class EventAdminImpl implements EventAdmin {
     /** The tracker for the event handlers. */
     private volatile EventHandlerTracker tracker;
 
@@ -84,8 +80,7 @@ public class EventAdminImpl implements EventAdmin
             final boolean requireTopic,
             final String[] ignoreTopics,
             final boolean addTimestamp,
-            final boolean addSubject)
-    {
+            final boolean addSubject) {
         checkNull(syncPool, "syncPool");
         checkNull(asyncPool, "asyncPool");
 
@@ -107,7 +102,7 @@ public class EventAdminImpl implements EventAdmin
      */
     private EventHandlerTracker getTracker() {
         final EventHandlerTracker localTracker = tracker;
-        if ( localTracker == null ) {
+        if (localTracker == null) {
             throw new IllegalStateException("The EventAdmin is stopped");
         }
         return localTracker;
@@ -119,15 +114,11 @@ public class EventAdminImpl implements EventAdmin
      * @param event The event.
      * @return True if the topic is delivered, false else.
      */
-    private boolean checkTopic( final Event event )
-    {
+    private boolean checkTopic(final Event event) {
         boolean result = true;
-        if ( this.m_ignoreTopics != null )
-        {
-            for(final Matchers.Matcher m : this.m_ignoreTopics)
-            {
-                if ( m.match(event.getTopic()) )
-                {
+        if (this.m_ignoreTopics != null) {
+            for (final Matchers.Matcher m : this.m_ignoreTopics) {
+                if (m.match(event.getTopic())) {
                     result = false;
                     break;
                 }
@@ -170,13 +161,10 @@ public class EventAdminImpl implements EventAdmin
      *
      * @param event The event to be posted by this service.
      * @throws IllegalStateException In case we are stopped.
-     *
      * @see org.osgi.service.event.EventAdmin#postEvent(org.osgi.service.event.Event)
      */
-    public void postEvent(final Event event)
-    {
-        if ( checkTopic( event ) )
-        {
+    public void postEvent(final Event event) {
+        if (checkTopic(event)) {
             m_postManager.execute(this.getTracker().getHandlers(event), prepareEvent(event));
         }
     }
@@ -186,22 +174,16 @@ public class EventAdminImpl implements EventAdmin
      *
      * @param event The event to be send by this service.
      * @throws IllegalStateException In case we are stopped.
-     *
      * @see org.osgi.service.event.EventAdmin#sendEvent(org.osgi.service.event.Event)
      */
-    public void sendEvent(final Event event)
-    {
-        if ( checkTopic( event ) )
-        {
+    public void sendEvent(final Event event) {
+        if (checkTopic(event)) {
             m_sendManager.execute(this.getTracker().getHandlers(event), prepareEvent(event), false);
         }
     }
 
-    /**
-     * This method can be used to stop the delivery of events.
-     */
-    public void stop()
-    {
+    /** This method can be used to stop the delivery of events. */
+    public void stop() {
         this.tracker.close();
         this.tracker = null;
     }
@@ -216,13 +198,13 @@ public class EventAdminImpl implements EventAdmin
      * @param addTimestamp True to add timestamp to the event, false else.
      * @param addSubject True to add subject to the event, false else.
      */
-    public void update(final int timeout,
-                       final String[] ignoreTimeout,
-                       final boolean requireTopic,
-                       final String[] ignoreTopics,
-                       final boolean addTimestamp,
-                       final boolean addSubject)
-    {
+    public void update(
+            final int timeout,
+            final String[] ignoreTimeout,
+            final boolean requireTopic,
+            final String[] ignoreTopics,
+            final boolean addTimestamp,
+            final boolean addSubject) {
         this.addTimestamp = addTimestamp;
         this.addSubject = addSubject;
         this.tracker.close();
@@ -233,18 +215,15 @@ public class EventAdminImpl implements EventAdmin
     }
 
     /**
-     * This is a utility method that will throw a <code>NullPointerException</code>
-     * in case that the given object is null. The message will be of the form
-     * "${name} + may not be null".
+     * This is a utility method that will throw a <code>NullPointerException</code> in case that the
+     * given object is null. The message will be of the form "${name} + may not be null".
      *
      * @param object The object to check.
      * @param name The object name (in the event).
      * @throws NullPointerException If the object is null.
      */
-    private void checkNull(final Object object, final String name)
-    {
-        if (null == object)
-        {
+    private void checkNull(final Object object, final String name) {
+        if (null == object) {
             throw new NullPointerException(name + " may not be null");
         }
     }

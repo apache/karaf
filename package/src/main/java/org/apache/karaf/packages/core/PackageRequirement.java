@@ -27,7 +27,14 @@ public class PackageRequirement {
     private String minVersion;
     private String maxVersion;
 
-    public PackageRequirement(String filter, boolean optional, Bundle bundle, boolean resolveable, String packageName, String minVersion, String maxVersion) {
+    public PackageRequirement(
+            String filter,
+            boolean optional,
+            Bundle bundle,
+            boolean resolveable,
+            String packageName,
+            String minVersion,
+            String maxVersion) {
         super();
         this.filter = filter;
         this.optional = optional;
@@ -37,7 +44,7 @@ public class PackageRequirement {
         this.minVersion = minVersion;
         this.maxVersion = maxVersion;
     }
-    
+
     public Bundle getBundle() {
         return bundle;
     }
@@ -45,6 +52,7 @@ public class PackageRequirement {
     public String getFilter() {
         return filter;
     }
+
     public boolean isOptional() {
         return optional;
     }
@@ -60,11 +68,11 @@ public class PackageRequirement {
     public String getMinVersion() {
         return minVersion;
     }
-    
+
     public String getMaxVersion() {
         return maxVersion;
     }
-    
+
     public String getVersionRange() {
         if (minVersion == null && maxVersion == null) {
             return "";
@@ -75,9 +83,8 @@ public class PackageRequirement {
     private String getString(String version) {
         return version == null ? "" : version;
     }
-    
 
     public String toString() {
-        return String.format("%s;version=\"[%s,%s)\"", packageName, minVersion, maxVersion); 
+        return String.format("%s;version=\"[%s,%s)\"", packageName, minVersion, maxVersion);
     }
 }

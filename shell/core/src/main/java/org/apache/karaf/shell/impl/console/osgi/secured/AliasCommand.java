@@ -20,10 +20,10 @@
 package org.apache.karaf.shell.impl.console.osgi.secured;
 
 public class AliasCommand {
-    
+
     private String scope;
     private String name;
-    
+
     public AliasCommand(String scope, String name) {
         this.setScope(scope);
         this.setName(name);
@@ -44,5 +44,4 @@ public class AliasCommand {
     public void setName(String name) {
         this.name = name;
     }
-
 }

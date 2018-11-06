@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.shell.security.impl;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
 import org.apache.felix.service.command.CommandProcessor;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -30,23 +33,19 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-
 @Deprecated
 public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
     static final String PROXY_COMMAND_ACL_PID_PREFIX = "org.apache.karaf.command.acl.";
     static final String PROXY_SERVICE_ACL_PID_PREFIX = "org.apache.karaf.service.acl.command.";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecuredCommandConfigTransformer.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(SecuredCommandConfigTransformer.class);
     private static final String CONFIGURATION_FILTER =
             "(" + Constants.SERVICE_PID + "=" + PROXY_COMMAND_ACL_PID_PREFIX + "*)";
     private static final String ACL_SCOPE_BUNDLE_MAP = "org.apache.karaf.command.acl.scope_bundle";
 
     private ConfigurationAdmin configAdmin;
-    
 
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
@@ -54,8 +53,7 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
     public void init() throws Exception {
         Configuration[] configs = configAdmin.listConfigurations(CONFIGURATION_FILTER);
-        if (configs == null)
-            return;
+        if (configs == null) return;
 
         for (Configuration config : configs) {
             generateServiceGuardConfig(config);
@@ -97,9 +95,17 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
             Dictionary<String, Object> map;
             if (!configMaps.containsKey(pid)) {
                 map = new Hashtable<>();
-                map.put("service.guard", "(&(" +
-                        CommandProcessor.COMMAND_SCOPE + "=" + scopeName + ")(" +
-                        CommandProcessor.COMMAND_FUNCTION + "=" + bareCommand + "))");
+                map.put(
+                        "service.guard",
+                        "(&("
+                                + CommandProcessor.COMMAND_SCOPE
+                                + "="
+                                + scopeName
+                                + ")("
+                                + CommandProcessor.COMMAND_FUNCTION
+                                + "="
+                                + bareCommand
+                                + "))");
                 configMaps.put(pid, map);
             } else {
                 map = configMaps.get(pid);
@@ -113,8 +119,10 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
             map.put("*", "*"); // any other method may be invoked by anyone
         }
 
-        LOGGER.info("Generating command ACL config {} into service ACL configs {}",
-                config.getPid(), configMaps.keySet());
+        LOGGER.info(
+                "Generating command ACL config {} into service ACL configs {}",
+                config.getPid(),
+                configMaps.keySet());
 
         // update config admin with the generated configuration
         for (Map.Entry<String, Dictionary<String, Object>> entry : configMaps.entrySet()) {
@@ -125,28 +133,39 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
     private String convertArgs(String commandACLArgs) {
         if (!commandACLArgs.startsWith("[/")) {
-            throw new IllegalStateException("Badly formatted argument match: " + commandACLArgs + " Should start with '[/'");
+            throw new IllegalStateException(
+                    "Badly formatted argument match: "
+                            + commandACLArgs
+                            + " Should start with '[/'");
         }
         if (!commandACLArgs.endsWith("/]")) {
-            throw new IllegalStateException("Badly formatted argument match: " + commandACLArgs + " Should end with '/]'");
+            throw new IllegalStateException(
+                    "Badly formatted argument match: " + commandACLArgs + " Should end with '/]'");
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("[/.*/,"); // add a wildcard argument since the Function execute method has the arguments as second arg
+        sb.append("[/.*/,"); // add a wildcard argument since the Function execute method has the
+        // arguments as
+        // second arg
         sb.append(commandACLArgs.substring(1));
         return sb.toString();
     }
 
-    void deleteServiceGuardConfig(String originatingPid, String scope) throws IOException, InvalidSyntaxException {
+    void deleteServiceGuardConfig(String originatingPid, String scope)
+            throws IOException, InvalidSyntaxException {
         if (scope.contains("."))
             // This is not a command scope as that should be a single word without any further dots
             return;
 
         // Delete all the generated configurations for this scope
-        Configuration[] configs = configAdmin.listConfigurations("(service.pid=" + PROXY_SERVICE_ACL_PID_PREFIX + scope + ".*)");
-        if (configs == null)
-            return;
+        Configuration[] configs =
+                configAdmin.listConfigurations(
+                        "(service.pid=" + PROXY_SERVICE_ACL_PID_PREFIX + scope + ".*)");
+        if (configs == null) return;
 
-        LOGGER.info("Config ACL deleted: {}. Deleting generated service ACL configs {}", originatingPid, configs);
+        LOGGER.info(
+                "Config ACL deleted: {}. Deleting generated service ACL configs {}",
+                originatingPid,
+                configs);
         for (Configuration config : configs) {
             config.delete();
         }
@@ -154,13 +173,14 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
 
     @Override
     public void configurationEvent(ConfigurationEvent event) {
-        if (!event.getPid().startsWith(PROXY_COMMAND_ACL_PID_PREFIX))
-            return;
+        if (!event.getPid().startsWith(PROXY_COMMAND_ACL_PID_PREFIX)) return;
 
         try {
             switch (event.getType()) {
                 case ConfigurationEvent.CM_DELETED:
-                    deleteServiceGuardConfig(event.getPid(), event.getPid().substring(PROXY_COMMAND_ACL_PID_PREFIX.length()));
+                    deleteServiceGuardConfig(
+                            event.getPid(),
+                            event.getPid().substring(PROXY_COMMAND_ACL_PID_PREFIX.length()));
                     break;
                 case ConfigurationEvent.CM_UPDATED:
                     Configuration config = configAdmin.getConfiguration(event.getPid(), null);
@@ -173,7 +193,8 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
         }
     }
 
-    private void refreshTheAffectedShellCommandBundle(ConfigurationEvent event, Configuration config) {
+    private void refreshTheAffectedShellCommandBundle(
+            ConfigurationEvent event, Configuration config) {
         if (!config.getPid().startsWith(PROXY_COMMAND_ACL_PID_PREFIX)) {
             // not a command scope configuration file
             return;
@@ -187,27 +208,32 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
         scopeName = scopeName.trim();
         for (Entry<String, String> entry : loadScopeBundleMaps().entrySet()) {
             if (entry.getKey().equals(scopeName)) {
-                filter = "(" +
-                    "osgi.blueprint.container.symbolicname" + "=" + entry.getValue() + ")";
+                filter =
+                        "("
+                                + "osgi.blueprint.container.symbolicname"
+                                + "="
+                                + entry.getValue()
+                                + ")";
                 break;
             }
         }
-        
+
         if (filter.length() == 0) {
             return;
         }
 
-        
         BundleContext bundleContext = event.getReference().getBundle().getBundleContext();
-        
+
         try {
-            ServiceReference<?>[] sr = bundleContext.getServiceReferences("org.osgi.service.blueprint.container.BlueprintContainer", filter);
+            ServiceReference<?>[] sr =
+                    bundleContext.getServiceReferences(
+                            "org.osgi.service.blueprint.container.BlueprintContainer", filter);
             if (sr == null) {
                 LOGGER.error("can't find the command bundle for scope " + scopeName);
                 return;
             }
             LOGGER.debug("the refreshed bundle is " + sr[0].getBundle().getSymbolicName());
-            
+
             ServiceReference ref = bundleContext.getServiceReference(PackageAdmin.class.getName());
             if (ref == null) {
                 LOGGER.error("PackageAdmin service is unavailable.");
@@ -219,33 +245,29 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
                     LOGGER.error("PackageAdmin service is unavailable.");
                     return;
                 }
-                pa.refreshPackages(new Bundle[]{sr[0].getBundle()});
-            }
-            finally {
+                pa.refreshPackages(new Bundle[] {sr[0].getBundle()});
+            } finally {
                 bundleContext.ungetService(ref);
             }
         } catch (InvalidSyntaxException ex) {
             LOGGER.error("Problem refresh the affected shell command bundle", ex);
         }
-        
-        
     }
-    
+
     private Map<String, String> loadScopeBundleMaps() {
         Map<String, String> scopeBundleMaps = new HashMap<>();
         try {
-            for (Configuration config : configAdmin.listConfigurations("(service.pid=" + ACL_SCOPE_BUNDLE_MAP + ")")) {
+            for (Configuration config :
+                    configAdmin.listConfigurations("(service.pid=" + ACL_SCOPE_BUNDLE_MAP + ")")) {
                 Enumeration<String> keys = config.getProperties().keys();
                 while (keys.hasMoreElements()) {
                     String key = keys.nextElement();
-                    scopeBundleMaps.put(key, (String)config.getProperties().get(key));
+                    scopeBundleMaps.put(key, (String) config.getProperties().get(key));
                 }
             }
         } catch (Exception ex) {
             LOGGER.error("Problem load the scope bundle map", ex);
-        } 
+        }
         return scopeBundleMaps;
     }
-    
 }
-

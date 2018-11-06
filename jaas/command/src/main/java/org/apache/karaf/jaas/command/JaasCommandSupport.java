@@ -20,9 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.TreeMap;
-
 import javax.security.auth.login.AppConfigurationEntry;
-
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
@@ -37,20 +35,15 @@ public abstract class JaasCommandSupport implements Action {
     public static final String JAAS_ENTRY = "JaasCommand.ENTRY";
     public static final String JAAS_CMDS = "JaasCommand.COMMANDS";
 
-    @Reference
-    List<BackingEngineFactory> engineFactories;
+    @Reference List<BackingEngineFactory> engineFactories;
 
-    @Reference
-    List<JaasRealm> realms;
+    @Reference List<JaasRealm> realms;
 
-    @Reference
-    Session session;
+    @Reference Session session;
 
     protected abstract Object doExecute(BackingEngine engine) throws Exception;
 
-    /**
-     * Add the command to the command queue.
-     */
+    /** Add the command to the command queue. */
     @Override
     public Object execute() throws Exception {
         JaasRealm realm = (JaasRealm) session.get(JAAS_REALM);
@@ -71,14 +64,15 @@ public abstract class JaasCommandSupport implements Action {
     public BackingEngine getBackingEngine(AppConfigurationEntry entry) {
         if (engineFactories != null) {
             for (BackingEngineFactory factory : engineFactories) {
-                String loginModuleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                String loginModuleClass =
+                        (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
                 if (factory.getModuleClass().equals(loginModuleClass)) {
                     return factory.build(entry.getOptions());
                 }
             }
         }
         return null;
-	}
+    }
 
     public List<JaasRealm> getRealms() {
         return getRealms(false);

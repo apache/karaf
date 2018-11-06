@@ -29,7 +29,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -37,7 +36,8 @@ import org.osgi.service.cm.Configuration;
 
 public class Configurations {
 
-    public static List<Configuration> loadConfigurations(BundleContext context, File directory) throws IOException {
+    public static List<Configuration> loadConfigurations(BundleContext context, File directory)
+            throws IOException {
         Map<String, Map<String, String>> configs = new HashMap<>();
         File[] files = directory.listFiles();
         if (files != null) {
@@ -65,7 +65,8 @@ public class Configurations {
         return createConfigurations(context, configs);
     }
 
-    public static List<Configuration> createConfigurations(BundleContext context, Map<String, Map<String, String>> configs) {
+    public static List<Configuration> createConfigurations(
+            BundleContext context, Map<String, Map<String, String>> configs) {
         List<Configuration> configurations = new ArrayList<>();
         for (Map.Entry<String, Map<String, String>> entry : configs.entrySet()) {
             String pid[] = parsePid(entry.getKey());
@@ -83,10 +84,9 @@ public class Configurations {
         if (n > 0) {
             String factoryPid = pid.substring(n + 1);
             pid = pid.substring(0, n);
-            return new String[] { pid, factoryPid };
+            return new String[] {pid, factoryPid};
         } else {
-            return new String[] { pid, null };
+            return new String[] {pid, null};
         }
     }
-
 }

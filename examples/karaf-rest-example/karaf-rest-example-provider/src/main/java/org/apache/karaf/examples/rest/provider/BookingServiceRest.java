@@ -19,7 +19,6 @@ package org.apache.karaf.examples.rest.provider;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -28,13 +27,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-
 import org.apache.karaf.examples.rest.api.Booking;
 import org.apache.karaf.examples.rest.api.BookingService;
 
 @Path("/")
 public class BookingServiceRest implements BookingService {
-    
+
     private final Map<Long, Booking> bookings = new HashMap<>();
 
     @Override
@@ -52,7 +50,7 @@ public class BookingServiceRest implements BookingService {
     public Booking get(@PathParam("id") Long id) {
         return bookings.get(id);
     }
-    
+
     @Override
     @Path("/")
     @Consumes("application/json")

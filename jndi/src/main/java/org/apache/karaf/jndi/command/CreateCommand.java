@@ -25,21 +25,24 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "jndi",  name = "create", description = "Create a new JNDI sub-context.")
+@Command(scope = "jndi", name = "create", description = "Create a new JNDI sub-context.")
 @Service
 public class CreateCommand implements Action {
 
-    @Argument(index = 0, name = "context", description = "The JNDI sub-context name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "context",
+            description = "The JNDI sub-context name",
+            required = true,
+            multiValued = false)
     @Completion(ContextsCompleter.class)
     String context;
 
-    @Reference
-    JndiService jndiService;
+    @Reference JndiService jndiService;
 
     @Override
     public Object execute() throws Exception {
         jndiService.create(context);
         return null;
     }
-
 }

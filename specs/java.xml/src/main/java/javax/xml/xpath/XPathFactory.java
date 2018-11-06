@@ -22,10 +22,10 @@ public abstract class XPathFactory {
 
     public static final String DEFAULT_OBJECT_MODEL_URI = "http://java.sun.com/jaxp/xpath/dom";
 
-    private static final String DEFAULT_IMPL = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
+    private static final String DEFAULT_IMPL =
+            "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
 
-    protected XPathFactory() {
-    }
+    protected XPathFactory() {}
 
     public static XPathFactory newDefaultInstance() {
         try {
@@ -35,8 +35,8 @@ public abstract class XPathFactory {
                     "XPathFactory#newInstance() failed to create an XPathFactory for the default object model: "
                             + DEFAULT_OBJECT_MODEL_URI
                             + " with the XPathFactoryConfigurationException: "
-                            + e.getMessage(), e
-            );
+                            + e.getMessage(),
+                    e);
         }
     }
 
@@ -48,12 +48,13 @@ public abstract class XPathFactory {
                     "XPathFactory#newInstance() failed to create an XPathFactory for the default object model: "
                             + DEFAULT_OBJECT_MODEL_URI
                             + " with the XPathFactoryConfigurationException: "
-                            + e.getMessage(), e
-            );
+                            + e.getMessage(),
+                    e);
         }
     }
 
-    public static XPathFactory newInstance(final String uri) throws XPathFactoryConfigurationException {
+    public static XPathFactory newInstance(final String uri)
+            throws XPathFactoryConfigurationException {
         if (uri == null) {
             throw new NullPointerException(
                     "XPathFactory#newInstance(String uri) cannot be called with uri == null");
@@ -69,19 +70,22 @@ public abstract class XPathFactory {
         XPathFactory xpathFactory = new $XPathFactoryFinder(classLoader).newFactory(uri);
         if (xpathFactory == null) {
             throw new XPathFactoryConfigurationException(
-                    "No XPathFactory implementation found for the object model: "
-                            + uri);
+                    "No XPathFactory implementation found for the object model: " + uri);
         }
         return xpathFactory;
     }
 
-    public static XPathFactory newInstance(String uri, String factoryClassName, ClassLoader classLoader) throws XPathFactoryConfigurationException {
+    public static XPathFactory newInstance(
+            String uri, String factoryClassName, ClassLoader classLoader)
+            throws XPathFactoryConfigurationException {
         ClassLoader cl = classLoader;
         if (uri == null) {
-            throw new NullPointerException("XPathFactory#newInstance(String uri) cannot be called with uri == null");
+            throw new NullPointerException(
+                    "XPathFactory#newInstance(String uri) cannot be called with uri == null");
         }
         if (uri.length() == 0) {
-            throw new IllegalArgumentException("XPathFactory#newInstance(String uri) cannot be called with uri == \"\"");
+            throw new IllegalArgumentException(
+                    "XPathFactory#newInstance(String uri) cannot be called with uri == \"\"");
         }
         if (cl == null) {
             cl = $XPathFactoryFinder.getContextClassLoader();
@@ -90,17 +94,18 @@ public abstract class XPathFactory {
 
         if (f == null) {
             throw new XPathFactoryConfigurationException(
-                    "No XPathFactory implementation found for the object model: "
-                            + uri);
+                    "No XPathFactory implementation found for the object model: " + uri);
         }
         if (f.isObjectModelSupported(uri)) {
             return f;
         } else {
-            throw new XPathFactoryConfigurationException("Factory "
-                    + factoryClassName + " doesn't support given " + uri
-                    + " object model");
+            throw new XPathFactoryConfigurationException(
+                    "Factory "
+                            + factoryClassName
+                            + " doesn't support given "
+                            + uri
+                            + " object model");
         }
-
     }
 
     public abstract boolean isObjectModelSupported(String objectModel);
@@ -108,13 +113,11 @@ public abstract class XPathFactory {
     public abstract void setFeature(String name, boolean value)
             throws XPathFactoryConfigurationException;
 
-    public abstract boolean getFeature(String name)
-            throws XPathFactoryConfigurationException;
+    public abstract boolean getFeature(String name) throws XPathFactoryConfigurationException;
 
     public abstract void setXPathVariableResolver(XPathVariableResolver resolver);
 
     public abstract void setXPathFunctionResolver(XPathFunctionResolver resolver);
 
     public abstract XPath newXPath();
-
 }

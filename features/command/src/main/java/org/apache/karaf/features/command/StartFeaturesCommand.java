@@ -19,7 +19,6 @@ package org.apache.karaf.features.command;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.command.completers.ResolvedFeatureCompleter;
@@ -29,18 +28,37 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "feature", name = "start", description = "Start features with the specified name and version.")
+@Command(
+        scope = "feature",
+        name = "start",
+        description = "Start features with the specified name and version.")
 @Service
 public class StartFeaturesCommand extends FeaturesCommandSupport {
 
-    @Argument(index = 0, name = "feature", description = "The name and version of the features to start. A feature id looks like name/version.", required = true, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "feature",
+            description =
+                    "The name and version of the features to start. A feature id looks like name/version.",
+            required = true,
+            multiValued = true)
     @Completion(ResolvedFeatureCompleter.class)
     List<String> features;
 
-    @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
+    @Option(
+            name = "-v",
+            aliases = "--verbose",
+            description = "Explain what is being done",
+            required = false,
+            multiValued = false)
     boolean verbose;
 
-    @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only", required = false, multiValued = false)
+    @Option(
+            name = "-t",
+            aliases = "--simulate",
+            description = "Perform a simulation only",
+            required = false,
+            multiValued = false)
     boolean simulate;
 
     @Option(name = "-g", aliases = "--region", description = "Region to apply to")

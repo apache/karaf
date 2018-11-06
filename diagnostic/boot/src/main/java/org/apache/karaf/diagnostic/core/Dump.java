@@ -19,7 +19,6 @@ package org.apache.karaf.diagnostic.core;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.karaf.diagnostic.core.common.DirectoryDumpDestination;
 import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 import org.apache.karaf.diagnostic.core.providers.BundleDumpProvider;
@@ -31,9 +30,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-/**
- * Dump helper
- */
+/** Dump helper */
 public final class Dump {
 
     public static DumpDestination directory(File file) {
@@ -44,7 +41,11 @@ public final class Dump {
         return new ZipDumpDestination(file);
     }
 
-    public static void dump(BundleContext bundleContext, DumpDestination destination, boolean noThreadDump, boolean noHeapDump) {
+    public static void dump(
+            BundleContext bundleContext,
+            DumpDestination destination,
+            boolean noThreadDump,
+            boolean noHeapDump) {
         List<DumpProvider> providers = new ArrayList<>();
         providers.add(new EnvironmentDumpProvider(bundleContext));
         providers.add(new MemoryDumpProvider());
@@ -59,7 +60,8 @@ public final class Dump {
             }
         }
         try {
-            for (ServiceReference<DumpProvider> ref : bundleContext.getServiceReferences(DumpProvider.class, null)) {
+            for (ServiceReference<DumpProvider> ref :
+                    bundleContext.getServiceReferences(DumpProvider.class, null)) {
                 DumpProvider provider = bundleContext.getService(ref);
                 try {
                     provider.createDump(destination);
@@ -80,5 +82,5 @@ public final class Dump {
     }
 
     // Private constructor
-    private Dump() { }
+    private Dump() {}
 }

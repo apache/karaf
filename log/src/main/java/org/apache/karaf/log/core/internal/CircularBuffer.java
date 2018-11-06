@@ -22,10 +22,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * An array that only keeps the last N elements added
- */
+/** An array that only keeps the last N elements added */
 public class CircularBuffer<T> {
 
     private T[] elements;
@@ -59,19 +56,18 @@ public class CircularBuffer<T> {
         start = 0;
         end = 0;
         full = false;
-        elements = (T[])Array.newInstance(type, maxElements);
+        elements = (T[]) Array.newInstance(type, maxElements);
     }
 
     public synchronized void add(T element) {
         if (null == element) {
-             throw new NullPointerException("Attempted to add null object to buffer");
+            throw new NullPointerException("Attempted to add null object to buffer");
         }
         if (full) {
             increaseStart();
         }
         elements[end] = element;
         increaseEnd();
-        
     }
 
     private void increaseStart() {
@@ -104,6 +100,4 @@ public class CircularBuffer<T> {
         }
         return result;
     }
-
-
 }

@@ -26,11 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.felix.utils.json.JSONWriter;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
@@ -42,10 +40,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-/**
- * WebConsole plugin to use with HTTP service.
- */
+/** WebConsole plugin to use with HTTP service. */
 public class HttpPlugin extends AbstractWebConsolePlugin {
 
     private final Logger log = LoggerFactory.getLogger(HttpPlugin.class);
@@ -86,14 +81,15 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void renderContent(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
 
         // get request info from request attribute
         final PrintWriter pw = response.getWriter();
 
         String appRoot = (String) request.getAttribute(WebConsoleConstants.ATTR_APP_ROOT);
-        final String featuresScriptTag = "<script src='" + appRoot + this.featuresJs
-                + "' language='JavaScript'></script>";
+        final String featuresScriptTag =
+                "<script src='" + appRoot + this.featuresJs + "' language='JavaScript'></script>";
         pw.println(featuresScriptTag);
 
         pw.println("<script type='text/javascript'>");
@@ -221,16 +217,21 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             String servletClassName = " ";
             if (servlet != null) {
                 servletClassName = servlet.getClass().getName();
-                servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1, servletClassName.length());
+                servletClassName =
+                        servletClassName.substring(
+                                servletClassName.lastIndexOf(".") + 1, servletClassName.length());
             }
             String servletName = event.getServletName() != null ? event.getServletName() : " ";
             if (servletName.contains(".")) {
-                servletName = servletName.substring(servletName.lastIndexOf(".") + 1, servletName.length());
+                servletName =
+                        servletName.substring(
+                                servletName.lastIndexOf(".") + 1, servletName.length());
             }
 
             String alias = event.getAlias() != null ? event.getAlias() : " ";
 
-            String[] urls = event.getUrlParameter() != null ? event.getUrlParameter() : new String[]{""};
+            String[] urls =
+                    event.getUrlParameter() != null ? event.getUrlParameter() : new String[] {""};
 
             ServletDetails details = new ServletDetails();
             details.setId(event.getBundle().getBundleId());
@@ -330,5 +331,4 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     public void setProxyService(ProxyService proxyService) {
         this.proxyService = proxyService;
     }
-
 }

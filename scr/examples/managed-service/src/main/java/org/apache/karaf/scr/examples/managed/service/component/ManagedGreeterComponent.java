@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.scr.examples.managed.service.component;
 
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.karaf.scr.examples.managed.service.ManagedGreeterService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -23,9 +25,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Component(name = ManagedGreeterComponent.COMPONENT_NAME)
 public class ManagedGreeterComponent {
@@ -39,9 +38,7 @@ public class ManagedGreeterComponent {
     private ManagedGreeterService greeterService;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    /**
-     * Called when all of the SCR Components required dependencies have been satisfied
-     */
+    /** Called when all of the SCR Components required dependencies have been satisfied */
     @Activate
     public void activate() {
         LOG.info("Activating the {}", COMPONENT_LABEL);
@@ -55,9 +52,7 @@ public class ManagedGreeterComponent {
         }
     }
 
-    /**
-     * Called when any of the SCR Components required dependencies become unsatisfied.
-     */
+    /** Called when any of the SCR Components required dependencies become unsatisfied. */
     @Deactivate
     public void deactivate() {
         LOG.info("Deactivating the {}", COMPONENT_LABEL);
@@ -89,5 +84,4 @@ public class ManagedGreeterComponent {
             lock.writeLock().unlock();
         }
     }
-
 }

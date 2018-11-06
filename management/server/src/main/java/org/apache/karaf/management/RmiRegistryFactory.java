@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.management;
 
-import org.osgi.framework.BundleContext;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
@@ -33,6 +31,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import org.osgi.framework.BundleContext;
 
 public class RmiRegistryFactory {
 
@@ -44,45 +43,33 @@ public class RmiRegistryFactory {
     private boolean locallyCreated;
 
     private BundleContext bundleContext;
-    
-    /**
-     * @return the create
-     */
+
+    /** @return the create */
     public boolean isCreate() {
         return create;
     }
 
-    /**
-     * @param create the create to set
-     */
+    /** @param create the create to set */
     public void setCreate(boolean create) {
         this.create = create;
     }
 
-    /**
-     * @return the locate
-     */
+    /** @return the locate */
     public boolean isLocate() {
         return locate;
     }
 
-    /**
-     * @param locate the locate to set
-     */
+    /** @param locate the locate to set */
     public void setLocate(boolean locate) {
         this.locate = locate;
     }
 
-    /**
-     * @return the port
-     */
+    /** @return the port */
     public int getPort() {
         return port;
     }
 
-    /**
-     * @param port the port to set
-     */
+    /** @param port the port to set */
     public void setPort(int port) {
         this.port = port;
     }
@@ -117,9 +104,12 @@ public class RmiRegistryFactory {
             if (host != null && !host.isEmpty()) {
                 RMIClientSocketFactory socketFactory = RMISocketFactory.getDefaultSocketFactory();
                 InetAddress addr = InetAddress.getByName(host);
-                RMIServerSocketFactory serverSocketFactory = new KarafServerSocketFactory(addr, port);
+                RMIServerSocketFactory serverSocketFactory =
+                        new KarafServerSocketFactory(addr, port);
 
-                registry = LocateRegistry.createRegistry(getPort(), socketFactory, serverSocketFactory);
+                registry =
+                        LocateRegistry.createRegistry(
+                                getPort(), socketFactory, serverSocketFactory);
             } else {
                 registry = LocateRegistry.createRegistry(getPort());
             }
@@ -142,7 +132,8 @@ public class RmiRegistryFactory {
 
             // clear TCPEndpointCache
             try {
-                Class<?> cls = getClass().getClassLoader().loadClass("sun.rmi.transport.tcp.TCPEndpoint");
+                Class<?> cls =
+                        getClass().getClassLoader().loadClass("sun.rmi.transport.tcp.TCPEndpoint");
                 Field localEndpointsField = cls.getDeclaredField("localEndpoints");
                 Field ssfField = cls.getDeclaredField("ssf");
                 localEndpointsField.setAccessible(true);
@@ -153,7 +144,11 @@ public class RmiRegistryFactory {
                     for (Iterator<Object> it = map.keySet().iterator(); it.hasNext(); ) {
                         Object key = it.next();
                         Object ssf = ssfField.get(key);
-                        if (ssf != null && ssf.getClass().getPackage().getName().equals("org.apache.karaf.management")) {
+                        if (ssf != null
+                                && ssf.getClass()
+                                        .getPackage()
+                                        .getName()
+                                        .equals("org.apache.karaf.management")) {
                             it.remove();
                         }
                     }
@@ -177,5 +172,4 @@ public class RmiRegistryFactory {
             return new ServerSocket(port, 0, addr);
         }
     }
-
 }

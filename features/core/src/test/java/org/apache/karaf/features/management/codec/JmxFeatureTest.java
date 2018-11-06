@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
-
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Config;
 import org.apache.karaf.features.internal.model.ConfigFile;
@@ -89,7 +88,8 @@ public class JmxFeatureTest {
         assertEquals(1, featureConfigs.size());
         assertNotNull(featureConfigs.get(new Object[] {FEATURE_CONFIG_PID}));
 
-        TabularData featureConfigFiles = (TabularData) compositeData.get(FEATURE_CONFIGURATIONFILES);
+        TabularData featureConfigFiles =
+                (TabularData) compositeData.get(FEATURE_CONFIGURATIONFILES);
         assertEquals(1, featureConfigFiles.size());
         assertNotNull(featureConfigFiles.get(new Object[] {"test-configfile.cfg"}));
     }

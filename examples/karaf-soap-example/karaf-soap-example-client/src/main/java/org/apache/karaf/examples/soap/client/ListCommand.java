@@ -27,7 +27,11 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Command(scope = "booking", name = "list", description = "List bookings")
 public class ListCommand implements Action {
 
-    @Option(name = "--url", description = "Location of the SOAP service", required = false, multiValued = false)
+    @Option(
+            name = "--url",
+            description = "Location of the SOAP service",
+            required = false,
+            multiValued = false)
     String url = "http://localhost:8181/cxf/example";
 
     @Override
@@ -39,11 +43,11 @@ public class ListCommand implements Action {
         table.column("Flight");
         if (client.list() != null) {
             for (Booking booking : client.list()) {
-                table.addRow().addContent(booking.getId(), booking.getCustomer(), booking.getFlight());
+                table.addRow()
+                        .addContent(booking.getId(), booking.getCustomer(), booking.getFlight());
             }
         }
         table.print(System.out);
         return null;
     }
-
 }

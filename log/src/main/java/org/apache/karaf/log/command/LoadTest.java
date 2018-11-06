@@ -23,9 +23,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Clear the last log entries.
- */
+/** Clear the last log entries. */
 @Command(scope = "log", name = "load-test", description = "Load test log.")
 @Service
 public class LoadTest implements Action {
@@ -43,11 +41,13 @@ public class LoadTest implements Action {
         Thread[] th = new Thread[threads];
         for (int i = 0; i < threads; i++) {
             final int idxThread = i;
-            th[i] = new Thread(() -> {
-                for (int i1 = 0; i1 < messages; i1++) {
-                    LOGGER.info("Message {} / {}", idxThread, i1);
-                }
-            });
+            th[i] =
+                    new Thread(
+                            () -> {
+                                for (int i1 = 0; i1 < messages; i1++) {
+                                    LOGGER.info("Message {} / {}", idxThread, i1);
+                                }
+                            });
         }
         long t0 = System.currentTimeMillis();
         for (Thread thread : th) {
@@ -61,5 +61,4 @@ public class LoadTest implements Action {
         System.out.println("Throughput: " + ((messages * threads) / (t1 - t0 + 0.0)) + " msg/ms");
         return null;
     }
-
 }

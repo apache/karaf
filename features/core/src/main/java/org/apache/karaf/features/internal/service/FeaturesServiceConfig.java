@@ -21,76 +21,96 @@ import org.apache.karaf.features.FeaturesService;
 public class FeaturesServiceConfig {
 
     /**
-     * Range to use when a version is specified on a feature dependency.
-     * The default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_FEATURE_RESOLUTION_RANGE}
+     * Range to use when a version is specified on a feature dependency. The default is {@link
+     * org.apache.karaf.features.FeaturesService#DEFAULT_FEATURE_RESOLUTION_RANGE}
      */
     public final String featureResolutionRange;
-    
+
     /**
-     * Range to use when verifying if a bundle should be updated or
-     * new bundle installed.
-     * The default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_BUNDLE_UPDATE_RANGE}
+     * Range to use when verifying if a bundle should be updated or new bundle installed. The
+     * default is {@link org.apache.karaf.features.FeaturesService#DEFAULT_BUNDLE_UPDATE_RANGE}
      */
     public final String bundleUpdateRange;
-    
+
     /**
-     * Use CRC to check snapshot bundles and update them if changed.
-     * Either:
-     * - none : never update snapshots
-     * - always : always update snapshots
-     * - crc : use CRC to detect changes
+     * Use CRC to check snapshot bundles and update them if changed. Either: - none : never update
+     * snapshots - always : always update snapshots - crc : use CRC to detect changes
      */
     public final String updateSnapshots;
-    
+
     public final int downloadThreads;
-    
+
     public final long scheduleDelay;
-    
+
     public final int scheduleMaxRun;
-    
-    /**
-     * Service requirements enforcement
-     */
+
+    /** Service requirements enforcement */
     public final String serviceRequirements;
 
-    /**
-     * Location of <code>etc/blacklisted.properties</code>
-     */
-    @Deprecated
-    public final String blacklisted;
+    /** Location of <code>etc/blacklisted.properties</code> */
+    @Deprecated public final String blacklisted;
 
-    /**
-     * Location of <code>etc/org.apache.karaf.features.xml</code>
-     */
+    /** Location of <code>etc/org.apache.karaf.features.xml</code> */
     public final String featureModifications;
 
     /**
-     * Location of <code>etc/versions.properties</code> to read properties to resolve placeholders in
-     * {@link #featureModifications}
+     * Location of <code>etc/versions.properties</code> to read properties to resolve placeholders
+     * in {@link #featureModifications}
      */
     public final String featureProcessingVersions;
 
-    /**
-     * Location of <code>etc/overrides.properties</code>
-     */
-    @Deprecated
-    public final String overrides;
+    /** Location of <code>etc/overrides.properties</code> */
+    @Deprecated public final String overrides;
 
     public FeaturesServiceConfig() {
         this(null, null, null, null);
     }
 
     public FeaturesServiceConfig(String featureModifications, String featureProcessingVersions) {
-        this(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, null, featureModifications, featureProcessingVersions, null);
+        this(
+                null,
+                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE,
+                null,
+                1,
+                0,
+                0,
+                null,
+                featureModifications,
+                featureProcessingVersions,
+                null);
     }
 
     @Deprecated
-    public FeaturesServiceConfig(String overrides, String blacklisted, String featureModifications, String featureProcessingVersions) {
-        this(overrides, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklisted, featureModifications, featureProcessingVersions, null);
+    public FeaturesServiceConfig(
+            String overrides,
+            String blacklisted,
+            String featureModifications,
+            String featureProcessingVersions) {
+        this(
+                overrides,
+                FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE,
+                null,
+                1,
+                0,
+                0,
+                blacklisted,
+                featureModifications,
+                featureProcessingVersions,
+                null);
     }
 
-    public FeaturesServiceConfig(String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun,
-                                 String featureModifications, String featureProcessingVersions, String serviceRequirements) {
+    public FeaturesServiceConfig(
+            String featureResolutionRange,
+            String bundleUpdateRange,
+            String updateSnapshots,
+            int downloadThreads,
+            long scheduleDelay,
+            int scheduleMaxRun,
+            String featureModifications,
+            String featureProcessingVersions,
+            String serviceRequirements) {
         this.overrides = null;
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
@@ -105,11 +125,18 @@ public class FeaturesServiceConfig {
     }
 
     @Deprecated
-    public FeaturesServiceConfig(String overrides, String featureResolutionRange, String bundleUpdateRange,
-                                 String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun,
-                                 String blacklisted,
-                                 String featureModifications, String featureProcessingVersions,
-                                 String serviceRequirements) {
+    public FeaturesServiceConfig(
+            String overrides,
+            String featureResolutionRange,
+            String bundleUpdateRange,
+            String updateSnapshots,
+            int downloadThreads,
+            long scheduleDelay,
+            int scheduleMaxRun,
+            String blacklisted,
+            String featureModifications,
+            String featureProcessingVersions,
+            String serviceRequirements) {
         this.overrides = overrides;
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
@@ -122,5 +149,4 @@ public class FeaturesServiceConfig {
         this.featureProcessingVersions = featureProcessingVersions;
         this.serviceRequirements = serviceRequirements;
     }
-
 }

@@ -16,6 +16,15 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,13 +36,12 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.TestBase;
 import org.apache.karaf.features.FeaturesService.Option;
+import org.apache.karaf.features.TestBase;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
@@ -51,18 +59,7 @@ import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-/**
- * Test cases for {@link org.apache.karaf.features.internal.service.FeaturesServiceImpl}
- */
+/** Test cases for {@link org.apache.karaf.features.internal.service.FeaturesServiceImpl} */
 public class FeaturesServiceImplTest extends TestBase {
 
     Logger logger = LoggerFactory.getLogger(FeaturesServiceImplTest.class);
@@ -72,37 +69,55 @@ public class FeaturesServiceImplTest extends TestBase {
     @Before
     public void setUp() throws IOException {
         dataFile = File.createTempFile("features", null, null);
-        URL.setURLStreamHandlerFactory(protocol -> protocol.equals("custom") ? new URLStreamHandler() {
-            @Override
-            protected URLConnection openConnection(URL u) throws IOException {
-                return getClass().getResource(u.getPath()).openConnection();
-            }
-        } : null);
+        URL.setURLStreamHandlerFactory(
+                protocol ->
+                        protocol.equals("custom")
+                                ? new URLStreamHandler() {
+                                    @Override
+                                    protected URLConnection openConnection(URL u)
+                                            throws IOException {
+                                        return getClass().getResource(u.getPath()).openConnection();
+                                    }
+                                }
+                                : null);
     }
-    
+
     @After
     public void after() throws Exception {
         Field field = URL.class.getDeclaredField("factory");
         field.setAccessible(true);
         field.set(null, null);
     }
-    
+
     @Test
     public void testListFeatureWithoutVersion() throws Exception {
         Feature transactionFeature = feature("transaction", "1.0.0");
         FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
         assertNotNull(impl.getFeatures("transaction", null));
-        assertSame(transactionFeature, impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0]);
+        assertSame(
+                transactionFeature,
+                impl.getFeatures(
+                                "transaction",
+                                org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[
+                        0]);
     }
 
     @Test
     public void testGetFeature() throws Exception {
         Feature transactionFeature = feature("transaction", "1.0.0");
         FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
-        assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
-        assertSame(transactionFeature, impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0]);
+        assertNotNull(
+                impl.getFeatures(
+                        "transaction",
+                        org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertSame(
+                transactionFeature,
+                impl.getFeatures(
+                                "transaction",
+                                org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[
+                        0]);
     }
-    
+
     @Test
     public void testGetFeatureStripVersion() throws Exception {
         Feature transactionFeature = feature("transaction", "1.0.0");
@@ -113,20 +128,35 @@ public class FeaturesServiceImplTest extends TestBase {
         assertNotNull(feature);
         assertSame("transaction", feature.getName());
     }
-    
+
     @Test
     public void testGetFeatureNotAvailable() throws Exception {
         Feature transactionFeature = feature("transaction", "1.0.0");
         FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
-        assertEquals(0, impl.getFeatures("activemq", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION).length);
+        assertEquals(
+                0,
+                impl.getFeatures(
+                                "activemq",
+                                org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)
+                        .length);
     }
-    
+
     @Test
     public void testGetFeatureHighestAvailable() throws Exception {
-        FeaturesServiceImpl impl = featuresServiceWithFeatures(feature("transaction", "1.0.0"),
-                                                               feature("transaction", "2.0.0"));
-        assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
-        assertEquals("2.0.0", impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0].getVersion());
+        FeaturesServiceImpl impl =
+                featuresServiceWithFeatures(
+                        feature("transaction", "1.0.0"), feature("transaction", "2.0.0"));
+        assertNotNull(
+                impl.getFeatures(
+                        "transaction",
+                        org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertEquals(
+                "2.0.0",
+                impl
+                        .getFeatures(
+                                "transaction",
+                                org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0]
+                        .getVersion());
     }
 
     @Test
@@ -134,11 +164,13 @@ public class FeaturesServiceImplTest extends TestBase {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         EasyMock.replay(installSupport);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg);
+        final FeaturesServiceImpl impl =
+                new FeaturesServiceImpl(
+                        new Storage(), null, null, this.resolver, installSupport, null, cfg);
         impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
         impl.getFeatureCache();
     }
-    
+
     @Test
     public void testRemoveRepo1() throws Exception {
         final FeaturesService featureService = createTestFeatureService();
@@ -152,7 +184,7 @@ public class FeaturesServiceImplTest extends TestBase {
         assertNotInstalled(featureService, a1Feature);
         assertNotInstalled(featureService, b1Feature);
     }
-    
+
     @Test
     public void testGetFeatureWithVersion() throws Exception {
         final FeaturesService featureService = createTestFeatureService();
@@ -188,7 +220,8 @@ public class FeaturesServiceImplTest extends TestBase {
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         FrameworkInfo dummyInfo = new FrameworkInfo();
         expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
-        expect(installSupport.installBundle(EasyMock.eq("root"), EasyMock.eq("a100"), anyObject())).andReturn(bundle);
+        expect(installSupport.installBundle(EasyMock.eq("root"), EasyMock.eq("a100"), anyObject()))
+                .andReturn(bundle);
         installSupport.startBundle(bundle);
         expectLastCall();
         expect(bundle.getBundleId()).andReturn(1L).anyTimes();
@@ -201,13 +234,14 @@ public class FeaturesServiceImplTest extends TestBase {
         expect(bundleRevision.getCapabilities(null)).andReturn(Collections.emptyList()).anyTimes();
         expect(bundleRevision.getRequirements(null)).andReturn(Collections.emptyList()).anyTimes();
         EasyMock.replay(installSupport, bundle, bundleStartLevel, bundleRevision);
-        FeaturesService featureService =  new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
-                installSupport, null, cfg) {
-            @Override
-            protected DownloadManager createDownloadManager() throws IOException {
-                return new TestDownloadManager(FeaturesServiceImplTest.class, "data1");
-            }
-        };
+        FeaturesService featureService =
+                new FeaturesServiceImpl(
+                        new Storage(), null, null, this.resolver, installSupport, null, cfg) {
+                    @Override
+                    protected DownloadManager createDownloadManager() throws IOException {
+                        return new TestDownloadManager(FeaturesServiceImplTest.class, "data1");
+                    }
+                };
 
         URI repoA = URI.create("custom:data1/features.xml");
         featureService.addRepository(repoA);
@@ -258,11 +292,13 @@ public class FeaturesServiceImplTest extends TestBase {
         FeaturesServiceConfig cfg = new FeaturesServiceConfig();
         BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
         EasyMock.replay(installSupport);
-        final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg ) {
-            protected Map<String,Map<String,Feature>> getFeatureCache() throws Exception {
-                return features;
-            }
-        };
+        final FeaturesServiceImpl impl =
+                new FeaturesServiceImpl(
+                        new Storage(), null, null, this.resolver, installSupport, null, cfg) {
+                    protected Map<String, Map<String, Feature>> getFeatureCache() throws Exception {
+                        return features;
+                    }
+                };
         return impl;
     }
 
@@ -272,41 +308,45 @@ public class FeaturesServiceImplTest extends TestBase {
         FrameworkInfo dummyInfo = new FrameworkInfo();
         expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
         EasyMock.replay(installSupport);
-        return new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
-                                       installSupport, null, cfg);
+        return new FeaturesServiceImpl(
+                new Storage(), null, null, this.resolver, installSupport, null, cfg);
     }
 
     private void assertNotInstalled(FeaturesService featureService, Feature feature) {
-        assertFalse("Feature " + feature.getName() + " should not be installed anymore after removal of repo",
-                    featureService.isInstalled(feature));
+        assertFalse(
+                "Feature "
+                        + feature.getName()
+                        + " should not be installed anymore after removal of repo",
+                featureService.isInstalled(feature));
     }
-    
+
     private void assertInstalled(FeaturesService featureService, Feature feature) {
-        assertTrue("Feature " + feature.getName() + " should still be installed after removal of repo",
-                    featureService.isInstalled(feature));
+        assertTrue(
+                "Feature " + feature.getName() + " should still be installed after removal of repo",
+                featureService.isInstalled(feature));
     }
 
     private void installFeature(final FeaturesService featureService, Feature feature)
-        throws Exception {
+            throws Exception {
         featureService.installFeature(feature, EnumSet.noneOf(Option.class));
         waitInstalled(featureService, feature);
     }
 
     private void waitInstalled(final FeaturesService featureService, Feature feature)
-        throws InterruptedException {
+            throws InterruptedException {
         int count = 40;
         while (!featureService.isInstalled(feature) && count > 0) {
             Thread.sleep(100);
-            count --;
+            count--;
         }
         if (count == 0) {
             throw new RuntimeException("Feature " + feature + " not installed.");
         }
     }
-    
+
     /**
-     * This test ensures that every feature get installed only once, even if it appears multiple times in the list
-     * of transitive feature dependencies (KARAF-1600)
+     * This test ensures that every feature get installed only once, even if it appears multiple
+     * times in the list of transitive feature dependencies (KARAF-1600)
      */
     /*
     @Test
@@ -368,6 +408,7 @@ public class FeaturesServiceImplTest extends TestBase {
         protected InputStream getInputStream() throws IOException {
             return null;
         }
+
         @Override
         protected OutputStream getOutputStream() throws IOException {
             return null;

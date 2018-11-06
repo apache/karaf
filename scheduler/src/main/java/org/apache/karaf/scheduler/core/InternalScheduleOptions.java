@@ -21,9 +21,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Map;
-
 import javax.xml.bind.DatatypeConverter;
-
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
@@ -33,6 +31,7 @@ import org.quartz.TriggerBuilder;
 
 /**
  * Scheduler options provide an extensible way of defining how to schedule a job.
+ *
  * @since 2.3
  */
 public class InternalScheduleOptions implements ScheduleOptions {
@@ -50,7 +49,7 @@ public class InternalScheduleOptions implements ScheduleOptions {
     public final IllegalArgumentException argumentException;
 
     public InternalScheduleOptions(Date date) {
-        if ( date == null ) {
+        if (date == null) {
             this.trigger = null;
             this.argumentException = new IllegalArgumentException("Date can't be null");
         } else {
@@ -79,9 +78,10 @@ public class InternalScheduleOptions implements ScheduleOptions {
             } else {
                 sb = SimpleScheduleBuilder.simpleSchedule().withRepeatCount(times - 1);
             }
-            trigger = TriggerBuilder.newTrigger()
-                        .startAt(date)
-                        .withSchedule(sb.withIntervalInMilliseconds(period * 1000));
+            trigger =
+                    TriggerBuilder.newTrigger()
+                            .startAt(date)
+                            .withSchedule(sb.withIntervalInMilliseconds(period * 1000));
         } catch (IllegalArgumentException e) {
             argumentException = e;
         }
@@ -94,13 +94,14 @@ public class InternalScheduleOptions implements ScheduleOptions {
         TriggerBuilder<? extends Trigger> trigger = null;
         IllegalArgumentException argumentException = null;
         try {
-            if ( expression == null ) {
+            if (expression == null) {
                 throw new IllegalArgumentException("Expression can't be null");
             }
-            if ( !CronExpression.isValidExpression(expression) ) {
+            if (!CronExpression.isValidExpression(expression)) {
                 throw new IllegalArgumentException("Expression is invalid : " + expression);
             }
-            trigger = TriggerBuilder.newTrigger()
+            trigger =
+                    TriggerBuilder.newTrigger()
                             .withSchedule(CronScheduleBuilder.cronSchedule(expression));
         } catch (IllegalArgumentException e) {
             argumentException = e;
@@ -110,25 +111,19 @@ public class InternalScheduleOptions implements ScheduleOptions {
         this.schedule = "cron(" + expression + ")";
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.ScheduleOptions#config(java.util.Map)
-     */
-    public ScheduleOptions config(final  Map<String, Serializable> config) {
+    /** @see org.apache.karaf.scheduler.ScheduleOptions#config(java.util.Map) */
+    public ScheduleOptions config(final Map<String, Serializable> config) {
         this.configuration = config;
         return this;
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.ScheduleOptions#name(java.lang.String)
-     */
+    /** @see org.apache.karaf.scheduler.ScheduleOptions#name(java.lang.String) */
     public ScheduleOptions name(final String name) {
         this.name = name;
         return this;
     }
 
-    /**
-     * @see org.apache.karaf.scheduler.ScheduleOptions#canRunConcurrently(boolean)
-     */
+    /** @see org.apache.karaf.scheduler.ScheduleOptions#canRunConcurrently(boolean) */
     public ScheduleOptions canRunConcurrently(final boolean flag) {
         this.canRunConcurrently = flag;
         return this;

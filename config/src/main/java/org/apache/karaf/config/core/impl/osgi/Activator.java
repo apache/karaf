@@ -27,8 +27,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 @Services(
         requires = @RequireService(ConfigurationAdmin.class),
-        provides = @ProvideService(ConfigRepository.class)
-)
+        provides = @ProvideService(ConfigRepository.class))
 public class Activator extends BaseActivator {
 
     protected void doStart() throws Exception {
@@ -44,5 +43,4 @@ public class Activator extends BaseActivator {
         configMBean.setConfigRepo(configRepository);
         registerMBean(configMBean, "type=config");
     }
-
 }

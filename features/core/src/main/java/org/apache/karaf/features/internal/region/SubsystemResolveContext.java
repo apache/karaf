@@ -16,6 +16,17 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
+import static org.eclipse.equinox.region.RegionFilter.VISIBLE_BUNDLE_NAMESPACE;
+import static org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE;
+import static org.osgi.framework.Constants.BUNDLE_VERSION_ATTRIBUTE;
+import static org.osgi.framework.Constants.RESOLUTION_DIRECTIVE;
+import static org.osgi.framework.Constants.RESOLUTION_OPTIONAL;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
+import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.resource.Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE;
+
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import org.apache.felix.utils.repository.BaseRepository;
 import org.apache.felix.utils.resource.CapabilityImpl;
 import org.apache.felix.utils.resource.RequirementImpl;
@@ -49,23 +59,13 @@ import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolveContext;
 
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
-import static org.eclipse.equinox.region.RegionFilter.VISIBLE_BUNDLE_NAMESPACE;
-import static org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE;
-import static org.osgi.framework.Constants.BUNDLE_VERSION_ATTRIBUTE;
-import static org.osgi.framework.Constants.RESOLUTION_DIRECTIVE;
-import static org.osgi.framework.Constants.RESOLUTION_OPTIONAL;
-import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
-import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
-import static org.osgi.resource.Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE;
-
 public class SubsystemResolveContext extends ResolveContext {
 
     private final Subsystem root;
     private final Map<String, Region> regions;
     private final Map<Resource, Integer> distance;
-    private final CandidateComparator candidateComparator = new CandidateComparator(this::getResourceCost);
+    private final CandidateComparator candidateComparator =
+            new CandidateComparator(this::getResourceCost);
 
     private final Map<Resource, Subsystem> resToSub = new HashMap<>();
     private final Repository repository;
@@ -73,9 +73,15 @@ public class SubsystemResolveContext extends ResolveContext {
     private final Downloader downloader;
     private final FeaturesService.ServiceRequirementsBehavior serviceRequirements;
 
-    public SubsystemResolveContext(Subsystem root, RegionDigraph digraph, Repository globalRepository, Downloader downloader, FeaturesService.ServiceRequirementsBehavior serviceRequirements) {
+    public SubsystemResolveContext(
+            Subsystem root,
+            RegionDigraph digraph,
+            Repository globalRepository,
+            Downloader downloader,
+            FeaturesService.ServiceRequirementsBehavior serviceRequirements) {
         this.root = root;
-        this.globalRepository = globalRepository != null ? new SubsystemRepository(globalRepository) : null;
+        this.globalRepository =
+                globalRepository != null ? new SubsystemRepository(globalRepository) : null;
         this.downloader = downloader;
         this.serviceRequirements = serviceRequirements;
 
@@ -91,7 +97,7 @@ public class SubsystemResolveContext extends ResolveContext {
         //  prefer that one over any capabilities from other resources
         distance = computeDistances(root);
     }
-    
+
     public Repository getRepository() {
         return repository;
     }
@@ -108,7 +114,8 @@ public class SubsystemResolveContext extends ResolveContext {
         unSettledNodes.add(root);
 
         while (!unSettledNodes.isEmpty()) {
-            unSettledNodes.sort(Comparator.comparingInt(r -> distance.getOrDefault(r, Integer.MAX_VALUE)));
+            unSettledNodes.sort(
+                    Comparator.comparingInt(r -> distance.getOrDefault(r, Integer.MAX_VALUE)));
             Resource node = unSettledNodes.remove(0);
             if (settledNodes.add(node)) {
                 Map<Resource, Integer> edge = computeEdges(node);
@@ -137,7 +144,10 @@ public class SubsystemResolveContext extends ResolveContext {
                 // If there's a single provider for any kind of mandatory requirement,
                 // this means the resource is also mandatory.
                 // Else prefer resources from the same subsystem (with the same owner).
-                int v = (caps.size() == 1) ? 0 : (Objects.equals(ResolverUtil.getOwnerName(r), owner)) ? 1 : 10;
+                int v =
+                        (caps.size() == 1)
+                                ? 0
+                                : (Objects.equals(ResolverUtil.getOwnerName(r), owner)) ? 1 : 10;
                 edges.merge(r, v, Math::min);
             }
         }
@@ -159,8 +169,9 @@ public class SubsystemResolveContext extends ResolveContext {
     }
 
     /**
-     * {@link #resToSub} will quickly map all {@link Subsystem#getInstallable() installable resources} to their
-     * {@link Subsystem}
+     * {@link #resToSub} will quickly map all {@link Subsystem#getInstallable() installable
+     * resources} to their {@link Subsystem}
+     *
      * @param subsystem
      */
     void prepare(Subsystem subsystem) {
@@ -190,7 +201,8 @@ public class SubsystemResolveContext extends ResolveContext {
                 caps.addAll(res);
             } else if (globalRepository != null) {
                 // Only bring in external resources for non optional requirements
-                if (!RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(RESOLUTION_DIRECTIVE))) {
+                if (!RESOLUTION_OPTIONAL.equals(
+                        requirement.getDirectives().get(RESOLUTION_DIRECTIVE))) {
                     resMap = globalRepository.findProviders(Collections.singleton(requirement));
                     res = resMap != null ? resMap.get(requirement) : null;
                     if (res != null && !res.isEmpty()) {
@@ -212,14 +224,20 @@ public class SubsystemResolveContext extends ResolveContext {
                 Set<Resource> providers = new HashSet<>();
                 for (Capability cap : caps) {
                     Resource resource = cap.getResource();
-                    String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
+                    String id =
+                            ResolverUtil.getSymbolicName(resource)
+                                    + "|"
+                                    + ResolverUtil.getVersion(resource);
                     if (!providers.contains(resource)) {
                         Set<Resource> oldRes = new HashSet<>(providers);
                         providers.clear();
                         String r1 = getRegion(resource).getName();
                         boolean superceded = false;
                         for (Resource r : oldRes) {
-                            String id2 = ResolverUtil.getSymbolicName(r) + "|" + ResolverUtil.getVersion(r);
+                            String id2 =
+                                    ResolverUtil.getSymbolicName(r)
+                                            + "|"
+                                            + ResolverUtil.getVersion(r);
                             if (id.equals(id2)) {
                                 String r2 = getRegion(r).getName();
                                 if (r1.equals(r2)) {
@@ -267,7 +285,8 @@ public class SubsystemResolveContext extends ResolveContext {
     }
 
     @Override
-    public int insertHostedCapability(List<Capability> capabilities, HostedCapability hostedCapability) {
+    public int insertHostedCapability(
+            List<Capability> capabilities, HostedCapability hostedCapability) {
         int idx = Collections.binarySearch(capabilities, hostedCapability, candidateComparator);
         if (idx < 0) {
             idx = Math.abs(idx + 1);
@@ -278,8 +297,10 @@ public class SubsystemResolveContext extends ResolveContext {
 
     @Override
     public boolean isEffective(Requirement requirement) {
-        boolean isServiceReq = ServiceNamespace.SERVICE_NAMESPACE.equals(requirement.getNamespace());
-        return !(isServiceReq && FeaturesService.ServiceRequirementsBehavior.Disable == serviceRequirements);
+        boolean isServiceReq =
+                ServiceNamespace.SERVICE_NAMESPACE.equals(requirement.getNamespace());
+        return !(isServiceReq
+                && FeaturesService.ServiceRequirementsBehavior.Disable == serviceRequirements);
     }
 
     @Override
@@ -308,13 +329,16 @@ public class SubsystemResolveContext extends ResolveContext {
             if (identities != null && !identities.isEmpty()) {
                 Capability identity = identities.iterator().next();
                 Map<String, Object> attrs = new HashMap<>();
-                attrs.put(BUNDLE_SYMBOLICNAME_ATTRIBUTE, identity.getAttributes().get(IDENTITY_NAMESPACE));
-                attrs.put(BUNDLE_VERSION_ATTRIBUTE, identity.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE));
+                attrs.put(
+                        BUNDLE_SYMBOLICNAME_ATTRIBUTE,
+                        identity.getAttributes().get(IDENTITY_NAMESPACE));
+                attrs.put(
+                        BUNDLE_VERSION_ATTRIBUTE,
+                        identity.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE));
                 return filter.isAllowed(VISIBLE_BUNDLE_NAMESPACE, attrs);
             }
             return false;
         }
-
     }
 
     class SubsystemRepository implements Repository {
@@ -327,7 +351,8 @@ public class SubsystemResolveContext extends ResolveContext {
         }
 
         @Override
-        public Map<Requirement, Collection<Capability>> findProviders(Collection<? extends Requirement> requirements) {
+        public Map<Requirement, Collection<Capability>> findProviders(
+                Collection<? extends Requirement> requirements) {
             Map<Requirement, Collection<Capability>> base = repository.findProviders(requirements);
             Map<Requirement, Collection<Capability>> result = new HashMap<>();
             for (Map.Entry<Requirement, Collection<Capability>> entry : base.entrySet()) {
@@ -353,12 +378,22 @@ public class SubsystemResolveContext extends ResolveContext {
         private void wrap(Map<Capability, Capability> map, Subsystem subsystem, Resource resource) {
             ResourceImpl wrapped = new ResourceImpl();
             for (Capability cap : resource.getCapabilities(null)) {
-                CapabilityImpl wCap = new CapabilityImpl(wrapped, cap.getNamespace(), cap.getDirectives(), cap.getAttributes());
+                CapabilityImpl wCap =
+                        new CapabilityImpl(
+                                wrapped,
+                                cap.getNamespace(),
+                                cap.getDirectives(),
+                                cap.getAttributes());
                 map.put(cap, wCap);
                 wrapped.addCapability(wCap);
             }
             for (Requirement req : resource.getRequirements(null)) {
-                RequirementImpl wReq = new RequirementImpl(wrapped, req.getNamespace(), req.getDirectives(), req.getAttributes());
+                RequirementImpl wReq =
+                        new RequirementImpl(
+                                wrapped,
+                                req.getNamespace(),
+                                req.getDirectives(),
+                                req.getAttributes());
                 wrapped.addRequirement(wReq);
             }
             addIdentityRequirement(wrapped, subsystem, false);
@@ -370,5 +405,4 @@ public class SubsystemResolveContext extends ResolveContext {
             }
         }
     }
-
 }

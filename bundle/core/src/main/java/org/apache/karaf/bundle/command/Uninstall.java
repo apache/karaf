@@ -23,7 +23,7 @@ import org.osgi.framework.Bundle;
 @Command(scope = "bundle", name = "uninstall", description = "Uninstall bundles.")
 @Service
 public class Uninstall extends BundlesCommand {
-    
+
     public Uninstall() {
         defaultAllBundles = false;
         errorMessage = "Error uninstalling bundle";
@@ -33,5 +33,4 @@ public class Uninstall extends BundlesCommand {
     protected void executeOnBundle(Bundle bundle) throws Exception {
         bundle.uninstall();
     }
-
 }

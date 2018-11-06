@@ -18,11 +18,10 @@
  */
 package org.apache.karaf.shell.support.ansi;
 
-import java.io.IOException;
-
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import org.junit.Test;
 
 public class AnsiSplitterTest {
 
@@ -32,5 +31,4 @@ public class AnsiSplitterTest {
         assertEquals("\u001B[1mis\u001B[0m", AnsiSplitter.substring(text, 5, 7, 4));
         assertEquals(13, AnsiSplitter.length(text, 4));
     }
-
 }

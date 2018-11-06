@@ -23,15 +23,14 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-
 import org.apache.karaf.features.BundleInfo;
 
 /**
- * <p>Deployable element to install.</p>
+ * Deployable element to install.
  *
- * <p>Java class for bundle complex type.</p>
+ * <p>Java class for bundle complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ * <p>The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
  * &lt;complexType name="bundle"&gt;
@@ -46,30 +45,28 @@ import org.apache.karaf.features.BundleInfo;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "bundle", propOrder = {
-        "value"
-        })
+@XmlType(
+        name = "bundle",
+        propOrder = {"value"})
 public class Bundle implements BundleInfo {
 
     @XmlValue
     @XmlSchemaType(name = "anyURI")
     protected String value;
     /** Original value may be queried if {@link #isOverriden()} is <code>true</code> */
-    @XmlTransient
-    protected String originalValue;
+    @XmlTransient protected String originalValue;
+
     @XmlAttribute(name = "start-level")
     protected Integer startLevel;
-    @XmlAttribute
-    protected Boolean start; // = true;
-    @XmlAttribute
-    protected Boolean dependency;
-    @XmlTransient
-    private boolean blacklisted = false;
+
+    @XmlAttribute protected Boolean start; // = true;
+    @XmlAttribute protected Boolean dependency;
+    @XmlTransient private boolean blacklisted = false;
+
     @XmlTransient
     private BundleInfo.BundleOverrideMode overriden = BundleInfo.BundleOverrideMode.NONE;
 
-    public Bundle() {
-    }
+    public Bundle() {}
 
     public Bundle(String value) {
         this.value = value;
@@ -78,8 +75,7 @@ public class Bundle implements BundleInfo {
     /**
      * Gets the value of the value property.
      *
-     * @return possible object is
-     * {@link String }
+     * @return possible object is {@link String }
      */
     public String getLocation() {
         return value.trim();
@@ -88,8 +84,7 @@ public class Bundle implements BundleInfo {
     /**
      * Sets the value of the value property.
      *
-     * @param value allowed object is
-     *              {@link String }
+     * @param value allowed object is {@link String }
      */
     public void setLocation(String value) {
         this.value = value;
@@ -98,8 +93,7 @@ public class Bundle implements BundleInfo {
     /**
      * Gets the value of the startLevel property.
      *
-     * @return possible object is
-     * {@link Integer }
+     * @return possible object is {@link Integer }
      */
     public int getStartLevel() {
         return startLevel == null ? 0 : startLevel;
@@ -108,8 +102,7 @@ public class Bundle implements BundleInfo {
     /**
      * Sets the value of the startLevel property.
      *
-     * @param value allowed object is
-     *              {@link Integer }
+     * @param value allowed object is {@link Integer }
      */
     public void setStartLevel(Integer value) {
         this.startLevel = value;
@@ -118,8 +111,7 @@ public class Bundle implements BundleInfo {
     /**
      * Gets the value of the start property.
      *
-     * @return possible object is
-     * {@link Boolean }
+     * @return possible object is {@link Boolean }
      */
     public boolean isStart() {
         return start == null ? true : start;
@@ -128,8 +120,7 @@ public class Bundle implements BundleInfo {
     /**
      * Sets the value of the start property.
      *
-     * @param value allowed object is
-     *              {@link Boolean }
+     * @param value allowed object is {@link Boolean }
      */
     public void setStart(Boolean value) {
         this.start = value;
@@ -138,8 +129,7 @@ public class Bundle implements BundleInfo {
     /**
      * Gets the value of the dependency property.
      *
-     * @return possible object is
-     * {@link Boolean }
+     * @return possible object is {@link Boolean }
      */
     public boolean isDependency() {
         return dependency == null ? false : dependency;
@@ -148,8 +138,7 @@ public class Bundle implements BundleInfo {
     /**
      * Sets the value of the dependency property.
      *
-     * @param value allowed object is
-     *              {@link Boolean }
+     * @param value allowed object is {@link Boolean }
      */
     public void setDependency(Boolean value) {
         this.dependency = value;
@@ -198,7 +187,8 @@ public class Bundle implements BundleInfo {
         if (start != bundle.start) {
             return false;
         }
-        if ((startLevel != null ? startLevel : 0) != (bundle.startLevel != null ? bundle.startLevel : 0)) {
+        if ((startLevel != null ? startLevel : 0)
+                != (bundle.startLevel != null ? bundle.startLevel : 0)) {
             return false;
         }
         return value != null ? value.equals(bundle.value) : bundle.value == null;

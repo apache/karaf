@@ -25,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
-
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.osgi.framework.BundleContext;
@@ -41,27 +40,22 @@ public class BootFeaturesInstaller {
     private final String[] repositories;
     private final String features;
     private final boolean asynchronous;
-    
-    /**
-     * The Unix separator character.
-     */
+
+    /** The Unix separator character. */
     private static final char UNIX_SEPARATOR = '/';
 
-    /**
-     * The Windows separator character.
-     */
+    /** The Windows separator character. */
     private static final char WINDOWS_SEPARATOR = '\\';
 
-    /**
-     * The system separator character.
-     */
+    /** The system separator character. */
     private static final char SYSTEM_SEPARATOR = File.separatorChar;
-    
-    public BootFeaturesInstaller(BundleContext bundleContext,
-                                 FeaturesServiceImpl featuresService,
-                                 String[] repositories,
-                                 String features,
-                                 boolean asynchronous) {
+
+    public BootFeaturesInstaller(
+            BundleContext bundleContext,
+            FeaturesServiceImpl featuresService,
+            String[] repositories,
+            String features,
+            boolean asynchronous) {
         this.bundleContext = bundleContext;
         this.featuresService = featuresService;
         this.repositories = repositories;
@@ -69,9 +63,7 @@ public class BootFeaturesInstaller {
         this.asynchronous = asynchronous;
     }
 
-    /**
-     * Install boot features
-     */
+    /** Install boot features */
     public void start() {
         if (featuresService.isBootDone()) {
             publishBootFinished();
@@ -94,7 +86,8 @@ public class BootFeaturesInstaller {
 
             List<Set<String>> stagedFeatures = parseBootFeatures(features);
             for (Set<String> features : stagedFeatures) {
-                featuresService.installFeatures(features, EnumSet.of(FeaturesService.Option.NoFailOnFeatureNotFound));
+                featuresService.installFeatures(
+                        features, EnumSet.of(FeaturesService.Option.NoFailOnFeatureNotFound));
             }
             featuresService.bootDone();
             publishBootFinished();
@@ -143,7 +136,8 @@ public class BootFeaturesInstaller {
                     }
                     paren++;
                 } else {
-                    throw new IllegalArgumentException("Bad syntax in boot features: '" + bootFeatures + "'");
+                    throw new IllegalArgumentException(
+                            "Bad syntax in boot features: '" + bootFeatures + "'");
                 }
             } else if (token.equals(")")) {
                 if (paren == 1) {
@@ -153,7 +147,8 @@ public class BootFeaturesInstaller {
                     }
                     paren--;
                 } else {
-                    throw new IllegalArgumentException("Bad syntax in boot features: '" + bootFeatures + "'");
+                    throw new IllegalArgumentException(
+                            "Bad syntax in boot features: '" + bootFeatures + "'");
                 }
             } else if (!token.matches("[ \t\r\n]+|,")) { // ignore spaces and commas
                 stage.add(token);
@@ -167,17 +162,17 @@ public class BootFeaturesInstaller {
 
     private void publishBootFinished() {
         if (bundleContext != null) {
-            BootFinished bootFinished = new BootFinished() {
-            };
-            bundleContext.registerService(BootFinished.class, bootFinished, new Hashtable<String, String>());
+            BootFinished bootFinished = new BootFinished() {};
+            bundleContext.registerService(
+                    BootFinished.class, bootFinished, new Hashtable<String, String>());
         }
     }
 
-    //-----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
     /**
      * Converts all separators to the Unix separator of forward slash.
-     * 
-     * @param path  the path to be changed, null ignored
+     *
+     * @param path the path to be changed, null ignored
      * @return the updated path
      */
     private String separatorsToUnix(String path) {
@@ -186,7 +181,7 @@ public class BootFeaturesInstaller {
             if (path == null || path.indexOf(WINDOWS_SEPARATOR) == -1) {
                 return path;
             }
-            
+
             path = path.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR);
             LOGGER.debug("Converted path to unix separators: {}", path);
         }

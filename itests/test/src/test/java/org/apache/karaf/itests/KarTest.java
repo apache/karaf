@@ -17,10 +17,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -44,5 +42,4 @@ public class KarTest extends KarafTestSupport {
         List<String> kars = (List<String>) mbeanServer.getAttribute(name, "Kars");
         assertEquals(0, kars.size());
     }
-
 }

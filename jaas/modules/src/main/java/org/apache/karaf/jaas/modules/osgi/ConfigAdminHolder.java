@@ -29,5 +29,4 @@ public class ConfigAdminHolder {
     public void setService(ConfigurationAdmin configAdmin) {
         ConfigAdminHolder.configAdmin = configAdmin;
     }
-
 }

@@ -16,17 +16,16 @@
  */
 package org.apache.karaf.jms.internal;
 
-import org.apache.karaf.util.json.JsonReader;
-
+import java.io.StringReader;
+import java.util.Collections;
+import java.util.List;
 import javax.jms.ConnectionMetaData;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
-import java.io.StringReader;
-import java.util.Collections;
-import java.util.List;
+import org.apache.karaf.util.json.JsonReader;
 
 class ArtemisDestinationSourceFactory implements DestinationSource.Factory {
 
@@ -34,7 +33,8 @@ class ArtemisDestinationSourceFactory implements DestinationSource.Factory {
     public DestinationSource create(JMSContext context) {
         try {
             ConnectionMetaData cmd = context.getMetaData();
-            if (cmd.getJMSProviderName().equals("ActiveMQ") && cmd.getProviderVersion().startsWith("2.")) {
+            if (cmd.getJMSProviderName().equals("ActiveMQ")
+                    && cmd.getProviderVersion().startsWith("2.")) {
                 return type -> getNames(context, type);
             }
         } catch (Throwable t) {
@@ -50,7 +50,8 @@ class ArtemisDestinationSourceFactory implements DestinationSource.Factory {
 
             context.start();
 
-            String routing = type == DestinationSource.DestinationType.Queue ? "ANYCAST" : "MULTICAST";
+            String routing =
+                    type == DestinationSource.DestinationType.Queue ? "ANYCAST" : "MULTICAST";
             context.createProducer()
                     .setProperty("_AMQ_ResourceName", "broker")
                     .setProperty("_AMQ_OperationName", "getQueueNames")

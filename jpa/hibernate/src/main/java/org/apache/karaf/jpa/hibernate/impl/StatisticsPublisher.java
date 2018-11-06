@@ -17,13 +17,11 @@
 package org.apache.karaf.jpa.hibernate.impl;
 
 import java.lang.reflect.Proxy;
-
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-
 import org.apache.karaf.jpa.hibernate.StatisticsMXBean;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -36,11 +34,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Track EntityManagerFactory services for the persistence units. 
- * Manage on StatisticsMXBean for each persistence unit named like:
- * org.hibernate.statistics:unitName=&lt;name of persistence unit&gt;
+ * Track EntityManagerFactory services for the persistence units. Manage on StatisticsMXBean for
+ * each persistence unit named like: org.hibernate.statistics:unitName=&lt;name of persistence
+ * unit&gt;
  */
-public class StatisticsPublisher implements ServiceTrackerCustomizer<EntityManagerFactory, EntityManagerFactory> {
+public class StatisticsPublisher
+        implements ServiceTrackerCustomizer<EntityManagerFactory, EntityManagerFactory> {
     private static Logger LOG = LoggerFactory.getLogger(StatisticsPublisher.class);
     private BundleContext context;
     private MBeanServer mbeanServer;
@@ -51,11 +50,11 @@ public class StatisticsPublisher implements ServiceTrackerCustomizer<EntityManag
         this.mbeanServer = mbeanServer;
         this.emfTracker = new ServiceTracker<>(context, EntityManagerFactory.class, this);
     }
-    
+
     public void start() {
         this.emfTracker.open(true);
     }
-    
+
     public void stop() {
         ServiceReference<EntityManagerFactory>[] emfRefs = this.emfTracker.getServiceReferences();
         for (ServiceReference<EntityManagerFactory> emfRef : emfRefs) {
@@ -66,18 +65,19 @@ public class StatisticsPublisher implements ServiceTrackerCustomizer<EntityManag
         }
         this.emfTracker.close();
     }
-    
+
     ObjectName getOName(ServiceReference<EntityManagerFactory> reference) {
         try {
-            String unitName = (String)reference.getProperty("osgi.unit.name");
+            String unitName = (String) reference.getProperty("osgi.unit.name");
             return new ObjectName("org.hibernate.statistics", "unitName", unitName);
         } catch (MalformedObjectNameException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
-    
-    private void publishStatistics(ServiceReference<EntityManagerFactory> reference, EntityManagerFactory emf) {
-        String persitenceProvider = (String)reference.getProperty("osgi.unit.provider");
+
+    private void publishStatistics(
+            ServiceReference<EntityManagerFactory> reference, EntityManagerFactory emf) {
+        String persitenceProvider = (String) reference.getProperty("osgi.unit.provider");
         if (!"org.hibernate.ejb.HibernatePersistence".equals(persitenceProvider)) {
             return;
         }
@@ -103,16 +103,19 @@ public class StatisticsPublisher implements ServiceTrackerCustomizer<EntityManag
     }
 
     private Object getStatisticsMBean(final Statistics statistics) {
-        return Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { StatisticsMXBean.class },
+        return Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class<?>[] {StatisticsMXBean.class},
                 (proxy, method, args) -> method.invoke(statistics, args));
     }
 
     @Override
-    public void modifiedService(ServiceReference<EntityManagerFactory> reference, EntityManagerFactory service) {
-    }
+    public void modifiedService(
+            ServiceReference<EntityManagerFactory> reference, EntityManagerFactory service) {}
 
     @Override
-    public void removedService(ServiceReference<EntityManagerFactory> reference, EntityManagerFactory service) {
+    public void removedService(
+            ServiceReference<EntityManagerFactory> reference, EntityManagerFactory service) {
         try {
             mbeanServer.unregisterMBean(getOName(reference));
         } catch (Exception e) {

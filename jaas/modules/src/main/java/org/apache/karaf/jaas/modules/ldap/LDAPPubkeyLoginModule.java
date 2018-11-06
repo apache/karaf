@@ -14,19 +14,18 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Map;
 import javax.naming.NamingException;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
-
+import javax.security.auth.login.LoginException;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
@@ -35,14 +34,16 @@ import org.apache.karaf.jaas.modules.publickey.PublickeyLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Karaf JAAS login module which uses a LDAP backend.
- */
+/** Karaf JAAS login module which uses a LDAP backend. */
 public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
 
     private static Logger logger = LoggerFactory.getLogger(LDAPPubkeyLoginModule.class);
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(
+            Subject subject,
+            CallbackHandler callbackHandler,
+            Map<String, ?> sharedState,
+            Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         LDAPCache.clear();
     }
@@ -67,7 +68,9 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
         } catch (IOException ioException) {
             throw new LoginException(ioException.getMessage());
         } catch (UnsupportedCallbackException unsupportedCallbackException) {
-            throw new LoginException(unsupportedCallbackException.getMessage() + " not available to obtain information from user.");
+            throw new LoginException(
+                    unsupportedCallbackException.getMessage()
+                            + " not available to obtain information from user.");
         }
 
         user = Util.doRFC2254Encoding(((NameCallback) callbacks[0]).getName());
@@ -109,10 +112,17 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
             if (!this.detailedLoginExcepion) {
                 throw new LoginException("Authentication failed");
             } else {
-                logger.warn("Public key authentication failed for user {}: {}", user, e.getMessage(), e);
-                throw new LoginException("Public key authentication failed for user " + user + ": " + e.getMessage());
+                logger.warn(
+                        "Public key authentication failed for user {}: {}",
+                        user,
+                        e.getMessage(),
+                        e);
+                throw new LoginException(
+                        "Public key authentication failed for user "
+                                + user
+                                + ": "
+                                + e.getMessage());
             }
-
         }
 
         principals.add(new UserPrincipal(user));
@@ -130,9 +140,9 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
         return true;
     }
 
-    private void authenticatePubkey(String userDn, PublicKey key, LDAPCache cache) throws FailedLoginException, NamingException {
-        if (key == null)
-            throw new FailedLoginException("no public key supplied by the client");
+    private void authenticatePubkey(String userDn, PublicKey key, LDAPCache cache)
+            throws FailedLoginException, NamingException {
+        if (key == null) throw new FailedLoginException("no public key supplied by the client");
         String[] storedKeys = cache.getUserPubkeys(userDn);
         if (storedKeys.length > 0) {
             String keyString = PublickeyLoginModule.getString(key);
@@ -154,5 +164,4 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
         principals.clear();
         return true;
     }
-
 }

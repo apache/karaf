@@ -16,16 +16,15 @@
  */
 package org.apache.karaf.scheduler.core;
 
-import org.apache.karaf.scheduler.ScheduleOptions;
-import org.apache.karaf.scheduler.Scheduler;
-import org.apache.karaf.scheduler.SchedulerMBean;
-import org.apache.karaf.scheduler.command.support.TriggerJob;
-
+import java.util.Map;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
-import java.util.Map;
+import org.apache.karaf.scheduler.ScheduleOptions;
+import org.apache.karaf.scheduler.Scheduler;
+import org.apache.karaf.scheduler.SchedulerMBean;
+import org.apache.karaf.scheduler.command.support.TriggerJob;
 
 public class SchedulerMBeanImpl extends StandardMBean implements SchedulerMBean {
 
@@ -38,18 +37,26 @@ public class SchedulerMBeanImpl extends StandardMBean implements SchedulerMBean 
     @Override
     public TabularData getJobs() throws MBeanException {
         try {
-            CompositeType jobType = new CompositeType("Job", "Scheduler job",
-                    new String[]{ "Job", "Schedule" },
-                    new String[]{ "Job Name", "Job Scheduling" },
-                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING });
-            TabularType tableType = new TabularType("Jobs", "Tables of all jobs", jobType, new String[]{ "Job" });
+            CompositeType jobType =
+                    new CompositeType(
+                            "Job",
+                            "Scheduler job",
+                            new String[] {"Job", "Schedule"},
+                            new String[] {"Job Name", "Job Scheduling"},
+                            new OpenType[] {SimpleType.STRING, SimpleType.STRING});
+            TabularType tableType =
+                    new TabularType("Jobs", "Tables of all jobs", jobType, new String[] {"Job"});
             TabularData table = new TabularDataSupport(tableType);
 
             Map<Object, ScheduleOptions> jobs = scheduler.getJobs();
             for (Map.Entry<Object, ScheduleOptions> entry : jobs.entrySet()) {
-                CompositeData data = new CompositeDataSupport(jobType,
-                        new String[]{ "Job", "Schedule" },
-                        new Object[]{ entry.getValue().name(), entry.getValue().schedule()});
+                CompositeData data =
+                        new CompositeDataSupport(
+                                jobType,
+                                new String[] {"Job", "Schedule"},
+                                new Object[] {
+                                    entry.getValue().name(), entry.getValue().schedule()
+                                });
                 table.put(data);
             }
             return table;
@@ -87,5 +94,4 @@ public class SchedulerMBeanImpl extends StandardMBean implements SchedulerMBean 
     public void setScheduler(Scheduler scheduler) {
         this.scheduler = scheduler;
     }
-
 }

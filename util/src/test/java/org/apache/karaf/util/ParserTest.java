@@ -16,22 +16,23 @@
  */
 package org.apache.karaf.util;
 
-import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.karaf.util.maven.Parser;
-import org.junit.Test;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.karaf.util.maven.Parser;
+import org.junit.Test;
+
 public class ParserTest {
 
-    private final static String PATH_WITH_CLASSIFIER = "org/apache/karaf/test/1.0-SNAPSHOT/test-1.0-SNAPSHOT-feature.xml";
-    private final static String PATH_WITHOUT_CLASSIFIER = "org/apache/karaf/test/1.0-SNAPSHOT/test-1.0-SNAPSHOT.xml";
+    private static final String PATH_WITH_CLASSIFIER =
+            "org/apache/karaf/test/1.0-SNAPSHOT/test-1.0-SNAPSHOT-feature.xml";
+    private static final String PATH_WITHOUT_CLASSIFIER =
+            "org/apache/karaf/test/1.0-SNAPSHOT/test-1.0-SNAPSHOT.xml";
 
     @Test
     public void parserTest() {
@@ -59,5 +60,4 @@ public class ParserTest {
         Parser p6 = new Parser("org.apache/karaf/1");
         assertThat(p6.toMvnURI(), equalTo("org.apache/karaf/1"));
     }
-
 }

@@ -15,7 +15,6 @@ package org.apache.karaf.itests.ssh;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -26,10 +25,9 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-
 public class KarSshCommandSecurityTest extends SshCommandTestBase {
     private static int counter = 0;
-        
+
     @Test
     public void testKarCommandSecurityViaSsh() throws Exception {
         String vieweruser = "view" + System.nanoTime() + "_" + counter++;

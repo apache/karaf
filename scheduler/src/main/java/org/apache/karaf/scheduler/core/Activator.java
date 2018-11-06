@@ -16,23 +16,14 @@
  */
 package org.apache.karaf.scheduler.core;
 
+import java.util.Enumeration;
+import java.util.Properties;
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ManagedService;
-import org.quartz.impl.jdbcjobstore.JobStoreSupport;
-import org.quartz.impl.jdbcjobstore.JobStoreTX;
-import org.quartz.impl.jdbcjobstore.StdJDBCDelegate;
-import org.quartz.simpl.RAMJobStore;
-import org.quartz.simpl.SimpleThreadPool;
-import org.quartz.spi.JobStore;
-import org.quartz.spi.ThreadPool;
-import org.quartz.utils.ConnectionProvider;
-
-import java.util.Enumeration;
-import java.util.Properties;
 
 @Services(provides = @ProvideService(Scheduler.class))
 @Managed("org.apache.karaf.scheduler.quartz")
@@ -78,5 +69,4 @@ public class Activator extends BaseActivator implements ManagedService {
         }
         super.doStop();
     }
-
 }

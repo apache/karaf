@@ -29,5 +29,4 @@ public class Activator extends BaseActivator {
         mbean.setBundleContext(bundleContext);
         registerMBean(mbean, "type=service");
     }
-
 }

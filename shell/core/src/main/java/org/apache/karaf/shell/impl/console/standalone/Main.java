@@ -32,7 +32,6 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
@@ -77,7 +76,9 @@ public class Main {
         // threadio.stop();
     }
 
-    private void run(ThreadIO threadio, String[] args, InputStream in, PrintStream out, PrintStream err) throws Exception {
+    private void run(
+            ThreadIO threadio, String[] args, InputStream in, PrintStream out, PrintStream err)
+            throws Exception {
         StringBuilder sb = new StringBuilder();
         String classpath = null;
         boolean batch = false;
@@ -106,7 +107,8 @@ public class Main {
         }
 
         if (file != null) {
-            try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            try (Reader reader =
+                    new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
                 sb.setLength(0);
                 for (int c = reader.read(); c >= 0; c = reader.read()) {
                     sb.append((char) c);
@@ -131,11 +133,20 @@ public class Main {
         run(sessionFactory, sb.toString(), in, out, err, cl);
     }
 
-    private void run(final SessionFactory sessionFactory, String command, final InputStream in, final PrintStream out, final PrintStream err, ClassLoader cl) throws Exception {
+    private void run(
+            final SessionFactory sessionFactory,
+            String command,
+            final InputStream in,
+            final PrintStream out,
+            final PrintStream err,
+            ClassLoader cl)
+            throws Exception {
 
         try (org.jline.terminal.Terminal jlineTerminal = TerminalBuilder.terminal()) {
             final Terminal terminal = new JLineTerminal(jlineTerminal);
-            try (Session session = createSession(sessionFactory, command.length() > 0 ? null : in, out, err, terminal)) {
+            try (Session session =
+                    createSession(
+                            sessionFactory, command.length() > 0 ? null : in, out, err, terminal)) {
                 session.put("USER", user);
                 session.put("APPLICATION", application);
 
@@ -144,7 +155,8 @@ public class Main {
                 if (command.length() > 0) {
                     // Shell is directly executing a sub/command, we don't setup a console
                     // in this case, this avoids us reading from stdin un-necessarily.
-                    session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
+                    session.put(
+                            NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
                     session.put(Session.PRINT_STACK_TRACES, "execution");
                     try {
                         session.execute(command);
@@ -171,7 +183,13 @@ public class Main {
      * @return the created session.
      * @throws Exception if something goes wrong during session creation.
      */
-    protected Session createSession(SessionFactory sessionFactory, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+    protected Session createSession(
+            SessionFactory sessionFactory,
+            InputStream in,
+            PrintStream out,
+            PrintStream err,
+            Terminal terminal)
+            throws Exception {
         return sessionFactory.create(in, out, err, terminal, null, null);
     }
 
@@ -182,8 +200,8 @@ public class Main {
     }
 
     /**
-     * Sub classes can override so that their registered commands do not conflict with the default shell
-     * implementation.
+     * Sub classes can override so that their registered commands do not conflict with the default
+     * shell implementation.
      *
      * @return the location of the discovery resource.
      */
@@ -191,8 +209,10 @@ public class Main {
         return "META-INF/services/org/apache/karaf/shell/commands";
     }
 
-    protected void discoverCommands(Session session, ClassLoader cl, String resource) throws IOException, ClassNotFoundException {
-        Manager manager = new ManagerImpl(session.getRegistry(), session.getFactory().getRegistry(), true);
+    protected void discoverCommands(Session session, ClassLoader cl, String resource)
+            throws IOException, ClassNotFoundException {
+        Manager manager =
+                new ManagerImpl(session.getRegistry(), session.getFactory().getRegistry(), true);
         Enumeration<URL> urls = cl.getResources(resource);
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
@@ -227,10 +247,11 @@ public class Main {
     }
 
     /**
-     * <p>Returns whether or not we are in multi-scope mode.</p>
+     * Returns whether or not we are in multi-scope mode.
      *
-     * <p>The default mode is multi-scoped where we prefix commands by their scope. If we are in single
-     * scoped mode then we don't use scope prefixes when registering or tab completing commands.</p>
+     * <p>The default mode is multi-scoped where we prefix commands by their scope. If we are in
+     * single scoped mode then we don't use scope prefixes when registering or tab completing
+     * commands.
      *
      * @return true if the console is multi-scope, false else.
      */

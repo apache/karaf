@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.karaf.maven.core.MavenRepositoryURL;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -33,39 +32,84 @@ import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.RepositoryPolicy;
 import org.osgi.service.cm.Configuration;
 
-@Command(scope = "maven", name = "repository-change", description = "Changes configuration of Maven repository")
+@Command(
+        scope = "maven",
+        name = "repository-change",
+        description = "Changes configuration of Maven repository")
 @Service
 public class RepositoryChangeCommand extends RepositoryEditCommandSupport {
 
-    @Option(name = "-s", aliases = { "--snapshots" }, description = "Enable SNAPSHOT handling in the repository", required = false, multiValued = false)
+    @Option(
+            name = "-s",
+            aliases = {"--snapshots"},
+            description = "Enable SNAPSHOT handling in the repository",
+            required = false,
+            multiValued = false)
     boolean snapshots = false;
 
-    @Option(name = "-nr", aliases = { "--no-releases" }, description = "Disable release handling in this repository", required = false, multiValued = false)
+    @Option(
+            name = "-nr",
+            aliases = {"--no-releases"},
+            description = "Disable release handling in this repository",
+            required = false,
+            multiValued = false)
     boolean noReleases = false;
 
-    @Option(name = "-up", aliases = { "--update-policy" }, description = "Update policy for repository (never, daily (default), interval:N, always)", required = false, multiValued = false)
+    @Option(
+            name = "-up",
+            aliases = {"--update-policy"},
+            description =
+                    "Update policy for repository (never, daily (default), interval:N, always)",
+            required = false,
+            multiValued = false)
     String updatePolicy;
 
-    @Option(name = "-cp", aliases = { "--checksum-policy" }, description = "Checksum policy for repository (ignore, warn (default), fail)", required = false, multiValued = false)
+    @Option(
+            name = "-cp",
+            aliases = {"--checksum-policy"},
+            description = "Checksum policy for repository (ignore, warn (default), fail)",
+            required = false,
+            multiValued = false)
     String checksumPolicy;
 
-    @Option(name = "-u", aliases = { "--username" }, description = "Username for remote repository", required = false, multiValued = false)
+    @Option(
+            name = "-u",
+            aliases = {"--username"},
+            description = "Username for remote repository",
+            required = false,
+            multiValued = false)
     String username;
 
-    @Option(name = "-p", aliases = { "--password" }, description = "Password for remote repository (may be encrypted, see \"maven:password -ep\")", required = false, multiValued = false)
+    @Option(
+            name = "-p",
+            aliases = {"--password"},
+            description =
+                    "Password for remote repository (may be encrypted, see \"maven:password -ep\")",
+            required = false,
+            multiValued = false)
     String password;
 
-    @Argument(description = "Repository URI. It may be file:// based, http(s):// based, may use other known protocol or even property placeholders (like ${karaf.base})", required = false)
+    @Argument(
+            description =
+                    "Repository URI. It may be file:// based, http(s):// based, may use other known protocol or even property placeholders (like ${karaf.base})",
+            required = false)
     String uri;
 
     @Override
-    protected void edit(String prefix, Dictionary<String, Object> config,
-                        MavenRepositoryURL[] allRepos, MavenRepositoryURL[] pidRepos, MavenRepositoryURL[] settingsRepos) throws Exception {
+    protected void edit(
+            String prefix,
+            Dictionary<String, Object> config,
+            MavenRepositoryURL[] allRepos,
+            MavenRepositoryURL[] pidRepos,
+            MavenRepositoryURL[] settingsRepos)
+            throws Exception {
 
-        Optional<MavenRepositoryURL> first = Arrays.stream(allRepos)
-                .filter((repo) -> id.equals(repo.getId())).findFirst();
+        Optional<MavenRepositoryURL> first =
+                Arrays.stream(allRepos).filter((repo) -> id.equals(repo.getId())).findFirst();
         if (!first.isPresent()) {
-            System.err.printf("Can't find %s repository with ID \"%s\"\n", (defaultRepository ? "default" : "remote"), id);
+            System.err.printf(
+                    "Can't find %s repository with ID \"%s\"\n",
+                    (defaultRepository ? "default" : "remote"), id);
             return;
         }
 
@@ -128,7 +172,11 @@ public class RepositoryChangeCommand extends RepositoryEditCommandSupport {
         if (!defaultRepository && changedRepository.getFrom() == MavenRepositoryURL.FROM.SETTINGS) {
             // find <repository> in any active profile to change it
             for (Profile profile : mavenSettings.getProfiles()) {
-                Optional<Repository> repository = profile.getRepositories().stream().filter((r) -> id.equals(r.getId())).findFirst();
+                Optional<Repository> repository =
+                        profile.getRepositories()
+                                .stream()
+                                .filter((r) -> id.equals(r.getId()))
+                                .findFirst();
                 if (repository.isPresent()) {
                     // I can't imagine it's not...
                     Repository r = repository.get();
@@ -137,7 +185,10 @@ public class RepositoryChangeCommand extends RepositoryEditCommandSupport {
                         r.setSnapshots(new RepositoryPolicy());
                         r.getSnapshots().setEnabled(false);
                     } else {
-                        RepositoryPolicy rp = r.getSnapshots() == null ? new RepositoryPolicy() : r.getSnapshots();
+                        RepositoryPolicy rp =
+                                r.getSnapshots() == null
+                                        ? new RepositoryPolicy()
+                                        : r.getSnapshots();
                         rp.setEnabled(true);
                         if (checksumPolicy != null) {
                             rp.setChecksumPolicy(changedRepository.getSnapshotsChecksumPolicy());
@@ -155,7 +206,8 @@ public class RepositoryChangeCommand extends RepositoryEditCommandSupport {
                         r.setReleases(new RepositoryPolicy());
                         r.getReleases().setEnabled(false);
                     } else {
-                        RepositoryPolicy rp = r.getReleases() == null ? new RepositoryPolicy() : r.getReleases();
+                        RepositoryPolicy rp =
+                                r.getReleases() == null ? new RepositoryPolicy() : r.getReleases();
                         rp.setEnabled(true);
                         if (checksumPolicy != null) {
                             rp.setChecksumPolicy(changedRepository.getReleasesChecksumPolicy());
@@ -182,7 +234,8 @@ public class RepositoryChangeCommand extends RepositoryEditCommandSupport {
                 }
                 newRepos.add(_r);
             }
-            updatePidRepositories(prefix, config, defaultRepository, newRepos, settingsRepos.length > 0);
+            updatePidRepositories(
+                    prefix, config, defaultRepository, newRepos, settingsRepos.length > 0);
             if (credentialsUpdated) {
                 updateSettings(prefix, config);
             }
@@ -193,5 +246,4 @@ public class RepositoryChangeCommand extends RepositoryEditCommandSupport {
 
         success = true;
     }
-
 }

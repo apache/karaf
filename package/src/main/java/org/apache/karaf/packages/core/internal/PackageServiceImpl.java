@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import org.apache.karaf.packages.core.PackageRequirement;
 import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
@@ -46,14 +45,16 @@ public class PackageServiceImpl implements PackageService {
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
             if (rev != null) {
-                List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+                List<BundleCapability> caps =
+                        rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
                 for (BundleCapability cap : caps) {
                     Map<String, Object> attr = cap.getAttributes();
-                    String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
-                    Version version = (Version)attr.get("version");
+                    String packageName = (String) attr.get(BundleRevision.PACKAGE_NAMESPACE);
+                    Version version = (Version) attr.get("version");
                     String key = packageName + ":" + version.toString();
                     PackageVersion pVer =
-                            packageVersionMap.computeIfAbsent(key, k -> new PackageVersion(packageName, version));
+                            packageVersionMap.computeIfAbsent(
+                                    key, k -> new PackageVersion(packageName, version));
                     pVer.addBundle(bundle);
                 }
             }
@@ -68,10 +69,17 @@ public class PackageServiceImpl implements PackageService {
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
             if (rev != null) {
-                List<BundleRequirement> reqs = rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
+                List<BundleRequirement> reqs =
+                        rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
                 for (BundleRequirement req : reqs) {
                     PackageRequirement preq = create(req, bundle);
-                    requirements.put(preq.getPackageName() + "|" + preq.getFilter() + "|" + preq.getBundle().getBundleId(), preq);
+                    requirements.put(
+                            preq.getPackageName()
+                                    + "|"
+                                    + preq.getFilter()
+                                    + "|"
+                                    + preq.getBundle().getBundleId(),
+                            preq);
                 }
             }
         }
@@ -83,7 +91,8 @@ public class PackageServiceImpl implements PackageService {
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
             if (rev != null) {
-                List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+                List<BundleCapability> caps =
+                        rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
                 for (BundleCapability cap : caps) {
                     if (req.matches(cap)) {
                         return true;
@@ -102,7 +111,7 @@ public class PackageServiceImpl implements PackageService {
         List<String> exports = new ArrayList<>();
         for (BundleCapability cap : caps) {
             Map<String, Object> attr = cap.getAttributes();
-            String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
+            String packageName = (String) attr.get(BundleRevision.PACKAGE_NAMESPACE);
             exports.add(packageName);
         }
         return exports;
@@ -112,7 +121,8 @@ public class PackageServiceImpl implements PackageService {
     public List<String> getImports(long bundleId) {
         Bundle bundle = bundleContext.getBundle(bundleId);
         BundleRevision rev = bundle.adapt(BundleRevision.class);
-        List<BundleRequirement> reqs = rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
+        List<BundleRequirement> reqs =
+                rev.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
         List<String> imports = new ArrayList<>();
         for (BundleRequirement req : reqs) {
             PackageRequirement packageReq = create(req, bundle);
@@ -120,7 +130,7 @@ public class PackageServiceImpl implements PackageService {
         }
         return imports;
     }
-    
+
     PackageRequirement create(BundleRequirement req, Bundle bundle) {
         Map<String, String> attr = req.getDirectives();
         String filter = attr.get("filter");
@@ -128,9 +138,13 @@ public class PackageServiceImpl implements PackageService {
         boolean optional = "optional".equals(resolution);
         boolean resolveable = checkResolveAble(req);
         ImportDetails details = new ImportDetails(filter);
-        return new PackageRequirement(filter, optional, bundle, resolveable, 
-                                      details.name, details.minVersion, details.maxVersion);
+        return new PackageRequirement(
+                filter,
+                optional,
+                bundle,
+                resolveable,
+                details.name,
+                details.minVersion,
+                details.maxVersion);
     }
-    
-
 }

@@ -16,6 +16,19 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import static java.util.jar.JarFile.MANIFEST_NAME;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEATURE;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
+import static org.apache.karaf.features.internal.resolver.ResourceUtils.toFeatureRequirement;
+import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
+import static org.eclipse.equinox.region.RegionFilter.VISIBLE_ALL_NAMESPACE;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
+import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.resource.Namespace.REQUIREMENT_FILTER_DIRECTIVE;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +44,6 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import org.apache.felix.utils.collections.StringArrayMap;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
@@ -64,43 +76,27 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
-import static java.util.jar.JarFile.MANIFEST_NAME;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEATURE;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_SUBSYSTEM;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.addIdentityRequirement;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.getUri;
-import static org.apache.karaf.features.internal.resolver.ResourceUtils.toFeatureRequirement;
-import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
-import static org.eclipse.equinox.region.RegionFilter.VISIBLE_ALL_NAMESPACE;
-import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
-import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
-import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
-import static org.osgi.resource.Namespace.REQUIREMENT_FILTER_DIRECTIVE;
-
-/**
- * A {@link Resource} representing ...
- */
+/** A {@link Resource} representing ... */
 public class Subsystem extends ResourceImpl {
 
     private static final String ALL_FILTER = "(|(!(all=*))(all=*))";
 
-    private static final String SUBSYSTEM_FILTER = String.format("(%s=%s)", CAPABILITY_TYPE_ATTRIBUTE, TYPE_SUBSYSTEM);
+    private static final String SUBSYSTEM_FILTER =
+            String.format("(%s=%s)", CAPABILITY_TYPE_ATTRIBUTE, TYPE_SUBSYSTEM);
 
-    private static final String FEATURE_FILTER = String.format("(%s=%s)", CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
+    private static final String FEATURE_FILTER =
+            String.format("(%s=%s)", CAPABILITY_TYPE_ATTRIBUTE, TYPE_FEATURE);
 
-    private static final String SUBSYSTEM_OR_FEATURE_FILTER = String.format("(|%s%s)", SUBSYSTEM_FILTER, FEATURE_FILTER);
+    private static final String SUBSYSTEM_OR_FEATURE_FILTER =
+            String.format("(|%s%s)", SUBSYSTEM_FILTER, FEATURE_FILTER);
 
     // Everything is visible
     private static final Map<String, Set<String>> SHARE_ALL_POLICY =
-            Collections.singletonMap(
-                    VISIBLE_ALL_NAMESPACE,
-                    Collections.singleton(ALL_FILTER));
+            Collections.singletonMap(VISIBLE_ALL_NAMESPACE, Collections.singleton(ALL_FILTER));
 
     // Nothing (but systems) is visible
     private static final Map<String, Set<String>> SHARE_NONE_POLICY =
-            Collections.singletonMap(
-                    IDENTITY_NAMESPACE,
-                    Collections.singleton(SUBSYSTEM_FILTER));
+            Collections.singletonMap(IDENTITY_NAMESPACE, Collections.singleton(SUBSYSTEM_FILTER));
 
     // name of the subsystem: region or region#feature[-version]
     private final String name;
@@ -120,27 +116,33 @@ public class Subsystem extends ResourceImpl {
     // a set of filters applied when parent subsystem needs capabilities from child subsystem
     private final Map<String, Set<String>> exportPolicy;
 
-    // contains subsystems representing features of this region, child subsystems for child regions, system resources(?),
-    // bundle resources added explicitly as reqs for this Subsystem, feature resources for subsystems representing
+    // contains subsystems representing features of this region, child subsystems for child regions,
+    // system resources(?),
+    // bundle resources added explicitly as reqs for this Subsystem, feature resources for
+    // subsystems
+    // representing
     // features, ...
     private final List<Resource> installable = new ArrayList<>();
 
     // mapping from "symbolic-name|version" to a DependencyInfo wrapping a Resource
     // <bundle dependency="false"> are collected directly in feature's subsystem
-    // <bundle dependency="true"> are collected in first parent subsystem of feature or in subsystem of scoped feature
+    // <bundle dependency="true"> are collected in first parent subsystem of feature or in subsystem
+    // of scoped feature
     private final Map<String, DependencyInfo> dependencies = new HashMap<>();
-    // non-mandatory dependant features (<feature>/<feature>) collected from current and child subsystems representing
+    // non-mandatory dependant features (<feature>/<feature>) collected from current and child
+    // subsystems representing
     // features (unless some subsystem for feature has <scoping acceptDependencies="true">)
     private final List<Requirement> dependentFeatures = new ArrayList<>();
 
-    // direct bundle URI dependencies - not added by FeaturesService, but used in startup stage of assembly builder
+    // direct bundle URI dependencies - not added by FeaturesService, but used in startup stage of
+    // assembly builder
     // these bundles will be downloaded
     private final List<String> bundles = new ArrayList<>();
 
     /**
-     * Constructs root subsystem {@link Resource} for {@link FeaturesService#ROOT_REGION} that imports/exports only
-     * caps/reqs with <code>(type=karaf.subsystem)</code>.
-     * Root subsystem by default accepts dependencies - will gather dependant features of child feature subsystems,
+     * Constructs root subsystem {@link Resource} for {@link FeaturesService#ROOT_REGION} that
+     * imports/exports only caps/reqs with <code>(type=karaf.subsystem)</code>. Root subsystem by
+     * default accepts dependencies - will gather dependant features of child feature subsystems,
      * effectively _flattening_ the set of features within single region's subsystem.
      *
      * @param name The name of the subsystem.
@@ -157,10 +159,11 @@ public class Subsystem extends ResourceImpl {
     }
 
     /**
-     * Constructs subsystem for a feature that either imports/exports all caps or (see {@link Feature#getScoping()})
-     * has configurable import/export policy + <code>(|(type=karaf.subsystem)(type=karaf.feature))</code> filter in
-     * {@link org.osgi.framework.namespace.IdentityNamespace#IDENTITY_NAMESPACE}.
-     * Such subsystem requires <code>type=karaf.feature; osgi.identity=feature-name[; version=feature-version]</code>.
+     * Constructs subsystem for a feature that either imports/exports all caps or (see {@link
+     * Feature#getScoping()}) has configurable import/export policy + <code>
+     * (|(type=karaf.subsystem)(type=karaf.feature))</code> filter in {@link
+     * org.osgi.framework.namespace.IdentityNamespace#IDENTITY_NAMESPACE}. Such subsystem requires
+     * <code>type=karaf.feature; osgi.identity=feature-name[; version=feature-version]</code>.
      *
      * @param name The subsystem name.
      * @param feature The feature.
@@ -171,20 +174,24 @@ public class Subsystem extends ResourceImpl {
         super(name, TYPE_SUBSYSTEM, Version.emptyVersion);
         this.name = name;
         this.parent = parent;
-        this.acceptDependencies = feature.getScoping() != null && feature.getScoping().acceptDependencies();
+        this.acceptDependencies =
+                feature.getScoping() != null && feature.getScoping().acceptDependencies();
         this.feature = feature;
         this.mandatory = mandatory;
         if (feature.getScoping() != null) {
             this.importPolicy = createPolicy(feature.getScoping().getImports());
-            this.importPolicy.put(IDENTITY_NAMESPACE, Collections.singleton(SUBSYSTEM_OR_FEATURE_FILTER));
+            this.importPolicy.put(
+                    IDENTITY_NAMESPACE, Collections.singleton(SUBSYSTEM_OR_FEATURE_FILTER));
             this.exportPolicy = createPolicy(feature.getScoping().getExports());
-            this.exportPolicy.put(IDENTITY_NAMESPACE, Collections.singleton(SUBSYSTEM_OR_FEATURE_FILTER));
+            this.exportPolicy.put(
+                    IDENTITY_NAMESPACE, Collections.singleton(SUBSYSTEM_OR_FEATURE_FILTER));
         } else {
             this.importPolicy = SHARE_ALL_POLICY;
             this.exportPolicy = SHARE_ALL_POLICY;
         }
 
-        addIdentityRequirement(this,
+        addIdentityRequirement(
+                this,
                 feature.getName(),
                 TYPE_FEATURE,
                 new VersionRange(VersionTable.getVersion(feature.getVersion()), true));
@@ -252,14 +259,16 @@ public class Subsystem extends ResourceImpl {
     }
 
     /**
-     * Create child subsystem for this subsystem. Child will become parent's mandatory requirement to force its resolution.
+     * Create child subsystem for this subsystem. Child will become parent's mandatory requirement
+     * to force its resolution.
      *
      * @param name The subsystem name.
      * @param acceptDependencies True to accept dependencies, false else.
      */
     public Subsystem createSubsystem(String name, boolean acceptDependencies) {
         if (feature != null) {
-            throw new UnsupportedOperationException("Can not create application subsystems inside a feature subsystem");
+            throw new UnsupportedOperationException(
+                    "Can not create application subsystems inside a feature subsystem");
         }
         // Create subsystem
         String childName = getName() + "/" + name;
@@ -297,15 +306,15 @@ public class Subsystem extends ResourceImpl {
             req = requirement;
         }
         switch (type) {
-        case "feature":
-            addRequirement(toFeatureRequirement(req));
-            break;
-        case "requirement":
-            addRequirement(req);
-            break;
-        case "bundle":
-            bundles.add(req);
-            break;
+            case "feature":
+                addRequirement(toFeatureRequirement(req));
+                break;
+            case "requirement":
+                addRequirement(req);
+                break;
+            case "bundle":
+                bundles.add(req);
+                break;
         }
     }
 
@@ -313,7 +322,8 @@ public class Subsystem extends ResourceImpl {
         for (Requirement req : ResourceBuilder.parseRequirement(this, requirement)) {
             Object range = req.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE);
             if (range instanceof String) {
-                req.getAttributes().put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange((String) range));
+                req.getAttributes()
+                        .put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange((String) range));
             }
             addRequirement(req);
         }
@@ -332,12 +342,14 @@ public class Subsystem extends ResourceImpl {
         doBuild(allFeatures, true);
     }
 
-    private void doBuild(Map<String, List<Feature>> allFeatures, boolean mandatory) throws Exception {
+    private void doBuild(Map<String, List<Feature>> allFeatures, boolean mandatory)
+            throws Exception {
         for (Subsystem child : children) {
             child.doBuild(allFeatures, true);
         }
         if (feature != null) {
-            // each dependant feature becomes a non-mandatory (why?) requirement of first parent that
+            // each dependant feature becomes a non-mandatory (why?) requirement of first parent
+            // that
             // accepts dependencies
             for (Dependency dep : feature.getDependencies()) {
                 if (dep.isBlacklisted()) {
@@ -355,7 +367,12 @@ public class Subsystem extends ResourceImpl {
                     continue;
                 }
                 Feature fcond = cond.asFeature();
-                String ssName = this.name + "#" + (fcond.hasVersion() ? fcond.getName() + "-" + fcond.getVersion() : fcond.getName());
+                String ssName =
+                        this.name
+                                + "#"
+                                + (fcond.hasVersion()
+                                        ? fcond.getName() + "-" + fcond.getVersion()
+                                        : fcond.getName());
                 Subsystem fs = getChild(ssName);
                 if (fs == null) {
                     fs = new Subsystem(ssName, fcond, this, true);
@@ -373,20 +390,38 @@ public class Subsystem extends ResourceImpl {
             if (requirements.isEmpty()) {
                 break;
             }
-            // for each feature requirement on this subsystem (osgi.identity;type=karaf.feature), we create a
+            // for each feature requirement on this subsystem (osgi.identity;type=karaf.feature), we
+            // create a
             // Subsystem representing mandatory feature.
             for (Requirement requirement : requirements) {
                 String name = (String) requirement.getAttributes().get(IDENTITY_NAMESPACE);
                 String type = (String) requirement.getAttributes().get(CAPABILITY_TYPE_ATTRIBUTE);
-                VersionRange range = (VersionRange) requirement.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE);
+                VersionRange range =
+                        (VersionRange)
+                                requirement.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE);
                 if (TYPE_FEATURE.equals(type) && allFeatures.containsKey(name)) {
                     for (Feature feature : allFeatures.get(name)) {
-                        if (range == null || range.contains(VersionTable.getVersion(feature.getVersion()))) {
+                        if (range == null
+                                || range.contains(VersionTable.getVersion(feature.getVersion()))) {
                             if (feature != this.feature && !feature.isBlacklisted()) {
-                                String ssName = this.name + "#" + (feature.hasVersion() ? feature.getName() + "-" + feature.getVersion() : feature.getName());
+                                String ssName =
+                                        this.name
+                                                + "#"
+                                                + (feature.hasVersion()
+                                                        ? feature.getName()
+                                                                + "-"
+                                                                + feature.getVersion()
+                                                        : feature.getName());
                                 Subsystem fs = getChild(ssName);
                                 if (fs == null) {
-                                    fs = new Subsystem(ssName, feature, this, mandatory && !SubsystemResolveContext.isOptional(requirement));
+                                    fs =
+                                            new Subsystem(
+                                                    ssName,
+                                                    feature,
+                                                    this,
+                                                    mandatory
+                                                            && !SubsystemResolveContext.isOptional(
+                                                                    requirement));
                                     fs.build(allFeatures);
                                     installable.add(fs);
                                     children.add(fs);
@@ -415,13 +450,15 @@ public class Subsystem extends ResourceImpl {
             for (String prereq : prereqs) {
                 String[] p = prereq.split("/");
                 if (feature.getName().equals(p[0])
-                        && VersionRange.parseVersionRange(p[1]).contains(Version.parseVersion(feature.getVersion()))) {
+                        && VersionRange.parseVersionRange(p[1])
+                                .contains(Version.parseVersion(feature.getVersion()))) {
                     // our feature is already among prerequisites, so ...
                     match = true;
                     break;
                 }
             }
-            // ... we won't be adding its prerequisites - they'll be handled after another PartialDeploymentException
+            // ... we won't be adding its prerequisites - they'll be handled after another
+            // PartialDeploymentException
             if (!match) {
                 for (Dependency dep : feature.getDependencies()) {
                     if (dep.isPrerequisite()) {
@@ -433,33 +470,39 @@ public class Subsystem extends ResourceImpl {
     }
 
     /**
-     * Downloads bundles for all the features in current and child subsystems. But also collects bundles
-     * as {@link DependencyInfo}.
+     * Downloads bundles for all the features in current and child subsystems. But also collects
+     * bundles as {@link DependencyInfo}.
      *
      * @param manager The {@link DownloadManager} to use.
      * @param featureResolutionRange The feature resolution range to use.
-     * @param serviceRequirements The {@link FeaturesService.ServiceRequirementsBehavior} behavior to use.
+     * @param serviceRequirements The {@link FeaturesService.ServiceRequirementsBehavior} behavior
+     *     to use.
      * @param repos The {@link RepositoryManager} to use.
      * @param callback The {@link SubsystemResolverCallback} to use.
      */
     @SuppressWarnings("InfiniteLoopStatement")
-    public void downloadBundles(DownloadManager manager,
-                                String featureResolutionRange,
-                                final FeaturesService.ServiceRequirementsBehavior serviceRequirements,
-                                RepositoryManager repos,
-                                SubsystemResolverCallback callback) throws Exception {
+    public void downloadBundles(
+            DownloadManager manager,
+            String featureResolutionRange,
+            final FeaturesService.ServiceRequirementsBehavior serviceRequirements,
+            RepositoryManager repos,
+            SubsystemResolverCallback callback)
+            throws Exception {
         for (Subsystem child : children) {
-            child.downloadBundles(manager, featureResolutionRange, serviceRequirements, repos, callback);
+            child.downloadBundles(
+                    manager, featureResolutionRange, serviceRequirements, repos, callback);
         }
 
-        // collect BundleInfos for given feature - both direct <feature>/<bundle>s and <feature>/<conditional>/<bundle>s
+        // collect BundleInfos for given feature - both direct <feature>/<bundle>s and
+        // <feature>/<conditional>/<bundle>s
         final Map<BundleInfo, Conditional> infos = new HashMap<>();
         final Downloader downloader = manager.createDownloader();
         if (feature != null) {
             for (Conditional cond : feature.getConditional()) {
                 if (!cond.isBlacklisted()) {
                     for (final BundleInfo bi : cond.getBundles()) {
-                        // bundles from conditional features will be added as non-mandatory requirements
+                        // bundles from conditional features will be added as non-mandatory
+                        // requirements
                         infos.put(bi, cond);
                     }
                 }
@@ -469,9 +512,11 @@ public class Subsystem extends ResourceImpl {
             }
         }
 
-        // features model doesn't have blacklisted entries removed, but marked as blacklisted - we now don't have
+        // features model doesn't have blacklisted entries removed, but marked as blacklisted - we
+        // now
+        // don't have
         // to download them
-        //infos.keySet().removeIf(Blacklisting::isBlacklisted);
+        // infos.keySet().removeIf(Blacklisting::isBlacklisted);
         for (Iterator<BundleInfo> iterator = infos.keySet().iterator(); iterator.hasNext(); ) {
             BundleInfo bi = iterator.next();
             if (bi.isBlacklisted()) {
@@ -484,60 +529,96 @@ public class Subsystem extends ResourceImpl {
 
         // all downloaded bundles
         final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<>();
-        // resources for locations that were overriden in OSGi mode - to check whether the override should actually
+        // resources for locations that were overriden in OSGi mode - to check whether the override
+        // should actually
         // take place, by checking resource's headers
         final Map<String, ResourceImpl> overrides = new ConcurrentHashMap<>();
 
-        boolean removeServiceRequirements = serviceRequirementsBehavior(feature, serviceRequirements);
+        boolean removeServiceRequirements =
+                serviceRequirementsBehavior(feature, serviceRequirements);
 
         // download collected BundleInfo locations
         for (Map.Entry<BundleInfo, Conditional> entry : infos.entrySet()) {
             final BundleInfo bi = entry.getKey();
             final String loc = bi.getLocation();
-            downloader.download(loc, provider -> {
-                // always download location (could be overriden)
-                ResourceImpl resource = createResource(loc, getMetadata(provider), removeServiceRequirements);
-                bundles.put(loc, resource);
+            downloader.download(
+                    loc,
+                    provider -> {
+                        // always download location (could be overriden)
+                        ResourceImpl resource =
+                                createResource(
+                                        loc, getMetadata(provider), removeServiceRequirements);
+                        bundles.put(loc, resource);
 
-                if (bi.isOverriden() == BundleInfo.BundleOverrideMode.OSGI) {
-                    // also download original from original bundle URI to check if we should override by comparing
-                    // symbolic name - requires MANIFEST.MF header access. If there should be no override, we'll get
-                    // back to original URI
-                    downloader.download(bi.getOriginalLocation(), provider2 -> {
-                        ResourceImpl originalResource = createResource(bi.getOriginalLocation(),
-                                getMetadata(provider2), removeServiceRequirements);
-                        bundles.put(bi.getOriginalLocation(), originalResource);
-                        // an entry in overrides map means that given location was overriden
-                        overrides.put(loc, originalResource);
+                        if (bi.isOverriden() == BundleInfo.BundleOverrideMode.OSGI) {
+                            // also download original from original bundle URI to check if we should
+                            // override by
+                            // comparing
+                            // symbolic name - requires MANIFEST.MF header access. If there should
+                            // be no override,
+                            // we'll get
+                            // back to original URI
+                            downloader.download(
+                                    bi.getOriginalLocation(),
+                                    provider2 -> {
+                                        ResourceImpl originalResource =
+                                                createResource(
+                                                        bi.getOriginalLocation(),
+                                                        getMetadata(provider2),
+                                                        removeServiceRequirements);
+                                        bundles.put(bi.getOriginalLocation(), originalResource);
+                                        // an entry in overrides map means that given location was
+                                        // overriden
+                                        overrides.put(loc, originalResource);
+                                    });
+                        }
                     });
-                }
-            });
         }
         // download direct bundle: requirements - without consulting overrides
-        for (Clause bundle : Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
+        for (Clause bundle :
+                Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
             final String loc = bundle.getName();
-            downloader.download(loc, provider -> {
-                bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements));
-            });
+            downloader.download(
+                    loc,
+                    provider -> {
+                        bundles.put(
+                                loc,
+                                createResource(
+                                        loc, getMetadata(provider), removeServiceRequirements));
+                    });
         }
-        // we *don't* have to download overrides separately - they're already taken into account from processed model
+        // we *don't* have to download overrides separately - they're already taken into account
+        // from
+        // processed model
 
-        // download additional libraries - only exported, so they're capabilities are taken into account during
+        // download additional libraries - only exported, so they're capabilities are taken into
+        // account
+        // during
         // resolution process
         if (feature != null) {
             for (Library library : feature.getLibraries()) {
                 if (library.isExport()) {
                     final String loc = library.getLocation();
-                    downloader.download(loc, provider -> {
-                        bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements));
-                    });
+                    downloader.download(
+                            loc,
+                            provider -> {
+                                bundles.put(
+                                        loc,
+                                        createResource(
+                                                loc,
+                                                getMetadata(provider),
+                                                removeServiceRequirements));
+                            });
                 }
             }
         }
         downloader.await();
 
-        // opposite to what we had before. Currently bundles are already overriden at model level, but
-        // as we finally have access to headers, we can compare symbolic names and if override mode is OSGi, then
+        // opposite to what we had before. Currently bundles are already overriden at model level,
+        // but
+        // as we finally have access to headers, we can compare symbolic names and if override mode
+        // is
+        // OSGi, then
         // we can restore original resource if there should be no override.
         Overrides.override(bundles, overrides);
 
@@ -548,7 +629,8 @@ public class Subsystem extends ResourceImpl {
                 if (cond.isBlacklisted()) {
                     continue;
                 }
-                FeatureResource resCond = FeatureResource.build(feature, cond, featureResolutionRange, bundles);
+                FeatureResource resCond =
+                        FeatureResource.build(feature, cond, featureResolutionRange, bundles);
                 // feature's subsystem will optionally require conditional feature resource
                 addIdentityRequirement(this, resCond, false);
                 // but it's a mandatory requirement in other way
@@ -556,8 +638,10 @@ public class Subsystem extends ResourceImpl {
                 installable.add(resCond);
                 resConds.put(cond, resCond);
             }
-            // Add features and make it require given subsystem that represents logical feature requirement
-            FeatureResource resFeature = FeatureResource.build(feature, featureResolutionRange, bundles);
+            // Add features and make it require given subsystem that represents logical feature
+            // requirement
+            FeatureResource resFeature =
+                    FeatureResource.build(feature, featureResolutionRange, bundles);
             addIdentityRequirement(resFeature, this);
             installable.add(resFeature);
             // Add dependencies
@@ -593,11 +677,16 @@ public class Subsystem extends ResourceImpl {
                 }
             }
         }
-        for (Clause bundle : Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
+        for (Clause bundle :
+                Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
             final String loc = bundle.getName();
             boolean dependency = Boolean.parseBoolean(bundle.getAttribute("dependency"));
-            boolean start = bundle.getAttribute("start") == null || Boolean.parseBoolean(bundle.getAttribute("start"));
-            boolean blacklisted = bundle.getAttribute("blacklisted") != null && Boolean.parseBoolean(bundle.getAttribute("blacklisted"));
+            boolean start =
+                    bundle.getAttribute("start") == null
+                            || Boolean.parseBoolean(bundle.getAttribute("start"));
+            boolean blacklisted =
+                    bundle.getAttribute("blacklisted") != null
+                            && Boolean.parseBoolean(bundle.getAttribute("blacklisted"));
             int startLevel = 0;
             try {
                 startLevel = Integer.parseInt(bundle.getAttribute("start-level"));
@@ -616,19 +705,23 @@ public class Subsystem extends ResourceImpl {
         for (DependencyInfo info : dependencies.values()) {
             installable.add(info.resource);
             // bundle resource will have a requirement on its feature's subsystem too
-            // when bundle is declared with dependency="true", it will have a requirement on its region's subsystem
+            // when bundle is declared with dependency="true", it will have a requirement on its
+            // region's
+            // subsystem
             addIdentityRequirement(info.resource, this, info.mandatory);
         }
     }
 
     /**
-     * How to handle requirements from {@link org.osgi.namespace.service.ServiceNamespace#SERVICE_NAMESPACE} for
-     * given feature.
+     * How to handle requirements from {@link
+     * org.osgi.namespace.service.ServiceNamespace#SERVICE_NAMESPACE} for given feature.
      */
-    private boolean serviceRequirementsBehavior(Feature feature, FeaturesService.ServiceRequirementsBehavior serviceRequirements) {
+    private boolean serviceRequirementsBehavior(
+            Feature feature, FeaturesService.ServiceRequirementsBehavior serviceRequirements) {
         if (FeaturesService.ServiceRequirementsBehavior.Disable == serviceRequirements) {
             return true;
-        } else if (feature != null && FeaturesService.ServiceRequirementsBehavior.Default == serviceRequirements) {
+        } else if (feature != null
+                && FeaturesService.ServiceRequirementsBehavior.Default == serviceRequirements) {
             return FeaturesNamespaces.URI_1_0_0.equals(feature.getNamespace())
                     || FeaturesNamespaces.URI_1_1_0.equals(feature.getNamespace())
                     || FeaturesNamespaces.URI_1_2_0.equals(feature.getNamespace())
@@ -641,8 +734,12 @@ public class Subsystem extends ResourceImpl {
     ResourceImpl cloneResource(Resource resource) {
         ResourceImpl res = new ResourceImpl();
         for (Capability cap : resource.getCapabilities(null)) {
-            res.addCapability(new CapabilityImpl(res, cap.getNamespace(),
-                    new StringArrayMap<>(cap.getDirectives()), new StringArrayMap<>(cap.getAttributes())));
+            res.addCapability(
+                    new CapabilityImpl(
+                            res,
+                            cap.getNamespace(),
+                            new StringArrayMap<>(cap.getDirectives()),
+                            new StringArrayMap<>(cap.getAttributes())));
         }
         for (Requirement req : resource.getRequirements(null)) {
             SimpleFilter sf;
@@ -653,16 +750,19 @@ public class Subsystem extends ResourceImpl {
             } else {
                 sf = SimpleFilter.convert(req.getAttributes());
             }
-            res.addRequirement(new RequirementImpl(res, req.getNamespace(),
-                    new StringArrayMap<>(req.getDirectives()), new StringArrayMap<>(req.getAttributes()), sf));
+            res.addRequirement(
+                    new RequirementImpl(
+                            res,
+                            req.getNamespace(),
+                            new StringArrayMap<>(req.getDirectives()),
+                            new StringArrayMap<>(req.getAttributes()),
+                            sf));
         }
         return res;
     }
 
     Map<String, String> getMetadata(StreamProvider provider) throws IOException {
-        try (
-                ZipInputStream zis = new ZipInputStream(provider.open())
-        ) {
+        try (ZipInputStream zis = new ZipInputStream(provider.open())) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (MANIFEST_NAME.equals(entry.getName())) {
@@ -675,15 +775,22 @@ public class Subsystem extends ResourceImpl {
                 }
             }
         }
-        throw new IllegalArgumentException("Resource " + provider.getUrl() + " does not contain a manifest");
+        throw new IllegalArgumentException(
+                "Resource " + provider.getUrl() + " does not contain a manifest");
     }
 
     /**
-     * Adds a {@link Resource} as dependency if this subsystem {@link Subsystem#isAcceptDependencies() accepts dependencies},
-     * otherwise, the dependency is added to parent subsystem, effectively searching for first parent subsystem representing
-     * region or scoped feature.
+     * Adds a {@link Resource} as dependency if this subsystem {@link
+     * Subsystem#isAcceptDependencies() accepts dependencies}, otherwise, the dependency is added to
+     * parent subsystem, effectively searching for first parent subsystem representing region or
+     * scoped feature.
      */
-    void addDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel, boolean blacklisted) {
+    void addDependency(
+            ResourceImpl resource,
+            boolean mandatory,
+            boolean start,
+            int startLevel,
+            boolean blacklisted) {
         if (isAcceptDependencies()) {
             doAddDependency(resource, mandatory, start, startLevel, blacklisted);
         } else {
@@ -691,18 +798,23 @@ public class Subsystem extends ResourceImpl {
         }
     }
 
-    /**
-     * Adds a {@link Resource} to this subsystem.
-     */
-    private void doAddDependency(ResourceImpl resource, boolean mandatory, boolean start, int startLevel, boolean blacklisted) {
-        String id = ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
-        DependencyInfo info = new DependencyInfo(resource, mandatory, start, startLevel, blacklisted);
+    /** Adds a {@link Resource} to this subsystem. */
+    private void doAddDependency(
+            ResourceImpl resource,
+            boolean mandatory,
+            boolean start,
+            int startLevel,
+            boolean blacklisted) {
+        String id =
+                ResolverUtil.getSymbolicName(resource) + "|" + ResolverUtil.getVersion(resource);
+        DependencyInfo info =
+                new DependencyInfo(resource, mandatory, start, startLevel, blacklisted);
         dependencies.merge(id, info, this::merge);
     }
 
     /**
-     * Merges two dependencies by taking lower start level, stronger <code>mandatory</code> option and stronger
-     * <code>start</code> option.
+     * Merges two dependencies by taking lower start level, stronger <code>mandatory</code> option
+     * and stronger <code>start</code> option.
      */
     private DependencyInfo merge(DependencyInfo di1, DependencyInfo di2) {
         DependencyInfo info = new DependencyInfo();
@@ -714,8 +826,19 @@ public class Subsystem extends ResourceImpl {
             } else if (r2 == null) {
                 info.resource = di2.resource;
             } else {
-                String id = ResolverUtil.getSymbolicName(di1.resource) + "/" + ResolverUtil.getVersion(di1.resource);
-                throw new IllegalStateException("Resource " + id + " is duplicated on subsystem " + this.toString() + ". First resource requires " + r1 + " while the second requires " + r2);
+                String id =
+                        ResolverUtil.getSymbolicName(di1.resource)
+                                + "/"
+                                + ResolverUtil.getVersion(di1.resource);
+                throw new IllegalStateException(
+                        "Resource "
+                                + id
+                                + " is duplicated on subsystem "
+                                + this.toString()
+                                + ". First resource requires "
+                                + r1
+                                + " while the second requires "
+                                + r2);
             }
         } else {
             info.resource = di1.resource;
@@ -739,9 +862,7 @@ public class Subsystem extends ResourceImpl {
         return null;
     }
 
-    /**
-     * TODO DOCUMENT: More generic than just {@link BundleInfo}
-     */
+    /** TODO DOCUMENT: More generic than just {@link BundleInfo} */
     class DependencyInfo implements BundleInfo {
         ResourceImpl resource;
         boolean mandatory;
@@ -750,10 +871,14 @@ public class Subsystem extends ResourceImpl {
         boolean blacklisted;
         BundleInfo.BundleOverrideMode overriden;
 
-        public DependencyInfo() {
-        }
+        public DependencyInfo() {}
 
-        public DependencyInfo(ResourceImpl resource, boolean mandatory, boolean start, int startLevel, boolean blacklisted) {
+        public DependencyInfo(
+                ResourceImpl resource,
+                boolean mandatory,
+                boolean start,
+                int startLevel,
+                boolean blacklisted) {
             this.resource = resource;
             this.mandatory = mandatory;
             this.start = start;
@@ -803,9 +928,7 @@ public class Subsystem extends ResourceImpl {
 
         @Override
         public String toString() {
-            return "DependencyInfo{" +
-                    "resource=" + resource +
-                    '}';
+            return "DependencyInfo{" + "resource=" + resource + '}';
         }
     }
 
@@ -817,7 +940,9 @@ public class Subsystem extends ResourceImpl {
         return policy;
     }
 
-    ResourceImpl createResource(String uri, Map<String, String> headers, boolean removeServiceRequirements) throws Exception {
+    ResourceImpl createResource(
+            String uri, Map<String, String> headers, boolean removeServiceRequirements)
+            throws Exception {
         try {
             return ResourceBuilder.build(uri, headers, removeServiceRequirements);
         } catch (BundleException e) {

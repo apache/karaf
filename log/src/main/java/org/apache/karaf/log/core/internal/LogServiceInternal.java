@@ -26,5 +26,4 @@ public interface LogServiceInternal {
     Map<String, String> getLevel(String logger);
 
     void setLevel(String logger, String level);
-
 }

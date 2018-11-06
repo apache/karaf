@@ -16,18 +16,15 @@
  */
 package org.apache.karaf.webconsole.instance;
 
-import javax.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
+import javax.servlet.Servlet;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 
-@Services(
-        requires = @RequireService(InstanceService.class)
-)
+@Services(requires = @RequireService(InstanceService.class))
 public class Activator extends BaseActivator {
 
     private InstancePlugin instancePlugin;
@@ -52,5 +49,4 @@ public class Activator extends BaseActivator {
             instancePlugin = null;
         }
     }
-
 }

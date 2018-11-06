@@ -16,10 +16,8 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import org.apache.felix.utils.version.VersionRange;
-import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.Feature;
-import org.osgi.framework.Version;
+import static org.apache.felix.utils.version.VersionRange.ANY_VERSION;
+import static org.apache.karaf.features.internal.util.MapUtils.filter;
 
 import java.util.Map;
 import java.util.Objects;
@@ -28,21 +26,20 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import static org.apache.felix.utils.version.VersionRange.ANY_VERSION;
-import static org.apache.karaf.features.internal.util.MapUtils.filter;
+import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.Feature;
+import org.osgi.framework.Version;
 
 /**
  * Requirement for a feature
- * 
- * <p>The syntax of a requirement as a String is name[/versionRange].
- * If no versionRange is given then a range of [0,) is assumed which matches all versions.
- * 
- * <p>
- * - name: Can be a feature name or a regexp like myfeat.*
- * - versionRange: version or range
- * - version: Will specify a specific version. Like [version,version]. An exemption is 0.0.0 which matches all versions.
- * - range: Like defined in OSGi VersionRange. Example: [1.0.0, 1.1.0)  
+ *
+ * <p>The syntax of a requirement as a String is name[/versionRange]. If no versionRange is given
+ * then a range of [0,) is assumed which matches all versions.
+ *
+ * <p>- name: Can be a feature name or a regexp like myfeat.* - versionRange: version or range -
+ * version: Will specify a specific version. Like [version,version]. An exemption is 0.0.0 which
+ * matches all versions. - range: Like defined in OSGi VersionRange. Example: [1.0.0, 1.1.0)
  */
 public class FeatureReq {
 
@@ -71,56 +68,67 @@ public class FeatureReq {
         this.name = parts[0];
         this.versionRange = (parts.length == 1) ? ANY_VERSION : range(parts[1]);
     }
-    
+
     public FeatureReq(String name, String versionRange) {
         this.name = name;
         this.versionRange = range(versionRange);
     }
-    
+
     public FeatureReq(String name, VersionRange versionRange, boolean blacklisted) {
         this.name = name;
         this.versionRange = versionRange;
         this.blacklisted = blacklisted;
     }
-    
+
     public FeatureReq(Feature feature) {
         this(feature.getName(), exactVersion(feature.getVersion()), feature.isBlacklisted());
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public VersionRange getVersionRange() {
         return versionRange;
     }
 
     public Set<FeatureReq> getMatchingRequirements(Set<FeatureReq> reqs) {
         Pattern pattern = Pattern.compile(name);
-        return filter(reqs, fr -> pattern.matcher(fr.getName()).matches()
+        return filter(
+                reqs,
+                fr ->
+                        pattern.matcher(fr.getName()).matches()
                                 && versionRange.intersect(fr.getVersionRange()) != null);
     }
 
     public Stream<Feature> getMatchingFeatures(Map<String, Map<String, Feature>> allFeatures) {
         Pattern pattern = Pattern.compile(name);
-        Function<String, Optional<Feature>> func = featureName -> {
-            Feature matchingFeature = null;
-            if (pattern.matcher(featureName).matches()) {
-                Map<String, Feature> versions = allFeatures.get(featureName);
-                matchingFeature = getLatestFeature(versions, versionRange);
-            }
-            return Optional.ofNullable(matchingFeature);
-        };
-        return allFeatures.keySet().stream().map(func).filter(Optional::isPresent).map(Optional::get);
+        Function<String, Optional<Feature>> func =
+                featureName -> {
+                    Feature matchingFeature = null;
+                    if (pattern.matcher(featureName).matches()) {
+                        Map<String, Feature> versions = allFeatures.get(featureName);
+                        matchingFeature = getLatestFeature(versions, versionRange);
+                    }
+                    return Optional.ofNullable(matchingFeature);
+                };
+        return allFeatures
+                .keySet()
+                .stream()
+                .map(func)
+                .filter(Optional::isPresent)
+                .map(Optional::get);
     }
 
-    private static Feature getLatestFeature(Map<String, Feature> versions, VersionRange versionRange) {
+    private static Feature getLatestFeature(
+            Map<String, Feature> versions, VersionRange versionRange) {
         Feature feature = null;
         if (versions != null && !versions.isEmpty()) {
             Version latest = Version.emptyVersion;
             for (String available : versions.keySet()) {
                 Version availableVersion = VersionTable.getVersion(available);
-                if (availableVersion.compareTo(latest) >= 0 && versionRange.contains(availableVersion)) {
+                if (availableVersion.compareTo(latest) >= 0
+                        && versionRange.contains(availableVersion)) {
                     Feature possiblyBlacklisted = versions.get(available);
                     // return only if there are no more non-blaclisted features
                     if (feature == null || !possiblyBlacklisted.isBlacklisted()) {
@@ -151,8 +159,7 @@ public class FeatureReq {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FeatureReq that = (FeatureReq) o;
-        return Objects.equals(name, that.name) &&
-               Objects.equals(versionRange, that.versionRange);
+        return Objects.equals(name, that.name) && Objects.equals(versionRange, that.versionRange);
     }
 
     @Override
@@ -178,5 +185,4 @@ public class FeatureReq {
     private static VersionRange exactVersion(String versionRange) {
         return new VersionRange(versionRange, true, true);
     }
-
 }

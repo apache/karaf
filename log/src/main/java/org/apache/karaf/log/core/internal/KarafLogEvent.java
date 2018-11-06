@@ -18,14 +18,13 @@ package org.apache.karaf.log.core.internal;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.ops4j.pax.logging.spi.PaxLevel;
 import org.ops4j.pax.logging.spi.PaxLocationInfo;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 @SuppressWarnings("rawtypes")
 public class KarafLogEvent implements PaxLoggingEvent {
-    
+
     private PaxLocationInfo locationInformation;
     private PaxLevel level;
     private String loggerName;
@@ -103,5 +102,4 @@ public class KarafLogEvent implements PaxLoggingEvent {
     public Map getProperties() {
         return this.properties;
     }
-
 }

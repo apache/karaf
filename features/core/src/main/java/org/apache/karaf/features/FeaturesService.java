@@ -21,12 +21,9 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.osgi.namespace.service.ServiceNamespace;
 
-/**
- * The service managing features repositories.
- */
+/** The service managing features repositories. */
 public interface FeaturesService {
 
     String ROOT_REGION = "root";
@@ -61,12 +58,18 @@ public interface FeaturesService {
     }
 
     /**
-     * Configuration options for handling requirements from {@link ServiceNamespace#SERVICE_NAMESPACE} namespace
+     * Configuration options for handling requirements from {@link
+     * ServiceNamespace#SERVICE_NAMESPACE} namespace
      */
     enum ServiceRequirementsBehavior {
-        /** Remove and do not consider any {@link ServiceNamespace#SERVICE_NAMESPACE} requirements */
+        /**
+         * Remove and do not consider any {@link ServiceNamespace#SERVICE_NAMESPACE} requirements
+         */
         Disable("disable"),
-        /** Consider {@link ServiceNamespace#SERVICE_NAMESPACE} requirements only for <code>http://karaf.apache.org/xmlns/features/v1.2.1</code> XSD and below */
+        /**
+         * Consider {@link ServiceNamespace#SERVICE_NAMESPACE} requirements only for <code>
+         * http://karaf.apache.org/xmlns/features/v1.2.1</code> XSD and below
+         */
         Default("default"),
         /** Always consider {@link ServiceNamespace#SERVICE_NAMESPACE} requirements */
         Enforce("enforce");
@@ -82,13 +85,14 @@ public interface FeaturesService {
         }
 
         public static ServiceRequirementsBehavior fromString(String serviceRequirements) {
-            return Arrays.stream(values()).filter(sub -> sub.value.equalsIgnoreCase(serviceRequirements)).findFirst().orElse(Default);
+            return Arrays.stream(values())
+                    .filter(sub -> sub.value.equalsIgnoreCase(serviceRequirements))
+                    .findFirst()
+                    .orElse(Default);
         }
     }
 
-    /**
-     * Configuration options for checking whether update'able bundle should really be updated
-     */
+    /** Configuration options for checking whether update'able bundle should really be updated */
     enum SnapshotUpdateBehavior {
         /** Never update */
         None("none"),
@@ -108,7 +112,10 @@ public interface FeaturesService {
         }
 
         public static SnapshotUpdateBehavior fromString(String updateSnapshots) {
-            return Arrays.stream(values()).filter(sub -> sub.value.equals(updateSnapshots)).findFirst().orElse(Crc);
+            return Arrays.stream(values())
+                    .filter(sub -> sub.value.equals(updateSnapshots))
+                    .findFirst()
+                    .orElse(Crc);
         }
     }
 
@@ -156,9 +163,11 @@ public interface FeaturesService {
 
     void installFeatures(Set<String> features, EnumSet<Option> options) throws Exception;
 
-    void installFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception;
+    void installFeatures(Set<String> features, String region, EnumSet<Option> options)
+            throws Exception;
 
-    void addRequirements(Map<String, Set<String>> requirements, EnumSet<Option> options) throws Exception;
+    void addRequirements(Map<String, Set<String>> requirements, EnumSet<Option> options)
+            throws Exception;
 
     void uninstallFeature(String name, EnumSet<Option> options) throws Exception;
 
@@ -170,15 +179,19 @@ public interface FeaturesService {
 
     void uninstallFeatures(Set<String> features, EnumSet<Option> options) throws Exception;
 
-    void uninstallFeatures(Set<String> features, String region, EnumSet<Option> options) throws Exception;
+    void uninstallFeatures(Set<String> features, String region, EnumSet<Option> options)
+            throws Exception;
 
-    void removeRequirements(Map<String, Set<String>> requirements, EnumSet<Option> options) throws Exception;
+    void removeRequirements(Map<String, Set<String>> requirements, EnumSet<Option> options)
+            throws Exception;
 
-    void updateFeaturesState(Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options) throws Exception;
+    void updateFeaturesState(
+            Map<String, Map<String, FeatureState>> stateChanges, EnumSet<Option> options)
+            throws Exception;
 
-    void updateReposAndRequirements(Set<URI> repos,
-                                    Map<String, Set<String>> requirements,
-                                    EnumSet<Option> options) throws Exception;
+    void updateReposAndRequirements(
+            Set<URI> repos, Map<String, Set<String>> requirements, EnumSet<Option> options)
+            throws Exception;
 
     Repository createRepository(URI uri) throws Exception;
 
@@ -223,5 +236,4 @@ public interface FeaturesService {
     String getFeatureXml(Feature feature);
 
     void refreshFeatures(EnumSet<Option> options) throws Exception;
-
 }

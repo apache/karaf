@@ -22,7 +22,6 @@ import java.security.GeneralSecurityException;
 import java.security.Principal;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.NameCallback;
@@ -34,7 +33,6 @@ import javax.security.auth.login.LoginContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
 import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.osgi.service.cm.ManagedService;
@@ -44,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 public class JaasSecurityProvider implements WebConsoleSecurityProvider2, ManagedService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(JaasSecurityProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JaasSecurityProvider.class);
 
     private static final String HEADER_WWW_AUTHENTICATE = "WWW-Authenticate";
 
@@ -78,7 +76,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
 
     @Override
     public Object authenticate(final String username, final String password) {
-        return doAuthenticate( "?", username, password );
+        return doAuthenticate("?", username, password);
     }
 
     @Override
@@ -101,21 +99,27 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         return def;
     }
 
-    public Subject doAuthenticate(final String address, final String username, final String password) {
+    public Subject doAuthenticate(
+            final String address, final String username, final String password) {
         try {
             Subject subject = new Subject();
             subject.getPrincipals().add(new ClientPrincipal("webconsole", address));
-            LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
-                for (Callback callback : callbacks) {
-                    if (callback instanceof NameCallback) {
-                        ((NameCallback) callback).setName(username);
-                    } else if (callback instanceof PasswordCallback) {
-                        ((PasswordCallback) callback).setPassword(password.toCharArray());
-                    } else {
-                        throw new UnsupportedCallbackException(callback);
-                    }
-                }
-            });
+            LoginContext loginContext =
+                    new LoginContext(
+                            realm,
+                            subject,
+                            callbacks -> {
+                                for (Callback callback : callbacks) {
+                                    if (callback instanceof NameCallback) {
+                                        ((NameCallback) callback).setName(username);
+                                    } else if (callback instanceof PasswordCallback) {
+                                        ((PasswordCallback) callback)
+                                                .setPassword(password.toCharArray());
+                                    } else {
+                                        throw new UnsupportedCallbackException(callback);
+                                    }
+                                }
+                            });
             loginContext.login();
             if (role != null && role.length() > 0) {
                 String clazz = "org.apache.karaf.jaas.boot.principal.RolePrincipal";
@@ -127,8 +131,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
                 }
                 boolean found = false;
                 for (Principal p : subject.getPrincipals()) {
-                    if (p.getClass().getName().equals(clazz)
-                            && p.getName().equals(name)) {
+                    if (p.getClass().getName().equals(clazz) && p.getName().equals(name)) {
                         found = true;
                         break;
                     }
@@ -155,84 +158,72 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
     }
 
     @Override
-    public boolean authenticate( HttpServletRequest request, HttpServletResponse response )
-    {
+    public boolean authenticate(HttpServletRequest request, HttpServletResponse response) {
         // Return immediately if the header is missing
-        String authHeader = request.getHeader( HEADER_AUTHORIZATION );
-        if ( authHeader != null && authHeader.length() > 0 )
-        {
+        String authHeader = request.getHeader(HEADER_AUTHORIZATION);
+        if (authHeader != null && authHeader.length() > 0) {
 
             // Get the authType (Basic, Digest) and authInfo (user/password)
             // from the header
             authHeader = authHeader.trim();
-            int blank = authHeader.indexOf( ' ' );
-            if ( blank > 0 )
-            {
-                String authType = authHeader.substring( 0, blank );
-                String authInfo = authHeader.substring( blank ).trim();
+            int blank = authHeader.indexOf(' ');
+            if (blank > 0) {
+                String authType = authHeader.substring(0, blank);
+                String authInfo = authHeader.substring(blank).trim();
 
                 // Check whether authorization type matches
-                if ( authType.equalsIgnoreCase( AUTHENTICATION_SCHEME_BASIC ) )
-                {
-                    try
-                    {
-                        String srcString = base64Decode( authInfo );
-                        int i = srcString.indexOf( ':' );
-                        String username = srcString.substring( 0, i );
-                        String password = srcString.substring( i + 1 );
+                if (authType.equalsIgnoreCase(AUTHENTICATION_SCHEME_BASIC)) {
+                    try {
+                        String srcString = base64Decode(authInfo);
+                        int i = srcString.indexOf(':');
+                        String username = srcString.substring(0, i);
+                        String password = srcString.substring(i + 1);
 
                         // authenticate
                         Subject subject = null;
-                        try
-                        {
+                        try {
                             HttpSession session = request.getSession(false);
-                            if ( session != null )
-                            {
-                                subject = (Subject) session.getAttribute( KarafOsgiManager.SUBJECT_RUN_AS );
+                            if (session != null) {
+                                subject =
+                                        (Subject)
+                                                session.getAttribute(
+                                                        KarafOsgiManager.SUBJECT_RUN_AS);
                             }
-                        }
-                        catch ( Throwable t )
-                        {
+                        } catch (Throwable t) {
                             // ignore
                         }
-                        if ( subject == null )
-                        {
+                        if (subject == null) {
                             String addr = request.getRemoteHost() + ":" + request.getRemotePort();
-                            subject = doAuthenticate( addr, username, password );
+                            subject = doAuthenticate(addr, username, password);
                         }
-                        if ( subject != null )
-                        {
+                        if (subject != null) {
                             // as per the spec, set attributes
-                            request.setAttribute( HttpContext.AUTHENTICATION_TYPE, HttpServletRequest.BASIC_AUTH );
-                            request.setAttribute( HttpContext.REMOTE_USER, username );
+                            request.setAttribute(
+                                    HttpContext.AUTHENTICATION_TYPE, HttpServletRequest.BASIC_AUTH);
+                            request.setAttribute(HttpContext.REMOTE_USER, username);
 
                             // set web console user attribute
-                            request.setAttribute( WebConsoleSecurityProvider2.USER_ATTRIBUTE, username );
+                            request.setAttribute(
+                                    WebConsoleSecurityProvider2.USER_ATTRIBUTE, username);
 
                             // set the JAAS subject
-                            request.setAttribute( KarafOsgiManager.SUBJECT_RUN_AS, subject );
+                            request.setAttribute(KarafOsgiManager.SUBJECT_RUN_AS, subject);
 
                             // create a session and store the information
-                            try
-                            {
+                            try {
                                 HttpSession session = request.getSession(true);
-                                if (sessionTimeout != 0)
-                                {
+                                if (sessionTimeout != 0) {
                                     session.setMaxInactiveInterval(sessionTimeout);
                                 }
-                                session.setAttribute( KarafOsgiManager.SUBJECT_RUN_AS, subject );
-                            }
-                            catch ( Throwable t )
-                            {
+                                session.setAttribute(KarafOsgiManager.SUBJECT_RUN_AS, subject);
+                            } catch (Throwable t) {
                                 // ignore
                             }
 
                             // succeed
                             return true;
                         }
-                    }
-                    catch ( Exception e )
-                    {
+                    } catch (Exception e) {
                         LOG.warn("Error during authentication", e);
                     }
                 }
@@ -246,9 +237,11 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
     }
 
     private void requireAuthentication(HttpServletResponse response) {
-        response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
-        response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
-        response.setContentLength( 0 );
+        response.setHeader(
+                HEADER_WWW_AUTHENTICATE,
+                AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentLength(0);
         try {
             response.flushBuffer();
         } catch (IOException e) {
@@ -256,18 +249,12 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
         }
     }
 
-    private static String base64Decode( String srcString )
-    {
+    private static String base64Decode(String srcString) {
         byte[] transformed = Base64.decodeBase64(srcString);
-        try
-        {
-            return new String( transformed, "ISO-8859-1" );
-        }
-        catch ( UnsupportedEncodingException uee )
-        {
-            return new String( transformed );
+        try {
+            return new String(transformed, "ISO-8859-1");
+        } catch (UnsupportedEncodingException uee) {
+            return new String(transformed);
         }
     }
-
-
 }

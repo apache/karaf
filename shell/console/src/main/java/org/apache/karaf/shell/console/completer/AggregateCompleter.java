@@ -20,18 +20,14 @@
 package org.apache.karaf.shell.console.completer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Collection;
-
 import org.apache.karaf.shell.console.Completer;
 
-/**
- * Completer which contains multipule completers and aggregates them together.
- */
+/** Completer which contains multipule completers and aggregates them together. */
 @Deprecated
-public class AggregateCompleter implements Completer
-{
+public class AggregateCompleter implements Completer {
     private final Collection<Completer> completers;
 
     public AggregateCompleter(final Collection<Completer> completers) {
@@ -39,7 +35,7 @@ public class AggregateCompleter implements Completer
         this.completers = completers;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public int complete(final String buffer, final int cursor, final List candidates) {
         // buffer could be null
         assert candidates != null;
@@ -69,13 +65,12 @@ public class AggregateCompleter implements Completer
         return max;
     }
 
-    private class Completion
-    {
+    private class Completion {
         public final List<String> candidates;
 
         public int cursor;
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
+        @SuppressWarnings({"unchecked", "rawtypes"})
         public Completion(final List candidates) {
             assert candidates != null;
 

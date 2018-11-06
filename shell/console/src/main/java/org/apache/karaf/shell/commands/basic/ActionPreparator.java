@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.commands.basic;
 
 import java.util.List;
-
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 
@@ -27,11 +26,11 @@ import org.apache.felix.service.command.CommandSession;
 public interface ActionPreparator {
 
     /**
-     * Check if the arguments are valid for the action and inject the arguments into the fields
-     * of the action.
-     * 
-     * Using deprecated Action for compatibility.
-     * 
+     * Check if the arguments are valid for the action and inject the arguments into the fields of
+     * the action.
+     *
+     * <p>Using deprecated Action for compatibility.
+     *
      * @param action The action to perform.
      * @param session The command session to use.
      * @param arguments The action arguments.
@@ -39,5 +38,4 @@ public interface ActionPreparator {
      * @throws Exception In case of preparation failure.
      */
     boolean prepare(Action action, CommandSession session, List<Object> arguments) throws Exception;
-
 }

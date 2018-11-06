@@ -16,9 +16,9 @@
  */
 package org.apache.karaf.features.internal.model;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class ConfigTest {
 
@@ -26,8 +26,7 @@ public class ConfigTest {
     public void testTrim() {
         Config config = new Config();
         config.setName("my.config");
-        config.setValue("    # my comment\n" +
-                        "    my.key = my.value\n");
+        config.setValue("    # my comment\n" + "    my.key = my.value\n");
 
         assertEquals("my.value", config.getProperties().getProperty("my.key"));
     }
@@ -36,11 +35,12 @@ public class ConfigTest {
     public void testInterpolation() {
         Config config = new Config();
         config.setName("my.config");
-        config.setValue("    # my comment\n" +
-                        "    my.nb = 2\n" +
-                        "    my.key.1 = my.value.1\n" +
-                        "    my.key.2 = my.value.2\n" +
-                        "    my.key.3 = ab${my.key.${my.nb}}");
+        config.setValue(
+                "    # my comment\n"
+                        + "    my.nb = 2\n"
+                        + "    my.key.1 = my.value.1\n"
+                        + "    my.key.2 = my.value.2\n"
+                        + "    my.key.3 = ab${my.key.${my.nb}}");
 
         assertEquals("abmy.value.2", config.getProperties().getProperty("my.key.3"));
     }

@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.felix.utils.extender.Extension;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
@@ -46,9 +45,7 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Commands extension
- */
+/** Commands extension */
 @SuppressWarnings("rawtypes")
 public class CommandExtension implements Extension {
 
@@ -61,17 +58,17 @@ public class CommandExtension implements Extension {
     private final List<Class> classes = new ArrayList<>();
     private Manager manager;
 
-
     public CommandExtension(Bundle bundle, Registry registry) {
         this.bundle = bundle;
         this.registry = registry;
         this.started = new CountDownLatch(1);
-        this.tracker = new AggregateServiceTracker(bundle.getBundleContext()) {
-            @Override
-            protected void updateState(State state) {
-                CommandExtension.this.updateState(state);
-            }
-        };
+        this.tracker =
+                new AggregateServiceTracker(bundle.getBundleContext()) {
+                    @Override
+                    protected void updateState(State state) {
+                        CommandExtension.this.updateState(state);
+                    }
+                };
     }
 
     public void start() throws Exception {
@@ -105,7 +102,8 @@ public class CommandExtension implements Extension {
             }
             AggregateServiceTracker.State state = tracker.open();
             if (!state.isSatisfied()) {
-                LOGGER.info("Command registration delayed for bundle {}/{}. Missing dependencies: {}",
+                LOGGER.info(
+                        "Command registration delayed for bundle {}/{}. Missing dependencies: {}",
                         bundle.getSymbolicName(),
                         bundle.getVersion(),
                         state.getMissingServices());
@@ -124,7 +122,11 @@ public class CommandExtension implements Extension {
                 started.await(5000, TimeUnit.MILLISECONDS);
             }
         } catch (InterruptedException e) {
-            LOGGER.warn("The wait for bundle " + bundle.getSymbolicName() + " being started before destruction has been interrupted.", e);
+            LOGGER.warn(
+                    "The wait for bundle "
+                            + bundle.getSymbolicName()
+                            + " being started before destruction has been interrupted.",
+                    e);
         }
         tracker.close();
     }
@@ -143,7 +145,8 @@ public class CommandExtension implements Extension {
         } else {
             return;
         }
-        LOGGER.info("{} commands for bundle {}/{}",
+        LOGGER.info(
+                "{} commands for bundle {}/{}",
                 action,
                 bundle.getSymbolicName(),
                 bundle.getVersion());
@@ -181,7 +184,10 @@ public class CommandExtension implements Extension {
                 Reference ref = field.getAnnotation(Reference.class);
                 if (ref != null) {
                     GenericType type = new GenericType(field.getGenericType());
-                    Class clazzRef = type.getRawClass() == List.class ? type.getActualTypeArgument(0).getRawClass() : type.getRawClass();
+                    Class clazzRef =
+                            type.getRawClass() == List.class
+                                    ? type.getActualTypeArgument(0).getRawClass()
+                                    : type.getRawClass();
                     if (clazzRef != BundleContext.class
                             && clazzRef != Session.class
                             && clazzRef != Terminal.class
@@ -207,5 +213,4 @@ public class CommandExtension implements Extension {
             tracker.trackSingle(clazzRef, optional);
         }
     }
-
 }

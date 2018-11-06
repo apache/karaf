@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
@@ -48,46 +47,48 @@ class StoredWiringResolver implements ResolverHook {
     void load() {
         try {
             Files.createDirectories(path);
-            Files.list(path).forEach(p -> {
-                String name = p.getFileName().toString();
-                if (name.matches("[0-9]+")) {
-                    long id = Long.parseLong(name);
-                    try (BufferedReader reader = Files.newBufferedReader(p)) {
-                        wiring.put(id, new BundleWires(id, reader));
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                }
-            });
+            Files.list(path)
+                    .forEach(
+                            p -> {
+                                String name = p.getFileName().toString();
+                                if (name.matches("[0-9]+")) {
+                                    long id = Long.parseLong(name);
+                                    try (BufferedReader reader = Files.newBufferedReader(p)) {
+                                        wiring.put(id, new BundleWires(id, reader));
+                                    } catch (IOException e) {
+                                        throw new UncheckedIOException(e);
+                                    }
+                                }
+                            });
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     @Override
-    public void filterResolvable(Collection<BundleRevision> candidates) {
-    }
+    public void filterResolvable(Collection<BundleRevision> candidates) {}
 
     @Override
-    public void filterSingletonCollisions(BundleCapability singleton,
-                                          Collection<BundleCapability> collisionCandidates) {
-    }
+    public void filterSingletonCollisions(
+            BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {}
 
     @Override
-    public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+    public void filterMatches(
+            BundleRequirement requirement, Collection<BundleCapability> candidates) {
         long sourceId = getBundleId(requirement);
         wiring.get(sourceId).filterMatches(requirement, candidates);
     }
 
     @Override
-    public void end() {
-    }
+    public void end() {}
 
     private long getBundleId(BundleRequirement requirement) {
         long sourceId = requirement.getRevision().getBundle().getBundleId();
         if (isFragment(requirement.getRevision())
-            && !requirement.getNamespace().equals(HostNamespace.HOST_NAMESPACE)
-            && !requirement.getNamespace().equals(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE)) {
+                && !requirement.getNamespace().equals(HostNamespace.HOST_NAMESPACE)
+                && !requirement
+                        .getNamespace()
+                        .equals(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE)) {
             sourceId = wiring.get(sourceId).getFragmentHost();
         }
         return sourceId;
@@ -96,8 +97,8 @@ class StoredWiringResolver implements ResolverHook {
     private static boolean isFragment(Resource resource) {
         for (Capability cap : resource.getCapabilities(null)) {
             if (IdentityNamespace.IDENTITY_NAMESPACE.equals(cap.getNamespace())) {
-                return IdentityNamespace.TYPE_FRAGMENT
-                    .equals(cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE));
+                return IdentityNamespace.TYPE_FRAGMENT.equals(
+                        cap.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE));
             }
         }
         return false;

@@ -31,10 +31,14 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Command(scope = "booking", name = "get", description = "Get the booking by id")
 public class GetCommand implements Action {
 
-    @Reference
-    private BookingService bookingService;
+    @Reference private BookingService bookingService;
 
-    @Argument(index = 0, name = "id", description = "Id of booking to retreive", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "id",
+            description = "Id of booking to retreive",
+            required = true,
+            multiValued = false)
     @Completion(BookingIdCompleter.class)
     Long id;
 
@@ -49,5 +53,4 @@ public class GetCommand implements Action {
         table.print(System.out);
         return null;
     }
-
 }

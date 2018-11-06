@@ -23,24 +23,25 @@ import static org.junit.Assert.assertThat;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.junit.Test;
 
-
 public class ConditionalTest {
 
     @Test
     public void testLoad() throws Exception {
-        RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f06.xml").toURI());
+        RepositoryImpl r =
+                new RepositoryImpl(getClass().getResource("internal/service/f06.xml").toURI());
         Feature[] features = r.getFeatures();
         assertEquals(1, features.length);
         Feature feature = features[0];
 
-        assertEquals(2,feature.getConditional().size());
+        assertEquals(2, feature.getConditional().size());
 
         Conditional conditional1 = feature.getConditional().get(0);
         assertThat(conditional1.getCondition(), contains("http"));
         assertEquals(1, conditional1.getBundles().size());
 
         Conditional conditional2 = feature.getConditional().get(1);
-        assertThat(conditional2.getCondition(), contains("req:osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(!(version>=1.7)))\""));
+        assertThat(
+                conditional2.getCondition(),
+                contains("req:osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(!(version>=1.7)))\""));
     }
-    
 }

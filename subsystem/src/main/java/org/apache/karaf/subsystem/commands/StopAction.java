@@ -35,5 +35,4 @@ public class StopAction extends SubsystemSupport implements Action {
         }
         return null;
     }
-
 }

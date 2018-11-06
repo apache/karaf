@@ -18,9 +18,7 @@ package org.apache.karaf.scr.management;
 
 import javax.management.openmbean.TabularData;
 
-/**
- * The management interface for SCR Components.
- */
+/** The management interface for SCR Components. */
 public interface ServiceComponentRuntimeMBean {
 
     String COMPONENT_BUNDLE_ID = "BundleId";
@@ -47,20 +45,20 @@ public interface ServiceComponentRuntimeMBean {
     String PROPERTY_VALUE = "Value";
 
     /*
-               itemValues[0] = reference.name;
-            itemValues[1] = reference.interfaceName;
-            itemValues[2] = reference.cardinality;
-            itemValues[3] = reference.policy;
-            itemValues[4] = reference.policyOption;
-            itemValues[5] = reference.target;
-            itemValues[6] = reference.bind;
-            itemValues[7] = reference.unbind;
-            itemValues[8] = reference.updated;
-            itemValues[9] = reference.field;
-            itemValues[10] = reference.fieldOption;
-            itemValues[11] = reference.scope;
+              itemValues[0] = reference.name;
+           itemValues[1] = reference.interfaceName;
+           itemValues[2] = reference.cardinality;
+           itemValues[3] = reference.policy;
+           itemValues[4] = reference.policyOption;
+           itemValues[5] = reference.target;
+           itemValues[6] = reference.bind;
+           itemValues[7] = reference.unbind;
+           itemValues[8] = reference.updated;
+           itemValues[9] = reference.field;
+           itemValues[10] = reference.fieldOption;
+           itemValues[11] = reference.scope;
 
-     */
+    */
     String REFERENCE_NAME = "Name";
     String REFERENCE_INTERFACE_NAME = "InterfaceName";
     String REFERENCE_CARDINALITY = "Cardinality";
@@ -76,29 +74,51 @@ public interface ServiceComponentRuntimeMBean {
 
     String REFERENCE_BOUND_SERVICES = "BoundServices";
 
-    /**
-     * The item names in the CompositeData representing a component
-     */
-    String[] COMPONENT_DESCRIPTION = {COMPONENT_BUNDLE_ID, COMPONENT_NAME, COMPONENT_FACTORY,
-            COMPONENT_SCOPE, COMPONENT_IMPLEMENTATION_CLASS, COMPONENT_DEFAULT_ENABLED,
-            COMPONENT_IMMEDIATE, COMPONENT_SERVICE_INTERFACES,
-            COMPONENT_PROPERTIES, COMPONENT_REFERENCES,
-            COMPONENT_ACTIVATE, COMPONENT_DEACTIVATE, COMPONENT_MODIFIED,
-            COMPONENT_CONFIGURATION_POLICY, COMPONENT_CONFIGURATION_PID};
+    /** The item names in the CompositeData representing a component */
+    String[] COMPONENT_DESCRIPTION = {
+        COMPONENT_BUNDLE_ID,
+        COMPONENT_NAME,
+        COMPONENT_FACTORY,
+        COMPONENT_SCOPE,
+        COMPONENT_IMPLEMENTATION_CLASS,
+        COMPONENT_DEFAULT_ENABLED,
+        COMPONENT_IMMEDIATE,
+        COMPONENT_SERVICE_INTERFACES,
+        COMPONENT_PROPERTIES,
+        COMPONENT_REFERENCES,
+        COMPONENT_ACTIVATE,
+        COMPONENT_DEACTIVATE,
+        COMPONENT_MODIFIED,
+        COMPONENT_CONFIGURATION_POLICY,
+        COMPONENT_CONFIGURATION_PID
+    };
 
-    String[] COMPONENT_CONFIGURATION = {COMPONENT_BUNDLE_ID, COMPONENT_NAME,
-            COMPONENT_STATE, COMPONENT_ID,
-            COMPONENT_PROPERTIES,
-            COMPONENT_SATISFIED_REFERENCES, COMPONENT_UNSATISFIED_REFERENCES
+    String[] COMPONENT_CONFIGURATION = {
+        COMPONENT_BUNDLE_ID,
+        COMPONENT_NAME,
+        COMPONENT_STATE,
+        COMPONENT_ID,
+        COMPONENT_PROPERTIES,
+        COMPONENT_SATISFIED_REFERENCES,
+        COMPONENT_UNSATISFIED_REFERENCES
     };
 
     String[] PROPERTY = {PROPERTY_KEY, PROPERTY_VALUE};
 
-    String[] REFERENCE = {REFERENCE_NAME, REFERENCE_INTERFACE_NAME,
-            REFERENCE_CARDINALITY, REFERENCE_POLICY,
-            REFERENCE_POLICY_OPTION, REFERENCE_TARGET,
-            REFERENCE_BIND, REFERENCE_UNBIND, REFERENCE_UPDATED,
-            REFERENCE_FIELD, REFERENCE_FIELD_OPTION, REFERENCE_SCOPE};
+    String[] REFERENCE = {
+        REFERENCE_NAME,
+        REFERENCE_INTERFACE_NAME,
+        REFERENCE_CARDINALITY,
+        REFERENCE_POLICY,
+        REFERENCE_POLICY_OPTION,
+        REFERENCE_TARGET,
+        REFERENCE_BIND,
+        REFERENCE_UNBIND,
+        REFERENCE_UPDATED,
+        REFERENCE_FIELD,
+        REFERENCE_FIELD_OPTION,
+        REFERENCE_SCOPE
+    };
 
     String[] SVC_REFERENCE = {REFERENCE_NAME, REFERENCE_TARGET, REFERENCE_BOUND_SERVICES};
 
@@ -144,5 +164,4 @@ public interface ServiceComponentRuntimeMBean {
      * @param componentName The component name.
      */
     void disableComponent(long bundleId, String componentName);
-
 }

@@ -17,12 +17,10 @@
  * under the License.
  */
 
-
 package org.apache.karaf.tooling.features;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
-
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
@@ -33,11 +31,10 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class BundleToArtifactTest extends MojoSupport {
 
     @SuppressWarnings("rawtypes")
-	public BundleToArtifactTest() throws NoSuchFieldException, IllegalAccessException {
+    public BundleToArtifactTest() throws NoSuchFieldException, IllegalAccessException {
         factory = new DefaultArtifactFactory();
         ArtifactHandlerManager artifactHandlerManager = new DefaultArtifactHandlerManager();
         Field f = factory.getClass().getDeclaredField("artifactHandlerManager");
@@ -51,9 +48,8 @@ public class BundleToArtifactTest extends MojoSupport {
         f.setAccessible(false);
     }
 
-    public void execute() throws MojoExecutionException, MojoFailureException {
-    }
-    
+    public void execute() throws MojoExecutionException, MojoFailureException {}
+
     @Test
     public void testSimpleURL() throws Exception {
         Artifact artifact = resourceToArtifact("mvn:org.foo/bar/1.0/kar", false);
@@ -86,10 +82,11 @@ public class BundleToArtifactTest extends MojoSupport {
         Assert.assertEquals("http://baz.com", artifact.getRepository().getUrl());
         Assert.assertNull(artifact.getClassifier());
     }
-    
+
     @Test
     public void testRemoteRepoURLWithId() throws Exception {
-        Artifact artifact = resourceToArtifact("mvn:http://baz.com@id=baz!org.foo/bar/1.0/kar", false);
+        Artifact artifact =
+                resourceToArtifact("mvn:http://baz.com@id=baz!org.foo/bar/1.0/kar", false);
         Assert.assertEquals("org.foo", artifact.getGroupId());
         Assert.assertEquals("bar", artifact.getArtifactId());
         Assert.assertEquals("1.0", artifact.getBaseVersion());

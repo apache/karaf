@@ -20,9 +20,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * <p>Represent a tree that can be written to the console.</p>
- *
- * The output will look like this:
+ * Represent a tree that can be written to the console. The output will look like this:
  *
  * <pre>
  * root
@@ -43,7 +41,8 @@ public class Tree<T> extends Node<T> {
     }
 
     /**
-     * Write the tree to a PrintStream, using the default toString() method to output the node values.
+     * Write the tree to a PrintStream, using the default toString() method to output the node
+     * values.
      *
      * @param stream the stream where to write.
      */
@@ -62,7 +61,8 @@ public class Tree<T> extends Node<T> {
     }
 
     /**
-     * Write the tree to a PrintWriter, using the default toString() method to output the node values.
+     * Write the tree to a PrintWriter, using the default toString() method to output the node
+     * values.
      *
      * @param writer the writer where to write.
      */
@@ -92,6 +92,5 @@ public class Tree<T> extends Node<T> {
     public interface Converter<T> {
 
         String toString(Node<T> node);
-
     }
 }

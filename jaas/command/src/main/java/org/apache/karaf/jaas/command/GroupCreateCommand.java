@@ -23,8 +23,13 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Command(scope = "jaas", name = "group-create", description = "Create a group in a realm")
 @Service
 public class GroupCreateCommand extends JaasCommandSupport {
-   
-    @Argument(index = 0, name = "group", description = "Group", required = true, multiValued = false)
+
+    @Argument(
+            index = 0,
+            name = "group",
+            description = "Group",
+            required = true,
+            multiValued = false)
     private String group;
 
     @Override
@@ -33,7 +38,6 @@ public class GroupCreateCommand extends JaasCommandSupport {
         return null;
     }
 
-        
     public String getGroup() {
         return group;
     }
@@ -46,5 +50,4 @@ public class GroupCreateCommand extends JaasCommandSupport {
     public String toString() {
         return "GroupCreateCommand {group='" + group + "'}";
     }
-
 }

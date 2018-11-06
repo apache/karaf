@@ -27,7 +27,10 @@ public class LogAppenderExampleTest extends KarafTestSupport {
     @Test
     public void test() throws Exception {
         // adding karaf-log-appender-example features repository
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-log-appender-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-log-appender-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         // install the karaf-log-appender-example feature
         installAndAssertFeature("karaf-log-appender-example");
@@ -36,5 +39,4 @@ public class LogAppenderExampleTest extends KarafTestSupport {
         System.out.println(output);
         assertContains("INFO - TEST", output);
     }
-
 }

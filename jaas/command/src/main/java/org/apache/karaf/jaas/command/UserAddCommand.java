@@ -24,10 +24,22 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class UserAddCommand extends JaasCommandSupport {
 
-    @Argument(index = 0, name = "username", description = "User Name", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "username",
+            description = "User Name",
+            required = true,
+            multiValued = false)
     private String username;
 
-    @Argument(index = 1, name = "password", description = "Password", required = true, multiValued = false, censor = true, mask = '#')
+    @Argument(
+            index = 1,
+            name = "password",
+            description = "Password",
+            required = true,
+            multiValued = false,
+            censor = true,
+            mask = '#')
     private String password;
 
     @Override
@@ -54,10 +66,13 @@ public class UserAddCommand extends JaasCommandSupport {
 
     @Override
     public String toString() {
-        return "UserAddCommand{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+        return "UserAddCommand{"
+                + "username='"
+                + username
+                + '\''
+                + ", password='"
+                + password
+                + '\''
+                + '}';
     }
-
 }

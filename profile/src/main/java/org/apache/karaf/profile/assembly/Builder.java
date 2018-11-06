@@ -16,6 +16,10 @@
  */
 package org.apache.karaf.profile.assembly;
 
+import static java.util.Collections.singletonList;
+import static java.util.jar.JarFile.MANIFEST_NAME;
+import static org.apache.karaf.profile.assembly.Builder.Stage.Startup;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,7 +64,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.properties.Properties;
@@ -110,13 +113,7 @@ import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.util.Collections.singletonList;
-import static java.util.jar.JarFile.MANIFEST_NAME;
-import static org.apache.karaf.profile.assembly.Builder.Stage.Startup;
-
-/**
- * A builder-like class to create instances of {@link Profile profiles}.
- */
+/** A builder-like class to create instances of {@link Profile profiles}. */
 public class Builder {
 
     private static final String STATIC_FEATURES_KAR = "mvn:org.apache.karaf.features/static/%s/kar";
@@ -132,31 +129,31 @@ public class Builder {
 
     public static final String ORG_OPS4J_PAX_URL_MVN_PID = "org.ops4j.pax.url.mvn";
 
-    /**
-     * <p>An indication of <em>stage</em> for bundles/features/repositories/kars/profiles.</p>
-     */
+    /** An indication of <em>stage</em> for bundles/features/repositories/kars/profiles. */
     public enum Stage {
         /**
-         * Karaf runtime is in <em>startup</em> stage when it installs OSGi bundles into OSGi framework before
-         * passing this responsibility to {@link FeaturesService}. A list of bundles to install is defined
-         * in <code>${karaf.etc}/startup.properties</code>.
+         * Karaf runtime is in <em>startup</em> stage when it installs OSGi bundles into OSGi
+         * framework before passing this responsibility to {@link FeaturesService}. A list of
+         * bundles to install is defined in <code>${karaf.etc}/startup.properties</code>.
          */
         Startup,
         /**
-         * Karaf runtime is in <em>boot</em> stage when it installs OSGi bundles using Karaf features. Features
-         * (and features XML repositories) are defined in <code>${karaf.etc}/org.apache.karaf.features.cfg</code>.
-         * Repositories and features available in startup stage should be <em>visible</em> in boot stage as well, as
-         * this is the stage where term <em>Karaf feature</em> gets its meaning.
+         * Karaf runtime is in <em>boot</em> stage when it installs OSGi bundles using Karaf
+         * features. Features (and features XML repositories) are defined in <code>
+         * ${karaf.etc}/org.apache.karaf.features.cfg</code>. Repositories and features available in
+         * startup stage should be <em>visible</em> in boot stage as well, as this is the stage
+         * where term <em>Karaf feature</em> gets its meaning.
          */
         Boot,
         /**
-         * <em>Installed</em> stage is just a space where bundles and features may be installed after starting
-         * Karaf runtime (e.g., using Karaf shell commands, JMX or UI).
+         * <em>Installed</em> stage is just a space where bundles and features may be installed
+         * after starting Karaf runtime (e.g., using Karaf shell commands, JMX or UI).
          */
         Installed;
 
         /**
          * Get a {@link Stage} corresponding to Maven scope.
+         *
          * @param scope
          * @return
          */
@@ -175,20 +172,25 @@ public class Builder {
     }
 
     /**
-     * <p>An identifiier of Karaf version <em>family</em>. Each version family may have special methods
-     * or requirements for generating/preparing configuration.</p>
+     * An identifiier of Karaf version <em>family</em>. Each version family may have special methods
+     * or requirements for generating/preparing configuration.
      */
     public enum KarafVersion {
-        v24, v3x, v4x
+        v24,
+        v3x,
+        v4x
     }
 
     /**
-     * <p>An idenfifier for supported Java version. This version is used for example in
-     * <code>${karaf.etc}/jre.properties</code> to define system packages for given Java version. Only
-     * supported versions are defined.</p>
+     * An idenfifier for supported Java version. This version is used for example in <code>
+     * ${karaf.etc}/jre.properties</code> to define system packages for given Java version. Only
+     * supported versions are defined.
      */
     public enum JavaVersion {
-        Java16("1.6", 1), Java17("1.7", 2), Java18("1.8", 3), Java9("9", 4);
+        Java16("1.6", 1),
+        Java17("1.7", 2),
+        Java18("1.8", 3),
+        Java9("9", 4);
 
         private String version;
         private int ordinal;
@@ -199,12 +201,12 @@ public class Builder {
         }
 
         public static JavaVersion from(String version) {
-            Optional<JavaVersion> v = Arrays.stream(values())
-                    .filter(jv -> jv.version.equals(version))
-                    .findFirst();
+            Optional<JavaVersion> v =
+                    Arrays.stream(values()).filter(jv -> jv.version.equals(version)).findFirst();
 
             if (!v.isPresent()) {
-                throw new IllegalArgumentException("Java version \"" + version + "\" is not supported");
+                throw new IllegalArgumentException(
+                        "Java version \"" + version + "\" is not supported");
             }
             return v.get();
         }
@@ -214,17 +216,16 @@ public class Builder {
         }
     }
 
-    /**
-     * TODOCUMENT
-     */
+    /** TODOCUMENT */
     public enum BlacklistPolicy {
         Discard,
         Fail
     }
 
     /**
-     * Configuration of features XML repository (standalone or inside KAR). <code>addAll</code> may configure
-     * given repository to install all defined features if no explicit feature is specified.
+     * Configuration of features XML repository (standalone or inside KAR). <code>addAll</code> may
+     * configure given repository to install all defined features if no explicit feature is
+     * specified.
      */
     static class RepositoryInfo {
         Stage stage;
@@ -236,13 +237,10 @@ public class Builder {
         }
     }
 
-    /**
-     * Class similar to {@link FeaturePattern} but simplified for profile name matching
-     */
+    /** Class similar to {@link FeaturePattern} but simplified for profile name matching */
     private static class ProfileNamePattern {
         private String name;
         private Pattern namePattern;
-
 
         public ProfileNamePattern(String profileName) {
             if (profileName == null) {
@@ -256,6 +254,7 @@ public class Builder {
 
         /**
          * Returns <code>if this feature pattern</code> matches given feature/version
+         *
          * @param profileName
          * @return
          */
@@ -325,6 +324,7 @@ public class Builder {
 
     /**
      * Sets the {@link Stage} used by next builder invocations.
+     *
      * @param stage
      * @return
      */
@@ -335,6 +335,7 @@ public class Builder {
 
     /**
      * Sets default <em>add all</em> flag for KARs and repositories.
+     *
      * @param addAll
      * @return
      */
@@ -345,6 +346,7 @@ public class Builder {
 
     /**
      * Configure a list of profile URIs to be used for profile import
+     *
      * @param profilesUri
      * @return
      */
@@ -354,8 +356,9 @@ public class Builder {
     }
 
     /**
-     * Configure libraries to use. Each library may contain OSGi header-like directives: <code>type</code>,
-     * <code>url</code>, <code>export</code> and <code>delegate</code>.
+     * Configure libraries to use. Each library may contain OSGi header-like directives: <code>type
+     * </code>, <code>url</code>, <code>export</code> and <code>delegate</code>.
+     *
      * @param libraries
      * @return
      */
@@ -365,7 +368,9 @@ public class Builder {
     }
 
     /**
-     * Configure KARs to use at current {@link #defaultStage stage} with default <em>add all</em> flag
+     * Configure KARs to use at current {@link #defaultStage stage} with default <em>add all</em>
+     * flag
+     *
      * @param kars
      * @return
      */
@@ -375,6 +380,7 @@ public class Builder {
 
     /**
      * Configure KARs to use at current {@link #defaultStage stage} with given <em>add all</em> flag
+     *
      * @param addAll
      * @param kars
      * @return
@@ -385,6 +391,7 @@ public class Builder {
 
     /**
      * Configure KARs to use at given stage with given <em>add all</em> flag
+     *
      * @param stage
      * @param addAll
      * @param kars
@@ -398,7 +405,9 @@ public class Builder {
     }
 
     /**
-     * Configure features XML repositories to use at current {@link #defaultStage stage} with default <em>add all</em> flag
+     * Configure features XML repositories to use at current {@link #defaultStage stage} with
+     * default <em>add all</em> flag
+     *
      * @param repositories
      * @return
      */
@@ -407,7 +416,9 @@ public class Builder {
     }
 
     /**
-     * Configure features XML repositories to use at current {@link #defaultStage stage} with given <em>add all</em> flag
+     * Configure features XML repositories to use at current {@link #defaultStage stage} with given
+     * <em>add all</em> flag
+     *
      * @param addAll
      * @param repositories
      * @return
@@ -418,6 +429,7 @@ public class Builder {
 
     /**
      * Configure features XML repositories to use at given stage with given <em>add all</em> flag
+     *
      * @param stage
      * @param addAll
      * @param repositories
@@ -431,8 +443,9 @@ public class Builder {
     }
 
     /**
-     * Configure features to use at current {@link #defaultStage stage}. Each feature may be specified as
-     * <code>name</code> or <code>name/version</code> (no version ranges allowed).
+     * Configure features to use at current {@link #defaultStage stage}. Each feature may be
+     * specified as <code>name</code> or <code>name/version</code> (no version ranges allowed).
+     *
      * @param features
      * @return
      */
@@ -441,8 +454,9 @@ public class Builder {
     }
 
     /**
-     * Configure features to use at given stage. Each feature may be specified as <code>name</code> or
-     * <code>name/version</code> (no version ranges allowed).
+     * Configure features to use at given stage. Each feature may be specified as <code>name</code>
+     * or <code>name/version</code> (no version ranges allowed).
+     *
      * @param stage
      * @param features
      * @return
@@ -456,6 +470,7 @@ public class Builder {
 
     /**
      * Configure bundle URIs to use at current {@link #defaultStage stage}.
+     *
      * @param bundles
      * @return
      */
@@ -465,6 +480,7 @@ public class Builder {
 
     /**
      * Configure bundle URIs to use at given stage.
+     *
      * @param stage
      * @param bundles
      * @return
@@ -478,6 +494,7 @@ public class Builder {
 
     /**
      * Configure profiles to use at current {@link #defaultStage stage}.
+     *
      * @param profiles
      * @return
      */
@@ -487,6 +504,7 @@ public class Builder {
 
     /**
      * Configure profiles to use at given stage.
+     *
      * @param stage
      * @param profiles
      * @return
@@ -500,6 +518,7 @@ public class Builder {
 
     /**
      * Configure target directory, where distribution is being assembled.
+     *
      * @param homeDirectory
      * @return
      */
@@ -512,8 +531,10 @@ public class Builder {
     }
 
     /**
-     * Configure Java version to use. This version will be resolved in several property placeholders inside
-     * <code>${karaf.etc}/config.properties</code> and <code>${karaf.etc}/jre.properties</code>.
+     * Configure Java version to use. This version will be resolved in several property placeholders
+     * inside <code>${karaf.etc}/config.properties</code> and <code>${karaf.etc}/jre.properties
+     * </code> .
+     *
      * @param javase
      * @return
      */
@@ -526,8 +547,9 @@ public class Builder {
     }
 
     /**
-     * Set environment to use that may be used to select different variant of PID configuration file, e.g.,
-     * <code>org.ops4j.pax.url.mvn.cfg#docker</code>.
+     * Set environment to use that may be used to select different variant of PID configuration
+     * file, e.g., <code>org.ops4j.pax.url.mvn.cfg#docker</code>.
+     *
      * @param environment
      * @return
      */
@@ -537,9 +559,10 @@ public class Builder {
     }
 
     /**
-     * Configure builder to generate <code>reference:</code>-like URIs in <code>${karaf.etc}/startup.properties</code>.
-     * Bundles declared in this way are not copied (by Felix) to <code>data/cache</code> directory, but are
-     * used from original location.
+     * Configure builder to generate <code>reference:</code>-like URIs in <code>
+     * ${karaf.etc}/startup.properties</code>. Bundles declared in this way are not copied (by
+     * Felix) to <code>data/cache</code> directory, but are used from original location.
+     *
      * @return
      */
     public Builder useReferenceUrls() {
@@ -547,8 +570,9 @@ public class Builder {
     }
 
     /**
-     * Configure builder to use (when <code>true</code>) <code>reference:</code>-like URIs in
-     * <code>${karaf.etc}/startup.properties</code>.
+     * Configure builder to use (when <code>true</code>) <code>reference:</code>-like URIs in <code>
+     * ${karaf.etc}/startup.properties</code>.
+     *
      * @param useReferenceUrls
      * @return
      */
@@ -558,8 +582,9 @@ public class Builder {
     }
 
     /**
-     * Configure builder to copy generated and configured profiles into <code>${karaf.etc}/profiles</code>
-     * directory.
+     * Configure builder to copy generated and configured profiles into <code>${karaf.etc}/profiles
+     * </code> directory.
+     *
      * @param writeProfiles
      */
     public void writeProfiles(boolean writeProfiles) {
@@ -568,6 +593,7 @@ public class Builder {
 
     /**
      * Configure builder to generate consistency report
+     *
      * @param generateConsistencyReport
      */
     public void generateConsistencyReport(String generateConsistencyReport) {
@@ -575,7 +601,9 @@ public class Builder {
     }
 
     /**
-     * Configure Karaf version to target. This impacts the way some configuration files are generated.
+     * Configure Karaf version to target. This impacts the way some configuration files are
+     * generated.
+     *
      * @param karafVersion
      * @return
      */
@@ -585,7 +613,9 @@ public class Builder {
     }
 
     /**
-     * Sets default start level for bundles declared in <code>${karaf.etc}/startup.properties</code>.
+     * Sets default start level for bundles declared in <code>${karaf.etc}/startup.properties</code>
+     * .
+     *
      * @param defaultStartLevel
      * @return
      */
@@ -595,12 +625,18 @@ public class Builder {
     }
 
     /**
-     * <p>Configures custom location for a file with features processing instructions. Normally this file is generated
-     * by the builder if any of blacklisted options are configured.</p>
-     * <p>If custom location is provided and it's not <code>etc/org.apache.karaf.features.xml</code>, it is copied</p>
-     * <p>If custom location is provided and it's <code>etc/org.apache.karaf.features.xml</code>, it's left as is</p>
-     * <p>Any additional blacklisting/overrides configuration via Maven configuration causes overwrite of original
-     * content.</p>
+     * Configures custom location for a file with features processing instructions. Normally this
+     * file is generated by the builder if any of blacklisted options are configured.
+     *
+     * <p>If custom location is provided and it's not <code>etc/org.apache.karaf.features.xml</code>
+     * , it is copied
+     *
+     * <p>If custom location is provided and it's <code>etc/org.apache.karaf.features.xml</code>,
+     * it's left as is
+     *
+     * <p>Any additional blacklisting/overrides configuration via Maven configuration causes
+     * overwrite of original content.
+     *
      * @param featuresProcessing
      */
     public Builder setFeaturesProcessing(Path featuresProcessing) {
@@ -609,16 +645,17 @@ public class Builder {
     }
 
     /**
-     * Ignore the dependency attribute (dependency="[true|false]") on bundles, effectively forcing their
-     * installation.
+     * Ignore the dependency attribute (dependency="[true|false]") on bundles, effectively forcing
+     * their installation.
      */
     public Builder ignoreDependencyFlag() {
         return ignoreDependencyFlag(true);
     }
 
     /**
-     * Configures builder to ignore (or not) <code>dependency</code> flag on bundles declared
-     * in features XML file.
+     * Configures builder to ignore (or not) <code>dependency</code> flag on bundles declared in
+     * features XML file.
+     *
      * @param ignoreDependencyFlag
      * @return
      */
@@ -629,6 +666,7 @@ public class Builder {
 
     /**
      * Configures builder to use offline pax-url-aether resolver
+     *
      * @return
      */
     public Builder offline() {
@@ -637,6 +675,7 @@ public class Builder {
 
     /**
      * Configures whether pax-url-aether resolver should work in offline mode
+     *
      * @param offline
      * @return
      */
@@ -646,8 +685,9 @@ public class Builder {
     }
 
     /**
-     * Configures local Maven repository to use by pax-url-aether. By default, assembly mojo sets the value
-     * read from current Maven build.
+     * Configures local Maven repository to use by pax-url-aether. By default, assembly mojo sets
+     * the value read from current Maven build.
+     *
      * @param localRepository
      * @return
      */
@@ -657,8 +697,9 @@ public class Builder {
     }
 
     /**
-     * Configures comma-separated list of remote Maven repositories to use by pax-url-aether.
-     * By default, assembly mojo sets the repositories from current Maven build.
+     * Configures comma-separated list of remote Maven repositories to use by pax-url-aether. By
+     * default, assembly mojo sets the repositories from current Maven build.
+     *
      * @param mavenRepositories
      * @return
      */
@@ -668,7 +709,9 @@ public class Builder {
     }
 
     /**
-     * Configures a function that may alter/replace {@link MavenResolver} used to resolve <code>mvn:</code> URIs.
+     * Configures a function that may alter/replace {@link MavenResolver} used to resolve <code>mvn:
+     * </code> URIs.
+     *
      * @param wrapper
      * @return
      */
@@ -679,6 +722,7 @@ public class Builder {
 
     /**
      * Short-hand builder configuration to use standard Karaf static KAR at current Karaf version
+     *
      * @return
      */
     public Builder staticFramework() {
@@ -687,6 +731,7 @@ public class Builder {
 
     /**
      * Short-hand builder configuration to use standard Karaf static KAR at given Karaf version
+     *
      * @param version
      * @return
      */
@@ -697,6 +742,7 @@ public class Builder {
 
     /**
      * Configure a list of blacklisted profile names (possibly using <code>*</code> glob)
+     *
      * @param profiles
      * @return
      */
@@ -707,6 +753,7 @@ public class Builder {
 
     /**
      * Configure a list of blacklisted feature names (see {@link FeaturePattern})
+     *
      * @param features
      * @return
      */
@@ -717,6 +764,7 @@ public class Builder {
 
     /**
      * Configure a list of blacklisted bundle URIs (see {@link LocationPattern})
+     *
      * @param bundles
      * @return
      */
@@ -727,6 +775,7 @@ public class Builder {
 
     /**
      * Configure a list of blacklisted features XML repository URIs (see {@link LocationPattern})
+     *
      * @param repositories
      * @return
      */
@@ -737,6 +786,7 @@ public class Builder {
 
     /**
      * TODOCUMENT
+     *
      * @param policy
      * @return
      */
@@ -747,6 +797,7 @@ public class Builder {
 
     /**
      * Specify a set of edits to apply when moving etc files.
+     *
      * @param propertyEdits the edits.
      * @return this.
      */
@@ -756,8 +807,9 @@ public class Builder {
     }
 
     /**
-     * Configures a list of PIDs (or PID patterns) to copy to <code>${karaf.etc}</code> from features, when
-     * assembling a distribution
+     * Configures a list of PIDs (or PID patterns) to copy to <code>${karaf.etc}</code> from
+     * features, when assembling a distribution
+     *
      * @param pidsToExtract
      * @return
      */
@@ -771,8 +823,8 @@ public class Builder {
     }
 
     /**
-     * Specify a set of url mappings to use instead of
-     * downloading from the original urls.
+     * Specify a set of url mappings to use instead of downloading from the original urls.
+     *
      * @param translatedUrls the urls translations.
      * @return this.
      */
@@ -783,6 +835,7 @@ public class Builder {
 
     /**
      * Configures additional properties to add to <code>${karaf.etc}/config.properties</code>
+     *
      * @param key
      * @param value
      * @return
@@ -794,6 +847,7 @@ public class Builder {
 
     /**
      * Configures additional properties to add to <code>${karaf.etc}/system.properties</code>
+     *
      * @param key
      * @param value
      * @return
@@ -828,7 +882,9 @@ public class Builder {
     }
 
     /**
-     * Main method to generate custom Karaf distribution using configuration provided with builder-like methods.
+     * Main method to generate custom Karaf distribution using configuration provided with
+     * builder-like methods.
+     *
      * @throws Exception
      */
     public void generateAssembly() throws Exception {
@@ -839,7 +895,8 @@ public class Builder {
             throw new IllegalArgumentException("homeDirectory is not set");
         }
         try {
-            executor = Executors.newScheduledThreadPool(8, ThreadUtils.namedThreadFactory("builder"));
+            executor =
+                    Executors.newScheduledThreadPool(8, ThreadUtils.namedThreadFactory("builder"));
 
             systemDirectory = homeDirectory.resolve("system");
             etcDirectory = homeDirectory.resolve("etc");
@@ -893,13 +950,16 @@ public class Builder {
         allProfiles = loadExternalProfiles(profilesUris);
         if (allProfiles.size() > 0) {
             StringBuilder sb = new StringBuilder();
-            LOGGER.info("   Found profiles: " + allProfiles.keySet().stream().collect(Collectors.joining(", ")));
+            LOGGER.info(
+                    "   Found profiles: "
+                            + allProfiles.keySet().stream().collect(Collectors.joining(", ")));
         }
 
         // Generate initial profile to collect overrides and blacklisting instructions
-        Profile initialProfile = ProfileBuilder.Factory.create("initial")
-                .setParents(new ArrayList<>(profiles.keySet()))
-                .getProfile();
+        Profile initialProfile =
+                ProfileBuilder.Factory.create("initial")
+                        .setParents(new ArrayList<>(profiles.keySet()))
+                        .getProfile();
         Profile initialOverlay = Profiles.getOverlay(initialProfile, allProfiles, environment);
         Profile initialEffective = Profiles.getEffective(initialOverlay, false);
 
@@ -916,25 +976,38 @@ public class Builder {
         String existingProcessorDefinitionURI = null;
         Path existingProcessorDefinition = etcDirectory.resolve("org.apache.karaf.features.xml");
         if (existingProcessorDefinition.toFile().isFile()) {
-            existingProcessorDefinitionURI = existingProcessorDefinition.toFile().toURI().toString();
-            LOGGER.info("Found existing features processor configuration: {}", homeDirectory.relativize(existingProcessorDefinition));
+            existingProcessorDefinitionURI =
+                    existingProcessorDefinition.toFile().toURI().toString();
+            LOGGER.info(
+                    "Found existing features processor configuration: {}",
+                    homeDirectory.relativize(existingProcessorDefinition));
         }
-        if (featuresProcessingLocation != null && featuresProcessingLocation.toFile().isFile()
+        if (featuresProcessingLocation != null
+                && featuresProcessingLocation.toFile().isFile()
                 && !featuresProcessingLocation.equals(existingProcessorDefinition)) {
             if (existingProcessorDefinitionURI != null) {
-                LOGGER.warn("Explicitly configured {} will be used for features processor configuration.", homeDirectory.relativize(featuresProcessingLocation));
+                LOGGER.warn(
+                        "Explicitly configured {} will be used for features processor configuration.",
+                        homeDirectory.relativize(featuresProcessingLocation));
             } else {
-                LOGGER.info("Found features processor configuration: {}", homeDirectory.relativize(featuresProcessingLocation));
+                LOGGER.info(
+                        "Found features processor configuration: {}",
+                        homeDirectory.relativize(featuresProcessingLocation));
             }
             existingProcessorDefinitionURI = featuresProcessingLocation.toFile().toURI().toString();
-            // when there are no other (configured via Maven for example) processing instructions (e.g., blacklisting)
+            // when there are no other (configured via Maven for example) processing instructions
+            // (e.g.,
+            // blacklisting)
             // we don't have to generate this file and may take original content
             needFeaturesProcessorFileCopy = true;
         }
 
-        // now we can configure blacklisting features processor which may have already defined (in XML)
+        // now we can configure blacklisting features processor which may have already defined (in
+        // XML)
         // configuration for bundle replacements or feature overrides.
-        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(existingProcessorDefinitionURI, null, blacklist, new HashSet<>());
+        FeaturesProcessorImpl processor =
+                new FeaturesProcessorImpl(
+                        existingProcessorDefinitionURI, null, blacklist, new HashSet<>());
 
         // add overrides from initialProfile
         Set<String> overrides = processOverrides(initialEffective.getOverrides());
@@ -944,14 +1017,23 @@ public class Builder {
         // Propagate feature installation from repositories
         //
         LOGGER.info("Loading repositories");
-        Map<String, Features> karRepositories = loadRepositories(manager, repositories.keySet(), false, processor);
+        Map<String, Features> karRepositories =
+                loadRepositories(manager, repositories.keySet(), false, processor);
         for (String repo : repositories.keySet()) {
             RepositoryInfo info = repositories.get(repo);
             if (info.addAll) {
-                LOGGER.info("   adding all non-blacklisted features from repository: " + repo + " (stage: " + info.stage + ")");
+                LOGGER.info(
+                        "   adding all non-blacklisted features from repository: "
+                                + repo
+                                + " (stage: "
+                                + info.stage
+                                + ")");
                 for (Feature feature : karRepositories.get(repo).getFeature()) {
                     if (feature.isBlacklisted()) {
-                        LOGGER.info("      feature {}/{} is blacklisted - skipping.", feature.getId(), feature.getVersion());
+                        LOGGER.info(
+                                "      feature {}/{} is blacklisted - skipping.",
+                                feature.getId(),
+                                feature.getVersion());
                     } else {
                         features.put(feature.getId(), info.stage);
                     }
@@ -963,9 +1045,12 @@ public class Builder {
             File directory = new File(generateConsistencyReport);
             if (directory.isDirectory()) {
                 LOGGER.info("Writing bundle report");
-                generateConsistencyReport(karRepositories, new File(directory, "bundle-report-full.xml"), true);
-                generateConsistencyReport(karRepositories, new File(directory, "bundle-report.xml"), false);
-                Files.copy(getClass().getResourceAsStream("/bundle-report.xslt"),
+                generateConsistencyReport(
+                        karRepositories, new File(directory, "bundle-report-full.xml"), true);
+                generateConsistencyReport(
+                        karRepositories, new File(directory, "bundle-report.xml"), false);
+                Files.copy(
+                        getClass().getResourceAsStream("/bundle-report.xslt"),
                         directory.toPath().resolve("bundle-report.xslt"),
                         StandardCopyOption.REPLACE_EXISTING);
             }
@@ -975,60 +1060,90 @@ public class Builder {
         // Generate profiles. If user has configured additional profiles, they'll be used as parents
         // of the generated ones.
         //
-        Profile startupProfile = generateProfile(Stage.Startup, profiles, repositories, features, bundles);
+        Profile startupProfile =
+                generateProfile(Stage.Startup, profiles, repositories, features, bundles);
         allProfiles.put(startupProfile.getId(), startupProfile);
 
-        // generated startup profile should be used (together with configured startup and boot profiles) as parent
-        // of the generated boot profile - similar visibility rule (boot stage requires startup stage) is applied
+        // generated startup profile should be used (together with configured startup and boot
+        // profiles)
+        // as parent
+        // of the generated boot profile - similar visibility rule (boot stage requires startup
+        // stage)
+        // is applied
         // for repositories and features
         profiles.put(startupProfile.getId(), Stage.Boot);
-        Profile bootProfile = generateProfile(Stage.Boot, profiles, repositories, features, bundles);
+        Profile bootProfile =
+                generateProfile(Stage.Boot, profiles, repositories, features, bundles);
         allProfiles.put(bootProfile.getId(), bootProfile);
 
-        Profile installedProfile = generateProfile(Stage.Installed, profiles, repositories, features, bundles);
+        Profile installedProfile =
+                generateProfile(Stage.Installed, profiles, repositories, features, bundles);
         allProfiles.put(installedProfile.getId(), installedProfile);
 
         //
-        // Compute "overlay" profile - a single profile with all parent profiles included (when there's the same
+        // Compute "overlay" profile - a single profile with all parent profiles included (when
+        // there's
+        // the same
         // file in both profiles, parent profile's version has lower priority)
         //
-        ProfileBuilder builder = ProfileBuilder.Factory.create(UUID.randomUUID().toString())
-                .setParents(Arrays.asList(startupProfile.getId(), bootProfile.getId(), installedProfile.getId()));
-        config.forEach((k ,v) -> builder.addConfiguration(Profile.INTERNAL_PID, Profile.CONFIG_PREFIX + k, v));
-        system.forEach((k ,v) -> builder.addConfiguration(Profile.INTERNAL_PID, Profile.SYSTEM_PREFIX + k, v));
-        // profile with all the parents configured and stage-agnostic blacklisting configuration added
+        ProfileBuilder builder =
+                ProfileBuilder.Factory.create(UUID.randomUUID().toString())
+                        .setParents(
+                                Arrays.asList(
+                                        startupProfile.getId(),
+                                        bootProfile.getId(),
+                                        installedProfile.getId()));
+        config.forEach(
+                (k, v) ->
+                        builder.addConfiguration(
+                                Profile.INTERNAL_PID, Profile.CONFIG_PREFIX + k, v));
+        system.forEach(
+                (k, v) ->
+                        builder.addConfiguration(
+                                Profile.INTERNAL_PID, Profile.SYSTEM_PREFIX + k, v));
+        // profile with all the parents configured and stage-agnostic blacklisting configuration
+        // added
         blacklistedRepositoryURIs.forEach(builder::addBlacklistedRepository);
         blacklistedFeatureIdentifiers.forEach(builder::addBlacklistedFeature);
         blacklistedBundleURIs.forEach(builder::addBlacklistedBundle);
         // final profilep
         Profile overallProfile = builder.getProfile();
 
-        // profile with parents included and "flattened" using inheritance rules (child files overwrite parent
-        // files and child PIDs are merged with parent PIDs and same properties are taken from child profiles)
+        // profile with parents included and "flattened" using inheritance rules (child files
+        // overwrite
+        // parent
+        // files and child PIDs are merged with parent PIDs and same properties are taken from child
+        // profiles)
         Profile overallOverlay = Profiles.getOverlay(overallProfile, allProfiles, environment);
 
-        // profile with property placeholders resolved or left unchanged (if there's no property value available,
+        // profile with property placeholders resolved or left unchanged (if there's no property
+        // value
+        // available,
         // so property placeholders are preserved - like ${karaf.base})
         Profile overallEffective = Profiles.getEffective(overallOverlay, false);
 
         if (writeProfiles) {
             Path profiles = etcDirectory.resolve("profiles");
             LOGGER.info("Adding profiles to {}", homeDirectory.relativize(profiles));
-            allProfiles.forEach((id, profile) -> {
-                try {
-                    Profiles.writeProfile(profiles, profile);
-                } catch (IOException e) {
-                    LOGGER.warn("Problem writing profile {}: {}", id, e.getMessage());
-                }
-            });
+            allProfiles.forEach(
+                    (id, profile) -> {
+                        try {
+                            Profiles.writeProfile(profiles, profile);
+                        } catch (IOException e) {
+                            LOGGER.warn("Problem writing profile {}: {}", id, e.getMessage());
+                        }
+                    });
         }
 
         manager = new CustomDownloadManager(resolver, executor, overallEffective, translatedUrls);
 
-//        Hashtable<String, String> profileProps = new Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
-//        final Map<String, String> properties = new HashMap<>();
-//        properties.put("karaf.default.repository", "system");
-//        InterpolationHelper.performSubstitution(profileProps, properties::get, false, false, true);
+        //        Hashtable<String, String> profileProps = new
+        // Hashtable<>(overallEffective.getConfiguration(ORG_OPS4J_PAX_URL_MVN_PID));
+        //        final Map<String, String> properties = new HashMap<>();
+        //        properties.put("karaf.default.repository", "system");
+        //        InterpolationHelper.performSubstitution(profileProps, properties::get, false,
+        // false,
+        // true);
 
         //
         // Write config and system properties
@@ -1065,10 +1180,13 @@ public class Builder {
         // Write all configuration files
         //
         LOGGER.info("Writing configurations");
-        for (Map.Entry<String, byte[]> config : overallEffective.getFileConfigurations().entrySet()) {
+        for (Map.Entry<String, byte[]> config :
+                overallEffective.getFileConfigurations().entrySet()) {
             Path configFile = etcDirectory.resolve(config.getKey());
             if (Files.exists(configFile)) {
-                LOGGER.info("   not changing existing config file: {}", homeDirectory.relativize(configFile));
+                LOGGER.info(
+                        "   not changing existing config file: {}",
+                        homeDirectory.relativize(configFile));
             } else {
                 LOGGER.info("   adding config file: {}", homeDirectory.relativize(configFile));
                 Files.createDirectories(configFile.getParent());
@@ -1079,15 +1197,25 @@ public class Builder {
         if (processor.hasInstructions()) {
             Path featuresProcessingXml = etcDirectory.resolve("org.apache.karaf.features.xml");
             if (hasOwnInstructions() || overrides.size() > 0) {
-                // just generate new etc/org.apache.karaf.features.xml file (with external config + builder config)
+                // just generate new etc/org.apache.karaf.features.xml file (with external config +
+                // builder
+                // config)
                 try (FileOutputStream fos = new FileOutputStream(featuresProcessingXml.toFile())) {
-                    LOGGER.info("Generating features processor configuration: {}", homeDirectory.relativize(featuresProcessingXml));
+                    LOGGER.info(
+                            "Generating features processor configuration: {}",
+                            homeDirectory.relativize(featuresProcessingXml));
                     processor.writeInstructions(fos);
                 }
             } else if (needFeaturesProcessorFileCopy) {
                 // we may simply copy configured features processor XML configuration
-                LOGGER.info("Copying features processor configuration: {} -> {}", homeDirectory.relativize(featuresProcessingLocation), homeDirectory.relativize(featuresProcessingXml));
-                Files.copy(featuresProcessingLocation, featuresProcessingXml, StandardCopyOption.REPLACE_EXISTING);
+                LOGGER.info(
+                        "Copying features processor configuration: {} -> {}",
+                        homeDirectory.relativize(featuresProcessingLocation),
+                        homeDirectory.relativize(featuresProcessingXml));
+                Files.copy(
+                        featuresProcessingLocation,
+                        featuresProcessingXml,
+                        StandardCopyOption.REPLACE_EXISTING);
             }
         }
 
@@ -1110,18 +1238,20 @@ public class Builder {
         if (propertyEdits != null) {
             KarafPropertiesEditor editor = new KarafPropertiesEditor();
             editor.setInputEtc(etcDirectory.toFile())
-            .setOutputEtc(etcDirectory.toFile())
-            .setEdits(propertyEdits);
+                    .setOutputEtc(etcDirectory.toFile())
+                    .setEdits(propertyEdits);
             editor.run();
         }
     }
 
     /**
      * Produces human readable XML with <em>feature consistency report</em>.
+     *
      * @param repositories
      * @param result
      */
-    public void generateConsistencyReport(Map<String, Features> repositories, File result, boolean full) {
+    public void generateConsistencyReport(
+            Map<String, Features> repositories, File result, boolean full) {
         Map<String, String> featureId2repository = new HashMap<>();
         // list of feature IDs containing given bundle URIs
         Map<String, Set<String>> bundle2featureId = new TreeMap<>(new URIAwareComparator());
@@ -1130,58 +1260,91 @@ public class Builder {
         Set<String> haveDuplicates = new HashSet<>();
 
         // collect closure of bundles and features
-        repositories.forEach((name, features) -> {
-            if (full || !features.isBlacklisted()) {
-                features.getFeature().forEach(feature -> {
-                    if (full || !feature.isBlacklisted()) {
-                        featureId2repository.put(feature.getId(), name);
-                        feature.getBundle().forEach(bundle -> {
-                            // normal bundles of feature
-                            bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
-                        });
-                        feature.getConditional().forEach(cond -> {
-                            cond.asFeature().getBundles().forEach(bundle -> {
-                                // conditional bundles of feature
-                                bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
-                            });
-                        });
+        repositories.forEach(
+                (name, features) -> {
+                    if (full || !features.isBlacklisted()) {
+                        features.getFeature()
+                                .forEach(
+                                        feature -> {
+                                            if (full || !feature.isBlacklisted()) {
+                                                featureId2repository.put(feature.getId(), name);
+                                                feature.getBundle()
+                                                        .forEach(
+                                                                bundle -> {
+                                                                    // normal bundles of feature
+                                                                    bundle2featureId
+                                                                            .computeIfAbsent(
+                                                                                    bundle.getLocation()
+                                                                                            .trim(),
+                                                                                    k ->
+                                                                                            new TreeSet<>())
+                                                                            .add(feature.getId());
+                                                                });
+                                                feature.getConditional()
+                                                        .forEach(
+                                                                cond -> {
+                                                                    cond.asFeature()
+                                                                            .getBundles()
+                                                                            .forEach(
+                                                                                    bundle -> {
+                                                                                        // conditional bundles of feature
+                                                                                        bundle2featureId
+                                                                                                .computeIfAbsent(
+                                                                                                        bundle.getLocation()
+                                                                                                                .trim(),
+                                                                                                        k ->
+                                                                                                                new TreeSet<>())
+                                                                                                .add(
+                                                                                                        feature
+                                                                                                                .getId());
+                                                                                    });
+                                                                });
+                                            }
+                                        });
                     }
                 });
-            }
-        });
         // collect bundle URIs - for now, only wrap:mvn: and mvn: are interesting
-        bundle2featureId.keySet().forEach(uri -> {
-            String originalUri = uri;
-            if (uri.startsWith("wrap:mvn:")) {
-                uri = uri.substring(5);
-                if (uri.indexOf(";") > 0) {
-                    uri = uri.substring(0, uri.indexOf(";"));
-                }
-                if (uri.indexOf("$") > 0) {
-                    uri = uri.substring(0, uri.indexOf("$"));
-                }
-            }
-            if (uri.startsWith("mvn:")) {
-                try {
-                    LocationPattern pattern = new LocationPattern(uri);
-                    String ga = String.format("%s/%s", pattern.getGroupId(), pattern.getArtifactId());
-                    ga2uri.computeIfAbsent(ga, k -> new LinkedList<>()).add(originalUri);
-                } catch (IllegalArgumentException ignored) {
-                    /*
-                        <!-- hibernate-validator-osgi-karaf-features-5.3.4.Final-features.xml -->
-                        <feature name="hibernate-validator-paranamer" version="5.3.4.Final">
-                            <feature>hibernate-validator</feature>
-                            <bundle>wrap:mvn:com.thoughtworks.paranamer:paranamer:2.8</bundle>
-                        </feature>
-                     */
-                }
-            }
-        });
-        ga2uri.values().forEach(l -> {
-            if (l.size() > 1) {
-                haveDuplicates.addAll(l);
-            }
-        });
+        bundle2featureId
+                .keySet()
+                .forEach(
+                        uri -> {
+                            String originalUri = uri;
+                            if (uri.startsWith("wrap:mvn:")) {
+                                uri = uri.substring(5);
+                                if (uri.indexOf(";") > 0) {
+                                    uri = uri.substring(0, uri.indexOf(";"));
+                                }
+                                if (uri.indexOf("$") > 0) {
+                                    uri = uri.substring(0, uri.indexOf("$"));
+                                }
+                            }
+                            if (uri.startsWith("mvn:")) {
+                                try {
+                                    LocationPattern pattern = new LocationPattern(uri);
+                                    String ga =
+                                            String.format(
+                                                    "%s/%s",
+                                                    pattern.getGroupId(), pattern.getArtifactId());
+                                    ga2uri.computeIfAbsent(ga, k -> new LinkedList<>())
+                                            .add(originalUri);
+                                } catch (IllegalArgumentException ignored) {
+                                    /*
+                                       <!-- hibernate-validator-osgi-karaf-features-5.3.4.Final-features.xml -->
+                                       <feature name="hibernate-validator-paranamer" version="5.3.4.Final">
+                                           <feature>hibernate-validator</feature>
+                                           <bundle>wrap:mvn:com.thoughtworks.paranamer:paranamer:2.8</bundle>
+                                       </feature>
+                                    */
+                                }
+                            }
+                        });
+        ga2uri.values()
+                .forEach(
+                        l -> {
+                            if (l.size() > 1) {
+                                haveDuplicates.addAll(l);
+                            }
+                        });
 
         if (result == null) {
             return;
@@ -1191,26 +1354,36 @@ public class Builder {
             writer.write("<?xml-stylesheet type=\"text/xsl\" href=\"bundle-report.xslt\"?>\n");
             writer.write("<consistency-report xmlns=\"urn:apache:karaf:consistency:1.0\">\n");
             writer.write("    <duplicates>\n");
-            ga2uri.forEach((key, uris) -> {
-                if (uris.size() > 1) {
-                    try {
-                        writer.write(String.format("        <duplicate ga=\"%s\">\n", key));
-                        for (String uri : uris) {
-                            writer.write(String.format("            <bundle uri=\"%s\">\n", sanitize(uri)));
-                            for (String fid : bundle2featureId.get(uri)) {
-                                writer.write(String.format("                <feature repository=\"%s\">%s</feature>\n", featureId2repository.get(fid), fid));
+            ga2uri.forEach(
+                    (key, uris) -> {
+                        if (uris.size() > 1) {
+                            try {
+                                writer.write(String.format("        <duplicate ga=\"%s\">\n", key));
+                                for (String uri : uris) {
+                                    writer.write(
+                                            String.format(
+                                                    "            <bundle uri=\"%s\">\n",
+                                                    sanitize(uri)));
+                                    for (String fid : bundle2featureId.get(uri)) {
+                                        writer.write(
+                                                String.format(
+                                                        "                <feature repository=\"%s\">%s</feature>\n",
+                                                        featureId2repository.get(fid), fid));
+                                    }
+                                    writer.write("            </bundle>\n");
+                                }
+                                writer.write("        </duplicate>\n");
+                            } catch (IOException e) {
                             }
-                            writer.write("            </bundle>\n");
                         }
-                        writer.write("        </duplicate>\n");
-                    } catch (IOException e) {
-                    }
-                }
-            });
+                    });
             writer.write("    </duplicates>\n");
             writer.write("    <bundles>\n");
             for (String uri : bundle2featureId.keySet()) {
-                writer.write(String.format("        <bundle uri=\"%s\" duplicate=\"%b\">\n", sanitize(uri), haveDuplicates.contains(uri)));
+                writer.write(
+                        String.format(
+                                "        <bundle uri=\"%s\" duplicate=\"%b\">\n",
+                                sanitize(uri), haveDuplicates.contains(uri)));
                 for (String fid : bundle2featureId.get(uri)) {
                     writer.write(String.format("            <feature>%s</feature>\n", fid));
                 }
@@ -1225,16 +1398,21 @@ public class Builder {
 
     /**
      * Sanitize before putting to XML
+     *
      * @param uri
      * @return
      */
     public String sanitize(String uri) {
-        return uri.replaceAll("&", "&amp;").replaceAll(">", "&lt;").replaceAll("<", "&gt;").replaceAll("\"", "&quot;");
+        return uri.replaceAll("&", "&amp;")
+                .replaceAll(">", "&lt;")
+                .replaceAll("<", "&gt;")
+                .replaceAll("\"", "&quot;");
     }
 
     /**
-     * Similar to {@link FeaturesProcessorImpl#hasInstructions()}, we check if there are any builder configuration
-     * options for blacklisted repos/features/bundles or overwrites.
+     * Similar to {@link FeaturesProcessorImpl#hasInstructions()}, we check if there are any builder
+     * configuration options for blacklisted repos/features/bundles or overwrites.
+     *
      * @return
      */
     private boolean hasOwnInstructions() {
@@ -1248,6 +1426,7 @@ public class Builder {
 
     /**
      * Checks existing (etc/overrides.properties) and configured (in profiles) overrides definitions
+     *
      * @param profileOverrides
      * @return
      */
@@ -1255,8 +1434,11 @@ public class Builder {
         Set<String> result = new LinkedHashSet<>();
         Path existingOverridesLocation = etcDirectory.resolve("overrides.properties");
         if (existingOverridesLocation.toFile().isFile()) {
-            LOGGER.warn("Found {} which is deprecated, please use new feature processor configuration.", homeDirectory.relativize(existingOverridesLocation));
-            result.addAll(Overrides.loadOverrides(existingOverridesLocation.toFile().toURI().toString()));
+            LOGGER.warn(
+                    "Found {} which is deprecated, please use new feature processor configuration.",
+                    homeDirectory.relativize(existingOverridesLocation));
+            result.addAll(
+                    Overrides.loadOverrides(existingOverridesLocation.toFile().toURI().toString()));
         }
         result.addAll(profileOverrides);
 
@@ -1265,6 +1447,7 @@ public class Builder {
 
     /**
      * Checks existing and configured blacklisting definitions
+     *
      * @param initialProfile
      * @return
      * @throws IOException
@@ -1274,7 +1457,9 @@ public class Builder {
         Blacklist blacklist = new Blacklist();
         Path existingBLacklistedLocation = etcDirectory.resolve("blacklisted.properties");
         if (existingBLacklistedLocation.toFile().isFile()) {
-            LOGGER.warn("Found {} which is deprecated, please use new feature processor configuration.", homeDirectory.relativize(existingBLacklistedLocation));
+            LOGGER.warn(
+                    "Found {} which is deprecated, please use new feature processor configuration.",
+                    homeDirectory.relativize(existingBLacklistedLocation));
             existingBlacklist = new Blacklist(Files.readAllLines(existingBLacklistedLocation));
         }
         for (String br : blacklistedRepositoryURIs) {
@@ -1327,7 +1512,8 @@ public class Builder {
         if (mavenRepositories != null) {
             props.put(ORG_OPS4J_PAX_URL_MVN_PID + ".repositories", mavenRepositories);
         }
-        MavenResolver resolver = MavenResolvers.createMavenResolver(props, ORG_OPS4J_PAX_URL_MVN_PID);
+        MavenResolver resolver =
+                MavenResolvers.createMavenResolver(props, ORG_OPS4J_PAX_URL_MVN_PID);
         return resolverWrapper.apply(resolver);
     }
 
@@ -1335,7 +1521,8 @@ public class Builder {
      * Loads all profiles declared in profile URIs. These will be used in addition to generated
      * <em>startup</em>, <em>boot</em> and <em>installed</em> profiles.
      */
-    private Map<String, Profile> loadExternalProfiles(List<String> profilesUris) throws IOException, MultiException, InterruptedException {
+    private Map<String, Profile> loadExternalProfiles(List<String> profilesUris)
+            throws IOException, MultiException, InterruptedException {
         Map<String, Profile> profiles = new LinkedHashMap<>();
         Map<String, Profile> filteredProfiles = new LinkedHashMap<>();
 
@@ -1357,13 +1544,18 @@ public class Builder {
                 profilePath = Paths.get(profileURI);
             } catch (FileSystemNotFoundException e) {
                 // file system does not exist, try to create it
-                FileSystem fs = FileSystems.newFileSystem(profileURI, new HashMap<>(), Builder.class.getClassLoader());
+                FileSystem fs =
+                        FileSystems.newFileSystem(
+                                profileURI, new HashMap<>(), Builder.class.getClassLoader());
                 profilePath = fs.provider().getPath(profileURI);
             }
             profiles.putAll(Profiles.loadProfiles(profilePath));
             // Handle blacklisted profiles
-            List<ProfileNamePattern> blacklistedProfilePatterns = blacklistedProfileNames.stream()
-                    .map(ProfileNamePattern::new).collect(Collectors.toList());
+            List<ProfileNamePattern> blacklistedProfilePatterns =
+                    blacklistedProfileNames
+                            .stream()
+                            .map(ProfileNamePattern::new)
+                            .collect(Collectors.toList());
 
             for (String profileName : profiles.keySet()) {
                 boolean blacklisted = false;
@@ -1373,7 +1565,9 @@ public class Builder {
                         // TODO review blacklist policy options
                         if (blacklistPolicy == BlacklistPolicy.Discard) {
                             // Override blacklisted profiles with empty one
-                            filteredProfiles.put(profileName, ProfileBuilder.Factory.create(profileName).getProfile());
+                            filteredProfiles.put(
+                                    profileName,
+                                    ProfileBuilder.Factory.create(profileName).getProfile());
                         } else {
                             // Remove profile completely
                         }
@@ -1414,8 +1608,15 @@ public class Builder {
         }
     }
 
-    void downloadLibraries(Downloader downloader, final Properties config, Collection<String> libraries, String indent) throws MalformedURLException {
-        Clause[] clauses = org.apache.felix.utils.manifest.Parser.parseClauses(libraries.toArray(new String[libraries.size()]));
+    void downloadLibraries(
+            Downloader downloader,
+            final Properties config,
+            Collection<String> libraries,
+            String indent)
+            throws MalformedURLException {
+        Clause[] clauses =
+                org.apache.felix.utils.manifest.Parser.parseClauses(
+                        libraries.toArray(new String[libraries.size()]));
         for (final Clause clause : clauses) {
             final String filename;
             final String library;
@@ -1426,81 +1627,125 @@ public class Builder {
                 filename = null;
                 library = clause.getName();
             }
-            final String type = clause.getDirective(LIBRARY_CLAUSE_TYPE) != null
-                    ? clause.getDirective(LIBRARY_CLAUSE_TYPE) : Library.TYPE_DEFAULT;
-            if (!javase.supportsEndorsedAndExtLibraries() && (Library.TYPE_ENDORSED.equals(type) || Library.TYPE_EXTENSION.equals(type))) {
-                LOGGER.warn("Ignoring library " + library + " of type " + type + " which is only supported for Java 1.8.");
+            final String type =
+                    clause.getDirective(LIBRARY_CLAUSE_TYPE) != null
+                            ? clause.getDirective(LIBRARY_CLAUSE_TYPE)
+                            : Library.TYPE_DEFAULT;
+            if (!javase.supportsEndorsedAndExtLibraries()
+                    && (Library.TYPE_ENDORSED.equals(type)
+                            || Library.TYPE_EXTENSION.equals(type))) {
+                LOGGER.warn(
+                        "Ignoring library "
+                                + library
+                                + " of type "
+                                + type
+                                + " which is only supported for Java 1.8.");
                 continue;
             }
             final String path;
             switch (type) {
-            case Library.TYPE_ENDORSED:  path = "lib/endorsed"; break;
-            case Library.TYPE_EXTENSION: path = "lib/ext"; break;
-            case Library.TYPE_BOOT:      path = "lib/boot"; break;
-            default:                     path = "lib"; break;
+                case Library.TYPE_ENDORSED:
+                    path = "lib/endorsed";
+                    break;
+                case Library.TYPE_EXTENSION:
+                    path = "lib/ext";
+                    break;
+                case Library.TYPE_BOOT:
+                    path = "lib/boot";
+                    break;
+                default:
+                    path = "lib";
+                    break;
             }
-            downloader.download(library, provider -> {
-                    synchronized (provider) {
-                        Path input = provider.getFile().toPath();
-                        String name = filename != null ? filename : input.getFileName().toString();
-                        Path libOutput = homeDirectory.resolve(path).resolve(name);
-                        if (!libOutput.toFile().getParentFile().isDirectory()) {
-                            libOutput.toFile().getParentFile().mkdirs();
-                        }
-                        LOGGER.info("{}   adding library: {}", indent, homeDirectory.relativize(libOutput));
-                        Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
-                        if (provider.getUrl().startsWith("mvn:")) {
-                            // copy boot library in system repository
-                            if (type.equals(Library.TYPE_BOOT)) {
-                                String mvnPath = Parser.pathFromMaven(provider.getUrl());
-                                Path sysOutput = systemDirectory.resolve(mvnPath);
-                                Files.createDirectories(sysOutput.getParent());
-                                Files.copy(input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
-                                libOutput = homeDirectory.resolve(path).resolve(name);
-                                // copy the file
-                                LOGGER.info("{}   adding maven library: {}", indent, provider.getUrl());
-                                Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
-                                /* a symlink could be used instead
+            downloader.download(
+                    library,
+                    provider -> {
+                        synchronized (provider) {
+                            Path input = provider.getFile().toPath();
+                            String name =
+                                    filename != null ? filename : input.getFileName().toString();
+                            Path libOutput = homeDirectory.resolve(path).resolve(name);
+                            if (!libOutput.toFile().getParentFile().isDirectory()) {
+                                libOutput.toFile().getParentFile().mkdirs();
+                            }
+                            LOGGER.info(
+                                    "{}   adding library: {}",
+                                    indent,
+                                    homeDirectory.relativize(libOutput));
+                            Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
+                            if (provider.getUrl().startsWith("mvn:")) {
+                                // copy boot library in system repository
+                                if (type.equals(Library.TYPE_BOOT)) {
+                                    String mvnPath = Parser.pathFromMaven(provider.getUrl());
+                                    Path sysOutput = systemDirectory.resolve(mvnPath);
+                                    Files.createDirectories(sysOutput.getParent());
+                                    Files.copy(
+                                            input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
+                                    libOutput = homeDirectory.resolve(path).resolve(name);
+                                    // copy the file
+                                    LOGGER.info(
+                                            "{}   adding maven library: {}",
+                                            indent,
+                                            provider.getUrl());
+                                    Files.copy(
+                                            input, libOutput, StandardCopyOption.REPLACE_EXISTING);
+                                    /* a symlink could be used instead
 
-                                if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
-                                    try {
-                                        Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
-                                    } catch (FileSystemException e) {
-                                        Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
+                                    if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
+                                        try {
+                                            Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+                                        } catch (FileSystemException e) {
+                                            Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
+                                        }
                                     }
+                                    */
                                 }
-                                */
                             }
                         }
-                    }
-                    boolean export = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_EXPORT));
-                    boolean delegate = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_DELEGATE));
-                    if (export || delegate) {
-                        Map<String, String> headers = getHeaders(provider);
-                        String packages = headers.get(Constants.EXPORT_PACKAGE);
-                        if (packages != null) {
-                            Clause[] clauses1 = org.apache.felix.utils.manifest.Parser.parseHeader(packages);
-                            if (export) {
-                                StringBuilder val = new StringBuilder(config.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA));
-                                for (Clause clause1 : clauses1) {
-                                    val.append(",").append(clause1.toString());
+                        boolean export =
+                                Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_EXPORT));
+                        boolean delegate =
+                                Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_DELEGATE));
+                        if (export || delegate) {
+                            Map<String, String> headers = getHeaders(provider);
+                            String packages = headers.get(Constants.EXPORT_PACKAGE);
+                            if (packages != null) {
+                                Clause[] clauses1 =
+                                        org.apache.felix.utils.manifest.Parser.parseHeader(
+                                                packages);
+                                if (export) {
+                                    StringBuilder val =
+                                            new StringBuilder(
+                                                    config.getProperty(
+                                                            Constants
+                                                                    .FRAMEWORK_SYSTEMPACKAGES_EXTRA));
+                                    for (Clause clause1 : clauses1) {
+                                        val.append(",").append(clause1.toString());
+                                    }
+                                    config.setProperty(
+                                            Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA,
+                                            val.toString());
                                 }
-                                config.setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, val.toString());
-                            }
-                            if (delegate) {
-                                StringBuilder val = new StringBuilder(config.getProperty(Constants.FRAMEWORK_BOOTDELEGATION));
-                                for (Clause clause1 : clauses1) {
-                                    val.append(",").append(clause1.getName());
+                                if (delegate) {
+                                    StringBuilder val =
+                                            new StringBuilder(
+                                                    config.getProperty(
+                                                            Constants.FRAMEWORK_BOOTDELEGATION));
+                                    for (Clause clause1 : clauses1) {
+                                        val.append(",").append(clause1.getName());
+                                    }
+                                    config.setProperty(
+                                            Constants.FRAMEWORK_BOOTDELEGATION, val.toString());
                                 }
-                                config.setProperty(Constants.FRAMEWORK_BOOTDELEGATION, val.toString());
                             }
                         }
-                    }
-            });
+                    });
         }
     }
 
-    private void installStage(Profile installedProfile, Set<Feature> allBootFeatures, FeaturesProcessor processor) throws Exception {
+    private void installStage(
+            Profile installedProfile, Set<Feature> allBootFeatures, FeaturesProcessor processor)
+            throws Exception {
         LOGGER.info("Install stage");
         //
         // Handle installed profiles
@@ -1512,7 +1757,8 @@ public class Builder {
 
         // Load startup repositories
         LOGGER.info("   Loading installed repositories");
-        Map<String, Features> installedRepositories = loadRepositories(manager, installedEffective.getRepositories(), true, processor);
+        Map<String, Features> installedRepositories =
+                loadRepositories(manager, installedEffective.getRepositories(), true, processor);
         // Compute startup feature dependencies
         Set<Feature> allInstalledFeatures = new HashSet<>();
         for (Features repo : installedRepositories.values()) {
@@ -1541,7 +1787,10 @@ public class Builder {
             }
             for (Conditional cond : feature.getConditional()) {
                 if (cond.isBlacklisted()) {
-                    LOGGER.info("   Conditionial " + cond.getConditionId() + " is blacklisted, ignoring");
+                    LOGGER.info(
+                            "   Conditionial "
+                                    + cond.getConditionId()
+                                    + " is blacklisted, ignoring");
                 }
                 for (Bundle bundle : cond.getBundle()) {
                     if (!ignoreDependencyFlag || !bundle.isDependency()) {
@@ -1556,7 +1805,9 @@ public class Builder {
         downloader.await();
     }
 
-    private Set<Feature> bootStage(Profile bootProfile, Profile startupEffective, FeaturesProcessor processor) throws Exception {
+    private Set<Feature> bootStage(
+            Profile bootProfile, Profile startupEffective, FeaturesProcessor processor)
+            throws Exception {
         LOGGER.info("Boot stage");
         //
         // Handle boot profiles
@@ -1565,7 +1816,8 @@ public class Builder {
         Profile bootEffective = Profiles.getEffective(bootOverlay, false);
         // Load startup repositories
         LOGGER.info("   Loading boot repositories");
-        Map<String, Features> bootRepositories = loadRepositories(manager, bootEffective.getRepositories(), true, processor);
+        Map<String, Features> bootRepositories =
+                loadRepositories(manager, bootEffective.getRepositories(), true, processor);
         // Compute startup feature dependencies
         Set<Feature> allBootFeatures = new HashSet<>();
         for (Features repo : bootRepositories.values()) {
@@ -1578,7 +1830,8 @@ public class Builder {
         // Add feature dependencies
         for (String nameOrPattern : bootEffective.getFeatures()) {
             // KARAF-5273: feature may be a pattern
-            for (String dependency : FeatureSelector.getMatchingFeatures(nameOrPattern, bootRepositories.values())) {
+            for (String dependency :
+                    FeatureSelector.getMatchingFeatures(nameOrPattern, bootRepositories.values())) {
                 Dependency dep = generatedDep.get(dependency);
                 if (dep == null) {
                     dep = createDependency(dependency);
@@ -1621,7 +1874,10 @@ public class Builder {
             }
             for (Conditional cond : feature.getConditional()) {
                 if (cond.isBlacklisted()) {
-                    LOGGER.info("   Conditionial " + cond.getConditionId() + " is blacklisted, ignoring");
+                    LOGGER.info(
+                            "   Conditionial "
+                                    + cond.getConditionId()
+                                    + " is blacklisted, ignoring");
                 }
                 for (Bundle bundle : cond.getBundle()) {
                     if (!ignoreDependencyFlag || !bundle.isDependency()) {
@@ -1636,7 +1892,8 @@ public class Builder {
             prereqs.put("spring:", Arrays.asList("deployer", "spring"));
             prereqs.put("wrap:", Collections.singletonList("wrap"));
             prereqs.put("war:", Collections.singletonList("war"));
-            ArtifactInstaller installer = new ArtifactInstaller(systemDirectory, downloader, blacklist);
+            ArtifactInstaller installer =
+                    new ArtifactInstaller(systemDirectory, downloader, blacklist);
             for (BundleInfo bundleInfo : bundleInfos) {
                 installer.installArtifact(bundleInfo);
                 for (Map.Entry<String, List<String>> entry : prereqs.entrySet()) {
@@ -1656,14 +1913,18 @@ public class Builder {
             }
 
             new ConfigInstaller(etcDirectory, pidsToExtract)
-                .installConfigs(feature, downloader, installer);
+                    .installConfigs(feature, downloader, installer);
             // Install libraries
             List<String> libraries = new ArrayList<>();
             for (Library library : feature.getLibraries()) {
-                String lib = library.getLocation() +
-                        ";type:=" + library.getType() +
-                        ";export:=" + library.isExport() +
-                        ";delegate:=" + library.isDelegate();
+                String lib =
+                        library.getLocation()
+                                + ";type:="
+                                + library.getType()
+                                + ";export:="
+                                + library.isExport()
+                                + ";delegate:="
+                                + library.isDelegate();
                 libraries.add(lib);
             }
             Path configPropertiesPath = etcDirectory.resolve("config.properties");
@@ -1687,14 +1948,21 @@ public class Builder {
             String repoUrl;
             if (karafVersion == KarafVersion.v24) {
                 String str = baos.toString();
-                str = str.replace("http://karaf.apache.org/xmlns/features/v1.3.0", "http://karaf.apache.org/xmlns/features/v1.2.0");
+                str =
+                        str.replace(
+                                "http://karaf.apache.org/xmlns/features/v1.3.0",
+                                "http://karaf.apache.org/xmlns/features/v1.2.0");
                 str = str.replaceAll(" dependency=\".*?\"", "");
                 str = str.replaceAll(" prerequisite=\".*?\"", "");
                 for (Feature f : rep.getFeature()) {
                     for (Dependency d : f.getFeature()) {
                         if (d.isPrerequisite()) {
                             if (!startupEffective.getFeatures().contains(d.getName())) {
-                                LOGGER.warn("Feature " + d.getName() + " is a prerequisite and should be installed as a startup feature.");                }
+                                LOGGER.warn(
+                                        "Feature "
+                                                + d.getName()
+                                                + " is a prerequisite and should be installed as a startup feature.");
+                            }
                         }
                     }
                 }
@@ -1709,8 +1977,7 @@ public class Builder {
             featuresProperties.put(FEATURES_REPOSITORIES, repoUrl);
             featuresProperties.put(FEATURES_BOOT, generated.getName());
             featuresProperties.save();
-        }
-        else {
+        } else {
             String repos = getRepos(rep);
             String boot = getBootFeatures(generatedDep);
 
@@ -1782,7 +2049,8 @@ public class Builder {
         return dep;
     }
 
-    private Profile startupStage(Profile startupProfile, FeaturesProcessor processor) throws Exception {
+    private Profile startupStage(Profile startupProfile, FeaturesProcessor processor)
+            throws Exception {
         LOGGER.info("Startup stage");
         //
         // Compute startup
@@ -1791,17 +2059,26 @@ public class Builder {
         Profile startupEffective = Profiles.getEffective(startupOverlay, false);
         // Load startup repositories
         LOGGER.info("   Loading startup repositories");
-        Map<String, Features> startupRepositories = loadRepositories(manager, startupEffective.getRepositories(), false, processor);
+        Map<String, Features> startupRepositories =
+                loadRepositories(manager, startupEffective.getRepositories(), false, processor);
 
         //
         // Resolve
         //
         LOGGER.info("   Resolving startup features and bundles");
-        LOGGER.info("      Features: " + startupEffective.getFeatures().stream().collect(Collectors.joining(", ")));
-        LOGGER.info("      Bundles: " + startupEffective.getBundles().stream().collect(Collectors.joining(", ")));
+        LOGGER.info(
+                "      Features: "
+                        + startupEffective
+                                .getFeatures()
+                                .stream()
+                                .collect(Collectors.joining(", ")));
+        LOGGER.info(
+                "      Bundles: "
+                        + startupEffective.getBundles().stream().collect(Collectors.joining(", ")));
 
         Map<String, Integer> bundles =
-                resolve(manager,
+                resolve(
+                        manager,
                         resolver,
                         startupRepositories.values(),
                         startupEffective.getFeatures(),
@@ -1813,9 +2090,11 @@ public class Builder {
         // Generate startup.properties
         //
         Properties startup = new Properties();
-        startup.setHeader(Collections.singletonList("# Bundles to be started on startup, with startlevel"));
+        startup.setHeader(
+                Collections.singletonList("# Bundles to be started on startup, with startlevel"));
         Map<Integer, Set<String>> invertedStartupBundles = MapUtils.invert(bundles);
-        for (Map.Entry<Integer, Set<String>> entry : new TreeMap<>(invertedStartupBundles).entrySet()) {
+        for (Map.Entry<Integer, Set<String>> entry :
+                new TreeMap<>(invertedStartupBundles).entrySet()) {
             String startLevel = Integer.toString(entry.getKey());
             for (String location : new TreeSet<>(entry.getValue())) {
                 if (useReferenceUrls) {
@@ -1839,6 +2118,7 @@ public class Builder {
 
     /**
      * Gets a list of objects (bundle URIs, profile IDs, feature IDs) configured for given stage
+     *
      * @param stage
      * @param data
      * @return
@@ -1854,8 +2134,9 @@ public class Builder {
     }
 
     /**
-     * Gets a list of features XML repository URIs configured for given stage. There's one special rule - startup
-     * repositories are added as boot repositories as well.
+     * Gets a list of features XML repository URIs configured for given stage. There's one special
+     * rule - startup repositories are added as boot repositories as well.
+     *
      * @param stage
      * @param data
      * @return
@@ -1863,8 +2144,8 @@ public class Builder {
     private List<String> getStagedRepositories(Stage stage, Map<String, RepositoryInfo> data) {
         List<String> staged = new ArrayList<>();
         for (String s : data.keySet()) {
-            if (data.get(s).stage == stage ||
-                    data.get(s).stage == Stage.Startup && stage == Stage.Boot) {
+            if (data.get(s).stage == stage
+                    || data.get(s).stage == Stage.Startup && stage == Stage.Boot) {
                 // For boot stage, we also want the startup repositories
                 staged.add(s);
             }
@@ -1872,50 +2153,66 @@ public class Builder {
         return staged;
     }
 
-    private Map<String, Features> loadRepositories(DownloadManager manager, Collection<String> repositories, final boolean install, FeaturesProcessor processor) throws Exception {
+    private Map<String, Features> loadRepositories(
+            DownloadManager manager,
+            Collection<String> repositories,
+            final boolean install,
+            FeaturesProcessor processor)
+            throws Exception {
         final Map<String, Features> loaded = new HashMap<>();
         final Downloader downloader = manager.createDownloader();
         for (String repository : repositories) {
-            downloader.download(repository, new DownloadCallback() {
-                @Override
-                public void downloaded(final StreamProvider provider) throws Exception {
-                    String url = provider.getUrl();
-                    if (processor.isRepositoryBlacklisted(url)) {
-                        LOGGER.info("   feature repository " + url + " is blacklisted");
-                        return;
-                    }
-                    synchronized (loaded) {
-                        if (!loaded.containsKey(provider.getUrl())) {
-                            if (install) {
-                                synchronized (provider) {
-                                    Path path = ArtifactInstaller.pathFromProviderUrl(systemDirectory, url);
-                                    Files.createDirectories(path.getParent());
-                                    LOGGER.info("      adding feature repository: " + url);
-                                    Files.copy(provider.getFile().toPath(), path, StandardCopyOption.REPLACE_EXISTING);
-                                }
+            downloader.download(
+                    repository,
+                    new DownloadCallback() {
+                        @Override
+                        public void downloaded(final StreamProvider provider) throws Exception {
+                            String url = provider.getUrl();
+                            if (processor.isRepositoryBlacklisted(url)) {
+                                LOGGER.info("   feature repository " + url + " is blacklisted");
+                                return;
                             }
-                            try (InputStream is = provider.open()) {
-                                Features featuresModel = JaxbUtil.unmarshal(url, is, false);
-                                // always process according to processor configuration
-                                featuresModel.setBlacklisted(processor.isRepositoryBlacklisted(url));
-                                processor.process(featuresModel);
+                            synchronized (loaded) {
+                                if (!loaded.containsKey(provider.getUrl())) {
+                                    if (install) {
+                                        synchronized (provider) {
+                                            Path path =
+                                                    ArtifactInstaller.pathFromProviderUrl(
+                                                            systemDirectory, url);
+                                            Files.createDirectories(path.getParent());
+                                            LOGGER.info("      adding feature repository: " + url);
+                                            Files.copy(
+                                                    provider.getFile().toPath(),
+                                                    path,
+                                                    StandardCopyOption.REPLACE_EXISTING);
+                                        }
+                                    }
+                                    try (InputStream is = provider.open()) {
+                                        Features featuresModel = JaxbUtil.unmarshal(url, is, false);
+                                        // always process according to processor configuration
+                                        featuresModel.setBlacklisted(
+                                                processor.isRepositoryBlacklisted(url));
+                                        processor.process(featuresModel);
 
-                                loaded.put(provider.getUrl(), featuresModel);
-                                for (String innerRepository : featuresModel.getRepository()) {
-                                    downloader.download(innerRepository, this);
+                                        loaded.put(provider.getUrl(), featuresModel);
+                                        for (String innerRepository :
+                                                featuresModel.getRepository()) {
+                                            downloader.download(innerRepository, this);
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                }
-            });
+                    });
         }
         downloader.await();
         return loaded;
     }
 
     /**
-     * Generate internal profile (for the purpose of custom assembly builder) for given <code>stage</code>.
+     * Generate internal profile (for the purpose of custom assembly builder) for given <code>stage
+     * </code>.
+     *
      * @param stage a {@link Stage} for which the profile is being generated
      * @param parentProfiles all profiles for given stage will be used as parent profiles
      * @param repositories repositories to use in generated profile
@@ -1923,14 +2220,22 @@ public class Builder {
      * @param bundles bundles to declare in generated profile
      * @return
      */
-    private Profile generateProfile(Stage stage, Map<String, Stage> parentProfiles, Map<String, RepositoryInfo> repositories, Map<String, Stage> features, Map<String, Stage> bundles) {
+    private Profile generateProfile(
+            Stage stage,
+            Map<String, Stage> parentProfiles,
+            Map<String, RepositoryInfo> repositories,
+            Map<String, Stage> features,
+            Map<String, Stage> bundles) {
         String name = "generated-" + stage.name().toLowerCase();
         List<String> stagedParentProfiles = getStaged(stage, parentProfiles);
 
         if (stagedParentProfiles.isEmpty()) {
             LOGGER.info("Generating {} profile", name);
         } else {
-            LOGGER.info("Generating {} profile with parents: {}", name, stagedParentProfiles.stream().collect(Collectors.joining(", ")));
+            LOGGER.info(
+                    "Generating {} profile with parents: {}",
+                    name,
+                    stagedParentProfiles.stream().collect(Collectors.joining(", ")));
         }
 
         return ProfileBuilder.Factory.create(name)
@@ -1942,34 +2247,40 @@ public class Builder {
     }
 
     /**
-     * <p>Resolves set of features and bundles using OSGi resolver to calculate startup stage bundles.</p>
-     * <p>Startup stage means that <em>current</em> state of the OSGi framework is just single system bundle installed
-     * and bundles+features are being resolved against this single <em>bundle 0</em>.</p>
+     * Resolves set of features and bundles using OSGi resolver to calculate startup stage bundles.
+     *
+     * <p>Startup stage means that <em>current</em> state of the OSGi framework is just single
+     * system bundle installed and bundles+features are being resolved against this single
+     * <em>bundle 0</em>.
      *
      * @param manager {@link DownloadManager} to help downloading bundles and resources
-     * @param resolver OSGi resolver which will resolve features and bundles in framework with only system bundle installed
+     * @param resolver OSGi resolver which will resolve features and bundles in framework with only
+     *     system bundle installed
      * @param repositories all available (not only to-be-installed) features
      * @param features feature identifiers to resolve
      * @param bundles bundle locations to resolve
-     * @param optionals optional URI locations that'll be available through {@link org.osgi.service.repository.Repository},
-     * used in resolution process
+     * @param optionals optional URI locations that'll be available through {@link
+     *     org.osgi.service.repository.Repository}, used in resolution process
      * @param processor {@link FeaturesProcessor} to process repositories/features/bundles
      * @return map from bundle URI to bundle start-level
      * @throws Exception
      */
     private Map<String, Integer> resolve(
-                    DownloadManager manager,
-                    Resolver resolver,
-                    Collection<Features> repositories,
-                    Collection<String> features,
-                    Collection<String> bundles,
-                    Collection<String> optionals,
-                    FeaturesProcessor processor) throws Exception {
+            DownloadManager manager,
+            Resolver resolver,
+            Collection<Features> repositories,
+            Collection<String> features,
+            Collection<String> bundles,
+            Collection<String> optionals,
+            FeaturesProcessor processor)
+            throws Exception {
 
         // System bundle will be single bundle installed with bundleId == 0
         BundleRevision systemBundle = getSystemBundle();
-        // Static distribution building callback and deployer that's used to deploy/collect startup-stage artifacts
-        AssemblyDeployCallback callback = new AssemblyDeployCallback(manager, this, systemBundle, repositories, processor);
+        // Static distribution building callback and deployer that's used to deploy/collect
+        // startup-stage artifacts
+        AssemblyDeployCallback callback =
+                new AssemblyDeployCallback(manager, this, systemBundle, repositories, processor);
         Deployer deployer = new Deployer(manager, resolver, callback);
 
         // Install framework
@@ -1982,12 +2293,14 @@ public class Builder {
         for (String feature : features) {
             // KARAF-5273: feature may be a pattern
             for (String featureName : FeatureSelector.getMatchingFeatures(feature, repositories)) {
-                MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, featureName);
+                MapUtils.addToMapSet(
+                        request.requirements, FeaturesService.ROOT_REGION, featureName);
             }
         }
         // Specify bundle requirements
         for (String bundle : bundles) {
-            MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, "bundle:" + bundle);
+            MapUtils.addToMapSet(
+                    request.requirements, FeaturesService.ROOT_REGION, "bundle:" + bundle);
         }
 
         deployer.deployFully(callback.getDeploymentState(), request);
@@ -1997,22 +2310,26 @@ public class Builder {
 
     /**
      * Optional resource URIs will be made available through OSGi {@link Repository}
+     *
      * @param manager
      * @param optionals
      * @return
      * @throws Exception
      */
-    private Repository repositoryOfOptionalResources(DownloadManager manager, Collection<String> optionals)
-            throws Exception {
+    private Repository repositoryOfOptionalResources(
+            DownloadManager manager, Collection<String> optionals) throws Exception {
         final List<Resource> resources = new ArrayList<>();
         Downloader downloader = manager.createDownloader();
         for (String optional : optionals) {
-            downloader.download(optional, provider -> {
-                Resource resource = ResourceBuilder.build(provider.getUrl(), getHeaders(provider));
-                synchronized (resources) {
-                    resources.add(resource);
-                }
-            });
+            downloader.download(
+                    optional,
+                    provider -> {
+                        Resource resource =
+                                ResourceBuilder.build(provider.getUrl(), getHeaders(provider));
+                        synchronized (resources) {
+                            resources.add(resource);
+                        }
+                    });
         }
         downloader.await();
         return new BaseRepository(resources);
@@ -2020,6 +2337,7 @@ public class Builder {
 
     /**
      * Prepares {@link BundleRevision} that represents System Bundle (a.k.a. <em>bundle 0</em>)
+     *
      * @return
      * @throws Exception
      */
@@ -2037,11 +2355,13 @@ public class Builder {
 
         String exportPackages = configProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES, "");
         if ("".equals(exportPackages.trim())) {
-            throw new IllegalArgumentException("\"org.osgi.framework.system.packages\" property should specify system bundle" +
-                    " packages. It can't be empty, please check etc/config.properties of the assembly.");
+            throw new IllegalArgumentException(
+                    "\"org.osgi.framework.system.packages\" property should specify system bundle"
+                            + " packages. It can't be empty, please check etc/config.properties of the assembly.");
         }
         if (configProps.containsKey(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA)) {
-            exportPackages += "," + configProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+            exportPackages +=
+                    "," + configProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
         }
         exportPackages = exportPackages.replaceAll(",\\s*,", ",");
         attributes.putValue(Constants.EXPORT_PACKAGE, exportPackages);
@@ -2059,9 +2379,7 @@ public class Builder {
 
     @SuppressWarnings("rawtypes")
     private Map<String, String> getHeaders(StreamProvider provider) throws IOException {
-        try (
-                ZipInputStream zis = new ZipInputStream(provider.open())
-        ) {
+        try (ZipInputStream zis = new ZipInputStream(provider.open())) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (MANIFEST_NAME.equals(entry.getName())) {
@@ -2074,7 +2392,7 @@ public class Builder {
                 }
             }
         }
-        throw new IllegalArgumentException("Resource " + provider.getUrl() + " does not contain a manifest");
+        throw new IllegalArgumentException(
+                "Resource " + provider.getUrl() + " does not contain a manifest");
     }
-
 }

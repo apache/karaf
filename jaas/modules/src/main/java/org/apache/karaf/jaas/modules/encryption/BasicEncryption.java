@@ -17,9 +17,7 @@ package org.apache.karaf.jaas.modules.encryption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-
 import javax.xml.bind.DatatypeConverter;
-
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.EncryptionService;
 import org.slf4j.Logger;
@@ -50,15 +48,21 @@ public class BasicEncryption implements Encryption {
         try {
             md = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
-            log.error("Initialization failed. Digest algorithm " + algorithm + " is not available.", e);
-            throw new IllegalArgumentException("Unable to configure login module: " + e.getMessage(), e);
+            log.error(
+                    "Initialization failed. Digest algorithm " + algorithm + " is not available.",
+                    e);
+            throw new IllegalArgumentException(
+                    "Unable to configure login module: " + e.getMessage(), e);
         }
-        if (encoding != null && encoding.length() > 0
+        if (encoding != null
+                && encoding.length() > 0
                 && !EncryptionService.ENCODING_HEXADECIMAL.equalsIgnoreCase(encoding)
                 && !EncryptionService.ENCODING_BASE64.equalsIgnoreCase(encoding)) {
             log.error("Initialization failed. Digest encoding " + encoding + " is not supported.");
             throw new IllegalArgumentException(
-                    "Unable to configure login module. Digest Encoding " + encoding + " not supported.");
+                    "Unable to configure login module. Digest Encoding "
+                            + encoding
+                            + " not supported.");
         }
     }
 
@@ -68,13 +72,17 @@ public class BasicEncryption implements Encryption {
         }
         // Digest the user provided password
         byte[] data = md.digest(password.getBytes());
-        if (encoding == null || encoding.length() == 0 || EncryptionService.ENCODING_HEXADECIMAL.equalsIgnoreCase(encoding)) {
+        if (encoding == null
+                || encoding.length() == 0
+                || EncryptionService.ENCODING_HEXADECIMAL.equalsIgnoreCase(encoding)) {
             return hexEncode(data);
         } else if (EncryptionService.ENCODING_BASE64.equalsIgnoreCase(encoding)) {
             return base64Encode(data);
         } else {
             throw new IllegalArgumentException(
-                    "Unable to configure login module. Digest Encoding " + encoding + " not supported.");
+                    "Unable to configure login module. Digest Encoding "
+                            + encoding
+                            + " not supported.");
         }
     }
 
@@ -87,7 +95,9 @@ public class BasicEncryption implements Encryption {
         }
         // both are non-null
         String encoded = encryptPassword(provided);
-        if (encoding == null || encoding.length() == 0 || EncryptionService.ENCODING_HEXADECIMAL.equalsIgnoreCase(encoding)) {
+        if (encoding == null
+                || encoding.length() == 0
+                || EncryptionService.ENCODING_HEXADECIMAL.equalsIgnoreCase(encoding)) {
             return real.equalsIgnoreCase(encoded);
         } else if (EncryptionService.ENCODING_BASE64.equalsIgnoreCase(encoding)) {
             return real.equals(encoded);
@@ -108,5 +118,4 @@ public class BasicEncryption implements Encryption {
     public static String base64Encode(byte[] input) {
         return DatatypeConverter.printBase64Binary(input);
     }
-
 }

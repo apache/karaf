@@ -16,11 +16,10 @@
  */
 package org.apache.karaf.audit.layout;
 
+import java.io.IOException;
 import org.apache.karaf.audit.Event;
 import org.apache.karaf.audit.util.Buffer;
 import org.apache.karaf.audit.util.FastDateFormat;
-
-import java.io.IOException;
 
 public class SimpleLayout extends AbstractLayout {
 
@@ -40,8 +39,7 @@ public class SimpleLayout extends AbstractLayout {
     }
 
     @Override
-    protected void footer(Event event) throws IOException {
-    }
+    protected void footer(Event event) throws IOException {}
 
     @Override
     protected void append(String key, Object val) throws IOException {
@@ -65,5 +63,4 @@ public class SimpleLayout extends AbstractLayout {
         fastDateFormat.writeTime(millis, true, buffer);
         buffer.append(fastDateFormat.getDate(millis, FastDateFormat.XXX));
     }
-
 }

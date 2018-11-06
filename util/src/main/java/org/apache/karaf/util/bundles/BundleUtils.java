@@ -28,7 +28,6 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import org.osgi.framework.Constants;
 
 public class BundleUtils {
@@ -36,7 +35,7 @@ public class BundleUtils {
     public static File fixBundleWithUpdateLocation(InputStream is, String uri) throws IOException {
         File file = File.createTempFile("update-", ".jar");
         try (ZipInputStream zis = new ZipInputStream(is);
-             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file))) {
+                ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file))) {
 
             byte[] buf = new byte[8192];
             zos.setLevel(0);
@@ -72,5 +71,4 @@ public class BundleUtils {
         }
         return file;
     }
-
 }

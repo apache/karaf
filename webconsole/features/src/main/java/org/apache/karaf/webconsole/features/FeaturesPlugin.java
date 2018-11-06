@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.webconsole.features;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -26,24 +25,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.felix.utils.json.JSONWriter;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.WebConsoleConstants;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * WebConsole plugin to use {@link FeaturesService}.
- */
+/** WebConsole plugin to use {@link FeaturesService}. */
 public class FeaturesPlugin extends AbstractWebConsolePlugin {
 
     private final Logger log = LoggerFactory.getLogger(FeaturesPlugin.class);
@@ -82,7 +77,8 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         boolean success = false;
 
         final String action = req.getParameter("action");
@@ -119,13 +115,15 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void renderContent(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
 
         final PrintWriter pw = response.getWriter();
 
         String appRoot = (String) request.getAttribute(WebConsoleConstants.ATTR_APP_ROOT);
 
-        final String featuresScriptTag = "<script src='" + appRoot + this.featuresJs + "' language='JavaScript'></script>";
+        final String featuresScriptTag =
+                "<script src='" + appRoot + this.featuresJs + "' language='JavaScript'></script>";
         pw.println(featuresScriptTag);
 
         pw.println("<script type='text/javascript'>");
@@ -271,8 +269,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
             jw.object();
             jw.key("name");
             String name = "";
-            if (r.getName() != null)
-                name = r.getName();
+            if (r.getName() != null) name = r.getName();
             jw.value(name);
             jw.key("url");
             String uri = r.getURI().toString();
@@ -298,7 +295,6 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
         jw.endArray();
 
         jw.endObject();
-
     }
 
     private List<Repository> getRepositories() {
@@ -332,7 +328,9 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
             for (Repository r : repositories) {
                 for (Feature f : r.getFeatures()) {
                     ExtendedFeature.State state =
-                            featuresService.isInstalled(f) ? ExtendedFeature.State.INSTALLED : ExtendedFeature.State.UNINSTALLED;
+                            featuresService.isInstalled(f)
+                                    ? ExtendedFeature.State.INSTALLED
+                                    : ExtendedFeature.State.UNINSTALLED;
                     features.add(new ExtendedFeature(state, r.getName(), f));
                 }
             }
@@ -377,8 +375,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
     private void appendFeatureInfoCount(final StringBuffer buf, String msg, int count) {
         buf.append(count);
         buf.append(" feature");
-        if (count != 1)
-            buf.append('s');
+        if (count != 1) buf.append('s');
         buf.append(' ');
         buf.append(msg);
     }
@@ -410,7 +407,8 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
         jw.endObject();
     }
 
-    private void action(JSONWriter jw, boolean enabled, String op, String title, String image) throws IOException {
+    private void action(JSONWriter jw, boolean enabled, String op, String title, String image)
+            throws IOException {
         jw.object();
         jw.key("enabled").value(enabled);
         jw.key("op").value(op);
@@ -426,5 +424,4 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
-
 }

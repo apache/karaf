@@ -53,5 +53,4 @@ public class WebDetail {
     public void setWebState(String webState) {
         this.webState = webState;
     }
-
 }

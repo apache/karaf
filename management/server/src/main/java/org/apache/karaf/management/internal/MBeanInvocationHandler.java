@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.management.internal;
 
-import javax.management.MBeanServer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,6 +23,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.management.MBeanServer;
 
 public class MBeanInvocationHandler implements InvocationHandler {
 
@@ -31,7 +31,14 @@ public class MBeanInvocationHandler implements InvocationHandler {
 
     private final InvocationHandler guard;
 
-    private final List<String> guarded = Collections.unmodifiableList(Arrays.asList("invoke", "getAttribute", "getAttributes", "setAttribute", "setAttributes"));
+    private final List<String> guarded =
+            Collections.unmodifiableList(
+                    Arrays.asList(
+                            "invoke",
+                            "getAttribute",
+                            "getAttributes",
+                            "setAttribute",
+                            "setAttributes"));
 
     public MBeanInvocationHandler(MBeanServer mBeanServer, InvocationHandler guard) {
         wrapped = mBeanServer;
@@ -43,7 +50,9 @@ public class MBeanInvocationHandler implements InvocationHandler {
             guard.invoke(proxy, method, args);
         }
 
-        if (method.getName().equals("equals") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == Object.class) {
+        if (method.getName().equals("equals")
+                && method.getParameterTypes().length == 1
+                && method.getParameterTypes()[0] == Object.class) {
             Object target = args[0];
             if (target != null && Proxy.isProxyClass(target.getClass())) {
                 InvocationHandler handler = Proxy.getInvocationHandler(target);
@@ -52,7 +61,8 @@ public class MBeanInvocationHandler implements InvocationHandler {
                 }
             }
         } else if (method.getName().equals("finalize") && method.getParameterTypes().length == 0) {
-            // special case finalize, don't route through to delegate because that will get its own call
+            // special case finalize, don't route through to delegate because that will get its own
+            // call
             return null;
         }
 

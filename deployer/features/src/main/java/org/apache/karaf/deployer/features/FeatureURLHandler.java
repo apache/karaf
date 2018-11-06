@@ -23,14 +23,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-
 import org.osgi.service.url.AbstractURLStreamHandlerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * URL handler for features
- */
+/** URL handler for features */
 public class FeatureURLHandler extends AbstractURLStreamHandlerService {
 
     private final Logger logger = LoggerFactory.getLogger(FeatureURLHandler.class);
@@ -49,7 +46,7 @@ public class FeatureURLHandler extends AbstractURLStreamHandlerService {
     @Override
     public URLConnection openConnection(URL url) throws IOException {
         if (url.getPath() == null || url.getPath().trim().length() == 0) {
-            throw new MalformedURLException("Path cannot be null or empty. Syntax: " + SYNTAX );
+            throw new MalformedURLException("Path cannot be null or empty. Syntax: " + SYNTAX);
         }
         featureXmlURL = new URL(url.getPath());
 
@@ -68,8 +65,7 @@ public class FeatureURLHandler extends AbstractURLStreamHandlerService {
         }
 
         @Override
-        public void connect() throws IOException {
-        }
+        public void connect() throws IOException {}
 
         @Override
         public InputStream getInputStream() throws IOException {
@@ -84,6 +80,4 @@ public class FeatureURLHandler extends AbstractURLStreamHandlerService {
             }
         }
     }
-
-
 }

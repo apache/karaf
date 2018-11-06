@@ -71,5 +71,4 @@ public class ServletDetails {
     public void setUrls(String[] urls) {
         this.urls = urls;
     }
-
 }

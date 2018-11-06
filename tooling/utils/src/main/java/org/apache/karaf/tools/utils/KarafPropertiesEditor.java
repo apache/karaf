@@ -16,19 +16,16 @@
  */
 package org.apache.karaf.tools.utils;
 
-import org.apache.karaf.tools.utils.model.KarafPropertyEdit;
-import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdit;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 
-/**
- * Apply a set of edits, reading files from a stock etc dir.
- */
+/** Apply a set of edits, reading files from a stock etc dir. */
 public class KarafPropertiesEditor {
     private File inputEtc;
     private File outputEtc;

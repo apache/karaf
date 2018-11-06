@@ -20,7 +20,6 @@ package org.apache.karaf.shell.impl.action.osgi;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -29,8 +28,8 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Track a single service by its type.
- * When tracking a single service, the dependency is always considered mandatory.
+ * Track a single service by its type. When tracking a single service, the dependency is always
+ * considered mandatory.
  *
  * @param <T> the service type (interface).
  */
@@ -42,18 +41,20 @@ public abstract class SingleServiceTracker<T> {
     private final AtomicReference<ServiceReference<T>> ref = new AtomicReference<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
 
-    private final ServiceListener listener = event -> {
-        if (open.get()) {
-            if (event.getType() == ServiceEvent.UNREGISTERING) {
-                ServiceReference<T> deadRef = (ServiceReference<T>) event.getServiceReference();
-                if (deadRef.equals(ref.get())) {
-                    findMatchingReference(deadRef);
+    private final ServiceListener listener =
+            event -> {
+                if (open.get()) {
+                    if (event.getType() == ServiceEvent.UNREGISTERING) {
+                        ServiceReference<T> deadRef =
+                                (ServiceReference<T>) event.getServiceReference();
+                        if (deadRef.equals(ref.get())) {
+                            findMatchingReference(deadRef);
+                        }
+                    } else if (event.getType() == ServiceEvent.REGISTERED && ref.get() == null) {
+                        findMatchingReference(null);
+                    }
                 }
-            } else if (event.getType() == ServiceEvent.REGISTERED && ref.get() == null) {
-                findMatchingReference(null);
-            }
-        }
-    };
+            };
 
     public SingleServiceTracker(BundleContext context, Class<T> clazz) {
         ctx = context;
@@ -138,5 +139,4 @@ public abstract class SingleServiceTracker<T> {
     public Class<?> getTrackedClass() {
         return clazz;
     }
-
 }

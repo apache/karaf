@@ -19,40 +19,44 @@ package org.apache.karaf.features;
 import java.net.URI;
 
 /**
- * <p>A repository of features. A runtime representation of JAXB model read from feature XML files.</p>
+ * A repository of features. A runtime representation of JAXB model read from feature XML files.
  *
- * <p>Original model may be subject to further processing (e.g., blacklisting)</p>
+ * <p>Original model may be subject to further processing (e.g., blacklisting)
  */
 public interface Repository extends Blacklisting {
 
     /**
      * Logical name of the {@link Repository}
+     *
      * @return
      */
     String getName();
 
     /**
      * Original URI of the {@link Repository}, where feature declarations were loaded from
+     *
      * @return
      */
     URI getURI();
 
     /**
      * An array of referenced repository URIs (<code>/features/repository</code>)
+     *
      * @return
      */
     URI[] getRepositories();
 
     /**
      * An array of referenced resource repository URIs (<code>/features/resource-repository</code>)
+     *
      * @return
      */
     URI[] getResourceRepositories();
 
     /**
      * An array of {@link Feature features} in this {@link Repository} after possible processing.
+     *
      * @return
      */
     Feature[] getFeatures();
-
 }

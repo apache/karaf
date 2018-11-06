@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -34,7 +33,10 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 
-@Command(scope = "bundle", name = "requirements", description = "Displays OSGi requirements of a given bundles.")
+@Command(
+        scope = "bundle",
+        name = "requirements",
+        description = "Displays OSGi requirements of a given bundles.")
 @Service
 public class Requirements extends BundlesCommand {
 
@@ -47,8 +49,7 @@ public class Requirements extends BundlesCommand {
     String namespace = "*";
 
     @Override
-    protected void executeOnBundle(Bundle bundle) throws Exception {
-    }
+    protected void executeOnBundle(Bundle bundle) throws Exception {}
 
     @Override
     protected Object doExecute(List<Bundle> bundles) throws Exception {
@@ -89,7 +90,8 @@ public class Requirements extends BundlesCommand {
 
     private static boolean printMatchingRequirements(BundleWiring wiring, Pattern namespace) {
         List<BundleWire> wires = wiring.getRequiredWires(null);
-        Map<BundleRequirement, List<BundleWire>> aggregateReqs = aggregateRequirements(namespace, wires);
+        Map<BundleRequirement, List<BundleWire>> aggregateReqs =
+                aggregateRequirements(namespace, wires);
         List<BundleRequirement> allReqs = wiring.getRequirements(null);
         boolean matches = false;
         for (BundleRequirement req : allReqs) {
@@ -97,14 +99,24 @@ public class Requirements extends BundlesCommand {
                 matches = true;
                 List<BundleWire> providers = aggregateReqs.get(req);
                 if (providers != null) {
-                    System.out.println(req.getNamespace() + "; "
-                                    + req.getDirectives().get(Constants.FILTER_DIRECTIVE) + " resolved by:");
+                    System.out.println(
+                            req.getNamespace()
+                                    + "; "
+                                    + req.getDirectives().get(Constants.FILTER_DIRECTIVE)
+                                    + " resolved by:");
                     for (BundleWire wire : providers) {
                         String msg;
-                        Object keyAttr = wire.getCapability().getAttributes().get(wire.getCapability().getNamespace());
+                        Object keyAttr =
+                                wire.getCapability()
+                                        .getAttributes()
+                                        .get(wire.getCapability().getNamespace());
                         if (keyAttr != null) {
-                            msg = wire.getCapability().getNamespace() + "; "
-                                    + keyAttr + " " + getVersionFromCapability(wire.getCapability());
+                            msg =
+                                    wire.getCapability().getNamespace()
+                                            + "; "
+                                            + keyAttr
+                                            + " "
+                                            + getVersionFromCapability(wire.getCapability());
                         } else {
                             msg = wire.getCapability().toString();
                         }
@@ -112,8 +124,12 @@ public class Requirements extends BundlesCommand {
                         System.out.println(msg);
                     }
                 } else {
-                    System.out.println(req.getNamespace() + "; "
-                                    + req.getDirectives().get(Constants.FILTER_DIRECTIVE) + " " + UNRESOLVED_MESSAGE);
+                    System.out.println(
+                            req.getNamespace()
+                                    + "; "
+                                    + req.getDirectives().get(Constants.FILTER_DIRECTIVE)
+                                    + " "
+                                    + UNRESOLVED_MESSAGE);
                 }
             }
         }
@@ -169,5 +185,4 @@ public class Requirements extends BundlesCommand {
     private static boolean matchNamespace(Pattern namespace, String actual) {
         return namespace.matcher(actual).matches();
     }
-
 }

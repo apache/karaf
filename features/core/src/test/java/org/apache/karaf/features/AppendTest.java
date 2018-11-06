@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
-
 import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.easymock.Capture;
@@ -47,12 +46,13 @@ public class AppendTest {
     private Feature feature;
     private ConfigurationAdmin admin;
     private FeatureConfigInstaller installer;
-    
+
     @Before
     public void before() throws Exception {
         System.setProperty("karaf.data", "data");
         System.setProperty("karaf.etc", "target");
-        RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f08.xml").toURI());
+        RepositoryImpl r =
+                new RepositoryImpl(getClass().getResource("internal/service/f08.xml").toURI());
         Feature[] features = r.getFeatures();
         feature = features[0];
         checkFeature(feature);
@@ -76,13 +76,14 @@ public class AppendTest {
     public void testAppendWhenFileExists() throws Exception {
         testAppendInternal(true);
     }
-    
+
     @Test
     public void testAppendWhenNoFileExists() throws Exception {
         testAppendInternal(false);
     }
 
-    private void testAppendInternal(boolean cfgFileExists) throws IOException, InvalidSyntaxException, FileNotFoundException {
+    private void testAppendInternal(boolean cfgFileExists)
+            throws IOException, InvalidSyntaxException, FileNotFoundException {
         File cfgFile = new File("target/org.ops4j.pax.web.cfg");
         cfgFile.delete();
         if (cfgFileExists) {
@@ -102,16 +103,16 @@ public class AppendTest {
         props.load(new FileInputStream(cfgFile));
         String v = props.getProperty("javax.servlet.context.tempdir");
         assertTrue("${karaf.data}/pax-web-jsp".equals(v) || "data/pax-web-jsp".equals(v));
-//        assertEquals("${karaf.data}/pax-web-jsp", props.getProperty("javax.servlet.context.tempdir"));
+        //        assertEquals("${karaf.data}/pax-web-jsp",
+        // props.getProperty("javax.servlet.context.tempdir"));
     }
 
     private Configuration expectConfig(ConfigurationAdmin admin, Hashtable<String, Object> original)
-        throws IOException, InvalidSyntaxException {
+            throws IOException, InvalidSyntaxException {
         Configuration config = c.createMock(Configuration.class);
         expect(admin.listConfigurations(eq("(service.pid=org.ops4j.pax.web)")))
-            .andReturn(new Configuration[] {
-                                            config
-        }).atLeastOnce();
+                .andReturn(new Configuration[] {config})
+                .atLeastOnce();
         expect(config.getProperties()).andReturn(original).atLeastOnce();
         return config;
     }

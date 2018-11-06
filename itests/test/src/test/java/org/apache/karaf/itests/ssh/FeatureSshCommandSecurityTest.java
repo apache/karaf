@@ -21,9 +21,7 @@ import org.junit.Test;
  * /framework/src/main/resources/resources/etc/org.apache.karaf.command.acl.feature.cfg
  */
 public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
-    
-    
-    
+
     @Test
     public void testFeatureCommandSecurityViaSsh() throws Exception {
         String vieweruser = "viewer" + System.nanoTime() + "_features";
@@ -32,27 +30,33 @@ public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
         addViewer(vieweruser);
 
         String r = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
-        Assert.assertFalse("Precondition failed, this test uses the " + feature + " subsystem to test features with...",
+        Assert.assertFalse(
+                "Precondition failed, this test uses the "
+                        + feature
+                        + " subsystem to test features with...",
                 r.contains(feature));
 
         assertCommand(vieweruser, "feature:install -r " + feature, Result.NOT_FOUND);
         String r2 = assertCommand("karaf", "feature:list -i --no-format", Result.OK);
-        Assert.assertFalse(feature + " features should not have been installed, as viewer doesn't have credentials",
+        Assert.assertFalse(
+                feature
+                        + " features should not have been installed, as viewer doesn't have credentials",
                 r2.contains(feature));
 
         assertCommand("karaf", "feature:install -r " + feature, Result.OK);
         String r3 = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
-        Assert.assertTrue(feature + " feature should have been installed by 'karaf' user",
+        Assert.assertTrue(
+                feature + " feature should have been installed by 'karaf' user",
                 r3.contains(feature));
 
         assertCommand(vieweruser, "feature:uninstall -r " + feature, Result.NOT_FOUND);
         String r4 = assertCommand("karaf", "feature:list -i --no-format", Result.OK);
-        Assert.assertTrue(feature + " feature should still be there, as viewer doesn't have credentials",
+        Assert.assertTrue(
+                feature + " feature should still be there, as viewer doesn't have credentials",
                 r4.contains(feature));
 
         assertCommand("karaf", "feature:uninstall -r " + feature, Result.OK);
         String r5 = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
-        Assert.assertFalse(feature + " feature should have been uninstalled",
-                r5.contains(feature));
+        Assert.assertFalse(feature + " feature should have been uninstalled", r5.contains(feature));
     }
 }

@@ -18,6 +18,10 @@
  */
 package org.apache.karaf.tooling;
 
+import static java.util.jar.JarFile.MANIFEST_NAME;
+
+import aQute.bnd.osgi.Macro;
+import aQute.bnd.osgi.Processor;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -52,9 +56,6 @@ import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import aQute.bnd.osgi.Macro;
-import aQute.bnd.osgi.Processor;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.resource.ResourceBuilder;
@@ -111,9 +112,10 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Requirement;
 import org.osgi.service.resolver.ResolutionException;
 
-import static java.util.jar.JarFile.MANIFEST_NAME;
-
-@Mojo(name = "verify", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true)
+@Mojo(
+        name = "verify",
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        threadSafe = true)
 public class VerifyMojo extends MojoSupport {
 
     @Parameter(property = "descriptors")
@@ -183,17 +185,21 @@ public class VerifyMojo extends MojoSupport {
         }
 
         Hashtable<String, String> config = new Hashtable<>();
-        String remoteRepositories = MavenUtil.remoteRepositoryList(project.getRemoteProjectRepositories());
+        String remoteRepositories =
+                MavenUtil.remoteRepositoryList(project.getRemoteProjectRepositories());
         getLog().info("Using repositories: " + remoteRepositories);
         config.put("maven.repositories", remoteRepositories);
         config.put("maven.localRepository", localRepo.getBasedir());
 
         if (mavenSession.getRequest().getUserSettingsFile().exists()) {
-            config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
+            config.put(
+                    "maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
         }
 
         // TODO: add more configuration bits ?
-        resolver = new ReactorMavenResolver(reactor, MavenResolvers.createMavenResolver(config, "maven"));
+        resolver =
+                new ReactorMavenResolver(
+                        reactor, MavenResolvers.createMavenResolver(config, "maven"));
         doExecute();
     }
 
@@ -217,19 +223,23 @@ public class VerifyMojo extends MojoSupport {
         try {
             return object.getClass().getMethod(getter).invoke(object);
         } catch (Exception e) {
-            throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
+            throw new MojoExecutionException(
+                    "Unable to build remote repository from " + object.toString(), e);
         }
     }
 
-    private static Object getPolicy(Object object, boolean snapshots) throws MojoExecutionException {
-        return invoke(object, "getPolicy", new Class[] { Boolean.TYPE }, new Object[] { snapshots });
+    private static Object getPolicy(Object object, boolean snapshots)
+            throws MojoExecutionException {
+        return invoke(object, "getPolicy", new Class[] {Boolean.TYPE}, new Object[] {snapshots});
     }
 
-    private static Object invoke(Object object, String getter, Class<?>[] types, Object[] params) throws MojoExecutionException {
+    private static Object invoke(Object object, String getter, Class<?>[] types, Object[] params)
+            throws MojoExecutionException {
         try {
             return object.getClass().getMethod(getter, types).invoke(object, params);
         } catch (Exception e) {
-            throw new MojoExecutionException("Unable to build remote repository from " + object.toString(), e);
+            throw new MojoExecutionException(
+                    "Unable to build remote repository from " + object.toString(), e);
         }
     }
 
@@ -249,7 +259,8 @@ public class VerifyMojo extends MojoSupport {
                     properties.put(key.toString(), val.toString());
                 }
             } catch (IOException e) {
-                throw new MojoExecutionException("Unable to load additional metadata from " + additionalMetadata, e);
+                throw new MojoExecutionException(
+                        "Unable to load additional metadata from " + additionalMetadata, e);
             }
         }
 
@@ -260,13 +271,20 @@ public class VerifyMojo extends MojoSupport {
             }
             descriptors = new LinkedHashSet<>();
             if (framework.contains("framework")) {
-                allDescriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
+                allDescriptors.add(
+                        "mvn:org.apache.karaf.features/framework/"
+                                + getVersion("org.apache.karaf.features:framework")
+                                + "/xml/features");
             }
-            allDescriptors.add("file:" + project.getBuild().getDirectory() + "/feature/feature.xml");
+            allDescriptors.add(
+                    "file:" + project.getBuild().getDirectory() + "/feature/feature.xml");
         } else {
             allDescriptors.addAll(descriptors);
             if (framework != null && framework.contains("framework")) {
-                allDescriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
+                allDescriptors.add(
+                        "mvn:org.apache.karaf.features/framework/"
+                                + getVersion("org.apache.karaf.features:framework")
+                                + "/xml/features");
             }
         }
 
@@ -286,8 +304,11 @@ public class VerifyMojo extends MojoSupport {
                         String nloc = null;
                         if (loc.contains("file:")) {
                             for (ConfigFile cfi : feature.getConfigfile()) {
-                                if (cfi.getFinalname().substring(1)
-                                        .equals(loc.substring(loc.indexOf("file:") + "file:".length()))) {
+                                if (cfi.getFinalname()
+                                        .substring(1)
+                                        .equals(
+                                                loc.substring(
+                                                        loc.indexOf("file:") + "file:".length()))) {
                                     nloc = cfi.getLocation();
                                 }
                             }
@@ -317,7 +338,7 @@ public class VerifyMojo extends MojoSupport {
         }
         if (features != null && !features.isEmpty()) {
             Pattern pattern = getPattern(features);
-            for (Iterator<Feature> iterator = featuresToTest.iterator(); iterator.hasNext();) {
+            for (Iterator<Feature> iterator = featuresToTest.iterator(); iterator.hasNext(); ) {
                 Feature feature = iterator.next();
                 String id = feature.getName() + "/" + feature.getVersion();
                 if (!pattern.matcher(id).matches()) {
@@ -335,8 +356,11 @@ public class VerifyMojo extends MojoSupport {
         for (Feature feature : featuresToTest) {
             String id = feature.getId();
             try {
-                verifyResolution(new CustomDownloadManager(resolver, executor),
-                                 repositories, Collections.singleton(id), properties);
+                verifyResolution(
+                        new CustomDownloadManager(resolver, executor),
+                        repositories,
+                        Collections.singleton(id),
+                        properties);
                 successes.add(id);
                 getLog().info("Verification of feature " + id + " succeeded");
             } catch (Exception e) {
@@ -363,16 +387,28 @@ public class VerifyMojo extends MojoSupport {
                 } catch (Exception e) {
                     if (ignoreMissingConditions && e.getCause() instanceof ResolutionException) {
                         boolean ignore = true;
-                        Collection<Requirement> requirements = ((ResolutionException) e.getCause()).getUnresolvedRequirements();
+                        Collection<Requirement> requirements =
+                                ((ResolutionException) e.getCause()).getUnresolvedRequirements();
                         for (Requirement req : requirements) {
-                            ignore &= (IdentityNamespace.IDENTITY_NAMESPACE.equals(req.getNamespace())
-                                    && ResourceUtils.TYPE_FEATURE.equals(req.getAttributes().get("type"))
-                                    && cond.getCondition().contains(req.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE).toString()));
+                            ignore &=
+                                    (IdentityNamespace.IDENTITY_NAMESPACE.equals(req.getNamespace())
+                                            && ResourceUtils.TYPE_FEATURE.equals(
+                                                    req.getAttributes().get("type"))
+                                            && cond.getCondition()
+                                                    .contains(
+                                                            req.getAttributes()
+                                                                    .get(
+                                                                            IdentityNamespace
+                                                                                    .IDENTITY_NAMESPACE)
+                                                                    .toString()));
                         }
                         if (ignore) {
                             ignored.add(cid);
-                            getLog().warn("Feature resolution failed for " + cid
-                                    + "\nMessage: " + e.getCause().getMessage());
+                            getLog().warn(
+                                            "Feature resolution failed for "
+                                                    + cid
+                                                    + "\nMessage: "
+                                                    + e.getCause().getMessage());
                             continue;
                         }
                     }
@@ -389,12 +425,21 @@ public class VerifyMojo extends MojoSupport {
             }
         }
         int nb = successes.size() + ignored.size() + failures.size();
-        getLog().info("Features verified: " + nb + ", failures: " + failures.size() + ", ignored: " + ignored.size());
+        getLog().info(
+                        "Features verified: "
+                                + nb
+                                + ", failures: "
+                                + failures.size()
+                                + ", ignored: "
+                                + ignored.size());
         if (!failures.isEmpty()) {
             getLog().info("Failures: " + String.join(", ", failures.keySet()));
         }
         if ("end".equals(fail) && !failures.isEmpty()) {
-            throw new MojoExecutionException("Verification failures", new MultiException("Verification failures", new ArrayList<>(failures.values())));
+            throw new MojoExecutionException(
+                    "Verification failures",
+                    new MultiException(
+                            "Verification failures", new ArrayList<>(failures.values())));
         }
     }
 
@@ -428,15 +473,22 @@ public class VerifyMojo extends MojoSupport {
         return Pattern.compile(sb.toString());
     }
 
-    private void verifyResolution(DownloadManager manager, final Map<String, Features> repositories, Set<String> features, Hashtable<String, String> properties) throws MojoExecutionException {
+    private void verifyResolution(
+            DownloadManager manager,
+            final Map<String, Features> repositories,
+            Set<String> features,
+            Hashtable<String, String> properties)
+            throws MojoExecutionException {
         try {
             Bundle systemBundle = getSystemBundle(getMetadata(properties, "metadata#"));
-            DummyDeployCallback callback = new DummyDeployCallback(systemBundle, repositories.values());
-            Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback);
-
+            DummyDeployCallback callback =
+                    new DummyDeployCallback(systemBundle, repositories.values());
+            Deployer deployer =
+                    new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback);
 
             // Install framework
-            Deployer.DeploymentRequest request = Deployer.DeploymentRequest.defaultDeploymentRequest();
+            Deployer.DeploymentRequest request =
+                    Deployer.DeploymentRequest.defaultDeploymentRequest();
 
             for (String fmwk : framework) {
                 MapUtils.addToMapSet(request.requirements, FeaturesService.ROOT_REGION, fmwk);
@@ -480,15 +532,22 @@ public class VerifyMojo extends MojoSupport {
 
                 // TODO: find unused resources ?
             } catch (Exception e) {
-                throw new MojoExecutionException("Feature resolution failed for " + features
-                        + "\nMessage: " + (e instanceof ResolutionException ? e.getMessage() : e.toString())
-                        + "\nRepositories: " + toString(new TreeSet<>(repositories.keySet()))
-                        + "\nResources: " + toString(new TreeSet<>(manager.getProviders().keySet())), e);
+                throw new MojoExecutionException(
+                        "Feature resolution failed for "
+                                + features
+                                + "\nMessage: "
+                                + (e instanceof ResolutionException ? e.getMessage() : e.toString())
+                                + "\nRepositories: "
+                                + toString(new TreeSet<>(repositories.keySet()))
+                                + "\nResources: "
+                                + toString(new TreeSet<>(manager.getProviders().keySet())),
+                        e);
             }
         } catch (MojoExecutionException e) {
             throw e;
         } catch (Exception e) {
-            throw new MojoExecutionException("Error verifying feature " + features + "\nMessage: " + e.getMessage(), e);
+            throw new MojoExecutionException(
+                    "Error verifying feature " + features + "\nMessage: " + e.getMessage(), e);
         }
     }
 
@@ -502,7 +561,8 @@ public class VerifyMojo extends MojoSupport {
         return sb.toString();
     }
 
-    private Bundle getSystemBundle(Map<String, Map<VersionRange, Map<String, String>>> metadata) throws Exception {
+    private Bundle getSystemBundle(Map<String, Map<VersionRange, Map<String, String>>> metadata)
+            throws Exception {
         URL configPropURL;
         if (configuration != null) {
             configPropURL = new URL(configuration);
@@ -516,23 +576,34 @@ public class VerifyMojo extends MojoSupport {
                 if (dir == null) {
                     dir = karafDistro.getArtifactId() + "-" + karafDistro.getBaseVersion();
                 }
-                configPropURL = new URL("jar:file:" + karafDistro.getFile() + "!/" + dir + "/etc/config.properties");
+                configPropURL =
+                        new URL(
+                                "jar:file:"
+                                        + karafDistro.getFile()
+                                        + "!/"
+                                        + dir
+                                        + "/etc/config.properties");
             } else {
                 String version = getVersion(distribution, "RELEASE");
                 String[] dist = distribution.split(":");
                 File distFile = resolver.resolve(dist[0], dist[1], null, "zip", version);
-                String resolvedVersion = distFile.getName().substring(dist[1].length() + 1, distFile.getName().length() - 4);
+                String resolvedVersion =
+                        distFile.getName()
+                                .substring(dist[1].length() + 1, distFile.getName().length() - 4);
                 String dir = distDir;
                 if (dir == null) {
                     dir = dist[1] + "-" + resolvedVersion;
                 }
-                configPropURL = new URL("jar:file:" + distFile + "!/" + dir + "/etc/config.properties");
+                configPropURL =
+                        new URL("jar:file:" + distFile + "!/" + dir + "/etc/config.properties");
             }
         }
-        org.apache.felix.utils.properties.Properties configProps = PropertiesLoader.loadPropertiesFile(configPropURL, true);
-//        copySystemProperties(configProps);
+        org.apache.felix.utils.properties.Properties configProps =
+                PropertiesLoader.loadPropertiesFile(configPropURL, true);
+        //        copySystemProperties(configProps);
         if (javase == null) {
-            configProps.put("java.specification.version", System.getProperty("java.specification.version"));
+            configProps.put(
+                    "java.specification.version", System.getProperty("java.specification.version"));
         } else {
             configProps.put("java.specification.version", javase);
         }
@@ -545,7 +616,8 @@ public class VerifyMojo extends MojoSupport {
 
         String exportPackages = configProps.getProperty("org.osgi.framework.system.packages");
         if (configProps.containsKey("org.osgi.framework.system.packages.extra")) {
-            exportPackages += "," + configProps.getProperty("org.osgi.framework.system.packages.extra");
+            exportPackages +=
+                    "," + configProps.getProperty("org.osgi.framework.system.packages.extra");
         }
         exportPackages = exportPackages.replaceAll(",\\s*,", ",");
         attributes.putValue(Constants.EXPORT_PACKAGE, exportPackages);
@@ -554,7 +626,7 @@ public class VerifyMojo extends MojoSupport {
         attributes.putValue(Constants.PROVIDE_CAPABILITY, systemCaps);
 
         // TODO: support metadata overrides on system bundle
-//        attributes = DeploymentBuilder.overrideAttributes(attributes, metadata);
+        //        attributes = DeploymentBuilder.overrideAttributes(attributes, metadata);
 
         final Hashtable<String, String> headers = new Hashtable<>();
         for (Map.Entry<Object, Object> attr : attributes.entrySet()) {
@@ -565,39 +637,49 @@ public class VerifyMojo extends MojoSupport {
         return resource.getBundle();
     }
 
-
-    public Map<String, Features> loadRepositories(DownloadManager manager, Set<String> uris) throws Exception {
+    public Map<String, Features> loadRepositories(DownloadManager manager, Set<String> uris)
+            throws Exception {
         final Map<String, Features> loaded = new HashMap<>();
         final Downloader downloader = manager.createDownloader();
 
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig());
         if (blacklistedDescriptors != null) {
-            blacklistedDescriptors.forEach(lp -> {
-                processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
-                        .add(new LocationPattern(lp));
-            });
+            blacklistedDescriptors.forEach(
+                    lp -> {
+                        processor
+                                .getInstructions()
+                                .getBlacklistedRepositoryLocationPatterns()
+                                .add(new LocationPattern(lp));
+                    });
         }
-        processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
+        processor
+                .getInstructions()
+                .getBlacklistedRepositoryLocationPatterns()
                 .add(new LocationPattern("mvn:" + selfGroupId + "/" + selfArtifactId));
 
         for (String repository : uris) {
             if (!processor.isRepositoryBlacklisted(repository)) {
-                downloader.download(repository, new DownloadCallback() {
-                    @Override
-                    public void downloaded(final StreamProvider provider) throws Exception {
-                        try (InputStream is = provider.open()) {
-                            Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
-                            synchronized (loaded) {
-                                loaded.put(provider.getUrl(), featuresModel);
-                                for (String innerRepository : featuresModel.getRepository()) {
-                                    if (!processor.isRepositoryBlacklisted(innerRepository)) {
-                                        downloader.download(innerRepository, this);
+                downloader.download(
+                        repository,
+                        new DownloadCallback() {
+                            @Override
+                            public void downloaded(final StreamProvider provider) throws Exception {
+                                try (InputStream is = provider.open()) {
+                                    Features featuresModel =
+                                            JaxbUtil.unmarshal(provider.getUrl(), is, false);
+                                    synchronized (loaded) {
+                                        loaded.put(provider.getUrl(), featuresModel);
+                                        for (String innerRepository :
+                                                featuresModel.getRepository()) {
+                                            if (!processor.isRepositoryBlacklisted(
+                                                    innerRepository)) {
+                                                downloader.download(innerRepository, this);
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
-                    }
-                });
+                        });
             }
         }
         downloader.await();
@@ -620,7 +702,8 @@ public class VerifyMojo extends MojoSupport {
         return result;
     }
 
-    public static Map<String, Map<VersionRange, Map<String, String>>> getMetadata(Map<String, String> properties, String prefix) {
+    public static Map<String, Map<VersionRange, Map<String, String>>> getMetadata(
+            Map<String, String> properties, String prefix) {
         Map<String, Map<VersionRange, Map<String, String>>> result = new HashMap<>();
         for (String key : properties.keySet()) {
             if (key.startsWith(prefix)) {
@@ -645,54 +728,66 @@ public class VerifyMojo extends MojoSupport {
         return result;
     }
 
-    public static class FakeBundleRevision extends ResourceImpl implements BundleRevision, BundleStartLevel {
+    public static class FakeBundleRevision extends ResourceImpl
+            implements BundleRevision, BundleStartLevel {
 
         private final Bundle bundle;
         private int startLevel;
 
-        public FakeBundleRevision(final Hashtable<String, String> headers, final String location, final long bundleId) throws BundleException {
+        public FakeBundleRevision(
+                final Hashtable<String, String> headers, final String location, final long bundleId)
+                throws BundleException {
             ResourceBuilder.build(this, location, headers);
-            this.bundle = (Bundle) Proxy.newProxyInstance(
-                    getClass().getClassLoader(),
-                    new Class[] { Bundle.class },
-                    new InvocationHandler() {
-                        @Override
-                        public Object invoke(Object proxy, Method method, Object[] args) {
-                            if (method.getName().equals("hashCode")) {
-                                return FakeBundleRevision.this.hashCode();
-                            } else if (method.getName().equals("equals")) {
-                                return proxy == args[0];
-                            } else if (method.getName().equals("toString")) {
-                                return bundle.getSymbolicName() + "/" + bundle.getVersion();
-                            } else if (method.getName().equals("adapt")) {
-                                if (args.length == 1 && args[0] == BundleRevision.class) {
-                                    return FakeBundleRevision.this;
-                                } else if (args.length == 1 && args[0] == BundleStartLevel.class) {
-                                    return FakeBundleRevision.this;
-                                }
-                            } else if (method.getName().equals("getHeaders")) {
-                                return headers;
-                            } else if (method.getName().equals("getBundleId")) {
-                                return bundleId;
-                            } else if (method.getName().equals("getLocation")) {
-                                return location;
-                            } else if (method.getName().equals("getSymbolicName")) {
-                                String name = headers.get(Constants.BUNDLE_SYMBOLICNAME);
-                                int idx = name.indexOf(';');
-                                if (idx > 0) {
-                                    name = name.substring(0, idx).trim();
-                                }
-                                return name;
-                            } else if (method.getName().equals("getVersion")) {
-                                return new Version(headers.get(Constants.BUNDLE_VERSION));
-                            } else if (method.getName().equals("getState")) {
-                                return Bundle.ACTIVE;
-                            } else if (method.getName().equals("getLastModified")) {
-                                return 0l;
-                            }
-                            return null;
-                        }
-                    });
+            this.bundle =
+                    (Bundle)
+                            Proxy.newProxyInstance(
+                                    getClass().getClassLoader(),
+                                    new Class[] {Bundle.class},
+                                    new InvocationHandler() {
+                                        @Override
+                                        public Object invoke(
+                                                Object proxy, Method method, Object[] args) {
+                                            if (method.getName().equals("hashCode")) {
+                                                return FakeBundleRevision.this.hashCode();
+                                            } else if (method.getName().equals("equals")) {
+                                                return proxy == args[0];
+                                            } else if (method.getName().equals("toString")) {
+                                                return bundle.getSymbolicName()
+                                                        + "/"
+                                                        + bundle.getVersion();
+                                            } else if (method.getName().equals("adapt")) {
+                                                if (args.length == 1
+                                                        && args[0] == BundleRevision.class) {
+                                                    return FakeBundleRevision.this;
+                                                } else if (args.length == 1
+                                                        && args[0] == BundleStartLevel.class) {
+                                                    return FakeBundleRevision.this;
+                                                }
+                                            } else if (method.getName().equals("getHeaders")) {
+                                                return headers;
+                                            } else if (method.getName().equals("getBundleId")) {
+                                                return bundleId;
+                                            } else if (method.getName().equals("getLocation")) {
+                                                return location;
+                                            } else if (method.getName().equals("getSymbolicName")) {
+                                                String name =
+                                                        headers.get(Constants.BUNDLE_SYMBOLICNAME);
+                                                int idx = name.indexOf(';');
+                                                if (idx > 0) {
+                                                    name = name.substring(0, idx).trim();
+                                                }
+                                                return name;
+                                            } else if (method.getName().equals("getVersion")) {
+                                                return new Version(
+                                                        headers.get(Constants.BUNDLE_VERSION));
+                                            } else if (method.getName().equals("getState")) {
+                                                return Bundle.ACTIVE;
+                                            } else if (method.getName().equals("getLastModified")) {
+                                                return 0l;
+                                            }
+                                            return null;
+                                        }
+                                    });
         }
 
         @Override
@@ -751,7 +846,8 @@ public class VerifyMojo extends MojoSupport {
         }
     }
 
-    public static class DummyDeployCallback extends StaticInstallSupport implements Deployer.DeployCallback {
+    public static class DummyDeployCallback extends StaticInstallSupport
+            implements Deployer.DeployCallback {
 
         private final Bundle systemBundle;
         private final Deployer.DeploymentState dstate;
@@ -792,27 +888,23 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
-        public void persistResolveRequest(Deployer.DeploymentRequest request) {
-        }
+        public void persistResolveRequest(Deployer.DeploymentRequest request) {}
 
         @Override
-        public void installConfigs(org.apache.karaf.features.Feature feature) {
-        }
-        
-        @Override
-        public void installLibraries(org.apache.karaf.features.Feature feature) {
-        }
+        public void installConfigs(org.apache.karaf.features.Feature feature) {}
 
         @Override
-        public void callListeners(FeatureEvent featureEvent) {
-        }
+        public void installLibraries(org.apache.karaf.features.Feature feature) {}
 
         @Override
-        public void callListeners(DeploymentEvent deployEvent) {
-        }
+        public void callListeners(FeatureEvent featureEvent) {}
 
         @Override
-        public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+        public void callListeners(DeploymentEvent deployEvent) {}
+
+        @Override
+        public Bundle installBundle(String region, String uri, InputStream is)
+                throws BundleException {
             try {
                 Hashtable<String, String> headers = new Hashtable<>();
                 ZipInputStream zis = new ZipInputStream(is);
@@ -825,7 +917,8 @@ public class VerifyMojo extends MojoSupport {
                         }
                     }
                 }
-                BundleRevision revision = new FakeBundleRevision(headers, uri, nextBundleId.incrementAndGet());
+                BundleRevision revision =
+                        new FakeBundleRevision(headers, uri, nextBundleId.incrementAndGet());
                 Bundle bundle = revision.getBundle();
                 MapUtils.addToMapSet(dstate.bundlesPerRegion, region, bundle.getBundleId());
                 dstate.bundles.put(bundle.getBundleId(), bundle);
@@ -836,10 +929,7 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
-        public void bundleBlacklisted(BundleInfo bundleInfo) {
-
-        }
-
+        public void bundleBlacklisted(BundleInfo bundleInfo) {}
     }
 
     public class MavenResolverLog extends org.apache.felix.resolver.Logger {
@@ -851,18 +941,18 @@ public class VerifyMojo extends MojoSupport {
         @Override
         protected void doLog(int level, String msg, Throwable throwable) {
             switch (level) {
-            case LOG_DEBUG:
-                getLog().debug(msg, throwable);
-                break;
-            case LOG_INFO:
-                getLog().info(msg, throwable);
-                break;
-            case LOG_WARNING:
-                getLog().warn(msg, throwable);
-                break;
-            case LOG_ERROR:
-                getLog().error(msg, throwable);
-                break;
+                case LOG_DEBUG:
+                    getLog().debug(msg, throwable);
+                    break;
+                case LOG_INFO:
+                    getLog().info(msg, throwable);
+                    break;
+                case LOG_WARNING:
+                    getLog().warn(msg, throwable);
+                    break;
+                case LOG_ERROR:
+                    getLog().error(msg, throwable);
+                    break;
             }
         }
     }

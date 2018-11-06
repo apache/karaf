@@ -20,12 +20,10 @@ import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-
 import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
 import org.junit.Assert;
@@ -39,8 +37,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class PackageTest extends KarafTestSupport {
-    @Inject
-    PackageService packageService;
+    @Inject PackageService packageService;
 
     @Test
     public void exportsCommand() throws Exception {
@@ -79,14 +76,16 @@ public class PackageTest extends KarafTestSupport {
         // We currently expect no duplicate package exports
         Map<String, Integer> expectedDups = new HashMap<>();
         List<PackageVersion> packageVersionMap = packageService.getExports();
-       
+
         for (PackageVersion pVer : packageVersionMap) {
             if (pVer.getBundles().size() > 1) {
                 String packageName = pVer.getPackageName();
                 int expectedNum = expectedDups.getOrDefault(packageName, 0);
-                Assert.assertEquals("Expecting number of duplicates for package " + packageName, expectedNum, pVer.getBundles().size());
+                Assert.assertEquals(
+                        "Expecting number of duplicates for package " + packageName,
+                        expectedNum,
+                        pVer.getBundles().size());
             }
         }
     }
-
 }

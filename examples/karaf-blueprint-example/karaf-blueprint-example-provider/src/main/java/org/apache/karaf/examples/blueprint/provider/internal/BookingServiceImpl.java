@@ -16,14 +16,11 @@
  */
 package org.apache.karaf.examples.blueprint.provider.internal;
 
+import java.util.*;
 import org.apache.karaf.examples.blueprint.common.Booking;
 import org.apache.karaf.examples.blueprint.common.BookingService;
 
-import java.util.*;
-
-/**
- * Very simple implementation of a booking service.
- */
+/** Very simple implementation of a booking service. */
 public class BookingServiceImpl implements BookingService {
 
     private Map<Long, Booking> bookings = new HashMap<>();
@@ -42,5 +39,4 @@ public class BookingServiceImpl implements BookingService {
     public void add(Booking booking) {
         bookings.put(booking.getId(), booking);
     }
-
 }

@@ -28,5 +28,4 @@ public interface Dependency extends Blacklisting {
     boolean isPrerequisite();
 
     boolean isDependency();
-
 }

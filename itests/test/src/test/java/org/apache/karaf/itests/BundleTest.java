@@ -16,10 +16,10 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularDataSupport;
-
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
@@ -28,16 +28,14 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import java.lang.management.ManagementFactory;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class BundleTest extends KarafTestSupport {
 
     private static final RolePrincipal[] ADMIN_ROLES = {
-            new RolePrincipal(BundleService.SYSTEM_BUNDLES_ROLE),
-            new RolePrincipal("admin"),
-            new RolePrincipal("manager")
+        new RolePrincipal(BundleService.SYSTEM_BUNDLES_ROLE),
+        new RolePrincipal("admin"),
+        new RolePrincipal("manager")
     };
 
     @Test
@@ -50,9 +48,9 @@ public class BundleTest extends KarafTestSupport {
     @Test
     public void listViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=root");
-            TabularDataSupport value = (TabularDataSupport) mbeanServer.getAttribute(name, "Bundles");
-            assertTrue(value.size() > 0);
+        ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=root");
+        TabularDataSupport value = (TabularDataSupport) mbeanServer.getAttribute(name, "Bundles");
+        assertTrue(value.size() > 0);
     }
 
     @Test
@@ -60,23 +58,27 @@ public class BundleTest extends KarafTestSupport {
         String allCapabilitiesOutput = executeCommand("bundle:capabilities", ADMIN_ROLES);
         System.out.println(allCapabilitiesOutput);
         assertFalse(allCapabilitiesOutput.isEmpty());
-        String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
+        String jmxWhiteboardBundleCapabilitiesOutput =
+                executeCommand("bundle:capabilities org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(jmxWhiteboardBundleCapabilitiesOutput);
-        assertContains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.2.0 [UNUSED]", jmxWhiteboardBundleCapabilitiesOutput);
+        assertContains(
+                "osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.2.0 [UNUSED]",
+                jmxWhiteboardBundleCapabilitiesOutput);
     }
 
     @Test
     public void classesCommand() throws Exception {
         String allClassesOutput = executeCommand("bundle:classes", ADMIN_ROLES);
         assertFalse(allClassesOutput.isEmpty());
-        String jmxWhiteboardBundleClassesOutput = executeCommand("bundle:classes org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
+        String jmxWhiteboardBundleClassesOutput =
+                executeCommand("bundle:classes org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(jmxWhiteboardBundleClassesOutput);
-        assertContains("org/apache/aries/jmx/whiteboard/Activator$MBeanTracker.class", jmxWhiteboardBundleClassesOutput);
+        assertContains(
+                "org/apache/aries/jmx/whiteboard/Activator$MBeanTracker.class",
+                jmxWhiteboardBundleClassesOutput);
     }
 
-    /**
-     * TODO We need some more thorough tests for diag
-     */
+    /** TODO We need some more thorough tests for diag */
     @Test
     public void diagCommand() throws Exception {
         String allDiagOutput = executeCommand("bundle:diag");
@@ -92,21 +94,26 @@ public class BundleTest extends KarafTestSupport {
 
     @Test
     public void headersCommand() throws Exception {
-        String headersOutput = executeCommand("bundle:headers org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
+        String headersOutput =
+                executeCommand("bundle:headers org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(headersOutput);
-        assertContains("Bundle-Activator = org.apache.aries.jmx.whiteboard.Activator", headersOutput);
+        assertContains(
+                "Bundle-Activator = org.apache.aries.jmx.whiteboard.Activator", headersOutput);
     }
 
     @Test
     public void infoCommand() throws Exception {
-        String infoOutput = executeCommand("bundle:info org.apache.karaf.management.server", ADMIN_ROLES);
+        String infoOutput =
+                executeCommand("bundle:info org.apache.karaf.management.server", ADMIN_ROLES);
         System.out.println(infoOutput);
         assertContains("This bundle starts the Karaf embedded MBean server", infoOutput);
     }
 
     @Test
     public void installUninstallCommand() throws Exception {
-        executeCommand("bundle:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6", ADMIN_ROLES);
+        executeCommand(
+                "bundle:install mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6",
+                ADMIN_ROLES);
         assertBundleInstalled("org.apache.servicemix.bundles.commons-lang");
         executeCommand("bundle:uninstall org.apache.servicemix.bundles.commons-lang", ADMIN_ROLES);
         assertBundleNotInstalled("org.apache.servicemix.bundles.commons-lang");
@@ -114,16 +121,17 @@ public class BundleTest extends KarafTestSupport {
 
     @Test
     public void showTreeCommand() throws Exception {
-        String bundleTreeOutput = executeCommand("bundle:tree-show org.apache.karaf.management.server", ADMIN_ROLES);
+        String bundleTreeOutput =
+                executeCommand("bundle:tree-show org.apache.karaf.management.server", ADMIN_ROLES);
         System.out.println(bundleTreeOutput);
         assertFalse(bundleTreeOutput.isEmpty());
     }
 
     @Test
     public void statusCommand() throws Exception {
-        String statusOutput = executeCommand("bundle:status org.apache.karaf.management.server", ADMIN_ROLES);
+        String statusOutput =
+                executeCommand("bundle:status org.apache.karaf.management.server", ADMIN_ROLES);
         System.out.println(statusOutput);
         assertFalse(statusOutput.isEmpty());
     }
-
 }

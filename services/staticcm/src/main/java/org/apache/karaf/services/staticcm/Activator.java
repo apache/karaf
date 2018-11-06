@@ -21,7 +21,6 @@ package org.apache.karaf.services.staticcm;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -43,7 +42,8 @@ public class Activator implements BundleActivator {
             cfgDirs = System.getProperty("karaf.etc");
         }
         for (String dir : cfgDirs.split(",")) {
-            List<Configuration> cfgs = Configurations.loadConfigurations(context, new File(dir.trim()));
+            List<Configuration> cfgs =
+                    Configurations.loadConfigurations(context, new File(dir.trim()));
             configs.addAll(cfgs);
         }
 

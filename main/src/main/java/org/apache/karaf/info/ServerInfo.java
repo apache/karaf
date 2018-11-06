@@ -17,31 +17,28 @@
  * under the License.
  */
 
-
 package org.apache.karaf.info;
 
 import java.io.File;
 import java.net.URI;
 
 public interface ServerInfo {
-    
+
     File getHomeDirectory();
-    
+
     String resolveHomePath(final String filename);
 
     File resolveHome(final String filename);
 
     URI resolveHome(final URI uri);
 
-    
     File getBaseDirectory();
-    
+
     String resolveBasePath(final String filename);
 
     File resolveBase(final String filename);
 
     URI resolveBase(final URI uri);
-    
 
     File getDataDirectory();
 

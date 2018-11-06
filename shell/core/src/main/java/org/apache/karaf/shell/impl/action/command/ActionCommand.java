@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.impl.action.command;
 
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Parsing;
@@ -93,7 +92,8 @@ public class ActionCommand implements org.apache.karaf.shell.api.console.Command
         try {
             return manager.instantiate(actionClass, session.getRegistry());
         } catch (Exception e) {
-            throw new RuntimeException("Unable to creation command action " + actionClass.getName(), e);
+            throw new RuntimeException(
+                    "Unable to creation command action " + actionClass.getName(), e);
         }
     }
 
@@ -118,7 +118,8 @@ public class ActionCommand implements org.apache.karaf.shell.api.console.Command
         }
 
         @Override
-        public void completeCandidates(Session session, CommandLine commandLine, List<Candidate> candidates) {
+        public void completeCandidates(
+                Session session, CommandLine commandLine, List<Candidate> candidates) {
             Object service = session.getRegistry().getService(clazz);
             if (service instanceof Completer) {
                 ((Completer) service).completeCandidates(session, commandLine, candidates);
@@ -151,5 +152,4 @@ public class ActionCommand implements org.apache.karaf.shell.api.console.Command
             throw new IllegalStateException("Could not find specified parser");
         }
     }
-
 }

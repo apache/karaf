@@ -21,13 +21,15 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "config", name = "property-list", description = "Lists properties from the currently edited configuration.")
+@Command(
+        scope = "config",
+        name = "property-list",
+        description = "Lists properties from the currently edited configuration.")
 @Service
 public class PropListCommand extends ConfigPropertyCommandSupport {
 
@@ -44,9 +46,7 @@ public class PropListCommand extends ConfigPropertyCommandSupport {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }
-        else
-        {
+        } else {
             try {
                 StringWriter sw = new StringWriter();
                 props.save(sw);
@@ -73,5 +73,4 @@ public class PropListCommand extends ConfigPropertyCommandSupport {
     protected boolean requiresUpdate(String pid) {
         return false;
     }
-
 }

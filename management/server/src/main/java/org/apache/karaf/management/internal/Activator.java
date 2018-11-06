@@ -18,10 +18,8 @@ package org.apache.karaf.management.internal;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
 import org.apache.karaf.jaas.config.KeystoreInstance;
 import org.apache.karaf.jaas.config.KeystoreManager;
 import org.apache.karaf.management.ConnectorServerFactory;
@@ -44,20 +42,19 @@ import org.slf4j.LoggerFactory;
 
 @Services(
         requires = {
-                @RequireService(ConfigurationAdmin.class),
-                @RequireService(KeystoreManager.class)
+            @RequireService(ConfigurationAdmin.class),
+            @RequireService(KeystoreManager.class)
         },
-        provides = @ProvideService(MBeanServer.class)
-)
+        provides = @ProvideService(MBeanServer.class))
 @Managed("org.apache.karaf.management")
 public class Activator extends BaseActivator implements ManagedService {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class); 
+
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     private ConnectorServerFactory connectorServerFactory;
     private RmiRegistryFactory rmiRegistryFactory;
     private MBeanServerFactory mbeanServerFactory;
-    
+
     private ServiceTracker<KeystoreInstance, KeystoreInstance> keystoreInstanceServiceTracker;
 
     private EventAdminLogger eventAdminLogger;
@@ -79,14 +76,19 @@ public class Activator extends BaseActivator implements ManagedService {
             }
         }
         if (logger == null) {
-            logger = new EventAdminLogger() {
-                @Override
-                public void close() {
-                }
-                @Override
-                public void log(String methodName, String[] signature, Object result, Throwable error, Object... params) {
-                }
-            };
+            logger =
+                    new EventAdminLogger() {
+                        @Override
+                        public void close() {}
+
+                        @Override
+                        public void log(
+                                String methodName,
+                                String[] signature,
+                                Object result,
+                                Throwable error,
+                                Object... params) {}
+                    };
         }
         eventAdminLogger = logger;
 
@@ -96,8 +98,19 @@ public class Activator extends BaseActivator implements ManagedService {
         int rmiServerPort = getInt("rmiServerPort", 44444);
 
         String jmxRealm = getString("jmxRealm", "karaf");
-        String serviceUrl = getString("serviceUrl",
-                "service:jmx:rmi://" + rmiServerHost + ":" + rmiServerPort + "/jndi/rmi://" + rmiRegistryHost + ":" + rmiRegistryPort + "/karaf-" + System.getProperty("karaf.name"));
+        String serviceUrl =
+                getString(
+                        "serviceUrl",
+                        "service:jmx:rmi://"
+                                + rmiServerHost
+                                + ":"
+                                + rmiServerPort
+                                + "/jndi/rmi://"
+                                + rmiRegistryHost
+                                + ":"
+                                + rmiRegistryPort
+                                + "/karaf-"
+                                + System.getProperty("karaf.name"));
 
         boolean daemon = getBoolean("daemon", true);
         boolean threaded = getBoolean("threaded", true);
@@ -112,7 +125,8 @@ public class Activator extends BaseActivator implements ManagedService {
         String trustStore = getString("trustStore", "karaf.ts");
         boolean createRmiRegistry = getBoolean("createRmiRegistry", true);
         boolean locateRmiRegistry = getBoolean("locateRmiRegistry", true);
-        boolean locateExistingMBeanServerIfPossible = getBoolean("locateExistingMBeanServerIfPossible", true);
+        boolean locateExistingMBeanServerIfPossible =
+                getBoolean("locateExistingMBeanServerIfPossible", true);
 
         KarafMBeanServerGuard guard = new KarafMBeanServerGuard();
         guard.setLogger(eventAdminLogger);
@@ -170,31 +184,42 @@ public class Activator extends BaseActivator implements ManagedService {
         register(MBeanServer.class, mbeanServer);
 
         if (secured) {
-            keystoreInstanceServiceTracker = new ServiceTracker<>(
-                    bundleContext, KeystoreInstance.class, new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
-                @Override
-                public KeystoreInstance addingService(ServiceReference<KeystoreInstance> reference) {
-                    try {
-                        connectorServerFactory.init();
-                    } catch (Exception e) {
-                        LOG.error("Can't re-init JMXConnectorServer with SSL enabled when register a keystore:" + e.getMessage());
-                    }
-                    return null;
-                }
+            keystoreInstanceServiceTracker =
+                    new ServiceTracker<>(
+                            bundleContext,
+                            KeystoreInstance.class,
+                            new ServiceTrackerCustomizer<KeystoreInstance, KeystoreInstance>() {
+                                @Override
+                                public KeystoreInstance addingService(
+                                        ServiceReference<KeystoreInstance> reference) {
+                                    try {
+                                        connectorServerFactory.init();
+                                    } catch (Exception e) {
+                                        LOG.error(
+                                                "Can't re-init JMXConnectorServer with SSL enabled when register a keystore:"
+                                                        + e.getMessage());
+                                    }
+                                    return null;
+                                }
 
-                @Override
-                public void modifiedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
-                }
+                                @Override
+                                public void modifiedService(
+                                        ServiceReference<KeystoreInstance> reference,
+                                        KeystoreInstance service) {}
 
-                @Override
-                public void removedService(ServiceReference<KeystoreInstance> reference, KeystoreInstance service) {
-                    try {
-                        connectorServerFactory.init();
-                    } catch (Exception e) {
-                        LOG.error("Can't re-init JMXConnectorServer with SSL enabled when unregister a keystore: " + e.getMessage());
-                    }
-                }
-            });
+                                @Override
+                                public void removedService(
+                                        ServiceReference<KeystoreInstance> reference,
+                                        KeystoreInstance service) {
+                                    try {
+                                        connectorServerFactory.init();
+                                    } catch (Exception e) {
+                                        LOG.error(
+                                                "Can't re-init JMXConnectorServer with SSL enabled when unregister a keystore: "
+                                                        + e.getMessage());
+                                    }
+                                }
+                            });
             keystoreInstanceServiceTracker.open();
         }
     }
@@ -240,5 +265,4 @@ public class Activator extends BaseActivator implements ManagedService {
             }
         }
     }
-
 }

@@ -16,14 +16,13 @@
  */
 package org.apache.karaf.client;
 
+import java.io.File;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.util.config.PropertiesLoader;
-
-import java.io.File;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.Map;
 
 public class ClientConfig {
 
@@ -50,7 +49,8 @@ public class ClientConfig {
     public ClientConfig(String[] args) throws Exception {
         File karafEtc = new File(System.getProperty("karaf.etc"));
         PropertiesLoader.loadSystemProperties(new File(karafEtc, "system.properties"));
-        Properties configProps = PropertiesLoader.loadConfigProperties(new File(karafEtc, "config.properties"));
+        Properties configProps =
+                PropertiesLoader.loadConfigProperties(new File(karafEtc, "config.properties"));
         configuration = loadProps(new File(karafEtc, "org.apache.karaf.shell.cfg"), configProps);
 
         host = getString("sshHost", "localhost");
@@ -68,7 +68,7 @@ public class ClientConfig {
         password = null;
         StringBuilder commandBuilder = new StringBuilder();
         boolean endOfOptionsMarkerReached = false;
-        
+
         for (int i = 0; i < args.length; i++) {
             if (!endOfOptionsMarkerReached && args[i].charAt(0) == '-') {
                 if (args[i].equals("-a")) {
@@ -92,7 +92,7 @@ public class ClientConfig {
                     } else {
                         user = args[i];
                         interactiveMode = true;
-                        password = null;//get chance to input the password with interactive way
+                        password = null; // get chance to input the password with interactive way
                     }
                 } else if (args[i].equals("-v")) {
                     level++;
@@ -116,7 +116,7 @@ public class ClientConfig {
                     } else {
                         retryAttempts = Integer.parseInt(args[i]);
                     }
-                    
+
                 } else if (args[i].equals("-p")) {
                     if (args.length <= ++i) {
                         System.err.println("miss the password");
@@ -172,55 +172,62 @@ public class ClientConfig {
         }
         command = commandBuilder.toString();
 
-        File userPropertiesFile = new File(karafEtc,"users.properties");
+        File userPropertiesFile = new File(karafEtc, "users.properties");
         if (userPropertiesFile.exists()) {
-	        Map<String, String> usersCfg = PropertiesLoader.loadPropertiesFile(userPropertiesFile.toURI().toURL(), false);
-	        if (!usersCfg.isEmpty()) {
-	            Set<String> users = new LinkedHashSet<>();
-	            for (String user : usersCfg.keySet()) {
-	                if (!user.startsWith(GROUP_PREFIX)) {
-	                    users.add(user);
-	                }
-	            }
-	            if (user == null) {
-	                if (users.iterator().hasNext()) {
-	                    user = users.iterator().next();
-	                }
-	            }
-	            if (interactiveMode && !inputPassword) {
-	                password = null;
-	            } else if (!inputPassword) {
-	                password = usersCfg.get(user);
-	                if (password != null && password.contains(ROLE_DELIMITER)) {
-	                    password = password.substring(0, password.indexOf(ROLE_DELIMITER));
-	                }
-	            }
-	        }
+            Map<String, String> usersCfg =
+                    PropertiesLoader.loadPropertiesFile(userPropertiesFile.toURI().toURL(), false);
+            if (!usersCfg.isEmpty()) {
+                Set<String> users = new LinkedHashSet<>();
+                for (String user : usersCfg.keySet()) {
+                    if (!user.startsWith(GROUP_PREFIX)) {
+                        users.add(user);
+                    }
+                }
+                if (user == null) {
+                    if (users.iterator().hasNext()) {
+                        user = users.iterator().next();
+                    }
+                }
+                if (interactiveMode && !inputPassword) {
+                    password = null;
+                } else if (!inputPassword) {
+                    password = usersCfg.get(user);
+                    if (password != null && password.contains(ROLE_DELIMITER)) {
+                        password = password.substring(0, password.indexOf(ROLE_DELIMITER));
+                    }
+                }
+            }
         }
     }
-    
+
     private static void showHelp() {
         System.out.println("Apache Karaf client");
         System.out.println("  -a [port]     specify the port to connect to");
         System.out.println("  -h [host]     specify the host to connect to");
         System.out.println("  -u [user]     specify the user name");
-        System.out.println("  -p [password] specify the password (optional, if not provided, the password is prompted)");
+        System.out.println(
+                "  -p [password] specify the password (optional, if not provided, the password is prompted)");
         System.out.println("  --help        shows this help message");
         System.out.println("  -v            raise verbosity");
-        System.out.println("  -l            set client logging level. Set to 0 for ERROR logging and up to 4 for TRACE");
+        System.out.println(
+                "  -l            set client logging level. Set to 0 for ERROR logging and up to 4 for TRACE");
         System.out.println("  -r [attempts] retry connection establishment (up to attempts times)");
         System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
-        System.out.println("  -b            batch mode, specify multiple commands via standard input");
+        System.out.println(
+                "  -b            batch mode, specify multiple commands via standard input");
         System.out.println("  -f [file]     read commands from the specified file");
-        System.out.println("  -k [keyFile]  specify the private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag");
+        System.out.println(
+                "  -k [keyFile]  specify the private keyFile location when using key login, need have BouncyCastle registered as security provider using this flag");
         System.out.println("  -t [timeout]  define the client idle timeout");
         System.out.println("  [commands] [--]   commands to run");
-        System.out.println("If no commands are specified, the client will be put in an interactive mode");
+        System.out.println(
+                "If no commands are specified, the client will be put in an interactive mode");
         System.exit(0);
     }
 
     private static TypedProperties loadProps(File file, Properties context) {
-        TypedProperties props = new TypedProperties((name, key, value) -> context.getProperty(value));
+        TypedProperties props =
+                new TypedProperties((name, key, value) -> context.getProperty(value));
         try {
             props.load(file);
         } catch (Exception e) {
@@ -274,9 +281,9 @@ public class ClientConfig {
     public String getUser() {
         return user;
     }
-    
+
     public void setUser(String user) {
-    	this.user = user;
+        this.user = user;
     }
 
     public String getPassword() {
@@ -318,5 +325,4 @@ public class ClientConfig {
     public long getIdleTimeout() {
         return idleTimeout;
     }
-
 }

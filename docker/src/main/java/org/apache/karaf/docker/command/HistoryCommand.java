@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.docker.command;
 
+import java.util.List;
 import org.apache.karaf.docker.ImageHistory;
 import org.apache.karaf.docker.command.completers.ImagesRepoTagsCompleter;
 import org.apache.karaf.shell.api.action.Argument;
@@ -24,13 +25,16 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-import java.util.List;
-
 @Command(scope = "docker", name = "history", description = "Show the history of an image")
 @Service
 public class HistoryCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "image", description = "Name or ID of the image", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "image",
+            description = "Name or ID of the image",
+            required = true,
+            multiValued = false)
     @Completion(ImagesRepoTagsCompleter.class)
     String image;
 
@@ -44,15 +48,16 @@ public class HistoryCommand extends DockerCommandSupport {
         table.column("Tags");
         table.column("Size");
         for (ImageHistory history : histories) {
-            table.addRow().addContent(history.getId(),
-                    history.getCreated(),
-                    history.getCreatedBy(),
-                    history.getComment(),
-                    history.getTags(),
-                    history.getSize());
+            table.addRow()
+                    .addContent(
+                            history.getId(),
+                            history.getCreated(),
+                            history.getCreatedBy(),
+                            history.getComment(),
+                            history.getTags(),
+                            history.getSize());
         }
         table.print(System.out);
         return null;
     }
-
 }

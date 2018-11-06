@@ -26,9 +26,7 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Bundle extender scanning for command classes.
- */
+/** Bundle extender scanning for command classes. */
 public class CommandExtender extends AbstractExtender {
 
     public static final String KARAF_COMMANDS = "Karaf-Commands";
@@ -62,12 +60,11 @@ public class CommandExtender extends AbstractExtender {
     @Override
     protected void debug(Bundle bundle, String msg) {
         StringBuilder buf = new StringBuilder();
-        if ( bundle != null )
-        {
-            buf.append( bundle.getSymbolicName() );
-            buf.append( " (" );
-            buf.append( bundle.getBundleId() );
-            buf.append( "): " );
+        if (bundle != null) {
+            buf.append(bundle.getSymbolicName());
+            buf.append(" (");
+            buf.append(bundle.getBundleId());
+            buf.append("): ");
         }
         buf.append(msg);
         LOGGER.debug(buf.toString());
@@ -76,12 +73,11 @@ public class CommandExtender extends AbstractExtender {
     @Override
     protected void warn(Bundle bundle, String msg, Throwable t) {
         StringBuilder buf = new StringBuilder();
-        if ( bundle != null )
-        {
-            buf.append( bundle.getSymbolicName() );
-            buf.append( " (" );
-            buf.append( bundle.getBundleId() );
-            buf.append( "): " );
+        if (bundle != null) {
+            buf.append(bundle.getSymbolicName());
+            buf.append(" (");
+            buf.append(bundle.getBundleId());
+            buf.append("): ");
         }
         buf.append(msg);
         LOGGER.warn(buf.toString(), t);
@@ -91,5 +87,4 @@ public class CommandExtender extends AbstractExtender {
     protected void error(String msg, Throwable t) {
         LOGGER.error(msg, t);
     }
-
 }

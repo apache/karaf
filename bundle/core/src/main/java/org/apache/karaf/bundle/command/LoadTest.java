@@ -23,13 +23,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
-import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -53,13 +52,16 @@ public class LoadTest implements Action {
     int refresh = 20;
 
     @Option(name = "--excludes", description = "List of bundles (ids or symbolic names) to exclude")
-    List<String> excludes = Arrays.asList("0", "org.ops4j.pax.url.mvn", "org.ops4j.pax.logging.pax-logging-api", "org.ops4j.pax.logging.pax-logging-log4j2");
+    List<String> excludes =
+            Arrays.asList(
+                    "0",
+                    "org.ops4j.pax.url.mvn",
+                    "org.ops4j.pax.logging.pax-logging-api",
+                    "org.ops4j.pax.logging.pax-logging-log4j2");
 
-    @Reference
-    Session session;
+    @Reference Session session;
 
-    @Reference
-    BundleContext bundleContext;
+    @Reference BundleContext bundleContext;
 
     @Override
     public Object execute() throws Exception {
@@ -86,91 +88,108 @@ public class LoadTest implements Action {
             locks[b].set(false);
         }
         for (int i = 0; i < threads; i++) {
-            new Thread(() -> {
-                try {
-                    Random rand = new Random();
-                    for (int j = 0; j < iterations; j++) {
-                        for (;;) {
-                            int b = rand.nextInt(bundles.length);
-                            if (locks[b].compareAndSet(false, true)) {
+            new Thread(
+                            () -> {
                                 try {
-                                    // Only touch active bundles
-                                    if (bundles[b].getState() != Bundle.ACTIVE) {
-                                        continue;
-                                    }
-                                    if (rand.nextInt(100) < refresh) {
-                                        try {
-                                            bundles[b].update();
-                                            final CountDownLatch latch1 = new CountDownLatch(1);
-                                            wiring.refreshBundles(Collections.singletonList(bundles[b]),
-                                                    (FrameworkListener) event -> latch1.countDown());
-                                            latch1.await();
-                                        } finally {
-                                            while (true) {
+                                    Random rand = new Random();
+                                    for (int j = 0; j < iterations; j++) {
+                                        for (; ; ) {
+                                            int b = rand.nextInt(bundles.length);
+                                            if (locks[b].compareAndSet(false, true)) {
                                                 try {
-                                                    bundles[b].start(Bundle.START_TRANSIENT);
-                                                    break;
+                                                    // Only touch active bundles
+                                                    if (bundles[b].getState() != Bundle.ACTIVE) {
+                                                        continue;
+                                                    }
+                                                    if (rand.nextInt(100) < refresh) {
+                                                        try {
+                                                            bundles[b].update();
+                                                            final CountDownLatch latch1 =
+                                                                    new CountDownLatch(1);
+                                                            wiring.refreshBundles(
+                                                                    Collections.singletonList(
+                                                                            bundles[b]),
+                                                                    (FrameworkListener)
+                                                                            event ->
+                                                                                    latch1
+                                                                                            .countDown());
+                                                            latch1.await();
+                                                        } finally {
+                                                            while (true) {
+                                                                try {
+                                                                    bundles[b].start(
+                                                                            Bundle.START_TRANSIENT);
+                                                                    break;
+                                                                } catch (Exception e) {
+                                                                    Thread.sleep(1);
+                                                                }
+                                                            }
+                                                        }
+                                                    } else {
+                                                        try {
+                                                            bundles[b].stop(Bundle.STOP_TRANSIENT);
+                                                        } finally {
+                                                            while (true) {
+                                                                try {
+                                                                    bundles[b].start(
+                                                                            Bundle.START_TRANSIENT);
+                                                                    break;
+                                                                } catch (Exception e) {
+                                                                    Thread.sleep(1);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    Thread.sleep(rand.nextInt(delay));
                                                 } catch (Exception e) {
-                                                    Thread.sleep(1);
+                                                    boolean ignore = false;
+                                                    if (e instanceof BundleException
+                                                            && e.getMessage() != null) {
+                                                        String msg = e.getMessage();
+                                                        if ("Cannot acquire global lock to update the bundle."
+                                                                        .equals(msg)
+                                                                || "Unable to acquire global lock for resolve."
+                                                                        .equals(msg)
+                                                                || msg.matches(
+                                                                        "Bundle .* cannot be update, since it is either starting or stopping.")) {
+                                                            ignore = true;
+                                                        }
+                                                    }
+                                                    if (!ignore) {
+                                                        e.printStackTrace();
+                                                    }
+                                                } finally {
+                                                    locks[b].set(false);
                                                 }
                                             }
-                                        }
-                                    } else {
-                                        try {
-                                            bundles[b].stop(Bundle.STOP_TRANSIENT);
-                                        } finally {
-                                            while (true) {
-                                                try {
-                                                    bundles[b].start(Bundle.START_TRANSIENT);
-                                                    break;
-                                                } catch (Exception e) {
-                                                    Thread.sleep(1);
-                                                }
-                                            }
+                                            break;
                                         }
                                     }
-                                    Thread.sleep(rand.nextInt(delay));
-                                } catch (Exception e) {
-                                    boolean ignore = false;
-                                    if (e instanceof BundleException && e.getMessage() != null) {
-                                        String msg = e.getMessage();
-                                        if ("Cannot acquire global lock to update the bundle.".equals(msg) ||
-                                                "Unable to acquire global lock for resolve.".equals(msg) ||
-                                                msg.matches("Bundle .* cannot be update, since it is either starting or stopping.")) {
-                                            ignore = true;
-                                        }
-                                    }
-                                    if (!ignore) {
-                                        e.printStackTrace();
-                                    }
+                                } catch (Throwable t) {
+                                    t.printStackTrace();
                                 } finally {
-                                    locks[b].set(false);
+                                    latch.countDown();
                                 }
-                            }
-                            break;
-                        }
-                    }
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                } finally {
-                    latch.countDown();
-                }
-            }).start();
+                            })
+                    .start();
         }
-        new Thread(() -> {
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.err.println("Load test finished");
-        }).start();
+        new Thread(
+                        () -> {
+                            try {
+                                latch.await();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            System.err.println("Load test finished");
+                        })
+                .start();
         return null;
     }
 
     private boolean confirm(Session session) throws IOException {
-        for (;;) {
-            String msg = "You are about to perform a start/stop/refresh load test on bundles.\nDo you wish to continue (yes/no): ";
+        for (; ; ) {
+            String msg =
+                    "You are about to perform a start/stop/refresh load test on bundles.\nDo you wish to continue (yes/no): ";
             String str = session.readLine(msg, null);
             if ("yes".equalsIgnoreCase(str)) {
                 return true;

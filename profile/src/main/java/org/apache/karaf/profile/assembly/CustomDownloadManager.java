@@ -18,7 +18,6 @@ package org.apache.karaf.profile.assembly;
 
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.impl.AbstractDownloadTask;
 import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;
@@ -34,11 +33,16 @@ public class CustomDownloadManager extends MavenDownloadManager {
         this(resolver, executor, null, null);
     }
 
-    public CustomDownloadManager(MavenResolver resolver, ScheduledExecutorService executor, Profile profile) {
+    public CustomDownloadManager(
+            MavenResolver resolver, ScheduledExecutorService executor, Profile profile) {
         this(resolver, executor, profile, null);
     }
 
-    public CustomDownloadManager(MavenResolver resolver, ScheduledExecutorService executor, Profile profile, Map<String, String> translatedUrls) {
+    public CustomDownloadManager(
+            MavenResolver resolver,
+            ScheduledExecutorService executor,
+            Profile profile,
+            Map<String, String> translatedUrls) {
         super(resolver, executor, 0, 1);
         this.profile = profile;
         this.translatedUrls = translatedUrls;
@@ -62,6 +66,4 @@ public class CustomDownloadManager extends MavenDownloadManager {
             return super.createDownloadTask(url);
         }
     }
-
-
 }

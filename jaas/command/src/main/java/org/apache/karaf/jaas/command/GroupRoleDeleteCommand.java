@@ -24,7 +24,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class GroupRoleDeleteCommand extends JaasCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "Group", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "group",
+            description = "Group",
+            required = true,
+            multiValued = false)
     private String group;
 
     @Argument(index = 1, name = "role", description = "Role", required = true, multiValued = false)
@@ -56,5 +61,4 @@ public class GroupRoleDeleteCommand extends JaasCommandSupport {
     public String toString() {
         return "GroupRoleDeleteCommand {groupname='" + group + "', role='" + role + "'}";
     }
-
 }

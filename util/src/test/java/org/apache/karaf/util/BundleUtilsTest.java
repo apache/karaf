@@ -16,19 +16,23 @@
  */
 package org.apache.karaf.util;
 
-import org.apache.karaf.util.bundles.BundleUtils;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileInputStream;
+import org.apache.karaf.util.bundles.BundleUtils;
+import org.junit.Test;
 
 public class BundleUtilsTest {
 
     @Test
     public void testJavaxMail() throws Exception {
-        String url = getClass().getClassLoader().getResource("com/sun/mail/util/ASCIIUtility.class").toString();
+        String url =
+                getClass()
+                        .getClassLoader()
+                        .getResource("com/sun/mail/util/ASCIIUtility.class")
+                        .toString();
         url = url.substring("jar:file:".length(), url.indexOf("!/"));
         File file = new File(url);
-        BundleUtils.fixBundleWithUpdateLocation(new FileInputStream(file), "mvn:javax.mail/mail/1.4.7");
+        BundleUtils.fixBundleWithUpdateLocation(
+                new FileInputStream(file), "mvn:javax.mail/mail/1.4.7");
     }
 }

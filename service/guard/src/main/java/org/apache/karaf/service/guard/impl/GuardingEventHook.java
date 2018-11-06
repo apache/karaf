@@ -16,13 +16,12 @@
  */
 package org.apache.karaf.service.guard.impl;
 
-import org.osgi.framework.*;
-import org.osgi.framework.hooks.service.EventListenerHook;
-import org.osgi.framework.hooks.service.ListenerHook;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import org.osgi.framework.*;
+import org.osgi.framework.hooks.service.EventListenerHook;
+import org.osgi.framework.hooks.service.ListenerHook;
 
 public class GuardingEventHook implements EventListenerHook {
 
@@ -30,14 +29,20 @@ public class GuardingEventHook implements EventListenerHook {
     private final GuardProxyCatalog guardProxyCatalog;
     private final Filter servicesFilter;
 
-    GuardingEventHook(BundleContext bundleContext, GuardProxyCatalog guardProxyCatalog, Filter securedServicesFilter) throws InvalidSyntaxException {
+    GuardingEventHook(
+            BundleContext bundleContext,
+            GuardProxyCatalog guardProxyCatalog,
+            Filter securedServicesFilter)
+            throws InvalidSyntaxException {
         this.bundleContext = bundleContext;
         this.guardProxyCatalog = guardProxyCatalog;
         this.servicesFilter = securedServicesFilter;
     }
 
     @Override
-    public void event(ServiceEvent event, Map<BundleContext, Collection<ListenerHook.ListenerInfo>> listeners) {
+    public void event(
+            ServiceEvent event,
+            Map<BundleContext, Collection<ListenerHook.ListenerInfo>> listeners) {
         if (servicesFilter == null) {
             return;
         }
@@ -55,10 +60,10 @@ public class GuardingEventHook implements EventListenerHook {
                 // don't hide anything from this bundle or the system bundle
                 continue;
             }
-            if (proxificationDone || (proxificationDone = guardProxyCatalog.handleProxificationForHook(sr))) {
+            if (proxificationDone
+                    || (proxificationDone = guardProxyCatalog.handleProxificationForHook(sr))) {
                 i.remove();
             }
         }
     }
-
 }

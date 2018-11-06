@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -34,24 +33,30 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-/**
- * Command for showing the full tree of bundles that have been used to resolve
- * a given bundle.
- */
-@Command(scope = "shell", name = "threads", description = "Prints the current threads (optionally with stacktraces)")
+/** Command for showing the full tree of bundles that have been used to resolve a given bundle. */
+@Command(
+        scope = "shell",
+        name = "threads",
+        description = "Prints the current threads (optionally with stacktraces)")
 @Service
 public class ThreadsAction implements Action {
 
-    @Option(name = "--tree" , description = "Display threads as a tree")
+    @Option(name = "--tree", description = "Display threads as a tree")
     boolean tree = false;
 
-    @Option(name = "--list" , description = "Display threads as a list")
+    @Option(name = "--list", description = "Display threads as a list")
     boolean list = false;
 
-    @Option(name = "-e", aliases = { "--empty-groups" }, description = "Show empty groups")
+    @Option(
+            name = "-e",
+            aliases = {"--empty-groups"},
+            description = "Show empty groups")
     boolean empty = false;
 
-    @Option(name = "-t", aliases = { "--threshold" }, description = "Minimal number of interesting stack trace line to display a thread")
+    @Option(
+            name = "-t",
+            aliases = {"--threshold"},
+            description = "Minimal number of interesting stack trace line to display a thread")
     int threshold = 1;
 
     @Option(name = "--locks", description = "Display locks")
@@ -63,10 +68,18 @@ public class ThreadsAction implements Action {
     @Option(name = "--packages", description = "Pruned packages")
     List<String> packages = Arrays.asList("java.", "sun.");
 
-    @Argument(name = "id", description="Show details for thread with this Id", required = false, multiValued = false)
+    @Argument(
+            name = "id",
+            description = "Show details for thread with this Id",
+            required = false,
+            multiValued = false)
     Long id;
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
     @Override
@@ -74,7 +87,8 @@ public class ThreadsAction implements Action {
         Map<Long, ThreadInfo> threadInfos = new TreeMap<>();
         ThreadMXBean threadsBean = ManagementFactory.getThreadMXBean();
         ThreadInfo[] infos;
-        if (threadsBean.isObjectMonitorUsageSupported() && threadsBean.isSynchronizerUsageSupported()) {
+        if (threadsBean.isObjectMonitorUsageSupported()
+                && threadsBean.isSynchronizerUsageSupported()) {
             infos = threadsBean.dumpAllThreads(true, true);
         } else {
             infos = threadsBean.getThreadInfo(threadsBean.getAllThreadIds(), Integer.MAX_VALUE);
@@ -86,11 +100,22 @@ public class ThreadsAction implements Action {
         if (id != null) {
             ThreadInfo ti = threadInfos.get(id);
             if (ti != null) {
-                System.out.println("Thread " + ti.getThreadId() + " " + ti.getThreadName() + " " + ti.getThreadState());
+                System.out.println(
+                        "Thread "
+                                + ti.getThreadId()
+                                + " "
+                                + ti.getThreadName()
+                                + " "
+                                + ti.getThreadState());
                 System.out.println("Stacktrace:");
                 StackTraceElement[] st = ti.getStackTrace();
                 for (StackTraceElement ste : st) {
-                    System.out.println(ste.getClassName() + "." + ste.getMethodName() + " line: " + ste.getLineNumber());
+                    System.out.println(
+                            ste.getClassName()
+                                    + "."
+                                    + ste.getMethodName()
+                                    + " line: "
+                                    + ste.getLineNumber());
                 }
             }
         } else if (list) {
@@ -102,12 +127,13 @@ public class ThreadsAction implements Action {
             table.column("Usr time");
             for (ThreadInfo thread : threadInfos.values()) {
                 long id = thread.getThreadId();
-                table.addRow().addContent(
-                        id,
-                        thread.getThreadName(),
-                        thread.getThreadState(),
-                        threadsBean.getThreadCpuTime(id) / 1000000,
-                        threadsBean.getThreadUserTime(id) / 1000000);
+                table.addRow()
+                        .addContent(
+                                id,
+                                thread.getThreadName(),
+                                thread.getThreadState(),
+                                threadsBean.getThreadCpuTime(id) / 1000000,
+                                threadsBean.getThreadUserTime(id) / 1000000);
             }
             table.print(System.out, !noFormat);
         } else {
@@ -222,7 +248,8 @@ public class ThreadsAction implements Action {
         }
 
         public void printTree(String indent) {
-            System.out.println(indent + "    " + "\"" + thread.getName() + "\": " + thread.getState());
+            System.out.println(
+                    indent + "    " + "\"" + thread.getName() + "\": " + thread.getState());
         }
 
         public void printDump(String indent) {
@@ -277,8 +304,15 @@ public class ThreadsAction implements Action {
         }
 
         private void printThread(String indent) {
-            StringBuilder sb = new StringBuilder("\"" + info.getThreadName() + "\"" + " Id="
-                    + info.getThreadId() + " in " + info.getThreadState());
+            StringBuilder sb =
+                    new StringBuilder(
+                            "\""
+                                    + info.getThreadName()
+                                    + "\""
+                                    + " Id="
+                                    + info.getThreadId()
+                                    + " in "
+                                    + info.getThreadState());
             if (info.getLockName() != null) {
                 sb.append(" on lock=" + info.getLockName());
             }
@@ -290,8 +324,12 @@ public class ThreadsAction implements Action {
             }
             System.out.println(sb.toString());
             if (info.getLockOwnerName() != null) {
-                System.out.println(indent + " owned by " + info.getLockOwnerName() + " Id="
-                        + info.getLockOwnerId());
+                System.out.println(
+                        indent
+                                + " owned by "
+                                + info.getLockOwnerName()
+                                + " Id="
+                                + info.getLockOwnerId());
             }
         }
 
@@ -301,8 +339,12 @@ public class ThreadsAction implements Action {
                 System.out.println(indent + "Locked monitors: count = " + monitors.length);
                 for (MonitorInfo mi : monitors) {
                     System.out.println(indent + "  - " + mi + " locked at ");
-                    System.out.println(indent + "      " + mi.getLockedStackDepth() + " "
-                            + mi.getLockedStackFrame());
+                    System.out.println(
+                            indent
+                                    + "      "
+                                    + mi.getLockedStackDepth()
+                                    + " "
+                                    + mi.getLockedStackFrame());
                 }
                 System.out.println();
             }
@@ -318,7 +360,5 @@ public class ThreadsAction implements Action {
                 System.out.println();
             }
         }
-
     }
-
 }

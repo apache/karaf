@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
@@ -47,42 +46,38 @@ import org.apache.xbean.finder.ClassFinder;
 import org.osgi.framework.BundleActivator;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
-/**
- * Generates service requirement and capabilities for activators
- */
-@Mojo(name = "service-metadata-generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, inheritByDefault = false)
+/** Generates service requirement and capabilities for activators */
+@Mojo(
+        name = "service-metadata-generate",
+        defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        inheritByDefault = false)
 public class GenerateServiceMetadata extends AbstractMojo {
 
-    /**
-     * The maven project.
-     */
+    /** The maven project. */
     @Parameter(defaultValue = "${project}")
     protected MavenProject project;
 
-    @Parameter(defaultValue="BNDExtension-Bundle-Activator")
+    @Parameter(defaultValue = "BNDExtension-Bundle-Activator")
     protected String activatorProperty;
 
-    @Parameter(defaultValue="BNDExtension-Require-Capability")
+    @Parameter(defaultValue = "BNDExtension-Require-Capability")
     protected String requirementsProperty;
 
-    @Parameter(defaultValue="BNDExtension-Provide-Capability")
+    @Parameter(defaultValue = "BNDExtension-Provide-Capability")
     protected String capabilitiesProperty;
 
     @Parameter(defaultValue = "${project.build.directory}/generated/karaf-tracker")
     protected String outputDirectory;
 
-    /**
-     * The classloader to use for loading the commands.
-     * Can be "project" or "plugin"
-     */
+    /** The classloader to use for loading the commands. Can be "project" or "plugin" */
     @Parameter(defaultValue = "project")
     protected String classLoader;
-    
-    @Parameter(defaultValue=".*")
+
+    @Parameter(defaultValue = ".*")
     protected String artifactInclude;
 
-    @Component
-    private BuildContext buildContext;
+    @Component private BuildContext buildContext;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -96,9 +91,13 @@ public class GenerateServiceMetadata extends AbstractMojo {
 
             List<Class<?>> activators = new ArrayList<>();
             for (Class<?> clazz : classes) {
-                URL classUrl = clazz.getClassLoader().getResource(clazz.getName().replace('.', '/') + ".class");
-                URL outputDirectoryUrl = new File(project.getBuild().getOutputDirectory()).toURI().toURL();
-                if (classUrl == null || !classUrl.getPath().startsWith(outputDirectoryUrl.getPath())) {
+                URL classUrl =
+                        clazz.getClassLoader()
+                                .getResource(clazz.getName().replace('.', '/') + ".class");
+                URL outputDirectoryUrl =
+                        new File(project.getBuild().getOutputDirectory()).toURI().toURL();
+                if (classUrl == null
+                        || !classUrl.getPath().startsWith(outputDirectoryUrl.getPath())) {
                     getLog().info("Ignoring " + classUrl);
                     continue;
                 }
@@ -118,7 +117,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
                         capabilities.add(getCapability(cap));
                     }
                 }
-                
+
                 addSourceDirectory = true;
             }
 
@@ -128,14 +127,20 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 project.addResource(resource);
             }
 
-            project.getProperties().setProperty(requirementsProperty, String.join(",", requirements));
-            project.getProperties().setProperty(capabilitiesProperty, String.join(",", capabilities));
+            project.getProperties()
+                    .setProperty(requirementsProperty, String.join(",", requirements));
+            project.getProperties()
+                    .setProperty(capabilitiesProperty, String.join(",", capabilities));
             if (activators.size() == 1) {
                 getLog().info("Activator " + activators.get(0).getName());
                 project.getProperties().setProperty(activatorProperty, activators.get(0).getName());
             }
-            project.getProperties().setProperty("BNDExtension-Private-Package", "org.apache.karaf.util.tracker");
-            project.getProperties().setProperty("BNDPrependExtension-Import-Package", "!org.apache.karaf.util.tracker.annotation");
+            project.getProperties()
+                    .setProperty("BNDExtension-Private-Package", "org.apache.karaf.util.tracker");
+            project.getProperties()
+                    .setProperty(
+                            "BNDPrependExtension-Import-Package",
+                            "!org.apache.karaf.util.tracker.annotation");
 
             List<Class<?>> services = finder.findAnnotatedClasses(Service.class);
             Set<String> packages = new TreeSet<>();
@@ -144,7 +149,8 @@ public class GenerateServiceMetadata extends AbstractMojo {
                 packages.add(clazz.getPackage().getName());
             }
             if (!packages.isEmpty()) {
-                project.getProperties().setProperty("BNDExtension-Karaf-Commands", String.join(",", packages));
+                project.getProperties()
+                        .setProperty("BNDExtension-Karaf-Commands", String.join(",", packages));
             }
 
         } catch (Exception e) {
@@ -156,7 +162,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
         String fltWithClass = combine(req.filter(), "(objectClass=" + req.value().getName() + ")");
         return "osgi.service;effective:=active;filter:=\"" + fltWithClass + "\"";
     }
-    
+
     private String getCapability(ProvideService cap) {
         return "osgi.service;effective:=active;objectClass=" + cap.value().getName();
     }
@@ -182,7 +188,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
     }
 
     private String combine(String filter1, String filter2) {
-        if (filter1!=null && !filter1.isEmpty()) {
+        if (filter1 != null && !filter1.isEmpty()) {
             return "(&" + filter2 + filter1 + ")";
         } else {
             return filter2;
@@ -196,7 +202,9 @@ public class GenerateServiceMetadata extends AbstractMojo {
 
             urls.add(new File(project.getBuild().getOutputDirectory()).toURI().toURL());
             for (Artifact artifact : project.getArtifacts()) {
-                if (artifactInclude != null && artifactInclude.length() > 0 && artifact.getArtifactId().matches(artifactInclude)) {
+                if (artifactInclude != null
+                        && artifactInclude.length() > 0
+                        && artifact.getArtifactId().matches(artifactInclude)) {
                     File file = artifact.getFile();
                     if (file != null) {
                         getLog().debug("Use artifact " + artifact.getArtifactId() + ": " + file);
@@ -206,7 +214,9 @@ public class GenerateServiceMetadata extends AbstractMojo {
                     getLog().debug("Ignore artifact " + artifact.getArtifactId());
                 }
             }
-            ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
+            ClassLoader loader =
+                    new URLClassLoader(
+                            urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
             finder = new ClassFinder(loader, urls);
         } else if ("plugin".equals(classLoader)) {
             finder = new ClassFinder(getClass().getClassLoader());
@@ -215,5 +225,4 @@ public class GenerateServiceMetadata extends AbstractMojo {
         }
         return finder;
     }
-
 }

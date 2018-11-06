@@ -16,13 +16,10 @@
  */
 package org.apache.karaf.scr.examples.component.factories;
 
-/**
- * The SCR Service interface we are going to publish
- */
+/** The SCR Service interface we are going to publish */
 public interface GreeterServiceComponentFactory {
 
     void startGreeter();
 
     void stopGreeter();
-
 }

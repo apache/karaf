@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.docker.internal.osgi;
 
-import org.apache.karaf.docker.DockerMBean;
+import java.io.File;
 import org.apache.karaf.docker.DockerService;
 import org.apache.karaf.docker.internal.DockerMBeanImpl;
 import org.apache.karaf.docker.internal.DockerServiceImpl;
@@ -24,11 +24,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
 
-import java.io.File;
-
-@Services(
-        provides = @ProvideService(DockerService.class)
-)
+@Services(provides = @ProvideService(DockerService.class))
 public class Activator extends BaseActivator {
 
     @Override
@@ -41,5 +37,4 @@ public class Activator extends BaseActivator {
         mbean.setDockerService(dockerService);
         registerMBean(mbean, "type=docker");
     }
-
 }

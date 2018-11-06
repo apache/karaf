@@ -17,7 +17,6 @@
 package org.apache.karaf.jaas.jasypt.impl;
 
 import java.util.Hashtable;
-
 import org.apache.karaf.jaas.modules.EncryptionService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -31,11 +30,9 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         Hashtable<String, Object> props = new Hashtable<>();
         props.put("name", "jasypt");
-        registration = context.registerService(
-                EncryptionService.class,
-                new JasyptEncryptionService(),
-                props);
-
+        registration =
+                context.registerService(
+                        EncryptionService.class, new JasyptEncryptionService(), props);
     }
 
     @Override

@@ -22,7 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ThreadUtils {
 
     /**
-     * Constructs threads with names <code>&lt;prefix&gt;-&lt;pool number&gt;-thread-&lt;thread number&gt;</code>.
+     * Constructs threads with names <code>
+     * &lt;prefix&gt;-&lt;pool number&gt;-thread-&lt;thread number&gt;</code>.
+     *
      * @param prefix prefix to be used for thread names created by this {@link ThreadFactory}
      * @return
      */
@@ -46,13 +48,9 @@ public class ThreadUtils {
         @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-            if (t.isDaemon())
-                t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY)
-                t.setPriority(Thread.NORM_PRIORITY);
+            if (t.isDaemon()) t.setDaemon(false);
+            if (t.getPriority() != Thread.NORM_PRIORITY) t.setPriority(Thread.NORM_PRIORITY);
             return t;
         }
-
     }
-
 }

@@ -20,7 +20,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.EnumSet;
 import java.util.Set;
-
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
@@ -39,7 +38,11 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 @ExamReactorStrategy(PerClass.class)
 public class SshCommandTestBase extends KarafTestSupport {
 
-    enum Result { OK, NOT_FOUND, NO_CREDENTIALS }
+    enum Result {
+        OK,
+        NOT_FOUND,
+        NO_CREDENTIALS
+    }
 
     private SshClient client;
     private ClientChannel channel;
@@ -48,15 +51,33 @@ public class SshCommandTestBase extends KarafTestSupport {
     void addUsers(String manageruser, String vieweruser) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OutputStream pipe = openSshChannel("karaf", "karaf", out);
-        pipe.write(("jaas:realm-manage --realm=karaf"
-                + ";jaas:user-add " + manageruser + " " + manageruser
-                + ";jaas:role-add " + manageruser + " manager"
-                + ";jaas:role-add " + manageruser + " viewer"
-                + ";jaas:role-add " + manageruser + " ssh"
-                + ";jaas:user-add " + vieweruser + " " + vieweruser
-                + ";jaas:role-add " + vieweruser + " viewer"
-                + ";jaas:role-add " + vieweruser + " ssh"
-                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
+        pipe.write(
+                ("jaas:realm-manage --realm=karaf"
+                                + ";jaas:user-add "
+                                + manageruser
+                                + " "
+                                + manageruser
+                                + ";jaas:role-add "
+                                + manageruser
+                                + " manager"
+                                + ";jaas:role-add "
+                                + manageruser
+                                + " viewer"
+                                + ";jaas:role-add "
+                                + manageruser
+                                + " ssh"
+                                + ";jaas:user-add "
+                                + vieweruser
+                                + " "
+                                + vieweruser
+                                + ";jaas:role-add "
+                                + vieweruser
+                                + " viewer"
+                                + ";jaas:role-add "
+                                + vieweruser
+                                + " ssh"
+                                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n")
+                        .getBytes());
         pipe.flush();
         closeSshChannel(pipe);
         System.out.println(new String(out.toByteArray()));
@@ -65,19 +86,27 @@ public class SshCommandTestBase extends KarafTestSupport {
     void addViewer(String vieweruser) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OutputStream pipe = openSshChannel("karaf", "karaf", out);
-        pipe.write(("jaas:realm-manage --realm=karaf"
-                + ";jaas:user-add " + vieweruser + " " + vieweruser
-                + ";jaas:role-add " + vieweruser + " viewer"
-                + ";jaas:role-add " + vieweruser + " ssh"
-                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
+        pipe.write(
+                ("jaas:realm-manage --realm=karaf"
+                                + ";jaas:user-add "
+                                + vieweruser
+                                + " "
+                                + vieweruser
+                                + ";jaas:role-add "
+                                + vieweruser
+                                + " viewer"
+                                + ";jaas:role-add "
+                                + vieweruser
+                                + " ssh"
+                                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n")
+                        .getBytes());
         pipe.flush();
         closeSshChannel(pipe);
         System.out.println(new String(out.toByteArray()));
     }
 
     String assertCommand(String user, String command, Result result) throws Exception {
-        if (!command.endsWith("\n"))
-            command += "\n";
+        if (!command.endsWith("\n")) command += "\n";
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OutputStream pipe = openSshChannel(user, user, out, out);
@@ -87,44 +116,61 @@ public class SshCommandTestBase extends KarafTestSupport {
         closeSshChannel(pipe);
         String output = new String(out.toByteArray());
 
-        switch(result) {
-        case OK:
-            Assert.assertFalse("Should not contain 'Insufficient credentials' or 'Command not found': " + output,
-                    output.contains("Insufficient credentials") || output.contains("Command not found"));
-            break;
-        case NOT_FOUND:
-            Assert.assertTrue("Should contain 'Command not found': " + output,
-                    output.contains("Command not found"));
-            break;
-        case NO_CREDENTIALS:
-            Assert.assertTrue("Should contain 'Insufficient credentials': " + output,
-                    output.contains("Insufficient credentials"));
-            break;
-        default:
-            Assert.fail("Unexpected enum value: " + result);
+        switch (result) {
+            case OK:
+                Assert.assertFalse(
+                        "Should not contain 'Insufficient credentials' or 'Command not found': "
+                                + output,
+                        output.contains("Insufficient credentials")
+                                || output.contains("Command not found"));
+                break;
+            case NOT_FOUND:
+                Assert.assertTrue(
+                        "Should contain 'Command not found': " + output,
+                        output.contains("Command not found"));
+                break;
+            case NO_CREDENTIALS:
+                Assert.assertTrue(
+                        "Should contain 'Insufficient credentials': " + output,
+                        output.contains("Insufficient credentials"));
+                break;
+            default:
+                Assert.fail("Unexpected enum value: " + result);
         }
         return output;
     }
 
-    private OutputStream openSshChannel(String username, String password, OutputStream ... outputs) throws Exception {
+    private OutputStream openSshChannel(String username, String password, OutputStream... outputs)
+            throws Exception {
         client = SshClient.setUpDefaultClient();
         client.start();
         String sshPort = getSshPort();
-        Awaitility.await().ignoreExceptions().until(() -> {
-            ConnectFuture future = client.connect(username, "localhost", Integer.parseInt(sshPort));
-            future.await();
-            session = future.getSession();
-            Set<ClientSessionEvent> ret = EnumSet.of(ClientSessionEvent.WAIT_AUTH);
-            while (ret.contains(ClientSessionEvent.WAIT_AUTH)) {
-                session.addPasswordIdentity(password);
-                session.auth().verify();
-                ret = session.waitFor(EnumSet.of(ClientSessionEvent.WAIT_AUTH, ClientSessionEvent.CLOSED, ClientSessionEvent.AUTHED), 0);
-            }
-            if (ret.contains(ClientSessionEvent.CLOSED)) {
-                throw new Exception("Could not open SSH channel");
-            }
-            return true;
-        });
+        Awaitility.await()
+                .ignoreExceptions()
+                .until(
+                        () -> {
+                            ConnectFuture future =
+                                    client.connect(
+                                            username, "localhost", Integer.parseInt(sshPort));
+                            future.await();
+                            session = future.getSession();
+                            Set<ClientSessionEvent> ret = EnumSet.of(ClientSessionEvent.WAIT_AUTH);
+                            while (ret.contains(ClientSessionEvent.WAIT_AUTH)) {
+                                session.addPasswordIdentity(password);
+                                session.auth().verify();
+                                ret =
+                                        session.waitFor(
+                                                EnumSet.of(
+                                                        ClientSessionEvent.WAIT_AUTH,
+                                                        ClientSessionEvent.CLOSED,
+                                                        ClientSessionEvent.AUTHED),
+                                                0);
+                            }
+                            if (ret.contains(ClientSessionEvent.CLOSED)) {
+                                throw new Exception("Could not open SSH channel");
+                            }
+                            return true;
+                        });
 
         channel = session.createChannel("shell");
         PipedOutputStream pipe = new PipedOutputStream();

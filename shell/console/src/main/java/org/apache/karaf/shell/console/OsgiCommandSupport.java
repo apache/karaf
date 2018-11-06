@@ -21,7 +21,6 @@ package org.apache.karaf.shell.console;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Action;
 import org.osgi.framework.Bundle;
@@ -30,7 +29,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 @Deprecated
-public abstract class OsgiCommandSupport extends AbstractAction implements Action, BundleContextAware {
+public abstract class OsgiCommandSupport extends AbstractAction
+        implements Action, BundleContextAware {
 
     protected BundleContext bundleContext;
     protected List<ServiceReference<?>> usedReferences;
@@ -46,7 +46,7 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
 
     public BundleContext getBundleContext() {
         Bundle framework = bundleContext.getBundle(0);
-        return framework == null? bundleContext: framework.getBundleContext();
+        return framework == null ? bundleContext : framework.getBundleContext();
     }
 
     public void setBundleContext(BundleContext bundleContext) {
@@ -61,8 +61,10 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
         }
     }
 
-    protected <T> List<T> getAllServices(Class<T> clazz, String filter) throws InvalidSyntaxException {
-        Collection<ServiceReference<T>> references = getBundleContext().getServiceReferences(clazz, filter);
+    protected <T> List<T> getAllServices(Class<T> clazz, String filter)
+            throws InvalidSyntaxException {
+        Collection<ServiceReference<T>> references =
+                getBundleContext().getServiceReferences(clazz, filter);
         List<T> services = new ArrayList<>();
         if (references != null) {
             for (ServiceReference<T> ref : references) {
@@ -100,5 +102,4 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
             }
         }
     }
-
 }

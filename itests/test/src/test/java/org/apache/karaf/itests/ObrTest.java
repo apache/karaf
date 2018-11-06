@@ -17,15 +17,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -39,7 +36,6 @@ public class ObrTest extends KarafTestSupport {
         installAndAssertFeature("obr");
     }
 
-       
     @Test
     public void listCommands() throws Exception {
         System.out.println(executeCommand("obr:url-list"));
@@ -56,5 +52,4 @@ public class ObrTest extends KarafTestSupport {
         TabularData bundles = (TabularData) mbeanServer.getAttribute(name, "Bundles");
         assertEquals(0, bundles.size());
     }
-
 }

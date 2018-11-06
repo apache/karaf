@@ -25,5 +25,4 @@ public interface Scoping {
     List<? extends ScopeFilter> getImports();
 
     List<? extends ScopeFilter> getExports();
-
 }

@@ -18,7 +18,6 @@ package org.apache.karaf.bundle.command;
  */
 
 import java.util.Collection;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -29,15 +28,22 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
 
-@Command(scope = "bundle", name = "find-class", description = "Locates a specified class in any deployed bundle")
+@Command(
+        scope = "bundle",
+        name = "find-class",
+        description = "Locates a specified class in any deployed bundle")
 @Service
 public class FindClass implements Action {
 
-    @Argument(index = 0, name = "className", description = "Class name or partial class name to be found", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "className",
+            description = "Class name or partial class name to be found",
+            required = true,
+            multiValued = false)
     String className;
 
-    @Reference
-    BundleContext bundleContext;
+    @Reference BundleContext bundleContext;
 
     @Override
     public Object execute() throws Exception {
@@ -60,15 +66,16 @@ public class FindClass implements Action {
             path = "/";
             filter = "*" + className + "*";
         }
-        for (Bundle bundle:bundles){
+        for (Bundle bundle : bundles) {
             BundleWiring wiring = bundle.adapt(BundleWiring.class);
-            if (wiring != null){
-                Collection<String> resources = wiring.listResources(path, filter, BundleWiring.LISTRESOURCES_RECURSE);
-                if (resources.size() > 0){
+            if (wiring != null) {
+                Collection<String> resources =
+                        wiring.listResources(path, filter, BundleWiring.LISTRESOURCES_RECURSE);
+                if (resources.size() > 0) {
                     String title = ShellUtil.getBundleName(bundle);
                     System.out.println("\n" + title);
                 }
-                for (String resource:resources){
+                for (String resource : resources) {
                     System.out.println(resource);
                 }
             } else {
@@ -76,5 +83,4 @@ public class FindClass implements Action {
             }
         }
     }
-
 }

@@ -39,5 +39,4 @@ public interface PlaceholderResolver {
      * @return The resolved value or EMPTY_STRING.
      */
     String resolve(Map<String, Map<String, String>> profile, String pid, String key, String value);
-
 }

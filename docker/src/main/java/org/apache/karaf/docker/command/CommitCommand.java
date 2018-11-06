@@ -23,21 +23,38 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "docker", name = "commit", description = "Create a new image from a container's changes")
+@Command(
+        scope = "docker",
+        name = "commit",
+        description = "Create a new image from a container's changes")
 @Service
 public class CommitCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "container", description = "Name or ID of the container", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "container",
+            description = "Name or ID of the container",
+            required = true,
+            multiValued = false)
     @Completion(ContainersNameCompleter.class)
     String container;
 
-    @Argument(index = 1, name = "repository", description = "Repository", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "repository",
+            description = "Repository",
+            required = true,
+            multiValued = false)
     String repo;
 
     @Argument(index = 2, name = "tag", description = "Tag", required = true, multiValued = false)
     String tag;
 
-    @Option(name = "--message", description = "Commit message",  required = false, multiValued = false)
+    @Option(
+            name = "--message",
+            description = "Commit message",
+            required = false,
+            multiValued = false)
     String message = "";
 
     @Override

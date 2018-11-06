@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import org.apache.karaf.packages.core.PackageService;
 import org.apache.karaf.packages.core.PackageVersion;
 import org.apache.karaf.shell.api.action.Action;
@@ -37,30 +36,51 @@ import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
-@Command(scope = "package", name = "exports", description = "Lists exported packages and the bundles that export them")
+@Command(
+        scope = "package",
+        name = "exports",
+        description = "Lists exported packages and the bundles that export them")
 @Service
 public class Exports implements Action {
 
-    @Option(name = "-d", description = "Only show packages that are exported by more than one bundle", required = false, multiValued = false)
+    @Option(
+            name = "-d",
+            description = "Only show packages that are exported by more than one bundle",
+            required = false,
+            multiValued = false)
     private boolean onlyDuplicates;
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
-    
-    @Option(name = "--show-name-only", description = "Show only package name", required = false, multiValued = false)
+
+    @Option(
+            name = "--show-name-only",
+            description = "Show only package name",
+            required = false,
+            multiValued = false)
     boolean showOnlyName = false;
-    
-    @Option(name = "-b", description = "Only show packages exported by given bundle id", required = false, multiValued = false)
+
+    @Option(
+            name = "-b",
+            description = "Only show packages exported by given bundle id",
+            required = false,
+            multiValued = false)
     private Integer bundleId;
-    
-    @Option(name = "-p", description = "Only show package starting with given name", required = false, multiValued = false)
+
+    @Option(
+            name = "-p",
+            description = "Only show package starting with given name",
+            required = false,
+            multiValued = false)
     private String packageFilter;
 
-    @Reference
-    private PackageService packageService;
+    @Reference private PackageService packageService;
 
-    @Reference
-    private BundleContext bundleContext;
+    @Reference private BundleContext bundleContext;
 
     @Override
     public Object execute() throws Exception {
@@ -85,10 +105,12 @@ public class Exports implements Action {
             for (Bundle bundle : pVer.getBundles()) {
                 if (matchesFilter(pVer, bundle)) {
                     if (!showOnlyName) {
-                        table.addRow().addContent(pVer.getPackageName(),
-                                              pVer.getVersion().toString(),
-                                              bundle.getBundleId(),
-                                              bundle.getSymbolicName());
+                        table.addRow()
+                                .addContent(
+                                        pVer.getPackageName(),
+                                        pVer.getVersion().toString(),
+                                        bundle.getBundleId(),
+                                        bundle.getSymbolicName());
                     } else {
                         table.addRow().addContent(pVer.getPackageName());
                     }
@@ -97,10 +119,10 @@ public class Exports implements Action {
         }
         table.print(System.out, !noFormat);
     }
-    
+
     private boolean matchesFilter(PackageVersion pVer, Bundle bundle) {
         return (bundleId == null || bundle.getBundleId() == bundleId)
-            && (packageFilter == null || pVer.getPackageName().startsWith(packageFilter));
+                && (packageFilter == null || pVer.getPackageName().startsWith(packageFilter));
     }
 
     private void checkDuplicateExports() {
@@ -110,12 +132,13 @@ public class Exports implements Action {
         table.column(new Col("Package Name"));
         table.column(new Col("Version"));
         table.column(new Col("Exporting bundles (ID)"));
-       
+
         for (String key : packageVersionMap.keySet()) {
             PackageVersion pVer = packageVersionMap.get(key);
             if (pVer.getBundles().size() > 1) {
-            	String pBundles = getBundlesSt(pVer.getBundles());
-            	table.addRow().addContent(pVer.getPackageName(), pVer.getVersion().toString(), pBundles); 
+                String pBundles = getBundlesSt(pVer.getBundles());
+                table.addRow()
+                        .addContent(pVer.getPackageName(), pVer.getVersion().toString(), pBundles);
             }
         }
         table.print(System.out, !noFormat);
@@ -134,14 +157,16 @@ public class Exports implements Action {
         for (Bundle bundle : bundles) {
             BundleRevision rev = bundle.adapt(BundleRevision.class);
             if (rev != null) {
-                List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+                List<BundleCapability> caps =
+                        rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
                 for (BundleCapability cap : caps) {
                     Map<String, Object> attr = cap.getAttributes();
-                    String packageName = (String)attr.get(BundleRevision.PACKAGE_NAMESPACE);
-                    Version version = (Version)attr.get("version");
+                    String packageName = (String) attr.get(BundleRevision.PACKAGE_NAMESPACE);
+                    Version version = (Version) attr.get("version");
                     String key = packageName + ":" + version.toString();
                     PackageVersion pVer =
-                            packageVersionMap.computeIfAbsent(key, k -> new PackageVersion(packageName, version));
+                            packageVersionMap.computeIfAbsent(
+                                    key, k -> new PackageVersion(packageName, version));
                     pVer.addBundle(bundle);
                 }
             }

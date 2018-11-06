@@ -16,11 +16,10 @@
  */
 package org.apache.karaf.docker.internal;
 
+import java.io.File;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.File;
 
 public class DockerServiceImplTest {
 
@@ -40,5 +39,4 @@ public class DockerServiceImplTest {
     public void testProvision() throws Exception {
         dockerService.provision("test", "8101", "1099", "44444", "8181", false, null);
     }
-
 }

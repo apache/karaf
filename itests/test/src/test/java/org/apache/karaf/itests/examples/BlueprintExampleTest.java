@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.itests.examples;
 
+import java.util.List;
 import org.apache.karaf.examples.blueprint.client.ClientService;
 import org.apache.karaf.examples.blueprint.common.Booking;
 import org.apache.karaf.examples.blueprint.common.BookingService;
@@ -24,8 +25,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import java.util.List;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class BlueprintExampleTest extends KarafTestSupport {
@@ -33,7 +32,10 @@ public class BlueprintExampleTest extends KarafTestSupport {
     @Test
     public void test() throws Exception {
         // add blueprint example features repository
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-blueprint-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-blueprint-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         // install the karaf-blueprint-example-provider feature
         installAndAssertFeature("karaf-blueprint-example-provider");
@@ -60,5 +62,4 @@ public class BlueprintExampleTest extends KarafTestSupport {
         }
         Assert.assertTrue(found);
     }
-
 }

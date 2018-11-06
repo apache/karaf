@@ -18,7 +18,6 @@ package org.apache.karaf.management;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
-
 import javax.management.MBeanServer;
 
 public class MBeanServerFactory {
@@ -98,9 +97,11 @@ public class MBeanServerFactory {
         }
         if (this.server == null) {
             if (this.registerWithFactory) {
-                this.server = javax.management.MBeanServerFactory.createMBeanServer(this.defaultDomain);
+                this.server =
+                        javax.management.MBeanServerFactory.createMBeanServer(this.defaultDomain);
             } else {
-                this.server = javax.management.MBeanServerFactory.newMBeanServer(this.defaultDomain);
+                this.server =
+                        javax.management.MBeanServerFactory.newMBeanServer(this.defaultDomain);
             }
             this.newlyRegistered = this.registerWithFactory;
         }
@@ -111,5 +112,4 @@ public class MBeanServerFactory {
             javax.management.MBeanServerFactory.releaseMBeanServer(this.server);
         }
     }
-
 }

@@ -21,27 +21,44 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "feature", name = "requirement-add", description = "Add provisioning requirements.")
+@Command(
+        scope = "feature",
+        name = "requirement-add",
+        description = "Add provisioning requirements.")
 @Service
 public class RequirementAdd extends FeaturesCommandSupport {
 
     @Argument(required = true, multiValued = true)
     List<String> requirements;
 
-    @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)
+    @Option(
+            name = "-r",
+            aliases = "--no-auto-refresh",
+            description = "Do not automatically refresh bundles",
+            required = false,
+            multiValued = false)
     boolean noRefresh;
 
-    @Option(name = "-s", aliases = "--no-auto-start", description = "Do not start the bundles", required = false, multiValued = false)
+    @Option(
+            name = "-s",
+            aliases = "--no-auto-start",
+            description = "Do not start the bundles",
+            required = false,
+            multiValued = false)
     boolean noStart;
 
-    @Option(name = "-m", aliases = "--no-auto-manage", description = "Do not automatically manage bundles", required = false, multiValued = false)
+    @Option(
+            name = "-m",
+            aliases = "--no-auto-manage",
+            description = "Do not automatically manage bundles",
+            required = false,
+            multiValued = false)
     boolean noManage;
 
     @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done")
@@ -50,7 +67,10 @@ public class RequirementAdd extends FeaturesCommandSupport {
     @Option(name = "-t", aliases = "--simulate", description = "Perform a simulation only")
     boolean simulate;
 
-    @Option(name = "--store", description = "Store the resolution into the given file and result for offline analysis")
+    @Option(
+            name = "--store",
+            description =
+                    "Store the resolution into the given file and result for offline analysis")
     String outputFile;
 
     @Option(name = "--features-wiring", description = "Print the wiring between features")
@@ -76,5 +96,4 @@ public class RequirementAdd extends FeaturesCommandSupport {
         featuresService.setResolutionOutputFile(outputFile);
         featuresService.addRequirements(reqs, options);
     }
-
 }

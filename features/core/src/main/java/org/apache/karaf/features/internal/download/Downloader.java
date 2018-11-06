@@ -17,7 +17,6 @@
 package org.apache.karaf.features.internal.download;
 
 import java.net.MalformedURLException;
-
 import org.apache.karaf.features.internal.util.MultiException;
 
 public interface Downloader {
@@ -25,5 +24,4 @@ public interface Downloader {
     void await() throws InterruptedException, MultiException;
 
     void download(String location, DownloadCallback downloadCallback) throws MalformedURLException;
-
 }

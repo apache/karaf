@@ -16,11 +16,8 @@
  */
 package org.apache.karaf.examples.soap.provider;
 
+import javax.jws.WebService;
 import org.apache.karaf.examples.soap.api.BookingService;
 
-import javax.jws.WebService;
-
 @WebService
-public interface BookingServiceSoap extends BookingService {
-
-}
+public interface BookingServiceSoap extends BookingService {}

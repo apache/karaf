@@ -18,22 +18,19 @@ package org.apache.karaf.docker;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Service to manipulate docker via REST API.
- */
+/** Service to manipulate docker via REST API. */
 public class DockerClient {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(DockerClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DockerClient.class);
 
     public static final String DEFAULT_URL = "http://localhost:2375";
 
@@ -72,7 +69,9 @@ public class DockerClient {
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("GET");
 
-        List<Container> containers = mapper.readValue(connection.getInputStream(), new TypeReference<List<Container>>(){});
+        List<Container> containers =
+                mapper.readValue(
+                        connection.getInputStream(), new TypeReference<List<Container>>() {});
         for (Container container : containers) {
             cleanName(container);
         }
@@ -119,17 +118,23 @@ public class DockerClient {
         mapper.writeValue(connection.getOutputStream(), config);
 
         if (connection.getResponseCode() != 201) {
-            throw new IllegalStateException("Can't create Docker container " + name + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't create Docker container "
+                            + name
+                            + ": "
+                            + connection.getResponseMessage());
         }
     }
 
     public void rm(String id, boolean removeVolumes, boolean force) throws Exception {
-        URL dockerUrl = new URL(this.url + "/containers/" + id + "?v=" + removeVolumes + "&force=" + force);
+        URL dockerUrl =
+                new URL(this.url + "/containers/" + id + "?v=" + removeVolumes + "&force=" + force);
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("DELETE");
 
         if (connection.getResponseCode() != 204) {
-            throw new IllegalStateException("Can't remove Docker container " + id + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't remove Docker container " + id + ": " + connection.getResponseMessage());
         }
     }
 
@@ -139,7 +144,8 @@ public class DockerClient {
         connection.setRequestMethod("POST");
 
         if (connection.getResponseCode() != 204) {
-            throw new IllegalStateException("Can't start Docker container " + id + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't start Docker container " + id + ": " + connection.getResponseMessage());
         }
     }
 
@@ -149,7 +155,8 @@ public class DockerClient {
         connection.setRequestMethod("POST");
 
         if (connection.getResponseCode() != 204) {
-            throw new IllegalStateException("Can't stop Docker container " + id + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't stop Docker container " + id + ": " + connection.getResponseMessage());
         }
     }
 
@@ -159,7 +166,11 @@ public class DockerClient {
         connection.setRequestMethod("POST");
 
         if (connection.getResponseCode() != 204) {
-            throw new IllegalStateException("Can't restart Docker container " + id + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't restart Docker container "
+                            + id
+                            + ": "
+                            + connection.getResponseMessage());
         }
     }
 
@@ -169,7 +180,8 @@ public class DockerClient {
         connection.setRequestMethod("POST");
 
         if (connection.getResponseCode() != 204) {
-            throw new IllegalStateException("Can't kill Docker container " + id + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't kill Docker container " + id + ": " + connection.getResponseMessage());
         }
     }
 
@@ -179,7 +191,8 @@ public class DockerClient {
         connection.setRequestMethod("POST");
 
         if (connection.getResponseCode() != 204) {
-            throw new IllegalStateException("Can't rename Docker container " + id + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't rename Docker container " + id + ": " + connection.getResponseMessage());
         }
     }
 
@@ -189,7 +202,8 @@ public class DockerClient {
         connection.setRequestMethod("POST");
 
         if (connection.getResponseCode() != 204) {
-            throw new IllegalStateException("Can't pause Docker container " + id + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't pause Docker container " + id + ": " + connection.getResponseMessage());
         }
     }
 
@@ -199,17 +213,36 @@ public class DockerClient {
         connection.setRequestMethod("POST");
 
         if (connection.getResponseCode() != 204) {
-            throw new IllegalStateException("Can't unpause Docker container " + id + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't unpause Docker container "
+                            + id
+                            + ": "
+                            + connection.getResponseMessage());
         }
     }
 
-    public String logs(String id, boolean stdout, boolean stderr, boolean timestamps, boolean details) throws Exception {
-        URL dockerUrl = new URL(this.url + "/containers/" + id + "/logs?stdout=" + stdout + "&stderr=" + stderr + "&timestamps=" + timestamps + "&details=" + details);
+    public String logs(
+            String id, boolean stdout, boolean stderr, boolean timestamps, boolean details)
+            throws Exception {
+        URL dockerUrl =
+                new URL(
+                        this.url
+                                + "/containers/"
+                                + id
+                                + "/logs?stdout="
+                                + stdout
+                                + "&stderr="
+                                + stderr
+                                + "&timestamps="
+                                + timestamps
+                                + "&details="
+                                + details);
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("GET");
 
         StringBuffer buffer = new StringBuffer();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {
             buffer.append(line).append("\n");
@@ -217,8 +250,20 @@ public class DockerClient {
         return buffer.toString();
     }
 
-    public void commit(String container, ContainerConfig config, String message, String repo, String tag) throws Exception {
-        URL dockerUrl = new URL(this.url + "/commit?container=" + container + "&comment=" + message + "&repo=" + repo + "&tag=" + tag);
+    public void commit(
+            String container, ContainerConfig config, String message, String repo, String tag)
+            throws Exception {
+        URL dockerUrl =
+                new URL(
+                        this.url
+                                + "/commit?container="
+                                + container
+                                + "&comment="
+                                + message
+                                + "&repo="
+                                + repo
+                                + "&tag="
+                                + tag);
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
@@ -226,7 +271,11 @@ public class DockerClient {
         mapper.writeValue(connection.getOutputStream(), config);
 
         if (connection.getResponseCode() != 201) {
-            throw new IllegalStateException("Can't commit Docker container " + container + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't commit Docker container "
+                            + container
+                            + ": "
+                            + connection.getResponseMessage());
         }
     }
 
@@ -235,7 +284,8 @@ public class DockerClient {
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("GET");
 
-        List<Image> images = mapper.readValue(connection.getInputStream(), new TypeReference<List<Image>>(){});
+        List<Image> images =
+                mapper.readValue(connection.getInputStream(), new TypeReference<List<Image>>() {});
         return images;
     }
 
@@ -244,7 +294,8 @@ public class DockerClient {
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("POST");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {
             LOGGER.debug(line);
@@ -254,7 +305,8 @@ public class DockerClient {
         }
 
         if (connection.getResponseCode() != 200) {
-            throw new IllegalStateException("Can't pull image " + name + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't pull image " + name + ": " + connection.getResponseMessage());
         }
     }
 
@@ -263,7 +315,8 @@ public class DockerClient {
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("POST");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {
             LOGGER.debug(line);
@@ -273,7 +326,8 @@ public class DockerClient {
         }
 
         if (connection.getResponseCode() != 200) {
-            throw new IllegalStateException("Can't push image " +  name + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't push image " + name + ": " + connection.getResponseMessage());
         }
     }
 
@@ -283,17 +337,20 @@ public class DockerClient {
         connection.setRequestMethod("POST");
 
         if (connection.getResponseCode() != 201) {
-            throw new IllegalStateException("Can't tag image " + name + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't tag image " + name + ": " + connection.getResponseMessage());
         }
     }
 
     public void rmi(String name, boolean force, boolean noprune) throws Exception {
-        URL dockerUrl = new URL(this.url + "/images/" + name + "?force=" + force + "&noprune=" + noprune);
+        URL dockerUrl =
+                new URL(this.url + "/images/" + name + "?force=" + force + "&noprune=" + noprune);
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("DELETE");
 
         if (connection.getResponseCode() != 200) {
-            throw new IllegalStateException("Can't remove image " + name + ": " + connection.getResponseMessage());
+            throw new IllegalStateException(
+                    "Can't remove image " + name + ": " + connection.getResponseMessage());
         }
     }
 
@@ -302,7 +359,9 @@ public class DockerClient {
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("GET");
 
-        List<ImageSearch> images = mapper.readValue(connection.getInputStream(), new TypeReference<List<ImageSearch>>(){});
+        List<ImageSearch> images =
+                mapper.readValue(
+                        connection.getInputStream(), new TypeReference<List<ImageSearch>>() {});
         return images;
     }
 
@@ -320,8 +379,9 @@ public class DockerClient {
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("GET");
 
-        List<ImageHistory> images = mapper.readValue(connection.getInputStream(), new TypeReference<List<ImageHistory>>(){});
+        List<ImageHistory> images =
+                mapper.readValue(
+                        connection.getInputStream(), new TypeReference<List<ImageHistory>>() {});
         return images;
     }
-
 }

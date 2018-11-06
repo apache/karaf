@@ -18,7 +18,6 @@ package org.apache.karaf.scheduler.core;
 
 import java.io.Serializable;
 import java.util.Map;
-
 import org.apache.karaf.scheduler.JobContext;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -27,25 +26,24 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 
 /**
- * This component is responsible to launch a {@link org.apache.karaf.scheduler.Job}
- * or {@link Runnable} in a Quartz Scheduler.
- *
+ * This component is responsible to launch a {@link org.apache.karaf.scheduler.Job} or {@link
+ * Runnable} in a Quartz Scheduler.
  */
 public class QuartzJobExecutor implements Job {
 
-    /**
-     * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
-     */
+    /** @see org.quartz.Job#execute(org.quartz.JobExecutionContext) */
     public void execute(final JobExecutionContext context) throws JobExecutionException {
 
         final JobDataMap data = context.getJobDetail().getJobDataMap();
         final Object job = data.get(QuartzScheduler.DATA_MAP_OBJECT);
-        final Logger logger = (Logger)data.get(QuartzScheduler.DATA_MAP_LOGGER);
+        final Logger logger = (Logger) data.get(QuartzScheduler.DATA_MAP_LOGGER);
 
         try {
-            logger.debug("Executing job {} with name {}", job, data.get(QuartzScheduler.DATA_MAP_NAME));
+            logger.debug(
+                    "Executing job {} with name {}", job, data.get(QuartzScheduler.DATA_MAP_NAME));
             if (job instanceof org.apache.karaf.scheduler.Job) {
-                final InternalScheduleOptions options = (InternalScheduleOptions) data.get(QuartzScheduler.DATA_MAP_OPTIONS);
+                final InternalScheduleOptions options =
+                        (InternalScheduleOptions) data.get(QuartzScheduler.DATA_MAP_OPTIONS);
                 final String name = (String) data.get(QuartzScheduler.DATA_MAP_NAME);
 
                 final JobContext jobCtx = new JobContextImpl(name, options.configuration);
@@ -71,16 +69,12 @@ public class QuartzJobExecutor implements Job {
             this.configuration = config;
         }
 
-        /**
-         * @see org.apache.karaf.scheduler.JobContext#getConfiguration()
-         */
+        /** @see org.apache.karaf.scheduler.JobContext#getConfiguration() */
         public Map<String, Serializable> getConfiguration() {
             return this.configuration;
         }
 
-        /**
-         * @see org.apache.karaf.scheduler.JobContext#getName()
-         */
+        /** @see org.apache.karaf.scheduler.JobContext#getName() */
         public String getName() {
             return this.name;
         }

@@ -17,27 +17,6 @@
 package org.apache.karaf.audit;
 
 import com.conversantmedia.util.concurrent.DisruptorBlockingQueue;
-import org.apache.karaf.audit.layout.GelfLayout;
-import org.apache.karaf.audit.layout.Rfc3164Layout;
-import org.apache.karaf.audit.layout.Rfc5424Layout;
-import org.apache.karaf.audit.layout.SimpleLayout;
-import org.apache.karaf.audit.logger.FileEventLogger;
-import org.apache.karaf.audit.logger.JulEventLogger;
-import org.apache.karaf.audit.logger.UdpEventLogger;
-import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.annotation.Managed;
-import org.apache.karaf.util.tracker.annotation.RequireService;
-import org.apache.karaf.util.tracker.annotation.Services;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-
-import javax.security.auth.Subject;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.AbstractMap;
@@ -58,6 +37,26 @@ import java.util.TimeZone;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import javax.security.auth.Subject;
+import org.apache.karaf.audit.layout.GelfLayout;
+import org.apache.karaf.audit.layout.Rfc3164Layout;
+import org.apache.karaf.audit.layout.Rfc5424Layout;
+import org.apache.karaf.audit.layout.SimpleLayout;
+import org.apache.karaf.audit.logger.FileEventLogger;
+import org.apache.karaf.audit.logger.JulEventLogger;
+import org.apache.karaf.audit.logger.UdpEventLogger;
+import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.annotation.Managed;
+import org.apache.karaf.util.tracker.annotation.RequireService;
+import org.apache.karaf.util.tracker.annotation.Services;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 
 @Services(requires = @RequireService(EventAdmin.class))
 @Managed("org.apache.karaf.audit")
@@ -95,8 +94,8 @@ public class Activator extends BaseActivator implements ManagedService {
     public static final String JUL_LEVEL = JUL_PREFIX + "level";
     public static final String TOPICS = "topics";
 
-    private static final EventImpl STOP_EVENT = new EventImpl(new Event("stop", Collections.emptyMap()));
-
+    private static final EventImpl STOP_EVENT =
+            new EventImpl(new Event("stop", Collections.emptyMap()));
 
     private BlockingQueue<EventImpl> queue;
     private volatile Thread runner;
@@ -148,13 +147,15 @@ public class Activator extends BaseActivator implements ManagedService {
         try {
             List<EventLogger> loggers = new ArrayList<>();
             if (getBoolean(FILE_ENABLED, true)) {
-                String path = getString(FILE_TARGET, System.getProperty("karaf.data") + "/log/audit.txt");
+                String path =
+                        getString(FILE_TARGET, System.getProperty("karaf.data") + "/log/audit.txt");
                 String encoding = getString(FILE_ENCODING, "UTF-8");
                 String policy = getString(FILE_POLICY, "size(8mb)");
                 int files = getInt(FILE_FILES, 32);
                 boolean compress = getBoolean(FILE_COMPRESS, true);
                 EventLayout layout = createLayout(getString(FILE_LAYOUT, FILE_LAYOUT));
-                loggers.add(new FileEventLogger(path, encoding, policy, files, compress, this, layout));
+                loggers.add(
+                        new FileEventLogger(path, encoding, policy, files, compress, this, layout));
             }
             if (getBoolean(UDP_ENABLED, false)) {
                 String host = getString(UDP_HOST, "localhost");
@@ -188,16 +189,18 @@ public class Activator extends BaseActivator implements ManagedService {
             case "simple":
                 return new SimpleLayout();
             case "rfc3164":
-                return new Rfc3164Layout(getInt(prefix + ".facility", 16),
+                return new Rfc3164Layout(
+                        getInt(prefix + ".facility", 16),
                         getInt(prefix + ".priority", 5),
                         getInt(prefix + ".enterprise", Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER),
                         TimeZone.getDefault(),
                         Locale.ENGLISH);
             case "rfc5424":
-                return new Rfc5424Layout(getInt(prefix + ".facility", 16),
-                                         getInt(prefix + ".priority", 5),
-                                         getInt(prefix + ".enterprise", Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER),
-                                         TimeZone.getDefault());
+                return new Rfc5424Layout(
+                        getInt(prefix + ".facility", 16),
+                        getInt(prefix + ".priority", 5),
+                        getInt(prefix + ".enterprise", Rfc5424Layout.DEFAULT_ENTERPRISE_NUMBER),
+                        TimeZone.getDefault());
             case "gelf":
                 return new GelfLayout();
             default:
@@ -210,7 +213,9 @@ public class Activator extends BaseActivator implements ManagedService {
         }
     }
 
-    private EventLayout createCustomLayout(String type) throws ClassNotFoundException, InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException {
+    private EventLayout createCustomLayout(String type)
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+                    java.lang.reflect.InvocationTargetException {
         Class<?> clazz = Class.forName(type);
         Constructor<?> cnsMap = null;
         Constructor<?> cnsDef = null;
@@ -241,7 +246,8 @@ public class Activator extends BaseActivator implements ManagedService {
         if (layout instanceof EventLayout) {
             return (EventLayout) layout;
         } else {
-            throw new IllegalArgumentException("The built layout does not implement " + EventLayout.class.getName());
+            throw new IllegalArgumentException(
+                    "The built layout does not implement " + EventLayout.class.getName());
         }
     }
 
@@ -457,7 +463,8 @@ public class Activator extends BaseActivator implements ManagedService {
 
         private String _subtype() {
             String topic = event.getTopic();
-            String subtype = topic.substring(topic.lastIndexOf('/') + 1).toLowerCase(Locale.ENGLISH);
+            String subtype =
+                    topic.substring(topic.lastIndexOf('/') + 1).toLowerCase(Locale.ENGLISH);
             if (subtype.startsWith("log_")) {
                 subtype = subtype.substring("log_".length());
             }
@@ -468,39 +475,42 @@ public class Activator extends BaseActivator implements ManagedService {
         public Iterable<String> keys() {
             String[] keys = event.getPropertyNames();
             Arrays.sort(keys);
-            return () -> new Iterator<String>() {
-                String next;
-                int index = -1;
-                @Override
-                public boolean hasNext() {
-                    if (next != null) {
-                        return true;
-                    }
-                    while (++index < keys.length) {
-                        switch (keys[index]) {
-                            case "timestamp":
-                            case "event.topics":
-                            case "subject":
-                            case "type":
-                            case "subtype":
-                                break;
-                            default:
-                                next = keys[index];
+            return () ->
+                    new Iterator<String>() {
+                        String next;
+                        int index = -1;
+
+                        @Override
+                        public boolean hasNext() {
+                            if (next != null) {
                                 return true;
+                            }
+                            while (++index < keys.length) {
+                                switch (keys[index]) {
+                                    case "timestamp":
+                                    case "event.topics":
+                                    case "subject":
+                                    case "type":
+                                    case "subtype":
+                                        break;
+                                    default:
+                                        next = keys[index];
+                                        return true;
+                                }
+                            }
+                            return false;
                         }
-                    }
-                    return false;
-                }
-                @Override
-                public String next() {
-                    if (!hasNext()) {
-                        throw new NoSuchElementException();
-                    }
-                    String str = next;
-                    next = null;
-                    return str;
-                }
-            };
+
+                        @Override
+                        public String next() {
+                            if (!hasNext()) {
+                                throw new NoSuchElementException();
+                            }
+                            String str = next;
+                            next = null;
+                            return str;
+                        }
+                    };
         }
 
         @Override
@@ -533,7 +543,5 @@ public class Activator extends BaseActivator implements ManagedService {
                 }
             };
         }
-
     }
-
 }

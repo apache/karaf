@@ -18,7 +18,6 @@ package org.apache.karaf.obr.command;
 
 import java.net.URI;
 import java.util.List;
-
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.obr.command.util.FileUtil;
@@ -31,36 +30,46 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class SourceCommand extends ObrCommandSupport {
 
-    @Option(name = "-x", aliases = {}, description = "Extract the archive", required = false, multiValued = false)
+    @Option(
+            name = "-x",
+            aliases = {},
+            description = "Extract the archive",
+            required = false,
+            multiValued = false)
     boolean extract;
 
-    @Argument(index = 0, name = "folder", description = "Local folder for storing sources", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "folder",
+            description = "Local folder for storing sources",
+            required = true,
+            multiValued = false)
     String localDir;
 
-    @Argument(index = 1, name = "bundles", description = "List of bundles to download the sources for. The bundles are identified using the following syntax: symbolic_name,version where version is optional.", required = true, multiValued = true)
+    @Argument(
+            index = 1,
+            name = "bundles",
+            description =
+                    "List of bundles to download the sources for. The bundles are identified using the following syntax: symbolic_name,version where version is optional.",
+            required = true,
+            multiValued = true)
     List<String> bundles;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
         for (String bundle : bundles) {
             String[] target = getTarget(bundle);
             Resource resource = selectNewestVersion(searchRepository(admin, target[0], target[1]));
-            if (resource == null)
-            {
+            if (resource == null) {
                 System.err.println("Unknown bundle and/or version: " + target[0]);
-            }
-            else
-            {
+            } else {
                 URI srcURL = (URI) resource.getProperties().get(Resource.SOURCE_URI);
-                if (srcURL != null)
-                {
-                    FileUtil.downloadSource(System.out, System.err, srcURL.toURL(), localDir, extract);
-                }
-                else
-                {
+                if (srcURL != null) {
+                    FileUtil.downloadSource(
+                            System.out, System.err, srcURL.toURL(), localDir, extract);
+                } else {
                     System.err.println("Missing source URL: " + target[0]);
                 }
             }
         }
     }
-
 }

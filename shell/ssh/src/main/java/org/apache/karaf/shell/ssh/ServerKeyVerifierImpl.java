@@ -22,27 +22,30 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-
 import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
 
 public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 
     private final KnownHostsManager knownHostsManager;
-	private final boolean quiet;
+    private final boolean quiet;
 
-    private final static String keyChangedMessage =
-                    " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
-                    " @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!      @ \n" +
-                    " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n" +
-                    "IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
-                    "Someone could be eavesdropping on you right now (man-in-the-middle attack)!\n" +
-                    "It is also possible that the RSA host key has just been changed.\n" +
-                    "Please contact your system administrator.\n" +
-                    "Add correct host key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts to get rid of this message.\n" +
-                    "Offending key in " + System.getProperty("user.home") + "/.sshkaraf/known_hosts\n" +
-                    "RSA host key has changed and you have requested strict checking.\n" +
-                    "Host key verification failed.";
+    private static final String keyChangedMessage =
+            " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n"
+                    + " @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!      @ \n"
+                    + " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n"
+                    + "IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n"
+                    + "Someone could be eavesdropping on you right now (man-in-the-middle attack)!\n"
+                    + "It is also possible that the RSA host key has just been changed.\n"
+                    + "Please contact your system administrator.\n"
+                    + "Add correct host key in "
+                    + System.getProperty("user.home")
+                    + "/.sshkaraf/known_hosts to get rid of this message.\n"
+                    + "Offending key in "
+                    + System.getProperty("user.home")
+                    + "/.sshkaraf/known_hosts\n"
+                    + "RSA host key has changed and you have requested strict checking.\n"
+                    + "Host key verification failed.";
 
     public ServerKeyVerifierImpl(KnownHostsManager knownHostsManager, boolean quiet) {
         this.knownHostsManager = knownHostsManager;
@@ -50,22 +53,25 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
     }
 
     @Override
-    public boolean verifyServerKey(ClientSession sshClientSession, SocketAddress remoteAddress,
-                                   PublicKey serverKey) {
+    public boolean verifyServerKey(
+            ClientSession sshClientSession, SocketAddress remoteAddress, PublicKey serverKey) {
         PublicKey knownKey;
         try {
             knownKey = knownHostsManager.getKnownKey(remoteAddress, serverKey.getAlgorithm());
         } catch (InvalidKeySpecException e) {
-            System.err.println("Invalid key stored for host " + remoteAddress + ". Terminating session.");
+            System.err.println(
+                    "Invalid key stored for host " + remoteAddress + ". Terminating session.");
             return false;
         }
         if (knownKey == null) {
             boolean confirm;
             if (!quiet) {
-                System.out.println("Connecting to unknown server. Add this server to known hosts ? (y/n)");
+                System.out.println(
+                        "Connecting to unknown server. Add this server to known hosts ? (y/n)");
                 confirm = getConfirmation();
             } else {
-                System.out.println("Connecting to unknown server. Automatically adding to known hosts.");
+                System.out.println(
+                        "Connecting to unknown server. Automatically adding to known hosts.");
                 confirm = true;
             }
             if (confirm) {
@@ -79,8 +85,10 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
 
         boolean verifed = (knownKey.equals(serverKey));
         if (!verifed) {
-            System.err.println("Server key for host " + remoteAddress
-                               + " does not match the stored key !! Terminating session.");
+            System.err.println(
+                    "Server key for host "
+                            + remoteAddress
+                            + " does not match the stored key !! Terminating session.");
             System.err.println(keyChangedMessage);
         }
         return verifed;
@@ -98,5 +106,4 @@ public class ServerKeyVerifierImpl implements ServerKeyVerifier {
         boolean confirm = ch == 'y';
         return confirm;
     }
-
 }

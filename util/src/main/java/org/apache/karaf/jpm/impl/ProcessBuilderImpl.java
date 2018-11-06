@@ -18,10 +18,8 @@ package org.apache.karaf.jpm.impl;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.karaf.jpm.Process;
 import org.apache.karaf.jpm.ProcessBuilder;
-
 
 public class ProcessBuilderImpl implements ProcessBuilder {
 

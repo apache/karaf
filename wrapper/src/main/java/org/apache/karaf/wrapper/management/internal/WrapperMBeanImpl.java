@@ -16,17 +16,14 @@
  */
 package org.apache.karaf.wrapper.management.internal;
 
-import org.apache.karaf.wrapper.WrapperService;
-import org.apache.karaf.wrapper.management.WrapperMBean;
-
+import java.io.File;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import java.io.File;
+import org.apache.karaf.wrapper.WrapperService;
+import org.apache.karaf.wrapper.management.WrapperMBean;
 
-/**
- * Implementation of the wrapper MBean.
- */
+/** Implementation of the wrapper MBean. */
 public class WrapperMBeanImpl extends StandardMBean implements WrapperMBean {
 
     private WrapperService wrapperService;
@@ -51,20 +48,28 @@ public class WrapperMBeanImpl extends StandardMBean implements WrapperMBean {
         }
     }
 
-    public File[] install(String name, String displayName, String description, String startType) throws MBeanException {
+    public File[] install(String name, String displayName, String description, String startType)
+            throws MBeanException {
         try {
             return wrapperService.install(name, displayName, description, startType);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
     }
-    
-    public File[] install(String name, String displayName, String description, String startType, String[] envs, String[] includes) throws MBeanException {
+
+    public File[] install(
+            String name,
+            String displayName,
+            String description,
+            String startType,
+            String[] envs,
+            String[] includes)
+            throws MBeanException {
         try {
-            return wrapperService.install(name, displayName, description, startType, envs, includes);
+            return wrapperService.install(
+                    name, displayName, description, startType, envs, includes);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
     }
-
 }

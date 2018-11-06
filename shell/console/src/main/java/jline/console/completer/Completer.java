@@ -17,8 +17,7 @@ import java.util.List;
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  * @since 2.3
  */
-public interface Completer
-{
+public interface Completer {
     //
     // FIXME: Check if we can use CharSequece for buffer?
     //
@@ -26,13 +25,13 @@ public interface Completer
     /**
      * Populates <i>candidates</i> with a list of possible completions for the <i>buffer</i>.
      *
-     * The <i>candidates</i> list will not be sorted before being displayed to the user: thus, the
-     * complete method should sort the {@link List} before returning.
+     * <p>The <i>candidates</i> list will not be sorted before being displayed to the user: thus,
+     * the complete method should sort the {@link List} before returning.
      *
-     * @param buffer        The buffer
-     * @param cursor        The current position of the cursor in the <i>buffer</i>
-     * @param candidates    The {@link List} of candidates to populate
-     * @return              The index of the <i>buffer</i> for which the completion will be relative
+     * @param buffer The buffer
+     * @param cursor The current position of the cursor in the <i>buffer</i>
+     * @param candidates The {@link List} of candidates to populate
+     * @return The index of the <i>buffer</i> for which the completion will be relative
      */
     int complete(String buffer, int cursor, List<CharSequence> candidates);
 }

@@ -15,7 +15,6 @@
 package org.apache.karaf.jaas.modules.encryption;
 
 import java.util.Map;
-
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.EncryptionService;
 
@@ -24,5 +23,4 @@ public class BasicEncryptionService implements EncryptionService {
     public Encryption createEncryption(Map<String, String> params) throws IllegalArgumentException {
         return new BasicEncryption(params);
     }
-
 }

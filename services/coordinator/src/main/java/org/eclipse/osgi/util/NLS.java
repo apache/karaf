@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
-
 public class NLS {
 
     public static void initializeMessages(final String bundleName, final Class<?> clazz) {
@@ -50,22 +49,22 @@ public class NLS {
     }
 
     public static String bind(String message, Object binding) {
-        return bind(message, new Object[] { binding });
+        return bind(message, new Object[] {binding});
     }
 
     public static String bind(String message, Object binding1, Object binding2) {
-        return bind(message, new Object[] { binding1, binding2 });
+        return bind(message, new Object[] {binding1, binding2});
     }
 
     public static String bind(String message, Object[] bindings) {
         int length = message.length();
-        //estimate correct size of string buffer to avoid growth
-        StringBuilder buffer = new StringBuilder(message.length()
-                                    + (bindings != null ? bindings.length * 5 : 0));
+        // estimate correct size of string buffer to avoid growth
+        StringBuilder buffer =
+                new StringBuilder(message.length() + (bindings != null ? bindings.length * 5 : 0));
         for (int i = 0; i < length; i++) {
             char c = message.charAt(i);
             switch (c) {
-                case '{' :
+                case '{':
                     int index = message.indexOf('}', i);
                     // if we don't have a matching closing brace then...
                     if (index == -1) {
@@ -85,14 +84,14 @@ public class NLS {
                         throw new IllegalArgumentException(e);
                     }
                     if (bindings == null || number >= bindings.length || number < 0) {
-                        buffer.append("<missing argument>"); //$NON-NLS-1$
+                        buffer.append("<missing argument>"); // $NON-NLS-1$
                         i = index;
                         break;
                     }
                     buffer.append(bindings[number]);
                     i = index;
                     break;
-                case '\'' :
+                case '\'':
                     // if a single quote is the last char on the line then skip it
                     int nextIndex = i + 1;
                     if (nextIndex >= length) {
@@ -117,11 +116,10 @@ public class NLS {
                     buffer.append(message.substring(nextIndex, index));
                     i = index;
                     break;
-                default :
+                default:
                     buffer.append(c);
             }
         }
         return buffer.toString();
     }
-
 }

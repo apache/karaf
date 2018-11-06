@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.scheduler.command.completers;
 
+import java.util.List;
+import java.util.Map;
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -25,14 +27,10 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-import java.util.List;
-import java.util.Map;
-
 @Service
 public class JobNameCompleter implements Completer {
 
-    @Reference
-    Scheduler scheduler;
+    @Reference Scheduler scheduler;
 
     @Override
     public int complete(Session session, CommandLine commandLine, List<String> candidates) {
@@ -48,5 +46,4 @@ public class JobNameCompleter implements Completer {
         }
         return delegate.complete(session, commandLine, candidates);
     }
-
 }

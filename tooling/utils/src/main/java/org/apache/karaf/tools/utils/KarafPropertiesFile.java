@@ -16,14 +16,13 @@
  */
 package org.apache.karaf.tools.utils;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.karaf.tools.utils.model.KarafPropertyEdit;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import org.apache.commons.io.FileUtils;
+import org.apache.karaf.tools.utils.model.KarafPropertyEdit;
 
 public class KarafPropertiesFile {
 
@@ -59,7 +58,7 @@ public class KarafPropertiesFile {
     public void put(String key, String value) {
         properties.put(key, value);
     }
-    
+
     public void remove(String key) {
         properties.remove(key);
     }
@@ -81,10 +80,11 @@ public class KarafPropertiesFile {
         } else if ("put".equals(editSpec.getOperation().getOperation())) {
             put(editSpec.getKey(), editSpec.getValue());
         } else if ("remove".equals(editSpec.getOperation().getOperation())) {
-            remove(editSpec.getKey());  
+            remove(editSpec.getKey());
         } else {
-        
-            throw new IllegalArgumentException("Operation must be 'extend' or 'put', not " + editSpec.getOperation());
+
+            throw new IllegalArgumentException(
+                    "Operation must be 'extend' or 'put', not " + editSpec.getOperation());
         }
     }
 
@@ -105,10 +105,9 @@ public class KarafPropertiesFile {
     public void replace(File source) {
         try {
             FileUtils.copyFile(source, propertyFile);
-        } 
-        catch (IOException e) {
-            throw new IllegalStateException(String.format("Failed to replace %s", propertyFile.getAbsolutePath()), e);
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    String.format("Failed to replace %s", propertyFile.getAbsolutePath()), e);
         }
     }
-
 }

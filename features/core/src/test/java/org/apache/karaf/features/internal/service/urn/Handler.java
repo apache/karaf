@@ -29,7 +29,8 @@ public class Handler extends URLStreamHandler {
     @Override
     protected URLConnection openConnection(URL u) throws IOException {
         String name = new File(u.getPath()).getName();
-        return getClass().getResource("/org/apache/karaf/features/" + name + ".xml").openConnection();
+        return getClass()
+                .getResource("/org/apache/karaf/features/" + name + ".xml")
+                .openConnection();
     }
-
 }

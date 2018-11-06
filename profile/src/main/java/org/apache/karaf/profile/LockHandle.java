@@ -16,14 +16,9 @@
  */
 package org.apache.karaf.profile;
 
-/**
- * A handle on an acquired read or write lock.
- */
+/** A handle on an acquired read or write lock. */
 public interface LockHandle extends AutoCloseable {
 
-    /**
-     * Release the lock
-     */
+    /** Release the lock */
     void close();
-
 }

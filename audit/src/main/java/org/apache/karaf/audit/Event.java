@@ -19,30 +19,29 @@ package org.apache.karaf.audit;
 import javax.security.auth.Subject;
 
 public interface Event {
-    
+
     String TYPE_SHELL = "shell";
     String TYPE_LOG = "log";
     String TYPE_SERVICE = "service";
     String TYPE_BUNDLE = "bundle";
     String TYPE_LOGIN = "login";
     String TYPE_JMX = "jmx";
-    String TYPE_FRAMEWORK= "framework";
+    String TYPE_FRAMEWORK = "framework";
     String TYPE_WEB = "web";
     String TYPE_REPOSITORIES = "repositories";
     String TYPE_FEATURES = "features";
     String TYPE_BLUEPRINT = "blueprint";
     String TYPE_UNKNOWN = "unknown";
-    
-    long timestamp();
-    
-    Subject subject();
-    
-    String type();
-    
-    String subtype();
-    
-    Iterable<String> keys();
-    
-    Object getProperty(String key);
 
+    long timestamp();
+
+    Subject subject();
+
+    String type();
+
+    String subtype();
+
+    Iterable<String> keys();
+
+    Object getProperty(String key);
 }

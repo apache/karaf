@@ -19,9 +19,7 @@ package org.apache.karaf.docker;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Represents a port mapping in a docker container.
- */
+/** Represents a port mapping in a docker container. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Port {
 

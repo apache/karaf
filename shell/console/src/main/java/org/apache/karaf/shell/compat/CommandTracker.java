@@ -20,7 +20,6 @@ package org.apache.karaf.shell.compat;
 
 import java.lang.reflect.Method;
 import java.util.List;
-
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.api.console.Completer;
@@ -50,10 +49,16 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
     }
 
     public void init() throws Exception {
-        Filter filter = context.createFilter(String.format("(&(%s=*)(%s=*)(|(%s=%s)(%s=%s)))",
-                CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION,
-                Constants.OBJECTCLASS, CommandWithAction.class.getName(),
-                Constants.OBJECTCLASS, org.apache.felix.gogo.commands.CommandWithAction.class.getName()));
+        Filter filter =
+                context.createFilter(
+                        String.format(
+                                "(&(%s=*)(%s=*)(|(%s=%s)(%s=%s)))",
+                                CommandProcessor.COMMAND_SCOPE,
+                                CommandProcessor.COMMAND_FUNCTION,
+                                Constants.OBJECTCLASS,
+                                CommandWithAction.class.getName(),
+                                Constants.OBJECTCLASS,
+                                org.apache.felix.gogo.commands.CommandWithAction.class.getName()));
         this.tracker = new ServiceTracker<>(context, filter, this);
         this.tracker.open();
     }
@@ -68,102 +73,124 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
 
         if (service instanceof CommandWithAction) {
             final CommandWithAction oldCommand = (CommandWithAction) service;
-            final org.apache.karaf.shell.api.console.Command command = new org.apache.karaf.shell.api.console.Command() {
-                @Override
-                public String getScope() {
-                    return reference.getProperty(CommandProcessor.COMMAND_SCOPE).toString();
-                }
+            final org.apache.karaf.shell.api.console.Command command =
+                    new org.apache.karaf.shell.api.console.Command() {
+                        @Override
+                        public String getScope() {
+                            return reference.getProperty(CommandProcessor.COMMAND_SCOPE).toString();
+                        }
 
-                @Override
-                public String getName() {
-                    return reference.getProperty(CommandProcessor.COMMAND_FUNCTION).toString();
-                }
+                        @Override
+                        public String getName() {
+                            return reference
+                                    .getProperty(CommandProcessor.COMMAND_FUNCTION)
+                                    .toString();
+                        }
 
-                @Override
-                public String getDescription() {
-                    final Command cmd = oldCommand.getActionClass().getAnnotation(Command.class);
-                    if (cmd != null) {
-                        return cmd.description();
-                    }
+                        @Override
+                        public String getDescription() {
+                            final Command cmd =
+                                    oldCommand.getActionClass().getAnnotation(Command.class);
+                            if (cmd != null) {
+                                return cmd.description();
+                            }
 
-                    try {
-                        Method method = oldCommand.getActionClass().getMethod("description");
-                        method.setAccessible(true);
-                        return (String) method.invoke(oldCommand.createNewAction());
-                    } catch (Throwable ignore) {
-                    }
+                            try {
+                                Method method =
+                                        oldCommand.getActionClass().getMethod("description");
+                                method.setAccessible(true);
+                                return (String) method.invoke(oldCommand.createNewAction());
+                            } catch (Throwable ignore) {
+                            }
 
-                    return getName();
-                }
+                            return getName();
+                        }
 
-                @Override
-                public Completer getCompleter(final boolean scoped) {
-                    final ArgumentCompleter completer = new ArgumentCompleter(oldCommand, getScope(), getName(), scoped);
-                    return completer::complete;
-                }
+                        @Override
+                        public Completer getCompleter(final boolean scoped) {
+                            final ArgumentCompleter completer =
+                                    new ArgumentCompleter(
+                                            oldCommand, getScope(), getName(), scoped);
+                            return completer::complete;
+                        }
 
-                @Override
-                public Parser getParser() {
-                    return null;
-                }
+                        @Override
+                        public Parser getParser() {
+                            return null;
+                        }
 
-                @Override
-                public Object execute(Session session, List<Object> arguments) throws Exception {
-                    // TODO: remove not really nice cast
-                    CommandSession commandSession = (CommandSession) session.get(".commandSession");
-                    return oldCommand.execute(commandSession, arguments);
-                }
-            };
+                        @Override
+                        public Object execute(Session session, List<Object> arguments)
+                                throws Exception {
+                            // TODO: remove not really nice cast
+                            CommandSession commandSession =
+                                    (CommandSession) session.get(".commandSession");
+                            return oldCommand.execute(commandSession, arguments);
+                        }
+                    };
             sessionFactory.getRegistry().register(command);
             return command;
         } else if (service instanceof org.apache.felix.gogo.commands.CommandWithAction) {
-            final org.apache.felix.gogo.commands.CommandWithAction oldCommand = (org.apache.felix.gogo.commands.CommandWithAction) service;
-            final org.apache.karaf.shell.api.console.Command command = new org.apache.karaf.shell.api.console.Command() {
-                @Override
-                public String getScope() {
-                    return reference.getProperty(CommandProcessor.COMMAND_SCOPE).toString();
-                }
+            final org.apache.felix.gogo.commands.CommandWithAction oldCommand =
+                    (org.apache.felix.gogo.commands.CommandWithAction) service;
+            final org.apache.karaf.shell.api.console.Command command =
+                    new org.apache.karaf.shell.api.console.Command() {
+                        @Override
+                        public String getScope() {
+                            return reference.getProperty(CommandProcessor.COMMAND_SCOPE).toString();
+                        }
 
-                @Override
-                public String getName() {
-                    return reference.getProperty(CommandProcessor.COMMAND_FUNCTION).toString();
-                }
+                        @Override
+                        public String getName() {
+                            return reference
+                                    .getProperty(CommandProcessor.COMMAND_FUNCTION)
+                                    .toString();
+                        }
 
-                @Override
-                public String getDescription() {
-                    final org.apache.felix.gogo.commands.Command cmd = oldCommand.getActionClass().getAnnotation(org.apache.felix.gogo.commands.Command.class);
-                    if (cmd != null) {
-                        return cmd.description();
-                    }
+                        @Override
+                        public String getDescription() {
+                            final org.apache.felix.gogo.commands.Command cmd =
+                                    oldCommand
+                                            .getActionClass()
+                                            .getAnnotation(
+                                                    org.apache.felix.gogo.commands.Command.class);
+                            if (cmd != null) {
+                                return cmd.description();
+                            }
 
-                    try {
-                        Method method = oldCommand.getActionClass().getMethod("description");
-                        method.setAccessible(true);
-                        return (String) method.invoke(oldCommand.createNewAction());
-                    } catch (Throwable ignore) {
-                    }
+                            try {
+                                Method method =
+                                        oldCommand.getActionClass().getMethod("description");
+                                method.setAccessible(true);
+                                return (String) method.invoke(oldCommand.createNewAction());
+                            } catch (Throwable ignore) {
+                            }
 
-                    return getName();
-                }
+                            return getName();
+                        }
 
-                @Override
-                public Completer getCompleter(final boolean scoped) {
-                    final OldArgumentCompleter completer = new OldArgumentCompleter(oldCommand, getScope(), getName(), scoped);
-                    return completer::complete;
-                }
+                        @Override
+                        public Completer getCompleter(final boolean scoped) {
+                            final OldArgumentCompleter completer =
+                                    new OldArgumentCompleter(
+                                            oldCommand, getScope(), getName(), scoped);
+                            return completer::complete;
+                        }
 
-                @Override
-                public Parser getParser() {
-                    return null;
-                }
+                        @Override
+                        public Parser getParser() {
+                            return null;
+                        }
 
-                @Override
-                public Object execute(Session session, List<Object> arguments) throws Exception {
-                    // TODO: remove not really nice cast
-                    CommandSession commandSession = (CommandSession) session.get(".commandSession");
-                    return oldCommand.execute(commandSession, arguments);
-                }
-            };
+                        @Override
+                        public Object execute(Session session, List<Object> arguments)
+                                throws Exception {
+                            // TODO: remove not really nice cast
+                            CommandSession commandSession =
+                                    (CommandSession) session.get(".commandSession");
+                            return oldCommand.execute(commandSession, arguments);
+                        }
+                    };
             sessionFactory.getRegistry().register(command);
             return command;
         } else {
@@ -172,8 +199,7 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
-    }
+    public void modifiedService(ServiceReference reference, Object service) {}
 
     @Override
     public void removedService(ServiceReference reference, Object service) {
@@ -181,7 +207,8 @@ public class CommandTracker implements ServiceTrackerCustomizer<Object, Object> 
             sessionFactory.getRegistry().unregister(service);
         }
         if (service instanceof List) {
-            List<org.apache.karaf.shell.api.console.Command> commands = (List<org.apache.karaf.shell.api.console.Command>) service;
+            List<org.apache.karaf.shell.api.console.Command> commands =
+                    (List<org.apache.karaf.shell.api.console.Command>) service;
             for (org.apache.karaf.shell.api.console.Command command : commands) {
                 sessionFactory.getRegistry().unregister(command);
             }

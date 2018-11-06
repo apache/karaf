@@ -19,7 +19,6 @@ package org.apache.karaf.features.internal.download.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
 
@@ -27,7 +26,8 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
 
     private final MavenResolver resolver;
 
-    public MavenDownloadTask(ScheduledExecutorService executor, MavenResolver resolver, String url) {
+    public MavenDownloadTask(
+            ScheduledExecutorService executor, MavenResolver resolver, String url) {
         super(executor, url);
         this.resolver = resolver;
     }
@@ -48,8 +48,9 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
     }
 
     /**
-     * Maven artifact may be looked up in several repositories. Only if exception for <strong>each</strong>
-     * repository is not retryable, we won't retry.
+     * Maven artifact may be looked up in several repositories. Only if exception for
+     * <strong>each</strong> repository is not retryable, we won't retry.
+     *
      * @param e
      * @return
      */
@@ -68,5 +69,4 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
                 return Retry.DEFAULT_RETRY;
         }
     }
-
 }

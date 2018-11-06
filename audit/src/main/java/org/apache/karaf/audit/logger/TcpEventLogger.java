@@ -16,15 +16,14 @@
  */
 package org.apache.karaf.audit.logger;
 
-import org.apache.karaf.audit.Event;
-import org.apache.karaf.audit.EventLayout;
-import org.apache.karaf.audit.EventLogger;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import org.apache.karaf.audit.Event;
+import org.apache.karaf.audit.EventLayout;
+import org.apache.karaf.audit.EventLogger;
 
 public class TcpEventLogger implements EventLogger {
 
@@ -34,7 +33,8 @@ public class TcpEventLogger implements EventLogger {
     private final EventLayout layout;
     private BufferedWriter writer;
 
-    public TcpEventLogger(String host, int port, String encoding, EventLayout layout) throws IOException {
+    public TcpEventLogger(String host, int port, String encoding, EventLayout layout)
+            throws IOException {
         this.host = host;
         this.port = port;
         this.encoding = Charset.forName(encoding);
@@ -45,7 +45,8 @@ public class TcpEventLogger implements EventLogger {
     public void write(Event event) throws IOException {
         if (writer == null) {
             Socket socket = new Socket(host, port);
-            this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), encoding));
+            this.writer =
+                    new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), encoding));
         }
         layout.format(event, writer);
         writer.append("\n");

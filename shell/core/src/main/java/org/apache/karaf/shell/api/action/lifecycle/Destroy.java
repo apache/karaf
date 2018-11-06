@@ -24,11 +24,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A class annotated with {@link Service} can have a method
- * annotation with <code>@Destroy</code> in which case the annotated
- * method will be called when the object is destroyed.
+ * A class annotated with {@link Service} can have a method annotation with <code>@Destroy</code> in
+ * which case the annotated method will be called when the object is destroyed.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface Destroy {
-}
+public @interface Destroy {}

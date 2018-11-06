@@ -21,7 +21,6 @@ package org.apache.karaf.features;
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.karaf.util.maven.Parser;
@@ -30,17 +29,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Helper class to compare Maven URIs (and falling back to other URIs) that may use globs and version ranges.</p>
+ * Helper class to compare Maven URIs (and falling back to other URIs) that may use globs and
+ * version ranges.
  *
- * <p>Each Maven URI may contain these components: groupId, artifactId, optional version, optional type and optional
- * classifier. Concrete URIs do not use globs and use precise versions (we do not consider <code>LATEST</code>
- * and <code>RELEASE</code> Maven versions here).</p>
+ * <p>Each Maven URI may contain these components: groupId, artifactId, optional version, optional
+ * type and optional classifier. Concrete URIs do not use globs and use precise versions (we do not
+ * consider <code>LATEST</code> and <code>RELEASE</code> Maven versions here).
  *
- * <p>When comparing two Maven URIs, we split them to components and may use RegExps and
- * {@link org.apache.felix.utils.version.VersionRange}s</p>
+ * <p>When comparing two Maven URIs, we split them to components and may use RegExps and {@link
+ * org.apache.felix.utils.version.VersionRange}s
  *
- * <p>When pattern URI doesn't use <code>mvn:</code> scheme, plain {@link String#equals(Object)} is used or
- * {@link Matcher#matches()} when pattern uses <code>*</code> glob.</p>
+ * <p>When pattern URI doesn't use <code>mvn:</code> scheme, plain {@link String#equals(Object)} is
+ * used or {@link Matcher#matches()} when pattern uses <code>*</code> glob.
  */
 public class LocationPattern {
 
@@ -97,7 +97,12 @@ public class LocationPattern {
                         version = new Version(VersionCleaner.clean(versionString));
                     }
                 } catch (IllegalArgumentException e) {
-                    IllegalArgumentException mue = new IllegalArgumentException("Can't parse version \"" + versionString + "\" as OSGi version object.", e);
+                    IllegalArgumentException mue =
+                            new IllegalArgumentException(
+                                    "Can't parse version \""
+                                            + versionString
+                                            + "\" as OSGi version object.",
+                                    e);
                     throw mue;
                 }
             }
@@ -130,21 +135,24 @@ public class LocationPattern {
 
     /**
      * Converts a String with one special character (<code>*</code>) into working {@link Pattern}
+     *
      * @param value
      * @return
      */
     public static Pattern toRegExp(String value) {
-        // TODO: escape all RegExp special chars that are valid path characters, only convert '*' into '.*'
-        return Pattern.compile(value
-                .replaceAll("\\.", "\\\\\\.")
-                .replaceAll("\\$", "\\\\\\$")
-                .replaceAll("\\^", "\\\\\\^")
-                .replaceAll("\\*", ".*")
-        );
+        // TODO: escape all RegExp special chars that are valid path characters, only convert '*'
+        // into
+        // '.*'
+        return Pattern.compile(
+                value.replaceAll("\\.", "\\\\\\.")
+                        .replaceAll("\\$", "\\\\\\$")
+                        .replaceAll("\\^", "\\\\\\^")
+                        .replaceAll("\\*", ".*"));
     }
 
     /**
      * Returns <code>true</code> if this location pattern matches other pattern.
+     *
      * @param otherUri
      * @return
      */
@@ -210,7 +218,10 @@ public class LocationPattern {
             return false;
         }
         if (classifierPattern != null) {
-            match = classifierPattern.matcher(other.classifier == null ? "" : other.classifier).matches();
+            match =
+                    classifierPattern
+                            .matcher(other.classifier == null ? "" : other.classifier)
+                            .matches();
         } else if (classifier != null) {
             match = classifier.equals(other.classifier);
         } else {
@@ -224,5 +235,4 @@ public class LocationPattern {
     public String toString() {
         return originalUri;
     }
-
 }

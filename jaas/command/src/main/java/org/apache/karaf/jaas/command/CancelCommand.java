@@ -16,7 +16,6 @@
 package org.apache.karaf.jaas.command;
 
 import java.util.LinkedList;
-
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -27,7 +26,7 @@ public class CancelCommand extends JaasCommandSupport {
 
     @Override
     public Object execute() throws Exception {
-        //Cleanup the session
+        // Cleanup the session
         session.put(JAAS_REALM, null);
         session.put(JAAS_ENTRY, null);
         session.put(JAAS_CMDS, new LinkedList<JaasCommandSupport>());
@@ -38,5 +37,4 @@ public class CancelCommand extends JaasCommandSupport {
     protected Object doExecute(BackingEngine engine) throws Exception {
         return null;
     }
-
 }

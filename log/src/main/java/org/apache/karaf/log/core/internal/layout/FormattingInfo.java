@@ -16,29 +16,25 @@
  */
 package org.apache.karaf.log.core.internal.layout;
 
-
+/** Copied from log4j */
 /**
- * Copied from log4j
- */
-/**
-   FormattingInfo instances contain the information obtained when parsing
-   formatting modifiers in conversion modifiers.
-
-   @since 0.8.2
+ * FormattingInfo instances contain the information obtained when parsing formatting modifiers in
+ * conversion modifiers.
+ *
+ * @since 0.8.2
  */
 public class FormattingInfo {
-  int min = -1;
-  int max = 0x7FFFFFFF;
-  boolean leftAlign = false;
+    int min = -1;
+    int max = 0x7FFFFFFF;
+    boolean leftAlign = false;
 
-  void reset() {
-    min = -1;
-    max = 0x7FFFFFFF;
-    leftAlign = false;
-  }
+    void reset() {
+        min = -1;
+        max = 0x7FFFFFFF;
+        leftAlign = false;
+    }
 
-  void dump() {
-    //LogLog.debug("min="+min+", max="+max+", leftAlign="+leftAlign);
-  }
+    void dump() {
+        // LogLog.debug("min="+min+", max="+max+", leftAlign="+leftAlign);
+    }
 }
-

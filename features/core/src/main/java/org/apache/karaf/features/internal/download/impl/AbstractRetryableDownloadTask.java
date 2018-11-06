@@ -20,13 +20,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractRetryableDownloadTask extends AbstractDownloadTask {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRetryableDownloadTask.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(AbstractRetryableDownloadTask.class);
 
     private long scheduleDelay = 250;
     private int scheduleMaxRun = 9;
@@ -69,8 +69,17 @@ public abstract class AbstractRetryableDownloadTask extends AbstractDownloadTask
                 }
                 if (++scheduleNbRun < retryCount) {
                     previousException = e;
-                    long delay = (long)(scheduleDelay * 3 / 2 + Math.random() * scheduleDelay / 2);
-                    LOGGER.debug("Error downloading " + url + ": " + e.getMessage() + ". " + retry + " in approx " + delay + " ms.");
+                    long delay = (long) (scheduleDelay * 3 / 2 + Math.random() * scheduleDelay / 2);
+                    LOGGER.debug(
+                            "Error downloading "
+                                    + url
+                                    + ": "
+                                    + e.getMessage()
+                                    + ". "
+                                    + retry
+                                    + " in approx "
+                                    + delay
+                                    + " ms.");
                     executorService.schedule(this, delay, TimeUnit.MILLISECONDS);
                     scheduleDelay *= 2;
                 } else {
@@ -87,16 +96,16 @@ public abstract class AbstractRetryableDownloadTask extends AbstractDownloadTask
     }
 
     /**
-     * Abstract download operation that may use <em>previous exception</em> as hint for optimized retry
+     * Abstract download operation that may use <em>previous exception</em> as hint for optimized
+     * retry
+     *
      * @param previousException
      * @return
      * @throws Exception
      */
     protected abstract File download(Exception previousException) throws Exception;
 
-    /**
-     * What kind of retry may be attempted
-     */
+    /** What kind of retry may be attempted */
     protected enum Retry {
         /** Each retry would lead to the same result */
         NO_RETRY,
@@ -105,5 +114,4 @@ public abstract class AbstractRetryableDownloadTask extends AbstractDownloadTask
         /** Retry with high expectation of success at some point */
         DEFAULT_RETRY
     }
-
 }

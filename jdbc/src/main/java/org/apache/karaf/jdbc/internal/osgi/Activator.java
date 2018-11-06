@@ -26,9 +26,8 @@ import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 @Services(
-    provides = @ProvideService(JdbcService.class),
-    requires = @RequireService(ConfigurationAdmin.class)
-)
+        provides = @ProvideService(JdbcService.class),
+        requires = @RequireService(ConfigurationAdmin.class))
 public class Activator extends BaseActivator {
     @Override
     protected void doStart() throws Exception {

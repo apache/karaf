@@ -18,9 +18,7 @@ package org.apache.karaf.jaas.command;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
 import javax.security.auth.login.AppConfigurationEntry;
-
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.command.completers.LoginModuleNameCompleter;
 import org.apache.karaf.jaas.command.completers.RealmCompleter;
@@ -31,7 +29,10 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "jaas", name = "realm-manage", description = "Manage users and roles of a JAAS Realm")
+@Command(
+        scope = "jaas",
+        name = "realm-manage",
+        description = "Manage users and roles of a JAAS Realm")
 @Service
 public class ManageRealmCommand extends JaasCommandSupport {
 
@@ -42,14 +43,29 @@ public class ManageRealmCommand extends JaasCommandSupport {
     @Option(name = "--index", description = "Realm Index", required = false, multiValued = false)
     int index;
 
-    @Option(name = "--module", description = "JAAS Login Module Class Name", required = false, multiValued = false)
+    @Option(
+            name = "--module",
+            description = "JAAS Login Module Class Name",
+            required = false,
+            multiValued = false)
     @Completion(LoginModuleNameCompleter.class)
     String moduleName;
 
-    @Option(name = "-f", aliases = { "--force" }, description = "Force the management of this realm, even if another one was under management", required = false, multiValued = false)
+    @Option(
+            name = "-f",
+            aliases = {"--force"},
+            description =
+                    "Force the management of this realm, even if another one was under management",
+            required = false,
+            multiValued = false)
     boolean force;
 
-    @Option(name = "-h", aliases = {"--hidden"}, description = "Manage hidden realms", required = false, multiValued = false)
+    @Option(
+            name = "-h",
+            aliases = {"--hidden"},
+            description = "Manage hidden realms",
+            required = false,
+            multiValued = false)
     boolean hidden;
 
     @SuppressWarnings("unchecked")
@@ -63,9 +79,13 @@ public class ManageRealmCommand extends JaasCommandSupport {
         AppConfigurationEntry oldEntry = (AppConfigurationEntry) this.session.get(JAAS_ENTRY);
 
         if (oldRealm != null && !oldRealm.getName().equals(realmName) && !force) {
-            System.err.println("Another JAAS Realm is being edited. Cancel/update first, or use the --force option.");
-        } else if (oldEntry != null && !oldEntry.getLoginModuleName().equals(moduleName) && !force) {
-            System.err.println("Another JAAS Login Module is being edited. Cancel/update first, or use the --force option.");
+            System.err.println(
+                    "Another JAAS Realm is being edited. Cancel/update first, or use the --force option.");
+        } else if (oldEntry != null
+                && !oldEntry.getLoginModuleName().equals(moduleName)
+                && !force) {
+            System.err.println(
+                    "Another JAAS Login Module is being edited. Cancel/update first, or use the --force option.");
         } else {
 
             JaasRealm realm = null;
@@ -76,7 +96,8 @@ public class ManageRealmCommand extends JaasCommandSupport {
                 List<JaasRealm> realms = getRealms(hidden);
                 if (realms != null && realms.size() > 0) {
                     int i = 1;
-                    realms_loop: for (JaasRealm r : realms) {
+                    realms_loop:
+                    for (JaasRealm r : realms) {
                         AppConfigurationEntry[] entries = r.getEntries();
 
                         if (entries != null) {
@@ -100,18 +121,22 @@ public class ManageRealmCommand extends JaasCommandSupport {
                             AppConfigurationEntry[] entries = realm.getEntries();
                             if (entries != null) {
                                 for (AppConfigurationEntry e : entries) {
-                                    String moduleClass = (String) e.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
+                                    String moduleClass =
+                                            (String)
+                                                    e.getOptions()
+                                                            .get(ProxyLoginModule.PROPERTY_MODULE);
                                     if (moduleName == null) {
                                         if (getBackingEngine(e) != null) {
                                             entry = e;
                                             break;
                                         }
                                     } else {
-                                        if (moduleName.equals(e.getLoginModuleName()) || moduleName.equals(moduleClass)) {
-	                                        if (getBackingEngine(e) != null) {
-												entry = e;
-												break;
-											}
+                                        if (moduleName.equals(e.getLoginModuleName())
+                                                || moduleName.equals(moduleClass)) {
+                                            if (getBackingEngine(e) != null) {
+                                                entry = e;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -152,5 +177,4 @@ public class ManageRealmCommand extends JaasCommandSupport {
     protected Object doExecute(BackingEngine engine) throws Exception {
         return null;
     }
-
 }

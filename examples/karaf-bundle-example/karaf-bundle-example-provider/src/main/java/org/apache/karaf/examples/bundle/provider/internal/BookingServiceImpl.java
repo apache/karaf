@@ -16,17 +16,14 @@
  */
 package org.apache.karaf.examples.bundle.provider.internal;
 
-import org.apache.karaf.examples.bundle.common.Booking;
-import org.apache.karaf.examples.bundle.common.BookingService;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.examples.bundle.common.Booking;
+import org.apache.karaf.examples.bundle.common.BookingService;
 
-/**
- * Very simple implementation of a booking service.
- */
+/** Very simple implementation of a booking service. */
 public class BookingServiceImpl implements BookingService {
 
     private Map<Long, Booking> bookings = new HashMap<>();
@@ -45,5 +42,4 @@ public class BookingServiceImpl implements BookingService {
     public void add(Booking booking) {
         bookings.put(booking.getId(), booking);
     }
-
 }

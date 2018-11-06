@@ -18,12 +18,9 @@ package org.apache.karaf.docker;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Map;
 
-/**
- * Represents configuration of a Docker Container.
- */
+/** Represents configuration of a Docker Container. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ContainerConfig {
 
@@ -202,5 +199,4 @@ public class ContainerConfig {
     public void setHostConfig(HostConfig hostConfig) {
         this.hostConfig = hostConfig;
     }
-
 }

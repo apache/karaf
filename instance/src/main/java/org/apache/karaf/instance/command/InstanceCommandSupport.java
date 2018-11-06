@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.shell.api.action.Action;
@@ -30,8 +29,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
 public abstract class InstanceCommandSupport implements Action {
 
-    @Reference
-    private InstanceService instanceService;
+    @Reference private InstanceService instanceService;
 
     public InstanceService getInstanceService() {
         return instanceService;
@@ -63,7 +61,8 @@ public abstract class InstanceCommandSupport implements Action {
         return instances;
     }
 
-    protected static Map<String, URL> getResources(List<String> resources) throws MalformedURLException {
+    protected static Map<String, URL> getResources(List<String> resources)
+            throws MalformedURLException {
         Map<String, URL> result = new HashMap<>();
         if (resources != null) {
             for (String resource : resources) {

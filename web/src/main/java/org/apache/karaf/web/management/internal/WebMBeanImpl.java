@@ -16,20 +16,17 @@
  */
 package org.apache.karaf.web.management.internal;
 
-import org.apache.karaf.web.WebBundle;
-import org.apache.karaf.web.WebContainerService;
-import org.apache.karaf.web.management.WebMBean;
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.karaf.web.WebBundle;
+import org.apache.karaf.web.WebContainerService;
+import org.apache.karaf.web.management.WebMBean;
 
-/**
- * Implementation of the Web MBean.
- */
+/** Implementation of the Web MBean. */
 public class WebMBeanImpl extends StandardMBean implements WebMBean {
 
     private WebContainerService webContainerService;
@@ -44,28 +41,54 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
 
     public TabularData getWebBundles() throws MBeanException {
         try {
-            CompositeType webType = new CompositeType("Web Bundle", "An OSGi Web bundle",
-                    new String[]{"ID", "State", "Web-State", "Level", "Web-ContextPath", "Name"},
-                    new String[]{"ID of the bundle",
-                            "OSGi state of the bundle",
-                            "Web state of the bundle",
-                            "Start level of the bundle",
-                            "Web context path",
-                            "Name of the bundle"},
-                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("Web Bundles", "Table of web bundles", webType,
-                    new String[]{"ID"});
+            CompositeType webType =
+                    new CompositeType(
+                            "Web Bundle",
+                            "An OSGi Web bundle",
+                            new String[] {
+                                "ID", "State", "Web-State", "Level", "Web-ContextPath", "Name"
+                            },
+                            new String[] {
+                                "ID of the bundle",
+                                "OSGi state of the bundle",
+                                "Web state of the bundle",
+                                "Start level of the bundle",
+                                "Web context path",
+                                "Name of the bundle"
+                            },
+                            new OpenType[] {
+                                SimpleType.LONG,
+                                SimpleType.STRING,
+                                SimpleType.STRING,
+                                SimpleType.INTEGER,
+                                SimpleType.STRING,
+                                SimpleType.STRING
+                            });
+            TabularType tableType =
+                    new TabularType(
+                            "Web Bundles", "Table of web bundles", webType, new String[] {"ID"});
             TabularData table = new TabularDataSupport(tableType);
             for (WebBundle webBundle : webContainerService.list()) {
                 try {
-                    CompositeData data = new CompositeDataSupport(webType,
-                            new String[]{"ID", "State", "Web-State", "Level", "Web-ContextPath", "Name"},
-                            new Object[]{webBundle.getBundleId(),
-                                    webBundle.getState(),
-                                    webBundle.getWebState(),
-                                    webBundle.getLevel(),
-                                    webBundle.getContextPath(),
-                                    webBundle.getName()});
+                    CompositeData data =
+                            new CompositeDataSupport(
+                                    webType,
+                                    new String[] {
+                                        "ID",
+                                        "State",
+                                        "Web-State",
+                                        "Level",
+                                        "Web-ContextPath",
+                                        "Name"
+                                    },
+                                    new Object[] {
+                                        webBundle.getBundleId(),
+                                        webBundle.getState(),
+                                        webBundle.getWebState(),
+                                        webBundle.getLevel(),
+                                        webBundle.getContextPath(),
+                                        webBundle.getName()
+                                    });
                     table.put(data);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -112,5 +135,4 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
             throw new MBeanException(null, e.toString());
         }
     }
-
 }

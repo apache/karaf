@@ -28,8 +28,7 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Command(scope = "booking", name = "list", description = "List the current bookings")
 public class ListCommand implements Action {
 
-    @Reference
-    private BookingService bookingService;
+    @Reference private BookingService bookingService;
 
     @Override
     public Object execute() throws Exception {
@@ -43,5 +42,4 @@ public class ListCommand implements Action {
         table.print(System.out);
         return null;
     }
-
 }

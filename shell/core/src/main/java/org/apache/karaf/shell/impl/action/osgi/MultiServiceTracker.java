@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -33,8 +32,8 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Track multiple service by its type.
- * When tracking multiple services, the dependency is always considered optional.
+ * Track multiple service by its type. When tracking multiple services, the dependency is always
+ * considered optional.
  *
  * @param <T> the service type (interface)..
  */
@@ -45,16 +44,17 @@ public abstract class MultiServiceTracker<T> {
     private final Map<ServiceReference<T>, T> refs = new HashMap<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
 
-    private final ServiceListener listener = event -> {
-        if (open.get()) {
-            if (event.getType() == ServiceEvent.UNREGISTERING) {
-                removeRef((ServiceReference<T>) event.getServiceReference());
-            } else if (event.getType() == ServiceEvent.REGISTERED) {
-                addRef((ServiceReference<T>) event.getServiceReference());
-            }
-            updateState();
-        }
-    };
+    private final ServiceListener listener =
+            event -> {
+                if (open.get()) {
+                    if (event.getType() == ServiceEvent.UNREGISTERING) {
+                        removeRef((ServiceReference<T>) event.getServiceReference());
+                    } else if (event.getType() == ServiceEvent.REGISTERED) {
+                        addRef((ServiceReference<T>) event.getServiceReference());
+                    }
+                    updateState();
+                }
+            };
 
     public MultiServiceTracker(BundleContext context, Class<T> clazz) {
         ctx = context;
@@ -124,5 +124,4 @@ public abstract class MultiServiceTracker<T> {
         }
         ctx.ungetService(ref);
     }
-
 }

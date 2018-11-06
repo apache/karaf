@@ -27,7 +27,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class DeleteCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The JDBC datasource name (the one used at creation time)", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The JDBC datasource name (the one used at creation time)",
+            required = true,
+            multiValued = false)
     @Completion(DataSourcesFileNameCompleter.class)
     String name;
 
@@ -36,5 +41,4 @@ public class DeleteCommand extends JdbcCommandSupport {
         this.getJdbcService().delete(name);
         return null;
     }
-
 }

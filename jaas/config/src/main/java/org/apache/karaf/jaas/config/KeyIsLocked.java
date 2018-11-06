@@ -35,5 +35,4 @@ public class KeyIsLocked extends GeneralSecurityException {
     public KeyIsLocked(Throwable cause) {
         super(cause);
     }
-
 }

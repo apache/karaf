@@ -17,17 +17,16 @@
 package org.apache.karaf.scheduler;
 
 /**
- * A job is executed by the {@link Scheduler} service.
- * If the implementation of the job requires certain environment information
- * it can implement this interface to get additional information
- * through the provided {@link JobContext}.
- * If no additional information is required, implementing {@link Runnable} is
- * sufficient.
+ * A job is executed by the {@link Scheduler} service. If the implementation of the job requires
+ * certain environment information it can implement this interface to get additional information
+ * through the provided {@link JobContext}. If no additional information is required, implementing
+ * {@link Runnable} is sufficient.
  */
 public interface Job {
 
     /**
      * Execute this job.
+     *
      * @param context The context of the job.
      */
     void execute(JobContext context);

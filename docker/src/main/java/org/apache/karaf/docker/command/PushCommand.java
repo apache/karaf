@@ -23,18 +23,31 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "docker", name = "push", description = "Push an image or a repository to a registry")
+@Command(
+        scope = "docker",
+        name = "push",
+        description = "Push an image or a repository to a registry")
 @Service
 public class PushCommand extends DockerCommandSupport {
 
-    @Argument(index = 0, name = "image", description = "Name or ID of the image", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "image",
+            description = "Name or ID of the image",
+            required = true,
+            multiValued = false)
     @Completion(ImagesRepoTagsCompleter.class)
     String image;
 
-    @Option(name = "--tag", description = "Push tag",  required = false, multiValued = false)
+    @Option(name = "--tag", description = "Push tag", required = false, multiValued = false)
     String tag = "latest";
 
-    @Option(name = "-v", aliases = "--verbose", description = "Display push progress on console", required = false, multiValued = false)
+    @Option(
+            name = "-v",
+            aliases = "--verbose",
+            description = "Display push progress on console",
+            required = false,
+            multiValued = false)
     boolean verbose;
 
     @Override
@@ -42,5 +55,4 @@ public class PushCommand extends DockerCommandSupport {
         getDockerService().push(image, tag, verbose, url);
         return null;
     }
-
 }

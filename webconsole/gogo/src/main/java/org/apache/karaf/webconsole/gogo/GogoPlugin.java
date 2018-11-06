@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-/**
- * Based on http://antony.lesuisse.org/software/ajaxterm/
- *  Public Domain License
- */
+/** Based on http://antony.lesuisse.org/software/ajaxterm/ Public Domain License */
 package org.apache.karaf.webconsole.gogo;
 
 import java.io.ByteArrayInputStream;
@@ -35,12 +32,10 @@ import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.zip.GZIPOutputStream;
-
 import javax.security.auth.Subject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.api.console.Session;
@@ -49,9 +44,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * WebConsole plugin for {@link Session}.
- */
+/** WebConsole plugin for {@link Session}. */
 public class GogoPlugin extends AbstractWebConsolePlugin {
 
     private final Logger logger = LoggerFactory.getLogger(GogoPlugin.class);
@@ -98,15 +91,27 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void renderContent(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         PrintWriter pw = response.getWriter();
 
         String appRoot = request.getContextPath() + request.getServletPath();
-        pw.println("<link href=\"" + appRoot + "/gogo/res/ui/gogo.css\" rel=\"stylesheet\" type=\"text/css\" />");
-        pw.println("<script src=\"" + appRoot + "/gogo/res/ui/gogo.js\" type=\"text/javascript\"></script>");
+        pw.println(
+                "<link href=\""
+                        + appRoot
+                        + "/gogo/res/ui/gogo.css\" rel=\"stylesheet\" type=\"text/css\" />");
+        pw.println(
+                "<script src=\""
+                        + appRoot
+                        + "/gogo/res/ui/gogo.js\" type=\"text/javascript\"></script>");
         pw.println("<div id='console'><div id='term'></div></div>");
         pw.println("<script type=\"text/javascript\"><!--");
-        pw.println("window.onload = function() { gogo.Terminal(document.getElementById(\"term\"), " + TERM_WIDTH + ", " + TERM_HEIGHT + "); }");
+        pw.println(
+                "window.onload = function() { gogo.Terminal(document.getElementById(\"term\"), "
+                        + TERM_WIDTH
+                        + ", "
+                        + TERM_HEIGHT
+                        + "); }");
         pw.println("--></script>");
     }
 
@@ -141,7 +146,8 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         String encoding = request.getHeader("Accept-Encoding");
         boolean supportsGzip = (encoding != null && encoding.toLowerCase().indexOf("gzip") > -1);
         SessionTerminal st = (SessionTerminal) request.getSession(true).getAttribute("terminal");
@@ -187,14 +193,15 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 InputStream input = new PipedInputStream(in);
                 OutputStream output = new PipedOutputStream(out);
                 PrintStream pipedOut = new PrintStream(output, true);
-                
-                Session session = sessionFactory.create(
-                        input,
-                        pipedOut,
-                        pipedOut,
-                        new WebTerminal(TERM_WIDTH, TERM_HEIGHT, input, pipedOut),
-                        null,
-                        null);
+
+                Session session =
+                        sessionFactory.create(
+                                input,
+                                pipedOut,
+                                pipedOut,
+                                new WebTerminal(TERM_WIDTH, TERM_HEIGHT, input, pipedOut),
+                                null,
+                                null);
                 new Thread(session, "Karaf web console user " + getCurrentUserName()).start();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -205,7 +212,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
             }
             new Thread(this).start();
         }
-        
+
         private String getCurrentUserName() {
             AccessControlContext acc = AccessController.getContext();
             final Subject subject = Subject.getSubject(acc);
@@ -245,7 +252,8 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 for (; ; ) {
                     byte[] buf = new byte[8192];
                     int l = out.read(buf);
-                    InputStreamReader r = new InputStreamReader(new ByteArrayInputStream(buf, 0, l));
+                    InputStreamReader r =
+                            new InputStreamReader(new ByteArrayInputStream(buf, 0, l));
                     StringBuilder sb = new StringBuilder();
                     for (; ; ) {
                         int c = r.read();
@@ -269,7 +277,5 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 e.printStackTrace();
             }
         }
-
     }
-
 }

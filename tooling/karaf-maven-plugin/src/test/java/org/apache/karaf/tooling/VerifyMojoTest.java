@@ -18,20 +18,19 @@
  */
 package org.apache.karaf.tooling;
 
-import org.apache.karaf.tooling.VerifyMojo;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 public class VerifyMojoTest {
 
     @Test
     public void testFeaturePattern() {
-        Pattern pattern = VerifyMojo.getPattern(Arrays.asList("foobiz", "!foo*", "bar", "!ba*", "*"));
+        Pattern pattern =
+                VerifyMojo.getPattern(Arrays.asList("foobiz", "!foo*", "bar", "!ba*", "*"));
         assertTrue(pattern.matcher("foobiz/1.0").matches());
         assertFalse(pattern.matcher("foobaz/1.0").matches());
         assertTrue(pattern.matcher("bar/1.0").matches());
@@ -41,5 +40,4 @@ public class VerifyMojoTest {
         pattern = VerifyMojo.getPattern(Arrays.asList("!hibernate", " *"));
         assertTrue(pattern.matcher("framework/4.2.0.SNAPSHOT").matches());
     }
-
 }

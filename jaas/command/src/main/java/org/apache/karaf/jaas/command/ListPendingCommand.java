@@ -16,16 +16,17 @@
 package org.apache.karaf.jaas.command;
 
 import java.util.Queue;
-
 import javax.security.auth.login.AppConfigurationEntry;
-
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-@Command(scope = "jaas", name = "pending-list", description = "List the pending modification on the active JAAS Realm/Login Module")
+@Command(
+        scope = "jaas",
+        name = "pending-list",
+        description = "List the pending modification on the active JAAS Realm/Login Module")
 @Service
 public class ListPendingCommand extends JaasCommandSupport {
 
@@ -38,7 +39,9 @@ public class ListPendingCommand extends JaasCommandSupport {
 
         if (realm != null && entry != null) {
             String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-            System.out.println(String.format("JAAS Realm %s/JAAS Login Module %s", realm.getName(), moduleClass));
+            System.out.println(
+                    String.format(
+                            "JAAS Realm %s/JAAS Login Module %s", realm.getName(), moduleClass));
 
             if (commandQueue != null && !commandQueue.isEmpty()) {
                 for (JaasCommandSupport command : commandQueue) {

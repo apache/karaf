@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.Map;
-
 import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.sshd.common.channel.PtyMode;
@@ -40,12 +39,14 @@ public class SshTerminal extends ExternalTerminal implements Terminal {
 
     private Environment environment;
 
-    public SshTerminal(Environment environment, InputStream input, OutputStream output) throws IOException {
-        super("Karaf SSH terminal",
-              environment.getEnv().get(Environment.ENV_TERM),
-              input,
-              output,
-              StandardCharsets.UTF_8);
+    public SshTerminal(Environment environment, InputStream input, OutputStream output)
+            throws IOException {
+        super(
+                "Karaf SSH terminal",
+                environment.getEnv().get(Environment.ENV_TERM),
+                input,
+                output,
+                StandardCharsets.UTF_8);
         this.environment = environment;
         this.environment.addSignalListener(this::handleSignal);
         for (Map.Entry<PtyMode, Integer> e : environment.getPtyModes().entrySet()) {
@@ -168,12 +169,14 @@ public class SshTerminal extends ExternalTerminal implements Terminal {
     }
 
     @Override
-    public void addSignalListener(SignalListener listener, org.apache.karaf.shell.api.console.Signal... signal) {
+    public void addSignalListener(
+            SignalListener listener, org.apache.karaf.shell.api.console.Signal... signal) {
         // TODO:JLINE
     }
 
     @Override
-    public void addSignalListener(SignalListener listener, EnumSet<org.apache.karaf.shell.api.console.Signal> signals) {
+    public void addSignalListener(
+            SignalListener listener, EnumSet<org.apache.karaf.shell.api.console.Signal> signals) {
         // TODO:JLINE
     }
 
@@ -196,5 +199,4 @@ public class SshTerminal extends ExternalTerminal implements Terminal {
     public void setEchoEnabled(boolean enabled) {
         echo(enabled);
     }
-
 }

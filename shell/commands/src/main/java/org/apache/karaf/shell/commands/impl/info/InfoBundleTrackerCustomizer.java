@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.shell.commands.impl.info;
 
+import java.util.Dictionary;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -24,23 +27,14 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Dictionary;
-import java.util.Properties;
-import java.util.StringTokenizer;
+/** Bundle tracker which check manifest headers for information. */
+public class InfoBundleTrackerCustomizer
+        implements BundleTrackerCustomizer<ServiceRegistration<InfoProvider>> {
 
-/**
- * Bundle tracker which check manifest headers for information.
- */
-public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer<ServiceRegistration<InfoProvider>> {
-
-    /**
-     * Logger.
-     */
+    /** Logger. */
     private Logger logger = LoggerFactory.getLogger(InfoBundleTrackerCustomizer.class);
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public ServiceRegistration<InfoProvider> addingBundle(Bundle bundle, BundleEvent event) {
         Dictionary headers = bundle.getHeaders();
         String headerEntry = (String) headers.get("Karaf-Info");
@@ -48,19 +42,21 @@ public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer<Serv
         InfoProvider provider = createInfo(headerEntry);
         if (provider == null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Ignore incorrect info {} provided by bundle {}",
-                        headerEntry, bundle.getSymbolicName());
+                logger.debug(
+                        "Ignore incorrect info {} provided by bundle {}",
+                        headerEntry,
+                        bundle.getSymbolicName());
             }
             return null;
         }
-        return bundle.getBundleContext().registerService(InfoProvider.class,
-                provider, null);
+        return bundle.getBundleContext().registerService(InfoProvider.class, provider, null);
     }
 
-    public void modifiedBundle(Bundle bundle, BundleEvent event, ServiceRegistration<InfoProvider> object) {
-    }
+    public void modifiedBundle(
+            Bundle bundle, BundleEvent event, ServiceRegistration<InfoProvider> object) {}
 
-    public void removedBundle(Bundle bundle, BundleEvent event, ServiceRegistration<InfoProvider> object) {
+    public void removedBundle(
+            Bundle bundle, BundleEvent event, ServiceRegistration<InfoProvider> object) {
         object.unregister();
     }
 
@@ -90,5 +86,4 @@ public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer<Serv
 
         return new PojoInfoProvider(name, properties);
     }
-
 }

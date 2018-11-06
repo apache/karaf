@@ -23,13 +23,8 @@ import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 
 @Services(
-        provides = {
-                @ProvideService(BookingMBean.class)
-        },
-        requires = {
-                @RequireService(BookingService.class)
-        }
-)
+        provides = {@ProvideService(BookingMBean.class)},
+        requires = {@RequireService(BookingService.class)})
 public class Activator extends BaseActivator {
 
     @Override

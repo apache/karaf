@@ -19,13 +19,13 @@ package org.apache.karaf.shell.commands;
 import java.util.Properties;
 
 /**
- * A bundle can publish a service with this interface to offer some informations for the shell:info command
+ * A bundle can publish a service with this interface to offer some informations for the shell:info
+ * command
  */
 @Deprecated
 public interface InfoProvider {
 
-	String getName();
+    String getName();
 
-	Properties getProperties();
-
+    Properties getProperties();
 }

@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.util.Dictionary;
 import java.util.Enumeration;
-
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 import org.apache.karaf.util.StreamUtils;
@@ -29,10 +28,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-/**
- * Dump provider which copies log files from data/log directory to
- * destination.
- */
+/** Dump provider which copies log files from data/log directory to destination. */
 public class LogDumpProvider implements DumpProvider {
 
     private final BundleContext bundleContext;
@@ -41,12 +37,11 @@ public class LogDumpProvider implements DumpProvider {
         this.bundleContext = bundleContext;
     }
 
-    /**
-     * Attach log entries from directory.
-     */
+    /** Attach log entries from directory. */
     public void createDump(DumpDestination destination) throws Exception {
         // get the ConfigAdmin service
-        ServiceReference ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+        ServiceReference ref =
+                bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
         if (ref == null) {
             return;
         }
@@ -54,7 +49,8 @@ public class LogDumpProvider implements DumpProvider {
         // get the PAX Logging configuration
         ConfigurationAdmin configurationAdmin = (ConfigurationAdmin) bundleContext.getService(ref);
         try {
-            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.logging", null);
+            Configuration configuration =
+                    configurationAdmin.getConfiguration("org.ops4j.pax.logging", null);
 
             // get the ".file" Pax Logging properties
             Dictionary dictionary = configuration.getProperties();
@@ -77,5 +73,4 @@ public class LogDumpProvider implements DumpProvider {
             bundleContext.ungetService(ref);
         }
     }
-
 }

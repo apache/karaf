@@ -13,14 +13,11 @@
  */
 package org.apache.karaf.itests;
 
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
-
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import org.apache.karaf.features.FeaturesService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,14 +26,12 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class JmsTest extends KarafTestSupport {
 
-    private static final EnumSet<FeaturesService.Option> NO_AUTO_REFRESH = EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles);
+    private static final EnumSet<FeaturesService.Option> NO_AUTO_REFRESH =
+            EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles);
 
     @Test(timeout = 60000)
     public void testCommands() throws Exception {
@@ -113,29 +108,65 @@ public class JmsTest extends KarafTestSupport {
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName objectName = new ObjectName("org.apache.karaf:type=jms,name=root");
 
-        mBeanServer.invoke(objectName, "create",
-                new String[]{ "testMBean", "activemq", "tcp://localhost:61616", "karaf", "karaf", "transx" },
-                new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
+        mBeanServer.invoke(
+                objectName,
+                "create",
+                new String[] {
+                    "testMBean", "activemq", "tcp://localhost:61616", "karaf", "karaf", "transx"
+                },
+                new String[] {
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String"
+                });
 
         Thread.sleep(2000);
 
-        mBeanServer.invoke(objectName, "send",
-                new String[]{ "jms/testMBean", "queueMBean", "message", null, "karaf", "karaf"},
-                new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
+        mBeanServer.invoke(
+                objectName,
+                "send",
+                new String[] {"jms/testMBean", "queueMBean", "message", null, "karaf", "karaf"},
+                new String[] {
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String",
+                    "java.lang.String"
+                });
 
-        Integer count = (Integer) mBeanServer.invoke(objectName, "count",
-                new String[]{ "jms/testMBean", "queueMBean", "karaf", "karaf"},
-                new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
+        Integer count =
+                (Integer)
+                        mBeanServer.invoke(
+                                objectName,
+                                "count",
+                                new String[] {"jms/testMBean", "queueMBean", "karaf", "karaf"},
+                                new String[] {
+                                    "java.lang.String",
+                                    "java.lang.String",
+                                    "java.lang.String",
+                                    "java.lang.String"
+                                });
         Assert.assertEquals((Integer) 1, count);
 
-        List<String> queues = (List<String>) mBeanServer.invoke(objectName, "queues",
-                new String[]{ "jms/testMBean", "karaf", "karaf"},
-                new String[]{ "java.lang.String", "java.lang.String", "java.lang.String" });
+        List<String> queues =
+                (List<String>)
+                        mBeanServer.invoke(
+                                objectName,
+                                "queues",
+                                new String[] {"jms/testMBean", "karaf", "karaf"},
+                                new String[] {
+                                    "java.lang.String", "java.lang.String", "java.lang.String"
+                                });
         Assert.assertTrue(queues.contains("queueMBean"));
 
-        mBeanServer.invoke(objectName, "delete",
-                new String[]{ "testMBean"},
-                new String[]{ "java.lang.String"});
+        mBeanServer.invoke(
+                objectName,
+                "delete",
+                new String[] {"testMBean"},
+                new String[] {"java.lang.String"});
     }
-
 }

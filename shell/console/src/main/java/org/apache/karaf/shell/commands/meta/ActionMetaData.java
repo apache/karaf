@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.felix.gogo.commands.Action;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
@@ -53,8 +52,13 @@ public class ActionMetaData {
     List<Argument> orderedArguments;
     private final Completer[] completers;
 
-    public ActionMetaData(Class<? extends Action> actionClass, Command command, Map<Option, Field> options, Map<Argument, Field> args,
-            List<Argument> orderedArguments, Completer[] completers) {
+    public ActionMetaData(
+            Class<? extends Action> actionClass,
+            Command command,
+            Map<Option, Field> options,
+            Map<Argument, Field> args,
+            List<Argument> orderedArguments,
+            Completer[] completers) {
         super();
         this.actionClass = actionClass;
         this.command = command;
@@ -67,7 +71,7 @@ public class ActionMetaData {
     public Class<? extends Action> getActionClass() {
         return actionClass;
     }
-    
+
     public Command getCommand() {
         return command;
     }
@@ -101,7 +105,12 @@ public class ActionMetaData {
                     if (globalScope) {
                         out.println(INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
                     } else {
-                        out.println(command.scope() + ":" + INTENSITY_BOLD + command.name() + INTENSITY_NORMAL);
+                        out.println(
+                                command.scope()
+                                        + ":"
+                                        + INTENSITY_BOLD
+                                        + command.name()
+                                        + INTENSITY_NORMAL);
                     }
                     out.println();
                 }
@@ -140,9 +149,11 @@ public class ActionMetaData {
                 for (Argument argument : argumentsSet) {
                     out.print("        ");
                     out.println(INTENSITY_BOLD + argument.name() + INTENSITY_NORMAL);
-                    ActionMetaData.printFormatted("                ", argument.description(), termWidth, out, true);
+                    ActionMetaData.printFormatted(
+                            "                ", argument.description(), termWidth, out, true);
                     if (!argument.required()) {
-                        if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
+                        if (argument.valueToShowInHelp() != null
+                                && argument.valueToShowInHelp().length() != 0) {
                             if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
                                 Object o = getDefaultValue(action, argument);
                                 String defaultValue = getDefaultValueString(o);
@@ -166,8 +177,10 @@ public class ActionMetaData {
                     }
                     out.print("        ");
                     out.println(INTENSITY_BOLD + opt + INTENSITY_NORMAL);
-                    ActionMetaData.printFormatted("                ", option.description(), termWidth, out, true);
-                    if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
+                    ActionMetaData.printFormatted(
+                            "                ", option.description(), termWidth, out, true);
+                    if (option.valueToShowInHelp() != null
+                            && option.valueToShowInHelp().length() != 0) {
                         if (Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
                             Object o = getDefaultValue(action, option);
                             String defaultValue = getDefaultValueString(o);
@@ -188,7 +201,7 @@ public class ActionMetaData {
             }
         }
     }
-    
+
     public Object getDefaultValue(Action action, Argument argument) {
         try {
             arguments.get(argument).setAccessible(true);
@@ -197,7 +210,7 @@ public class ActionMetaData {
             return null;
         }
     }
-    
+
     public Object getDefaultValue(Action action, Option option) {
         try {
             options.get(option).setAccessible(true);
@@ -206,22 +219,23 @@ public class ActionMetaData {
             return null;
         }
     }
-    
+
     public String getDetailedDescription() {
         String desc = command.detailedDescription();
         return loadDescription(actionClass, desc);
     }
-    
+
     private String loadDescription(Class<?> clazz, String desc) {
         if (desc != null && desc.startsWith("classpath:")) {
             desc = loadClassPathResource(clazz, desc.substring("classpath:".length()));
         }
         return desc;
     }
-    
+
     public String getDefaultValueString(Object o) {
-        if (o != null && (!(o instanceof Boolean) || ((Boolean)o))
-            && (!(o instanceof Number) || ((Number)o).doubleValue() != 0.0)) {
+        if (o != null
+                && (!(o instanceof Boolean) || ((Boolean) o))
+                && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
             return o.toString();
         } else {
             return null;
@@ -232,7 +246,8 @@ public class ActionMetaData {
         out.println("                (defaults to " + value + ")");
     }
 
-    static void printFormatted(String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
+    static void printFormatted(
+            String prefix, String str, int termWidth, PrintStream out, boolean prefixFirstLine) {
         int pfxLen = prefix.length();
         int maxwidth = termWidth - pfxLen;
         Pattern wrap = Pattern.compile("(\\S\\S{" + maxwidth + ",}|.{1," + maxwidth + "})(\\s+|$)");
@@ -267,7 +282,7 @@ public class ActionMetaData {
         if (is == null) {
             return "Unable to load description from " + path;
         }
-    
+
         try {
             Reader r = new InputStreamReader(is);
             StringWriter sw = new StringWriter();
@@ -286,5 +301,4 @@ public class ActionMetaData {
             }
         }
     }
-
 }

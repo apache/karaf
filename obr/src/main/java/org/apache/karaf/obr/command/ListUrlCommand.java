@@ -23,11 +23,18 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "obr", name = "url-list", description = "Displays the repository URLs currently associated with the OBR service.")
+@Command(
+        scope = "obr",
+        name = "url-list",
+        description = "Displays the repository URLs currently associated with the OBR service.")
 @Service
 public class ListUrlCommand extends ObrCommandSupport {
 
-    @Option(name = "--no-format", description = "Disable table rendered output", required = false, multiValued = false)
+    @Option(
+            name = "--no-format",
+            description = "Disable table rendered output",
+            required = false,
+            multiValued = false)
     boolean noFormat;
 
     protected void doExecute(RepositoryAdmin admin) {
@@ -46,5 +53,4 @@ public class ListUrlCommand extends ObrCommandSupport {
 
         table.print(System.out, !noFormat);
     }
-
 }

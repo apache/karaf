@@ -18,7 +18,6 @@ package org.apache.karaf.service.core.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -31,15 +30,12 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-
 import org.apache.karaf.service.core.ServicesMBean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-/**
- * Implementation of the Services MBean.
- */
+/** Implementation of the Services MBean. */
 public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
 
     private BundleContext bundleContext;
@@ -74,17 +70,29 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
 
     public TabularData getServices(long bundleId, boolean inUse) throws MBeanException {
         try {
-            CompositeType serviceType = new CompositeType("Service", "OSGi Service",
-                    new String[]{"Interfaces", "Properties"},
-                    new String[]{"Interfaces class name of the service", "Properties of the service"},
-                    new OpenType[]{new ArrayType(1, SimpleType.STRING), new ArrayType(1, SimpleType.STRING)});
-            TabularType tableType = new TabularType("Services", "Table of OSGi Services", serviceType,
-                    new String[]{"Interfaces", "Properties"});
+            CompositeType serviceType =
+                    new CompositeType(
+                            "Service",
+                            "OSGi Service",
+                            new String[] {"Interfaces", "Properties"},
+                            new String[] {
+                                "Interfaces class name of the service", "Properties of the service"
+                            },
+                            new OpenType[] {
+                                new ArrayType(1, SimpleType.STRING),
+                                new ArrayType(1, SimpleType.STRING)
+                            });
+            TabularType tableType =
+                    new TabularType(
+                            "Services",
+                            "Table of OSGi Services",
+                            serviceType,
+                            new String[] {"Interfaces", "Properties"});
             TabularData table = new TabularDataSupport(tableType);
 
             Bundle[] bundles;
             if (bundleId >= 0) {
-                bundles = new Bundle[]{bundleContext.getBundle(bundleId)};
+                bundles = new Bundle[] {bundleContext.getBundle(bundleId)};
             } else {
                 bundles = bundleContext.getBundles();
             }
@@ -103,9 +111,13 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
                             for (String key : reference.getPropertyKeys()) {
                                 properties.add(key + " = " + reference.getProperty(key));
                             }
-                            CompositeData data = new CompositeDataSupport(serviceType,
-                                    new String[]{"Interfaces", "Properties"},
-                                    new Object[]{interfaces, properties.toArray(new String[0])});
+                            CompositeData data =
+                                    new CompositeDataSupport(
+                                            serviceType,
+                                            new String[] {"Interfaces", "Properties"},
+                                            new Object[] {
+                                                interfaces, properties.toArray(new String[0])
+                                            });
                             table.put(data);
                         }
                     }
@@ -126,5 +138,4 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
-
 }

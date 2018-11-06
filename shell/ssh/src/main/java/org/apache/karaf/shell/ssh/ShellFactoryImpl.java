@@ -25,9 +25,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Map;
-
 import javax.security.auth.Subject;
-
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.ShellUtil;
@@ -39,10 +37,7 @@ import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SessionAware;
 import org.apache.sshd.server.session.ServerSession;
 
-/**
- * SSHD {@link org.apache.sshd.server.Command} factory which provides access to
- * Shell.
- */
+/** SSHD {@link org.apache.sshd.server.Command} factory which provides access to Shell. */
 public class ShellFactoryImpl implements Factory<Command> {
     private SessionFactory sessionFactory;
 
@@ -93,20 +88,30 @@ public class ShellFactoryImpl implements Factory<Command> {
 
         public void start(final Environment env) throws IOException {
             try {
-                final Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session
-                        .getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                final Subject subject =
+                        ShellImpl.this.session != null
+                                ? ShellImpl.this.session.getAttribute(
+                                        KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY)
+                                : null;
                 String encoding = getEncoding(env);
                 terminal = new SshTerminal(env, in, out);
                 final PrintStream pout = new PrintStream(terminal.output(), true, encoding);
-                final PrintStream perr = err instanceof PrintStream ?
-                        (PrintStream) err : out == err ? pout : new PrintStream(err, true, encoding);
-                shell = sessionFactory.create(in, pout,
-                        perr, terminal, encoding, this::destroy);
+                final PrintStream perr =
+                        err instanceof PrintStream
+                                ? (PrintStream) err
+                                : out == err ? pout : new PrintStream(err, true, encoding);
+                shell = sessionFactory.create(in, pout, perr, terminal, encoding, this::destroy);
                 for (Map.Entry<String, String> e : env.getEnv().entrySet()) {
                     shell.put(e.getKey(), e.getValue());
                 }
-                JaasHelper.runAs(subject, () ->
-                    new Thread(shell, "Karaf ssh console user " + ShellUtil.getCurrentUserName()).start());
+                JaasHelper.runAs(
+                        subject,
+                        () ->
+                                new Thread(
+                                                shell,
+                                                "Karaf ssh console user "
+                                                        + ShellUtil.getCurrentUserName())
+                                        .start());
             } catch (Exception e) {
                 throw new IOException("Unable to start shell", e);
             }
@@ -120,12 +125,11 @@ public class ShellFactoryImpl implements Factory<Command> {
                 callback.onExit(0);
             }
         }
-
     }
 
     /**
-     * Get the default encoding.  Will first look at the LC_CTYPE environment variable, then the input.encoding
-     * system property, then the default charset according to the JVM.
+     * Get the default encoding. Will first look at the LC_CTYPE environment variable, then the
+     * input.encoding system property, then the default charset according to the JVM.
      *
      * @return The default encoding to use when none is specified.
      */
@@ -140,8 +144,9 @@ public class ShellFactoryImpl implements Factory<Command> {
     }
 
     /**
-     * Parses the LC_CTYPE value to extract the encoding according to the POSIX standard, which says that the LC_CTYPE
-     * environment variable may be of the format <code>[language[_territory][.codeset][@modifier]]</code>
+     * Parses the LC_CTYPE value to extract the encoding according to the POSIX standard, which says
+     * that the LC_CTYPE environment variable may be of the format <code>
+     * [language[_territory][.codeset][@modifier]]</code>
      *
      * @param ctype The ctype to parse, may be null
      * @return The encoding, if one was present, otherwise null
@@ -177,5 +182,4 @@ public class ShellFactoryImpl implements Factory<Command> {
             }
         }
     }
-
 }

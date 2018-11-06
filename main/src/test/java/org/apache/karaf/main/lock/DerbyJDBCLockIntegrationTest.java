@@ -21,11 +21,9 @@ package org.apache.karaf.main.lock;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.felix.utils.properties.Properties;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 
 @Ignore
 public class DerbyJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
@@ -36,15 +34,15 @@ public class DerbyJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
         password = "root";
         driver = "org.apache.derby.jdbc.ClientDriver";
         url = "jdbc:derby://127.0.0.1:1527/test";
-        
+
         super.setUp();
     }
-    
+
     @Override
     DefaultJDBCLock createLock(Properties props) {
         return new DerbyJDBCLock(props);
     }
-    
+
     @Test
     public void initShouldCreateTheDatabaseIfItNotExists() throws Exception {
         String database = "test" + System.currentTimeMillis();
@@ -52,7 +50,7 @@ public class DerbyJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
         props.put("karaf.lock.jdbc.url", url);
         lock = createLock(props);
         lock.lock();
-        
+
         assertTrue(lock.lockConnection.getMetaData().getURL().contains(database));
     }
 }

@@ -14,10 +14,8 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.KarafTestSupport;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -45,7 +43,7 @@ public class StandardFeaturesTest extends KarafTestSupport {
         assertFeatureInstalled("service");
         assertFeatureInstalled("system");
     }
-	
+
     @Test
     public void installFrameworkSecurityFeature() throws Exception {
         installAssertAndUninstallFeatures("framework-security");
@@ -60,12 +58,12 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void installAriesBlueprintWebFeature() throws Exception {
         installAssertAndUninstallFeatures("blueprint-web");
     }
-    
+
     @Test
     public void installWrapperFeature() throws Exception {
         installAssertAndUninstallFeatures("wrapper");
     }
-    
+
     @Test
     public void installObrFeature() throws Exception {
         installAssertAndUninstallFeatures("obr");
@@ -95,7 +93,7 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void installWebConsoleFeature() throws Exception {
         installAssertAndUninstallFeatures("webconsole");
     }
-    
+
     @Test
     public void installSchedulerFeature() throws Exception {
         installAssertAndUninstallFeatures("scheduler");
@@ -120,5 +118,4 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void installJolokiaFeature() throws Exception {
         installAssertAndUninstallFeatures("jolokia");
     }
-
 }

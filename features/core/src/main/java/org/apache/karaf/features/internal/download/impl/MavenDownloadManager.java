@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
@@ -51,8 +50,11 @@ public class MavenDownloadManager implements DownloadManager {
 
     private volatile int allPending = 0;
 
-    public MavenDownloadManager(MavenResolver mavenResolver, ScheduledExecutorService executorService,
-                                long scheduleDelay, int scheduleMaxRun) {
+    public MavenDownloadManager(
+            MavenResolver mavenResolver,
+            ScheduledExecutorService executorService,
+            long scheduleDelay,
+            int scheduleMaxRun) {
         this.mavenResolver = mavenResolver;
         this.executorService = executorService;
         this.scheduleDelay = scheduleDelay;
@@ -72,9 +74,7 @@ public class MavenDownloadManager implements DownloadManager {
         return new MavenDownloader();
     }
 
-    @SuppressWarnings({
-     "unchecked", "rawtypes"
-    })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Map<String, StreamProvider> getProviders() {
         return (Map) Collections.synchronizedMap(downloaded);
@@ -105,7 +105,8 @@ public class MavenDownloadManager implements DownloadManager {
         }
 
         @Override
-        public void download(final String location, final DownloadCallback downloadCallback) throws MalformedURLException {
+        public void download(final String location, final DownloadCallback downloadCallback)
+                throws MalformedURLException {
             AbstractDownloadTask task;
             synchronized (lock) {
                 task = downloaded.get(location);
@@ -131,27 +132,28 @@ public class MavenDownloadManager implements DownloadManager {
                 allPending++;
             }
             final AbstractDownloadTask downloadTask = task;
-            task.addListener(future -> {
-                try {
-                    // Call the callback
-                    if (downloadCallback != null) {
-                        downloadCallback.downloaded(downloadTask);
-                    }
-                    // Make sure we log any download error if the callback suppressed it
-                    downloadTask.getFile();
-                } catch (Throwable e) {
-                    exception.addSuppressed(e);
-                } finally {
-                    synchronized (lock) {
-                        downloading.remove(location);
-                        downloaded.put(location, downloadTask);
-                        --allPending;
-                        if (--pending == 0) {
-                            lock.notifyAll();
+            task.addListener(
+                    future -> {
+                        try {
+                            // Call the callback
+                            if (downloadCallback != null) {
+                                downloadCallback.downloaded(downloadTask);
+                            }
+                            // Make sure we log any download error if the callback suppressed it
+                            downloadTask.getFile();
+                        } catch (Throwable e) {
+                            exception.addSuppressed(e);
+                        } finally {
+                            synchronized (lock) {
+                                downloading.remove(location);
+                                downloaded.put(location, downloadTask);
+                                --allPending;
+                                if (--pending == 0) {
+                                    lock.notifyAll();
+                                }
+                            }
                         }
-                    }
-                }
-            });
+                    });
         }
 
         protected AbstractDownloadTask createDownloadTask(String url) {
@@ -185,7 +187,8 @@ public class MavenDownloadManager implements DownloadManager {
 
             private String innerUrl;
 
-            public ChainedDownloadTask(ScheduledExecutorService executorService, String url, String innerUrl) {
+            public ChainedDownloadTask(
+                    ScheduledExecutorService executorService, String url, String innerUrl) {
                 super(executorService, url);
                 this.innerUrl = innerUrl;
             }
@@ -193,39 +196,40 @@ public class MavenDownloadManager implements DownloadManager {
             @Override
             public void run() {
                 try {
-                    MavenDownloader.this.download(innerUrl, provider -> {
-                        try {
-                            AbstractDownloadTask future = (AbstractDownloadTask) provider;
-                            String file = future.getFile().toURI().toURL().toExternalForm();
-                            String real = url.replace(innerUrl, file);
-                            MavenDownloader.this.download(real, provider1 -> {
+                    MavenDownloader.this.download(
+                            innerUrl,
+                            provider -> {
                                 try {
-                                    setFile(provider1.getFile());
+                                    AbstractDownloadTask future = (AbstractDownloadTask) provider;
+                                    String file = future.getFile().toURI().toURL().toExternalForm();
+                                    String real = url.replace(innerUrl, file);
+                                    MavenDownloader.this.download(
+                                            real,
+                                            provider1 -> {
+                                                try {
+                                                    setFile(provider1.getFile());
+                                                } catch (IOException e) {
+                                                    setException(e);
+                                                } catch (Throwable t) {
+                                                    setException(new IOException(t));
+                                                }
+                                            });
                                 } catch (IOException e) {
                                     setException(e);
                                 } catch (Throwable t) {
                                     setException(new IOException(t));
                                 }
                             });
-                        } catch (IOException e) {
-                            setException(e);
-                        } catch (Throwable t) {
-                            setException(new IOException(t));
-                        }
-                    });
                 } catch (IOException e) {
                     setException(e);
                 } catch (Throwable t) {
                     setException(new IOException(t));
                 }
             }
-
         }
-
     }
 
     protected AbstractDownloadTask createCustomDownloadTask(final String url) {
         return new SimpleDownloadTask(executorService, url, tmpPath);
     }
-
 }

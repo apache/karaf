@@ -15,8 +15,8 @@
  */
 package org.apache.karaf.scheduler.command;
 
-import org.apache.karaf.scheduler.command.support.TriggerJob;
 import org.apache.karaf.scheduler.Scheduler;
+import org.apache.karaf.scheduler.command.support.TriggerJob;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -31,11 +31,14 @@ public class Trigger implements Action {
     @Argument(description = "Name of the job to trigger", required = true)
     String name;
 
-    @Option(name = "-b", aliases = "background", description = "schedule the trigger in the background", required = false)
+    @Option(
+            name = "-b",
+            aliases = "background",
+            description = "schedule the trigger in the background",
+            required = false)
     boolean background = false;
 
-    @Reference
-    Scheduler scheduler;
+    @Reference Scheduler scheduler;
 
     @Override
     public Object execute() throws Exception {
@@ -50,6 +53,4 @@ public class Trigger implements Action {
         }
         return null;
     }
-
-
 }

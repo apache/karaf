@@ -16,13 +16,10 @@
  */
 package org.apache.karaf.scr.examples.managed.service;
 
-/**
- * The SCR Service interface we are going to publish
- */
+/** The SCR Service interface we are going to publish */
 public interface ManagedGreeterService {
 
     void startGreeter();
 
     void stopGreeter();
-
 }

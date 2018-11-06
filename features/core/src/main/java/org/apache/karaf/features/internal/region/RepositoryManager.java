@@ -19,7 +19,6 @@ package org.apache.karaf.features.internal.region;
 import java.net.URI;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.apache.felix.utils.repository.BaseRepository;
 import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
@@ -34,13 +33,11 @@ public class RepositoryManager {
             String u = URI.create(base).resolve(uri.substring("xml:".length())).toString();
             uri = "xml:" + u;
             repo = new XmlRepository(u, 0, false);
-        }
-        else if (uri.startsWith("json:")) {
+        } else if (uri.startsWith("json:")) {
             String u = URI.create(base).resolve(uri.substring("json:".length())).toString();
             uri = "json:" + u;
             repo = new JsonRepository(u, 0, false);
-        }
-        else {
+        } else {
             String u = URI.create(base).resolve(uri).toString();
             uri = "xml:" + u;
             repo = new XmlRepository(u, 0, false);
@@ -48,5 +45,4 @@ public class RepositoryManager {
         repositories.putIfAbsent(uri, repo);
         return repositories.get(uri);
     }
-
 }

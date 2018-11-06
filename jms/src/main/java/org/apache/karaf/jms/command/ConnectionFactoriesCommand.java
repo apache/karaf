@@ -17,12 +17,14 @@
 package org.apache.karaf.jms.command;
 
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "jms", name = "connectionfactories", description = "List the JMS connection factories")
+@Command(
+        scope = "jms",
+        name = "connectionfactories",
+        description = "List the JMS connection factories")
 @Service
 public class ConnectionFactoriesCommand extends JmsCommandSupport {
 
@@ -41,5 +43,4 @@ public class ConnectionFactoriesCommand extends JmsCommandSupport {
 
         return null;
     }
-
 }

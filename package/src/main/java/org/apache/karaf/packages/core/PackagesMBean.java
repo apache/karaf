@@ -17,16 +17,16 @@
 package org.apache.karaf.packages.core;
 
 import java.util.List;
-
 import javax.management.openmbean.TabularData;
 
-/**
- * Packages MBean.
- */
+/** Packages MBean. */
 public interface PackagesMBean {
 
     TabularData getExports();
+
     TabularData getImports();
+
     List<String> getExports(long bundleId);
+
     List<String> getImports(long bundleId);
 }

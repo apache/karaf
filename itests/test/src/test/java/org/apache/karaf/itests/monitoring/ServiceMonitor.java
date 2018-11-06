@@ -18,7 +18,6 @@ package org.apache.karaf.itests.monitoring;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 

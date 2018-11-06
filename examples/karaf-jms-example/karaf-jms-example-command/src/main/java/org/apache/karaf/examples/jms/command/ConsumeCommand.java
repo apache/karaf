@@ -13,28 +13,31 @@
  */
 package org.apache.karaf.examples.jms.command;
 
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Argument;
-import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Service
 @Command(scope = "example", name = "consume", description = "Consume a message from a JMS queue")
 public class ConsumeCommand implements Action {
 
-    @Argument(index = 0, name = "queue", description = "Name of the queue", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "queue",
+            description = "Name of the queue",
+            required = true,
+            multiValued = false)
     String queue;
 
-    @Reference
-    ConnectionFactory connectionFactory;
+    @Reference ConnectionFactory connectionFactory;
 
     @Override
     public Object execute() throws Exception {
@@ -51,5 +54,4 @@ public class ConsumeCommand implements Action {
         }
         return null;
     }
-
 }

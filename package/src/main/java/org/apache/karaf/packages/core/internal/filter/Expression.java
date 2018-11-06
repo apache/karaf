@@ -16,6 +16,4 @@
  */
 package org.apache.karaf.packages.core.internal.filter;
 
-public interface Expression {
-
-}
+public interface Expression {}

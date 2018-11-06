@@ -25,16 +25,27 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ConsumeCommand extends JmsConnectionCommandSupport {
 
-    @Argument(index = 1, name = "queue", description = "The JMS queue where to consume messages", required = true, multiValued = false)
+    @Argument(
+            index = 1,
+            name = "queue",
+            description = "The JMS queue where to consume messages",
+            required = true,
+            multiValued = false)
     String queue;
 
-    @Option(name = "-s", aliases = { "--selector" }, description = "The selector to use to select the messages to consume", required = false, multiValued = false)
+    @Option(
+            name = "-s",
+            aliases = {"--selector"},
+            description = "The selector to use to select the messages to consume",
+            required = false,
+            multiValued = false)
     String selector;
 
     @Override
     public Object execute() throws Exception {
-        System.out.println(getJmsService().consume(connectionFactory, queue, selector, username, password) + " message(s) consumed");
+        System.out.println(
+                getJmsService().consume(connectionFactory, queue, selector, username, password)
+                        + " message(s) consumed");
         return null;
     }
-
 }

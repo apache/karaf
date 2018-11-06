@@ -22,7 +22,6 @@ package org.apache.karaf.config.command.completers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.karaf.shell.api.action.lifecycle.Destroy;
 import org.apache.karaf.shell.api.action.lifecycle.Init;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -41,19 +40,16 @@ import org.osgi.service.cm.ConfigurationListener;
 /**
  * {@link Completer} for Configuration Admin configurations.
  *
- * Displays a list of existing config instance configurations for completion.
- *
+ * <p>Displays a list of existing config instance configurations for completion.
  */
 @Service
 public class ConfigurationCompleter implements Completer, ConfigurationListener {
 
     private final StringsCompleter delegate = new StringsCompleter();
 
-    @Reference
-    private ConfigurationAdmin admin;
+    @Reference private ConfigurationAdmin admin;
 
-    @Reference
-    private BundleContext bundleContext;
+    @Reference private BundleContext bundleContext;
 
     private ServiceRegistration<ConfigurationListener> registration;
 
@@ -88,7 +84,8 @@ public class ConfigurationCompleter implements Completer, ConfigurationListener 
         registration.unregister();
     }
 
-    public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
+    public int complete(
+            final Session session, final CommandLine commandLine, final List<String> candidates) {
         return delegate.complete(session, commandLine, candidates);
     }
 

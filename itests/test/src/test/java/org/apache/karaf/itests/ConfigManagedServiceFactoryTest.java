@@ -21,9 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
 
 import java.io.IOException;
-
 import javax.inject.Inject;
-
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,68 +38,68 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @ExamReactorStrategy(PerClass.class)
 public class ConfigManagedServiceFactoryTest extends KarafTestSupport {
 
-	@Inject
-	ConfigurationAdmin configAdmin;
+    @Inject ConfigurationAdmin configAdmin;
 
-	@org.ops4j.pax.exam.Configuration
-	public Option[] config() {
-		return new Option[] {
-				CoreOptions.composite(super.config()),
-				replaceConfigurationFile("etc/myconfig-test1.cfg",
-						getConfigFile("/etc/myconfig-test1.cfg")),
-		// KarafDistributionOption.debugConfiguration()
-		};
-	}
+    @org.ops4j.pax.exam.Configuration
+    public Option[] config() {
+        return new Option[] {
+            CoreOptions.composite(super.config()),
+            replaceConfigurationFile(
+                    "etc/myconfig-test1.cfg", getConfigFile("/etc/myconfig-test1.cfg")),
+            // KarafDistributionOption.debugConfiguration()
+        };
+    }
 
-	@Test
-	public void updateProperties() throws IOException, InvalidSyntaxException {
-		checkInitialValuesFromFelixConfigAdmin();
-		checkEditByFactoryPid();
-		checkEditByArbitraryAttribute();
-	}
-	
-	@Test
-	public void createNewFactoryConfig() throws Exception {
-		executeCommand("config:edit --factory myconfig2\n"
-				+ "config:property-set test1 data1\n"
-				+ "config:update", new RolePrincipal("manager"));
-		Configuration config = configAdmin.listConfigurations("(service.factorypid=myconfig2)")[0];
-		assertEquals("data1", config.getProperties().get("test1"));
-	}
+    @Test
+    public void updateProperties() throws IOException, InvalidSyntaxException {
+        checkInitialValuesFromFelixConfigAdmin();
+        checkEditByFactoryPid();
+        checkEditByArbitraryAttribute();
+    }
 
-	private void checkInitialValuesFromFelixConfigAdmin() throws IOException,
-			InvalidSyntaxException {
-		Configuration config = readConfig();
-		assertNotNull("The configuration is null", config);
-		assertEquals("data1", config.getProperties().get("test1"));
-		assertEquals("data2", config.getProperties().get("test2"));
-	}
+    @Test
+    public void createNewFactoryConfig() throws Exception {
+        executeCommand(
+                "config:edit --factory myconfig2\n"
+                        + "config:property-set test1 data1\n"
+                        + "config:update",
+                new RolePrincipal("manager"));
+        Configuration config = configAdmin.listConfigurations("(service.factorypid=myconfig2)")[0];
+        assertEquals("data1", config.getProperties().get("test1"));
+    }
 
-	private void checkEditByFactoryPid() throws IOException,
-			InvalidSyntaxException {
-		executeCommand("config:edit '(service.factorypid=myconfig)'\n"
-				+ "config:property-set test1 data1new\n" + "config:update",
-				new RolePrincipal("manager"));
-		Configuration config = readConfig();
-		assertEquals("data1new", config.getProperties().get("test1"));
-		assertEquals("data2", config.getProperties().get("test2"));
-	}
+    private void checkInitialValuesFromFelixConfigAdmin()
+            throws IOException, InvalidSyntaxException {
+        Configuration config = readConfig();
+        assertNotNull("The configuration is null", config);
+        assertEquals("data1", config.getProperties().get("test1"));
+        assertEquals("data2", config.getProperties().get("test2"));
+    }
 
-	private void checkEditByArbitraryAttribute() throws IOException,
-			InvalidSyntaxException {
-		executeCommand("config:edit '(test2=data2)'\n"
-				+ "config:property-set test1 data1new2\n" + "config:update",
-				new RolePrincipal("manager"));
-		Configuration config = readConfig();
-		assertEquals("data1new2", config.getProperties().get("test1"));
-		assertEquals("data2", config.getProperties().get("test2"));
-	}
+    private void checkEditByFactoryPid() throws IOException, InvalidSyntaxException {
+        executeCommand(
+                "config:edit '(service.factorypid=myconfig)'\n"
+                        + "config:property-set test1 data1new\n"
+                        + "config:update",
+                new RolePrincipal("manager"));
+        Configuration config = readConfig();
+        assertEquals("data1new", config.getProperties().get("test1"));
+        assertEquals("data2", config.getProperties().get("test2"));
+    }
 
-	private Configuration readConfig() throws IOException,
-			InvalidSyntaxException {
-		Configuration[] configs = configAdmin
-				.listConfigurations("(service.factorypid=myconfig)");
-		return configs[0];
-	}
+    private void checkEditByArbitraryAttribute() throws IOException, InvalidSyntaxException {
+        executeCommand(
+                "config:edit '(test2=data2)'\n"
+                        + "config:property-set test1 data1new2\n"
+                        + "config:update",
+                new RolePrincipal("manager"));
+        Configuration config = readConfig();
+        assertEquals("data1new2", config.getProperties().get("test1"));
+        assertEquals("data2", config.getProperties().get("test2"));
+    }
 
+    private Configuration readConfig() throws IOException, InvalidSyntaxException {
+        Configuration[] configs = configAdmin.listConfigurations("(service.factorypid=myconfig)");
+        return configs[0];
+    }
 }

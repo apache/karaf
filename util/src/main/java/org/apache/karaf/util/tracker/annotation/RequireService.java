@@ -27,5 +27,4 @@ public @interface RequireService {
     String filter() default "";
 
     boolean optional() default false;
-
 }

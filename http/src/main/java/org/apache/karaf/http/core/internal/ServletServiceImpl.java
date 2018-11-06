@@ -19,9 +19,7 @@ package org.apache.karaf.http.core.internal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 import javax.servlet.Servlet;
-
 import org.apache.karaf.http.core.ServletInfo;
 import org.apache.karaf.http.core.ServletService;
 import org.ops4j.pax.web.service.spi.ServletEvent;
@@ -37,19 +35,23 @@ public class ServletServiceImpl implements ServletService {
     public List<ServletInfo> getServlets() {
         List<ServletInfo> servletInfos = new ArrayList<>();
         List<ServletEvent> events = servletEventHandler.getServletEvents();
-        events.sort(Comparator.<ServletEvent>comparingLong(s -> s.getBundle().getBundleId())
-                .thenComparing(ServletEvent::getServletName));
+        events.sort(
+                Comparator.<ServletEvent>comparingLong(s -> s.getBundle().getBundleId())
+                        .thenComparing(ServletEvent::getServletName));
         for (ServletEvent event : events) {
             Servlet servlet = event.getServlet();
             String servletClassName = " ";
             if (servlet != null) {
-                    servletClassName = servlet.getClass().getName();
-                    servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1,
-                                                                          servletClassName.length());
+                servletClassName = servlet.getClass().getName();
+                servletClassName =
+                        servletClassName.substring(
+                                servletClassName.lastIndexOf(".") + 1, servletClassName.length());
             }
             String servletName = event.getServletName() != null ? event.getServletName() : " ";
             if (servletName.contains(".")) {
-                servletName = servletName.substring(servletName.lastIndexOf(".") + 1, servletName.length());
+                servletName =
+                        servletName.substring(
+                                servletName.lastIndexOf(".") + 1, servletName.length());
             }
 
             String alias = event.getAlias();
@@ -57,7 +59,11 @@ public class ServletServiceImpl implements ServletService {
 
             String contextPath = event.getBundle().getHeaders().get("Web-ContextPath");
             if (contextPath == null) {
-                contextPath = event.getBundle().getHeaders().get("Webapp-Context"); // this one used by pax-web but is deprecated
+                contextPath =
+                        event.getBundle()
+                                .getHeaders()
+                                .get("Webapp-Context"); // this one used by pax-web but is
+                // deprecated
             }
             if (contextPath != null) {
                 contextPath = contextPath.trim();
@@ -90,5 +96,4 @@ public class ServletServiceImpl implements ServletService {
         }
         return servletInfos;
     }
-
 }

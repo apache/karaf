@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -33,30 +32,44 @@ import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-@Command(scope = "feature", name = "regions", description = "Prints information about region digraph.")
+@Command(
+        scope = "feature",
+        name = "regions",
+        description = "Prints information about region digraph.")
 @Service
 public class RegionInfoCommand implements Action {
 
     @Option(name = "-v", aliases = "--verbose", required = false, description = "Show all info.")
     boolean verbose;
 
-    @Option(name = "-b", aliases = "--bundles", required = false, description = "Show bundles in each region.")
+    @Option(
+            name = "-b",
+            aliases = "--bundles",
+            required = false,
+            description = "Show bundles in each region.")
     boolean bundles;
 
     @Option(name = "-f", aliases = "--filters", required = false, description = "Show filters.")
     boolean filters;
 
-    @Option(name = "-n", aliases = "--namespaces", required = false, description = "Show namespaces in each filter.")
+    @Option(
+            name = "-n",
+            aliases = "--namespaces",
+            required = false,
+            description = "Show namespaces in each filter.")
     boolean namespaces;
 
-    @Argument(index = 0, name = "regions", description = "Regions to provide detailed info for.", required = false, multiValued = true)
+    @Argument(
+            index = 0,
+            name = "regions",
+            description = "Regions to provide detailed info for.",
+            required = false,
+            multiValued = true)
     List<String> regions;
 
-    @Reference
-    RegionDigraph regionDigraph;
+    @Reference RegionDigraph regionDigraph;
 
-    @Reference
-    BundleContext bundleContext;
+    @Reference BundleContext bundleContext;
 
     public Object execute() throws Exception {
         System.out.println("Regions");
@@ -94,7 +107,8 @@ public class RegionInfoCommand implements Action {
                 System.out.println("  filter to " + f.getRegion().getName());
                 if (verbose || namespaces) {
                     RegionFilter rf = f.getFilter();
-                    for (Map.Entry<String, Collection<String>> policy : rf.getSharingPolicy().entrySet()) {
+                    for (Map.Entry<String, Collection<String>> policy :
+                            rf.getSharingPolicy().entrySet()) {
                         String namespace = policy.getKey();
                         System.out.println("    namespace: " + namespace);
                         for (String e : policy.getValue()) {
@@ -125,5 +139,4 @@ public class RegionInfoCommand implements Action {
             return "Unknown     ";
         }
     }
-
 }

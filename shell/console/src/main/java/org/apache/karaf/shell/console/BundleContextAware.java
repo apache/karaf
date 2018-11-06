@@ -24,5 +24,4 @@ import org.osgi.framework.BundleContext;
 public interface BundleContextAware {
 
     void setBundleContext(BundleContext bundleContext);
-
 }

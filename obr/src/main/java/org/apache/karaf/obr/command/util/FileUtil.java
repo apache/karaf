@@ -31,24 +31,20 @@ import java.net.URLConnection;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-public class FileUtil
-{
+public class FileUtil {
     public static void downloadSource(
-        PrintStream out, PrintStream err,
-        URL srcURL, String dirStr, boolean extract)
-    {
+            PrintStream out, PrintStream err, URL srcURL, String dirStr, boolean extract) {
         // Get the file name from the URL.
-        String fileName = (srcURL.getFile().lastIndexOf('/') > 0)
-            ? srcURL.getFile().substring(srcURL.getFile().lastIndexOf('/') + 1)
-            : srcURL.getFile();
+        String fileName =
+                (srcURL.getFile().lastIndexOf('/') > 0)
+                        ? srcURL.getFile().substring(srcURL.getFile().lastIndexOf('/') + 1)
+                        : srcURL.getFile();
 
-        try
-        {
+        try {
             out.println("Connecting...");
 
             File dir = new File(dirStr);
-            if (!dir.exists())
-            {
+            if (!dir.exists()) {
                 err.println("Destination directory does not exist.");
             }
             File file = new File(dir, fileName);
@@ -58,19 +54,14 @@ public class FileUtil
             int total = conn.getContentLength();
             InputStream is = conn.getInputStream();
 
-            if (total > 0)
-            {
-                out.println("Downloading " + fileName
-                    + " ( " + total + " bytes ).");
-            }
-            else
-            {
+            if (total > 0) {
+                out.println("Downloading " + fileName + " ( " + total + " bytes ).");
+            } else {
                 out.println("Downloading " + fileName + ".");
             }
             byte[] buffer = new byte[4096];
             int count = 0;
-            for (int len = is.read(buffer); len > 0; len = is.read(buffer))
-            {
+            for (int len = is.read(buffer); len > 0; len = is.read(buffer)) {
                 count += len;
                 os.write(buffer, 0, len);
             }
@@ -78,48 +69,35 @@ public class FileUtil
             os.close();
             is.close();
 
-            if (extract)
-            {
+            if (extract) {
                 JarInputStream jis = new JarInputStream(new FileInputStream(file));
                 out.println("Extracting...");
                 unjar(jis, dir);
                 jis.close();
                 file.delete();
             }
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             err.println(ex);
         }
     }
 
-    public static void unjar(JarInputStream jis, File dir)
-        throws IOException
-    {
+    public static void unjar(JarInputStream jis, File dir) throws IOException {
         // Reusable buffer.
         byte[] buffer = new byte[4096];
 
         // Loop through JAR entries.
-        for (JarEntry je = jis.getNextJarEntry();
-             je != null;
-             je = jis.getNextJarEntry())
-        {
-            if (je.getName().startsWith("/"))
-            {
+        for (JarEntry je = jis.getNextJarEntry(); je != null; je = jis.getNextJarEntry()) {
+            if (je.getName().startsWith("/")) {
                 throw new IOException("JAR resource cannot contain absolute paths.");
             }
 
             File target = new File(dir, je.getName());
 
             // Check to see if the JAR entry is a directory.
-            if (je.isDirectory())
-            {
-                if (!target.exists())
-                {
-                    if (!target.mkdirs())
-                    {
-                        throw new IOException("Unable to create target directory: "
-                            + target);
+            if (je.isDirectory()) {
+                if (!target.exists()) {
+                    if (!target.mkdirs()) {
+                        throw new IOException("Unable to create target directory: " + target);
                     }
                 }
                 // Just continue since directories do not have content to copy.
@@ -127,10 +105,8 @@ public class FileUtil
             }
 
             int lastIndex = je.getName().lastIndexOf('/');
-            String name = (lastIndex >= 0) ?
-                je.getName().substring(lastIndex + 1) : je.getName();
-            String destination = (lastIndex >= 0) ?
-                je.getName().substring(0, lastIndex) : "";
+            String name = (lastIndex >= 0) ? je.getName().substring(lastIndex + 1) : je.getName();
+            String destination = (lastIndex >= 0) ? je.getName().substring(0, lastIndex) : "";
 
             // JAR files use '/', so convert it to platform separator.
             destination = destination.replace('/', File.separatorChar);
@@ -139,36 +115,27 @@ public class FileUtil
     }
 
     public static void copy(
-        InputStream is, File dir, String destName, String destDir, byte[] buffer)
-        throws IOException
-    {
-        if (destDir == null)
-        {
+            InputStream is, File dir, String destName, String destDir, byte[] buffer)
+            throws IOException {
+        if (destDir == null) {
             destDir = "";
         }
 
         // Make sure the target directory exists and
         // that is actually a directory.
         File targetDir = new File(dir, destDir);
-        if (!targetDir.exists())
-        {
-            if (!targetDir.mkdirs())
-            {
-                throw new IOException("Unable to create target directory: "
-                    + targetDir);
+        if (!targetDir.exists()) {
+            if (!targetDir.mkdirs()) {
+                throw new IOException("Unable to create target directory: " + targetDir);
             }
-        }
-        else if (!targetDir.isDirectory())
-        {
-            throw new IOException("Target is not a directory: "
-                + targetDir);
+        } else if (!targetDir.isDirectory()) {
+            throw new IOException("Target is not a directory: " + targetDir);
         }
 
-        BufferedOutputStream bos = new BufferedOutputStream(
-            new FileOutputStream(new File(targetDir, destName)));
+        BufferedOutputStream bos =
+                new BufferedOutputStream(new FileOutputStream(new File(targetDir, destName)));
         int count = 0;
-        while ((count = is.read(buffer)) > 0)
-        {
+        while ((count = is.read(buffer)) > 0) {
             bos.write(buffer, 0, count);
         }
         bos.close();

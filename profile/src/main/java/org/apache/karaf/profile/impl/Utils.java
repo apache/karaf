@@ -20,13 +20,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
-
 import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.properties.TypedProperties;
 
 public final class Utils {
 
-    private Utils() { }
+    private Utils() {}
 
     public static void assertNotNull(Object object, String message) {
         if (object == null) {
@@ -57,7 +56,6 @@ public final class Utils {
         return sb.toString();
     }
 
-
     public static byte[] toBytes(TypedProperties source) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -82,7 +80,7 @@ public final class Utils {
         return toBytes(toProperties(source));
     }
 
-    public static TypedProperties toProperties(byte[] source)  {
+    public static TypedProperties toProperties(byte[] source) {
         try {
             TypedProperties rc = new TypedProperties(false);
             if (source != null) {

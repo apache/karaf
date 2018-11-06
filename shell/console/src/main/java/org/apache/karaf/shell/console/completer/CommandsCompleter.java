@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
@@ -44,8 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
- * instead used from the non-OSGi {@code org.apache.karaf.shell.console.impl.Main}.
+ * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi
+ * but is instead used from the non-OSGi {@code org.apache.karaf.shell.console.impl.Main}.
  */
 @Deprecated
 public class CommandsCompleter implements Completer {
@@ -78,7 +77,7 @@ public class CommandsCompleter implements Completer {
             tracker.dispose();
         }
     }
-    
+
     public int complete(String buffer, int cursor, List<String> candidates) {
         if (session == null) {
             session = CommandSessionHolder.getSession();
@@ -103,7 +102,7 @@ public class CommandsCompleter implements Completer {
                 }
             }
             if (!subShell.equals("*")) {
-                completers.add(new StringsCompleter(new String[] { "exit" }));
+                completers.add(new StringsCompleter(new String[] {"exit"}));
             }
             int res = new AggregateCompleter(completers).complete(buffer, cursor, candidates);
             Collections.sort(candidates);
@@ -151,9 +150,11 @@ public class CommandsCompleter implements Completer {
 
     protected static class ScopeComparator implements Comparator<String> {
         private final List<String> scopes;
+
         public ScopeComparator(List<String> scopes) {
             this.scopes = scopes;
         }
+
         @Override
         public int compare(String o1, String o2) {
             String[] p1 = o1.split(":");
@@ -236,18 +237,35 @@ public class CommandsCompleter implements Completer {
                 function = unProxy(function);
                 if (function instanceof CommandWithAction) {
                     try {
-                        global.put(command, new ArgumentCompleter(session, (CommandWithAction) function, command));
-                        local.put(command, new ArgumentCompleter(session, (CommandWithAction) function, rawCommand));
+                        global.put(
+                                command,
+                                new ArgumentCompleter(
+                                        session, (CommandWithAction) function, command));
+                        local.put(
+                                command,
+                                new ArgumentCompleter(
+                                        session, (CommandWithAction) function, rawCommand));
                     } catch (Throwable t) {
-                        LOGGER.debug("Unable to create completers for command '" + command + "'", t);
+                        LOGGER.debug(
+                                "Unable to create completers for command '" + command + "'", t);
                     }
-                }
-                else if (function instanceof org.apache.felix.gogo.commands.CommandWithAction) {
+                } else if (function instanceof org.apache.felix.gogo.commands.CommandWithAction) {
                     try {
-                        global.put(command, new OldArgumentCompleter(session, (org.apache.felix.gogo.commands.CommandWithAction) function, command));
-                        local.put(command, new OldArgumentCompleter(session, (org.apache.felix.gogo.commands.CommandWithAction) function, rawCommand));
+                        global.put(
+                                command,
+                                new OldArgumentCompleter(
+                                        session,
+                                        (org.apache.felix.gogo.commands.CommandWithAction) function,
+                                        command));
+                        local.put(
+                                command,
+                                new OldArgumentCompleter(
+                                        session,
+                                        (org.apache.felix.gogo.commands.CommandWithAction) function,
+                                        rawCommand));
                     } catch (Throwable t) {
-                        LOGGER.debug("Unable to create completers for command '" + command + "'", t);
+                        LOGGER.debug(
+                                "Unable to create completers for command '" + command + "'", t);
                     }
                 }
                 commands.add(command);
@@ -264,8 +282,7 @@ public class CommandsCompleter implements Completer {
         }
         synchronized (this) {
             return new Map[] {
-                    new HashMap<>(this.globalCompleters),
-                    new HashMap<>(this.localCompleters)
+                new HashMap<>(this.globalCompleters), new HashMap<>(this.localCompleters)
             };
         }
     }
@@ -281,7 +298,9 @@ public class CommandsCompleter implements Completer {
         Set<String> aliases = new HashSet<>();
         for (String var : vars) {
             Object content = session.get(var);
-            if (content != null && "org.apache.felix.gogo.runtime.Closure".equals(content.getClass().getName())) {
+            if (content != null
+                    && "org.apache.felix.gogo.runtime.Closure"
+                            .equals(content.getClass().getName())) {
                 aliases.add(var);
             }
         }
@@ -292,10 +311,10 @@ public class CommandsCompleter implements Completer {
         if (function == null || function.getClass() != CommandProxy.class) {
             return function;
         }
-        CommandProxy proxy = (CommandProxy)function;
+        CommandProxy proxy = (CommandProxy) function;
         Object target = proxy.getTarget();
         try {
-            return target instanceof Function ? (Function)target : function;
+            return target instanceof Function ? (Function) target : function;
         } finally {
             proxy.ungetTarget();
         }
@@ -303,27 +322,28 @@ public class CommandsCompleter implements Completer {
 
     private class CommandTracker {
         private final ServiceListener listener;
+
         public CommandTracker() throws Exception {
             BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
             if (context == null) {
                 throw new IllegalStateException("Bundle is stopped");
             }
-            listener = event -> {
-                synchronized (CommandsCompleter.this) {
-                    commands.clear();
-                }
-            };
-            context.addServiceListener(listener,
-                    String.format("(&(%s=*)(%s=*))",
-                            CommandProcessor.COMMAND_SCOPE,
-                            CommandProcessor.COMMAND_FUNCTION));
+            listener =
+                    event -> {
+                        synchronized (CommandsCompleter.this) {
+                            commands.clear();
+                        }
+                    };
+            context.addServiceListener(
+                    listener,
+                    String.format(
+                            "(&(%s=*)(%s=*))",
+                            CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION));
         }
-        
+
         public void dispose() {
             BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
             context.removeServiceListener(listener);
         }
     }
-
 }
-

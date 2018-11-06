@@ -1,18 +1,16 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.karaf.specs.locator;
 
@@ -30,11 +28,10 @@ public class OsgiLocator {
     public static final String TIMEOUT = "org.apache.karaf.specs.timeout";
 
     private static final Map<String, List<Callable<Class>>> FACTORIES = new HashMap<>();
-    
+
     private static final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 
-    private OsgiLocator() {
-    }
+    private OsgiLocator() {}
 
     public static void unregister(String id, Callable<Class> factory) {
         LOCK.writeLock().lock();
@@ -51,8 +48,7 @@ public class OsgiLocator {
     public static void register(String id, Callable<Class> factory) {
         LOCK.writeLock().lock();
         try {
-            FACTORIES.computeIfAbsent(id, k -> new ArrayList<>())
-                    .add(0, factory);
+            FACTORIES.computeIfAbsent(id, k -> new ArrayList<>()).add(0, factory);
             synchronized (LOCK) {
                 LOCK.notifyAll();
             }
@@ -60,7 +56,6 @@ public class OsgiLocator {
             LOCK.writeLock().unlock();
         }
     }
-
 
     public static <T> Class<T> locate(Class<T> factoryId) {
         return locate(factoryId, factoryId.getName());
@@ -73,7 +68,8 @@ public class OsgiLocator {
             if (prop != null) {
                 timeout = Long.parseLong(prop);
             }
-        } catch (Throwable t) { }
+        } catch (Throwable t) {
+        }
         return timeout;
     }
 
@@ -116,9 +112,11 @@ public class OsgiLocator {
                         } catch (Exception ex) {
                             // do nothing here
                         }
-                        if (c != null && factoryClass == c.getClassLoader().loadClass(factoryClass.getName())
-                                 && (factoryClassName == null || c.getName().equals(factoryClassName)))
-                        {
+                        if (c != null
+                                && factoryClass
+                                        == c.getClassLoader().loadClass(factoryClass.getName())
+                                && (factoryClassName == null
+                                        || c.getName().equals(factoryClassName))) {
                             return c;
                         }
                     }
@@ -157,5 +155,4 @@ public class OsgiLocator {
             LOCK.readLock().unlock();
         }
     }
-
 }

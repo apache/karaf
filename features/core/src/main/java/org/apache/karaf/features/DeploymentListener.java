@@ -19,7 +19,8 @@ package org.apache.karaf.features;
 import java.util.EventListener;
 
 /**
- * Interface implemented by components interested in bundle lifecycle operations triggered by {@link FeaturesService}.
+ * Interface implemented by components interested in bundle lifecycle operations triggered by {@link
+ * FeaturesService}.
  */
 public interface DeploymentListener extends EventListener {
     /**

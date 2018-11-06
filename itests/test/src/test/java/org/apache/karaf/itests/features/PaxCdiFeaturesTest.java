@@ -13,32 +13,28 @@
  */
 package org.apache.karaf.itests.features;
 
+import static org.ops4j.pax.exam.CoreOptions.composite;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.karaf.itests.util.RunIfRule;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import static org.ops4j.pax.exam.CoreOptions.composite;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class PaxCdiFeaturesTest extends KarafTestSupport {
 
-    @Rule
-    public RunIfRule rule = new RunIfRule();
+    @Rule public RunIfRule rule = new RunIfRule();
 
-    
     @Test
     public void installPaxCdiFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi");
@@ -71,9 +67,13 @@ public class PaxCdiFeaturesTest extends KarafTestSupport {
 
     @Configuration
     public Option[] config() {
-        return options(composite(
-                super.config()),
-                features(maven().groupId("org.ops4j.pax.cdi").artifactId("pax-cdi-features").versionAsInProject().type("xml").classifier("features"))
-        );
+        return options(
+                composite(super.config()),
+                features(
+                        maven().groupId("org.ops4j.pax.cdi")
+                                .artifactId("pax-cdi-features")
+                                .versionAsInProject()
+                                .type("xml")
+                                .classifier("features")));
     }
 }

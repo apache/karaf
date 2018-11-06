@@ -1,18 +1,16 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.karaf.specs.activator;
 
@@ -25,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.apache.karaf.specs.locator.OsgiLocator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -45,11 +42,12 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
         try {
             String prop = System.getProperty("org.apache.karaf.specs.debug");
             debug = prop != null && !"false".equals(prop);
-        } catch (Throwable t) { }
+        } catch (Throwable t) {
+        }
     }
 
     /**
-     * <p>Output debugging messages.</p>
+     * Output debugging messages.
      *
      * @param msg <code>String</code> to print to <code>stderr</code>.
      */
@@ -66,8 +64,10 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
         bundleContext.addBundleListener(this);
         debugPrintln("checking existing bundles");
         for (Bundle bundle : bundleContext.getBundles()) {
-            if (bundle.getState() == Bundle.RESOLVED || bundle.getState() == Bundle.STARTING ||
-                    bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STOPPING) {
+            if (bundle.getState() == Bundle.RESOLVED
+                    || bundle.getState() == Bundle.STARTING
+                    || bundle.getState() == Bundle.ACTIVE
+                    || bundle.getState() == Bundle.STOPPING) {
                 register(bundle);
             }
         }
@@ -94,7 +94,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
         }
         if (event.getType() == BundleEvent.RESOLVED) {
             register(event.getBundle());
-        } else if (event.getType() == BundleEvent.UNRESOLVED || event.getType() == BundleEvent.UNINSTALLED) {
+        } else if (event.getType() == BundleEvent.UNRESOLVED
+                || event.getType() == BundleEvent.UNINSTALLED) {
             unregister(event.getBundle().getBundleId());
         }
     }
@@ -120,7 +121,11 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
         }
         if (map != null) {
             for (Map.Entry<String, Callable<Class>> entry : map.entrySet()) {
-                debugPrintln("registering service for key " + entry.getKey() + " with value " + entry.getValue());
+                debugPrintln(
+                        "registering service for key "
+                                + entry.getKey()
+                                + " with value "
+                                + entry.getValue());
                 OsgiLocator.register(entry.getKey(), entry.getValue());
             }
         }
@@ -130,7 +135,11 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
         Map<String, Callable<Class>> map = factories.remove(bundleId);
         if (map != null) {
             for (Map.Entry<String, Callable<Class>> entry : map.entrySet()) {
-                debugPrintln("unregistering service for key " + entry.getKey() + " with value " + entry.getValue());
+                debugPrintln(
+                        "unregistering service for key "
+                                + entry.getKey()
+                                + " with value "
+                                + entry.getValue());
                 OsgiLocator.unregister(entry.getKey(), entry.getValue());
             }
         }
@@ -151,12 +160,14 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
         public Class call() throws Exception {
             try {
                 debugPrintln("loading factory for key: " + factoryId);
-                
-                if (clazz == null){
+
+                if (clazz == null) {
                     synchronized (this) {
-                        if (clazz == null){
+                        if (clazz == null) {
                             debugPrintln("creating factory for key: " + factoryId);
-                            BufferedReader br = new BufferedReader(new InputStreamReader(u.openStream(), "UTF-8"));
+                            BufferedReader br =
+                                    new BufferedReader(
+                                            new InputStreamReader(u.openStream(), "UTF-8"));
                             try {
                                 String factoryClassName = br.readLine();
                                 while (factoryClassName != null) {
@@ -186,12 +197,12 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
         @Override
         public String toString() {
-           return u.toString();
+            return u.toString();
         }
 
         @Override
         public int hashCode() {
-           return u.hashCode();
+            return u.hashCode();
         }
 
         @Override

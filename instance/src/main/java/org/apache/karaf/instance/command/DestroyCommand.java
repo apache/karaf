@@ -17,7 +17,6 @@
 package org.apache.karaf.instance.command;
 
 import java.util.List;
-
 import org.apache.karaf.instance.command.completers.InstanceCompleter;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.shell.api.action.Argument;
@@ -26,14 +25,19 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.MultiException;
 
-/**
- * Destroy an existing instance.
- */
-@Command(scope = "instance", name = "destroy", description = "Destroys an existing container instance.")
+/** Destroy an existing instance. */
+@Command(
+        scope = "instance",
+        name = "destroy",
+        description = "Destroys an existing container instance.")
 @Service
-public class DestroyCommand extends InstanceCommandSupport
-{
-    @Argument(index = 0, name = "name", description= "The name of the container instance to destroy", required = true, multiValued = true)
+public class DestroyCommand extends InstanceCommandSupport {
+    @Argument(
+            index = 0,
+            name = "name",
+            description = "The name of the container instance to destroy",
+            required = true,
+            multiValued = true)
     @Completion(InstanceCompleter.class)
     private List<String> instances = null;
 
@@ -50,5 +54,4 @@ public class DestroyCommand extends InstanceCommandSupport
         exception.throwIfExceptions();
         return null;
     }
-
 }

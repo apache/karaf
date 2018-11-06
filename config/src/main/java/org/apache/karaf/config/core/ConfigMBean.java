@@ -13,13 +13,11 @@
  */
 package org.apache.karaf.config.core;
 
-import javax.management.MBeanException;
 import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
 
-/**
- * MBean to manipulate the Config layer.
- */
+/** MBean to manipulate the Config layer. */
 public interface ConfigMBean {
 
     /**
@@ -111,7 +109,7 @@ public interface ConfigMBean {
      * @throws MBeanException in case of MBean failure.
      */
     void update(String pid, Map<String, String> properties) throws MBeanException;
-    
+
     /**
      * Create a factory based configuration.
      *
@@ -120,6 +118,6 @@ public interface ConfigMBean {
      * @return the created PID.
      * @throws MBeanException in case of MBean failure.
      */
-    String createFactoryConfiguration(String factoryPid, Map<String, String> properties) throws MBeanException;
-
+    String createFactoryConfiguration(String factoryPid, Map<String, String> properties)
+            throws MBeanException;
 }

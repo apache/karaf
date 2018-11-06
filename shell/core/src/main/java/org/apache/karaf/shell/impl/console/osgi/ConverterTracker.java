@@ -24,9 +24,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-/**
- * Tracker for Converter.
- */
+/** Tracker for Converter. */
 public class ConverterTracker extends ServiceTracker<Converter, Converter> {
 
     private SessionFactoryImpl sessionFactory;

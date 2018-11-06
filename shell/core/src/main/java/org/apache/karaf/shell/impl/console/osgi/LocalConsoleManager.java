@@ -18,13 +18,10 @@
  */
 package org.apache.karaf.shell.impl.console.osgi;
 
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.security.PrivilegedAction;
-
 import javax.security.auth.Subject;
-
 import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
@@ -33,20 +30,19 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.console.JLineTerminal;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.util.jaas.JaasHelper;
-import org.apache.sshd.common.util.io.NoCloseOutputStream;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 public class LocalConsoleManager {
-    
+
     private static final String INPUT_ENCODING = "input.encoding";
     private static final String KARAF_DELAY_CONSOLE = "karaf.delay.console";
     private static final String KARAF_LOCAL_USER = "karaf.local.user";
     private static final String KARAF_LOCAL_ROLES = "karaf.local.roles";
     private static final String KARAF_LOCAL_ROLES_DEFAULT = "admin,manager,viewer,systembundles";
-    
+
     private SessionFactory sessionFactory;
     private BundleContext bundleContext;
     private Session session;
@@ -55,54 +51,70 @@ public class LocalConsoleManager {
 
     private DelayedStarted watcher;
 
-    public LocalConsoleManager(BundleContext bundleContext,
-                               SessionFactory sessionFactory) throws Exception {
+    public LocalConsoleManager(BundleContext bundleContext, SessionFactory sessionFactory)
+            throws Exception {
         this.bundleContext = bundleContext;
         this.sessionFactory = sessionFactory;
     }
 
     public void start() throws Exception {
-        final Terminal terminal = TerminalBuilder.builder()
-                .nativeSignals(true)
-                .signalHandler(Terminal.SignalHandler.SIG_IGN)
-                .build();
+        final Terminal terminal =
+                TerminalBuilder.builder()
+                        .nativeSignals(true)
+                        .signalHandler(Terminal.SignalHandler.SIG_IGN)
+                        .build();
 
-        final Subject subject = createLocalKarafSubject();    
-        this.session = JaasHelper.doAs(subject, (PrivilegedAction<Session>) () -> {
-            String encoding = getEncoding();
-            PrintStream pout = new PrintStream(terminal.output()) {
-                @Override
-                public void close() {
-                    // do nothing
-                }
-            };
-            session = sessionFactory.create(
-                                  terminal.input(),
-                                  pout,
-                                  pout,
-                                  new JLineTerminal(terminal),
-                                  encoding,
-                                  LocalConsoleManager.this::close);
-            session.put(Session.IS_LOCAL, true);
-            registration = bundleContext.registerService(Session.class, session, null);
-            String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
-            boolean delayconsole = Boolean.parseBoolean(System.getProperty(KARAF_DELAY_CONSOLE));
-            if (delayconsole) {
-                watcher = new DelayedStarted(session, name, bundleContext, System.in);
-                new Thread(watcher, name).start();
-            } else {
-                new Thread(session, name).start();
-            }
-            return session;
-        });
+        final Subject subject = createLocalKarafSubject();
+        this.session =
+                JaasHelper.doAs(
+                        subject,
+                        (PrivilegedAction<Session>)
+                                () -> {
+                                    String encoding = getEncoding();
+                                    PrintStream pout =
+                                            new PrintStream(terminal.output()) {
+                                                @Override
+                                                public void close() {
+                                                    // do nothing
+                                                }
+                                            };
+                                    session =
+                                            sessionFactory.create(
+                                                    terminal.input(),
+                                                    pout,
+                                                    pout,
+                                                    new JLineTerminal(terminal),
+                                                    encoding,
+                                                    LocalConsoleManager.this::close);
+                                    session.put(Session.IS_LOCAL, true);
+                                    registration =
+                                            bundleContext.registerService(
+                                                    Session.class, session, null);
+                                    String name =
+                                            "Karaf local console user "
+                                                    + ShellUtil.getCurrentUserName();
+                                    boolean delayconsole =
+                                            Boolean.parseBoolean(
+                                                    System.getProperty(KARAF_DELAY_CONSOLE));
+                                    if (delayconsole) {
+                                        watcher =
+                                                new DelayedStarted(
+                                                        session, name, bundleContext, System.in);
+                                        new Thread(watcher, name).start();
+                                    } else {
+                                        new Thread(session, name).start();
+                                    }
+                                    return session;
+                                });
         // TODO: register the local session so that ssh can add the agent
-//        registration = bundleContext.register(CommandSession.class, console.getSession(), null);
+        //        registration = bundleContext.register(CommandSession.class, console.getSession(),
+        // null);
 
     }
 
     /**
-     * Get the default encoding.  Will first look at the LC_CTYPE environment variable, then the input.encoding
-     * system property, then the default charset according to the JVM.
+     * Get the default encoding. Will first look at the LC_CTYPE environment variable, then the
+     * input.encoding system property, then the default charset according to the JVM.
      *
      * @return The default encoding to use when none is specified.
      */
@@ -116,8 +128,9 @@ public class LocalConsoleManager {
     }
 
     /**
-     * Parses the LC_CTYPE value to extract the encoding according to the POSIX standard, which says that the LC_CTYPE
-     * environment variable may be of the format <code>[language[_territory][.codeset][@modifier]]</code>
+     * Parses the LC_CTYPE value to extract the encoding according to the POSIX standard, which says
+     * that the LC_CTYPE environment variable may be of the format <code>
+     * [language[_territory][.codeset][@modifier]]</code>
      *
      * @param ctype The ctype to parse, may be null
      * @return The encoding, if one was present, otherwise null
@@ -179,5 +192,4 @@ public class LocalConsoleManager {
             // Ignore
         }
     }
-
 }

@@ -25,36 +25,50 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.system.FrameworkType;
 import org.apache.karaf.system.SystemService;
 
-/**
- * Command for enabling/disabling debug logging on the OSGi framework
- */
+/** Command for enabling/disabling debug logging on the OSGi framework */
 @Command(scope = "system", name = "framework", description = "OSGi Framework options.")
 @Service
 public class FrameworkOptions implements Action {
 
-    @Option(name = "-debug", aliases={"--enable-debug"}, description="Enable debug for the OSGi framework", required = false, multiValued = false)
+    @Option(
+            name = "-debug",
+            aliases = {"--enable-debug"},
+            description = "Enable debug for the OSGi framework",
+            required = false,
+            multiValued = false)
     boolean debug;
 
-    @Option(name = "-nodebug", aliases={"--disable-debug"}, description="Disable debug for the OSGi framework", required = false, multiValued = false)
+    @Option(
+            name = "-nodebug",
+            aliases = {"--disable-debug"},
+            description = "Disable debug for the OSGi framework",
+            required = false,
+            multiValued = false)
     boolean nodebug;
 
-    @Argument(name = "framework", required = false, description = "Name of the OSGi framework to use")
+    @Argument(
+            name = "framework",
+            required = false,
+            description = "Name of the OSGi framework to use")
     String framework;
 
-    @Reference
-    SystemService systemService;
+    @Reference SystemService systemService;
 
     @Override
     public Object execute() throws Exception {
 
-        if (!debug^nodebug && framework == null) {
-            System.out.printf("Current OSGi framework is %s%n", systemService.getFramework().name());
+        if (!debug ^ nodebug && framework == null) {
+            System.out.printf(
+                    "Current OSGi framework is %s%n", systemService.getFramework().name());
             return null;
         }
         if (framework != null) {
             FrameworkType frameworkType = FrameworkType.valueOf(framework);
             systemService.setFramework(frameworkType);
-            System.out.println("Changed OSGi framework to " + frameworkType.toString().toLowerCase() + ". Karaf needs to be restarted to make the change effective");
+            System.out.println(
+                    "Changed OSGi framework to "
+                            + frameworkType.toString().toLowerCase()
+                            + ". Karaf needs to be restarted to make the change effective");
         }
         if (debug) {
             FrameworkType frameworkType = systemService.getFramework();
@@ -69,5 +83,4 @@ public class FrameworkOptions implements Action {
 
         return null;
     }
-
 }

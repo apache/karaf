@@ -27,7 +27,12 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class PsCommand extends DockerCommandSupport {
 
-    @Option(name = "-a", aliases = {"--all", "--showAll" }, description = "Display all containers or only running ones", required = false, multiValued = false)
+    @Option(
+            name = "-a",
+            aliases = {"--all", "--showAll"},
+            description = "Display all containers or only running ones",
+            required = false,
+            multiValued = false)
     boolean showAll;
 
     @Override
@@ -47,24 +52,29 @@ public class PsCommand extends DockerCommandSupport {
         for (Container container : getDockerService().ps(showAll, url)) {
             StringBuffer portBuffer = new StringBuffer();
             for (Port port : container.getPorts()) {
-                portBuffer.append(port.getType()).append(":").append(port.getPrivatePort()).append(":").append(port.getPublicPort()).append(" ");
+                portBuffer
+                        .append(port.getType())
+                        .append(":")
+                        .append(port.getPrivatePort())
+                        .append(":")
+                        .append(port.getPublicPort())
+                        .append(" ");
             }
-            table.addRow().addContent(
-                    container.getId(),
-                    container.getNames(),
-                    container.getCommand(),
-                    container.getCreated(),
-                    container.getImage(),
-                    container.getImageId(),
-                    container.getStatus(),
-                    container.getState(),
-                    portBuffer.toString(),
-                    container.getSizeRw(),
-                    container.getSizeRootFs()
-            );
+            table.addRow()
+                    .addContent(
+                            container.getId(),
+                            container.getNames(),
+                            container.getCommand(),
+                            container.getCreated(),
+                            container.getImage(),
+                            container.getImageId(),
+                            container.getStatus(),
+                            container.getState(),
+                            portBuffer.toString(),
+                            container.getSizeRw(),
+                            container.getSizeRootFs());
         }
         table.print(System.out);
         return null;
     }
-
 }

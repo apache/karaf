@@ -14,6 +14,9 @@
  */
 package org.apache.karaf.jaas.modules.encryption;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.EncryptionService;
 import org.osgi.framework.BundleContext;
@@ -23,10 +26,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
 
 public class EncryptionSupport {
     private final Logger logger = LoggerFactory.getLogger(EncryptionSupport.class);
@@ -40,7 +39,7 @@ public class EncryptionSupport {
     private String name;
 
     private Map<String, String> encOpts;
-    
+
     public static EncryptionSupport noEncryptionSupport() {
         Map<String, Object> options = new HashMap<>();
         options.put("enabled", "false");
@@ -68,7 +67,7 @@ public class EncryptionSupport {
             logOptions();
         }
     }
-    
+
     public String encrypt(String plain) {
         getEncryption();
         if (encryption == null || isEncrypted(plain)) {
@@ -77,21 +76,23 @@ public class EncryptionSupport {
             return encryptionPrefix + encryption.encryptPassword(plain) + encryptionSuffix;
         }
     }
-    
+
     private void logOptions() {
         if (name != null && name.length() > 0) {
-            logger.debug("Encryption is enabled. Using service " + name + " with options " + encOpts);
+            logger.debug(
+                    "Encryption is enabled. Using service " + name + " with options " + encOpts);
         } else {
             logger.debug("Encryption is enabled. Using options " + encOpts);
         }
     }
-    
+
     private String defaulIfNull(String value, String defaultValue) {
         return value == null ? defaultValue : value;
     }
-    
+
     private boolean isEncrypted(String password) {
-        boolean prefixPresent = "".equals(encryptionPrefix) || password.startsWith(encryptionPrefix);
+        boolean prefixPresent =
+                "".equals(encryptionPrefix) || password.startsWith(encryptionPrefix);
         boolean suffixPresent = "".equals(encryptionSuffix) || password.endsWith(encryptionSuffix);
         return prefixPresent && suffixPresent;
     }
@@ -106,7 +107,8 @@ public class EncryptionSupport {
             return encryption;
         }
 
-        ServiceTracker<EncryptionService, EncryptionService> tracker = new ServiceTracker<>(bundleContext, getFilter(), null);
+        ServiceTracker<EncryptionService, EncryptionService> tracker =
+                new ServiceTracker<>(bundleContext, getFilter(), null);
         tracker.open();
         try {
             return getEncryptionInternal(tracker);
@@ -115,13 +117,15 @@ public class EncryptionSupport {
         }
     }
 
-    private Encryption getEncryptionInternal(ServiceTracker<EncryptionService, EncryptionService> tracker) {
+    private Encryption getEncryptionInternal(
+            ServiceTracker<EncryptionService, EncryptionService> tracker) {
         try {
             tracker.waitForService(20000);
         } catch (InterruptedException e1) {
             return null;
         }
-        SortedMap<ServiceReference<EncryptionService>, EncryptionService> tracked = tracker.getTracked();
+        SortedMap<ServiceReference<EncryptionService>, EncryptionService> tracked =
+                tracker.getTracked();
         if (tracked.isEmpty()) {
             throw new IllegalStateException(noEncryptionServiceMsg());
         }
@@ -136,12 +140,15 @@ public class EncryptionSupport {
                 // continue
             }
         }
-        throw new IllegalStateException("No EncryptionService supporting the required options could be found.");
+        throw new IllegalStateException(
+                "No EncryptionService supporting the required options could be found.");
     }
 
     private String noEncryptionServiceMsg() {
         if (name != null && name.length() > 0) {
-            return "Encryption service " + name + " not found. Please check that the encryption service is correctly set up.";
+            return "Encryption service "
+                    + name
+                    + " not found. Please check that the encryption service is correctly set up.";
         } else {
             return "No encryption service found. Please install the Karaf encryption feature and check that the encryption algorithm is supported.";
         }
@@ -150,7 +157,7 @@ public class EncryptionSupport {
     private org.osgi.framework.Filter getFilter() {
         String nameFilter = name != null && name.length() > 0 ? "(name=" + name + ")" : null;
         String objFilter = "(objectClass=" + EncryptionService.class.getName() + ")";
-        String filter = nameFilter == null ? objFilter : "(&" + nameFilter + objFilter + ")"; 
+        String filter = nameFilter == null ? objFilter : "(&" + nameFilter + objFilter + ")";
         try {
             return FrameworkUtil.createFilter(filter);
         } catch (InvalidSyntaxException e) {
@@ -177,12 +184,9 @@ public class EncryptionSupport {
     public void setEncryptionPrefix(String encryptionPrefix) {
         this.encryptionPrefix = encryptionPrefix;
     }
-    
-    /**
-     * For tests
-     */
+
+    /** For tests */
     void setEncryption(Encryption encryption) {
         this.encryption = encryption;
     }
-
 }

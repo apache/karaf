@@ -21,7 +21,6 @@ package org.apache.karaf.shell.impl.console.commands;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.impl.console.commands.help.HelpCommand;
 

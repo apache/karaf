@@ -27,5 +27,4 @@ public interface ProxyService {
     void removeProxy(String url) throws Exception;
 
     void initProxies();
-
 }

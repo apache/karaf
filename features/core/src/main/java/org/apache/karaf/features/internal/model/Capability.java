@@ -22,11 +22,11 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 /**
- * <p>Additional capability for a feature.</p>
+ * Additional capability for a feature.
  *
- * <p>Java class for bundle complex type.</p>
+ * <p>Java class for bundle complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.</p>
+ * <p>The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
  * &lt;complexType name="capability"&gt;
@@ -38,15 +38,14 @@ import javax.xml.bind.annotation.XmlValue;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "capability", propOrder = {"value"})
+@XmlType(
+        name = "capability",
+        propOrder = {"value"})
 public class Capability implements org.apache.karaf.features.Capability {
 
-    @XmlValue
-    protected String value;
+    @XmlValue protected String value;
 
-
-    public Capability() {
-    }
+    public Capability() {}
 
     public Capability(String value) {
         this.value = value;

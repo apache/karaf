@@ -26,23 +26,24 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-/**
- * Unique bundle command.
- */
+/** Unique bundle command. */
 public abstract class BundleCommand implements Action {
 
     @Option(name = "--context", description = "Use the given bundle context")
     String context = "0";
 
-    @Argument(index = 0, name = "id", description = "The bundle ID or name or name/version", required = true, multiValued = false)
+    @Argument(
+            index = 0,
+            name = "id",
+            description = "The bundle ID or name or name/version",
+            required = true,
+            multiValued = false)
     @Completion(BundleSymbolicNameCompleter.class)
     String id;
 
-    @Reference
-    BundleService bundleService;
+    @Reference BundleService bundleService;
 
-    @Reference
-    BundleContext bundleContext;
+    @Reference BundleContext bundleContext;
 
     public Object execute() throws Exception {
         Bundle bundle = bundleService.getBundle(id);
@@ -54,5 +55,4 @@ public abstract class BundleCommand implements Action {
     public void setBundleService(BundleService bundleService) {
         this.bundleService = bundleService;
     }
-
 }

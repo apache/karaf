@@ -26,7 +26,7 @@ public class SimpleAnsi {
     public static String COLOR_BLUE = "\u001b[34m";
     public static String COLOR_MAGENTA = "\u001b[35m";
     public static String COLOR_DEFAULT = "\u001b[39m";
-    
+
     public static String INTENSITY_BOLD = "\u001b[1m";
     public static String INTENSITY_NORMAL = "\u001b[22m";
 

@@ -18,9 +18,7 @@ package org.apache.karaf.wrapper;
 
 import java.io.File;
 
-/**
- * Interface describing the Wrapper service.
- */
+/** Interface describing the Wrapper service. */
 public interface WrapperService {
 
     /**
@@ -37,11 +35,13 @@ public interface WrapperService {
      * @param displayName The display name of the service.
      * @param description The description of the service.
      * @param startType Mode in which the service is installed. AUTO_START or DEMAND_START.
-     * @return An array containing the wrapper configuration file (index 0) and the service file (index 1).
+     * @return An array containing the wrapper configuration file (index 0) and the service file
+     *     (index 1).
      * @throws Exception If the wrapper install fails.
      */
-    File[] install(String name, String displayName, String description, String startType) throws Exception;
-    
+    File[] install(String name, String displayName, String description, String startType)
+            throws Exception;
+
     /**
      * Install the Karaf container as a system service in the OS.
      *
@@ -51,9 +51,16 @@ public interface WrapperService {
      * @param startType Mode in which the service is installed. AUTO_START or DEMAND_START.
      * @param envs The environment variable and values
      * @param includes The include statement for JSW wrapper conf
-     * @return An array containing the wrapper configuration file (index 0) and the service file (index 1).
+     * @return An array containing the wrapper configuration file (index 0) and the service file
+     *     (index 1).
      * @throws Exception If the wrapper install fails.
      */
-    File[] install(String name, String displayName, String description, String startType, String[] envs, String[] includes) throws Exception;
-
+    File[] install(
+            String name,
+            String displayName,
+            String description,
+            String startType,
+            String[] envs,
+            String[] includes)
+            throws Exception;
 }

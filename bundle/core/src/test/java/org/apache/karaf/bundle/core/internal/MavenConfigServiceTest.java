@@ -16,11 +16,10 @@
  */
 package org.apache.karaf.bundle.core.internal;
 
-import java.util.Hashtable;
-
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import java.util.Hashtable;
+import org.junit.Test;
 
 public class MavenConfigServiceTest {
 
@@ -40,15 +39,18 @@ public class MavenConfigServiceTest {
     @Test
     public void testLocalRepoFromSettings() throws Exception {
         Hashtable<String, Object> config = new Hashtable<>();
-        config.put("org.ops4j.pax.url.mvn.settings", getClass().getResource("/settings.xml").getPath());
+        config.put(
+                "org.ops4j.pax.url.mvn.settings",
+                getClass().getResource("/settings.xml").getPath());
         assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config));
     }
 
     @Test
     public void testLocalRepoFromSettingsNs() throws Exception {
         Hashtable<String, Object> config = new Hashtable<>();
-        config.put("org.ops4j.pax.url.mvn.settings", getClass().getResource("/settings2.xml").getPath());
+        config.put(
+                "org.ops4j.pax.url.mvn.settings",
+                getClass().getResource("/settings2.xml").getPath());
         assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config));
     }
-
 }

@@ -17,7 +17,6 @@
 package org.apache.karaf.config.command;
 
 import java.util.Arrays;
-
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;
 import org.apache.karaf.shell.api.action.Action;
@@ -25,10 +24,9 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.console.Session;
 
 /**
- * Abstract class from which all commands related to the ConfigurationAdmin
- * service should derive.
- * This command retrieves a reference to the ConfigurationAdmin service before
- * calling another method to actually process the command.
+ * Abstract class from which all commands related to the ConfigurationAdmin service should derive.
+ * This command retrieves a reference to the ConfigurationAdmin service before calling another
+ * method to actually process the command.
  */
 public abstract class ConfigCommandSupport implements Action {
 
@@ -37,11 +35,9 @@ public abstract class ConfigCommandSupport implements Action {
     public static final String PROPERTY_FACTORY = "ConfigCommand.Factory";
     public static final String PROPERTY_ALIAS = "ConfigCommand.Alias";
 
-    @Reference
-    protected ConfigRepository configRepository;
+    @Reference protected ConfigRepository configRepository;
 
-    @Reference
-    protected Session session;
+    @Reference protected Session session;
 
     @Override
     public Object execute() throws Exception {

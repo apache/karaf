@@ -17,7 +17,6 @@
 package org.apache.karaf.bundle.command;
 
 import java.util.Arrays;
-
 import org.apache.karaf.bundle.core.internal.BundleServiceImpl;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -34,14 +33,13 @@ public class ListServicesTest {
         listServices.setBundleContext(bundleContext);
         listServices.setBundleService(new BundleServiceImpl(bundleContext));
     }
-    
+
     @Test
     public void listAllShort() throws Exception {
         System.out.println("listAllShort");
         listServices.execute();
     }
 
-    
     @Test
     public void listAllLong() throws Exception {
         System.out.println("listAllLong");
@@ -56,6 +54,4 @@ public class ListServicesTest {
         listServices.inUse = true;
         listServices.execute();
     }
-
-
 }

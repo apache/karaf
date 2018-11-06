@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Hashtable;
 import java.util.List;
-
 import org.apache.felix.utils.resource.ResourceBuilder;
 import org.apache.felix.utils.resource.ResourceImpl;
 import org.osgi.framework.Bundle;
@@ -34,20 +33,22 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
-/**
- * Fake bundle revision implementation for resolution simulations without OSGi.
- */
+/** Fake bundle revision implementation for resolution simulations without OSGi. */
 public class FakeBundleRevision extends ResourceImpl implements BundleRevision, BundleStartLevel {
 
     private final Bundle bundle;
     private int startLevel;
 
-    public FakeBundleRevision(final Hashtable<String, String> headers, final String location, final long bundleId) throws BundleException {
+    public FakeBundleRevision(
+            final Hashtable<String, String> headers, final String location, final long bundleId)
+            throws BundleException {
         ResourceBuilder.build(this, location, headers);
-        this.bundle = (Bundle) Proxy.newProxyInstance(
-                getClass().getClassLoader(),
-                new Class[]{Bundle.class},
-                new BundleRevisionInvocationHandler(headers, location, bundleId));
+        this.bundle =
+                (Bundle)
+                        Proxy.newProxyInstance(
+                                getClass().getClassLoader(),
+                                new Class[] {Bundle.class},
+                                new BundleRevisionInvocationHandler(headers, location, bundleId));
     }
 
     @Override
@@ -111,7 +112,8 @@ public class FakeBundleRevision extends ResourceImpl implements BundleRevision, 
         private final String location;
         private final long bundleId;
 
-        public BundleRevisionInvocationHandler(Hashtable<String, String> headers, String location, long bundleId) {
+        public BundleRevisionInvocationHandler(
+                Hashtable<String, String> headers, String location, long bundleId) {
             this.headers = headers;
             this.location = location;
             this.bundleId = bundleId;

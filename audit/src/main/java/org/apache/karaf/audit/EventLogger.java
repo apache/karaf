@@ -22,9 +22,6 @@ import java.io.IOException;
 
 public interface EventLogger extends Flushable, Closeable {
 
-    /**
-     * Write the event.
-     */
+    /** Write the event. */
     void write(Event event) throws IOException;
-
 }

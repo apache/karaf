@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import org.apache.sshd.agent.SshAgent;
 import org.apache.sshd.agent.local.AgentImpl;
 import org.apache.sshd.agent.local.LocalAgentFactory;
@@ -67,9 +66,7 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.slf4j.impl.SimpleLogger;
 
-/**
- * A very simple
- */
+/** A very simple */
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -79,7 +76,9 @@ public class Main {
         if (config.getFile() != null) {
             StringBuilder sb = new StringBuilder();
             sb.setLength(0);
-            try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(config.getFile())))) {
+            try (Reader reader =
+                    new BufferedReader(
+                            new InputStreamReader(new FileInputStream(config.getFile())))) {
                 for (int c = reader.read(); c >= 0; c = reader.read()) {
                     sb.append((char) c);
                 }
@@ -99,72 +98,93 @@ public class Main {
             FilePasswordProvider passwordProvider = null;
             final Console console = System.console();
             if (console != null) {
-                passwordProvider = resourceKey -> {
-                    char[] pwd = console.readPassword("Enter password for " + resourceKey + ": ");
-                    return new String(pwd);
-                };
+                passwordProvider =
+                        resourceKey -> {
+                            char[] pwd =
+                                    console.readPassword(
+                                            "Enter password for " + resourceKey + ": ");
+                            return new String(pwd);
+                        };
                 client.setFilePasswordProvider(passwordProvider);
-                client.setUserInteraction(new UserInteraction() {
-                    @Override
-                    public void welcome(ClientSession s, String banner, String lang) {
-                        System.out.println(banner);
-                    }
-                    @Override
-                    public String[] interactive(ClientSession s, String name, String instruction, String lang, String[] prompt, boolean[] echo) {
-                        String[] answers = new String[prompt.length];
-                        try {
-                            for (int i = 0; i < prompt.length; i++) {
-                                if (echo[i]) {
-                                    answers[i] = console.readLine(prompt[i] + " ");
-                                } else {
-                                    answers[i] = new String(console.readPassword(prompt[i] + " "));
-                                }
-                                if (answers[i] == null) {
+                client.setUserInteraction(
+                        new UserInteraction() {
+                            @Override
+                            public void welcome(ClientSession s, String banner, String lang) {
+                                System.out.println(banner);
+                            }
+
+                            @Override
+                            public String[] interactive(
+                                    ClientSession s,
+                                    String name,
+                                    String instruction,
+                                    String lang,
+                                    String[] prompt,
+                                    boolean[] echo) {
+                                String[] answers = new String[prompt.length];
+                                try {
+                                    for (int i = 0; i < prompt.length; i++) {
+                                        if (echo[i]) {
+                                            answers[i] = console.readLine(prompt[i] + " ");
+                                        } else {
+                                            answers[i] =
+                                                    new String(
+                                                            console.readPassword(prompt[i] + " "));
+                                        }
+                                        if (answers[i] == null) {
+                                            return null;
+                                        }
+                                    }
+                                    return answers;
+                                } catch (IOError e) {
                                     return null;
                                 }
                             }
-                            return answers;
-                        } catch (IOError e) {
-                            return null;
-                        }
-                    }
-                    @Override
-                    public boolean isInteractionAllowed(ClientSession session) {
-                        return true;
-                    }
-                    @Override
-                    public void serverVersionInfo(ClientSession session, List<String> lines) {
-                    }
-                    @Override
-                    public String getUpdatedPassword(ClientSession session, String prompt, String lang) {
-                        return null;
-                    }
-                });
+
+                            @Override
+                            public boolean isInteractionAllowed(ClientSession session) {
+                                return true;
+                            }
+
+                            @Override
+                            public void serverVersionInfo(
+                                    ClientSession session, List<String> lines) {}
+
+                            @Override
+                            public String getUpdatedPassword(
+                                    ClientSession session, String prompt, String lang) {
+                                return null;
+                            }
+                        });
             }
-            
-            if (config.getUser()==null || config.getUser().isEmpty()) {
-            	while (true) {
-            		String user = console.readLine("Enter user: ");
-            		if (user==null || user.isEmpty()) {
-            			System.err.println("User must not be empty!");
-            		}
-            		else {
-                    	config.setUser(user);
-                    	break;
-            		}
-            	}
-            }
-            else if (console != null) {
+
+            if (config.getUser() == null || config.getUser().isEmpty()) {
+                while (true) {
+                    String user = console.readLine("Enter user: ");
+                    if (user == null || user.isEmpty()) {
+                        System.err.println("User must not be empty!");
+                    } else {
+                        config.setUser(user);
+                        break;
+                    }
+                }
+            } else if (console != null) {
                 console.printf("Logging in as %s\n", config.getUser());
             }
-            
+
             setupAgent(config.getUser(), config.getKeyFile(), client, passwordProvider);
 
             // define hearbeat (for the keep alive) and timeouts
             // TODO this should be dealt by Apache SSH client directly using .ssh/config
             client.getProperties().put(ClientFactoryManager.HEARTBEAT_INTERVAL, "60000");
-            client.getProperties().put(ClientFactoryManager.IDLE_TIMEOUT, String.valueOf(config.getIdleTimeout()));
-            client.getProperties().put(ClientFactoryManager.NIO2_READ_TIMEOUT, String.valueOf(config.getIdleTimeout()));
+            client.getProperties()
+                    .put(
+                            ClientFactoryManager.IDLE_TIMEOUT,
+                            String.valueOf(config.getIdleTimeout()));
+            client.getProperties()
+                    .put(
+                            ClientFactoryManager.NIO2_READ_TIMEOUT,
+                            String.valueOf(config.getIdleTimeout()));
 
             // TODO: remove the line below when SSHD-732 is fixed
             client.setKeyPairProvider(new FileKeyPairProvider());
@@ -183,11 +203,12 @@ public class Main {
             if (type == null) {
                 type = Terminal.TYPE_DUMB;
             }
-            try (Terminal terminal = TerminalBuilder.builder()
-                        .nativeSignals(true)
-                        .type(type)
-                        .signalHandler(Terminal.SignalHandler.SIG_IGN)
-                        .build()) {
+            try (Terminal terminal =
+                    TerminalBuilder.builder()
+                            .nativeSignals(true)
+                            .type(type)
+                            .signalHandler(Terminal.SignalHandler.SIG_IGN)
+                            .build()) {
                 if (config.getCommand().length() > 0) {
                     ChannelExec channel = session.createExecChannel(config.getCommand() + "\n");
                     channel.setIn(new ByteArrayInputStream(new byte[0]));
@@ -202,7 +223,7 @@ public class Main {
                                     }
                                     Thread.sleep(1000);
                                 } catch (Exception e) {
-                                    //ignore
+                                    // ignore
                                 }
                             }
                         }
@@ -216,7 +237,7 @@ public class Main {
                     if (channel.getExitStatus() != null) {
                         exitStatus = channel.getExitStatus();
                     }
-                    
+
                 } else {
                     ChannelShell channel = session.createShellChannel();
                     Attributes attributes = terminal.enterRawMode();
@@ -234,11 +255,13 @@ public class Main {
                         modes.put(PtyMode.VSTOP, attributes.getControlChar(ControlChar.VSTOP));
                         modes.put(PtyMode.VSUSP, attributes.getControlChar(ControlChar.VSUSP));
                         modes.put(PtyMode.VDSUSP, attributes.getControlChar(ControlChar.VDSUSP));
-                        modes.put(PtyMode.VREPRINT, attributes.getControlChar(ControlChar.VREPRINT));
+                        modes.put(
+                                PtyMode.VREPRINT, attributes.getControlChar(ControlChar.VREPRINT));
                         modes.put(PtyMode.VWERASE, attributes.getControlChar(ControlChar.VWERASE));
                         modes.put(PtyMode.VLNEXT, attributes.getControlChar(ControlChar.VLNEXT));
                         modes.put(PtyMode.VSTATUS, attributes.getControlChar(ControlChar.VSTATUS));
-                        modes.put(PtyMode.VDISCARD, attributes.getControlChar(ControlChar.VDISCARD));
+                        modes.put(
+                                PtyMode.VDISCARD, attributes.getControlChar(ControlChar.VDISCARD));
                         // Input flags
                         modes.put(PtyMode.IGNPAR, getFlag(attributes, InputFlag.IGNPAR));
                         modes.put(PtyMode.PARMRK, getFlag(attributes, InputFlag.PARMRK));
@@ -273,46 +296,75 @@ public class Main {
                         channel.setEnv("TERM", terminal.getType());
                         String ctype = System.getenv("LC_CTYPE");
                         if (ctype == null) {
-                            ctype = Locale.getDefault().toString() + "."
-                                    + System.getProperty("input.encoding", Charset.defaultCharset().name());
+                            ctype =
+                                    Locale.getDefault().toString()
+                                            + "."
+                                            + System.getProperty(
+                                                    "input.encoding",
+                                                    Charset.defaultCharset().name());
                         }
                         channel.setEnv("LC_CTYPE", ctype);
                         channel.setIn(new NoCloseInputStream(terminal.input()));
                         channel.setOut(new NoCloseOutputStream(terminal.output()));
                         channel.setErr(new NoCloseOutputStream(terminal.output()));
                         channel.open().verify();
-                        Terminal.SignalHandler prevWinchHandler = terminal.handle(Terminal.Signal.WINCH, signal -> {
-                            try {
-                                Size size = terminal.getSize();
-                                channel.sendWindowChange(size.getColumns(), size.getRows());
-                            } catch (IOException e) {
-                                // Ignore
-                            }
-                        });
-                        Terminal.SignalHandler prevQuitHandler = terminal.handle(Terminal.Signal.QUIT, signal -> {
-                            try {
-                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VQUIT));
-                                channel.getInvertedIn().flush();
-                            } catch (IOException e) {
-                                // Ignore
-                            }
-                        });
-                        Terminal.SignalHandler prevIntHandler = terminal.handle(Terminal.Signal.INT, signal -> {
-                            try {
-                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VINTR));
-                                channel.getInvertedIn().flush();
-                            } catch (IOException e) {
-                                // Ignore
-                            }
-                        });
-                        Terminal.SignalHandler prevStopHandler = terminal.handle(Terminal.Signal.TSTP, signal -> {
-                            try {
-                                channel.getInvertedIn().write(attributes.getControlChar(Attributes.ControlChar.VDSUSP));
-                                channel.getInvertedIn().flush();
-                            } catch (IOException e) {
-                                // Ignore
-                            }
-                        });
+                        Terminal.SignalHandler prevWinchHandler =
+                                terminal.handle(
+                                        Terminal.Signal.WINCH,
+                                        signal -> {
+                                            try {
+                                                Size size = terminal.getSize();
+                                                channel.sendWindowChange(
+                                                        size.getColumns(), size.getRows());
+                                            } catch (IOException e) {
+                                                // Ignore
+                                            }
+                                        });
+                        Terminal.SignalHandler prevQuitHandler =
+                                terminal.handle(
+                                        Terminal.Signal.QUIT,
+                                        signal -> {
+                                            try {
+                                                channel.getInvertedIn()
+                                                        .write(
+                                                                attributes.getControlChar(
+                                                                        Attributes.ControlChar
+                                                                                .VQUIT));
+                                                channel.getInvertedIn().flush();
+                                            } catch (IOException e) {
+                                                // Ignore
+                                            }
+                                        });
+                        Terminal.SignalHandler prevIntHandler =
+                                terminal.handle(
+                                        Terminal.Signal.INT,
+                                        signal -> {
+                                            try {
+                                                channel.getInvertedIn()
+                                                        .write(
+                                                                attributes.getControlChar(
+                                                                        Attributes.ControlChar
+                                                                                .VINTR));
+                                                channel.getInvertedIn().flush();
+                                            } catch (IOException e) {
+                                                // Ignore
+                                            }
+                                        });
+                        Terminal.SignalHandler prevStopHandler =
+                                terminal.handle(
+                                        Terminal.Signal.TSTP,
+                                        signal -> {
+                                            try {
+                                                channel.getInvertedIn()
+                                                        .write(
+                                                                attributes.getControlChar(
+                                                                        Attributes.ControlChar
+                                                                                .VDSUSP));
+                                                channel.getInvertedIn().flush();
+                                            } catch (IOException e) {
+                                                // Ignore
+                                            }
+                                        });
                         try {
                             channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
                         } finally {
@@ -352,7 +404,8 @@ public class Main {
         return attributes.getLocalFlag(flag) ? 1 : 0;
     }
 
-    private static void setupAgent(String user, String keyFile, SshClient client, FilePasswordProvider passwordProvider) {
+    private static void setupAgent(
+            String user, String keyFile, SshClient client, FilePasswordProvider passwordProvider) {
         SshAgent agent;
         URL builtInPrivateKey = Main.class.getClassLoader().getResource("karaf.key");
         agent = startAgent(user, builtInPrivateKey, keyFile, passwordProvider);
@@ -360,11 +413,13 @@ public class Main {
         client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
     }
 
-    private static ClientSession connectWithRetries(SshClient client, ClientConfig config) throws Exception {
+    private static ClientSession connectWithRetries(SshClient client, ClientConfig config)
+            throws Exception {
         ClientSession session = null;
         int retries = 0;
         do {
-            ConnectFuture future = client.connect(config.getUser(), config.getHost(), config.getPort());
+            ConnectFuture future =
+                    client.connect(config.getUser(), config.getHost(), config.getPort());
             future.await();
             try {
                 session = future.getSession();
@@ -380,7 +435,8 @@ public class Main {
         return session;
     }
 
-    private static SshAgent startAgent(String user, URL privateKeyUrl, String keyFile, FilePasswordProvider passwordProvider) {
+    private static SshAgent startAgent(
+            String user, URL privateKeyUrl, String keyFile, FilePasswordProvider passwordProvider) {
         InputStream is = null;
         try {
             SshAgent agent = new AgentImpl();
@@ -390,10 +446,11 @@ public class Main {
             is.close();
             agent.addIdentity(keyPair, user);
             if (keyFile != null) {
-                FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(Paths.get(keyFile));
+                FileKeyPairProvider fileKeyPairProvider =
+                        new FileKeyPairProvider(Paths.get(keyFile));
                 fileKeyPairProvider.setPasswordFinder(passwordProvider);
                 for (KeyPair key : fileKeyPairProvider.loadKeys()) {
-                    agent.addIdentity(key, user);                
+                    agent.addIdentity(key, user);
                 }
             }
             return agent;
@@ -414,26 +471,33 @@ public class Main {
         }
     }
 
-    private static void registerSignalHandler(final Terminal terminal, final PtyCapableChannelSession channel) {
+    private static void registerSignalHandler(
+            final Terminal terminal, final PtyCapableChannelSession channel) {
         try {
             Class<?> signalClass = Class.forName("sun.misc.Signal");
             Class<?> signalHandlerClass = Class.forName("sun.misc.SignalHandler");
             // Implement signal handler
-            Object signalHandler = Proxy.newProxyInstance(Main.class.getClassLoader(),
-                    new Class<?>[]{signalHandlerClass}, (proxy, method, args) -> {
-                        Size size = terminal.getSize();
-                        channel.sendWindowChange(size.getColumns(), size.getRows());
-                        return null;
-                    }
-            );
+            Object signalHandler =
+                    Proxy.newProxyInstance(
+                            Main.class.getClassLoader(),
+                            new Class<?>[] {signalHandlerClass},
+                            (proxy, method, args) -> {
+                                Size size = terminal.getSize();
+                                channel.sendWindowChange(size.getColumns(), size.getRows());
+                                return null;
+                            });
             // Register the signal handler, this code is equivalent to:
             // Signal.handle(new Signal("CONT"), signalHandler);
-            signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(
-                    null,
-                    signalClass.getConstructor(String.class).newInstance("WINCH"),
-                    signalHandler);
+            signalClass
+                    .getMethod("handle", signalClass, signalHandlerClass)
+                    .invoke(
+                            null,
+                            signalClass.getConstructor(String.class).newInstance("WINCH"),
+                            signalHandler);
         } catch (Exception e) {
-            // Ignore this exception, if the above failed, the signal API is incompatible with what we're expecting
+            // Ignore this exception, if the above failed, the signal API is incompatible with what
+            // we're
+            // expecting
 
         }
     }
@@ -446,14 +510,17 @@ public class Main {
             Object signalHandler = signalHandlerClass.getField("SIG_DFL").get(null);
             // Register the signal handler, this code is equivalent to:
             // Signal.handle(new Signal("CONT"), signalHandler);
-            signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(
-                    null,
-                    signalClass.getConstructor(String.class).newInstance("WINCH"),
-                    signalHandler);
+            signalClass
+                    .getMethod("handle", signalClass, signalHandlerClass)
+                    .invoke(
+                            null,
+                            signalClass.getConstructor(String.class).newInstance("WINCH"),
+                            signalHandler);
         } catch (Exception e) {
-            // Ignore this exception, if the above failed, the signal API is incompatible with what we're expecting
+            // Ignore this exception, if the above failed, the signal API is incompatible with what
+            // we're
+            // expecting
 
         }
     }
-
 }

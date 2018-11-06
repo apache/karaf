@@ -14,6 +14,17 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -27,18 +38,6 @@ import javax.naming.event.NamespaceChangeListener;
 import javax.naming.event.NamingEvent;
 import javax.naming.event.NamingExceptionEvent;
 import javax.naming.event.ObjectChangeListener;
-import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,7 +166,8 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         LOGGER.debug("  base DN: " + options.getUserBaseDn());
         LOGGER.debug("  filter: " + filter);
 
-        NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getUserBaseDn(), filter, controls);
+        NamingEnumeration<SearchResult> namingEnumeration =
+                context.search(options.getUserBaseDn(), filter, controls);
         try {
             if (!namingEnumeration.hasMore()) {
                 LOGGER.warn("User " + user + " not found in LDAP.");
@@ -176,7 +176,8 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
             LOGGER.debug("Found the user DN.");
             SearchResult result = namingEnumeration.next();
 
-            // We need to do the following because slashes are handled badly. For example, when searching
+            // We need to do the following because slashes are handled badly. For example, when
+            // searching
             // for a user with lots of special characters like cn=admin,=+<>#;\
             // SearchResult contains 2 different results:
             //
@@ -186,12 +187,16 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
             // the second escapes the slashes correctly.
             String userDNNamespace = result.getNameInNamespace();
             // handle case where cn, ou, dc case doesn't match
-            int indexOfUserBaseDN = userDNNamespace.toLowerCase().indexOf("," + options.getUserBaseDn().toLowerCase());
-            String userDN = (indexOfUserBaseDN > 0) ?
-                    userDNNamespace.substring(0, indexOfUserBaseDN) :
-                    result.getName();
+            int indexOfUserBaseDN =
+                    userDNNamespace
+                            .toLowerCase()
+                            .indexOf("," + options.getUserBaseDn().toLowerCase());
+            String userDN =
+                    (indexOfUserBaseDN > 0)
+                            ? userDNNamespace.substring(0, indexOfUserBaseDN)
+                            : result.getName();
 
-            return new String[]{userDN, userDNNamespace};
+            return new String[] {userDN, userDNNamespace};
         } finally {
             if (namingEnumeration != null) {
                 try {
@@ -203,7 +208,8 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         }
     }
 
-    public synchronized String[] getUserRoles(String user, String userDn, String userDnNamespace) throws Exception {
+    public synchronized String[] getUserRoles(String user, String userDn, String userDnNamespace)
+            throws Exception {
         String[] result = userRoles.get(userDn);
         if (result == null) {
             result = doGetUserRoles(user, userDn, userDnNamespace);
@@ -225,7 +231,6 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         return result;
     }
 
-
     protected Set<String> tryMappingRole(String role) {
         Set<String> roles = new HashSet<>();
         if (options.getRoleMapping().isEmpty()) {
@@ -242,8 +247,8 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         return roles;
     }
 
-
-    private String[] doGetUserRoles(String user, String userDn, String userDnNamespace) throws NamingException {
+    private String[] doGetUserRoles(String user, String userDn, String userDnNamespace)
+            throws NamingException {
         DirContext context = open();
 
         SearchControls controls = new SearchControls();
@@ -257,14 +262,17 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         if (filter != null) {
             filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
             filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDn));
-            filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDnNamespace));
+            filter =
+                    filter.replaceAll(
+                            Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDnNamespace));
             filter = filter.replace("\\", "\\\\");
 
             LOGGER.debug("Looking for the user roles in LDAP with ");
             LOGGER.debug("  base DN: " + options.getRoleBaseDn());
             LOGGER.debug("  filter: " + filter);
 
-            NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getRoleBaseDn(), filter, controls);
+            NamingEnumeration<SearchResult> namingEnumeration =
+                    context.search(options.getRoleBaseDn(), filter, controls);
             try {
                 List<String> rolesList = new ArrayList<>();
                 while (namingEnumeration.hasMore()) {
@@ -288,7 +296,6 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
                             }
                         }
                     }
-
                 }
                 return rolesList.toArray(new String[rolesList.size()]);
             } finally {
@@ -311,9 +318,13 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
 
         String userPubkeyAttribute = options.getUserPubkeyAttribute();
         if (userPubkeyAttribute != null) {
-            LOGGER.debug("Looking for public keys of user {} in attribute {}", userDn, userPubkeyAttribute);
+            LOGGER.debug(
+                    "Looking for public keys of user {} in attribute {}",
+                    userDn,
+                    userPubkeyAttribute);
 
-            Attributes attributes = context.getAttributes(userDn, new String[]{userPubkeyAttribute});
+            Attributes attributes =
+                    context.getAttributes(userDn, new String[] {userPubkeyAttribute});
             Attribute pubkeyAttribute = attributes.get(userPubkeyAttribute);
 
             List<String> pubkeyList = new ArrayList<>();
@@ -331,7 +342,6 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
             return new String[] {};
         }
     }
-
 
     @Override
     public void objectAdded(NamingEvent evt) {

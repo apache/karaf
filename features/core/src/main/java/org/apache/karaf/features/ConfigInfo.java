@@ -19,15 +19,14 @@ package org.apache.karaf.features;
 import java.util.Properties;
 
 public interface ConfigInfo {
-	
-	String getName();
-	
-	String getValue();
-	
-	Properties getProperties();
 
-	boolean isAppend();
+    String getName();
 
-	boolean isExternal();
+    String getValue();
 
+    Properties getProperties();
+
+    boolean isAppend();
+
+    boolean isExternal();
 }

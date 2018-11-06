@@ -16,10 +16,20 @@
  */
 package org.apache.karaf.features.internal.resolver;
 
+import static org.apache.karaf.features.internal.resolver.FeatureResource.CONDITIONAL_TRUE;
+import static org.apache.karaf.features.internal.resolver.FeatureResource.REQUIREMENT_CONDITIONAL_DIRECTIVE;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
+import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
+import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
+import static org.osgi.resource.Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE;
+import static org.osgi.resource.Namespace.RESOLUTION_MANDATORY;
+import static org.osgi.resource.Namespace.RESOLUTION_OPTIONAL;
+import static org.osgi.service.repository.ContentNamespace.CAPABILITY_URL_ATTRIBUTE;
+import static org.osgi.service.repository.ContentNamespace.CONTENT_NAMESPACE;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.felix.utils.collections.StringArrayMap;
 import org.apache.felix.utils.resource.CapabilityImpl;
 import org.apache.felix.utils.resource.RequirementImpl;
@@ -32,25 +42,13 @@ import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 
-import static org.apache.karaf.features.internal.resolver.FeatureResource.CONDITIONAL_TRUE;
-import static org.apache.karaf.features.internal.resolver.FeatureResource.REQUIREMENT_CONDITIONAL_DIRECTIVE;
-import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE;
-import static org.osgi.framework.namespace.IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE;
-import static org.osgi.framework.namespace.IdentityNamespace.IDENTITY_NAMESPACE;
-import static org.osgi.resource.Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE;
-import static org.osgi.resource.Namespace.RESOLUTION_MANDATORY;
-import static org.osgi.resource.Namespace.RESOLUTION_OPTIONAL;
-import static org.osgi.service.repository.ContentNamespace.CAPABILITY_URL_ATTRIBUTE;
-import static org.osgi.service.repository.ContentNamespace.CONTENT_NAMESPACE;
-
 public final class ResourceUtils {
 
     public static final String TYPE_SUBSYSTEM = "karaf.subsystem";
 
     public static final String TYPE_FEATURE = "karaf.feature";
 
-    private ResourceUtils() {
-    }
+    private ResourceUtils() {}
 
     public static String getType(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
@@ -74,7 +72,8 @@ public final class ResourceUtils {
     }
 
     /**
-     * If the resource has <code>type=karaf.feature</code> capability, returns its ID (name[/version]).
+     * If the resource has <code>type=karaf.feature</code> capability, returns its ID
+     * (name[/version]).
      */
     public static String getFeatureId(Resource resource) {
         List<Capability> caps = resource.getCapabilities(null);
@@ -91,24 +90,43 @@ public final class ResourceUtils {
         return null;
     }
 
-    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, String range) {
+    public static RequirementImpl addIdentityRequirement(
+            ResourceImpl resource, String name, String type, String range) {
         return addIdentityRequirement(resource, name, type, range, true);
     }
 
-    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, String range, boolean mandatory) {
-        return addIdentityRequirement(resource, name, type, range != null ? new VersionRange(range) : null, mandatory);
+    public static RequirementImpl addIdentityRequirement(
+            ResourceImpl resource, String name, String type, String range, boolean mandatory) {
+        return addIdentityRequirement(
+                resource, name, type, range != null ? new VersionRange(range) : null, mandatory);
     }
 
-    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range) {
+    public static RequirementImpl addIdentityRequirement(
+            ResourceImpl resource, String name, String type, VersionRange range) {
         return addIdentityRequirement(resource, name, type, range, true);
     }
 
-    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range, boolean mandatory) {
+    public static RequirementImpl addIdentityRequirement(
+            ResourceImpl resource,
+            String name,
+            String type,
+            VersionRange range,
+            boolean mandatory) {
         return addIdentityRequirement(resource, name, type, range, mandatory, false);
     }
-    public static RequirementImpl addIdentityRequirement(ResourceImpl resource, String name, String type, VersionRange range, boolean mandatory, boolean conditional) {
-        Map<String, String> dirs = new StringArrayMap<>((mandatory ? 0 : 1) + (conditional ? 1 : 0));
-        Map<String, Object> attrs = new StringArrayMap<>((name != null ? 1 : 0) + (type != null ? 1 : 0) + (range != null ? 1 : 0));
+
+    public static RequirementImpl addIdentityRequirement(
+            ResourceImpl resource,
+            String name,
+            String type,
+            VersionRange range,
+            boolean mandatory,
+            boolean conditional) {
+        Map<String, String> dirs =
+                new StringArrayMap<>((mandatory ? 0 : 1) + (conditional ? 1 : 0));
+        Map<String, Object> attrs =
+                new StringArrayMap<>(
+                        (name != null ? 1 : 0) + (type != null ? 1 : 0) + (range != null ? 1 : 0));
         if (!mandatory) {
             dirs.put(REQUIREMENT_RESOLUTION_DIRECTIVE, RESOLUTION_OPTIONAL);
         }
@@ -124,7 +142,8 @@ public final class ResourceUtils {
         if (range != null) {
             attrs.put(CAPABILITY_VERSION_ATTRIBUTE, range);
         }
-        RequirementImpl requirement = new RequirementImpl(resource, IDENTITY_NAMESPACE, dirs, attrs);
+        RequirementImpl requirement =
+                new RequirementImpl(resource, IDENTITY_NAMESPACE, dirs, attrs);
         resource.addRequirement(requirement);
         return requirement;
     }
@@ -133,12 +152,15 @@ public final class ResourceUtils {
         addIdentityRequirement(resource, required, true);
     }
 
-    public static void addIdentityRequirement(ResourceImpl resource, Resource required, boolean mandatory) {
+    public static void addIdentityRequirement(
+            ResourceImpl resource, Resource required, boolean mandatory) {
         for (Capability cap : required.getCapabilities(null)) {
             if (cap.getNamespace().equals(IDENTITY_NAMESPACE)) {
                 Map<String, Object> attributes = cap.getAttributes();
                 Map<String, String> dirs = new StringArrayMap<>(1);
-                dirs.put(REQUIREMENT_RESOLUTION_DIRECTIVE, mandatory ? RESOLUTION_MANDATORY : RESOLUTION_OPTIONAL);
+                dirs.put(
+                        REQUIREMENT_RESOLUTION_DIRECTIVE,
+                        mandatory ? RESOLUTION_MANDATORY : RESOLUTION_OPTIONAL);
                 Version version = (Version) attributes.get(CAPABILITY_VERSION_ATTRIBUTE);
                 Map<String, Object> attrs = new StringArrayMap<>(version != null ? 3 : 2);
                 attrs.put(IDENTITY_NAMESPACE, attributes.get(IDENTITY_NAMESPACE));
@@ -146,14 +168,17 @@ public final class ResourceUtils {
                 if (version != null) {
                     attrs.put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(version, true));
                 }
-                resource.addRequirement(new RequirementImpl(resource, IDENTITY_NAMESPACE, dirs, attrs));
+                resource.addRequirement(
+                        new RequirementImpl(resource, IDENTITY_NAMESPACE, dirs, attrs));
             }
         }
     }
 
     /**
      * Changes feature identifier (<code>name[/version]</code>) into a requirement specification.
-     * The OSGi manifest header for a feature will be: <code>osgi.identity;osgi.identity=feature-name;type=karaf.feature[;version=feature-version];filter:=filter-from-attrs</code>.
+     * The OSGi manifest header for a feature will be: <code>
+     * osgi.identity;osgi.identity=feature-name;type=karaf.feature[;version=feature-version];filter:=filter-from-attrs
+     * </code>.
      *
      * @param feature The feature name.
      * @return The feature requirement.
@@ -166,8 +191,9 @@ public final class ResourceUtils {
         if (parts.length > 1) {
             attrs.put(CAPABILITY_VERSION_ATTRIBUTE, new VersionRange(parts[1]));
         }
-        Map<String, String> dirs = Collections.singletonMap(
-            Constants.FILTER_DIRECTIVE, SimpleFilter.convert(attrs).toString());
+        Map<String, String> dirs =
+                Collections.singletonMap(
+                        Constants.FILTER_DIRECTIVE, SimpleFilter.convert(attrs).toString());
         return new RequirementImpl(null, IDENTITY_NAMESPACE, dirs, attrs).toString();
     }
 

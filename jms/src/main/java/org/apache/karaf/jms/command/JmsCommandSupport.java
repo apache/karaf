@@ -22,8 +22,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
 public abstract class JmsCommandSupport implements Action {
 
-    @Reference
-    private JmsService jmsService;
+    @Reference private JmsService jmsService;
 
     public JmsService getJmsService() {
         return jmsService;
@@ -32,5 +31,4 @@ public abstract class JmsCommandSupport implements Action {
     public void setJmsService(JmsService jmsService) {
         this.jmsService = jmsService;
     }
-
 }

@@ -16,25 +16,19 @@
  */
 package org.apache.karaf.profile.assembly;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.junit.Test;
 import org.osgi.framework.Constants;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class BuilderTest {
 
@@ -54,10 +48,11 @@ public class BuilderTest {
         }
 
         Path mvnRepo = Paths.get("target/test-classes/repo");
-        Builder builder = Builder.newInstance()
-                .repositories(Builder.Stage.Startup, true, "mvn:foo/baz/1.0/xml/features")
-                .homeDirectory(workDir)
-                .localRepository(mvnRepo.toString());
+        Builder builder =
+                Builder.newInstance()
+                        .repositories(Builder.Stage.Startup, true, "mvn:foo/baz/1.0/xml/features")
+                        .homeDirectory(workDir)
+                        .localRepository(mvnRepo.toString());
         try {
             builder.generateAssembly();
         } catch (Exception e) {
@@ -68,11 +63,12 @@ public class BuilderTest {
 
     @Test
     public void testPidsToExtract() {
-        String pidsToExtract = "\n" +
-                "                        !jmx.acl.*,\n" +
-                "                        !org.apache.karaf.command.acl.*,\n" +
-                "                        *\n" +
-                "                    ";
+        String pidsToExtract =
+                "\n"
+                        + "                        !jmx.acl.*,\n"
+                        + "                        !org.apache.karaf.command.acl.*,\n"
+                        + "                        *\n"
+                        + "                    ";
         List<String> p2e = Arrays.asList(pidsToExtract.split(","));
         Builder builder = Builder.newInstance().pidsToExtract(p2e);
         assertThat(builder.getPidsToExtract().get(0), equalTo("!jmx.acl.*"));
@@ -92,5 +88,4 @@ public class BuilderTest {
             Files.delete(path);
         }
     }
-
 }

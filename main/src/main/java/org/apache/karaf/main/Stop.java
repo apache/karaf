@@ -18,8 +18,6 @@
  */
 package org.apache.karaf.main;
 
-import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,15 +25,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.Socket;
+import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 
-/**
- * Main class used to stop the root Karaf instance
- */
+/** Main class used to stop the root Karaf instance */
 public class Stop {
 
     /**
-     * Send the shutdown command to the running Karaf instance. Uses either a shut down port configured in config.properties or
-     * the port from the shutdown port file.
+     * Send the shutdown command to the running Karaf instance. Uses either a shut down port
+     * configured in config.properties or the port from the shutdown port file.
      *
      * @param args The arguments to the stop main method.
      * @throws Exception In case of failure while stopping.
@@ -46,10 +43,16 @@ public class Stop {
             try {
                 config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
             } catch (FileNotFoundException fnfe) {
-                System.err.println(config.portFile + " shutdown port file doesn't exist. The container is not running.");
+                System.err.println(
+                        config.portFile
+                                + " shutdown port file doesn't exist. The container is not running.");
                 System.exit(3);
             } catch (IOException ioe) {
-                System.err.println("Can't read " + config.portFile + " shutdown port file: " + ioe.getMessage());
+                System.err.println(
+                        "Can't read "
+                                + config.portFile
+                                + " shutdown port file: "
+                                + ioe.getMessage());
                 System.exit(4);
             }
         }
@@ -70,7 +73,8 @@ public class Stop {
         } else {
             // using the pid file
             int pid = getPidFromPidFile(config.pidFile);
-            org.apache.karaf.jpm.Process process = new ProcessBuilderFactoryImpl().newBuilder().attach(pid);
+            org.apache.karaf.jpm.Process process =
+                    new ProcessBuilderFactoryImpl().newBuilder().attach(pid);
             if (process.isRunning()) {
                 process.destroy();
                 System.exit(0);
@@ -79,7 +83,6 @@ public class Stop {
                 System.exit(1);
             }
         }
-
     }
 
     private static int getPortFromShutdownPortFile(String portFile) throws IOException {
@@ -99,5 +102,4 @@ public class Stop {
         r.close();
         return pid;
     }
-
 }

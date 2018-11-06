@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.itests.examples;
 
+import java.util.List;
 import org.apache.karaf.examples.bundle.client.ClientService;
 import org.apache.karaf.examples.bundle.common.Booking;
 import org.apache.karaf.examples.bundle.common.BookingService;
@@ -24,8 +25,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import java.util.List;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class BundleExampleTest extends KarafTestSupport {
@@ -33,7 +32,10 @@ public class BundleExampleTest extends KarafTestSupport {
     @Test
     public void test() throws Exception {
         // add bundle example features repository
-        addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-bundle-example-features/" + System.getProperty("karaf.version") + "/xml");
+        addFeaturesRepository(
+                "mvn:org.apache.karaf.examples/karaf-bundle-example-features/"
+                        + System.getProperty("karaf.version")
+                        + "/xml");
 
         // install the karaf-bundle-example-provider feature
         installAndAssertFeature("karaf-bundle-example-provider");
@@ -60,5 +62,4 @@ public class BundleExampleTest extends KarafTestSupport {
         }
         Assert.assertTrue(found);
     }
-
 }

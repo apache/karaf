@@ -48,13 +48,12 @@ public class Parser {
 
     void ws() {
         // derek: BUGFIX: loop if comment  at beginning of input
-        //while (!eof() && Character.isWhitespace(peek())) {
+        // while (!eof() && Character.isWhitespace(peek())) {
         while (!eof() && (!escaped && Character.isWhitespace(peek()) || current == 0)) {
             if (current != 0 || !escaped && Character.isWhitespace(peek())) {
                 current++;
             }
-            if (peek() == '/' && current < text.length() - 2
-                && text.charAt(current + 1) == '/') {
+            if (peek() == '/' && current < text.length() - 2 && text.charAt(current + 1) == '/') {
                 comment();
             }
             if (current == 0) {
@@ -156,8 +155,7 @@ public class Parser {
     }
 
     CharSequence context(int around) {
-        return text.subSequence(Math.max(0, current - 20), Math.min(text.length(),
-            current + 4));
+        return text.subSequence(Math.max(0, current - 20), Math.min(text.length(), current + 4));
     }
 
     public List<List<String>> pipeline() {
@@ -168,8 +166,7 @@ public class Parser {
             ws();
             if (!eof()) {
                 statements.add(statement());
-            }
-            else {
+            } else {
                 statements.add(new ArrayList<>());
                 break;
             }
@@ -197,8 +194,7 @@ public class Parser {
         return s;
     }
 
-    public String messy()
-    {
+    public String messy() {
         start = current;
         char c = peek();
         if (c > 0 && SPECIAL.indexOf(c) < 0) {
@@ -215,8 +211,7 @@ public class Parser {
             } finally {
                 start = -1;
             }
-        }
-        else {
+        } else {
             return value();
         }
     }
@@ -252,33 +247,26 @@ public class Parser {
                 if (!escaped) {
                     if (Character.isWhitespace(c) || c == ';' || c == '|' || c == '=') {
                         break;
-                    }
-                    else if (c == '{') {
+                    } else if (c == '{') {
                         next();
                         find('}', '{');
-                    }
-                    else if (c == '(') {
+                    } else if (c == '(') {
                         next();
                         find(')', '(');
-                    }
-                    else if (c == '<') {
+                    } else if (c == '<') {
                         next();
                         find('>', '<');
-                    }
-                    else if (c == '[') {
+                    } else if (c == '[') {
                         next();
                         find(']', '[');
-                    }
-                    else if (c == '\'' || c == '"') {
+                    } else if (c == '\'' || c == '"') {
                         next();
                         quote(c);
                         next();
-                    }
-                    else {
+                    } else {
                         next();
                     }
-                }
-                else {
+                } else {
                     next();
                 }
             }
@@ -298,8 +286,8 @@ public class Parser {
 
     char unicode() {
         if (current + 4 > text.length()) {
-            throw new IllegalArgumentException("Unicode \\u escape at eof at pos ..."
-                + context(current) + "...");
+            throw new IllegalArgumentException(
+                    "Unicode \\u escape at eof at pos ..." + context(current) + "...");
         }
 
         String s = text.subSequence(current, current + 4).toString();
@@ -313,8 +301,12 @@ public class Parser {
 
         while (level != 0) {
             if (eof()) {
-                throw new RuntimeException("Eof found in the middle of a compound for '"
-                    + target + deeper + "', begins at " + context(start));
+                throw new RuntimeException(
+                        "Eof found in the middle of a compound for '"
+                                + target
+                                + deeper
+                                + "', begins at "
+                                + context(start));
             }
 
             char c = next();
@@ -330,8 +322,7 @@ public class Parser {
                         } else {
                             if (c == '\'') {
                                 quote('\'');
-                            }
-                            else {
+                            } else {
                                 if (c == '`') {
                                     quote('`');
                                 }
@@ -378,8 +369,7 @@ public class Parser {
             return text.subSequence(start, current);
         }
         throw new IllegalArgumentException(
-            "Reference to variable does not match syntax of a variable: "
-                + context(start));
+                "Reference to variable does not match syntax of a variable: " + context(start));
     }
 
     public String toString() {
@@ -393,5 +383,4 @@ public class Parser {
         }
         return sb.toString();
     }
-
 }

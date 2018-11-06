@@ -26,5 +26,4 @@ public interface SchedulerMBean {
     void trigger(String name, boolean background) throws MBeanException;
 
     void unschedule(String name) throws MBeanException;
-
 }

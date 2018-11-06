@@ -14,6 +14,8 @@
  */
 package org.apache.karaf.jaas.blueprint.jasypt.handler;
 
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarInputStream;
-
 import junit.framework.TestCase;
 import org.apache.felix.connect.PojoServiceRegistryFactoryImpl;
 import org.apache.felix.connect.launch.BundleDescriptor;
@@ -49,8 +50,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-
 public class EncryptablePropertyPlaceholderTest extends TestCase {
 
     public static final long DEFAULT_TIMEOUT = 30000;
@@ -68,28 +67,39 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
         String val = enc.encrypt("bar");
         System.setProperty("foo", val);
 
-        System.setProperty("org.bundles.framework.storage", "target/bundles/" + System.currentTimeMillis());
+        System.setProperty(
+                "org.bundles.framework.storage", "target/bundles/" + System.currentTimeMillis());
         System.setProperty("karaf.name", "root");
 
-        List<BundleDescriptor> bundles = new ClasspathScanner().scanForBundles("(Bundle-SymbolicName=*)");
-        bundles.add(getBundleDescriptor(
-                "target/jasypt.jar",
-                bundle().add("OSGI-INF/blueprint/karaf-jaas-jasypt.xml", getClass().getResource("/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
-                           .set("Manifest-Version", "2")
-                           .set("Bundle-ManifestVersion", "2")
-                           .set("Bundle-SymbolicName", "jasypt")
-                           .set("Bundle-Version", "0.0.0")));
-        bundles.add(getBundleDescriptor(
-                "target/test.jar",
-                bundle().add("OSGI-INF/blueprint/test.xml", getClass().getResource("test.xml"))
-                           .set("Manifest-Version", "2")
-                           .set("Bundle-ManifestVersion", "2")
-                           .set("Bundle-SymbolicName", "test")
-                           .set("Bundle-Version", "0.0.0")));
+        List<BundleDescriptor> bundles =
+                new ClasspathScanner().scanForBundles("(Bundle-SymbolicName=*)");
+        bundles.add(
+                getBundleDescriptor(
+                        "target/jasypt.jar",
+                        bundle().add(
+                                        "OSGI-INF/blueprint/karaf-jaas-jasypt.xml",
+                                        getClass()
+                                                .getResource(
+                                                        "/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
+                                .set("Manifest-Version", "2")
+                                .set("Bundle-ManifestVersion", "2")
+                                .set("Bundle-SymbolicName", "jasypt")
+                                .set("Bundle-Version", "0.0.0")));
+        bundles.add(
+                getBundleDescriptor(
+                        "target/test.jar",
+                        bundle().add(
+                                        "OSGI-INF/blueprint/test.xml",
+                                        getClass().getResource("test.xml"))
+                                .set("Manifest-Version", "2")
+                                .set("Bundle-ManifestVersion", "2")
+                                .set("Bundle-SymbolicName", "test")
+                                .set("Bundle-Version", "0.0.0")));
 
         Map config = new HashMap();
         config.put(PojoServiceRegistryFactory.BUNDLE_DESCRIPTORS, bundles);
-        PojoServiceRegistry reg = new PojoServiceRegistryFactoryImpl().newPojoServiceRegistry(config);
+        PojoServiceRegistry reg =
+                new PojoServiceRegistryFactoryImpl().newPojoServiceRegistry(config);
         bundleContext = reg.getBundleContext();
     }
 
@@ -104,9 +114,7 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
             headers.put(entry.getKey().toString(), entry.getValue().toString());
         }
         return new BundleDescriptor(
-                getClass().getClassLoader(),
-                "jar:" + file.toURI().toString() + "!/",
-                headers);
+                getClass().getClassLoader(), "jar:" + file.toURI().toString() + "!/", headers);
     }
 
     @After
@@ -117,14 +125,13 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
     @Test
     public void testPlaceholder() throws Exception {
 
-        for (Bundle bundle: bundleContext.getBundles()) {
+        for (Bundle bundle : bundleContext.getBundles()) {
             System.out.println(bundle.getSymbolicName() + " / " + bundle.getVersion());
         }
 
         Bean encoded = getOsgiService(Bean.class, "(encoded=*)");
         assertEquals("bar", encoded.getString());
     }
-
 
     protected <T> T getOsgiService(Class<T> type, long timeout) {
         return getOsgiService(type, null, timeout);
@@ -146,7 +153,14 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
                 if (filter.startsWith("(")) {
                     flt = "(&(" + Constants.OBJECTCLASS + "=" + type.getName() + ")" + filter + ")";
                 } else {
-                    flt = "(&(" + Constants.OBJECTCLASS + "=" + type.getName() + ")(" + filter + "))";
+                    flt =
+                            "(&("
+                                    + Constants.OBJECTCLASS
+                                    + "="
+                                    + type.getName()
+                                    + ")("
+                                    + filter
+                                    + "))";
                 }
             } else {
                 flt = "(" + Constants.OBJECTCLASS + "=" + type.getName() + ")";
@@ -161,11 +175,13 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
                 Dictionary dic = bundleContext.getBundle().getHeaders();
                 System.err.println("Test bundle headers: " + explode(dic));
 
-                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, null))) {
+                for (ServiceReference ref :
+                        asCollection(bundleContext.getAllServiceReferences(null, null))) {
                     System.err.println("ServiceReference: " + ref);
                 }
 
-                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, flt))) {
+                for (ServiceReference ref :
+                        asCollection(bundleContext.getAllServiceReferences(null, flt))) {
                     System.err.println("Filtered ServiceReference: " + ref);
                 }
 
@@ -207,5 +223,4 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
         }
         return result;
     }
-
 }

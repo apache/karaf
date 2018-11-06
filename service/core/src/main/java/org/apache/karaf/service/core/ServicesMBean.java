@@ -19,15 +19,14 @@ package org.apache.karaf.service.core;
 import javax.management.MBeanException;
 import javax.management.openmbean.TabularData;
 
-/**
- * Services MBean.
- */
+/** Services MBean. */
 public interface ServicesMBean {
 
     TabularData getServices() throws MBeanException;
 
     TabularData getServices(boolean inUse) throws MBeanException;
-    TabularData getServices(long bundleId) throws MBeanException;
-    TabularData getServices(long bundleId, boolean inUse) throws MBeanException;
 
+    TabularData getServices(long bundleId) throws MBeanException;
+
+    TabularData getServices(long bundleId, boolean inUse) throws MBeanException;
 }

@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.felix.utils.manifest.Attribute;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Directive;
@@ -45,21 +44,24 @@ import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
-@Command(scope = "bundle", name = "headers", description = "Displays OSGi headers of a given bundles.")
+@Command(
+        scope = "bundle",
+        name = "headers",
+        description = "Displays OSGi headers of a given bundles.")
 @Service
 public class Headers extends BundlesCommand {
 
-    protected final static String KARAF_PREFIX = "Karaf-";
-    protected final static String BUNDLE_PREFIX = "Bundle-";
-    protected final static String PACKAGE_SUFFFIX = "-Package";
-    protected final static String SERVICE_SUFFIX = "-Service";
-    protected final static String CAPABILITY_SUFFIX = "-Capability";
-    protected final static String IMPORT_PACKAGES_ATTRIB = "Import-Package";
-    protected final static String REQUIRE_BUNDLE_ATTRIB = "Require-Bundle";
+    protected static final String KARAF_PREFIX = "Karaf-";
+    protected static final String BUNDLE_PREFIX = "Bundle-";
+    protected static final String PACKAGE_SUFFFIX = "-Package";
+    protected static final String SERVICE_SUFFIX = "-Service";
+    protected static final String CAPABILITY_SUFFIX = "-Capability";
+    protected static final String IMPORT_PACKAGES_ATTRIB = "Import-Package";
+    protected static final String REQUIRE_BUNDLE_ATTRIB = "Require-Bundle";
 
     @Option(name = "--indent", description = "Indentation method")
     int indent = -1;
-    
+
     @Option(name = "--no-uses", description = "Print or not the Export-Package uses section")
     boolean noUses = false;
 
@@ -134,7 +136,8 @@ public class Headers extends BundlesCommand {
         Iterator<Map.Entry<String, Object>> it = otherAttribs.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> e = it.next();
-            output.append(String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
+            output.append(
+                    String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
         }
         if (otherAttribs.size() > 0) {
             output.append('\n');
@@ -143,7 +146,8 @@ public class Headers extends BundlesCommand {
         it = karafAttribs.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> e = it.next();
-            output.append(String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
+            output.append(
+                    String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
         }
         if (karafAttribs.size() > 0) {
             output.append('\n');
@@ -152,7 +156,8 @@ public class Headers extends BundlesCommand {
         it = bundleAttribs.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> e = it.next();
-            output.append(String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
+            output.append(
+                    String.format("%s = %s\n", e.getKey(), ShellUtil.getValueString(e.getValue())));
         }
         if (bundleAttribs.size() > 0) {
             output.append('\n');
@@ -171,33 +176,51 @@ public class Headers extends BundlesCommand {
         }
 
         Map<String, ClauseFormatter> formatters = new HashMap<>();
-        formatters.put(REQUIRE_BUNDLE_ATTRIB, new ClauseFormatter() {
-            public void pre(Clause clause, StringBuilder output) {
-                boolean isSatisfied = checkBundle(clause.getName(), clause.getAttribute("bundle-version"));
-                output.append(isSatisfied ? SimpleAnsi.COLOR_DEFAULT : SimpleAnsi.COLOR_RED);
-            }
-            public void post(Clause clause, StringBuilder output) {
-                output.append(SimpleAnsi.RESET);
-            }
-        });
-        formatters.put(IMPORT_PACKAGES_ATTRIB, new ClauseFormatter() {
-            public void pre(Clause clause, StringBuilder output) {
-                boolean isSatisfied = checkPackage(clause.getName(), clause.getAttribute("version"));
-                boolean isOptional = "optional".equals(clause.getDirective("resolution"));
-                output.append(isSatisfied ? SimpleAnsi.COLOR_DEFAULT : SimpleAnsi.COLOR_RED);
-                output.append(isSatisfied || isOptional ? SimpleAnsi.INTENSITY_NORMAL : SimpleAnsi.INTENSITY_BOLD);
-            }
-            public void post(Clause clause, StringBuilder output) {
-                output.append(SimpleAnsi.RESET);
-            }
-        });
+        formatters.put(
+                REQUIRE_BUNDLE_ATTRIB,
+                new ClauseFormatter() {
+                    public void pre(Clause clause, StringBuilder output) {
+                        boolean isSatisfied =
+                                checkBundle(
+                                        clause.getName(), clause.getAttribute("bundle-version"));
+                        output.append(
+                                isSatisfied ? SimpleAnsi.COLOR_DEFAULT : SimpleAnsi.COLOR_RED);
+                    }
+
+                    public void post(Clause clause, StringBuilder output) {
+                        output.append(SimpleAnsi.RESET);
+                    }
+                });
+        formatters.put(
+                IMPORT_PACKAGES_ATTRIB,
+                new ClauseFormatter() {
+                    public void pre(Clause clause, StringBuilder output) {
+                        boolean isSatisfied =
+                                checkPackage(clause.getName(), clause.getAttribute("version"));
+                        boolean isOptional = "optional".equals(clause.getDirective("resolution"));
+                        output.append(
+                                isSatisfied ? SimpleAnsi.COLOR_DEFAULT : SimpleAnsi.COLOR_RED);
+                        output.append(
+                                isSatisfied || isOptional
+                                        ? SimpleAnsi.INTENSITY_NORMAL
+                                        : SimpleAnsi.INTENSITY_BOLD);
+                    }
+
+                    public void post(Clause clause, StringBuilder output) {
+                        output.append(SimpleAnsi.RESET);
+                    }
+                });
 
         it = packagesAttribs.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> e = it.next();
             output.append(e.getKey());
             output.append(" = \n");
-            formatHeader(ShellUtil.getValueString(e.getValue()), formatters.get(e.getKey()), output, indent);
+            formatHeader(
+                    ShellUtil.getValueString(e.getValue()),
+                    formatters.get(e.getKey()),
+                    output,
+                    indent);
             output.append("\n");
         }
         if (packagesAttribs.size() > 0) {
@@ -209,15 +232,18 @@ public class Headers extends BundlesCommand {
 
     protected interface ClauseFormatter {
         void pre(Clause clause, StringBuilder output);
+
         void post(Clause clause, StringBuilder output);
     }
 
-    protected void formatHeader(String header, ClauseFormatter formatter, StringBuilder builder, int indent) {
+    protected void formatHeader(
+            String header, ClauseFormatter formatter, StringBuilder builder, int indent) {
         Clause[] clauses = Parser.parseHeader(header);
         formatClauses(clauses, formatter, builder, indent);
     }
 
-    protected void formatClauses(Clause[] clauses, ClauseFormatter formatter, StringBuilder builder, int indent) {
+    protected void formatClauses(
+            Clause[] clauses, ClauseFormatter formatter, StringBuilder builder, int indent) {
         boolean first = true;
         for (Clause clause : clauses) {
             if (first) {
@@ -229,7 +255,8 @@ public class Headers extends BundlesCommand {
         }
     }
 
-    protected void formatClause(Clause clause, ClauseFormatter formatter, StringBuilder builder, int indent) {
+    protected void formatClause(
+            Clause clause, ClauseFormatter formatter, StringBuilder builder, int indent) {
         builder.append("\t");
         if (formatter != null) {
             formatter.pre(clause, builder);
@@ -295,7 +322,6 @@ public class Headers extends BundlesCommand {
         }
     }
 
-
     private boolean checkBundle(String bundleName, String version) {
         VersionRange vr = VersionRange.parseVersionRange(version);
         Bundle[] bundles = bundleContext.getBundles();
@@ -315,7 +341,10 @@ public class Headers extends BundlesCommand {
         Bundle[] bundles = bundleContext.getBundles();
         for (int i = 0; (bundles != null) && (i < bundles.length); i++) {
             BundleWiring wiring = bundles[i].adapt(BundleWiring.class);
-            List<BundleCapability> caps = wiring != null ? wiring.getCapabilities(BundleRevision.PACKAGE_NAMESPACE) : null;
+            List<BundleCapability> caps =
+                    wiring != null
+                            ? wiring.getCapabilities(BundleRevision.PACKAGE_NAMESPACE)
+                            : null;
             if (caps != null) {
                 for (BundleCapability cap : caps) {
                     String n = getAttribute(cap, BundleRevision.PACKAGE_NAMESPACE);
@@ -328,10 +357,9 @@ public class Headers extends BundlesCommand {
         }
         return false;
     }
-    
-    private String getAttribute(BundleCapability cap, String name)  {
+
+    private String getAttribute(BundleCapability cap, String name) {
         Object obj = cap.getAttributes().get(name);
         return obj != null ? obj.toString() : null;
     }
-
 }

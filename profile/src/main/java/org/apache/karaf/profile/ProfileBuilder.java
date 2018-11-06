@@ -19,12 +19,9 @@ package org.apache.karaf.profile;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.karaf.profile.impl.ProfileBuilderImpl;
 
-/**
- * A profile builder.
- */
+/** A profile builder. */
 public interface ProfileBuilder {
 
     ProfileBuilder addAttribute(String key, String value);
@@ -32,33 +29,31 @@ public interface ProfileBuilder {
     ProfileBuilder setAttributes(Map<String, String> attributes);
 
     ProfileBuilder from(Profile profile);
-    
+
     ProfileBuilder identity(String profileId);
 
     List<String> getParents();
-    
+
     ProfileBuilder addParent(String parentId);
 
     ProfileBuilder addParents(List<String> parentIds);
 
     ProfileBuilder setParents(List<String> parentIds);
-    
+
     ProfileBuilder removeParent(String parentId);
 
     Set<String> getConfigurationKeys();
 
     /**
-     * Return a copy of the configuration with the specified pid
-     * or an empty map if it does not exist yet.
-     * The copy should be used for updates and then used with
-     * {@link #addConfiguration(String, java.util.Map)} to keep
-     * the layout and comments.
+     * Return a copy of the configuration with the specified pid or an empty map if it does not
+     * exist yet. The copy should be used for updates and then used with {@link
+     * #addConfiguration(String, java.util.Map)} to keep the layout and comments.
      *
      * @param pid The configuration PID.
      * @return The copy of the configuration with the given PID.
      */
     Map<String, Object> getConfiguration(String pid);
-    
+
     ProfileBuilder addConfiguration(String pid, Map<String, Object> config);
 
     ProfileBuilder addConfiguration(String pid, String key, Object value);
@@ -68,15 +63,15 @@ public interface ProfileBuilder {
     ProfileBuilder deleteConfiguration(String pid);
 
     Set<String> getFileConfigurationKeys();
-    
+
     byte[] getFileConfiguration(String key);
-    
+
     ProfileBuilder addFileConfiguration(String fileName, byte[] data);
-    
+
     ProfileBuilder setFileConfigurations(Map<String, byte[]> configs);
 
     ProfileBuilder deleteFileConfiguration(String fileName);
-    
+
     ProfileBuilder setBundles(List<String> values);
 
     ProfileBuilder addBundle(String value);
@@ -102,11 +97,11 @@ public interface ProfileBuilder {
     ProfileBuilder addBlacklistedRepository(String value);
 
     ProfileBuilder setOverrides(List<String> values);
-    
+
     ProfileBuilder setOptionals(List<String> values);
-    
+
     ProfileBuilder setOverlay(boolean overlay);
-    
+
     Profile getProfile();
 
     final class Factory {
@@ -124,7 +119,6 @@ public interface ProfileBuilder {
         }
 
         // Hide ctor
-        private Factory() {
-        }
+        private Factory() {}
     }
 }

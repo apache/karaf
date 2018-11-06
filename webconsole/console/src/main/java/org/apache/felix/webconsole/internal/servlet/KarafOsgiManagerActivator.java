@@ -18,9 +18,7 @@
  */
 package org.apache.felix.webconsole.internal.servlet;
 
-
 import java.util.Hashtable;
-
 import org.apache.felix.webconsole.WebConsoleSecurityProvider;
 import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
 import org.osgi.framework.BundleActivator;
@@ -29,47 +27,38 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
 
-
 /**
- * This is the main, starting class of the Bundle. It initializes and disposes
- * the Apache Web Console upon bundle lifecycle requests.
+ * This is the main, starting class of the Bundle. It initializes and disposes the Apache Web
+ * Console upon bundle lifecycle requests.
  */
-public class KarafOsgiManagerActivator implements BundleActivator
-{
+public class KarafOsgiManagerActivator implements BundleActivator {
 
     private ServiceRegistration registration;
     private KarafOsgiManager osgiManager;
 
-
-    /**
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
-    public void start( BundleContext bundleContext )
-    {
+    /** @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext) */
+    public void start(BundleContext bundleContext) {
         Hashtable<String, String> props = new Hashtable<>();
         props.put(Constants.SERVICE_PID, "org.apache.karaf.webconsole");
-        registration = bundleContext.registerService(
-                new String[] {WebConsoleSecurityProvider.class.getName(), WebConsoleSecurityProvider2.class.getName(), ManagedService.class.getName() },
-                new JaasSecurityProvider(),
-                props
-        );
-        osgiManager = new KarafOsgiManager( bundleContext );
+        registration =
+                bundleContext.registerService(
+                        new String[] {
+                            WebConsoleSecurityProvider.class.getName(),
+                            WebConsoleSecurityProvider2.class.getName(),
+                            ManagedService.class.getName()
+                        },
+                        new JaasSecurityProvider(),
+                        props);
+        osgiManager = new KarafOsgiManager(bundleContext);
     }
 
-
-    /**
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
-    public void stop( BundleContext arg0 )
-    {
-        if ( osgiManager != null )
-        {
+    /** @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext) */
+    public void stop(BundleContext arg0) {
+        if (osgiManager != null) {
             osgiManager.dispose();
         }
-        if ( registration != null )
-        {
+        if (registration != null) {
             registration.unregister();
         }
     }
-
 }

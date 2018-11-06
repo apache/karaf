@@ -18,24 +18,20 @@ package org.apache.karaf.shell.support;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 
-
-/**
- *
- */
+/** */
 public class RegexCommandLoggingFilter implements CommandLoggingFilter {
 
     public static final String DEFAULT_REPLACEMENT = "*****";
 
     private static class ReplaceRegEx {
         private Pattern pattern;
-        private int group=1;
+        private int group = 1;
         private String replacement;
 
         public ReplaceRegEx(String pattern, int group, String replacement) {
-            this.pattern = Pattern.compile(";* *"+pattern);
+            this.pattern = Pattern.compile(";* *" + pattern);
             this.group = group;
             this.replacement = replacement;
         }
@@ -43,9 +39,13 @@ public class RegexCommandLoggingFilter implements CommandLoggingFilter {
         public CharSequence filter(CharSequence command) {
             Matcher m = pattern.matcher(command);
             int offset = 0;
-            while( m.find() ) {
+            while (m.find()) {
                 int origLen = command.length();
-                command = new StringBuilder(command).replace(m.start(group)+offset, m.end(group)+offset, replacement).toString();
+                command =
+                        new StringBuilder(command)
+                                .replace(
+                                        m.start(group) + offset, m.end(group) + offset, replacement)
+                                .toString();
                 offset += command.length() - origLen;
             }
             return command;
@@ -53,13 +53,13 @@ public class RegexCommandLoggingFilter implements CommandLoggingFilter {
     }
 
     private String pattern;
-    private int group=1;
-    private String replacement=DEFAULT_REPLACEMENT;
+    private int group = 1;
+    private String replacement = DEFAULT_REPLACEMENT;
 
     ArrayList<ReplaceRegEx> regexs = new ArrayList<>();
 
     public CharSequence filter(CharSequence command) {
-        if( pattern!=null ) {
+        if (pattern != null) {
             command = new ReplaceRegEx(pattern, group, replacement).filter(command);
         }
         for (ReplaceRegEx regex : regexs) {
@@ -71,6 +71,7 @@ public class RegexCommandLoggingFilter implements CommandLoggingFilter {
     public void addRegEx(String pattern) {
         addRegEx(pattern, 1);
     }
+
     public void addRegEx(String pattern, int group) {
         addRegEx(pattern, group, DEFAULT_REPLACEMENT);
     }
@@ -79,15 +80,15 @@ public class RegexCommandLoggingFilter implements CommandLoggingFilter {
         regexs.add(new ReplaceRegEx(pattern, group, replacement));
     }
 
-    public void addCommandOption(String option, String...commands) {
+    public void addCommandOption(String option, String... commands) {
         String pattern = "(";
         for (String command : commands) {
-            if( pattern.length() > 1 ) {
+            if (pattern.length() > 1) {
                 pattern += "|";
             }
             pattern += Pattern.quote(command);
         }
-        pattern += ") +.*?"+Pattern.quote(option)+" +([^ ]+)";
+        pattern += ") +.*?" + Pattern.quote(option) + " +([^ ]+)";
         regexs.add(new ReplaceRegEx(pattern, 2, DEFAULT_REPLACEMENT));
     }
 

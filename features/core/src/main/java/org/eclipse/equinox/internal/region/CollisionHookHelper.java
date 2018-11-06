@@ -18,10 +18,7 @@ package org.eclipse.equinox.internal.region;
 
 import org.osgi.framework.hooks.bundle.CollisionHook;
 
-/**
- * Hack to access CollisionHook as StandardRegionDigraph.getBundleCollisionHook() is
- * not public
- */
+/** Hack to access CollisionHook as StandardRegionDigraph.getBundleCollisionHook() is not public */
 public class CollisionHookHelper {
     public static CollisionHook getCollisionHook(StandardRegionDigraph digraph) {
         return (CollisionHook) digraph.getBundleCollisionHook();

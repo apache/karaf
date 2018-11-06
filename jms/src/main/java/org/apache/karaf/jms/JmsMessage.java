@@ -16,16 +16,14 @@
  */
 package org.apache.karaf.jms;
 
-import javax.jms.*;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import javax.jms.*;
 
-/**
- * Describe a JMS message is more human readable way.
- */
+/** Describe a JMS message is more human readable way. */
 public class JmsMessage {
 
     private Map<String, Object> properties = new HashMap<>();
@@ -90,7 +88,6 @@ public class JmsMessage {
         type = message.getJMSType();
         content = getMessageContent(message);
     }
-
 
     private String getMessageContent(Message message) throws JMSException {
         if (message instanceof TextMessage) {
@@ -160,5 +157,4 @@ public class JmsMessage {
     public String getType() {
         return type;
     }
-
 }

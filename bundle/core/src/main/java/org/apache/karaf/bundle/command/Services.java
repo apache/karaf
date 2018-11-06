@@ -19,7 +19,6 @@ package org.apache.karaf.bundle.command;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -32,30 +31,49 @@ import org.osgi.framework.ServiceReference;
 @Service
 public class Services extends BundlesCommand {
 
-    @Option(name = "-a", aliases = {}, description = "Shows all services. (Karaf commands and completers are hidden by default)", required = false, multiValued = false)
+    @Option(
+            name = "-a",
+            aliases = {},
+            description =
+                    "Shows all services. (Karaf commands and completers are hidden by default)",
+            required = false,
+            multiValued = false)
     boolean showAll;
 
-    @Option(name = "-u", aliases = {}, description = "Shows the services each bundle uses. (By default the provided services are shown)", required = false, multiValued = false)
+    @Option(
+            name = "-u",
+            aliases = {},
+            description =
+                    "Shows the services each bundle uses. (By default the provided services are shown)",
+            required = false,
+            multiValued = false)
     boolean inUse;
-    
-    @Option(name = "-p", aliases = {}, description = "Shows the properties of the services", required = false, multiValued = false)
+
+    @Option(
+            name = "-p",
+            aliases = {},
+            description = "Shows the properties of the services",
+            required = false,
+            multiValued = false)
     boolean showProperties = false;
 
-    Set<String> hidden = new HashSet<>(Arrays.asList(
-            "org.apache.felix.service.command.Function",
-            "org.apache.karaf.shell.console.Completer"
-    ));
+    Set<String> hidden =
+            new HashSet<>(
+                    Arrays.asList(
+                            "org.apache.felix.service.command.Function",
+                            "org.apache.karaf.shell.console.Completer"));
 
     @Override
     protected void executeOnBundle(Bundle bundle) throws Exception {
-        ServiceReference<?>[] refs = (inUse) ? bundle.getServicesInUse() : bundle.getRegisteredServices();
+        ServiceReference<?>[] refs =
+                (inUse) ? bundle.getServicesInUse() : bundle.getRegisteredServices();
         printServices(bundle, refs, showProperties);
     }
-    
+
     private void printServices(Bundle bundle, ServiceReference<?>[] refs, boolean showProperties) {
         boolean headerPrinted = false;
         boolean needSeparator = false;
-        
+
         if (refs == null) {
             return;
         }
@@ -69,7 +87,8 @@ public class Services extends BundlesCommand {
             if (!headerPrinted) {
                 headerPrinted = true;
                 System.out.println("");
-                String title = ShellUtil.getBundleName(bundle) + ((inUse) ? " uses:" : " provides:");
+                String title =
+                        ShellUtil.getBundleName(bundle) + ((inUse) ? " uses:" : " provides:");
                 System.out.println(title);
                 System.out.println(ShellUtil.getUnderlineString(title));
             }
@@ -105,5 +124,4 @@ public class Services extends BundlesCommand {
             System.out.println(key + " = " + ShellUtil.getValueString(serviceRef.getProperty(key)));
         }
     }
-
 }

@@ -46,9 +46,7 @@ public interface FeaturesServiceMBean {
 
     String FEATURE_CONFIG_FILES_ELEMENTS = "Files";
 
-    /**
-     * The type of the event which is emitted for features events
-     */
+    /** The type of the event which is emitted for features events */
     String FEATURE_EVENT_TYPE = "org.apache.karaf.features.featureEvent";
 
     String FEATURE_EVENT_EVENT_TYPE = "Type";
@@ -59,27 +57,34 @@ public interface FeaturesServiceMBean {
 
     String FEATURE_EVENT_REGION = "Region";
 
-    /**
-     * The item names in the CompositeData representing a feature
-     */
-    String[] FEATURE = {FEATURE_NAME, FEATURE_VERSION, FEATURE_DEPENDENCIES, FEATURE_BUNDLES,
-        FEATURE_CONFIGURATIONS, FEATURE_CONFIGURATIONFILES, FEATURE_INSTALLED, FEATURE_BLACKLISTED,
-        FEATURE_REQUIRED};
+    /** The item names in the CompositeData representing a feature */
+    String[] FEATURE = {
+        FEATURE_NAME,
+        FEATURE_VERSION,
+        FEATURE_DEPENDENCIES,
+        FEATURE_BUNDLES,
+        FEATURE_CONFIGURATIONS,
+        FEATURE_CONFIGURATIONFILES,
+        FEATURE_INSTALLED,
+        FEATURE_BLACKLISTED,
+        FEATURE_REQUIRED
+    };
 
     String[] FEATURE_IDENTIFIER = {FEATURE_NAME, FEATURE_VERSION};
 
-    String[] FEATURE_CONFIG = {FEATURE_CONFIG_PID, FEATURE_CONFIG_ELEMENTS, FEATURE_CONFIG_APPEND };
+    String[] FEATURE_CONFIG = {FEATURE_CONFIG_PID, FEATURE_CONFIG_ELEMENTS, FEATURE_CONFIG_APPEND};
 
     String[] FEATURE_CONFIG_FILES = {FEATURE_CONFIG_FILES_ELEMENTS};
 
     String[] FEATURE_CONFIG_ELEMENT = {FEATURE_CONFIG_ELEMENT_KEY, FEATURE_CONFIG_ELEMENT_VALUE};
 
     /**
-     * The item names in the CompositeData representing the event raised for
-     * feature events within the OSGi container by this bean
+     * The item names in the CompositeData representing the event raised for feature events within
+     * the OSGi container by this bean
      */
-    String[] FEATURE_EVENT = {FEATURE_NAME, FEATURE_VERSION, FEATURE_EVENT_REGION, FEATURE_EVENT_EVENT_TYPE};
-
+    String[] FEATURE_EVENT = {
+        FEATURE_NAME, FEATURE_VERSION, FEATURE_EVENT_REGION, FEATURE_EVENT_EVENT_TYPE
+    };
 
     String REPOSITORY_NAME = "Name";
 
@@ -91,9 +96,7 @@ public interface FeaturesServiceMBean {
 
     String REPOSITORY_BLACKLISTED = "Blacklisted";
 
-    /**
-     * The type of the event which is emitted for repositories events
-     */
+    /** The type of the event which is emitted for repositories events */
     String REPOSITORY_EVENT_TYPE = "org.apache.karaf.features.repositoryEvent";
 
     String REPOSITORY_EVENT_EVENT_TYPE = "Type";
@@ -102,14 +105,18 @@ public interface FeaturesServiceMBean {
 
     String REPOSITORY_EVENT_EVENT_TYPE_REMOVED = "Removed";
 
-    /**
-     * The item names in the CompositeData representing a feature
-     */
-    String[] REPOSITORY = {REPOSITORY_NAME, REPOSITORY_URI, REPOSITORY_REPOSITORIES, REPOSITORY_FEATURES, REPOSITORY_BLACKLISTED};
+    /** The item names in the CompositeData representing a feature */
+    String[] REPOSITORY = {
+        REPOSITORY_NAME,
+        REPOSITORY_URI,
+        REPOSITORY_REPOSITORIES,
+        REPOSITORY_FEATURES,
+        REPOSITORY_BLACKLISTED
+    };
 
     /**
-     * The item names in the CompositeData representing the event raised for
-     * feature events within the OSGi container by this bean
+     * The item names in the CompositeData representing the event raised for feature events within
+     * the OSGi container by this bean
      */
     String[] REPOSITORY_EVENT = {REPOSITORY_URI, REPOSITORY_EVENT_EVENT_TYPE};
 
@@ -137,7 +144,8 @@ public interface FeaturesServiceMBean {
 
     void installFeature(String name, String version, boolean noRefresh) throws Exception;
 
-    void installFeature(String name, String version, boolean noRefresh, boolean noStart) throws Exception;
+    void installFeature(String name, String version, boolean noRefresh, boolean noStart)
+            throws Exception;
 
     TabularData infoFeature(String name) throws Exception;
 
@@ -150,5 +158,4 @@ public interface FeaturesServiceMBean {
     void uninstallFeature(String name, String version) throws Exception;
 
     void uninstallFeature(String name, String version, boolean noRefresh) throws Exception;
-
 }
