@@ -113,9 +113,6 @@ public class ArchiveMojo extends MojoSupport {
     private boolean useSymLinks = false;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().debug("Setting artifact file: " + targetFile);
-        org.apache.maven.artifact.Artifact artifact = project.getArtifact();
-        artifact.setFile(targetFile);
         try {
             //now pack up the server.
             if(archiveTarGz){
@@ -146,6 +143,9 @@ public class ArchiveMojo extends MojoSupport {
         if (attach) {
             projectHelper.attachArtifact(project, artifact1.getType(), classifier, target1);
         }
+
+        artifact1.setFile(target1);
+        project.setArtifact(artifact1);
     }
 
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,

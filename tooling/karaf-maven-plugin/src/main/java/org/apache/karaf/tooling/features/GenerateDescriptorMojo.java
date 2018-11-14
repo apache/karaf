@@ -342,7 +342,12 @@ public class GenerateDescriptorMojo extends MojoSupport {
                         throw new MojoExecutionException("Could not create directory for features file: " + dir);
                     }
                     filter(inputFile, outputFile);
-                    projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                    getLog().info("Generation not enabled");
+                    getLog().info("Attaching artifact");
+                    //projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                    Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType, attachmentArtifactClassifier);
+                    artifact.setFile(outputFile);
+                    project.setArtifact(artifact);
                     return;
                 }
             }
@@ -357,6 +362,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 try (PrintStream out = new PrintStream(new FileOutputStream(outputFile))) {
                     writeFeatures(out);
                 }
+                getLog().info("Attaching features XML");
                 // now lets attach it
                 projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
             } else {
