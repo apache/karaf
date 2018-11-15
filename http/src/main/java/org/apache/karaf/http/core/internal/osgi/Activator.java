@@ -98,6 +98,8 @@ public class Activator extends BaseActivator implements ManagedService {
 
     @Override
     public void updated(Dictionary<String, ?> properties) {
-        proxyService.initProxies();
+        if (proxyService != null) {
+            proxyService.initProxies();
+        }
     }
 }
