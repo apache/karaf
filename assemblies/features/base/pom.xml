@@ -43,11 +43,6 @@
                         <version>2.3.0</version>
                     </dependency>
                     <dependency>
-                        <groupId>javax.activation</groupId>
-                        <artifactId>javax.activation-api</artifactId>
-                        <version>1.2.0</version>
-                    </dependency>
-                    <dependency>
                         <groupId>javax.annotation</groupId>
                         <artifactId>javax.annotation-api</artifactId>
                         <version>${javax.annotation.version}</version>
@@ -220,11 +215,6 @@
                                 <artifactItem>
                                     <groupId>javax.annotation</groupId>
                                     <artifactId>javax.annotation-api</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>javax.activation</groupId>
-                                    <artifactId>javax.activation-api</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
