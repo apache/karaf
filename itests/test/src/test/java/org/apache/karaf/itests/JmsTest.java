@@ -13,46 +13,51 @@
  */
 package org.apache.karaf.itests;
 
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.karaf.features.FeaturesService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.MavenUtils;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 @RunWith(PaxExam.class)
-@ExamReactorStrategy(PerClass.class)
+@ExamReactorStrategy(PerMethod.class)
 public class JmsTest extends KarafTestSupport {
 
-    private static final EnumSet<FeaturesService.Option> NO_AUTO_REFRESH = EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles);
+    @Configuration
+    public Option[] config() {
+        String version = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
+        List<Option> options = new LinkedList<>(Arrays.asList(super.config()));
+        options.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresRepositories",
+                "mvn:org.apache.karaf.features/framework/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/spring/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/enterprise-legacy/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/standard/" + version + "/xml/features, " +
+                        "mvn:org.apache.activemq/activemq-karaf/5.15.8/xml/features"));
+        options.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
+        "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,shell-compat,activemq-broker-noweb"));
+        return options.toArray(new Option[options.size()]);
+    }
 
     @Test(timeout = 60000)
     public void testCommands() throws Exception {
-        System.out.println("== Add features repositories");
-        executeCommand("feature:repo-add spring-legacy");
-        executeCommand("feature:repo-add activemq 5.15.3");
-
-        featureService.installFeature("aries-blueprint");
-
         System.out.println("== Installing JMS feature");
-        featureService.installFeature("jms", NO_AUTO_REFRESH);
-        featureService.installFeature("pax-jms-activemq", NO_AUTO_REFRESH);
-
-        System.out.println("== Installing ActiveMQ");
-        featureService.installFeature("shell-compat");
-        featureService.installFeature("activemq-broker-noweb", NO_AUTO_REFRESH);
+        featureService.installFeature("jms");
+        featureService.installFeature("pax-jms-activemq");
 
         System.out.println("== Creating JMS ConnectionFactory");
         executeCommand("jms:create test");
@@ -95,18 +100,9 @@ public class JmsTest extends KarafTestSupport {
 
     @Test
     public void testMBean() throws Exception {
-        System.out.println("== Add features repositories");
-        executeCommand("feature:repo-add spring-legacy");
-        executeCommand("feature:repo-add activemq 5.15.3");
-        featureService.installFeature("aries-blueprint");
-
         System.out.println("== Installing JMS feature");
-        featureService.installFeature("jms", NO_AUTO_REFRESH);
-        featureService.installFeature("pax-jms-activemq", NO_AUTO_REFRESH);
-
-        System.out.println("== Installing ActiveMQ");
-        featureService.installFeature("shell-compat");
-        featureService.installFeature("activemq-broker-noweb", NO_AUTO_REFRESH);
+        featureService.installFeature("jms");
+        featureService.installFeature("pax-jms-activemq");
 
         Thread.sleep(2000);
 
