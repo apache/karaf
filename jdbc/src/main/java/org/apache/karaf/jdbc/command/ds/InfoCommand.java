@@ -30,7 +30,7 @@ import java.util.Map;
 @Service
 public class InfoCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "datasource", description = "The JDBC datasource name", required = true, multiValued = false)
+    @Argument(index = 0, name = "datasource", description = "The JDBC datasource name, its JNDI name or service.id", required = true, multiValued = false)
     @Completion(DataSourcesNameCompleter.class)
     String datasource;
 

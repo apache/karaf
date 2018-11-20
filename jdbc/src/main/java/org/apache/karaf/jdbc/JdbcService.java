@@ -65,6 +65,14 @@ public interface JdbcService {
     List<String> datasources() throws Exception;
 
     /**
+     * List service IDs of JDBC datasource OSGi services available
+     *
+     * @return A {@link List} of datasources OSGi service IDs.
+     * @throws Exception If the service fails.
+     */
+    List<Long> datasourceServiceIds() throws Exception;
+
+    /**
      * Execute a SQL query on a given JDBC datasource.
      *
      * @param datasource The JDBC datasource name.

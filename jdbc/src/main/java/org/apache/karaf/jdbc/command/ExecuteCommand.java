@@ -30,7 +30,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ExecuteCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "datasource", description = "The JDBC datasource", required = true, multiValued = false)
+    @Argument(index = 0, name = "datasource", description = "The JDBC datasource name, its JNDI name or service.id", required = true, multiValued = false)
     @Completion(DataSourcesNameCompleter.class)
     String datasource;
 

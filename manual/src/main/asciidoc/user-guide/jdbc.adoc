@@ -110,20 +110,22 @@ The `jdbc:ds-list` command lists the JDBC datasources:
 
 ----
 karaf@root()> jdbc:ds-list
-Name | Product | Version | URL | Status
----------------------------------------
-
+Name │ Service Id │ Product        │ Version              │ URL             │ Status
+─────┼────────────┼────────────────┼──────────────────────┼─────────────────┼───────
+test │ 112        │ Apache Derby   │ 10.8.2.2 - (1181258) │ jdbc:derby:test │ OK
 ----
 
 ===== `jdbc:ds-info`
 
-The `jdbc:ds-info` command provides details about a JDBC datasource:
+The `jdbc:ds-info` command provides details about a JDBC datasource. The data source may be specified using name
+or service.id:
 
 ----
 karaf@root()> jdbc:ds-info test
 Property       | Value
 --------------------------------------------------
 driver.version | 10.8.2.2 - (1181258)
+service.id     | 112
 username       | APP
 db.version     | 10.8.2.2 - (1181258)
 db.product     | Apache Derby
@@ -208,6 +210,7 @@ The object name to use is `org.apache.karaf:type=jdbc,name=*`.
 The `Datasources` attribute provides a tabular data of all JDBC datasource, containing:
 
 * `name` is the JDBC datasource name
+* `service.id` is the JDBC datasource ID of OSGi service
 * `product` is the database product backend
 * `url` is the JDBC URL used by the datasource
 * `version` is the database version backend.

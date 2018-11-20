@@ -35,7 +35,7 @@ import org.apache.karaf.shell.support.table.ShellTable;
 @Service
 public class QueryCommand extends JdbcCommandSupport {
 
-    @Argument(index = 0, name = "datasource", description = "The JDBC datasource to use", required = true, multiValued = false)
+    @Argument(index = 0, name = "datasource", description = "The JDBC datasource name, its JNDI name or service.id to use", required = true, multiValued = false)
     @Completion(DataSourcesNameCompleter.class)
     String datasource;
 

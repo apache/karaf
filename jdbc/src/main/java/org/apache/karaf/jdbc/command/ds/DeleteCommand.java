@@ -17,7 +17,7 @@
 package org.apache.karaf.jdbc.command.ds;
 
 import org.apache.karaf.jdbc.command.JdbcCommandSupport;
-import org.apache.karaf.jdbc.command.completers.DataSourcesFileNameCompleter;
+import org.apache.karaf.jdbc.command.completers.DataSourcesNameCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -28,7 +28,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 public class DeleteCommand extends JdbcCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The JDBC datasource name (the one used at creation time)", required = true, multiValued = false)
-    @Completion(DataSourcesFileNameCompleter.class)
+    @Completion(DataSourcesNameCompleter.class)
     String name;
 
     @Override

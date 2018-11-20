@@ -36,24 +36,24 @@ public class JdbcMBeanImpl implements JdbcMBean {
     public TabularData getDatasources() throws MBeanException {
         try {
             CompositeType type = new CompositeType("DataSource", "JDBC DataSource",
-                    new String[]{ "name", "product", "version", "url", "status"},
-                    new String[]{ "Name", "Database product", "Database version", "JDBC URL", "Status" },
-                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
+                    new String[]{ "name", "product", "version", "url", "status", "service.id"},
+                    new String[]{ "Name", "Database product", "Database version", "JDBC URL", "Status", "Service ID" },
+                    new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
             TabularType tableType = new TabularType("JDBC DataSources", "Table of the JDBC DataSources",
-                    type, new String[]{ "name" });
+                    type, new String[]{ "service.id" });
             TabularData table = new TabularDataSupport(tableType);
 
-            for (String datasource : jdbcService.datasources()) {
+            for (Long datasource : jdbcService.datasourceServiceIds()) {
                 try {
-                    Map<String, String> info = jdbcService.info(datasource);
+                    Map<String, String> info = jdbcService.info(Long.toString(datasource));
                     CompositeData data = new CompositeDataSupport(type,
-                            new String[]{"name", "product", "version", "url", "status"},
-                            new Object[]{datasource, info.get("db.product"), info.get("db.version"), info.get("url"), "OK"});
+                            new String[]{"name", "product", "version", "url", "status", "service.id"},
+                            new Object[]{info.get("name"), info.get("db.product"), info.get("db.version"), info.get("url"), "OK", info.get("service.id")});
                     table.put(data);
                 } catch (Exception e) {
                     CompositeData data = new CompositeDataSupport(type,
-                            new String[]{"name", "product", "version", "url", "status"},
-                            new Object[]{datasource, "", "", "", "ERROR"});
+                            new String[]{"name", "product", "version", "url", "status", "service.id"},
+                            new Object[]{datasource, "", "", "", "ERROR", ""});
                     table.put(data);
                 }
             }

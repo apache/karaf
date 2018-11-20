@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.jdbc.command.ds;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,22 +34,35 @@ public class ListCommand extends JdbcCommandSupport {
     public Object execute() throws Exception {
         ShellTable table = new ShellTable();
         table.column("Name");
+        table.column("Service Id");
         table.column("Product");
         table.column("Version");
         table.column("URL");
         table.column("Status");
 
-        List<String> datasources = this.getJdbcService().datasources();
-        for (String dsName: datasources) {
+        boolean duplication = false;
+        Map<String, Long> nameToId = new HashMap<>();
+
+        List<Long> datasources = this.getJdbcService().datasourceServiceIds();
+        Collections.sort(datasources);
+        for (Long id: datasources) {
             try {
-                Map<String, String> info = this.getJdbcService().info(dsName);
-                table.addRow().addContent(dsName, info.get("db.product"), info.get("db.version"), info.get("url"), "OK");
+                Map<String, String> info = this.getJdbcService().info(Long.toString(id));
+                table.addRow().addContent(info.get("name"), info.get("service.id"), info.get("db.product"), info.get("db.version"), info.get("url"), "OK");
+                if (nameToId.put(info.get("name"), id) != null) {
+                    duplication = true;
+                }
             } catch (Exception e) {
-                table.addRow().addContent(dsName, "", "", "", "Error " + e.getMessage());
+                table.addRow().addContent(id, "", "", "", "", "Error " + e.getMessage());
             }
         }
 
         table.print(System.out);
+
+        if (duplication) {
+            System.out.println("\nThere are multiple data source services registered with the same name. Please review your configuration.");
+        }
+
         return null;
     }
 
