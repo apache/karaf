@@ -18,8 +18,10 @@ package org.apache.karaf.kar.internal;
 
 import java.io.File;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,12 @@ class FeatureDetector {
 
     FeatureDetector() {
         dbf = DocumentBuilderFactory.newInstance();
+        try {
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        } catch (ParserConfigurationException ex) {
+            //
+        }
         dbf.setNamespaceAware(true);
     }
     /**
