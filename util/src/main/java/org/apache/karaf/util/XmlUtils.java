@@ -136,8 +136,9 @@ public class XmlUtils {
         TransformerFactory tf = TRANSFORMER_FACTORY.get();
         if (tf == null) {
             tf = TransformerFactory.newInstance();
-            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            // KARAF-6016: avoid regression with blueprint especially
+            // tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            // tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             TRANSFORMER_FACTORY.set(tf);
         }
         return tf.newTransformer();
@@ -147,8 +148,9 @@ public class XmlUtils {
         TransformerFactory tf = TRANSFORMER_FACTORY.get();
         if (tf == null) {
             tf = TransformerFactory.newInstance();
-            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            // KARAF-6016: avoid regression with blueprint especially
+            // tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            // tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             TRANSFORMER_FACTORY.set(tf);
         }
         return tf.newTransformer(xsltSource);
