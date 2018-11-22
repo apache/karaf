@@ -106,6 +106,7 @@ public class XmlUtils {
         if (spf == null) {
             spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(true);
+            spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
             spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
             spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
