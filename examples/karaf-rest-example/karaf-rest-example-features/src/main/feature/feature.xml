@@ -19,6 +19,7 @@
 <features name="karaf-rest-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
+    <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/1.0.3/xml</repository>
     
     <feature name="karaf-rest-example-common" version="${project.version}">
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-api/${project.version}</bundle>
@@ -46,6 +47,14 @@
     <feature name="karaf-rest-example-client-cxf" version="${project.version}">
         <feature version="${project.version}">karaf-rest-example-provider</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-client-cxf/${project.version}</bundle>
+    </feature>
+
+    <feature name="karaf-rest-example-whiteboard" version="${project.version}">
+        <feature version="${project.version}">karaf-rest-example-common</feature>
+        <feature>http-whiteboard</feature>
+        <feature>aries-jax-rs-whiteboard</feature>
+        <feature>aries-jax-rs-whiteboard-jackson</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-whiteboard/${project.version}</bundle>
     </feature>
 
 </features>
