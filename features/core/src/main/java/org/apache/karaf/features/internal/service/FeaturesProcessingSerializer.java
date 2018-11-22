@@ -28,6 +28,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -106,6 +107,8 @@ public class FeaturesProcessingSerializer {
 
         // indirect unmarshaling with property resolution inside XML attribute values and CDATA
         SAXParserFactory spf = SAXParserFactory.newInstance();
+        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+        spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         spf.setNamespaceAware(true);
         XMLReader xmlReader = spf.newSAXParser().getXMLReader();
         xmlReader.setContentHandler(new ResolvingContentHandler(new Properties() {
