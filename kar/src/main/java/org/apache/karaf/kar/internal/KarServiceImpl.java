@@ -102,8 +102,8 @@ public class KarServiceImpl implements KarService {
     @Override
     public void install(URI karUri, File repoDir, File resourceDir, boolean noAutoStartBundles) throws Exception {
         busy.set(true);
+        Kar kar = new Kar(karUri);
         try {
-            Kar kar = new Kar(karUri);
             kar.extract(repoDir, resourceDir);
             writeToFile(kar.getFeatureRepos(), new File(repoDir, FEATURE_CONFIG_FILE));
             for (URI uri : kar.getFeatureRepos()) {
@@ -141,6 +141,11 @@ public class KarServiceImpl implements KarService {
                 }
                 delayedDeployerThread = null;
             }
+        } catch (Exception e) {
+            // cleanup state if exception occurs during installation
+            deleteRecursively(new File(storage, kar.getKarName()));
+            // throw the exception to the "clients"
+            throw e;
         } finally {
             busy.set(false);
         }
