@@ -121,6 +121,7 @@ public class XmlUtils {
         if (dbf == null) {
             dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
             dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
             dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
