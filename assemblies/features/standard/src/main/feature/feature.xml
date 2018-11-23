@@ -825,6 +825,35 @@ start-level = admin                           # admin can set any start level, i
         <capability>http-service;provider:=felix-httplite</capability>
     </feature>
 
+    <feature name="felix-http" version="4.0.6" description="Felix HTTP Jetty Service">
+        <config name="org.apache.felix.http">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+org.apache.felix.http.port=8181
+        </config>
+        <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.http.servlet-api/1.1.2</bundle>
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.jetty/4.0.6</bundle>
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.whiteboard/4.0.0</bundle>
+        <capability>http-service;provider:=felix</capability>
+    </feature>
+
     <feature name="pax-http-service" description="Pax-Web OSGi HTTP Service" version="${pax.web.version}">
         <feature>pax-http</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
