@@ -52,8 +52,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.security.KeyPair;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -81,10 +84,10 @@ public class ClientMojo extends AbstractMojo {
     private int delay;
 
     @Parameter
-    private List<String> commands;
+    private List<CommandDescriptor> commands;
 
     @Parameter
-    private List<File> scripts;
+    private List<ScriptDescriptor> scripts;
 
     @Parameter
     private File keyFile;
@@ -92,32 +95,42 @@ public class ClientMojo extends AbstractMojo {
     private static final String NEW_LINE = System.getProperty("line.separator");
 
     public void execute() throws MojoExecutionException {
-        // Add commands from scripts to already declared commands
+        // ranking the commands and scripts
+        Comparator<CommandDescriptor> comparator = Comparator.comparingInt(CommandDescriptor::getRank);
+        SortedSet<CommandDescriptor> sortedCommands = new TreeSet<>(comparator);
         if (scripts != null) {
-            for (File script : scripts) {
-                try (BufferedReader br = new BufferedReader(new FileReader(script))) {
+            for (ScriptDescriptor script : scripts) {
+                File file = script.getScript();
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                     String line;
                     while ((line = br.readLine()) != null) {
                         line = line.trim();
                         if (line.isEmpty()) {
                             continue;
                         }
-                        commands.add(line);
+                        CommandDescriptor descriptor = new CommandDescriptor();
+                        descriptor.setCommand(line);
+                        descriptor.setRank(script.getRank());
+                        sortedCommands.add(descriptor);
                     }
                 } catch (Exception e) {
                     throw new MojoExecutionException(e, e.getMessage(), e.toString());
                 }
             }
         }
+        if (commands != null) {
+            sortedCommands.addAll(commands);
+        }
 
-        if (commands == null || commands.isEmpty()) {
-            getLog().warn("No OSGi command was specified");
+        if (sortedCommands == null || sortedCommands.isEmpty()) {
+            getLog().warn("No command specified");
             return;
         }
 
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw, true);
-        for (String cmd : commands) {
+        for (CommandDescriptor command : sortedCommands) {
+            String cmd = command.getCommand();
             getLog().info(cmd);
             pw.println(cmd);
         }
