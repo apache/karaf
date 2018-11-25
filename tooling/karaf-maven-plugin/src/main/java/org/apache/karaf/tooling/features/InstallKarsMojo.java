@@ -562,6 +562,11 @@ public class InstallKarsMojo extends MojoSupport {
             if (bundleLocation.startsWith("war:")) {
                 bundleLocation = bundleLocation.substring("war:".length());
             }
+            // checked all known prefixes, clean a possible custom one wrapping mvn:
+            int mvnIndex = bundleLocation.indexOf("mvn:");
+            if (mvnIndex > 0) {
+                bundleLocation = bundleLocation.substring(mvnIndex);
+            }
             File bundleFile;
             if (bundleLocation.startsWith("mvn:")) {
                 if (bundleLocation.endsWith("/")) {
