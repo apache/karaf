@@ -150,8 +150,6 @@ public class GenericJDBCLock implements Lock {
     DataSource dataSource;
     String url;
     String driver;
-    String user;
-    String password;
     String table;
     String clusterName;
     String table_id;
@@ -175,8 +173,6 @@ public class GenericJDBCLock implements Lock {
         BootstrapLogManager.configureLogger(LOG);
         this.url = props.getProperty(PROPERTY_LOCK_URL);
         this.driver = props.getProperty(PROPERTY_LOCK_JDBC_DRIVER);
-        this.user = props.getProperty(PROPERTY_LOCK_JDBC_USER, DEFAULT_USER);
-        this.password = props.getProperty(PROPERTY_LOCK_JDBC_PASSWORD, DEFAULT_PASSWORD);
         this.table = props.getProperty(PROPERTY_LOCK_JDBC_TABLE, DEFAULT_TABLE);
         this.clusterName = props.getProperty(PROPERTY_LOCK_JDBC_CLUSTERNAME, DEFAULT_CLUSTERNAME);
         this.table_id = props.getProperty(PROPERTY_LOCK_JDBC_TABLE_ID, DEFAULT_TABLE_ID);
@@ -190,6 +186,9 @@ public class GenericJDBCLock implements Lock {
         }
         boolean cacheEnabled = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_JDBC_CACHE, DEFAULT_CACHE));
         int validTimeout = Integer.parseInt(props.getProperty(PROPERTY_LOCK_JDBC_VALID_TIMEOUT, DEFAULT_VALID_TIMEOUT));
+
+        String user = props.getProperty(PROPERTY_LOCK_JDBC_USER, DEFAULT_USER);
+        String password = props.getProperty(PROPERTY_LOCK_JDBC_PASSWORD, DEFAULT_PASSWORD);
         this.dataSource = new GenericDataSource(driver, url, user, password, cacheEnabled, validTimeout);
         init();
     }
