@@ -51,6 +51,14 @@ public class LogServiceImpl implements LogService, PaxAppender {
         else if (config.get("log4j2.rootLogger.level") != null) {
             return new LogServiceLog4j2Impl(config);
         }
+        else if (config.get("org.ops4j.pax.logging.log4j2.config.file") != null) {
+            String file = config.get("org.ops4j.pax.logging.log4j2.config.file").toString();
+            if (file.endsWith(".xml")) {
+                return new LogServiceLog4j2XmlImpl(file);
+            } else {
+                throw new IllegalStateException("Unsupported Log4j2 configuration type: " + file);
+            }
+        }
         else {
             throw new IllegalStateException("Unrecognized configuration");
         }
