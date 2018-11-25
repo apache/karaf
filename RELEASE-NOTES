@@ -15,6 +15,34 @@
  * limitations under the License.
  */
 
+		    Apache Karaf 4.1.7
+		    ==================
+ Apache Karaf 4.1.7 is a maintenance release on the 4.1.x series, bringing bug fixes, updates and some improvements.
+
+ ChangeLog:
+ ----------
+** Bug
+    * [KARAF-5509] - http-whiteboard resources are not published properly
+    * [KARAF-5704] - boot feature fails to install if  bundle is located in data/tmp folder
+    * [KARAF-5790] - Using XML log4j configuration file causes logging to crash
+    * [KARAF-5854] - KAR file installation is not atomic
+    * [KARAF-5886] - Improve LD_LIBRARY_PATH loading
+    * [KARAF-5887] - NPE when starting karaf using bin/shell
+    * [KARAF-5911] - Restrict XML entity on provided XMLFactoryInput
+    * [KARAF-5916] - ssh terminal rendering is not correct using ssh client
+    * [KARAF-5932] - karaf-maven-plugin doesn't use user-supplied settings.xml
+    * [KARAF-5939] - karaf-assembly packaging fails with m-i-p 3.0.0-M1
+    * [KARAF-5980] - SSH output broken
+    * [KARAF-6016] - Can't load blueprint XML
+
+** New Feature
+    * [KARAF-5789] - Add Felix HTTP feature
+
+** Improvement
+    * [KARAF-5906] - Update to Apache Felix Webconsole 4.3.8 and latest jQuery UI 1.12.1
+    * [KARAF-5992] - profilesUri option does not accept multiple values
+    * [KARAF-5994] - Competitive configurations between various mojos
+
 		    Apache Karaf 4.1.6
 		    ==================
  Apache Karaf 4.1.6 is a maintenance release on the 4.1.x series, bringing bug fixes, updates and some improvements.
