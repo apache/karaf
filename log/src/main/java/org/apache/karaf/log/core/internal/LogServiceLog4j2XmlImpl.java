@@ -124,6 +124,7 @@ public class LogServiceLog4j2XmlImpl implements LogServiceInternal {
             }
             try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
                 TransformerFactory tFactory = TransformerFactory.newInstance();
+                tFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
                 Transformer transformer = tFactory.newTransformer();
                 transformer.transform(new DOMSource(doc), new StreamResult(os));
             }
