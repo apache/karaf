@@ -1902,6 +1902,10 @@ public class Builder {
 
                                 loaded.put(provider.getUrl(), featuresModel);
                                 for (String innerRepository : featuresModel.getRepository()) {
+                                    if (processor.isRepositoryBlacklisted(innerRepository)) {
+                                        LOGGER.info("   referenced feature repository " + innerRepository + " is blacklisted");
+                                        continue;
+                                    }
                                     downloader.download(innerRepository, this);
                                 }
                             }
