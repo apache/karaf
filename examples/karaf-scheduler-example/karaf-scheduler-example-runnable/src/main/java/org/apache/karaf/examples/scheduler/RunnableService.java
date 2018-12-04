@@ -22,6 +22,7 @@ import org.osgi.service.component.annotations.Component;
         property = {
                 "scheduler.name=example",
                 "scheduler.period:Long=10",
+                "scheduler.times:Integer=5",
                 "scheduler.concurrent:Boolean=false"
         }
 )

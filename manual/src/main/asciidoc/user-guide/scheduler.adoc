@@ -47,6 +47,9 @@ All jobs allow configuration using service properties:
 |Scheduler.PROPERTY_SCHEDULER_PERIOD | - |
 Defines the period for a job. The period is expressed in seconds. This property needs to be of type Long.
 
+|Scheduler.PROPERTY_SCHEDULER_TIMES | -1 |
+Defines the number of times the job is executed. -1 means infinite.
+
 |Scheduler.PROPERTY_SCHEDULER_IMMEDIATE |false |
 Define if a periodically job should be scheduled immediate.
 Default is to not startup immediate, the job is started the first time after the period has expired.
@@ -119,6 +122,26 @@ Name                       │ Schedule
 ───────────────────────────┼──────────────────────────────────────────
 PingJob.126                │ at(2017-11-22T15:37:17.103+01:00, -1, 10)
 ----
+
+It's also possible to pass the number of execution of the scheduler job using the `scheduler.times` service property:
+
+```
+@Component(immediate = true, property = {
+    "scheduler.period:Long=60",
+    "scheduler.times:Integer=5",
+    "scheduler.concurrent:Boolean=false",
+    "scheduler.name=PingJob"
+  }
+)
+public class PingThread implements Runnable {
+
+  @Override
+  public void run() {
+    // ..
+  }
+
+}
+```
 
 ==== Schedule a new Job using the Gogo Shell
 
