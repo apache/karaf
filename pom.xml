@@ -200,7 +200,7 @@
         <felix.gogo.jline.version>1.1.0</felix.gogo.jline.version>
         <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
-        <felix.plugin.version>3.5.1</felix.plugin.version>
+        <felix.plugin.version>4.1.0</felix.plugin.version>
         <felix.utils.version>1.11.0</felix.utils.version>
         <felix.webconsole.version>4.3.8</felix.webconsole.version>
         <felix.webconsole.api.version>3.1.2</felix.webconsole.api.version>

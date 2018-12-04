@@ -98,6 +98,7 @@
                             org.apache.karaf.itests
                         </Export-Package>
                     </instructions>
+                    <excludeDependencies>geronimo-atinject_1.0_spec</excludeDependencies>
                 </configuration>
             </plugin>
         </plugins>
