@@ -57,6 +57,8 @@ public class XATest extends KarafTestSupport {
                 "mvn:org.apache.activemq/artemis-features/2.6.0/xml/features, " +
                 "mvn:org.apache.camel.karaf/apache-camel/2.20.1/xml/features"
             ));
+        result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
+                "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms,pax-jms-artemis"));
         result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
         result.add(replaceConfigurationFile("etc/org.ops4j.datasource-derby.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-derby.cfg")));
         result.add(replaceConfigurationFile("etc/xa-test-camel.xml", getConfigFile("/org/apache/karaf/itests/features/xa-test-camel.xml")));
@@ -71,15 +73,6 @@ public class XATest extends KarafTestSupport {
 
     @Test
     public void test() throws Exception {
-        featureService.installFeature("aries-blueprint");
-
-        System.out.println("== Installing Artemis");
-        featureService.installFeature("artemis", NO_AUTO_REFRESH);
-        Thread.sleep(15000);//sleep a while ensure the jms broker is up
-        featureService.installFeature("jms", NO_AUTO_REFRESH);
-        featureService.installFeature("pax-jms-artemis", NO_AUTO_REFRESH);
-
-        System.out.println(" ");
         System.out.println(executeCommand("jms:info artemis"));
 
         System.out.println("== Installing Derby");
