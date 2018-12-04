@@ -49,6 +49,7 @@ import javax.management.openmbean.TabularType;
 import javax.management.remote.JMXConnector;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -126,6 +127,7 @@ public class JMXSecurityTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore("Randomly fails on Jenkins. See KARAF-5845")
     public void testJMXSecurityAsManager() throws Exception {
         String suffix = "_" + counter.incrementAndGet();
         String managerUser = "managerUser" + System.currentTimeMillis() + suffix;
@@ -166,6 +168,7 @@ public class JMXSecurityTest extends KarafTestSupport {
     }
 
     @Test
+    @Ignore("Randomly fails on Jenkins. See KARAF-5845")
     public void testJMXSecurityAsAdmin() throws Exception {
         JMXConnector connector = getJMXConnector();
         MBeanServerConnection connection = connector.getMBeanServerConnection();
