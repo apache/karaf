@@ -40,8 +40,8 @@ public class LogServiceLog4j2Impl implements LogServiceInternal {
 
     public LogServiceLog4j2Impl(Dictionary<String, Object> config) {
         this.config = new DictionaryAsMap<>(config);
-        namePattern = Pattern.compile("log4j2\\.logger\\.([a-zA-Z_]+)\\.name");
-        levelPattern = Pattern.compile("log4j2\\.logger\\.([a-zA-Z_]+)\\.level");
+        namePattern = Pattern.compile("log4j2\\.logger\\.([a-zA-Z0-9_]+)\\.name");
+        levelPattern = Pattern.compile("log4j2\\.logger\\.([a-zA-Z0-9_]+)\\.level");
     }
 
     public Map<String, String> getLevel(String logger) {
