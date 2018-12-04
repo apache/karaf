@@ -249,6 +249,16 @@
             <artifactId>karaf-rest-example-client-http</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.examples</groupId>
+            <artifactId>karaf-websocket-example</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-client</artifactId>
+            <version>9.4.12.v20180830</version>
+        </dependency>
     </dependencies>
 
     <build>
