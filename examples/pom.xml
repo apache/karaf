@@ -61,6 +61,7 @@
         <module>karaf-scheduler-example</module>
         <module>karaf-scr-example</module>
         <module>karaf-soap-example</module>
+        <module>karaf-websocket-example</module>
         <module>karaf-war-example</module>
     </modules>
 
