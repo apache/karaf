@@ -219,6 +219,11 @@
             <groupId>org.apache.xbean</groupId>
             <artifactId>xbean-finder-shaded</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -376,7 +381,6 @@
             </plugin>
         </plugins>
     </build>
-
 
     <reporting>
         <!--<outputDirectory>target/site</outputDirectory>-->
