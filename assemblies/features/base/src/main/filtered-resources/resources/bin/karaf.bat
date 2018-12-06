@@ -95,6 +95,16 @@ if "%KARAF_ETC%" == "" (
     set "KARAF_ETC=%KARAF_BASE%\etc"
 )
 
+if not "%KARAF_LOG%" == "" (
+    if not exist "%KARAF_LOG%" (
+        call :warn KARAF_LOG is not valid: "%KARAF_LOG%"
+        goto END
+    )
+)
+if "%KARAF_LOG%" == "" (
+    set "KARAF_LOG=%KARAF_DATA%\log"
+)
+
 set LOCAL_CLASSPATH=%CLASSPATH%
 
 set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
@@ -433,6 +443,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
                 -Dkaraf.home="%KARAF_HOME%" ^
                 -Dkaraf.base="%KARAF_BASE%" ^
                 -Dkaraf.etc="%KARAF_ETC%" ^
+                -Dkaraf.log="%KARAF_LOG%" ^
                 -Dkaraf.restart.jvm.supported=true ^
                 -Djava.io.tmpdir="%KARAF_DATA%\tmp" ^
                 -Dkaraf.data="%KARAF_DATA%" ^
@@ -447,6 +458,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
                 -Dkaraf.home="%KARAF_HOME%" ^
                 -Dkaraf.base="%KARAF_BASE%" ^
                 -Dkaraf.etc="%KARAF_ETC%" ^
+                -Dkaraf.log="%KARAF_LOG%" ^
                 -Dkaraf.restart.jvm.supported=true ^
                 -Djava.io.tmpdir="%KARAF_DATA%\tmp" ^
                 -Dkaraf.data="%KARAF_DATA%" ^

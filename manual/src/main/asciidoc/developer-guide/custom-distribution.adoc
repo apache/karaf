@@ -456,7 +456,7 @@ log4j.appender.sift.default=my-custom
 log4j.appender.sift.appender=org.apache.log4j.FileAppender
 log4j.appender.sift.appender.layout=org.apache.log4j.PatternLayout
 log4j.appender.sift.appender.layout.ConversionPattern=%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n
-log4j.appender.sift.appender.file=${karaf.data}/log/$\\{bundle.name\\}.log
+log4j.appender.sift.appender.file=${karaf.log}/$\\{bundle.name\\}.log
 log4j.appender.sift.appender.append=true
 ----
 

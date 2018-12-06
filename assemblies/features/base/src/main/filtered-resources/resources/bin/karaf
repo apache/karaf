@@ -145,6 +145,9 @@ init() {
     # Locate the Karaf etc directory
     locateEtc
 
+    # Locate the Karaf log directory
+    locateLog
+
     # Setup the native library path
     setupNativePath
 
@@ -284,8 +287,8 @@ run() {
 
         # Ensure the log directory exists
         # We may need to have a place to redirect stdout/stderr
-        if [ ! -d "${KARAF_DATA}/log" ]; then
-            mkdir -p "${KARAF_DATA}/log"
+        if [ ! -d "${KARAF_LOG}" ]; then
+            mkdir -p "${KARAF_LOG}"
         fi
         if [ ! -d "${KARAF_DATA}/tmp" ]; then
             mkdir -p "${KARAF_DATA}/tmp"
@@ -314,6 +317,7 @@ run() {
                     -Dkaraf.base="${KARAF_BASE}" \
                     -Dkaraf.data="${KARAF_DATA}" \
                     -Dkaraf.etc="${KARAF_ETC}" \
+                    -Dkaraf.log="${KARAF_LOG}" \
                     -Dkaraf.restart.jvm.supported=true \
                     -Djava.io.tmpdir="${KARAF_DATA}/tmp" \
                     -Djava.util.logging.config.file="${KARAF_BASE}/etc/java.util.logging.properties" \
@@ -331,6 +335,7 @@ run() {
                     -Dkaraf.base="${KARAF_BASE}" \
                     -Dkaraf.data="${KARAF_DATA}" \
                     -Dkaraf.etc="${KARAF_ETC}" \
+                    -Dkaraf.log="${KARAF_LOG}" \
                     -Dkaraf.restart.jvm.supported=true \
                     -Djava.io.tmpdir="${KARAF_DATA}/tmp" \
                     -Djava.util.logging.config.file="${KARAF_BASE}/etc/java.util.logging.properties" \
