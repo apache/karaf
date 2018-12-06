@@ -168,7 +168,7 @@ public class BootstrapLogManager {
     	}
     	Properties props = loadPaxLoggingConfig();
   		// Make a best effort to log to the default file appender configured for log4j
-  		return props.getProperty(LOG4J_APPENDER_FILE, "${karaf.data}/log/karaf.log");
+  		return props.getProperty(LOG4J_APPENDER_FILE, "${karaf.log}/karaf.log");
     }
 
     /**

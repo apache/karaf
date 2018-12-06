@@ -29,7 +29,7 @@ public class BootstrapLogManagerTest {
 	
 	private Properties getConfigProperties() {
 		Properties configProps = new Properties();
-		configProps.put("karaf.data", "target");
+		configProps.put("karaf.log", "target/log");
 		return configProps;
 	}
 	

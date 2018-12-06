@@ -138,6 +138,16 @@ locateEtc() {
     fi
 }
 
+locateLog() {
+    if [ "x${KARAF_LOG}" != "x" ]; then
+        if [ ! -d "${KARAF_LOG}" ]; then
+            die "KARAF_LOG is not valid: ${KARAF_LOG}"
+        fi
+    else
+        KARAF_LOG=${KARAF_DATA}/log
+    fi
+}
+
 setupNativePath() {
     # Support for loading native libraries
     if [ "x${LD_LIBRARY_PATH}" != "x" ]; then

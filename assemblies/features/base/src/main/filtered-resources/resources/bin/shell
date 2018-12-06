@@ -99,6 +99,9 @@ init() {
     # Locate the Karaf etc directory
     locateEtc
 
+    # Locate the Karaf log directory
+    locateLog
+
     # Setup the native library path
     setupNativePath
 
@@ -125,6 +128,7 @@ run() {
         -Dkaraf.home="${KARAF_HOME}" \
         -Dkaraf.base="${KARAF_BASE}" \
         -Dkaraf.etc="${KARAF_ETC}" \
+        -Dkaraf.log="${KARAF_LOG}" \
         -Dkaraf.data="${KARAF_DATA}" \
         -Djava.io.tmpdir="${KARAF_DATA}/tmp" \
         -Djava.util.logging.config.file="${KARAF_BASE}/etc/java.util.logging.properties" \

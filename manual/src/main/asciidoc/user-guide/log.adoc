@@ -77,7 +77,7 @@ log4j.appender.stdout.layout.ConversionPattern=%d{ISO8601} | %-5.5p | %-16.16t |
 log4j.appender.out=org.apache.log4j.RollingFileAppender
 log4j.appender.out.layout=org.apache.log4j.PatternLayout
 log4j.appender.out.layout.ConversionPattern=%d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n
-log4j.appender.out.file=${karaf.data}/log/karaf.log
+log4j.appender.out.file=${karaf.log}/karaf.log
 log4j.appender.out.append=true
 log4j.appender.out.maxFileSize=1MB
 log4j.appender.out.maxBackupIndex=10
@@ -89,7 +89,7 @@ log4j.appender.sift.default=karaf
 log4j.appender.sift.appender=org.apache.log4j.FileAppender
 log4j.appender.sift.appender.layout=org.apache.log4j.PatternLayout
 log4j.appender.sift.appender.layout.ConversionPattern=%d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %m%n
-log4j.appender.sift.appender.file=${karaf.data}/log/$\\{bundle.name\\}.log
+log4j.appender.sift.appender.file=${karaf.log}/$\\{bundle.name\\}.log
 log4j.appender.sift.appender.append=true
 ----
 
@@ -138,8 +138,8 @@ A default configuration in `etc/log4j2.xml` could be:
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n"/>
         </Console>
-        <RollingFile name="out" fileName="${karaf.data}/log/karaf.log"
-              append="true" filePattern="${karaf.data}/log/$${date:yyyy-MM}/fuse-%d{MM-dd-yyyy}-%i.log.gz">
+        <RollingFile name="out" fileName="${karaf.log}/karaf.log"
+              append="true" filePattern="${karaf.log}/$${date:yyyy-MM}/fuse-%d{MM-dd-yyyy}-%i.log.gz">
            <PatternLayout>
              <Pattern>%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n</Pattern>
            </PatternLayout>
@@ -588,7 +588,7 @@ log4j.appender.sift.default=karaf
 log4j.appender.sift.appender=org.apache.log4j.FileAppender
 log4j.appender.sift.appender.layout=org.apache.log4j.PatternLayout
 log4j.appender.sift.appender.layout.ConversionPattern=%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n
-log4j.appender.sift.appender.file=${karaf.data}/log/$\\{bundle.name\\}.log
+log4j.appender.sift.appender.file=${karaf.log}/$\\{bundle.name\\}.log
 log4j.appender.sift.appender.append=true
 ----
 

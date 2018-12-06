@@ -1597,7 +1597,7 @@ runner.flush-timeout = 100
 
 # File logger
 file.enabled = true
-file.target = ${karaf.data}/log/audit.txt
+file.target = ${karaf.log}/audit.txt
 file.encoding = UTF-8
 file.layout.type = simple
 # rotating policy: can be 'daily', 'size([0-9]+(kb|mb|gb)?\)'
