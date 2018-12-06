@@ -524,8 +524,9 @@ public class ConsoleSessionImpl implements Session {
             String[] scopes = ((String) get(Session.SCOPE)).split(":");
             List<Command> commands = registry.getCommands();
             for (String scope : scopes) {
+                boolean globalScope = Session.SCOPE_GLOBAL.equals(scope);
                 for (Command command : commands) {
-                    if ((Session.SCOPE_GLOBAL.equals(scope) || command.getScope().equals(scope)) && command.getName().equals(name)) {
+                    if ((globalScope || command.getScope().equals(scope)) && command.getName().equals(name)) {
                         return command.getScope() + ":" + name;
                     }
                 }
