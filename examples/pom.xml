@@ -37,7 +37,7 @@
         <module>karaf-blueprint-example</module>
         <module>karaf-branding-example</module>
         <module>karaf-bundle-example</module>
-        <!-- <module>karaf-camel-example</module> -->
+        <module>karaf-camel-example</module>
         <!-- <module>karaf-cdi-example</module> -->
         <module>karaf-command-example</module>
         <module>karaf-deployer-example</module>
