@@ -50,6 +50,8 @@ public class JmsExampleTest extends KarafTestSupport {
                         "mvn:org.apache.karaf.features/standard/" + version + "/xml/features, " +
                         "mvn:org.apache.activemq/artemis-features/2.6.0/xml/features"
         ));
+        result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
+                "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms,pax-jms-artemis"));
         result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
         if (JavaVersionUtil.getMajorVersion() >= 9) {
             //need asm 6.x which support java9plus to run this test
@@ -62,14 +64,6 @@ public class JmsExampleTest extends KarafTestSupport {
 
     @Test
     public void test() throws Exception {
-        featureService.installFeature("aries-blueprint");
-
-        System.out.println("== Installing Artemis");
-        featureService.installFeature("artemis", NO_AUTO_REFRESH);
-        Thread.sleep(15000);//sleep a while ensure the jms broker is up
-        featureService.installFeature("jms", NO_AUTO_REFRESH);
-        featureService.installFeature("pax-jms-artemis", NO_AUTO_REFRESH);
-
         String output = executeCommand("jms:info artemis");
         System.out.println(output);
         assertContains("ActiveMQ", output);
