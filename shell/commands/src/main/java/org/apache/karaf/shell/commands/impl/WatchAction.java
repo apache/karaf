@@ -48,6 +48,7 @@ import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.shell.support.completers.CommandsCompleter;
 import org.apache.karaf.shell.support.parsing.CommandLineImpl;
 import org.apache.karaf.shell.support.parsing.DefaultParser;
+import org.apache.karaf.util.ThreadUtils;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
@@ -73,7 +74,7 @@ public class WatchAction implements Action {
     @Reference
     SessionFactory sessionFactory;
 
-    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.namedThreadFactory("shell:watch"));
 
     private boolean abort;
     private Thread reading;
