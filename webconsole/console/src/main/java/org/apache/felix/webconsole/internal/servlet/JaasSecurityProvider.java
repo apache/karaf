@@ -87,7 +87,7 @@ public class JaasSecurityProvider implements WebConsoleSecurityProvider2, Manage
             properties = new Hashtable<>();
         }
         realm = getString(properties, "realm", "karaf");
-        role = getString(properties, "role", System.getProperty("karaf.admin.role", "admin"));
+        role = getString(properties, "role", "admin");
         sessionTimeout = Integer.parseInt(getString(properties, "sessionTimeout", "0"));
     }
 
