@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.apache.karaf.util.StreamUtils;
+import org.apache.karaf.util.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
     public AutoEncryptionSupport(Map<String, Object> properties) {
         running = true;
         encryptionSupport = new EncryptionSupport(properties);
-        executor = Executors.newSingleThreadExecutor();
+        executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("encryption"));
         executor.execute(this);
     }
 
