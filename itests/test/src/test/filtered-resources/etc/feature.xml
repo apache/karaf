@@ -191,7 +191,6 @@
 
             #
             # Role name used for SSH access authorization
-            # If not set, this defaults to the ${karaf.admin.role} configured in etc/system.properties
             #
             # sshRole = admin
 
