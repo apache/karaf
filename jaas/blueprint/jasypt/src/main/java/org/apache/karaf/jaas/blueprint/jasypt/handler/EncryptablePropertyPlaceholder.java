@@ -14,10 +14,12 @@
  */
 package org.apache.karaf.jaas.blueprint.jasypt.handler;
 
+import org.apache.aries.blueprint.ext.AbstractPropertyPlaceholderExt;
 import org.jasypt.encryption.StringEncryptor;
-import org.apache.aries.blueprint.ext.AbstractPropertyPlaceholder;
 
-public class EncryptablePropertyPlaceholder extends AbstractPropertyPlaceholder {
+import java.util.Map;
+
+public class EncryptablePropertyPlaceholder extends AbstractPropertyPlaceholderExt {
 
     private StringEncryptor encryptor;
 
@@ -37,5 +39,11 @@ public class EncryptablePropertyPlaceholder extends AbstractPropertyPlaceholder 
     protected String getProperty(String val) {
         return encryptor.decrypt(val);
     }
+
+    @Override
+    public Map<String, Object> getDefaultProperties() {
+        return null;
+    }
+
 
 }
