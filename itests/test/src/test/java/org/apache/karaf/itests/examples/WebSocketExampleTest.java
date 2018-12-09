@@ -54,7 +54,12 @@ public class WebSocketExampleTest extends KarafTestSupport {
         Bundle bundle = bundleContext.installBundle("mvn:org.apache.karaf.examples/karaf-websocket-example/" + System.getProperty("karaf.version"));
         bundle.start();
 
-        System.out.println(executeCommand("http:list"));
+        String httpList = executeCommand("http:list");
+        while (!httpList.contains("Deployed")) {
+            Thread.sleep(1000);
+            httpList = executeCommand("http:list");
+        }
+        System.out.println(httpList);
 
         WebSocketClient client = new WebSocketClient();
         SimpleSocket socket = new SimpleSocket();
