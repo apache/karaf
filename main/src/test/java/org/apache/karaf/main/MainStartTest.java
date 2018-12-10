@@ -35,6 +35,10 @@ public class MainStartTest {
         if(main != null){
             main.destroy();
         }
+
+		System.clearProperty("karaf.home");
+		System.clearProperty("karaf.data");
+		System.clearProperty("karaf.log");
     }
 
     @Test
@@ -43,10 +47,12 @@ public class MainStartTest {
         File home = new File(basedir, "test-karaf-home");
         // generate an unique folder name to avoid conflict with folder created by other unit tests (KARAF-2558)
         File data = new File(home, "data" + System.currentTimeMillis());
+		File log = new File(home, "log" + System.currentTimeMillis());
 
 		String[] args = new String[0];
 		System.setProperty("karaf.home", home.toString());
 		System.setProperty("karaf.data", data.toString());
+		System.setProperty("karaf.log", log.toString());
 
 		main = new Main(args);
 		main.launch();

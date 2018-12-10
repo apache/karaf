@@ -18,11 +18,8 @@
  */
 package org.apache.karaf.main;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
-
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.karaf.main.util.Utils;
 import org.junit.After;
 import org.junit.Assert;
@@ -34,21 +31,26 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 
+import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
+
 public class MainLockingTest {
     private File home;
 
     private File data;
+    private File log;
 
     @Before
     public void setUp() throws IOException {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         home = new File(basedir, "test-karaf-home");
-        data = new File(home, "data");
+        data = new File(home, "data" + System.currentTimeMillis());
+        log = new File(home, "log" + System.currentTimeMillis());
 
         Utils.deleteDirectory(data);
 
         System.setProperty("karaf.home", home.toString());
         System.setProperty("karaf.data", data.toString());
+        System.setProperty("karaf.log", log.toString());
         System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
 
         System.setProperty("karaf.lock", "true");
@@ -60,6 +62,18 @@ public class MainLockingTest {
     public void tearDown() {
         home = null;
         data = null;
+        log = null;
+
+        System.clearProperty("karaf.home");
+        System.clearProperty("karaf.data");
+        System.clearProperty("karaf.log");
+        System.clearProperty("karaf.framework.factory");
+
+        System.clearProperty("karaf.lock");
+        System.clearProperty("karaf.lock.delay");
+        System.clearProperty("karaf.lock.class");
+
+        System.clearProperty("karaf.pid.file");
     }
 
     @Test
