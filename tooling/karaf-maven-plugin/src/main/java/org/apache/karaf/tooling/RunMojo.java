@@ -119,6 +119,7 @@ public class RunMojo extends MojoSupport {
         System.setProperty("karaf.base", karafDirectory.getAbsolutePath());
         System.setProperty("karaf.data", karafDirectory.getAbsolutePath() + "/data");
         System.setProperty("karaf.etc", karafDirectory.getAbsolutePath() + "/etc");
+        System.setProperty("karaf.log", karafDirectory.getAbsolutePath() + "/data/log");
         System.setProperty("karaf.instances", karafDirectory.getAbsolutePath() + "/instances");
         System.setProperty("karaf.startLocalConsole", "false");
         System.setProperty("karaf.startRemoteShell", startSsh);
