@@ -540,6 +540,7 @@ public class InstanceServiceImpl implements InstanceService {
                 + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                 + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
+                + " -Dkaraf.log=\"" + new File(new File(new File(location).getCanonicalFile(), "data"), "log") + "\""
                 + " -Djava.io.tmpdir=\"" + new File(new File(location).getCanonicalPath(), "data" + File.separator + "tmp") + "\""
                 + " -Dkaraf.startLocalConsole=false"
                 + " -Dkaraf.startRemoteShell=true"
@@ -617,6 +618,7 @@ public class InstanceServiceImpl implements InstanceService {
                         + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                         + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                         + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
+                        + " -Dkaraf.log=\"" + new File(new File(new File(location).getCanonicalFile(), "data"), "log") + "\""
                         + " -Dkaraf.instances=\"" + System.getProperty("karaf.instances") + "\""
                         + " -classpath \"" + classpath.toString() + "\""
                         + " " + Execute.class.getName()
@@ -829,6 +831,7 @@ public class InstanceServiceImpl implements InstanceService {
             props.put("karaf.home", System.getProperty("karaf.home"));
             props.put("karaf.data", new File(new File(instance.loc), "data").getCanonicalPath());
             props.put("karaf.etc", new File(new File(instance.loc), "etc").getCanonicalPath());
+            props.put("karaf.log", new File(new File(new File(instance.loc), "data"), "log").getCanonicalPath());
             InterpolationHelper.performSubstitution(props, null, true, false, true);
             int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
             String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
