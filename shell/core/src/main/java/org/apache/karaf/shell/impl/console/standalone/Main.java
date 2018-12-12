@@ -52,6 +52,10 @@ public class Main {
     private String user = "karaf";
 
     public static void main(String args[]) throws Exception {
+        Package p = Package.getPackage("org.apache.karaf.shell.impl.console.standalone");
+        if (p != null && p.getImplementationVersion() != null) {
+            System.setProperty("karaf.version", p.getImplementationVersion());
+        }
         Main main = new Main();
         main.run(args);
     }

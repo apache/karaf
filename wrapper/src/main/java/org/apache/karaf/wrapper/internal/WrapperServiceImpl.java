@@ -61,6 +61,8 @@ public class WrapperServiceImpl implements WrapperService {
         props.put("${karaf.base}", base.getPath());
         props.put("${karaf.data}", System.getProperty("karaf.data"));
         props.put("${karaf.etc}", System.getProperty("karaf.etc"));
+        props.put("${karaf.log}", System.getProperty("karaf.log"));
+        props.put("${karaf.version}", System.getProperty("karaf.version"));
         props.put("${name}", name);
         props.put("${displayName}", displayName);
         props.put("${description}", description);
@@ -80,7 +82,14 @@ public class WrapperServiceImpl implements WrapperService {
                 serviceFile = new File(bin, name + "-service.bat");
                 wrapperConf = new File(etc, name + "-wrapper.conf");
 
-                copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "windows64/karaf-wrapper-java8.conf", props, envs, includes);
+                }
+
                 copyFilteredResourceTo(serviceFile, "windows64/karaf-service.bat", props, envs, includes);
 
                 mkdir(lib);
@@ -93,7 +102,14 @@ public class WrapperServiceImpl implements WrapperService {
                 serviceFile = new File(bin, name + "-service.bat");
                 wrapperConf = new File(etc, name + "-wrapper.conf");
 
-                copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper-java8.conf", props, envs, includes);
+                }
+
                 copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props, envs, includes);
 
                 mkdir(lib);
@@ -111,7 +127,14 @@ public class WrapperServiceImpl implements WrapperService {
             chmod(serviceFile, "a+x");
 
             wrapperConf = new File(etc, name + "-wrapper.conf");
-            copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+
+            if (!System.getProperty("java.version").startsWith("1.")) {
+                // we are on Java > 8 (Java 9, 10, 11, ...)
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+            } else {
+                // we are on Java 8
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+            }
 
             File plistConf = new File(bin, "org.apache.karaf."+ name + ".plist");
             copyFilteredResourceTo(plistConf, "macosx/org.apache.karaf.KARAF.plist", props, envs, includes);
@@ -137,7 +160,13 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(systemdFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+                }
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "linux64/libwrapper.so", false);
@@ -157,7 +186,13 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(systemdFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+                }
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
@@ -176,7 +211,13 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+                }
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc64/libwrapper.a", false);
@@ -192,7 +233,13 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+                }
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.a"), "aix/ppc32/libwrapper.a", false);
@@ -211,7 +258,13 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+                }
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc64/libwrapper.so", false);
@@ -227,7 +280,13 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+                }
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86/libwrapper.so", false);
@@ -243,7 +302,13 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+                }
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/x86_64/libwrapper.so", false);
@@ -259,7 +324,13 @@ public class WrapperServiceImpl implements WrapperService {
                 chmod(serviceFile, "a+x");
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
-                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+                if (!System.getProperty("java.version").startsWith("1.")) {
+                    // we are on Java > 8 (Java 9, 10, 11, ...)
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+                } else {
+                    // we are on Java 8
+                    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+                }
 
                 mkdir(lib);
                 copyResourceTo(new File(lib, "libwrapper.so"), "solaris/sparc32/libwrapper.so", false);
@@ -276,7 +347,13 @@ public class WrapperServiceImpl implements WrapperService {
             chmod(serviceFile, "a+x");
 
             wrapperConf = new File(etc, name + "-wrapper.conf");
-            copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props, envs, includes);
+            if (!System.getProperty("java.version").startsWith("1.")) {
+                // we are on Java > 8 (Java 9, 10, 11, ...)
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java11.conf", props, envs, includes);
+            } else {
+                // we are on Java 8
+                copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper-java8.conf", props, envs, includes);
+            }
 
             mkdir(lib);
             copyResourceTo(new File(lib, "libwrapper.sl"), "hpux/parisc64/libwrapper.sl", false);
