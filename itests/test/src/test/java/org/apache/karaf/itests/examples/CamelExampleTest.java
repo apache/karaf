@@ -53,13 +53,9 @@ public class CamelExampleTest extends KarafTestSupport {
 
     public void verify() throws Exception {
         String output = executeCommand("camel:route-list");
-        while (true) {
-            if (!output.contains("Started")) {
-                Thread.sleep(500);
-                output = executeCommand("camel:route-list");
-            } else {
-                break;
-            }
+        while (!output.contains("Started")) {
+            Thread.sleep(500);
+            output = executeCommand("camel:route-list");
         }
         System.out.println(output);
 
