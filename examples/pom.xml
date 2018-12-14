@@ -63,6 +63,7 @@
         <module>karaf-soap-example</module>
         <module>karaf-websocket-example</module>
         <module>karaf-war-example</module>
+        <module>karaf-redis-example</module>
     </modules>
 
 </project>

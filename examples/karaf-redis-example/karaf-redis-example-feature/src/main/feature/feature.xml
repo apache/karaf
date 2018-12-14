@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<features   name="karaf-redis-example-${project.version}"
+            xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+
+    <feature name="karaf-redis-example-api" version="${project.version}">
+        <bundle>mvn:${project.groupId}/karaf-redis-example-api/${project.version}</bundle>
+    </feature>
+
+    <feature name="karaf-redis-example-command" version="${project.version}">
+        <feature version="${project.version}">karaf-redis-example-api</feature>
+        <bundle>wrap:mvn:com.google.code.gson/gson/2.8.5</bundle>
+        <bundle>wrap:mvn:org.apache.commons/commons-pool2/2.6.0</bundle>
+        <bundle>wrap:mvn:redis.clients/jedis/2.9.0</bundle>
+        <bundle>mvn:${project.groupId}/karaf-redis-example-command/${project.version}</bundle>
+    </feature>
+
+    <feature name="karaf-redis-example" version="${project.version}">
+        <feature version="${project.version}">karaf-redis-example-command</feature>
+        <conditional>
+            <condition>shell</condition>
+            <bundle>mvn:${project.groupId}/karaf-redis-example-provider/${project.version}</bundle>
+        </conditional>
+    </feature>
+
+</features>

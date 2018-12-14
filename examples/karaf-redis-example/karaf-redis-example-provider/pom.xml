@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>karaf-redis-example</artifactId>
+        <groupId>org.apache.karaf.examples</groupId>
+        <version>4.2.2-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>karaf-redis-example-provider</artifactId>
+
+    <name>Apache Karaf :: Example :: Redis :: Provider</name>
+
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <!-- OSGi Core -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+        <!-- CommandLine Api -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>karaf-redis-example-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Karaf utile -->
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <version>4.2.1</version>
+        </dependency>
+        <!-- Redis driver -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <!-- JSON Converter -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>org.apache.karaf.examples.redis.provider.Activator</Bundle-Activator>
+                        <Private-Package>
+                            org.apache.karaf.examples.redis.provider,
+                            org.apache.karaf.util.tracker,
+                            org.apache.karaf.util.tracker.annotation
+                        </Private-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
