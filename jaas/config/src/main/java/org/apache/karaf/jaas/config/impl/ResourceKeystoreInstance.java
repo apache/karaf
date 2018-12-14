@@ -59,8 +59,6 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
     private Map keyPasswords = new HashMap();
     private File keystoreFile; // Only valid after startup and if the resource points to a file
 
-    // The following variables are the state of the keystore, which should be chucked if the file on disk changes
-    private List privateKeys = new ArrayList();
     private List trustCerts = new ArrayList();
     private KeyStore keystore;
     private long keystoreReadDate = Long.MIN_VALUE;
@@ -226,13 +224,6 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         return keystorePassword == null;
     }
 
-    public String[] listPrivateKeys() {
-        if (!loadKeystoreData()) {
-            return null;
-        }
-        return (String[]) privateKeys.toArray(new String[privateKeys.size()]);
-    }
-
     public String[] listTrustCertificates() {
         if (!loadKeystoreData()) {
             return null;
@@ -258,7 +249,6 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         // Load the keystore data
         try {
             keystoreReadDate = System.currentTimeMillis();
-            privateKeys.clear();
             trustCerts.clear();
             if (keystore == null) {
                 keystore = KeyStore.getInstance(JKS);
@@ -269,9 +259,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
             Enumeration aliases = keystore.aliases();
             while (aliases.hasMoreElements()) {
                 String alias = (String) aliases.nextElement();
-                if (keystore.isKeyEntry(alias)) {
-                    privateKeys.add(alias);
-                } else if (keystore.isCertificateEntry(alias)) {
+                if (keystore.isCertificateEntry(alias)) {
                     trustCerts.add(alias);
                 }
             }
