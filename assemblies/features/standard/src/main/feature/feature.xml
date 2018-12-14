@@ -1452,7 +1452,7 @@ org.apache.felix.eventadmin.AddSubject=true
         blueprint inside web-bundle containers" version="${project.version}">
         <feature>war</feature>
         <feature>aries-blueprint</feature>
-        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.web.version}</bundle>
+        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.webosgi.version}</bundle>
     </feature>
 
     <feature name="wrap" description="Wrap URL handler" version="${pax.url.version}">
