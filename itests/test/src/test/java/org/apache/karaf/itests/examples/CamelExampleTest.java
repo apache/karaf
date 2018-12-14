@@ -37,14 +37,14 @@ public class CamelExampleTest extends KarafTestSupport {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-camel-example-features/" + System.getProperty("karaf.version") + "/xml");
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testJavaDSL() throws Exception {
         setup();
         installAndAssertFeature("karaf-camel-example-java");
         verify();
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testBlueprintDSL() throws Exception {
         setup();
         installAndAssertFeature("karaf-camel-example-blueprint");

@@ -45,7 +45,7 @@ import static junit.framework.TestCase.assertTrue;
 @ExamReactorStrategy(PerClass.class)
 public class WebSocketExampleTest extends KarafTestSupport {
 
-    @Test
+    @Test(timeout = 60000)
     public void test() throws Exception {
         featureService.installFeature("scr");
         featureService.installFeature("http");
