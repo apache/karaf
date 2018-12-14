@@ -21,7 +21,20 @@
   ## Abstract
   
   This example shows you how to use Redis in karaf framework.
-  
+  This example contained two service for collecting data in RAM and Redis, API of ``UserService`` manages data in RAM
+  and ``UserServiceRedis`` manages data in list of Redis that its key is named ``USERLIST``. after installing this example
+  follow command will add to karaf console:
+  * ```user:add <first-name> <last-name> <phone-number>``` add user to RAM collection.
+  * ```user:add-redis <first-name> <last-name> <phone-number>``` add user to list of Redis collection.
+  * ```user:list``` show user list that collected in RAM.
+  * ```user:list-redis``` show user list that collected in list of Redis.
+  * ```user:remove <user-id>``` by pressing Tab button all ids of users listed, ids of users that chosen removed from 
+  RAM collection.  
+  * ```user:remove-redis <user-id>``` by pressing Tab button all ids of users listed, ids of users that chosen removed from 
+  list of Redis.
+  * ```user:remove-all``` clear data stored in RAM collection.
+  * ```user:remove-all-redis``` clear data stored in list of Redis.
+    
   ## Artifacts
   
   * **karaf-redis-example-api** is a main container object and service interface.

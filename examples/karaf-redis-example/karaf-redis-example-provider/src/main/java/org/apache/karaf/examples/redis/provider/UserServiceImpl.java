@@ -14,29 +14,34 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.examples.redis.command.completer;
+package org.apache.karaf.examples.redis.provider;
 
 import org.apache.karaf.examples.redis.api.User;
 import org.apache.karaf.examples.redis.api.UserService;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-@Service
-public class Completer implements org.apache.karaf.shell.api.console.Completer {
+public class UserServiceImpl implements UserService {
 
-    @Reference
-    private UserService userService;
+    private Map<Integer, User> users = new HashMap<>();
 
-    public int complete(Session session, CommandLine commandLine, List<String> list) {
-        StringsCompleter completer = new StringsCompleter();
-        for(User user : userService.list()){
-            completer.getStrings().add(String.valueOf(user.getId()));
+    public void add(User user) {
+        users.put(user.getId(), user);
+    }
+
+    public void remove(int id) {
+        if(users.keySet().contains(id)) {
+            users.remove(id);
         }
-        return completer.complete(session, commandLine, list);
+    }
+
+    public Collection<User> list() {
+        return users.values();
+    }
+
+    public void clear() {
+        users.clear();
     }
 }
