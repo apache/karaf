@@ -79,7 +79,7 @@ The build the distribution, simply do:
 mvn clean install
 ```
 
-You can find the resulting distribution in the `target` folder: `karaf-profile-example-static-4.2.1-SNAPSHOT.tar.gz`.
+You can find the resulting distribution in the `target` folder: `karaf-profile-example-static-xxxx.tar.gz`.
 
 ### Profile & shell
 

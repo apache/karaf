@@ -45,7 +45,7 @@ mvn clean install
 On a running Karaf instance, register the features repository using:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-camel-example-features/4.2.2-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-camel-example-features/LATEST/xml
 ```
 
 Then, you can install either Camel Java or Blueprint features:

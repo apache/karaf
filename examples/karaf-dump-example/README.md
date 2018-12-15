@@ -39,7 +39,7 @@ On a running Karaf instance, install the scr feature and the dump bundle:
 
 ```
 karaf@root()> feature:install scr
-karaf@root()> bundle:install -s mvn:org.apache.karaf.examples/karaf-dump-example/4.2.1-SNAPSHOT
+karaf@root()> bundle:install -s mvn:org.apache.karaf.examples/karaf-dump-example/LATEST
 ```
 
 ## Usage

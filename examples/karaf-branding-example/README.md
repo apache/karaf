@@ -77,5 +77,5 @@ mvn clean install
 The `karaf-branding-example` bundle has to be part of the startup bundles. You have two ways to register your custom
 branding bundle:
 
-1. You can define the `karaf-branding-example` bundle URL (`mvn:org.apache.karaf.examples/karaf-branding-example/4.2.1-SNAPSHOT`) in the `etc/startup.properties` file.
-2. You can create your own custom profile (see profile example for detail), defining `karaf-branding-example` bundle URL (`bundle.mvn\:org.apache.karaf.examples/karaf-branding-example/4.2.1-SNAPSHOT = mvn:org.apache.karaf.examples/karaf-branding-starter/4.2.1-SNAPSHOT`) in the `etc/profile.cfg` file. 
+1. You can define the `karaf-branding-example` bundle URL (`mvn:org.apache.karaf.examples/karaf-branding-example/LATEST`) in the `etc/startup.properties` file.
+2. You can create your own custom profile (see profile example for detail), defining `karaf-branding-example` bundle URL (`bundle.mvn\:org.apache.karaf.examples/karaf-branding-example/LATEST = mvn:org.apache.karaf.examples/karaf-branding-starter/LATEST`) in the `etc/profile.cfg` file. 

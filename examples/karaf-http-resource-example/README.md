@@ -43,7 +43,7 @@ mvn clean install
 On a running Karaf instance, register the features repository:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-http-resource-example-features/4.2.2-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-http-resource-example-features/LATEST/xml
 ```
 
 Then, you can install the `karaf-http-resource-example-whiteboard` feature:

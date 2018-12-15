@@ -42,7 +42,7 @@ mvn clean install
 On a running Karaf instance, register the features repository:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-log-appender-example-features/4.2.1-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-log-appender-example-features/LATEST/xml
 ```
 
 Then you can install the log appender feature:

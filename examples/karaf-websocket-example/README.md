@@ -47,7 +47,7 @@ karaf@root()> feature:install scr
 Then, you can install the websocket example bundle:
 
 ```
-karaf@root()> bundle:install -s mvn:org.apache.karaf.examples/karaf-websocket-example/4.2.2-SNAPSHOT
+karaf@root()> bundle:install -s mvn:org.apache.karaf.examples/karaf-websocket-example/LATEST
 ```
 
 You can see the websocket registered in the HTTP service:

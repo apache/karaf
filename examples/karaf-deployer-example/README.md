@@ -42,7 +42,7 @@ On a running Karaf instance, just install the deployer service using:
 
 ```
 karaf@root()> feature:install scr
-karaf@root()> bundle:install -s mvn:org.apache.karaf.examples/karaf-deployer-example/4.2.1-SNAPSHOT
+karaf@root()> bundle:install -s mvn:org.apache.karaf.examples/karaf-deployer-example/LATEST
 ```
 
 

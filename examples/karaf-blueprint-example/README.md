@@ -43,7 +43,7 @@ mvn clean install
 On a running Karaf instance, you register the blueprint example features repository with:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-blueprint-example-features/4.2.1-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-blueprint-example-features/LATEST/xml
 ```
 
 Then you can install the `karaf-blueprint-example-provider` feature:
