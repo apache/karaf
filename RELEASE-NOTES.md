@@ -17,6 +17,127 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.2
+
+Apache Karaf 4.2.2 is a major update on the 4.2.x series. It brings lot of fixes, updates and improvements
+especially about Java 11 support and much more.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-4819] - System Property karaf.clean.all Doesn't Work
+    * [KARAF-5469] - Installation of a non blueprint feature triggers the installation of the blueprint compatibility bundle
+    * [KARAF-5509] - http-whiteboard resources are not published properly
+    * [KARAF-5567] - Trying to access ServerInfo service results in bundle wiring issue
+    * [KARAF-5703] - pax jdbc config 1.2.0 fails to register XA Datasource
+    * [KARAF-5886] - Improve LD_LIBRARY_PATH loading
+    * [KARAF-5887] - NPE when starting karaf using bin/shell
+    * [KARAF-5897] - ensure javax.xml.stream api works for both JDK8 and 11
+    * [KARAF-5902] - Fix example itests
+    * [KARAF-5908] - Service Wrapper fails to start on Windows when JAVA_HOME contains whitespace 
+    * [KARAF-5909] - Starting Karaf 4.2.1 won't start as Windows service
+    * [KARAF-5911] - Restrict XML entity on provided XMLFactoryInput
+    * [KARAF-5912] - Don't need to use jaxb jars for JDK8
+    * [KARAF-5916] - ssh terminal rendering is not correct using ssh client
+    * [KARAF-5917] - EventLoggerTest is broken for some timezones.
+    * [KARAF-5931] - More than one Datrasource Configuration does not work
+    * [KARAF-5932] - karaf-maven-plugin doesn't use user-supplied settings.xml
+    * [KARAF-5939] - karaf-assembly packaging fails with m-i-p 3.0.0-M1
+    * [KARAF-5962] - Regression when installing some features containing fragments 4.2.0 -> 4.2.1
+    * [KARAF-5980] - SSH output broken
+    * [KARAF-5983] - Default ssh port (in the activator) should be 8101
+    * [KARAF-5989] - Error while sending email because of javax.activation
+    * [KARAF-5990] - Blacklisted dependent features should be skipped during assembly generation
+    * [KARAF-5997] - Build fails with Java11 because exam 4.13-SNAPSHOT unavailable
+    * [KARAF-6003] - IllegalStateException: Need active coordination - cannot use JPA and Jasypt
+    * [KARAF-6004] - karaf-maven-plugin:assembly results in ArrayIndexOutOfBoundsException
+    * [KARAF-6020] - Command feature:info fails showing conditional dependencies
+    * [KARAF-6021] - Running karaf-maven-plugin in java 11 fails
+    * [KARAF-6024] - Blacklisted dependent repositories should be skipped during assembly generation
+    * [KARAF-6027] - `log:get` does not report the right log level for loggers that contain numbers
+    * [KARAF-6033] - Command "shell wrapper:install" fails
+    * [KARAF-6039] - maven-resources-plugin in same pom twice
+    * [KARAF-6041] - Upgrade to Aries Proxy Impl 1.1.3
+    * [KARAF-6042] - WebSocketExampleTest is flaky
+    * [KARAF-6044] - KARAF_LOG env variable generates stack trace in test cases
+    * [KARAF-6048] - Camel Test case prone to endless loop
+
+#### New Feature
+    * [KARAF-5789] - Add Felix HTTP feature
+    * [KARAF-6001] - Upgrade to Pax Web 7.2.4 / Jetty 9.4.12.v20180830
+    * [KARAF-6036] - Add Spring 5.1.3.RELEASE support
+
+#### Improvement
+    * [KARAF-4095] - Introduce KARAF_LOG env variable
+    * [KARAF-4336] - Add support for ordering of CLI scripts and commands in karaf-maven-plugin
+    * [KARAF-5232] - Give meaningful names to threads
+    * [KARAF-5263] - org.apache.karaf.shell.cfg et al still reference obsolete 'karaf.admin.role'
+    * [KARAF-5906] - Update to Apache Felix Webconsole 4.3.8 and latest jQuery UI 1.12.1
+    * [KARAF-5919] - Be able to store Http Proxy list in order to keep configuration after restart
+    * [KARAF-5937] - karaf-maven-plugin verify doesn't explain why verification failed
+    * [KARAF-5940] - Assembly and feature archetype itest is failing
+    * [KARAF-5979] - SSH role types should be configurable
+    * [KARAF-5981] - Docker build.sh should support exploded distribution
+    * [KARAF-5982] - Add additional running mode in the docker-entrypoint.sh
+    * [KARAF-5988] - add javax.annotation api when using JDK11
+    * [KARAF-5991] - add jaxb api into Karaf specs
+    * [KARAF-5995] - ensure there is a way to quit bin/client "cmd"
+    * [KARAF-6014] - Improve jdbc:* commands
+    * [KARAF-6022] - Add times support in Karaf scheduler
+
+#### Test
+    * [KARAF-5845] - JMXSecurityTest.testJMXSecurityAs[Admin|Manager] is flaky
+    * [KARAF-5929] - fix several itests failed with JDK11
+    * [KARAF-5933] - use JAXB2.3 with JDK 9/10/11
+
+#### Task
+    * [KARAF-5882] - ensure karaf-soap-example can build and run with JDK11
+    * [KARAF-5893] - Add Camel examples
+    * [KARAF-5913] - Add config management exemple
+    * [KARAF-5985] - ensure we can see up-to-the-minute log when using bin/client "log:tail"
+    * [KARAF-5987] - don't use java.security.acl classes since they will be removed from java12
+    * [KARAF-6011] - Add websocket example
+    * [KARAF-6018] - use org.glassfish.jaxb instead of com.sun.xml.bind
+    * [KARAF-6023] - upgrade to pax-exam 4.13.0
+
+#### Dependency upgrade
+    * [KARAF-5806] - Upgrade to easymock 4.0.1
+    * [KARAF-5927] - Upgrade to XBean 4.12
+    * [KARAF-5934] - Upgrade to maven-bundle-plugin 4.1.0
+    * [KARAF-5935] - Upgrade to maven-invoker-plugin 3.1.0 and maven-plugin-plugin 3.5.2
+    * [KARAF-5936] - Upgrade to maven-scm-publish-plugin 3.0.0 and asciidoctor-maven-plugin 1.5.6
+    * [KARAF-5941] - Upgrade to JNA 4.5.2
+    * [KARAF-5942] - Upgrade to Aries Blueprint Core 1.10.1
+    * [KARAF-5943] - Upgrade to Aries Blueprint CM 1.3.1
+    * [KARAF-5945] - Upgrade to commons-compress 1.18
+    * [KARAF-5946] - Upgrade to commons-lang3 3.8.1
+    * [KARAF-5947] - Upgrade to Felix ConfigAdmin 1.9.6
+    * [KARAF-5948] - Upgrade to Felix Framework Security 2.6.1
+    * [KARAF-5950] - Upgrade to Felix Metatype 1.2.2
+    * [KARAF-5952] - Upgrade to Felix SCR 2.1.8
+    * [KARAF-5953] - Upgrade to Felix WebConsole Plugin DS 2.1.0
+    * [KARAF-5954] - Upgrade to geronimo-atinject_1.0_spec 1.1
+    * [KARAF-5955] - Upgrade to maven-dependency-tree 3.0.1
+    * [KARAF-5956] - Upgrade to Maven Wagon 3.2.0
+    * [KARAF-5958] - Upgrade to hibernate-validator 6.0.13.Final
+    * [KARAF-5959] - Upgrade to Ant ServiceMix bundle 1.10.3_1
+    * [KARAF-5960] - Upgrade to Apache POM 21
+    * [KARAF-5961] - Upgrade to ASM 7.0
+    * [KARAF-6015] - Upgrade to Aries SpiFly 1.2
+    * [KARAF-6028] - Upgrade to Felix ConfigAdmin 1.9.10
+    * [KARAF-6029] - Upgrade to Felix SCR 2.1.14
+    * [KARAF-6030] - Upgrade to awaitility 3.1.3
+    * [KARAF-6031] - Upgrade to easymock 4.0.2
+    * [KARAF-6032] - Upgrade to pax-jms 1.0.2
+    * [KARAF-6034] - Upgrade to Spring 4.3.21.RELEASE
+    * [KARAF-6035] - Upgrade to Spring 5.0.10.RELEASE
+    * [KARAF-6043] - Upgrade to Pax Exam 4.13.1
+    * [KARAF-6045] - Upgrade to Pax Web 7.2.5
+    * [KARAF-6046] - Upgrade to Felix Utils 1.11.2
+
+#### Documentation
+    * [KARAF-5900] - Use the asciidoctor-maven-plugin and custom ASF theme for the manual generation
+
 ## Apache Karaf 4.2.1
 
 Apache Karaf 4.2.1 is a major update on the 4.2.x series. It brings bunch of fixes, dependencies updates
