@@ -80,7 +80,7 @@ public class KarafTestSupport {
 
     private static final EnumSet<FeaturesService.Option> NO_AUTO_REFRESH = EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles);
     public static final String MIN_RMI_SERVER_PORT = "44444";
-    public static final String MAX_RMI_SERVER_PORT = "66666";
+    public static final String MAX_RMI_SERVER_PORT = "65534";
     public static final String MIN_HTTP_PORT = "9080";
     public static final String MAX_HTTP_PORT = "9999";
     public static final String MIN_RMI_REG_PORT = "1099";
@@ -172,6 +172,7 @@ public class KarafTestSupport {
 
     @Configuration
     public Option[] config() {
+        String karafVersion = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
         MavenArtifactUrlReference karafUrl = CoreOptions.maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
         String httpPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_HTTP_PORT), Integer.parseInt(MAX_HTTP_PORT)));
         String rmiRegistryPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_REG_PORT), Integer.parseInt(MAX_RMI_REG_PORT)));
@@ -220,11 +221,10 @@ public class KarafTestSupport {
                 new VMOption("--add-reads=java.xml=java.logging"),
                 new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
                 new VMOption("--patch-module"),
-                new VMOption("java.base=lib/endorsed/org.apache.karaf.specs.locator-" 
-                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT") + ".jar"),
-                new VMOption("--patch-module"),
-                new VMOption("java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" 
-                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT") + ".jar"),
+                new VMOption("java.base=lib/endorsed/org.apache.karaf.specs.locator-"
+                    + System.getProperty("karaf.version", karafVersion) + ".jar"),
+                new VMOption("--patch-module"), new VMOption("java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-"
+                    + System.getProperty("karaf.version", karafVersion) + ".jar"),
                 new VMOption("--add-opens"),
                 new VMOption("java.base/java.security=ALL-UNNAMED"),
                 new VMOption("--add-opens"),
