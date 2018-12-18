@@ -384,27 +384,27 @@ ecf=http://download.eclipse.org/rt/ecf/latest/site.p2/karaf-features.xml
 decanter=mvn:org.apache.karaf.decanter/apache-karaf-decanter/LATEST/xml/features
 ----
 
-You can directly provide a features repository name to the `feature:repo-add` command. For install, to install Apache Karaf Cellar, you can do:
+You can directly provide a features repository name to the `feature:repo-add` command. For install, to install PAX JDBC, you can do:
 
 ----
-karaf@root()> feature:repo-add cellar
-Adding feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/LATEST/xml/features
+karaf@root()> feature:repo-add pax-jdbc
+Adding feature url mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features
 ----
 
 When you don't provide the optional `version` argument, Apache Karaf installs the latest version of the features repository available.
 You can specify a target version with the `version` argument:
 
 ----
-karaf@root()> feature:repo-add cellar 4.0.0.RC1
-Adding feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0.RC1/xml/features
+karaf@root()> feature:repo-add pax-jdbc 1.3.0
+Adding feature url mvn:org.ops4j.pax.jdbc/pax-jdbc-features/1.3.0/xml/features
 ----
 
 Instead of providing a features repository name defined in the `etc/org.apache.karaf.features.repos.cfg` configuration file,
 you can directly provide the features repository URL to the `feature:repo-add` command:
 
 ----
-karaf@root()> feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0.RC1/xml/features
-Adding feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/4.0.0.RC1/xml/features
+karaf@root()> feature:repo-add mvn:org.ops4j.pax.jdbc/pax-jdbc-features/1.3.0/xml/features
+Adding feature url mvn:org.ops4j.pax.jdbc/pax-jdbc-features/1.3.0/xml/features
 ----
 
 By default, the `feature:repo-add` command just registers the features repository, it doesn't install any feature.
@@ -412,7 +412,7 @@ If you specify the `-i` option, the `feature:repo-add` command registers the fea
 features described in this features repository:
 
 ----
-karaf@root()> feature:repo-add -i cellar
+karaf@root()> feature:repo-add -i pax-jdbc
 ----
 
 ===== `feature:repo-refresh`
@@ -442,25 +442,25 @@ Refreshing feature url mvn:org.apache.karaf.features/standard/4.0.0/xml/features
 ----
 
 ----
-karaf@root()> feature:repo-refresh cellar
-Refreshing feature url mvn:org.apache.karaf.cellar/apache-karaf-cellar/LATEST/xml/features
+karaf@root()> feature:repo-refresh pax-jdbc
+Refreshing feature url mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features
 ----
 
 ===== `feature:repo-remove`
 
 The `feature:repo-remove` command removes a features repository from the registered ones.
 
-The `feature:repo-remove` command requires a argument:
+The `feature:repo-remove` command requires an argument:
 
 * the features repository name (as displayed in the repository column of the `feature:repo-list` command output)
 * the features repository URL (as displayed in the URL column of the `feature:repo-list` command output)
 
 ----
-karaf@root()> feature:repo-remove karaf-cellar-4.0.0.RC1
+karaf@root()> feature:repo-remove org.ops4j.pax.jdbc-1.3.0
 ----
 
 ----
-karaf@root()> feature:repo-remove mvn:org.apache.karaf.cellar/apache-karaf-cellar/LATEST/xml/features
+karaf@root()> feature:repo-remove mvn:org.ops4j.pax.jdbc/pax-jdbc-features/1.3.0/xml/features
 ----
 
 By default, the `feature:repo-remove` command just removes the features repository from the registered ones: it doesn't
@@ -469,7 +469,7 @@ uninstall the features provided by the features repository.
 If you use `-u` option, the `feature:repo-remove` command uninstalls all features described by the features repository:
 
 ----
-karaf@root()> feature:repo-remove -u karaf-cellar-4.0.0.RC1
+karaf@root()> feature:repo-remove -u org.ops4j.pax.jdbc-1.3.0
 ----
 
 ===== `feature:list`
