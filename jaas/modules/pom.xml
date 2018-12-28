@@ -81,7 +81,7 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <scope>provided</scope>
-            <version>4.3.5</version>
+            <version>${httpclient.version}</version>
         </dependency>
 
         <!-- Test dependencies -->
