@@ -37,6 +37,7 @@
         <module>karaf-rest-example-provider</module>
         <module>karaf-rest-example-client</module>
         <module>karaf-rest-example-features</module>
+        <module>karaf-rest-example-whiteboard</module>
     </modules>
     
     <properties>
