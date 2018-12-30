@@ -667,7 +667,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
      * Extract the MANIFEST from the give file.
      */
 
-    private Manifest getManifest(File file) throws IOException {
+    private Manifest getManifest(File file) {
         final InputStream is;
         try {
             is = Files.newInputStream(file.toPath());
@@ -686,6 +686,9 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 }
                 return m;
             }
+        } catch (IOException e) {
+            getLog().warn("Error while reading artifact", e);
+            return null;
         }
     }
 
