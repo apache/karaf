@@ -38,8 +38,11 @@ public class ServletExampleTest extends KarafTestSupport {
 
     private void verify() throws Exception {
         String command = executeCommand("http:list");
+        while (!command.contains("servlet-example")) {
+            Thread.sleep(200);
+            command = executeCommand("http:list");
+        }
         System.out.println(command);
-        assertContains("servlet-example", command);
 
         URL url = new URL("http://localhost:" + getHttpPort() + "/servlet-example");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
