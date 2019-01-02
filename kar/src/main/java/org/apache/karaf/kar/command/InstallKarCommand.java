@@ -20,9 +20,11 @@ import org.apache.karaf.kar.KarService;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.support.completers.UriCompleter;
 
 import java.net.URI;
 
@@ -31,6 +33,7 @@ import java.net.URI;
 public class InstallKarCommand implements Action {
 
     @Argument(index = 0, name = "url", description = "The URL of the KAR file to install.", required = true, multiValued = false)
+    @Completion(UriCompleter.class)
     private String url;
 
     @Option(name = "--no-start", description = "Do not start the bundles automatically", required = false, multiValued = false)
