@@ -18,8 +18,11 @@
  */
 package org.apache.karaf.main;
 
+import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
+
 import java.io.File;
 import java.io.IOException;
+
 import org.apache.karaf.main.util.Utils;
 import org.junit.After;
 import org.junit.Assert;
@@ -30,8 +33,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
-
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 public class MainLockingTest {
     private File home;
@@ -71,6 +72,7 @@ public class MainLockingTest {
 
         System.clearProperty("karaf.lock");
         System.clearProperty("karaf.lock.delay");
+        System.clearProperty("karaf.lock.lostThreshold");
         System.clearProperty("karaf.lock.class");
 
         System.clearProperty("karaf.pid.file");
@@ -90,6 +92,52 @@ public class MainLockingTest {
                     .build( withBnd() )
         );
         
+        bundle.start();
+
+        Thread.sleep(1000);
+
+        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
+
+        MockLock lock = (MockLock) main.getLock();
+
+        Assert.assertEquals(100, sl.getStartLevel());
+
+        // simulate losing a lock
+        lock.setIsAlive(false);
+        lock.setLock(false);
+
+        // lets wait until the start level change is complete
+        lock.waitForLock();
+        Assert.assertEquals(1, sl.getStartLevel());
+
+        Thread.sleep(1000);
+
+        // get lock back
+        lock.setIsAlive(true);
+        lock.setLock(true);
+
+        Thread.sleep(1000);
+
+        // exit framework + lock loop
+        main.destroy();
+    }
+
+    @Test
+    public void testRetainsMasterLockOverFluctuation() throws Exception {
+        System.setProperty("karaf.lock.lostThreshold", "3");
+
+        String[] args = new String[0];
+        Main main = new Main(args);
+        main.launch();
+        Framework framework = main.getFramework();
+        String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
+        Bundle bundle = framework.getBundleContext().installBundle("foo",
+                TinyBundles.bundle()
+                    .set( Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName() )
+                    .add( activatorName, getClass().getClassLoader().getResourceAsStream( activatorName ) )
+                    .build( withBnd() )
+        );
+
         bundle.start();       
         
         FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
@@ -104,7 +152,7 @@ public class MainLockingTest {
         
         // lets wait until the start level change is complete
         lock.waitForLock();
-        Assert.assertEquals(1, sl.getStartLevel());
+        Assert.assertEquals(100, sl.getStartLevel());
 
         Thread.sleep(1000);
         
@@ -117,7 +165,7 @@ public class MainLockingTest {
         
         // exit framework + lock loop
         main.destroy();
-    }    
+    }
 
     @Test
     public void testMasterWritesPid() throws Exception {

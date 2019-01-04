@@ -387,9 +387,14 @@ public class Main {
     private void doMonitor() throws Exception {
         lock = createLock();
         File dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA));
+        int livenessFailureCount = 0;
+        boolean locked = false;
         while (!exiting) {
             if (lock.lock()) {
-                lockCallback.lockAcquired();
+                if (!locked) {
+                    lockCallback.lockAcquired();
+                    locked = true;
+                }
                 for (;;) {
                     if (!dataDir.isDirectory()) {
                         LOG.info("Data directory does not exist anymore, halting");
@@ -407,7 +412,11 @@ public class Main {
                     }
                 }
                 if (!exiting) {
-                    lockCallback.lockLost();
+                    livenessFailureCount++;
+                    if (livenessFailureCount > config.lockLostThreshold) {
+                        locked = false;
+                        lockCallback.lockLost();
+                    }
                 } else {
                     lockCallback.stopShutdownThread();
                 }
