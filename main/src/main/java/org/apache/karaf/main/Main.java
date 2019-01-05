@@ -391,6 +391,7 @@ public class Main {
         boolean locked = false;
         while (!exiting) {
             if (lock.lock()) {
+                livenessFailureCount = 0;
                 if (!locked) {
                     lockCallback.lockAcquired();
                     locked = true;
@@ -421,18 +422,21 @@ public class Main {
                     lockCallback.stopShutdownThread();
                 }
             } else {
-                livenessFailureCount++;
-                if (livenessFailureCount <= config.lockLostThreshold) {
-                    lockCallback.waitingForLock();
-                } else {
-                    if (locked) {
+                if (locked) {
+                    livenessFailureCount++;
+                    if (livenessFailureCount <= config.lockLostThreshold) {
+                        lockCallback.waitingForLock();
+                    } else {
                         locked = false;
                         lockCallback.lockLost();
                     }
+                } else {
                     if (config.lockSlaveBlock) {
                         LOG.log(Level.SEVERE, "Can't lock, and lock is exclusive");
                         System.err.println("Can't lock (another instance is running), and lock is exclusive");
                         System.exit(5);
+                    } else {
+                        lockCallback.waitingForLock();
                     }
                 }
             }
