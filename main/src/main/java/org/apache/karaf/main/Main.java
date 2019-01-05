@@ -421,12 +421,19 @@ public class Main {
                     lockCallback.stopShutdownThread();
                 }
             } else {
-                if (config.lockSlaveBlock) {
-                    LOG.log(Level.SEVERE, "Can't lock, and lock is exclusive");
-                    System.err.println("Can't lock (another instance is running), and lock is exclusive");
-                    System.exit(5);
-                } else {
+                livenessFailureCount++;
+                if (livenessFailureCount <= config.lockLostThreshold) {
                     lockCallback.waitingForLock();
+                } else {
+                    if (locked) {
+                        locked = false;
+                        lockCallback.lockLost();
+                    }
+                    if (config.lockSlaveBlock) {
+                        LOG.log(Level.SEVERE, "Can't lock, and lock is exclusive");
+                        System.err.println("Can't lock (another instance is running), and lock is exclusive");
+                        System.exit(5);
+                    }
                 }
             }
             try {
