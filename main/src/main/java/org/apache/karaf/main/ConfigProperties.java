@@ -121,6 +121,8 @@ public class ConfigProperties {
 
     public static final String PROPERTY_LOCK_DELAY = "karaf.lock.delay";
 
+    public static final String PROPERTY_LOCK_LOST_THRESHOLD = "karaf.lock.lostThreshold";
+
     private static final String PROPERTY_LOCK_LEVEL = "karaf.lock.level";
 
     private static final String PROPERTY_LOCK_SLAVE_BLOCK = "karaf.lock.slave.block";
@@ -157,6 +159,8 @@ public class ConfigProperties {
 
     public static final String DEFAULT_LOCK_DELAY = "1000";
 
+    public static final String DEFAULT_LOCK_LOST_THRESHOLD = "0";
+
 
     /**
      * If a lock should be used before starting the runtime
@@ -175,6 +179,7 @@ public class ConfigProperties {
     int lockStartLevel = 1;
     int lockDefaultBootLevel = 1;
     int lockDelay;
+    int lockLostThreshold;
     boolean lockSlaveBlock = false;
     int shutdownTimeout = 5 * 60 * 1000;
     boolean useLock;
@@ -231,6 +236,7 @@ public class ConfigProperties {
         System.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(this.defaultStartLevel));
         this.lockStartLevel = Integer.parseInt(props.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
         this.lockDelay = Integer.parseInt(props.getProperty(PROPERTY_LOCK_DELAY, DEFAULT_LOCK_DELAY));
+        this.lockLostThreshold = Integer.parseInt(props.getProperty(PROPERTY_LOCK_LOST_THRESHOLD, DEFAULT_LOCK_LOST_THRESHOLD));
         this.lockSlaveBlock = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_SLAVE_BLOCK, "false"));
         this.props.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockDefaultBootLevel));
         this.shutdownTimeout = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
