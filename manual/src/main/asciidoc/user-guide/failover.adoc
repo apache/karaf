@@ -83,6 +83,7 @@ karaf.lock.jdbc.password=password
 karaf.lock.jdbc.table=KARAF_LOCK
 karaf.lock.jdbc.clustername=karaf
 karaf.lock.jdbc.timeout=30
+karaf.lock.lostThreshold=0
 ----
 
 * `karaf.lock` property enabled the HA/failover mechanism
@@ -90,6 +91,7 @@ karaf.lock.jdbc.timeout=30
  is the most generic database lock system implementation. Apache Karaf supports lock system for specific databases (see later for details).
 * `karaf.lock.level` property is the container-level locking (see later for details).
 * `karaf.lock.delay` property is the interval period (in milliseconds) to check if the lock has been released or not.
+* `karaf.lock.lostThreshold` property is the count of attempts to re-acquire the lock before shutting down.
 * `karaf.lock.jdbc.url` property contains the JDBC URL to the database (derby in this example).
 * `karaf.lock.jdbc.driver` property contains the class name of the JDBC driver to use (derby in this example).
 * `karaf.lock.jdbc.user` property contains the username to use to connect to the database.
