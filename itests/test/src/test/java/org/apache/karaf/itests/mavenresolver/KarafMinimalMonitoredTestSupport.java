@@ -97,10 +97,10 @@ public abstract class KarafMinimalMonitoredTestSupport {
                 new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
                 new VMOption("--patch-module"),
                 new VMOption("java.base=lib/endorsed/org.apache.karaf.specs.locator-" 
-                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT") + ".jar"),
+                + System.getProperty("karaf.version", "4.2.3-SNAPSHOT") + ".jar"),
                 new VMOption("--patch-module"),
                 new VMOption("java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" 
-                + System.getProperty("karaf.version", "4.2.2-SNAPSHOT") + ".jar"),
+                + System.getProperty("karaf.version", "4.2.3-SNAPSHOT") + ".jar"),
                 new VMOption("--add-opens"),
                 new VMOption("java.base/java.security=ALL-UNNAMED"),
                 new VMOption("--add-opens"),

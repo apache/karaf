@@ -55,7 +55,7 @@ mvn clean install
 On a running Karaf instance, register the features repository using:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-config-example-features/4.2.2-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-config-example-features/4.2.3-SNAPSHOT/xml
 ```
 
 ## Usage
@@ -67,7 +67,7 @@ If you install the `karaf-config-example-static` feature, it will create the `et
 
 ```
 karaf@root()> feature:install karaf-config-example-static 
-felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.2-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
+felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.3-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
 foo = bar
 hello = world
 org.apache.karaf.features.configKey = org.apache.karaf.example.config
@@ -87,7 +87,7 @@ Then, you can install the `karaf-config-example-common` feature providing the co
 ```
 karaf@root()> feature:install karaf-config-example-common
 Configuration changed
-felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.2-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
+felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.3-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
 foo = bar
 org.apache.karaf.features.configKey = org.apache.karaf.example.config
 service.pid = org.apache.karaf.example.config
@@ -100,7 +100,7 @@ karaf@root()> config:edit org.apache.karaf.example.config
 karaf@root()> config:property-set hello world
 karaf@root()> config:update
 Configuration changed
-felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.2-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
+felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.3-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
 foo = bar
 hello = world
 org.apache.karaf.features.configKey = org.apache.karaf.example.config
@@ -120,7 +120,7 @@ Then you will see in the Karaf shell console:
 
 ```
 karaf@root()> New configuration with pid org.apache.karaf.example.config.994408d3-b950-4ef5-9cf0-eaaad97922f3
-felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.2-SNAPSHOT/etc/org.apache.karaf.example.config-test.cfg
+felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.3-SNAPSHOT/etc/org.apache.karaf.example.config-test.cfg
 hello = world
 service.factoryPid = org.apache.karaf.example.config
 service.pid = org.apache.karaf.example.config.994408d3-b950-4ef5-9cf0-eaaad97922f3
@@ -193,7 +193,7 @@ service.pid = org.apache.karaf.example.config
 hello = world
 org.apache.karaf.features.configKey = org.apache.karaf.example.config
 component.name = my-component
-felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.2-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
+felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.3-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
 component.id = 1
 foo = bar
 ```
@@ -205,7 +205,7 @@ service.pid = org.apache.karaf.example.config
 hello = world
 org.apache.karaf.features.configKey = org.apache.karaf.example.config
 component.name = my-component
-felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.2-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
+felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.3-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
 component.id = 1
 foo = bar
 test = other
