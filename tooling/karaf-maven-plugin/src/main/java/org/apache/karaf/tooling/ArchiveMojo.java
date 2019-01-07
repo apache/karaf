@@ -146,8 +146,10 @@ public class ArchiveMojo extends MojoSupport {
             projectHelper.attachArtifact(project, artifact1.getType(), classifier, target1);
         }
 
-        artifact2.setFile(target1);
-        project.setArtifact(artifact2);
+        if (!project.getPackaging().equals("pom")) {
+            artifact2.setFile(target1);
+            project.setArtifact(artifact2);
+        }
     }
 
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
