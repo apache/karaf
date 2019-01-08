@@ -160,6 +160,7 @@
                     <libraries>
                     </libraries>
                     <javase>1.8</javase>
+                    <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
                 </configuration>
             </plugin>
         </plugins>
@@ -184,6 +185,67 @@
                                     <descriptors>
                                         <descriptor>src/main/descriptors/src.xml</descriptor>
                                     </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>consistency</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.code.maven-replacer-plugin</groupId>
+                        <artifactId>replacer</artifactId>
+                        <version>1.5.3</version>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>replace</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <filesToInclude>${project.build.directory}/bundle-report*.xml</filesToInclude>
+                            <replacements>
+                                <replacement>
+                                    <token>href="bundle-report.xslt"</token>
+                                    <value>href="${project.artifactId}-${project.version}-bundle-report.xslt"</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${project.build.directory}/bundle-report.xml</file>
+                                            <classifier>bundle-report</classifier>
+                                            <type>xml</type>
+                                        </artifact>
+                                        <artifact>
+                                            <file>${project.build.directory}/bundle-report-full.xml</file>
+                                            <classifier>bundle-report-full</classifier>
+                                            <type>xml</type>
+                                        </artifact>
+                                        <artifact>
+                                            <file>${project.build.directory}/bundle-report.xslt</file>
+                                            <classifier>bundle-report</classifier>
+                                            <type>xslt</type>
+                                        </artifact>
+                                    </artifacts>
                                 </configuration>
                             </execution>
                         </executions>
