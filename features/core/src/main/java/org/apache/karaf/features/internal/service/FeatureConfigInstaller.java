@@ -105,25 +105,31 @@ public class FeatureConfigInstaller {
 			String[] pid = parsePid(config.getName());
 			Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
 			if (cfg == null) {
-				Dictionary<String, String> cfgProps = convertToDict(props);
-				cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-				String key = createConfigurationKey(pid[0], pid[1]);
-				cfgProps.put(CONFIG_KEY, key);
-				props.put(CONFIG_KEY, key);
-                if (storage != null && configCfgStore) {
-                    File cfgFile;
-                    if (pid[1] != null) {
-                        cfgFile = new File(storage, pid[0] + "-" + pid[1] + ".cfg");
+			    File cfgFile = null;
+			    if (storage != null && configCfgStore) {
+			        if (pid[1] != null) {
+			            cfgFile = new File(storage, pid[0] + "-" + pid[1] + ".cfg");
                     } else {
                         cfgFile = new File(storage, pid[0] + ".cfg");
                     }
-                    cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
                 }
-				cfg.update(cfgProps);
-                try {
-                    updateStorage(pid[0], pid[1], props, false);
-                } catch (Exception e) {
-                    LOGGER.warn("Can't update cfg file", e);
+                if (!cfgFile.exists()) {
+                    Dictionary<String, String> cfgProps = convertToDict(props);
+                    cfg = createConfiguration(configAdmin, pid[0], pid[1]);
+                    String key = createConfigurationKey(pid[0], pid[1]);
+                    cfgProps.put(CONFIG_KEY, key);
+                    props.put(CONFIG_KEY, key);
+                    if (storage != null && configCfgStore) {
+                        cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
+                    }
+                    cfg.update(cfgProps);
+                    try {
+                        updateStorage(pid[0], pid[1], props, false);
+                    } catch (Exception e) {
+                        LOGGER.warn("Can't update cfg file", e);
+                    }
+                } else {
+                    LOGGER.info("Skipping configuration {} - file already exists", cfgFile);
                 }
 			} else if (config.isAppend()) {
                 boolean update = false;
