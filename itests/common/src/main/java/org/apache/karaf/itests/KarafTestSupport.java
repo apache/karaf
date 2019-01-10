@@ -172,7 +172,6 @@ public class KarafTestSupport {
 
     @Configuration
     public Option[] config() {
-        String karafVersion = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
         MavenArtifactUrlReference karafUrl = CoreOptions.maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
         String httpPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_HTTP_PORT), Integer.parseInt(MAX_HTTP_PORT)));
         String rmiRegistryPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_REG_PORT), Integer.parseInt(MAX_RMI_REG_PORT)));
@@ -222,9 +221,9 @@ public class KarafTestSupport {
                 new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
                 new VMOption("--patch-module"),
                 new VMOption("java.base=lib/endorsed/org.apache.karaf.specs.locator-"
-                    + System.getProperty("karaf.version", karafVersion) + ".jar"),
+                    + System.getProperty("karaf.version") + ".jar"),
                 new VMOption("--patch-module"), new VMOption("java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-"
-                    + System.getProperty("karaf.version", karafVersion) + ".jar"),
+                    + System.getProperty("karaf.version") + ".jar"),
                 new VMOption("--add-opens"),
                 new VMOption("java.base/java.security=ALL-UNNAMED"),
                 new VMOption("--add-opens"),
