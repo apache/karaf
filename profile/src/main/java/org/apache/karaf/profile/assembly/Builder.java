@@ -46,7 +46,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -60,7 +59,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import org.apache.felix.resolver.ResolverImpl;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.properties.Properties;
@@ -188,7 +186,12 @@ public class Builder {
      * supported versions are defined.</p>
      */
     public enum JavaVersion {
-        Java16("1.6", 1), Java17("1.7", 2), Java18("1.8", 3), Java9("9", 4);
+        Java16("1.6", 1),
+        Java17("1.7", 2),
+        Java18("1.8", 3),
+        Java9("9", 4),
+        Java10("10", 5),
+        Java11("11", 6);
 
         private String version;
         private int ordinal;
@@ -199,14 +202,12 @@ public class Builder {
         }
 
         public static JavaVersion from(String version) {
-            Optional<JavaVersion> v = Arrays.stream(values())
-                    .filter(jv -> jv.version.equals(version))
-                    .findFirst();
-
-            if (!v.isPresent()) {
-                throw new IllegalArgumentException("Java version \"" + version + "\" is not supported");
+            for (JavaVersion value : values()) {
+                if (value.version.equals(version)) {
+                    return value;
+                }
             }
-            return v.get();
+            throw new IllegalArgumentException("Java version \"" + version + "\" is not supported");
         }
 
         public boolean supportsEndorsedAndExtLibraries() {
