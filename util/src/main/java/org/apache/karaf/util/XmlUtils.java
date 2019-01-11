@@ -32,6 +32,8 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -41,6 +43,8 @@ import org.xml.sax.XMLReader;
  * Utils class to manipulate XML document in a thread safe way.
  */
 public class XmlUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(XmlUtils.class);
 
     private static final ThreadLocal<DocumentBuilderFactory> DOCUMENT_BUILDER_FACTORY = new ThreadLocal<>();
     private static final ThreadLocal<TransformerFactory> TRANSFORMER_FACTORY = new ThreadLocal<>();
@@ -139,8 +143,16 @@ public class XmlUtils {
         if (tf == null) {
             tf = TransformerFactory.newInstance();
             tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
-            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            try {
+                tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_DTD);
+            }
+            try {
+                tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
+            }
             TRANSFORMER_FACTORY.set(tf);
         }
         return tf.newTransformer();
@@ -151,8 +163,16 @@ public class XmlUtils {
         if (tf == null) {
             tf = TransformerFactory.newInstance();
             tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
-            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            try {
+                tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_DTD);
+            }
+            try {
+                tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
+            }
             TRANSFORMER_FACTORY.set(tf);
         }
         return tf.newTransformer(xsltSource);
