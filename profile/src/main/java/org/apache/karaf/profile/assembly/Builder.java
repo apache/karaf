@@ -1703,7 +1703,7 @@ public class Builder {
                 repoUrl = "file:etc/" + output.getName();
             } else {
                 bais = new ByteArrayInputStream(baos.toByteArray());
-                repoUrl = "file:${karaf.home}/etc/" + output.getName();
+                repoUrl = "file:${karaf.etc}/" + output.getName();
             }
             Files.copy(bais, output.toPath());
             Properties featuresProperties = new Properties(featuresCfgFile.toFile());
