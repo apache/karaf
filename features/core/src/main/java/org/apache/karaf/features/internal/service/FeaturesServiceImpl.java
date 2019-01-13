@@ -353,6 +353,13 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     //
 
     @Override
+    public Feature[] repositoryProvidedFeatures(URI uri) throws Exception {
+        Features features = JaxbUtil.unmarshal(uri.toURL().toExternalForm(), true);
+        Feature[] array = new Feature[features.getFeature().size()];
+        return features.getFeature().toArray(array);
+    }
+
+    @Override
     public void validateRepository(URI uri) throws Exception {
         throw new UnsupportedOperationException();
     }

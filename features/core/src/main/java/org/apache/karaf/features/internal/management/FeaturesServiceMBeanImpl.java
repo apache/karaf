@@ -126,6 +126,11 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         }
     }
 
+    @Override
+    public TabularData repositoryProvidedFeatures(String uri) throws Exception {
+        return infoFeature(featuresService.repositoryProvidedFeatures(new URI(uri)));
+    }
+
     public void addRepository(String uri) throws Exception {
         URI repoUri = new URI(uri);
         if (featuresService.isRepositoryUriBlacklisted(repoUri)) {

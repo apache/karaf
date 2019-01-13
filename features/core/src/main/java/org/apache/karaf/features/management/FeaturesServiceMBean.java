@@ -117,6 +117,8 @@ public interface FeaturesServiceMBean {
 
     TabularData getRepositories() throws Exception;
 
+    TabularData repositoryProvidedFeatures(String url) throws Exception;
+
     void addRepository(String url) throws Exception;
 
     void addRepository(String url, boolean install) throws Exception;

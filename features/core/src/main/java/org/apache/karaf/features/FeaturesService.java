@@ -122,6 +122,8 @@ public interface FeaturesService {
 
     boolean isRepositoryUriBlacklisted(URI uri);
 
+    Feature[] repositoryProvidedFeatures(URI uri) throws Exception;
+
     void addRepository(URI uri) throws Exception;
 
     void addRepository(URI uri, boolean install) throws Exception;
