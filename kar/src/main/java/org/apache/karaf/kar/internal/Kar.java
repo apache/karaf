@@ -114,23 +114,27 @@ public class Kar {
 
             ZipEntry entry = zipIs.getNextEntry();
             while (entry != null) {
-                if (entry.getName().startsWith("repository/")) {
-                    String path = entry.getName().substring("repository/".length());
-                    File destFile = new File(repoDir, path);
-                    extract(zipIs, entry, destFile);
-                    if (scanForRepos && featureDetector.isFeaturesRepository(destFile)) {
-                        Map map = new HashMap<>();
-                        String uri = Parser.pathToMaven(path, map);
-                        if (map.get("classifier") != null && ((String) map.get("classifier")).equalsIgnoreCase("features"))
-                            featureRepos.add(URI.create(uri));
-                        else featureRepos.add(destFile.toURI());
+                if (entry.getName().contains("..")) {
+                    LOGGER.warn("kar entry {} contains a .. relative path. For security reasons, it's not allowed.", entry.getName());
+                } else {
+                    if (entry.getName().startsWith("repository/")) {
+                        String path = entry.getName().substring("repository/".length());
+                        File destFile = new File(repoDir, path);
+                        extract(zipIs, entry, destFile);
+                        if (scanForRepos && featureDetector.isFeaturesRepository(destFile)) {
+                            Map map = new HashMap<>();
+                            String uri = Parser.pathToMaven(path, map);
+                            if (map.get("classifier") != null && ((String) map.get("classifier")).equalsIgnoreCase("features"))
+                                featureRepos.add(URI.create(uri));
+                            else featureRepos.add(destFile.toURI());
+                        }
                     }
-                }
 
-                if (entry.getName().startsWith("resources/")) {
-                    String path = entry.getName().substring("resources/".length());
-                    File destFile = new File(resourceDir, path);
-                    extract(zipIs, entry, destFile);
+                    if (entry.getName().startsWith("resources/")) {
+                        String path = entry.getName().substring("resources/".length());
+                        File destFile = new File(resourceDir, path);
+                        extract(zipIs, entry, destFile);
+                    }
                 }
                 entry = zipIs.getNextEntry();
             }
