@@ -75,6 +75,13 @@
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
