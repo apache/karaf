@@ -153,7 +153,7 @@
         <cglib2.version>2.2.0</cglib2.version>
         
         <jna.version>4.5.2</jna.version>
-        <jaxb.version>2.3.0</jaxb.version> 
+        <jaxb.version>2.3.2</jaxb.version> 
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-codec.version>1.10</commons-codec.version>
         <commons-compress.version>1.18</commons-compress.version>
@@ -1772,6 +1772,26 @@
                 <artifactId>geronimo-atinject_1.0_spec</artifactId>
                 <version>1.1</version>
             </dependency>
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>${jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>${jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>txw2</artifactId>
+                <version>${jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>istack-commons-runtime</artifactId>
+                <version>3.0.7</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1787,6 +1807,9 @@
             <artifactId>easymock</artifactId>
             <scope>test</scope>
         </dependency>
+
+
+
     </dependencies>
 
     <build>

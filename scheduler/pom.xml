@@ -124,29 +124,27 @@
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>
 	        <id>java9-plus</id>
 	        <properties>
                 <plexus-utils.version>3.1.0</plexus-utils.version>
-                <mvn.opts>--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED --add-modules java.activation,java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
+                <mvn.opts>--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
 	        </properties>
                 <dependencies>
-                    <dependency>
-                        <groupId>javax.xml.bind</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                        <version>${jaxb.version}</version>
-                    </dependency>
                     <dependency>
                         <groupId>javax.activation</groupId>
                         <artifactId>activation</artifactId>
                         <version>1.1.1</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-runtime</artifactId>
-                        <version>2.3.1</version>
                     </dependency>
                 </dependencies>
 	        <activation>
