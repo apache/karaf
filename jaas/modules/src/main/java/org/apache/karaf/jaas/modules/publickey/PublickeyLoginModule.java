@@ -142,6 +142,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         if (debug) {
             LOG.debug("Successfully logged in " + user);
         }
+        succeeded = true;
         return true;
     }
 
@@ -185,23 +186,6 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
         byte[] data = str.getBytes();
         dos.writeInt(data.length);
         dos.write(data);
-    }
-
-    public boolean abort() throws LoginException {
-        clear();
-        if (debug) {
-            LOG.debug("abort");
-        }
-        return true;
-    }
-
-    public boolean logout() throws LoginException {
-        subject.getPrincipals().removeAll(principals);
-        principals.clear();
-        if (debug) {
-            LOG.debug("logout");
-        }
-        return true;
     }
 
 }

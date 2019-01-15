@@ -91,6 +91,7 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
                 principals.add(new RolePrincipal(infos[i]));
             }
 
+            succeeded = true;
             return true;
         } catch (LoginException e) {
             throw e;
@@ -99,24 +100,6 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
         } finally {
             callbackHandler = null;
             options = null;
-        }
-    }
-
-
-    public boolean abort() throws LoginException {
-        subject = null;
-        principals = null;
-        return true;
-    }
-
-    public boolean logout() throws LoginException {
-        try {
-            subject.getPrincipals().removeAll(principals);
-            principals.clear();
-            return true;
-        } finally {
-            subject = null;
-            principals = null;
         }
     }
 
