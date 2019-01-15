@@ -64,6 +64,7 @@ public class JmsExampleTest extends KarafTestSupport {
 
     @Test
     public void test() throws Exception {
+        Thread.sleep(10000);//wait until artemis up
         String output = executeCommand("jms:info artemis");
         System.out.println(output);
         assertContains("ActiveMQ", output);

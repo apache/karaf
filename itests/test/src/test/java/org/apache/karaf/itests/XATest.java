@@ -73,6 +73,7 @@ public class XATest extends KarafTestSupport {
 
     @Test
     public void test() throws Exception {
+        Thread.sleep(10000);//wait and until artemis server up
         System.out.println(executeCommand("jms:info artemis"));
 
         System.out.println("== Installing Derby");
