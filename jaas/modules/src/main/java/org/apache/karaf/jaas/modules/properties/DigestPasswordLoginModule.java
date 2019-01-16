@@ -227,23 +227,7 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
         if (debug) {
             LOGGER.debug("Successfully logged in {}", user);
         }
-        return true;
-    }
-
-    public boolean abort() throws LoginException {
-        clear();
-        if (debug) {
-            LOGGER.debug("abort");
-        }
-        return true;
-    }
-
-    public boolean logout() throws LoginException {
-        subject.getPrincipals().removeAll(principals);
-        principals.clear();
-        if (debug) {
-            LOGGER.debug("logout");
-        }
+        succeeded = true;
         return true;
     }
 

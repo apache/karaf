@@ -127,6 +127,7 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
             throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
         }
 
+        succeeded = true;
         return true;
     }
 
@@ -143,16 +144,6 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
             }
         }
         throw new FailedLoginException("no matching public key found");
-    }
-
-    public boolean abort() throws LoginException {
-        return true;
-    }
-
-    public boolean logout() throws LoginException {
-        subject.getPrincipals().removeAll(principals);
-        principals.clear();
-        return true;
     }
 
 }

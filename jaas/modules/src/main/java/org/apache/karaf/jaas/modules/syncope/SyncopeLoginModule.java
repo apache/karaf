@@ -124,6 +124,7 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
             principals.add(new RolePrincipal(role));
         }
 
+        succeeded = true;
         return true;
     }
 
@@ -191,16 +192,6 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
             }
         }
         return roles;
-    }
-
-    public boolean abort() {
-        return true;
-    }
-
-    public boolean logout() throws LoginException {
-        subject.getPrincipals().removeAll(principals);
-        principals.clear();
-        return true;
     }
 
 }

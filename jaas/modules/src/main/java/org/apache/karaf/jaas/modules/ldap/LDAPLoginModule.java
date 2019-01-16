@@ -157,16 +157,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         } catch (Exception e) {
             throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
         }
-        return true;
-    }
-
-    public boolean abort() throws LoginException {
-        return true;
-    }
-
-    public boolean logout() throws LoginException {
-        subject.getPrincipals().removeAll(principals);
-        principals.clear();
+        succeeded = true;
         return true;
     }
 

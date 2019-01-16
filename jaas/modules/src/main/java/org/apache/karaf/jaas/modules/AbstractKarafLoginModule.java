@@ -26,12 +26,16 @@ import javax.security.auth.spi.LoginModule;
 import org.apache.karaf.jaas.boot.principal.RolePolicy;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Abstract JAAS login module extended by all Karaf Login Modules.
  */
 public abstract class AbstractKarafLoginModule implements LoginModule {
+
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(AbstractKarafLoginModule.class);
 
     protected Set<Principal> principals = new HashSet<>();
     protected Subject subject;
@@ -44,6 +48,10 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     protected String roleDiscriminator;
     protected boolean detailedLoginExcepion;
 
+    /** the authentication status*/
+    protected boolean succeeded = false;
+    protected boolean commitSucceeded = false;
+
     /**
      * the bundle context is required to use the encryption service
      */
@@ -51,8 +59,11 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
 
     private EncryptionSupport encryptionSupport;
 
+    @Override
     public boolean commit() throws LoginException {
-        if (principals.isEmpty()) {
+        if (!succeeded || principals.isEmpty()) {
+            clear();
+            succeeded = false;
             return false;
         }
         RolePolicy policy = RolePolicy.getPolicy(rolePolicy);
@@ -61,11 +72,46 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         } else {
             subject.getPrincipals().addAll(principals);
         }
+        commitSucceeded = true;
+        return true;
+    }
+
+    @Override
+    public boolean abort() throws LoginException {
+        if (debug) {
+            LOGGER.debug("abort");
+        }
+        if (!succeeded) {
+            return false;
+        } else if (succeeded && commitSucceeded) {
+            // we succeeded, but another required module failed
+            logout();
+        } else {
+            // our commit failed
+            clear();
+            succeeded = false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean logout() throws LoginException {
+        if (debug) {
+            LOGGER.debug("logout");
+        }
+
+        subject.getPrincipals().removeAll(principals);
+        clear();
+
+        succeeded = false;
+        commitSucceeded = false;
+
         return true;
     }
 
     protected void clear() {
         user = null;
+        principals.clear();
     }
 
     public void initialize(Subject sub, CallbackHandler handler, Map<String, ?> options) {

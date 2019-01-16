@@ -61,7 +61,8 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
         context.login();
 
         try {
-            return Subject.doAs(context.getSubject(), (PrivilegedExceptionAction<Boolean>) this::doLogin);
+            succeeded = Subject.doAs(context.getSubject(), (PrivilegedExceptionAction<Boolean>) this::doLogin);
+            return succeeded;
         } catch (PrivilegedActionException pExcp) {
             logger.error("error with delegated authentication", pExcp);
             throw new LoginException(pExcp.getMessage());
@@ -131,21 +132,11 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
     }
 
     @Override
-    public boolean abort() throws LoginException {
-        return true;
-    }
-
-    @Override
     public boolean commit() throws LoginException {
         boolean ret = super.commit();
-        principals.addAll(subject.getPrincipals(KerberosPrincipal.class));
+        if (ret) {
+            principals.addAll(subject.getPrincipals(KerberosPrincipal.class));
+        }
         return ret;
-    }
-
-    @Override
-    public boolean logout() throws LoginException {
-        subject.getPrincipals().removeAll(principals);
-        principals.clear();
-        return true;
     }
 }

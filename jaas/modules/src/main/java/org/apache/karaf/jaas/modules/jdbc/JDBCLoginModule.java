@@ -129,19 +129,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         } catch (Exception ex) {
             throw new LoginException("Error has occurred while retrieving credentials from database:" + ex.getMessage());
         }
-        return true;
-    }
-
-    public boolean abort() throws LoginException {
-        return true;
-    }
-
-    public boolean logout() throws LoginException {
-        subject.getPrincipals().removeAll(principals);
-        principals.clear();
-        if (debug) {
-            LOGGER.debug("logout");
-        }
+        succeeded = true;
         return true;
     }
 
