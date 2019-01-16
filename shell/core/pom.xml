@@ -175,7 +175,8 @@
                             org.apache.felix.service.threadio,
                         </Private-Package>
                         <Provide-Capability>
-                            osgi.service;effective:=active;objectClass=org.apache.karaf.shell.api.console.SessionFactory
+                            osgi.service;effective:=active;objectClass=org.apache.karaf.shell.api.console.SessionFactory,
+                            org.apache.felix.gogo;org.apache.felix.gogo=command.implementation;version:Version="1.0.0"
                         </Provide-Capability>
                         <Bundle-Activator>
                             org.apache.karaf.shell.impl.console.osgi.Activator
