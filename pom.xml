@@ -146,6 +146,7 @@
         <aspectj.bundle.version>1.7.4_1</aspectj.bundle.version>
         <ant.bundle.version>1.10.3_1</ant.bundle.version>
         <antlr.bundle.version>2.7.7_5</antlr.bundle.version>
+        <asm6.version>6.2.1</asm6.version>
         <asm.version>7.0</asm.version>
         <javax.annotation.version>1.2</javax.annotation.version>
         <awaitility.version>3.1.5</awaitility.version>

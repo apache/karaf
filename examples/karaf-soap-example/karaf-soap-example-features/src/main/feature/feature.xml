@@ -22,6 +22,11 @@
 
     <feature name="karaf-soap-example-common" version="${project.version}">
         <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-api/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm/${asm6.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-util/${asm6.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-tree/${asm6.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-analysis/${asm6.version}</bundle>
+        <bundle dependency="true">mvn:org.ow2.asm/asm-commons/${asm6.version}</bundle>
     </feature>
     
     <feature name="karaf-soap-example-provider" version="${project.version}">
