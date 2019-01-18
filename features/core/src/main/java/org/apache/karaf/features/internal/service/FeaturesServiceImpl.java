@@ -45,6 +45,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -916,7 +917,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             saveState();
             stateCopy = state.copy();
         }
-        doProvisionInThread(requirements, emptyMap(), stateCopy, getFeaturesById(), options);
+        doProvisionInThread(requirements, emptyMap(), stateCopy, getFeaturesById(), options, false);
     }
 
     @Override
@@ -964,13 +965,38 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
                                     final State state,
                                     final Map<String, Feature> featureById,
                                     final EnumSet<Option> options) throws Exception {
+        doProvisionInThread(requirements, stateChanges, state, featureById, options, true);
+    }
+
+    /**
+     * Actual deployment needs to be done in a separate thread.
+     * The reason is that if the console is refreshed, the current thread which is running
+     * the command may be interrupted while waiting for the refresh to be done, leading
+     * to bundles not being started after the refresh.
+     *
+     * @param requirements the provided requirements to match.
+     * @param stateChanges the current features state.
+     * @param state the current provisioning state.
+     * @param options the provisioning options.
+     * @param wait wait for provisioning to complete
+     * @throws Exception in case of provisioning failure.
+     */
+    private void doProvisionInThread(final Map<String, Set<String>> requirements,
+                                     final Map<String, Map<String, FeatureState>> stateChanges,
+                                     final State state,
+                                     final Map<String, Feature> featureById,
+                                     final EnumSet<Option> options,
+                                     boolean wait) throws Exception {
         try {
             final String outputFile = this.outputFile.get();
             this.outputFile.set(null);
-            executor.submit(() -> {
+            Future<Object> future = executor.submit(() -> {
                 doProvision(requirements, stateChanges, state, featureById, options, outputFile);
                 return null;
-            }).get();
+            });
+            if (wait) {
+                future.get();
+            }
         } catch (ExecutionException e) {
             Throwable t = e.getCause();
             if (t instanceof RuntimeException) {
