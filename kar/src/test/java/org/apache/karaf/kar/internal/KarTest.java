@@ -74,6 +74,38 @@ public class KarTest {
         Assert.assertEquals(0, repoDirFiles.length);
         File[] resourceDirFiles = resourceDir.listFiles();
         Assert.assertEquals(0, resourceDirFiles.length);
+
+        badKarFile.delete();
+    }
+
+    @Test
+    public void badEncodedKarExtractTest() throws Exception {
+        File base = new File("target/test");
+        base.mkdirs();
+        File badKarFile = new File(base,"badencoded.kar");
+        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(badKarFile));
+        // Use the encoded form of ".." here
+        ZipEntry entry = new ZipEntry("%2e%2e/%2e%2e/%2e%2e/%2e%2e/foo.bar");
+        zos.putNextEntry(entry);
+
+        byte[] data = "Test Data".getBytes();
+        zos.write(data, 0, data.length);
+        zos.closeEntry();
+        zos.close();
+
+        Kar kar = new Kar(new URI("file:target/test/badencoded.kar"));
+        File repoDir = new File("target/test/repo");
+        repoDir.mkdirs();
+        File resourceDir = new File("target/test/resources");
+        resourceDir.mkdirs();
+        kar.extract(repoDir, resourceDir);
+
+        File[] repoDirFiles = repoDir.listFiles();
+        Assert.assertEquals(0, repoDirFiles.length);
+        File[] resourceDirFiles = resourceDir.listFiles();
+        Assert.assertEquals(0, resourceDirFiles.length);
+
+        badKarFile.delete();
     }
 
 }
