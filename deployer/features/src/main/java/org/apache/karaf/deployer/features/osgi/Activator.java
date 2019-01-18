@@ -23,6 +23,8 @@ import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.deployer.features.FeatureDeploymentListener;
 import org.apache.karaf.deployer.features.FeatureURLHandler;
+import org.apache.karaf.features.DeploymentEvent;
+import org.apache.karaf.features.DeploymentListener;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -33,6 +35,7 @@ import org.osgi.service.url.URLStreamHandlerService;
 public class Activator extends BaseActivator {
 
     private FeatureDeploymentListener listener;
+    private DeploymentListener deploymentListener;
 
     @Override
     protected void doStart() throws Exception {
@@ -46,19 +49,47 @@ public class Activator extends BaseActivator {
         FeatureURLHandler handler = new FeatureURLHandler();
         register(URLStreamHandlerService.class, handler, props);
 
-        listener = new FeatureDeploymentListener();
-        listener.setFeaturesService(service);
-        listener.setBundleContext(bundleContext);
-        listener.init();
-        register(new Class[] { ArtifactUrlTransformer.class, ArtifactListener.class },
-                 listener);
+        deploymentListener = new DeploymentFinishedListener(service);
+        service.registerListener(deploymentListener);
     }
 
     protected void doStop() {
         super.doStop();
+        if (deploymentListener != null) {
+            FeaturesService service = getTrackedService(FeaturesService.class);
+            if (service != null) {
+                service.unregisterListener(deploymentListener);
+            }
+        }
         if (listener != null) {
             listener.destroy();
             listener = null;
+        }
+    }
+
+    private class DeploymentFinishedListener implements DeploymentListener {
+
+        private final FeaturesService service;
+
+        public DeploymentFinishedListener(FeaturesService service) {
+            this.service = service;
+        }
+
+        @Override
+        public void deploymentEvent(DeploymentEvent e) {
+            if (e == DeploymentEvent.DEPLOYMENT_FINISHED && listener == null) {
+                logger.info("Deployment finished. Registering FeatureDeploymentListener");
+                listener = new FeatureDeploymentListener();
+                listener.setFeaturesService(service);
+                listener.setBundleContext(bundleContext);
+                try {
+                    listener.init();
+                    Activator.this.register(new Class[] { ArtifactUrlTransformer.class, ArtifactListener.class },
+                            listener);
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                }
+            }
         }
     }
 
