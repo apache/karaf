@@ -114,7 +114,7 @@ public class Kar {
 
             ZipEntry entry = zipIs.getNextEntry();
             while (entry != null) {
-                if (entry.getName().contains("..")) {
+                if (entry.getName().contains("..") || entry.getName().contains("%2e%2e")) {
                     LOGGER.warn("kar entry {} contains a .. relative path. For security reasons, it's not allowed.", entry.getName());
                 } else {
                     if (entry.getName().startsWith("repository/")) {
