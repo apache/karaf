@@ -363,7 +363,8 @@ user=key,role
 By default, Karaf allows a key for the karaf user:
 
 ----
-# karaf=AAAAB3NzaC1kc3MAAACBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAAAAFQCXYFCPFSMLzLKSuYKi64QL8Fgc9QAAAIEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoAAACBAKKSU2PFl/qOLxIwmBZPPIcJshVe7bVUpFvyl3BbJDow8rXfskl8wO63OzP/qLmcJM0+JbcRU/53JjTuyk31drV2qxhIOsLDC9dGCWj47Y7TyhPdXh/0dthTRBy6bqGtRPxGa7gJov1xm/UuYYXPIUR/3x9MAZvZ5xvE0kYXO+rx,admin
+#karaf=AAAAB3NzaC1kc3MAAACBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAAAAFQCXYFCPFSMLzLKSuYKi64QL8Fgc9QAAAIEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoAAACBAKKSU2PFl/qOLxIwmBZPPIcJshVe7bVUpFvyl3BbJDow8rXfskl8wO63OzP/qLmcJM0+JbcRU/53JjTuyk31drV2qxhIOsLDC9dGCWj47Y7TyhPdXh/0dthTRBy6bqGtRPxGa7gJov1xm/UuYYXPIUR/3x9MAZvZ5xvE0kYXO+rx,_g_:admingroup
+_g_\:admingroup = group,admin,manager,viewer,systembundles,ssh
 ----
 
 [NOTE]
@@ -376,32 +377,35 @@ The easiest way to create key pair is to use OpenSSH.
 You can create a key pair using:
 
 ----
-ssh-keygen -t dsa -f karaf.id_dsa -N karaf
+ssh-keygen -t rsa -f karaf.id_rsa
 ----
+
+NB: you can provide a passphrase with `-N` option to `ssh-keygen` but, in that case, you will need to enter the passphrase to allow the SSH client to use the key.
 
 You have now the public and private keys:
 
 ----
--rw-------  1 jbonofre jbonofre    771 Jul 25 22:05 karaf.id_dsa
--rw-r--r--  1 jbonofre jbonofre    607 Jul 25 22:05 karaf.id_dsa.pub
+-rw-------  1 jbonofre jbonofre    771 Jul 25 22:05 karaf.id_rsa
+-rw-r--r--  1 jbonofre jbonofre    607 Jul 25 22:05 karaf.id_rsa.pub
 ----
 
-You can copy in the content of the `karaf.id_dsa.pub` file in the `etc/keys.properties`:
+You copy the key from `karaf.id_rsa.pub` file in the `etc/keys.properties`:
 
 ----
-karaf=AAAAB3NzaC1kc3MAAACBAJLj9vnEhu3/Q9Cvym2jRDaNWkATgQiHZxmErCmiLRuD5Klfv+HT/+8WoYdnvj0YaXFP80phYhzZ7fbIO2LRFhYhPmGLa9nSeOsQlFuX5A9kY1120yB2kxSIZI0fU2hy1UCgmTxdTQPSYtdWBJyvO/vczoX/8I3FziEfss07Hj1NAAAAFQD1dKEzkt4e7rBPDokPOMZigBh4kwAAAIEAiLnpbGNbKm8SNLUEc/fJFswg4G4VjjngjbPZAjhkYe4+H2uYmynry6V+GOTS2kaFQGZRf9XhSpSwfdxKtx7vCCaoH9bZ6S5Pe0voWmeBhJXi/Sww8f2stpitW2Oq7V7lDdDG81+N/D7/rKDD5PjUyMsVqc1n9wCTmfqmi6XPEw8AAACAHAGwPn/Mv7P9Q9+JZRWtGq+i4pL1zs1OluiStCN9e/Ok96t3gRVKPheQ6IwLacNjC9KkSKrLtsVyepGA+V5j/N+Cmsl6csZilnLvMUTvL/cmHDEEhTIQnPNrDDv+tED2BFqkajQqYLgMWeGVqXsBU6IT66itZlYtrq4v6uDQG/o=,admin
+karaf=AAAAB3NzaC1yc2EAAAADAQABAAABAQCtXN9ZZ+K67UFbxZMxHsoR69vHNbN8qi17v/5jF83FUexRqu8FvWCInBoW7eVFyeIiFXGd/zaCrDHrZsqpwXNEha3ifvfGTY2+gMLfZZFgh2LFubXBH6G725XKs9aus+KLrwC8u/uPr9Sw3YeSb0zxrjiXqv6hGYhaAHnskAgRCUxa+P4/JYNVS/2+ZrvBrVMAwgEuwt1Y1IDYsXQRmLJPn5ayMCfzPTANXfgB7Hix    72f2XpHV3FdnKTbYwdA32Bg4ptJkuvyMXnBy5y7ChRU150YGRToC4ETcPF2DB0EPOcbOLsQlNTKKRYuNR1zEpp6RAfiWD65kmYK766CE8AbB,_g_:admingroup
+_g_\:admingroup = group,admin,manager,viewer,systembundles,ssh
 ----
 
-and specify to the client to use the `karaf.id_dsa` private key:
+and specify to the client to use the `karaf.id_rsa` private key:
 
 ----
-bin/client -k ~/karaf.id_dsa
+bin/client -k ~/karaf.id_rsa
 ----
 
 or to ssh
 
 ----
-ssh -p 8101 -i ~/karaf.id_dsa karaf@localhost
+ssh -p 8101 -i ~/karaf.id_rsa karaf@localhost
 ----
 
 ==== RBAC
