@@ -22,9 +22,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
@@ -120,11 +124,11 @@ public class WrapperServiceImpl implements WrapperService {
 
             File file = new File(bin, name + "-wrapper");
             copyResourceTo(file, "macosx/karaf-wrapper", false);
-            chmod(file, "a+x");
+            makeFileExecutable(file);
 
             serviceFile = new File(bin, name + "-service");
             copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-            chmod(serviceFile, "a+x");
+            makeFileExecutable(serviceFile);
 
             wrapperConf = new File(etc, name + "-wrapper.conf");
 
@@ -149,15 +153,15 @@ public class WrapperServiceImpl implements WrapperService {
 
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "linux64/karaf-wrapper", false);
-                chmod(file, "a+x");
+                makeFileExecutable(file);
 
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-                chmod(serviceFile, "a+x");
+                makeFileExecutable(serviceFile);
 
                 systemdFile = new File(bin, name + ".service");
                 copyFilteredResourceTo(systemdFile, "unix/karaf.service", props, envs, includes);
-                chmod(systemdFile, "a+x");
+                makeFileExecutable(systemdFile);
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 if (!System.getProperty("java.version").startsWith("1.")) {
@@ -175,15 +179,15 @@ public class WrapperServiceImpl implements WrapperService {
 
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "linux/karaf-wrapper", false);
-                chmod(file, "a+x");
+                makeFileExecutable(file);
 
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-                chmod(serviceFile, "a+x");
+                makeFileExecutable(serviceFile);
 
                 systemdFile = new File(bin, name + ".service");
                 copyFilteredResourceTo(systemdFile, "unix/karaf.service", props, envs, includes);
-                chmod(systemdFile, "a+x");
+                makeFileExecutable(systemdFile);
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 if (!System.getProperty("java.version").startsWith("1.")) {
@@ -204,11 +208,11 @@ public class WrapperServiceImpl implements WrapperService {
 
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "aix/ppc64/karaf-wrapper", false);
-                chmod(file, "a+x");
+                makeFileExecutable(file);
 
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-                chmod(serviceFile, "a+x");
+                makeFileExecutable(serviceFile);
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 if (!System.getProperty("java.version").startsWith("1.")) {
@@ -226,11 +230,11 @@ public class WrapperServiceImpl implements WrapperService {
 
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "aix/ppc32/karaf-wrapper", false);
-                chmod(file, "a+x");
+                makeFileExecutable(file);
 
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-                chmod(serviceFile, "a+x");
+                makeFileExecutable(serviceFile);
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 if (!System.getProperty("java.version").startsWith("1.")) {
@@ -251,11 +255,11 @@ public class WrapperServiceImpl implements WrapperService {
 
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "solaris/sparc64/karaf-wrapper", false);
-                chmod(file, "a+x");
+                makeFileExecutable(file);
 
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-                chmod(serviceFile, "a+x");
+                makeFileExecutable(serviceFile);
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 if (!System.getProperty("java.version").startsWith("1.")) {
@@ -273,11 +277,11 @@ public class WrapperServiceImpl implements WrapperService {
 
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "solaris/x86/karaf-wrapper", false);
-                chmod(file, "a+x");
+                makeFileExecutable(file);
 
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-                chmod(serviceFile, "a+x");
+                makeFileExecutable(serviceFile);
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 if (!System.getProperty("java.version").startsWith("1.")) {
@@ -295,11 +299,11 @@ public class WrapperServiceImpl implements WrapperService {
 
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "solaris/x86_64/karaf-wrapper", false);
-                chmod(file, "a+x");
+                makeFileExecutable(file);
 
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-                chmod(serviceFile, "a+x");
+                makeFileExecutable(serviceFile);
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 if (!System.getProperty("java.version").startsWith("1.")) {
@@ -317,11 +321,11 @@ public class WrapperServiceImpl implements WrapperService {
 
                 File file = new File(bin, name + "-wrapper");
                 copyResourceTo(file, "solaris/sparc32/karaf-wrapper", false);
-                chmod(file, "a+x");
+                makeFileExecutable(file);
 
                 serviceFile = new File(bin, name + "-service");
                 copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-                chmod(serviceFile, "a+x");
+                makeFileExecutable(serviceFile);
 
                 wrapperConf = new File(etc, name + "-wrapper.conf");
                 if (!System.getProperty("java.version").startsWith("1.")) {
@@ -340,11 +344,11 @@ public class WrapperServiceImpl implements WrapperService {
 
             File file = new File(bin, name + "-wrapper");
             copyResourceTo(file, "hpux/parisc64/karaf-wrapper", false);
-            chmod(file, "a+x");
+            makeFileExecutable(file);
 
             serviceFile = new File(bin, name + "-service");
             copyFilteredResourceTo(serviceFile, "unix/karaf-service", props, envs, includes);
-            chmod(serviceFile, "a+x");
+            makeFileExecutable(serviceFile);
 
             wrapperConf = new File(etc, name + "-wrapper.conf");
             if (!System.getProperty("java.version").startsWith("1.")) {
@@ -498,11 +502,16 @@ public class WrapperServiceImpl implements WrapperService {
         return line;
     }
 
-    private int chmod(File serviceFile, String mode) throws Exception {
-        ProcessBuilder builder = new ProcessBuilder();
-        builder.command("chmod", mode, serviceFile.getCanonicalPath());
-        Process p = builder.start();
-        return p.waitFor();
+    private void makeFileExecutable(File serviceFile) throws IOException {
+        Set<PosixFilePermission> permissions = new HashSet<>();
+        permissions.add(PosixFilePermission.OWNER_EXECUTE);
+        permissions.add(PosixFilePermission.GROUP_EXECUTE);
+        permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+
+        // Get the existing permissions and add the executable permissions to them
+        Set<PosixFilePermission> filePermissions = Files.getPosixFilePermissions(serviceFile.toPath());
+        filePermissions.addAll(permissions);
+        Files.setPosixFilePermissions(serviceFile.toPath(), filePermissions);
     }
 
     private void createJar(File outFile, String resource) throws Exception {

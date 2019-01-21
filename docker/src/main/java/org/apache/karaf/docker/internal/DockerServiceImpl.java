@@ -19,6 +19,8 @@ package org.apache.karaf.docker.internal;
 import org.apache.karaf.docker.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
 
 public class DockerServiceImpl implements DockerService {
@@ -149,15 +151,15 @@ public class DockerServiceImpl implements DockerService {
             containerStorage = new File(storageLocation, name);
             containerStorage.mkdirs();
             copy(karafBase, containerStorage);
-            chmod(new File(containerStorage, "bin/karaf"), "a+x");
-            chmod(new File(containerStorage, "bin/client"), "a+x");
-            chmod(new File(containerStorage, "bin/inc"), "a+x");
-            chmod(new File(containerStorage, "bin/instance"), "a+x");
-            chmod(new File(containerStorage, "bin/setenv"), "a+x");
-            chmod(new File(containerStorage, "bin/shell"), "a+x");
-            chmod(new File(containerStorage, "bin/start"), "a+x");
-            chmod(new File(containerStorage, "bin/status"), "a+x");
-            chmod(new File(containerStorage, "bin/stop"), "a+x");
+            makeFileExecutable(new File(containerStorage, "bin/karaf"));
+            makeFileExecutable(new File(containerStorage, "bin/client"));
+            makeFileExecutable(new File(containerStorage, "bin/inc"));
+            makeFileExecutable(new File(containerStorage, "bin/instance"));
+            makeFileExecutable(new File(containerStorage, "bin/setenv"));
+            makeFileExecutable(new File(containerStorage, "bin/shell"));
+            makeFileExecutable(new File(containerStorage, "bin/start"));
+            makeFileExecutable(new File(containerStorage, "bin/status"));
+            makeFileExecutable(new File(containerStorage, "bin/stop"));
         } else {
             containerStorage = karafBase;
         }
@@ -424,15 +426,16 @@ public class DockerServiceImpl implements DockerService {
 
     }
 
-    private int chmod(File serviceFile, String mode) throws IOException {
-        java.lang.ProcessBuilder builder = new java.lang.ProcessBuilder();
-        builder.command("chmod", mode, serviceFile.getCanonicalPath());
-        java.lang.Process p = builder.start();
-        try {
-            return p.waitFor();
-        } catch (InterruptedException e) {
-            throw (IOException) new InterruptedIOException().initCause(e);
-        }
+    private void makeFileExecutable(File serviceFile) throws IOException {
+        Set<PosixFilePermission> permissions = new HashSet<>();
+        permissions.add(PosixFilePermission.OWNER_EXECUTE);
+        permissions.add(PosixFilePermission.GROUP_EXECUTE);
+        permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+
+        // Get the existing permissions and add the executable permissions to them
+        Set<PosixFilePermission> filePermissions = Files.getPosixFilePermissions(serviceFile.toPath());
+        filePermissions.addAll(permissions);
+        Files.setPosixFilePermissions(serviceFile.toPath(), filePermissions);
     }
 
 }
