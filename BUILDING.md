@@ -29,7 +29,7 @@
    JDK location, and that your PATH includes `%JAVA_HOME%\bin` (windows) or 
    `$JAVA_HOME$/bin` (unix).
 
-3. Install Maven 3.0.3 (or later), which can be downloaded from 
+3. Install Maven 3.5.0 (or later), which can be downloaded from 
    http://maven.apache.org/download.html. Make sure that your PATH includes 
    the `$MVN_HOME/bin` directory. 
 
