@@ -110,13 +110,99 @@ set PATH=%PATH%;%KARAF_BASE%\lib;%KARAF_HOME%\lib
 
 rem Setup the Java Virtual Machine
 if not "%JAVA%" == "" goto :Check_JAVA_END
-    set JAVA=java
-    if "%JAVA_HOME%" == "" call :warn JAVA_HOME not set; results may vary
-    if not "%JAVA_HOME%" == "" set JAVA=%JAVA_HOME%\bin\java
+    if not "%JAVA_HOME%" == "" goto :TryJDKEnd
+        call :warn JAVA_HOME not set; results may vary
+:TryJRE
+    start /w regedit /e __reg1.txt "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment"
+    if not exist __reg1.txt goto :TryJDK
+    type __reg1.txt | find "CurrentVersion" > __reg2.txt
+    if errorlevel 1 goto :TryJDK
+    for /f "tokens=2 delims==" %%x in (__reg2.txt) do set JavaTemp=%%~x
+    if errorlevel 1 goto :TryJDK
+    set JavaTemp=%JavaTemp%##
+    set JavaTemp=%JavaTemp:                ##=##%
+    set JavaTemp=%JavaTemp:        ##=##%
+    set JavaTemp=%JavaTemp:    ##=##%
+    set JavaTemp=%JavaTemp:  ##=##%
+    set JavaTemp=%JavaTemp: ##=##%
+    set JavaTemp=%JavaTemp:##=%
+    del __reg1.txt
+    del __reg2.txt
+    start /w regedit /e __reg1.txt "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\%JavaTemp%"
+    if not exist __reg1.txt goto :TryJDK
+    type __reg1.txt | find "JavaHome" > __reg2.txt
+    if errorlevel 1 goto :TryJDK
+    for /f "tokens=2 delims==" %%x in (__reg2.txt) do set JAVA_HOME=%%~x
+    if errorlevel 1 goto :TryJDK
+    del __reg1.txt
+    del __reg2.txt
+    goto TryJDKEnd
+:TryJDK
+    start /w regedit /e __reg1.txt "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Development Kit"
+    if not exist __reg1.txt (
+        goto TryRegJRE
+    )
+    type __reg1.txt | find "CurrentVersion" > __reg2.txt
+    if errorlevel 1 (
+        goto TryRegJRE
+    )
+    for /f "tokens=2 delims==" %%x in (__reg2.txt) do set JavaTemp=%%~x
+    if errorlevel 1 (
+        goto TryRegJRE
+    )
+    set JavaTemp=%JavaTemp%##
+    set JavaTemp=%JavaTemp:                ##=##%
+    set JavaTemp=%JavaTemp:        ##=##%
+    set JavaTemp=%JavaTemp:    ##=##%
+    set JavaTemp=%JavaTemp:  ##=##%
+    set JavaTemp=%JavaTemp: ##=##%
+    set JavaTemp=%JavaTemp:##=%
+    del __reg1.txt
+    del __reg2.txt
+    start /w regedit /e __reg1.txt "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Development Kit\%JavaTemp%"
+    if not exist __reg1.txt (
+        goto TryRegJRE
+    )
+    type __reg1.txt | find "JavaHome" > __reg2.txt
+    if errorlevel 1 (
+        goto TryRegJRE
+    )
+    for /f "tokens=2 delims==" %%x in (__reg2.txt) do set JAVA_HOME=%%~x
+    if errorlevel 1 (
+        goto TryRegJRE
+    )
+    del __reg1.txt
+    del __reg2.txt
+:TryRegJRE
+    rem try getting the JAVA_HOME from registry
+    FOR /F "usebackq tokens=3*" %%A IN (`REG QUERY "HKLM\Software\JavaSoft\Java Runtime Environment" /v CurrentVersion`) DO (
+       set JAVA_VERSION=%%A
+    )
+    FOR /F "usebackq tokens=3*" %%A IN (`REG QUERY "HKLM\Software\JavaSoft\Java Runtime Environment\%JAVA_VERSION%" /v JavaHome`) DO (
+       set JAVA_HOME=%%A %%B
+    )
+    if not exist "%JAVA_HOME%" (
+       goto TryRegJDK
+	)
+	goto TryJDKEnd
+:TryRegJDK
+    rem try getting the JAVA_HOME from registry
+    FOR /F "usebackq tokens=3*" %%A IN (`REG QUERY "HKLM\Software\JavaSoft\Java Development Kit" /v CurrentVersion`) DO (
+       set JAVA_VERSION=%%A
+    )
+    FOR /F "usebackq tokens=3*" %%A IN (`REG QUERY "HKLM\Software\JavaSoft\Java Development Kit\%JAVA_VERSION%" /v JavaHome`) DO (
+       set JAVA_HOME=%%A %%B
+    )
+    if not exist "%JAVA_HOME%" (
+       call :warn Unable to retrieve JAVA_HOME from Registry
+    )
+	goto TryJDKEnd
+:TryJDKEnd
     if not exist "%JAVA_HOME%" (
         call :warn JAVA_HOME is not valid: "%JAVA_HOME%"
         goto END
     )
+    set JAVA=%JAVA_HOME%\bin\java
 :Check_JAVA_END
 
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
