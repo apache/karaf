@@ -52,7 +52,9 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
@@ -306,6 +308,8 @@ public class Builder {
     List<String> pidsToExtract = new LinkedList<>();
     boolean writeProfiles;
     String generateConsistencyReport;
+    String consistencyReportProjectName;
+    String consistencyReportProjectVersion;
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
@@ -574,6 +578,22 @@ public class Builder {
      */
     public void generateConsistencyReport(String generateConsistencyReport) {
         this.generateConsistencyReport = generateConsistencyReport;
+    }
+
+    /**
+     * Configure project name to be used in consistency report
+     * @param consistencyReportProjectName
+     */
+    public void setConsistencyReportProjectName(String consistencyReportProjectName) {
+        this.consistencyReportProjectName = consistencyReportProjectName;
+    }
+
+    /**
+     * Configure project version to be used in consistency report
+     * @param consistencyReportProjectVersion
+     */
+    public void setConsistencyReportProjectVersion(String consistencyReportProjectVersion) {
+        this.consistencyReportProjectVersion = consistencyReportProjectVersion;
     }
 
     /**
@@ -1107,13 +1127,19 @@ public class Builder {
 
         if (generateConsistencyReport != null) {
             File directory = new File(generateConsistencyReport);
-            if (directory.isDirectory()) {
-                LOGGER.info("Writing bundle report");
-                generateConsistencyReport(karRepositories, allInstalledFeatures, installedProfile, new File(directory, "bundle-report-full.xml"), true);
-                generateConsistencyReport(karRepositories, allInstalledFeatures, installedProfile, new File(directory, "bundle-report.xml"), false);
-                Files.copy(getClass().getResourceAsStream("/bundle-report.xslt"),
-                        directory.toPath().resolve("bundle-report.xslt"),
-                        StandardCopyOption.REPLACE_EXISTING);
+            if (directory.isFile()) {
+                LOGGER.warn("Can't generate consistency report into {} - it's not a directory", generateConsistencyReport);
+            } else {
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+                if (directory.isDirectory()) {
+                    LOGGER.info("Writing bundle report");
+                    generateConsistencyReport(karRepositories, allInstalledFeatures, installedProfile, new File(directory, "bundle-report.xml"));
+                    Files.copy(getClass().getResourceAsStream("/bundle-report.xslt"),
+                            directory.toPath().resolve("bundle-report.xslt"),
+                            StandardCopyOption.REPLACE_EXISTING);
+                }
             }
         }
     }
@@ -1121,9 +1147,11 @@ public class Builder {
     /**
      * Produces human readable XML with <em>feature consistency report</em>.
      * @param repositories
+     * @param allInstalledFeatures
+     * @param installedProfile
      * @param result
      */
-    public void generateConsistencyReport(Map<String, Features> repositories, Set<Feature> allInstalledFeatures, Profile installedProfile, File result, boolean full) {
+    public void generateConsistencyReport(Map<String, Features> repositories, Set<Feature> allInstalledFeatures, Profile installedProfile, File result) {
         Profile installedOverlay = Profiles.getOverlay(installedProfile, allProfiles, environment);
         Profile installedEffective = Profiles.getEffective(installedOverlay, false);
 
@@ -1134,106 +1162,173 @@ public class Builder {
         FeatureSelector selector = new FeatureSelector(allInstalledFeatures);
         Set<Feature> effectiveInstalledFeatures = selector.getMatching(installFeatures);
 
-        Map<String, String> featureId2repository = new HashMap<>();
-        // list of feature IDs containing given bundle URIs
-        Map<String, Set<String>> bundle2featureId = new TreeMap<>(new URIAwareComparator());
-        // map of groupId/artifactId to full URI list to detect "duplicates"
-        Map<String, List<String>> ga2uri = new TreeMap<>();
-        Set<String> haveDuplicates = new HashSet<>();
-
-        // collect closure of bundles and features
-        repositories.forEach((name, features) -> {
-            if (full || !features.isBlacklisted()) {
-                features.getFeature().forEach(feature -> {
-                    if (full || (!feature.isBlacklisted() && effectiveInstalledFeatures.contains(feature))) {
-                        featureId2repository.put(feature.getId(), name);
-                        feature.getBundle().forEach(bundle -> {
-                            // normal bundles of feature
-                            bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
-                        });
-                        feature.getConditional().forEach(cond -> {
-                            cond.asFeature().getBundles().forEach(bundle -> {
-                                // conditional bundles of feature
-                                bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
-                            });
-                        });
-                    }
-                });
-            }
-        });
-        // collect bundle URIs - for now, only wrap:mvn: and mvn: are interesting
-        bundle2featureId.keySet().forEach(uri -> {
-            String originalUri = uri;
-            if (uri.startsWith("wrap:mvn:")) {
-                uri = uri.substring(5);
-                if (uri.indexOf(";") > 0) {
-                    uri = uri.substring(0, uri.indexOf(";"));
-                }
-                if (uri.indexOf("$") > 0) {
-                    uri = uri.substring(0, uri.indexOf("$"));
-                }
-            }
-            if (uri.startsWith("mvn:")) {
-                try {
-                    LocationPattern pattern = new LocationPattern(uri);
-                    String ga = String.format("%s/%s", pattern.getGroupId(), pattern.getArtifactId());
-                    ga2uri.computeIfAbsent(ga, k -> new LinkedList<>()).add(originalUri);
-                } catch (IllegalArgumentException ignored) {
-                    /*
-                        <!-- hibernate-validator-osgi-karaf-features-5.3.4.Final-features.xml -->
-                        <feature name="hibernate-validator-paranamer" version="5.3.4.Final">
-                            <feature>hibernate-validator</feature>
-                            <bundle>wrap:mvn:com.thoughtworks.paranamer:paranamer:2.8</bundle>
-                        </feature>
-                     */
-                }
-            }
-        });
-        ga2uri.values().forEach(l -> {
-            if (l.size() > 1) {
-                haveDuplicates.addAll(l);
-            }
-        });
-
         if (result == null) {
             return;
         }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(result))) {
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
             writer.write("<?xml-stylesheet type=\"text/xsl\" href=\"bundle-report.xslt\"?>\n");
-            writer.write("<consistency-report xmlns=\"urn:apache:karaf:consistency:1.0\">\n");
-            writer.write("    <duplicates>\n");
-            ga2uri.forEach((key, uris) -> {
-                if (uris.size() > 1) {
-                    try {
-                        writer.write(String.format("        <duplicate ga=\"%s\">\n", key));
-                        for (String uri : uris) {
-                            writer.write(String.format("            <bundle uri=\"%s\">\n", sanitize(uri)));
-                            for (String fid : bundle2featureId.get(uri)) {
-                                writer.write(String.format("                <feature repository=\"%s\">%s</feature>\n", featureId2repository.get(fid), fid));
-                            }
-                            writer.write("            </bundle>\n");
+            writer.write("<consistency-report xmlns=\"urn:apache:karaf:consistency:1.0\" project=\"" + consistencyReportProjectName + "\" version=\"" + consistencyReportProjectVersion + "\">\n");
+
+            ReportFlavor[] flavors = new ReportFlavor[] {
+                    all,
+                    notBlacklisted,
+                    new ReportFlavor() {
+                        @Override
+                        public String name() {
+                            return "installed";
                         }
-                        writer.write("        </duplicate>\n");
-                    } catch (IOException e) {
+
+                        @Override
+                        public boolean include(Features repository) {
+                            return !repository.isBlacklisted();
+                        }
+
+                        @Override
+                        public boolean include(Feature feature) {
+                            return !feature.isBlacklisted()
+                                    && effectiveInstalledFeatures.contains(feature);
+                        }
                     }
+            };
+
+            for (ReportFlavor flavor : flavors) {
+                writer.write("<report flavor=\"" + flavor.name() + "\">\n");
+
+                Map<String, String> featureId2repository = new HashMap<>();
+                // list of feature IDs containing given bundle URIs
+                Map<String, Set<String>> bundle2featureId = new TreeMap<>(new URIAwareComparator());
+                // map of groupId/artifactId to full URI list to detect "duplicates"
+                Map<String, List<String>> ga2uri = new TreeMap<>();
+                Set<String> haveDuplicates = new HashSet<>();
+
+                // collect closure of bundles and features
+                repositories.forEach((name, features) -> {
+                    if (flavor.include(features)) {
+                        features.getFeature().forEach(feature -> {
+                            if (flavor.include(feature)) {
+                                featureId2repository.put(feature.getId(), name);
+                                feature.getBundle().forEach(bundle -> {
+                                    // normal bundles of feature
+                                    bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                                });
+                                feature.getConditional().forEach(cond -> {
+                                    cond.asFeature().getBundles().forEach(bundle -> {
+                                        // conditional bundles of feature
+                                        bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                                    });
+                                });
+                            }
+                        });
+                    }
+                });
+                // collect bundle URIs - for now, only wrap:mvn: and mvn: are interesting
+                bundle2featureId.keySet().forEach(uri -> {
+                    String originalUri = uri;
+                    if (uri.startsWith("wrap:mvn:")) {
+                        uri = uri.substring(5);
+                        if (uri.indexOf(";") > 0) {
+                            uri = uri.substring(0, uri.indexOf(";"));
+                        }
+                        if (uri.indexOf("$") > 0) {
+                            uri = uri.substring(0, uri.indexOf("$"));
+                        }
+                    }
+                    if (uri.startsWith("mvn:")) {
+                        try {
+                            LocationPattern pattern = new LocationPattern(uri);
+                            String ga = String.format("%s/%s", pattern.getGroupId(), pattern.getArtifactId());
+                            ga2uri.computeIfAbsent(ga, k -> new LinkedList<>()).add(originalUri);
+                        } catch (IllegalArgumentException ignored) {
+                        /*
+                            <!-- hibernate-validator-osgi-karaf-features-5.3.4.Final-features.xml -->
+                            <feature name="hibernate-validator-paranamer" version="5.3.4.Final">
+                                <feature>hibernate-validator</feature>
+                                <bundle>wrap:mvn:com.thoughtworks.paranamer:paranamer:2.8</bundle>
+                            </feature>
+                         */
+                        }
+                    }
+                });
+                ga2uri.values().forEach(l -> {
+                    if (l.size() > 1) {
+                        haveDuplicates.addAll(l);
+                    }
+                });
+                writer.write("    <duplicates>\n");
+                ga2uri.forEach((key, uris) -> {
+                    if (uris.size() > 1) {
+                        try {
+                            writer.write(String.format("        <duplicate ga=\"%s\">\n", key));
+                            for (String uri : uris) {
+                                writer.write(String.format("            <bundle uri=\"%s\">\n", sanitize(uri)));
+                                for (String fid : bundle2featureId.get(uri)) {
+                                    writer.write(String.format("                <feature repository=\"%s\">%s</feature>\n", featureId2repository.get(fid), fid));
+                                }
+                                writer.write("            </bundle>\n");
+                            }
+                            writer.write("        </duplicate>\n");
+                        } catch (IOException ignored) {
+                        }
+                    }
+                });
+                writer.write("    </duplicates>\n");
+                writer.write("    <bundles>\n");
+                for (String uri : bundle2featureId.keySet()) {
+                    writer.write(String.format("        <bundle uri=\"%s\" duplicate=\"%b\">\n", sanitize(uri), haveDuplicates.contains(uri)));
+                    for (String fid : bundle2featureId.get(uri)) {
+                        writer.write(String.format("            <feature>%s</feature>\n", fid));
+                    }
+                    writer.write("        </bundle>\n");
                 }
-            });
-            writer.write("    </duplicates>\n");
-            writer.write("    <bundles>\n");
-            for (String uri : bundle2featureId.keySet()) {
-                writer.write(String.format("        <bundle uri=\"%s\" duplicate=\"%b\">\n", sanitize(uri), haveDuplicates.contains(uri)));
-                for (String fid : bundle2featureId.get(uri)) {
-                    writer.write(String.format("            <feature>%s</feature>\n", fid));
-                }
-                writer.write("        </bundle>\n");
+                writer.write("    </bundles>\n");
+                writer.write("</report>\n");
             }
-            writer.write("    </bundles>\n");
             writer.write("</consistency-report>\n");
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    private interface ReportFlavor {
+        String name();
+        boolean include(Features repository);
+        boolean include(Feature feature);
+    }
+
+    private ReportFlavor all = new ReportFlavor() {
+        @Override
+        public String name() {
+            return "all";
+        }
+
+        @Override
+        public boolean include(Features repository) {
+            return true;
+        }
+
+        @Override
+        public boolean include(Feature feature) {
+            return true;
+        }
+    };
+
+    private ReportFlavor notBlacklisted = new ReportFlavor() {
+        @Override
+        public String name() {
+            return "available";
+        }
+
+        @Override
+        public boolean include(Features repository) {
+            return !repository.isBlacklisted();
+        }
+
+        @Override
+        public boolean include(Feature feature) {
+            return !feature.isBlacklisted();
+        }
+    };
 
     /**
      * Sanitize before putting to XML

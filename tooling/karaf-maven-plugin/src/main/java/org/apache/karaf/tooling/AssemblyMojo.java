@@ -276,6 +276,18 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     private String generateConsistencyReport;
 
+    /**
+     * When generating consistency report, we can specify project name. By default it's "Apache Karaf"
+     */
+    @Parameter(defaultValue = "Apache Karaf")
+    private String consistencyReportProjectName;
+
+    /**
+     * When generating consistency report, we can specify project version. By default it's "${project.version}"
+     */
+    @Parameter(defaultValue = "${project.version}")
+    private String consistencyReportProjectVersion;
+
     /*
      * KARs are not configured using Maven plugin configuration, but rather detected from dependencies.
      * All KARs are just unzipped into the assembly being constructed, but additionally KAR's embedded
@@ -475,6 +487,8 @@ public class AssemblyMojo extends MojoSupport {
         builder.pidsToExtract(pidsToExtract);
         builder.writeProfiles(writeProfiles);
         builder.generateConsistencyReport(generateConsistencyReport);
+        builder.setConsistencyReportProjectName(consistencyReportProjectName);
+        builder.setConsistencyReportProjectVersion(consistencyReportProjectVersion);
         builder.environment(environment);
         builder.defaultStartLevel(defaultStartLevel);
         if (featuresProcessing != null) {

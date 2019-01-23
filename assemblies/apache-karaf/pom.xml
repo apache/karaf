@@ -161,6 +161,7 @@
                     </libraries>
                     <javase>1.8</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
+                    <consistencyReportProjectName>Apache Karaf (full)</consistencyReportProjectName>
                 </configuration>
             </plugin>
         </plugins>
