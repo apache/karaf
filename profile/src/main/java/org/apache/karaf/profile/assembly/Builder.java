@@ -317,6 +317,7 @@ public class Builder {
     private FeaturesProcessing featuresProcessing = new FeaturesProcessing();
     private Map<String, String> translatedUrls;
     private Blacklist blacklist;
+    private String generatedBootFeatureName;
 
     private Function<MavenResolver, MavenResolver> resolverWrapper = Function.identity();
 
@@ -960,18 +961,6 @@ public class Builder {
             }
         }
 
-        if (generateConsistencyReport != null) {
-            File directory = new File(generateConsistencyReport);
-            if (directory.isDirectory()) {
-                LOGGER.info("Writing bundle report");
-                generateConsistencyReport(karRepositories, new File(directory, "bundle-report-full.xml"), true);
-                generateConsistencyReport(karRepositories, new File(directory, "bundle-report.xml"), false);
-                Files.copy(getClass().getResourceAsStream("/bundle-report.xslt"),
-                        directory.toPath().resolve("bundle-report.xslt"),
-                        StandardCopyOption.REPLACE_EXISTING);
-            }
-        }
-
         //
         // Generate profiles. If user has configured additional profiles, they'll be used as parents
         // of the generated ones.
@@ -1105,7 +1094,7 @@ public class Builder {
         //
         // Installed stage
         //
-        installStage(installedProfile, allBootFeatures, processor);
+        Set<Feature> allInstalledFeatures = installStage(installedProfile, allBootFeatures, processor);
 
         // 'improve' configuration files.
         if (propertyEdits != null) {
@@ -1115,6 +1104,18 @@ public class Builder {
             .setEdits(propertyEdits);
             editor.run();
         }
+
+        if (generateConsistencyReport != null) {
+            File directory = new File(generateConsistencyReport);
+            if (directory.isDirectory()) {
+                LOGGER.info("Writing bundle report");
+                generateConsistencyReport(karRepositories, allInstalledFeatures, installedProfile, new File(directory, "bundle-report-full.xml"), true);
+                generateConsistencyReport(karRepositories, allInstalledFeatures, installedProfile, new File(directory, "bundle-report.xml"), false);
+                Files.copy(getClass().getResourceAsStream("/bundle-report.xslt"),
+                        directory.toPath().resolve("bundle-report.xslt"),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
     }
 
     /**
@@ -1122,7 +1123,17 @@ public class Builder {
      * @param repositories
      * @param result
      */
-    public void generateConsistencyReport(Map<String, Features> repositories, File result, boolean full) {
+    public void generateConsistencyReport(Map<String, Features> repositories, Set<Feature> allInstalledFeatures, Profile installedProfile, File result, boolean full) {
+        Profile installedOverlay = Profiles.getOverlay(installedProfile, allProfiles, environment);
+        Profile installedEffective = Profiles.getEffective(installedOverlay, false);
+
+        List<String> installFeatures = new ArrayList<>();
+        installFeatures.add(generatedBootFeatureName);
+        installFeatures.addAll(installedEffective.getFeatures());
+
+        FeatureSelector selector = new FeatureSelector(allInstalledFeatures);
+        Set<Feature> effectiveInstalledFeatures = selector.getMatching(installFeatures);
+
         Map<String, String> featureId2repository = new HashMap<>();
         // list of feature IDs containing given bundle URIs
         Map<String, Set<String>> bundle2featureId = new TreeMap<>(new URIAwareComparator());
@@ -1134,7 +1145,7 @@ public class Builder {
         repositories.forEach((name, features) -> {
             if (full || !features.isBlacklisted()) {
                 features.getFeature().forEach(feature -> {
-                    if (full || !feature.isBlacklisted()) {
+                    if (full || (!feature.isBlacklisted() && effectiveInstalledFeatures.contains(feature))) {
                         featureId2repository.put(feature.getId(), name);
                         feature.getBundle().forEach(bundle -> {
                             // normal bundles of feature
@@ -1501,7 +1512,7 @@ public class Builder {
         }
     }
 
-    private void installStage(Profile installedProfile, Set<Feature> allBootFeatures, FeaturesProcessor processor) throws Exception {
+    private Set<Feature> installStage(Profile installedProfile, Set<Feature> allBootFeatures, FeaturesProcessor processor) throws Exception {
         LOGGER.info("Install stage");
         //
         // Handle installed profiles
@@ -1555,6 +1566,7 @@ public class Builder {
             installer.installArtifact(location);
         }
         downloader.await();
+        return allInstalledFeatures;
     }
 
     private Set<Feature> bootStage(Profile bootProfile, Profile startupEffective, FeaturesProcessor processor) throws Exception {
@@ -1574,8 +1586,9 @@ public class Builder {
         }
         // Generate a global feature
         Map<String, Dependency> generatedDep = new HashMap<>();
+        generatedBootFeatureName = UUID.randomUUID().toString();
         Feature generated = new Feature();
-        generated.setName(UUID.randomUUID().toString());
+        generated.setName(generatedBootFeatureName);
         // Add feature dependencies
         for (String nameOrPattern : bootEffective.getFeatures()) {
             // KARAF-5273: feature may be a pattern
