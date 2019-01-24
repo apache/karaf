@@ -210,7 +210,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <filesToInclude>${project.build.directory}/bundle-report*.xml</filesToInclude>
+                            <filesToInclude>${project.build.directory}/bundle-report.xml</filesToInclude>
                             <replacements>
                                 <replacement>
                                     <token>href="bundle-report.xslt"</token>
@@ -234,11 +234,6 @@
                                         <artifact>
                                             <file>${project.build.directory}/bundle-report.xml</file>
                                             <classifier>bundle-report</classifier>
-                                            <type>xml</type>
-                                        </artifact>
-                                        <artifact>
-                                            <file>${project.build.directory}/bundle-report-full.xml</file>
-                                            <classifier>bundle-report-full</classifier>
                                             <type>xml</type>
                                         </artifact>
                                         <artifact>
