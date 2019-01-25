@@ -22,6 +22,7 @@ if not "%ECHO%" == "" echo %ECHO%
 setlocal
 set DIRNAME=%~dp0%
 set PROGNAME=%~nx0%
+set TERM=windows
 set ARGS=%*
 
 rem Sourcing environment settings for karaf similar to tomcats setenv
