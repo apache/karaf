@@ -21,6 +21,7 @@ package org.apache.karaf.shell.ssh;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.Map;
@@ -40,12 +41,12 @@ public class SshTerminal extends ExternalTerminal implements Terminal {
 
     private Environment environment;
 
-    public SshTerminal(Environment environment, InputStream input, OutputStream output) throws IOException {
+    public SshTerminal(Environment environment, InputStream input, OutputStream output, String encoding) throws IOException {
         super("Karaf SSH terminal",
               environment.getEnv().get(Environment.ENV_TERM),
               input,
               output,
-              StandardCharsets.UTF_8);
+              Charset.forName(encoding));
         this.environment = environment;
         this.environment.addSignalListener(this::handleSignal);
         for (Map.Entry<PtyMode, Integer> e : environment.getPtyModes().entrySet()) {
