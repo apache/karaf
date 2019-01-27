@@ -1189,6 +1189,11 @@ public class Builder {
                             return !feature.isBlacklisted()
                                     && effectiveInstalledFeatures.contains(feature);
                         }
+
+                        @Override
+                        public boolean include(BundleInfo bundle) {
+                            return !bundle.isBlacklisted();
+                        }
                     }
             };
 
@@ -1210,12 +1215,16 @@ public class Builder {
                                 featureId2repository.put(feature.getId(), name);
                                 feature.getBundle().forEach(bundle -> {
                                     // normal bundles of feature
-                                    bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                                    if (flavor.include(bundle)) {
+                                        bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                                    }
                                 });
                                 feature.getConditional().forEach(cond -> {
                                     cond.asFeature().getBundles().forEach(bundle -> {
                                         // conditional bundles of feature
-                                        bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                                        if (flavor.include(bundle)) {
+                                            bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                                        }
                                     });
                                 });
                             }
@@ -1294,6 +1303,7 @@ public class Builder {
         String name();
         boolean include(Features repository);
         boolean include(Feature feature);
+        boolean include(BundleInfo bundle);
     }
 
     private ReportFlavor all = new ReportFlavor() {
@@ -1309,6 +1319,11 @@ public class Builder {
 
         @Override
         public boolean include(Feature feature) {
+            return true;
+        }
+
+        @Override
+        public boolean include(BundleInfo bundle) {
             return true;
         }
     };
@@ -1327,6 +1342,11 @@ public class Builder {
         @Override
         public boolean include(Feature feature) {
             return !feature.isBlacklisted();
+        }
+
+        @Override
+        public boolean include(BundleInfo bundle) {
+            return !bundle.isBlacklisted();
         }
     };
 
