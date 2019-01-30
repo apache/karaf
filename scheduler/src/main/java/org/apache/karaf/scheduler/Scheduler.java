@@ -105,7 +105,7 @@ public interface Scheduler {
      */
     boolean unschedule(String jobName);
 
-    Map<Object, ScheduleOptions> getJobs() throws SchedulerError;
+    Map<String, ScheduleOptions> getJobs() throws SchedulerError;
 
     /**
      * Triggers a scheduled job.
