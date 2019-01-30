@@ -65,7 +65,7 @@ public final class Profiles {
                         if (profileId.endsWith("/")) {
                             profileId = profileId.substring(0, profileId.length() - 1);
                         }
-                        profileId = profileId.replaceAll(root.getFileSystem().getSeparator(), "-");
+                        profileId = profileId.replace(root.getFileSystem().getSeparator(), "-");
                         profileId = profileId.substring(0, profileId.length() - PROFILE_FOLDER_SUFFIX.length());
                         builder = ProfileBuilder.Factory.create(profileId);
                     }
@@ -104,7 +104,7 @@ public final class Profiles {
      * @throws IOException
      */
     public static void deleteProfile(Path root, String id) throws IOException {
-        Path path = root.resolve(id.replaceAll("-", root.getFileSystem().getSeparator()) + PROFILE_FOLDER_SUFFIX);
+        Path path = root.resolve(id.replace("-", root.getFileSystem().getSeparator()) + PROFILE_FOLDER_SUFFIX);
         if (Files.isDirectory(path)) {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 @Override
@@ -129,7 +129,7 @@ public final class Profiles {
      * @throws IOException
      */
     public static void writeProfile(Path root, Profile profile) throws IOException {
-        Path path = root.resolve(profile.getId().replaceAll("-", root.getFileSystem().getSeparator()) + PROFILE_FOLDER_SUFFIX);
+        Path path = root.resolve(profile.getId().replace("-", root.getFileSystem().getSeparator()) + PROFILE_FOLDER_SUFFIX);
         Files.createDirectories(path);
         for (Map.Entry<String, byte[]> entry : profile.getFileConfigurations().entrySet()) {
             Files.write(path.resolve(entry.getKey()), entry.getValue(), StandardOpenOption.CREATE_NEW);
