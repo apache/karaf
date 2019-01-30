@@ -1206,15 +1206,21 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     private void makeFileExecutable(File serviceFile) throws IOException {
-        Set<PosixFilePermission> permissions = new HashSet<>();
-        permissions.add(PosixFilePermission.OWNER_EXECUTE);
-        permissions.add(PosixFilePermission.GROUP_EXECUTE);
-        permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+        try {
+            Set<PosixFilePermission> permissions = new HashSet<>();
+            permissions.add(PosixFilePermission.OWNER_EXECUTE);
+            permissions.add(PosixFilePermission.GROUP_EXECUTE);
+            permissions.add(PosixFilePermission.OTHERS_EXECUTE);
 
-        // Get the existing permissions and add the executable permissions to them
-        Set<PosixFilePermission> filePermissions = Files.getPosixFilePermissions(serviceFile.toPath());
-        filePermissions.addAll(permissions);
-        Files.setPosixFilePermissions(serviceFile.toPath(), filePermissions);
+            // Get the existing permissions and add the executable permissions to them
+            Set<PosixFilePermission> filePermissions = Files.getPosixFilePermissions(serviceFile.toPath());
+            filePermissions.addAll(permissions);
+            Files.setPosixFilePermissions(serviceFile.toPath(), filePermissions);
+        }
+        catch (UnsupportedOperationException ex)
+        {
+            serviceFile.setExecutable(true, false);
+        }
     }
 
     private void copy(File source, File destination) throws IOException {
