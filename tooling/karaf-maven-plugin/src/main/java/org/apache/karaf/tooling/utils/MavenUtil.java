@@ -208,7 +208,7 @@ public class MavenUtil {
     }
     
     public static String getFileName(Artifact artifact) {
-        return artifact.getArtifactId() + "-" + artifact.getBaseVersion()
+        return artifact.getArtifactId() + "-" + artifact.getVersion()
             + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
     }
 
