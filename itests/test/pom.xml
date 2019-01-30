@@ -309,6 +309,7 @@
                         <spring51.version>${spring51.version}</spring51.version>
                         <spring.security31.version>${spring.security31.version}</spring.security31.version>
                         <spring.security42.version>${spring.security42.version}</spring.security42.version>
+                        <spring.security51.version>${spring.security51.version}</spring.security51.version>
                         <activemq.version>${activemq.version}</activemq.version>
                     </systemPropertyVariables>
                     <excludes>
@@ -370,6 +371,7 @@
                                 <spring51.version>${spring51.version}</spring51.version>
                                 <spring.security31.version>${spring.security31.version}</spring.security31.version>
                                 <spring.security42.version>${spring.security42.version}</spring.security42.version>
+                                <spring.security51.version>${spring.security51.version}</spring.security51.version>
                                 <activemq.version>${activemq.version}</activemq.version>
                     		</systemPropertyVariables>
                         </configuration>

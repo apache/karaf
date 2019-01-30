@@ -79,4 +79,11 @@ public class Spring51FeaturesTest extends KarafTestSupport {
         installAssertAndUninstallFeature("spring-websocket", System.getProperty("spring51.version"));
     }
 
+    // Spring Security
+
+    @Test
+    public void installSpringSecurityFeature() throws Exception {
+        installAssertAndUninstallFeature("spring-security", System.getProperty("spring.security51.version"));
+    }
+
 }
