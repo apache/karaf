@@ -35,6 +35,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -54,9 +55,12 @@ public class FileEventLogger implements EventLogger {
     private long size;
     private Path path;
     private Writer writer;
-    private FastDateFormat fastDateFormat = new FastDateFormat();
+    private FastDateFormat fastDateFormat;
+    private TimeZone timeZone;
 
-    public FileEventLogger(String path, String encoding, String policy, int files, boolean compress, ThreadFactory factory, EventLayout layout) throws IOException {
+    public FileEventLogger(String path, String encoding, String policy, int files, boolean compress, ThreadFactory factory, EventLayout layout, TimeZone timeZone) throws IOException {
+        this.fastDateFormat = new FastDateFormat(timeZone, Locale.ENGLISH);
+        this.timeZone = timeZone;
         this.path = Paths.get(path);
         this.encoding = Charset.forName(encoding);
         this.policy = policy;
@@ -161,7 +165,7 @@ public class FileEventLogger implements EventLogger {
                     .filter(p -> p.startsWith(fix[0]))
                     .filter(p -> !p.endsWith(".tmp"))
                     .collect(Collectors.toList());
-            String date = new FastDateFormat().getDate(timestamp, FastDateFormat.YYYY_MM_DD);
+            String date = new FastDateFormat(timeZone, Locale.ENGLISH).getDate(timestamp, FastDateFormat.YYYY_MM_DD);
             List<String> sameDate = paths.stream()
                     .filter(p -> p.matches("\\Q" + fix[0] + "-" + date + "\\E(-[0-9]+)?\\Q" + fix[1] + "\\E"))
                     .collect(Collectors.toList());
