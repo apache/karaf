@@ -30,7 +30,8 @@ The `scheduler` feature automatically installs the `scheduler` command group, to
 
 ----
 scheduler:list
-scheduler:schedule
+scheduler:schedule-script
+scheduler:schedule-command
 scheduler:unschedule
 scheduler:reschedule
 ----
@@ -146,7 +147,7 @@ public class PingThread implements Runnable {
 ==== Schedule a new Job using the Gogo Shell
 
 ----
-karaf@root()> scheduler:schedule --help
+karaf@root()> scheduler:schedule-script --help
 DESCRIPTION
         scheduler:schedule
 
@@ -175,6 +176,40 @@ OPTIONS
                 Display this help message
         --name
                 Name of this job
+
+----
+
+==== Schedule a command
+
+----
+karaf@root()> scheduler:schedule-command --help
+DESCRIPTION
+        scheduler:schedule-command
+
+        Schedule a command execution
+
+SYNTAX
+        scheduler:schedule-command [options] command
+
+ARGUMENTS
+        command
+                The command to schedule
+                (required)
+
+OPTIONS
+        --period
+                Time during executions (in seconds)
+        --at
+                Absolute date in ISO format (ex: 2014-05-13T13:56:45)
+        --help
+                Display this help message
+        --times
+                Number of times this job should be executed
+                (defaults to -1)
+        --concurrent
+                Should jobs run concurrently or not (defaults to false)
+        --cron
+                The cron expression
 
 ----
 

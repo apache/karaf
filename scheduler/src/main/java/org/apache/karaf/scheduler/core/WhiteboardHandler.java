@@ -20,7 +20,6 @@ import java.util.Date;
 
 import org.apache.karaf.scheduler.Job;
 import org.apache.karaf.scheduler.Scheduler;
-import org.apache.karaf.scheduler.command.Schedule;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;

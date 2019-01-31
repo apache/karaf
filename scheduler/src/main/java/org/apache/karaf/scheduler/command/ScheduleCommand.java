@@ -16,29 +16,23 @@
  */
 package org.apache.karaf.scheduler.command;
 
-import java.util.Date;
-
-import javax.xml.bind.DatatypeConverter;
-
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;
-import org.apache.karaf.scheduler.command.support.ScriptJob;
+import org.apache.karaf.scheduler.command.support.CommandJob;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.Function;
 import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.api.console.SessionFactory;
 
-@Command(scope = "scheduler", name = "schedule", description = "Schedule a script execution")
+import javax.xml.bind.DatatypeConverter;
+import java.util.Date;
+
+@Command(scope = "scheduler", name = "schedule-command", description = "Schedule a command execution")
 @Service
-public class Schedule implements Action {
-
-    @Option(name = "--name", description = "Name of this job")
-    String name;
+public class ScheduleCommand implements Action {
 
     @Option(name = "--concurrent", description = "Should jobs run concurrently or not (defaults to false)")
     boolean concurrent;
@@ -55,17 +49,14 @@ public class Schedule implements Action {
     @Option(name = "--period", description = "Time during executions (in seconds)")
     long period;
 
-    @Argument(name = "script", required = true, description = "The script to schedule")
-    Function script;
+    @Argument(name = "command", required = true, description = "The command to schedule")
+    String command;
 
     @Reference
     Scheduler scheduler;
 
     @Reference
     Session session;
-
-    @Reference
-    SessionFactory sessionFactory;
 
     @Override
     public Object execute() throws Exception {
@@ -88,13 +79,12 @@ public class Schedule implements Action {
                 options = scheduler.AT(date);
             }
         }
-        if (name != null) {
-            options.name(name);
-        }
         if (concurrent) {
             options.canRunConcurrently(concurrent);
         }
-        scheduler.schedule(new ScriptJob(sessionFactory, session, script), options);
+        options.name(command);
+        scheduler.schedule(new CommandJob(session, command), options);
         return null;
     }
+
 }
