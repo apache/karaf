@@ -19,8 +19,8 @@
 
 # Apache Karaf
 
-[Apache Karaf](http://karaf.apache.org) is a modern and polymorphic applications container.
-It's a lightweight, powered, and enterprise ready container powered by OSGi.
+[Apache Karaf](http://karaf.apache.org) is a modern and polymorphic applications runtime.
+It's a lightweight, powered, and enterprise ready runtime powered by OSGi.
 [Apache Karaf](http://karaf.apache.org) is a "product project", providing a complete and turnkey runtime. The runtime is
 "multi-facets", meaning that you can deploy different kind of applications: OSGi or non OSGi, webapplication, services based, ...
 
@@ -54,7 +54,7 @@ It's a lightweight, powered, and enterprise ready container powered by OSGi.
 * **Enterprise features**: Karaf provides a bunch of enterprise features that you can use in your applications (JDBC, JPA, JTA, JMS, ...).
 * **WebContainer**: Karaf provides a full features web container, allowing you to deploy your web applications.
 * **REST & Services**: Karaf supports different service frameworks as Apache CXF allowing you to easily implements your services.
-* **Karaf Extensions**: Karaf project is a complete ecosystem. The container can be extended by other Karaf subprojects such as Karaf Decanter, Karaf Cellar, Karaf Cave, ...
+* **Karaf Extensions**: Karaf project is a complete ecosystem. The runtime can be extended by other Karaf subprojects such as Karaf Decanter, Karaf Cellar, Karaf Cave, ...
 * **Third Party Extensions**: Karaf is a supported runtime for a lot of other projects as [Apache Camel](http://camel.apache.org), and much more.
 
 ## Getting Started

@@ -17,6 +17,70 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.3
+
+Apache Karaf 4.2.3 is a major update on the 4.2.x series. It brings several fixes, updates and improvements.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-5086] - Java 8 default methods cause IncompatibleClassChangeError in blueprint
+    * [KARAF-6005] - Resolve of bundle with version range in a feature only works with ".m2" and not with "system" directory
+    * [KARAF-6037] - DB connection and acquire lock to be retried few times before giving up
+    * [KARAF-6050] - package org.apache.karaf.specs.locator not in java.base
+    * [KARAF-6052] - Don't use cellar to illustreate provisioning commands (feature:) in documentation
+    * [KARAF-6057] - karaf-plugin breaks with maven-install-plugin-2.5.2
+    * [KARAF-6058] - Even key based auth enabled, ssh still prompt for password
+    * [KARAF-6066] - Karaf Client doesn't respond to some keystrokes on Windows
+    * [KARAF-6069] - Distribution pom is not uploaded on Central
+    * [KARAF-6074] - Race condition between the FeaturesService and FeatureDeploymentListener
+    * [KARAF-6076] - Blueprint loading fails with Saxon or Xalan
+    * [KARAF-6077] - Feature verify fails with UnsupportedOperationException on some features
+    * [KARAF-6080] - Duplicate configuration randomly created on the first start in ConfigurationAdmin
+    * [KARAF-6084] - Startup bundles do not resolve correctly when compiled with Java 11 during assembly
+    * [KARAF-6086] - Profile builder should use ${karaf.etc} instead of ${karaf.home}/etc
+    * [KARAF-6089] - Deadlock with FeatureDeploymentListener
+    * [KARAF-6093] - Error putting an attachment on a SOAP message via CXF due to javax.xml.soap
+    * [KARAF-6103] - When doing a "mvn compile" the karaf-maven-plugin causes a IOException
+    * [KARAF-6106] - LinkageError due to javax.activation not in kernel anymore
+    * [KARAF-6107] - client doesn't find JAVA_HOME on Windows
+    * [KARAF-6112] - Table rendering is not correct on client on windows
+    * [KARAF-6116] - karaf-maven-plugin adds incorrect snapshot version to repository
+    * [KARAF-6120] - Karaf Profiles don't parse on Windows
+    * [KARAF-6123] - Karaf scheduler can't be easily configured with a JDBC job store
+    * [KARAF-6124] - Instance Creation on Windows fails due to unsupported operation
+    * [KARAF-6125] - Audit library creates incorrect dates due to timezones
+
+#### Improvement
+    * [KARAF-6051] - Add operation to get features contained in a feature repository
+    * [KARAF-6062] - CLASSPATH error when using KARAF with JDK11 on windows
+    * [KARAF-6090] - kar extract should ignore path containing .. relative path
+    * [KARAF-6108] - Service wrapper should add selected JAVA_HOME also to the PATH variable.
+    * [KARAF-6109] - Enhance bundle report to reflect effective installed features for custom distributions
+
+#### Wish
+    * [KARAF-6060] - shell:wc -l should only print line count, without leading spaces
+
+#### Task
+    * [KARAF-5901] - Create Aries JAXRS whiteboard example
+    * [KARAF-6100] - Align narayana version with pax-* projects
+
+#### Dependency upgrade
+    * [KARAF-6071] - Upgrade to pax-transx 0.4.1
+    * [KARAF-6079] - Upgrade to pax-url 2.6.1
+    * [KARAF-6087] - Upgrade to Aries Proxy Impl 1.1.4
+    * [KARAF-6088] - Upgrade to pax-web 7.2.7
+    * [KARAF-6091] - upgrade jaxb 2.3.2
+    * [KARAF-6094] - Upgrade to itstack-commons-runtime 3.0.8
+    * [KARAF-6095] - Upgrade to Aries JPA 2.7.1
+    * [KARAF-6096] - Upgrade to Felix Gogo 1.1.4
+    * [KARAF-6097] - Upgrade to Maven Wagon 3.3.1
+    * [KARAF-6098] - Upgrade to awaitility 3.1.5
+    * [KARAF-6099] - Upgrade to Narayana 5.9.2.Final
+    * [KARAF-6101] - Release train: pax-cdi 1.1.0, pax-jms 1.0.3, pax-jdbc 1.3.2, pax-transx 0.4.2, pax-web 7.2.7
+    * [KARAF-6102] - Align some minor dependencies with pax-* projects
+    * [KARAF-6105] - Upgrade to Hibernate 5.2.17.Final
+
 ## Apache Karaf 4.2.2
 
 Apache Karaf 4.2.2 is a major update on the 4.2.x series. It brings lot of fixes, updates and improvements
