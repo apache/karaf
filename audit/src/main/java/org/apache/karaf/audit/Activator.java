@@ -154,7 +154,7 @@ public class Activator extends BaseActivator implements ManagedService {
                 int files = getInt(FILE_FILES, 32);
                 boolean compress = getBoolean(FILE_COMPRESS, true);
                 EventLayout layout = createLayout(getString(FILE_LAYOUT, FILE_LAYOUT));
-                loggers.add(new FileEventLogger(path, encoding, policy, files, compress, this, layout));
+                loggers.add(new FileEventLogger(path, encoding, policy, files, compress, this, layout, TimeZone.getDefault()));
             }
             if (getBoolean(UDP_ENABLED, false)) {
                 String host = getString(UDP_HOST, "localhost");
