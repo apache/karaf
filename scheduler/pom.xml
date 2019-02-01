@@ -64,11 +64,11 @@
                             org.apache.karaf.scheduler;version=${project.version};-noimport:=true
                         </Export-Package>
                         <Import-Package>
-                            !com.mchange.*,
-                            !oracle.*,
-                            !org.quartz.*,
+                            com.mchange.*;resolution:=optional,
+                            oracle.*;resolution:=optional,
+                            org.quartz.*;resolution:=optional,
                             !weblogic.*,
-                            !javax.transaction,
+                            javax.transaction;resolution:=optional,
                             javax.servlet*;resolution:=optional,
                             org.jboss.*;resolution:=optional,
                             javax.xml.bind*;version="[2.2,3)",
