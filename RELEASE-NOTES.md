@@ -50,6 +50,7 @@ Apache Karaf 4.2.3 is a major update on the 4.2.x series. It brings several fixe
     * [KARAF-6123] - Karaf scheduler can't be easily configured with a JDBC job store
     * [KARAF-6124] - Instance Creation on Windows fails due to unsupported operation
     * [KARAF-6125] - Audit library creates incorrect dates due to timezones
+    * [KARAF-6130] - Documentation points to wrong examples location
 
 #### Improvement
     * [KARAF-6051] - Add operation to get features contained in a feature repository
@@ -80,6 +81,9 @@ Apache Karaf 4.2.3 is a major update on the 4.2.x series. It brings several fixe
     * [KARAF-6101] - Release train: pax-cdi 1.1.0, pax-jms 1.0.3, pax-jdbc 1.3.2, pax-transx 0.4.2, pax-web 7.2.7
     * [KARAF-6102] - Align some minor dependencies with pax-* projects
     * [KARAF-6105] - Upgrade to Hibernate 5.2.17.Final
+    * [KARAF-6127] - Upgrade to Felix Framework 5.6.12
+    * [KARAF-6128] - Upgrade to javax.annotation 1.3
+    * [KARAF-6129] - Upgrade to Pax JDBC 1.3.3
 
 ## Apache Karaf 4.2.2
 
