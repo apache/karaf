@@ -60,7 +60,7 @@ public class XATest extends KarafTestSupport {
         result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
                 "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms,pax-jms-artemis"));
         result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
-        result.add(replaceConfigurationFile("etc/org.ops4j.datasource-derby.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-derby.cfg")));
+        result.add(replaceConfigurationFile("etc/org.ops4j.datasource-h2.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-h2.cfg")));
         result.add(replaceConfigurationFile("etc/xa-test-camel.xml", getConfigFile("/org/apache/karaf/itests/features/xa-test-camel.xml")));
         if (JavaVersionUtil.getMajorVersion() >= 9) {
             //need asm 6.x which support java9plus to run this test
@@ -76,9 +76,9 @@ public class XATest extends KarafTestSupport {
         Thread.sleep(10000);//wait and until artemis server up
         System.out.println(executeCommand("jms:info artemis"));
 
-        System.out.println("== Installing Derby");
+        System.out.println("== Installing H2");
         featureService.installFeature("jdbc", NO_AUTO_REFRESH);
-        featureService.installFeature("pax-jdbc-derby", NO_AUTO_REFRESH);
+        featureService.installFeature("pax-jdbc-h2", NO_AUTO_REFRESH);
         featureService.installFeature("pax-jdbc-pool-transx", NO_AUTO_REFRESH);
 
         System.out.println(" ");
@@ -98,15 +98,15 @@ public class XATest extends KarafTestSupport {
 
         System.out.println(executeCommand("camel:route-list"));
 
-        System.out.println("== Creating tables in Derby");
-        System.out.println(executeCommand("jdbc:execute derby CREATE TABLE messages (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))"));
+        System.out.println("== Creating tables in H2");
+        System.out.println(executeCommand("jdbc:execute h2 CREATE TABLE messages (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))"));
 
-        System.out.println("== Sending a message in Artemis broker that should be consumed by Camel route and inserted into the Derby database");
+        System.out.println("== Sending a message in Artemis broker that should be consumed by Camel route and inserted into the H2 database");
         System.out.println(executeCommand("jms:send artemis MyQueue 'the-message'"));
 
         Thread.sleep(5000);
 
-        String output = executeCommand("jdbc:query derby select * from messages");
+        String output = executeCommand("jdbc:query h2 select * from messages");
         System.err.println(output);
 
         assertContains("the-message", output);
