@@ -24,7 +24,7 @@
 
     <feature name="karaf-jdbc-example-provider" version="${project.version}">
         <config name="org.ops4j.datasource-karaf-example">
-            osgi.jdbc.driver.class=org.apache.derby.jdbc.EmbeddedDriver
+            osgi.jdbc.driver.name=derby
             dataSourceName=jdbc/karaf-example
             url=jdbc:derby:data/example/derby;create=true
         </config>
