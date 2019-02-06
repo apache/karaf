@@ -48,13 +48,15 @@ public class JmsTest extends KarafTestSupport {
                         "mvn:org.apache.karaf.features/enterprise-legacy/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/standard/" + version + "/xml/features, " +
                         "mvn:org.apache.activemq/activemq-karaf/" + System.getProperty("activemq.version") + "/xml/features"));
-        options.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
-        "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,shell-compat,activemq-broker-noweb"));
         return options.toArray(new Option[options.size()]);
     }
 
     @Test(timeout = 60000)
     public void testCommands() throws Exception {
+        System.out.println("== Installing ActiveMQ");
+        featureService.installFeature("aries-blueprint");
+        featureService.installFeature("activemq-broker-noweb");
+
         System.out.println("== Installing JMS feature");
         featureService.installFeature("jms");
         featureService.installFeature("pax-jms-activemq");
@@ -100,6 +102,10 @@ public class JmsTest extends KarafTestSupport {
 
     @Test
     public void testMBean() throws Exception {
+        System.out.println("== Installing ActiveMQ");
+        featureService.installFeature("aries-blueprint");
+        featureService.installFeature("activemq-broker-noweb");
+
         System.out.println("== Installing JMS feature");
         featureService.installFeature("jms");
         featureService.installFeature("pax-jms-activemq");
