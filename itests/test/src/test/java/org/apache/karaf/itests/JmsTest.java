@@ -47,7 +47,7 @@ public class JmsTest extends KarafTestSupport {
                         "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/enterprise-legacy/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/standard/" + version + "/xml/features, " +
-                        "mvn:org.apache.activemq/activemq-karaf/5.15.8/xml/features"));
+                        "mvn:org.apache.activemq/activemq-karaf/" + System.getProperty("activemq.version") + "/xml/features"));
         options.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
         "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,shell-compat,activemq-broker-noweb"));
         return options.toArray(new Option[options.size()]);
