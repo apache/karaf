@@ -28,7 +28,7 @@ Apache Karaf 4.2.3 is a major update on the 4.2.x series. It brings several fixe
     * [KARAF-6005] - Resolve of bundle with version range in a feature only works with ".m2" and not with "system" directory
     * [KARAF-6037] - DB connection and acquire lock to be retried few times before giving up
     * [KARAF-6050] - package org.apache.karaf.specs.locator not in java.base
-    * [KARAF-6052] - Don't use cellar to illustreate provisioning commands (feature:) in documentation
+    * [KARAF-6052] - Don't use cellar to illustreate provisioning commands (feature:*) in documentation
     * [KARAF-6057] - karaf-plugin breaks with maven-install-plugin-2.5.2
     * [KARAF-6058] - Even key based auth enabled, ssh still prompt for password
     * [KARAF-6066] - Karaf Client doesn't respond to some keystrokes on Windows
@@ -52,12 +52,18 @@ Apache Karaf 4.2.3 is a major update on the 4.2.x series. It brings several fixe
     * [KARAF-6125] - Audit library creates incorrect dates due to timezones
     * [KARAF-6130] - Documentation points to wrong examples location
 
+#### New Feature
+    * [KARAF-5873] - Add spring-security 5.0.7.RELEASE feature
+
 #### Improvement
     * [KARAF-6051] - Add operation to get features contained in a feature repository
     * [KARAF-6062] - CLASSPATH error when using KARAF with JDK11 on windows
     * [KARAF-6090] - kar extract should ignore path containing .. relative path
     * [KARAF-6108] - Service wrapper should add selected JAVA_HOME also to the PATH variable.
     * [KARAF-6109] - Enhance bundle report to reflect effective installed features for custom distributions
+
+#### Test
+    * [KARAF-6139] - JmsTest is failing
 
 #### Wish
     * [KARAF-6060] - shell:wc -l should only print line count, without leading spaces
@@ -84,6 +90,13 @@ Apache Karaf 4.2.3 is a major update on the 4.2.x series. It brings several fixe
     * [KARAF-6127] - Upgrade to Felix Framework 5.6.12
     * [KARAF-6128] - Upgrade to javax.annotation 1.3
     * [KARAF-6129] - Upgrade to Pax JDBC 1.3.3
+    * [KARAF-6131] - Upgrade to Pax JDBC 1.3.4
+    * [KARAF-6132] - Upgrade to Pax CDI 1.1.1
+    * [KARAF-6133] - Upgrade to Pax Web 7.2.8
+    * [KARAF-6134] - Upgrade to Spring 5.1.4.RELEASE
+    * [KARAF-6135] - Upgrade to Spring 5.0.12.RELEASE
+    * [KARAF-6137] - Upgrade to eclipselink 2.7.4
+    * [KARAF-6138] - Upgrade to hibernate-validator 6.0.14.Final
 
 ## Apache Karaf 4.2.2
 
