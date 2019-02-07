@@ -164,7 +164,7 @@
 
     <!-- Spring Security -->
 
-    <feature name="spring-security" description="Spring Security 5.1.x support" version="${spring.security42.version}">
+    <feature name="spring-security" description="Spring Security 5.1.x support" version="${spring.security51.version}">
         <feature>war</feature>
         <feature version="[5.1,6)">spring-jdbc</feature>
         <feature version="[5.1,6)">spring-tx</feature>
