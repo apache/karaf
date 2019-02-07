@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.specs</groupId>
         <artifactId>specs</artifactId>
-        <version>4.2.3</version>
+        <version>4.2.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.apache.karaf.specs.activator</artifactId>
