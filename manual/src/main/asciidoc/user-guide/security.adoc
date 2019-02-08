@@ -105,7 +105,7 @@ The initial `etc/users.properties` file contains:
 # with the name "karaf".
 #
 karaf = karaf,_g_:admingroup
-_g_\:admingroup = group,admin,manager,viewer
+_g_\:admingroup = group,admin,manager,viewer,ssh
 ----
 
 We can see in this file, that we have one user by default: `karaf`.
