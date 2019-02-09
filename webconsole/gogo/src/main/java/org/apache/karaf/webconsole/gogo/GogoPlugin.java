@@ -165,6 +165,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                     ie.printStackTrace();
                 }
             } else {
+                response.setHeader("Content-Type", "text/html");
                 response.getOutputStream().write(dump.getBytes());
             }
         }
