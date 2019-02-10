@@ -26,7 +26,8 @@ public class Id extends BundleCommand {
 
     @Override
     protected Object doExecute(Bundle bundle) throws Exception {
-        return bundle.getBundleId();
+        System.out.println(bundle.getBundleId());
+        return null;
     }
 
 }

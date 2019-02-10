@@ -26,7 +26,8 @@ public class Status extends BundleCommand {
 
     @Override
     protected Object doExecute(Bundle bundle) throws Exception {
-        return getState(bundle);
+        System.out.println(getState(bundle));
+        return null;
     }
 
     /**
