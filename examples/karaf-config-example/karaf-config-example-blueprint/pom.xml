@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
         <artifactId>karaf-config-example</artifactId>
-        <version>4.2.4-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
