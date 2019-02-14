@@ -53,8 +53,8 @@ public class InstanceTest extends KarafTestSupport {
         Assert.assertEquals(oldNum, getInstancesNum(mbeanServer, name));
     }
 
-    @Ignore
-    public void createStartCommand() throws Exception {
+    @Test
+    public void createStartStopDestroyCommand() throws Exception {
         System.out.println(executeCommand("instance:create itest666"));
         assertContains("itest", executeCommand("instance:list"));
         System.out.println(executeCommand("instance:start itest666"));
@@ -83,6 +83,7 @@ public class InstanceTest extends KarafTestSupport {
         }
         System.out.println("itest instance status: " + output);
         assertContains("Stopped", output);
+        executeCommand("instance:destroy itest666");
     }
 
     private int getInstancesNum(MBeanServerConnection connection, ObjectName name) throws Exception {
