@@ -129,6 +129,7 @@ public class Builder {
     private static final String LIBRARY_CLAUSE_TYPE = "type";
     private static final String LIBRARY_CLAUSE_EXPORT = "export";
     private static final String LIBRARY_CLAUSE_DELEGATE = "delegate";
+    private static final String START_LEVEL = "start-level";
 
     public static final String ORG_OPS4J_PAX_URL_MVN_PID = "org.ops4j.pax.url.mvn";
 
@@ -1720,7 +1721,23 @@ public class Builder {
         // Add bundles
         for (String location : bootEffective.getBundles()) {
             location = location.replace("profile:", "file:etc/");
+            int intLevel = -100;
+            if (location.contains(START_LEVEL)) {
+                //extract start-level for this bundle
+                String level = location.substring(location.indexOf(START_LEVEL));
+                level = level.substring(START_LEVEL.length() + 1);
+                if (level.startsWith("\"")) {
+                    level = level.substring(1, level.length() - 1);
+                }
+                intLevel = Integer.valueOf(level);
+                LOGGER.debug("bundle start-level: " + level);
+                location = location.substring(0, location.indexOf(START_LEVEL) - 1);
+                LOGGER.debug("new bundle location after strip start-level: " + location);
+            }
             Bundle bun = new Bundle();
+            if (intLevel > 0) {
+                bun.setStartLevel(intLevel);
+            }
             bun.setLocation(location);
             generated.getBundle().add(bun);
         }
