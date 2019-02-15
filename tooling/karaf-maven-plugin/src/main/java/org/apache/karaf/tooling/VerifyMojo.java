@@ -77,6 +77,7 @@ import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
+import org.apache.karaf.features.internal.service.FeaturesProcessor;
 import org.apache.karaf.features.internal.service.FeaturesProcessorImpl;
 import org.apache.karaf.features.internal.service.FeaturesServiceConfig;
 import org.apache.karaf.features.internal.service.State;
@@ -121,6 +122,9 @@ public class VerifyMojo extends MojoSupport {
 
     @Parameter(property = "blacklistedDescriptors")
     protected Set<String> blacklistedDescriptors;
+
+    @Parameter(property = "featureProcessingInstructions")
+    protected File featureProcessingInstructions;
 
     @Parameter(property = "features")
     protected List<String> features;
@@ -331,9 +335,15 @@ public class VerifyMojo extends MojoSupport {
         }
         Set<String> successes = new LinkedHashSet<>();
         Set<String> ignored = new LinkedHashSet<>();
+        Set<String> skipped = new LinkedHashSet<>();
         Map<String, Exception> failures = new LinkedHashMap<>();
         for (Feature feature : featuresToTest) {
             String id = feature.getId();
+            if (feature.isBlacklisted()) {
+                skipped.add(id);
+                getLog().info("Verification of feature " + id + " skipped");
+                continue;
+            }
             try {
                 verifyResolution(new CustomDownloadManager(resolver, executor),
                                  repositories, Collections.singleton(id), properties);
@@ -389,7 +399,7 @@ public class VerifyMojo extends MojoSupport {
             }
         }
         int nb = successes.size() + ignored.size() + failures.size();
-        getLog().info("Features verified: " + nb + ", failures: " + failures.size() + ", ignored: " + ignored.size());
+        getLog().info("Features verified: " + nb + ", failures: " + failures.size() + ", ignored: " + ignored.size() + ", skipped: " + skipped.size());
         if (!failures.isEmpty()) {
             getLog().info("Failures: " + String.join(", ", failures.keySet()));
         }
@@ -570,7 +580,13 @@ public class VerifyMojo extends MojoSupport {
         final Map<String, Features> loaded = new HashMap<>();
         final Downloader downloader = manager.createDownloader();
 
-        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(new FeaturesServiceConfig());
+        FeaturesServiceConfig config = null;
+        if (featureProcessingInstructions != null) {
+            config = new FeaturesServiceConfig(featureProcessingInstructions.toURI().toString(), null);
+        } else {
+            config = new FeaturesServiceConfig();
+        }
+        FeaturesProcessorImpl processor = new FeaturesProcessorImpl(config);
         if (blacklistedDescriptors != null) {
             blacklistedDescriptors.forEach(lp -> {
                 processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
@@ -587,6 +603,7 @@ public class VerifyMojo extends MojoSupport {
                     public void downloaded(final StreamProvider provider) throws Exception {
                         try (InputStream is = provider.open()) {
                             Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
+                            processor.process(featuresModel);
                             synchronized (loaded) {
                                 loaded.put(provider.getUrl(), featuresModel);
                                 for (String innerRepository : featuresModel.getRepository()) {
