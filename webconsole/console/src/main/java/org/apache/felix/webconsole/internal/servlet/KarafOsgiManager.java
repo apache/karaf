@@ -72,6 +72,10 @@ public class KarafOsgiManager extends OsgiManager {
     }
 
     protected void doService(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
+        // Add some standard security HTTP headers
+        res.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
+        res.setHeader("X-XSS-Protection", "1; mode=block");
+        res.setHeader("X-Content-Type-Options", "nosniff");
         super.service(req, res);
     }
 }
