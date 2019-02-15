@@ -142,6 +142,10 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/generated-resources/org/apache/karaf/instance</outputDirectory>
                             <addDefaultExcludes>false</addDefaultExcludes>
+                            <useDefaultDelimiters>false</useDefaultDelimiters>
+                            <delimiters>
+                              <delimiter>@@</delimiter>
+                            </delimiters>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/../assemblies/features/base/src/main/resources</directory>
@@ -171,25 +175,6 @@
                                 </resource>
                             </resources>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <useDefaultDelimiters>false</useDefaultDelimiters>
-                    <delimiters>
-                        <delimiter>@@</delimiter>
-                    </delimiters>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>filter</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>resources</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
