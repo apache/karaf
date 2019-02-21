@@ -92,9 +92,16 @@ public class ClientMojo extends AbstractMojo {
     @Parameter
     private File keyFile;
 
+    @Parameter(property = "skip", defaultValue = "false")
+    private boolean skip;
+
     private static final String NEW_LINE = System.getProperty("line.separator");
 
     public void execute() throws MojoExecutionException {
+        if (skip || (System.getProperty("client.skip") != null && System.getProperty("client.skip").equalsIgnoreCase("true"))) {
+            getLog().info("Client execution is skipped");
+            return;
+        }
         // ranking the commands and scripts
         Comparator<CommandDescriptor> comparator = Comparator.comparingInt(CommandDescriptor::getRank);
         SortedSet<CommandDescriptor> sortedCommands = new TreeSet<>(comparator);
