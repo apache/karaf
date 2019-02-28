@@ -61,15 +61,22 @@ public class JaasHelper {
         if (index > 0) {
             clazz = requestedRole.substring(0, index);
             role = requestedRole.substring(index + 1);
+            
+            for (Principal p : principals) {
+                if (clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
+                    return true;
+                }
+            }
         } else {
-            clazz = RolePrincipal.class.getName();
             role = requestedRole;
-        }
-        for (Principal p : principals) {
-            if (clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
-                return true;
+            
+            for (Principal p : principals) {
+                if (RolePrincipal.class.isAssignableFrom(p.getClass()) && role.equals(p.getName())) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 
