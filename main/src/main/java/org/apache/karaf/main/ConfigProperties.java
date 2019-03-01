@@ -85,6 +85,18 @@ public class ConfigProperties {
      */
     public static final String ENV_KARAF_ETC = "KARAF_ETC";
     /**
+     * The system property for specifying the Karaf log directory. The log directory
+     * holds the log files.
+     */
+    public static final String PROP_KARAF_LOG = "karaf.log";
+
+    public static final String PROP_KARAF_LOG_URI = "karaf.log.uri";
+    /**
+     * The environment variable for specifying the Karaf log directory. The log directory
+     * holds the log files.
+     */
+    public static final String ENV_KARAF_LOG = "KARAF_LOG";
+    /**
      * The system property for specifying the Karaf data directory. The data directory
      * holds the bundles data and cache for a Karaf instance.
      */
@@ -171,6 +183,7 @@ public class ConfigProperties {
     File karafBase;
     File karafData;
     File karafEtc;
+    File karafLog;
     File karafInstances;
     
     Properties props;
@@ -203,6 +216,7 @@ public class ConfigProperties {
         this.karafBase = Utils.getKarafDirectory(PROP_KARAF_BASE, ENV_KARAF_BASE, karafHome, false, true);
         this.karafData = Utils.getKarafDirectory(PROP_KARAF_DATA, ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
         this.karafEtc = Utils.getKarafDirectory(PROP_KARAF_ETC, ENV_KARAF_ETC, new File(karafBase, "etc"), true, true);
+        this.karafLog = Utils.getKarafDirectory(PROP_KARAF_LOG, ENV_KARAF_LOG, new File(karafData, "log"), true, true);
 
         this.karafInstances = Utils.getKarafDirectory(PROP_KARAF_INSTANCES, ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
@@ -214,12 +228,14 @@ public class ConfigProperties {
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());
         System.setProperty(PROP_KARAF_ETC, karafEtc.getPath());
+        System.setProperty(PROP_KARAF_LOG, karafLog.getPath());
         System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
 
         System.setProperty(PROP_KARAF_HOME_URI, karafHome.toURI().toASCIIString());
         System.setProperty(PROP_KARAF_BASE_URI, karafBase.toURI().toASCIIString());
         System.setProperty(PROP_KARAF_DATA_URI, karafData.toURI().toASCIIString());
         System.setProperty(PROP_KARAF_ETC_URI, karafEtc.toURI().toASCIIString());
+        System.setProperty(PROP_KARAF_LOG_URI, karafLog.toURI().toASCIIString());
         System.setProperty(PROP_KARAF_INSTANCES_URI, karafInstances.toURI().toASCIIString());
 
         if (!karafEtc.exists()) {
