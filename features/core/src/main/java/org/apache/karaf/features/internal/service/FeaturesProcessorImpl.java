@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -220,20 +221,24 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
     private void staticOverrideBundle(Bundle bundle) {
         bundle.setOverriden(BundleInfo.BundleOverrideMode.NONE);
 
+        String originalLocation = bundle.getLocation();
+        final List<BundleReplacements.OverrideBundle> candidates = new ArrayList<>();
         for (BundleReplacements.OverrideBundle override : this.getInstructions().getBundleReplacements().getOverrideBundles()) {
-            String originalLocation = bundle.getLocation();
             if (override.getOriginalUriPattern().matches(originalLocation)) {
-                LOG.debug("Overriding bundle location \"" + originalLocation + "\" with \"" + override.getReplacement() + "\"");
-                bundle.setOriginalLocation(originalLocation);
-                if (override.getMode() == BundleReplacements.BundleOverrideMode.MAVEN) {
-                    bundle.setOverriden(BundleInfo.BundleOverrideMode.MAVEN);
-                } else {
-                    bundle.setOverriden(BundleInfo.BundleOverrideMode.OSGI);
-                }
-                bundle.setLocation(override.getReplacement());
-                // TOCHECK: last rule wins - no break!!!
-                //break;
+                candidates.add(override);
             }
+        }
+        if (!candidates.isEmpty()) {
+            BundleReplacements.OverrideBundle bestMatch = candidates.stream()
+                    .max((o1, o2) -> Integer.compare(o1.getReplacement().length(), o2.getReplacement().length())).get();
+            LOG.debug("Overriding bundle location \"" + originalLocation + "\" with \"" + bestMatch.getReplacement() + "\"");
+            bundle.setOriginalLocation(originalLocation);
+            if (bestMatch.getMode() == BundleReplacements.BundleOverrideMode.MAVEN) {
+                bundle.setOverriden(BundleInfo.BundleOverrideMode.MAVEN);
+            } else {
+                bundle.setOverriden(BundleInfo.BundleOverrideMode.OSGI);
+            }
+            bundle.setLocation(bestMatch.getReplacement());
         }
     }
 
