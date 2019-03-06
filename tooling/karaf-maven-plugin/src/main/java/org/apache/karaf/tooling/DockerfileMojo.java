@@ -37,6 +37,9 @@ public class DockerfileMojo extends MojoSupport {
     @Parameter(defaultValue = "${project.build.directory}/assembly")
     private File assembly;
 
+    @Parameter(defaultValue = "[\"karaf\", \"run\"]")
+    private String command;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Creating Dockerfile");
@@ -49,7 +52,7 @@ public class DockerfileMojo extends MojoSupport {
             buffer.append("ENV PATH $PATH:$KARAF_HOME/bin").append("\n");
             buffer.append("COPY ").append(assembly.getName()).append(" $KARAF_HOME").append("\n");
             buffer.append("EXPOSE 8101 1099 44444 8181").append("\n");
-            buffer.append("CMD [\"karaf\", \"run\"]").append("\n");
+            buffer.append("CMD ").append(command).append("\n");
             try (FileWriter writer = new FileWriter(dockerFile)) {
                 writer.write(buffer.toString());
             }
