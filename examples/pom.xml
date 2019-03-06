@@ -42,6 +42,7 @@
         <module>karaf-command-example</module>
         <module>karaf-config-example</module>
         <module>karaf-deployer-example</module>
+        <module>karaf-docker-example</module>
         <module>karaf-dump-example</module>
         <!-- <module>karaf-encryption-example</module> -->
         <module>karaf-http-resource-example</module>
