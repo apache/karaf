@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: karaf-docker-example-dist
+spec:
+  containers:
+    - name: karaf-docker-example-dist-ctr
+      image: 295331841498.dkr.ecr.eu-west-1.amazonaws.com/karaf:latest
+      resources:
+        limits:
+          memory: "500Mi"
+        requests:
+          memory: "250Mi"
+      command: ["karaf", "run"]
+      args: ["--vm", "1", "--vm-bytes", "250M", "--vm-hang", "1"]
