@@ -29,7 +29,7 @@ public class ExitCommand extends TopLevelCommand {
 
     @Override
     public String getDescription() {
-        return "Exit from the current shell";
+        return "Exit from the current subshell";
     }
 
     @Override
