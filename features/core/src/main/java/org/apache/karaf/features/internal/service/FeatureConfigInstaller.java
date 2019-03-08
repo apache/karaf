@@ -112,7 +112,7 @@ public class FeatureConfigInstaller {
             if (cfg == null) {
             	
             	File cfgFile = null;
-            	 if (storage != null && configCfgStore) {
+            	 if (storage != null) {
             		 cfgFile = new File(storage, cid.fullPid + ".cfg");
             	 }
             	 if (!cfgFile.exists()) {
