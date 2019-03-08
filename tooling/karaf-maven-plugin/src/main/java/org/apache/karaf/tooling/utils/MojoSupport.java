@@ -275,7 +275,7 @@ public abstract class MojoSupport extends AbstractMojo {
 
         //check if the resourceLocation descriptor contains also remote repository information.
         ArtifactRepository repo = null;
-        if (resourceLocation.startsWith("http://")) {
+        if (resourceLocation.startsWith("http://") || resourceLocation.startsWith("https://")) {
             final int repoDelimIndex = resourceLocation.indexOf('!');
             String repoUrl = resourceLocation.substring(0, repoDelimIndex);
             int paramIndex = repoUrl.indexOf("@");
