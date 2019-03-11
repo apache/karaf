@@ -44,7 +44,13 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
 
     @Override
     protected File download(Exception previousException) throws Exception {
-        return resolver.resolve(url, previousException);
+                
+        try {
+            return resolver.resolve(url, previousException);
+        } catch (Exception ex) {
+            //try again with removing timestamp from snapshot 
+            return resolver.resolve(Parser.pathToMaven(Parser.pathFromMaven(url)), previousException);
+        }
     }
 
     /**
