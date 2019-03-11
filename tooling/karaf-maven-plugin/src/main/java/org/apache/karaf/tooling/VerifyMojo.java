@@ -266,7 +266,16 @@ public class VerifyMojo extends MojoSupport {
             if (framework.contains("framework")) {
                 allDescriptors.add("mvn:org.apache.karaf.features/framework/" + getVersion("org.apache.karaf.features:framework") + "/xml/features");
             }
-            allDescriptors.add("file:" + project.getBuild().getDirectory() + "/feature/feature.xml");
+            String filePrefix = null;
+            if (System.getProperty("os.name").contains("Windows")) {
+                filePrefix = "file:/";
+            } else {
+                filePrefix = "file:";
+            }
+            allDescriptors.add(filePrefix + project.getBuild().getDirectory() + File.separator 
+                               + "feature"
+                               + File.separator 
+                               + "feature.xml");
         } else {
             allDescriptors.addAll(descriptors);
             if (framework != null && framework.contains("framework")) {
