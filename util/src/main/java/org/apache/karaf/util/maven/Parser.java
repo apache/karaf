@@ -20,6 +20,8 @@ package org.apache.karaf.util.maven;
 
 import java.net.MalformedURLException;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Parser for mvn: protocol.
@@ -32,6 +34,7 @@ import java.util.Map;
 public class Parser
 {
 
+    private static final Pattern VERSION_FILE_PATTERN = Pattern.compile( "^(.*)-([0-9]{8}\\.[0-9]{6})-([0-9]+)$" );
     /**
      * Default version if none present in the url.
      */
@@ -418,7 +421,29 @@ public class Parser
      */
     public String getArtifactPath( final String version )
     {
-        return new StringBuilder()
+           
+        Matcher m = VERSION_FILE_PATTERN.matcher(version);
+
+        if ( m.matches() )
+        {
+            this.m_version = m.group( 1 ) + "-" + "SNAPSHOT";
+            String ret = new StringBuilder()
+                .append( m_group.replaceAll( GROUP_SEPARATOR, FILE_SEPARATOR ) )
+                .append( FILE_SEPARATOR )
+                .append( m_artifact )
+                .append( FILE_SEPARATOR )
+                .append( m_version )
+                .append( FILE_SEPARATOR )
+                .append( m_artifact )
+                .append( VERSION_SEPARATOR )
+                .append( m_version )
+                .append( m_fullClassifier )
+                .append( TYPE_SEPARATOR )
+                .append( m_type )
+                .toString();
+            return ret;
+        } else {
+            return new StringBuilder()
                 .append( m_group.replaceAll( GROUP_SEPARATOR, FILE_SEPARATOR ) )
                 .append( FILE_SEPARATOR )
                 .append( m_artifact )
@@ -432,6 +457,7 @@ public class Parser
                 .append( TYPE_SEPARATOR )
                 .append( m_type )
                 .toString();
+        }
     }
 
     /**
