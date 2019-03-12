@@ -24,7 +24,7 @@ By provisioning application, it means install all modules, configuration, and tr
 
 It natively supports the deployment of OSGi applications.
 
-An OSGi application is a set of OSGi bundles. An OSGi bundles is a regular jar file, with additional metadata in the jar MANIFEST.
+An OSGi application is a set of OSGi bundles. An OSGi bundle is a regular jar file, with additional metadata in the jar MANIFEST.
 
 In OSGi, a bundle can depend to other bundles. So, it means that to deploy an OSGi application, most of the time, you have
 to firstly deploy a lot of other bundles required by the application.
@@ -611,7 +611,7 @@ are still available for the wiring (the bundles are in resolved state).
 
 The `feature:uninstall` command uninstalls a feature. As the `feature:install` command, the `feature:uninstall` command
 requires the `feature` argument. The `feature` argument is the name of the feature, or the name/version of the feature.
-If only the name of the feature is provided (not the version), the latest version available will be installed.
+If only the name of the feature is provided (not the version), the latest version available will be uninstalled.
 
 ----
 karaf@root()> feature:uninstall eventadmin
