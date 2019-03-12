@@ -76,7 +76,7 @@ public class Converters implements Converter
         String del = "";
         for (String s : list)
         {
-            sb.append(del + getShortName(s));
+            sb.append(del).append(getShortName(s));
             del = " | ";
         }
         return sb;
