@@ -68,7 +68,7 @@ public class SpringStateService
         StringBuilder message = new StringBuilder();
         Date date = new Date(event.getTimestamp());
         SimpleDateFormat df = new SimpleDateFormat();
-        message.append(df.format(date) + "\n");
+        message.append(df.format(date)).append("\n");
         if (event instanceof BootstrappingDependencyEvent) {
             message.append(getServiceInfo((BootstrappingDependencyEvent)event));
         }
