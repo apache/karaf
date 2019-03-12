@@ -87,7 +87,7 @@ public class JndiServiceImpl implements JndiService {
                     StringBuilder sb = new StringBuilder();
                     if (pair.getName().contains(":"))
                         sb.append(pair.getName());
-                    else sb.append("/" + pair.getName());
+                    else sb.append("/").append(pair.getName());
                     names((Context) o, sb, map);
                 } else {
                     if (pair.getName().contains(":"))
@@ -117,7 +117,7 @@ public class JndiServiceImpl implements JndiService {
             }
             if (o instanceof Context) {
                 StringBuilder sb = new StringBuilder();
-                sb.append("/" + pair.getName());
+                sb.append("/").append(pair.getName());
                 contexts((Context) o, sb, contexts);
             }
         }

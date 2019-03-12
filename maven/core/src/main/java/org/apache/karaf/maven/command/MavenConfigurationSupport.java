@@ -493,7 +493,7 @@ public abstract class MavenConfigurationSupport implements Action {
 
                             if (repo.getReleases() != null) {
                                 if (!repo.getReleases().isEnabled()) {
-                                    builder.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_DISALLOW_RELEASES);
+                                    builder.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_DISALLOW_RELEASES);
                                 }
                                 SourceAnd<String> up = updatePolicy(repo.getReleases().getUpdatePolicy());
                                 addPolicy(builder, "".equals(up.val()) ? "never" : up.val(), ServiceConstants.OPTION_RELEASES_UPDATE);
@@ -502,7 +502,7 @@ public abstract class MavenConfigurationSupport implements Action {
                             }
                             if (repo.getSnapshots() != null) {
                                 if (repo.getSnapshots().isEnabled()) {
-                                    builder.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
+                                    builder.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
                                 }
                                 SourceAnd<String> up = updatePolicy(repo.getSnapshots().getUpdatePolicy());
                                 addPolicy(builder, "".equals(up.val()) ? "never" : up.val(), ServiceConstants.OPTION_SNAPSHOTS_UPDATE);

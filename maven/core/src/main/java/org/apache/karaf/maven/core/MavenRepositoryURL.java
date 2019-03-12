@@ -403,41 +403,41 @@ public class MavenRepositoryURL
 
         sb.append(m_repositoryURL.toString());
         if (m_id != null) {
-            sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ID + "=" + m_id);
+            sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_ID).append("=").append(m_id);
         }
         if (!m_releasesEnabled) {
-            sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_DISALLOW_RELEASES);
+            sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_DISALLOW_RELEASES);
         }
         if (m_snapshotsEnabled) {
-            sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
+            sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_ALLOW_SNAPSHOTS);
         }
         if (m_releasesEnabled) {
             if (!m_snapshotsEnabled) {
                 if (m_releasesUpdatePolicy != null) {
-                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_RELEASES_UPDATE + "=" + m_releasesUpdatePolicy);
+                    sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_RELEASES_UPDATE).append("=").append(m_releasesUpdatePolicy);
                 }
                 if (m_releasesChecksumPolicy != null) {
-                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_RELEASES_CHECKSUM + "=" + m_releasesChecksumPolicy);
+                    sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_RELEASES_CHECKSUM).append("=").append(m_releasesChecksumPolicy);
                 }
             }
         }
         if (m_snapshotsEnabled) {
             if (!m_releasesEnabled) {
                 if (m_snapshotsUpdatePolicy != null) {
-                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_SNAPSHOTS_UPDATE + "=" + m_snapshotsUpdatePolicy);
+                    sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_SNAPSHOTS_UPDATE).append("=").append(m_snapshotsUpdatePolicy);
                 }
                 if (m_snapshotsChecksumPolicy != null) {
-                    sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_SNAPSHOTS_CHECKSUM + "=" + m_snapshotsChecksumPolicy);
+                    sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_SNAPSHOTS_CHECKSUM).append("=").append(m_snapshotsChecksumPolicy);
                 }
             }
         }
         if (m_snapshotsEnabled && m_releasesEnabled) {
             // compact snapshots & release update & checksum policies
             if (m_releasesUpdatePolicy != null && Objects.equals(m_releasesUpdatePolicy, m_snapshotsUpdatePolicy)) {
-                sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_UPDATE + "=" + m_releasesUpdatePolicy);
+                sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_UPDATE).append("=").append(m_releasesUpdatePolicy);
             }
             if (m_releasesChecksumPolicy != null && Objects.equals(m_releasesChecksumPolicy, m_snapshotsChecksumPolicy)) {
-                sb.append(ServiceConstants.SEPARATOR_OPTIONS + ServiceConstants.OPTION_CHECKSUM + "=" + m_releasesChecksumPolicy);
+                sb.append(ServiceConstants.SEPARATOR_OPTIONS).append(ServiceConstants.OPTION_CHECKSUM).append("=").append(m_releasesChecksumPolicy);
             }
         }
 

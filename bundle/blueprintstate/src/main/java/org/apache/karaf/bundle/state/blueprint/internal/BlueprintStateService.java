@@ -65,7 +65,7 @@ public class BlueprintStateService implements org.osgi.service.blueprint.contain
         StringBuilder message = new StringBuilder();
         Date date = new Date(event.getTimestamp());
         SimpleDateFormat df = new SimpleDateFormat();
-        message.append(df.format(date) + "\n");
+        message.append(df.format(date)).append("\n");
         if (event.getCause() != null) {
             message.append("Exception: \n");
             addMessages(message, event.getCause());
@@ -73,7 +73,7 @@ public class BlueprintStateService implements org.osgi.service.blueprint.contain
         if (event.getDependencies() != null) {
             message.append("Missing dependencies: \n");
             for (String dep : event.getDependencies()) {
-                message.append(dep + " ");
+                message.append(dep).append(" ");
             }
             message.append("\n");
         }
