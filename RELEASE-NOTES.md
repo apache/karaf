@@ -17,6 +17,44 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.4
+
+Apache Karaf 4.2.4 is a update on the 4.2.x series, bringing fixes and updates.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6039] - maven-resources-plugin in same pom twice
+    * [KARAF-6144] - Some bundle:* commands doesn't output on System.out
+    * [KARAF-6153] - Instance fails to start
+    * [KARAF-6156] - Support extending Karaf JAAS Principal classes
+    * [KARAF-6160] - NPE when setting configCfgStore=false in the org.apache.karaf.features.cfg
+    * [KARAF-6170] - karaf-maven-plugin doesn't support "https" remoteRepos URI accembly
+    * [KARAF-6171] - batch command line mode does not work
+    * [KARAF-6180] - Pax-exam issues with logging config
+    * [KARAF-6186] - Downgrade to wagon 3.2.0
+    * [KARAF-6189] - Don't overwrite JAVA_HOME on gentoo system
+
+#### Improvement
+    * [KARAF-6157] - ensure karaf-maven-plugin can honor start-level for bootBundles
+    * [KARAF-6159] - Allow to override/blacklist some features for VerifyMojo
+    * [KARAF-6167] - Add skip option to karaf-maven-plugin
+    * [KARAF-6177] - improve shell:exit help message
+    * [KARAF-6183] - FeaturesProcessorImpl improvement for bundle override
+
+#### Task
+    * [KARAF-6155] - Add an itest to check startup using equinox
+
+#### Dependency upgrade
+    * [KARAF-6188] - Upgrade to Felix ConfigAdmin 1.9.14
+    * [KARAF-6190] - Upgrade to Spring 5.1.5.RELEASE
+    * [KARAF-6191] - Upgrade to Spring 4.3.22.RELEASE
+    * [KARAF-6192] - Upgrade to Aries JPA 2.7.2
+    * [KARAF-6193] - Upgrade to Felix SCR 2.1.16
+    * [KARAF-6194] - Upgrade to awaitility 3.1.6
+    * [KARAF-6195] - Upgrade to ASM 7.1
+    * [KARAF-6196] - Upgrade to jline 3.10.0
+
 ## Apache Karaf 4.2.3
 
 Apache Karaf 4.2.3 is a major update on the 4.2.x series. It brings several fixes, updates and improvements.
