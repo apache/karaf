@@ -26,6 +26,7 @@ Apache Karaf 4.2.4 is a update on the 4.2.x series, bringing fixes and updates.
 #### Bug
     * [KARAF-6039] - maven-resources-plugin in same pom twice
     * [KARAF-6144] - Some bundle:* commands doesn't output on System.out
+    * [KARAF-6151] - Installing activemq-broker-noweb feature pollutes the shell
     * [KARAF-6153] - Instance fails to start
     * [KARAF-6156] - Support extending Karaf JAAS Principal classes
     * [KARAF-6160] - NPE when setting configCfgStore=false in the org.apache.karaf.features.cfg
