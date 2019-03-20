@@ -97,7 +97,7 @@ public class ArchiveMojo extends MojoSupport {
     private boolean attach = true;
 
     /**
-     * If supplied, the classifer for the artifact when attached.
+     * If supplied, the classifier for the artifact when attached.
      */
     @Parameter
     private String classifier;
