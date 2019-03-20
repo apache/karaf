@@ -259,6 +259,7 @@
                         <pomExclude>test-assembly/pom.xml</pomExclude>
                         <pomExclude>test-check-dependencies-failure/pom.xml</pomExclude>
                         <pomExclude>test-assembly-prop-edits/pom.xml</pomExclude>
+                        <pomExclude>test-dockerfile/pom.xml</pomExclude>
                     </pomExcludes>
                     <postBuildHookScript>verify</postBuildHookScript>
                     <localRepositoryPath>${project.build.directory}/system</localRepositoryPath>
@@ -293,6 +294,7 @@
                                 <pomExclude>test-assembly/pom.xml</pomExclude>
                                 <pomExclude>test-check-dependencies-failure/pom.xml</pomExclude>
                                 <pomExclude>test-assembly-prop-edits/pom.xml</pomExclude>
+                                <pomExclude>test-dockerfile/pom.xml</pomExclude>
                             </pomExcludes>
                         </configuration>
                     </execution>
