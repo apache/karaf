@@ -52,10 +52,10 @@
                             org.osgi.service.log;version="[1.3,2)"
                         </DynamicImport-Package>
                         <Import-Package>
-                            org.osgi.service.cm,
+                            !org.osgi.service.cm,
                             *
                         </Import-Package>
-                        <Export-Package>org.osgi.service.cm</Export-Package>
+                        <Export-Package>org.osgi.service.cm;version=1.6</Export-Package>
                         <Private-Package>
                             org.apache.karaf.services.staticcm,
                             org.apache.felix.utils.properties
