@@ -52,6 +52,7 @@ import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -148,7 +149,7 @@ public class Krb5LoginModuleTest extends KarafKerberosITest {
         super.tearDown();
     }
 
-    @Test
+    @Ignore
     public void testKeytabSuccess() throws Exception {
         Map<String, Object> props = new HashMap<>();
         props.put("debug", "true");
@@ -201,7 +202,7 @@ public class Krb5LoginModuleTest extends KarafKerberosITest {
 
     }
 
-    @Test
+    @Ignore
     public void testLoginSuccess() throws Exception {
         Subject subject = new Subject();
         Krb5LoginModule module = new Krb5LoginModule();
