@@ -239,6 +239,8 @@ public class KarafTestSupport {
                 new VMOption("--add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED"),
                 new VMOption("--add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED"),
                 new VMOption("--add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED"),
                 new VMOption("--add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED"),
                 new VMOption("-classpath"),
                 new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*")
