@@ -52,7 +52,6 @@ import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -134,10 +133,11 @@ public class Krb5LoginModuleTest extends KarafKerberosITest {
         super.setUp();
 
         // Set up a partition for EXAMPLE.COM and add user and service principals to test authentication with.
+        setupEnv(TcpTransport.class,
+                 EncryptionType.AES128_CTS_HMAC_SHA1_96, ChecksumType.HMAC_SHA1_96_AES128);
         KerberosTestUtils.fixServicePrincipalName(
                 "ldap/" + KerberosTestUtils.getHostName() + "@EXAMPLE.COM", null, getLdapServer());
-        setupEnv(TcpTransport.class,
-                EncryptionType.AES128_CTS_HMAC_SHA1_96, ChecksumType.HMAC_SHA1_96_AES128);
+        
 
         kdcServer.getConfig().setPaEncTimestampRequired(false);
         // Use our custom configuration to avoid reliance on external config
@@ -149,7 +149,7 @@ public class Krb5LoginModuleTest extends KarafKerberosITest {
         super.tearDown();
     }
 
-    @Ignore
+    @Test
     public void testKeytabSuccess() throws Exception {
         Map<String, Object> props = new HashMap<>();
         props.put("debug", "true");
@@ -202,7 +202,7 @@ public class Krb5LoginModuleTest extends KarafKerberosITest {
 
     }
 
-    @Ignore
+    @Test
     public void testLoginSuccess() throws Exception {
         Subject subject = new Subject();
         Krb5LoginModule module = new Krb5LoginModule();
