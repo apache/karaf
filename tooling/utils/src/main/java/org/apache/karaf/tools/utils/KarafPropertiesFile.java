@@ -23,11 +23,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Properties;
 
 public class KarafPropertiesFile {
 
-    private final Properties properties;
+    private final SortedProperties properties;
     private final File propertyFile;
 
     public KarafPropertiesFile(File karafHome, String location) {
@@ -36,7 +35,7 @@ public class KarafPropertiesFile {
 
     public KarafPropertiesFile(File propertyFile) {
         this.propertyFile = propertyFile;
-        properties = new Properties();
+        properties = new SortedProperties();
     }
 
     private static File homedPropFile(File karafHome, String location) {
