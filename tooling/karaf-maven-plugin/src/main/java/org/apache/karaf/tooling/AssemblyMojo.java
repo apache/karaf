@@ -536,14 +536,6 @@ public class AssemblyMojo extends MojoSupport {
                .bundles(toArray(startupBundles))
                .profiles(toArray(startupProfiles));
 
-        // Boot stage
-        builder.defaultStage(Builder.Stage.Boot)
-                .kars(toArray(bootKars))
-                .repositories(bootFeatures.isEmpty() && bootProfiles.isEmpty() && installAllFeaturesByDefault, toArray(bootRepositories))
-                .features(toArray(bootFeatures))
-                .bundles(toArray(bootBundles))
-                .profiles(toArray(bootProfiles));
-
         // Installed stage
         builder.defaultStage(Builder.Stage.Installed)
                 .kars(toArray(installedKars))
@@ -551,6 +543,14 @@ public class AssemblyMojo extends MojoSupport {
                 .features(toArray(installedFeatures))
                 .bundles(toArray(installedBundles))
                 .profiles(toArray(installedProfiles));
+
+        // Boot stage
+        builder.defaultStage(Builder.Stage.Boot)
+                .kars(toArray(bootKars))
+                .repositories(bootFeatures.isEmpty() && bootProfiles.isEmpty() && installAllFeaturesByDefault, toArray(bootRepositories))
+                .features(toArray(bootFeatures))
+                .bundles(toArray(bootBundles))
+                .profiles(toArray(bootProfiles));
 
         // Generate the assembly
         builder.generateAssembly();
