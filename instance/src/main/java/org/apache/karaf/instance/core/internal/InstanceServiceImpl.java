@@ -513,7 +513,16 @@ public class InstanceServiceImpl implements InstanceService {
 
         String jdkOpts;
         if (!System.getProperty("java.version").startsWith("1.")) {
-            jdkOpts = " --add-opens java.base/java.security=ALL-UNNAMED" +
+            File jdk9LibDir = new File(libDir, "jdk9plus");
+            File endorsedLibDir = new File(libDir, "endorsed");
+            StringBuilder jdk9plusClasspath = classpathFromLibDir(jdk9LibDir);
+            classpath.append(System.getProperty("path.separator"));
+            classpath.append(jdk9plusClasspath);
+            jdkOpts = " --add-reads=java.xml=java.logging" +
+                      " --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED" +
+                      " --patch-module java.base=" + endorsedLibDir.getAbsolutePath() + "/org.apache.karaf.specs.locator-4.3.0-SNAPSHOT.jar" +
+                      " --patch-module java.xml=" + endorsedLibDir.getAbsolutePath() + "/org.apache.karaf.specs.java.xml-4.3.0-SNAPSHOT.jar" +
+                      " --add-opens java.base/java.security=ALL-UNNAMED" +
                       " --add-opens java.base/java.net=ALL-UNNAMED" +
                       " --add-opens java.base/java.lang=ALL-UNNAMED" +
                       " --add-opens java.base/java.util=ALL-UNNAMED" +
@@ -522,10 +531,10 @@ public class InstanceServiceImpl implements InstanceService {
                       " --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED" +
                       " --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" +
                       " --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED" +
-                      " --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED" +
-                      " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED" +
-                      " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
-                      " --add-modules java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws";
+                      " --add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED" +
+                      " --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED" +
+                      " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED";
+                      
         } else {
             jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
                     + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\"";
