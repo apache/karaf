@@ -197,6 +197,7 @@ public class KarafTestSupport {
                 CoreOptions.mavenBundle().groupId("javax.annotation").artifactId("javax.annotation-api").versionAsInProject(),
                 KarafDistributionOption.replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
                 //replaceConfigurationFile("etc/host.key", getConfigFile("/etc/host.key")),
+                KarafDistributionOption.replaceConfigurationFile("etc/org.apache.karaf.features.xml", getConfigFile("/etc/org.apache.karaf.features.xml")),
                 KarafDistributionOption.editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "updateSnapshots", "none"),
                 KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", httpPort),
                 KarafDistributionOption.editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
