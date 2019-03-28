@@ -158,7 +158,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature version="[2,3)">transaction</feature>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-j2ee-connector_1.6_spec/1.0</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-validation_1.0_spec/1.1</bundle>
-        <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.1</bundle>
+        <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.4</bundle>
     </feature>
 
     <feature name="openjpa3" description="OpenJPA engine support" version="${openjpa.version}">
