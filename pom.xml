@@ -188,7 +188,7 @@
         <objenesis.version>2.6</objenesis.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
-        <equinox.version>3.13.200</equinox.version>
+        <equinox.version>3.13.300</equinox.version>
         <bndlib.version>2.4.0</bndlib.version>
         <equinox.region.version>1.2.101.v20150831-1342</equinox.region.version>
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
