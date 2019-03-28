@@ -263,7 +263,7 @@
         <hibernate42.version>4.2.15.Final</hibernate42.version>
         <hibernate43.version>4.3.6.Final</hibernate43.version>
         <hibernate.version>5.2.17.Final</hibernate.version>
-        <hibernate.validator.version>6.0.14.Final</hibernate.validator.version>
+        <hibernate.validator.version>6.0.16.Final</hibernate.validator.version>
         <httpclient.version>4.5.6</httpclient.version>
         <jansi.version>1.17.1</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
