@@ -14,6 +14,7 @@
  */
 package org.apache.karaf.jaas.modules.audit;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -22,6 +23,10 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
+
+import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
+
+import static java.util.stream.Collectors.toList;
 
 public abstract class AbstractAuditLoginModule implements LoginModule {
 
@@ -88,4 +93,16 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
         return false;
     }
 
+    protected String getPrincipalInfo() {
+        String principalInfo;
+        List<String> principalInfos = subject.getPrincipals(ClientPrincipal.class).stream().map(r->r.getName()).collect(toList());
+
+        if (principalInfos.size() > 0) {
+            principalInfo = String.join(", ", principalInfos);
+        } else {
+            principalInfo = "no client principals found";
+        }
+
+        return principalInfo;
+    }
 }
