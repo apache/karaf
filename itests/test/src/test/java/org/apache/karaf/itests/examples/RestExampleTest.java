@@ -79,9 +79,11 @@ public class RestExampleTest extends KarafTestSupport {
         installAndAssertFeature("karaf-rest-example-whiteboard");
 
         String output = executeCommand("http:list");
-        while (!output.contains("Deployed")) {
+        int i = 0;
+        while (!output.contains("Deployed") && i < 50) {
             Thread.sleep(500);
             output = executeCommand("http:list");
+            i++;
         }
         System.out.println(output);
 
