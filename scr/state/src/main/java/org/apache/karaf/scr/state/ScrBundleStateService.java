@@ -30,7 +30,9 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentConfigurationDTO;
 
-@Component
+@Component(
+        name = "ServiceComponentRuntimeBundleStateService"
+)
 public class ScrBundleStateService implements BundleStateService {
 
     @Reference

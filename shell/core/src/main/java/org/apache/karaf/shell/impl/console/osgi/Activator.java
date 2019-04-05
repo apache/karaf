@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.felix.service.command.CommandProcessor;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.impl.action.command.ManagerImpl;
@@ -46,6 +47,7 @@ public class Activator implements BundleActivator {
 
     private SessionFactoryImpl sessionFactory;
     private ServiceRegistration<SessionFactory> sessionFactoryRegistration;
+    private ServiceRegistration<CommandProcessor> commandProcessorRegistration;
 
     private CommandExtender actionExtender;
 
@@ -106,6 +108,7 @@ public class Activator implements BundleActivator {
         sessionFactory.register(new ManagerImpl(sessionFactory, sessionFactory));
 
         sessionFactoryRegistration = context.registerService(SessionFactory.class, sessionFactory, null);
+        commandProcessorRegistration = context.registerService(CommandProcessor.class, sessionFactory.getCommandProcessor(), null);
 
         actionExtender = new CommandExtender(sessionFactory);
         actionExtender.start(context);
@@ -130,6 +133,7 @@ public class Activator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         filterTracker.close();
+        commandProcessorRegistration.unregister();
         sessionFactoryRegistration.unregister();
         if (localConsoleManager != null) {
             localConsoleManager.stop();
