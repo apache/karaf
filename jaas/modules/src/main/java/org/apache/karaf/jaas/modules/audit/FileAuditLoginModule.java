@@ -58,7 +58,7 @@ public class FileAuditLoginModule extends AbstractAuditLoginModule {
             case LOGOUT: actionStr = "Explicit logout"; break;
             default: actionStr = action.toString(); break;
             }
-            writer.println(DATE_FORMAT.format(date) + " - " + actionStr + " - " + username);
+            writer.println(DATE_FORMAT.format(date) + " - " + actionStr + " - " + username + " - " + getPrincipalInfo());
             writer.flush();
             writer.close();
             if (lock.isValid()) {
