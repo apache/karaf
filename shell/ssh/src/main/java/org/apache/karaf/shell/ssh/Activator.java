@@ -141,23 +141,24 @@ public class Activator extends BaseActivator implements ManagedService {
     }
 
     protected SshServer createSshServer(SessionFactory sessionFactory) {
-        int sshPort            = getInt("sshPort", 8101);
-        String sshHost         = getString("sshHost", "0.0.0.0");
-        long sshIdleTimeout    = getLong("sshIdleTimeout", 1800000);
-        int nioWorkers         = getInt("nio-workers", 2);
-        String sshRealm        = getString("sshRealm", "karaf");
-        Class<?>[] roleClasses = getClassesArray("sshRoleTypes", "org.apache.karaf.jaas.boot.principal.RolePrincipal");
-        String sshRole         = getString("sshRole", null);
-        String hostKey         = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
-        String[] authMethods   = getStringArray("authMethods", "keyboard-interactive,password,publickey");
-        int keySize            = getInt("keySize", 2048);
-        String algorithm       = getString("algorithm", "RSA");
-        String[] macs          = getStringArray("macs", "hmac-sha2-512,hmac-sha2-256,hmac-sha1");
-        String[] ciphers       = getStringArray("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
-        String[] kexAlgorithms = getStringArray("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
-        String welcomeBanner   = getString("welcomeBanner", null);
-        String moduliUrl       = getString("moduli-url", null);
-        boolean sftpEnabled     = getBoolean("sftpEnabled", true);
+        int sshPort                 = getInt("sshPort", 8101);
+        String sshHost              = getString("sshHost", "0.0.0.0");
+        long sshIdleTimeout         = getLong("sshIdleTimeout", 1800000);
+        int nioWorkers              = getInt("nio-workers", 2);
+        int maxConcurrentSessions  = getInt("max-concurrent-sessions", -1);
+        String sshRealm             = getString("sshRealm", "karaf");
+        Class<?>[] roleClasses      = getClassesArray("sshRoleTypes", "org.apache.karaf.jaas.boot.principal.RolePrincipal");
+        String sshRole              = getString("sshRole", null);
+        String hostKey              = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
+        String[] authMethods        = getStringArray("authMethods", "keyboard-interactive,password,publickey");
+        int keySize                 = getInt("keySize", 2048);
+        String algorithm            = getString("algorithm", "RSA");
+        String[] macs               = getStringArray("macs", "hmac-sha2-512,hmac-sha2-256,hmac-sha1");
+        String[] ciphers            = getStringArray("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
+        String[] kexAlgorithms      = getStringArray("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
+        String welcomeBanner        = getString("welcomeBanner", null);
+        String moduliUrl            = getString("moduli-url", null);
+        boolean sftpEnabled         = getBoolean("sftpEnabled", true);
         
         Path serverKeyPath = Paths.get(hostKey);
         KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverKeyPath.toFile(), algorithm, keySize);
@@ -172,6 +173,7 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setCipherFactories(SshUtils.buildCiphers(ciphers));
         server.setKeyExchangeFactories(SshUtils.buildKexAlgorithms(kexAlgorithms));
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
+
         if (sftpEnabled) {
             server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate(cmd -> new ShellCommand(sessionFactory, cmd)).build());
             server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
@@ -187,6 +189,9 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setForwardingFilter(AcceptAllForwardingFilter.INSTANCE);
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
         server.getProperties().put(SshServer.NIO_WORKERS, Integer.toString(nioWorkers));
+        if (maxConcurrentSessions != -1) {
+            server.getProperties().put(SshServer.MAX_CONCURRENT_SESSIONS, Integer.toString(maxConcurrentSessions));
+        }
         if (moduliUrl != null) {
             server.getProperties().put(SshServer.MODULI_URL, moduliUrl);
         }
