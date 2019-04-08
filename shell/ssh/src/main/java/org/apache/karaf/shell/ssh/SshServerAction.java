@@ -45,6 +45,9 @@ public class SshServerAction implements Action
     @Option(name = "-n", aliases = { "--nio-workers" }, description = "The number of NIO worker threads to use", required = false, multiValued = false)
     private int nioWorkers = 2;
 
+    @Option(name = "-c", aliases = { "--max-concurrent-sessions" }, description = "The maximum number of concurrent sessions opened on the ssh server", required = false, multiValued = false)
+    private int maxConcurrentSessions = -1;
+
     @Option(name = "-w", aliases = { "--welcome-banner" }, description = "The welcome banner to display when logging in", required = false, multiValued = false)
     private String welcomeBanner;
     
@@ -64,8 +67,13 @@ public class SshServerAction implements Action
         // idle timeout
         server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(idleTimeout));
         
-        // nio-workes
+        // nio-workers
         server.getProperties().put(SshServer.NIO_WORKERS, Integer.toString(nioWorkers));
+
+        // max-concurrent-sessions
+        if (maxConcurrentSessions != -1) {
+            server.getProperties().put(SshServer.MAX_CONCURRENT_SESSIONS, Integer.toString(maxConcurrentSessions));
+        }
         
         // welcome banner
         if (welcomeBanner != null) {
