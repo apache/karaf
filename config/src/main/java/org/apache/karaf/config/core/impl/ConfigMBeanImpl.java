@@ -84,6 +84,9 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
 
     @Override
     public void install(String url, String finalname, boolean override) throws MBeanException {
+        if (finalname.contains("..")) {
+            throw new IllegalArgumentException("For security reason, relative path is not allowed in config file final name");
+        }
         try {
             File etcFolder = new File(System.getProperty("karaf.etc"));
             File file = new File(etcFolder, finalname);
