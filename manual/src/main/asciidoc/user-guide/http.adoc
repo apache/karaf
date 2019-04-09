@@ -22,7 +22,15 @@ The Karaf http feature enables the Pax Web implementation of the OSGi HTTPServic
 root@karaf()> feature:install http
 ----
 
-Test the HTTP service is up by pointing your browser to [http://localhost:8181/].
+NB: the HTTP service will be actually bound only when at least one web application will use it.
+
+If you want to test the HTTP service, you can install the `webconsole` feature:
+
+----
+root@karaf()> feature:install webconsole
+----
+
+Then, you can test the HTTP service by accessing the Apache Karaf WebConsole pointing your browser to [http://localhost:8181/system/console].
 
 ===== Configuring the HTTPService
 
