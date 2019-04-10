@@ -102,6 +102,10 @@
                         <Export-Package>
                         	org.apache.karaf.shell.commands.info;-noimport:=true
                         </Export-Package>
+                        <Import-Package>
+                            com.sun.management;resolution:=optional,
+                            *
+                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.util.process;-split-package:=merge-first,
                             org.apache.karaf.util;-split-package:=merge-first,

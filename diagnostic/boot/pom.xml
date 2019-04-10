@@ -63,6 +63,7 @@
                             org.apache.karaf.diagnostic.core.providers
                         </Private-Package>
                         <Import-Package>
+                            com.sun.management;resolution:=optional,
                             sun.misc;resolution:=optional,
                             *
                         </Import-Package>

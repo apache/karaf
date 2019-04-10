@@ -87,7 +87,7 @@ public class ProxyServlet extends HttpServlet {
 
     protected HttpClient createHttpClient(HttpParams hcParams) {
         try {
-            Class clientClazz = Class.forName("og.apache.http.impl.client.SystemDefaultHttpClient");
+            Class clientClazz = Class.forName("org.apache.http.impl.client.SystemDefaultHttpClient");
             Constructor constructor = clientClazz.getConstructor(HttpParams.class);
             return (HttpClient) constructor.newInstance(hcParams);
         } catch (ClassNotFoundException e) {
