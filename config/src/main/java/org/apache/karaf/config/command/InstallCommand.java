@@ -45,6 +45,9 @@ public class InstallCommand implements Action {
 
     @Override
     public Object execute() throws Exception {
+        if (finalname.contains("..")) {
+            throw new IllegalArgumentException("For security reason, relative path is not allowed in config file final name");
+        }
         File etcFolder = new File(System.getProperty("karaf.etc"));
         File file = new File(etcFolder, finalname);
         if (file.exists()) {
