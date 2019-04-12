@@ -178,7 +178,7 @@
                             org.apache.felix.gogo.api;version=0.17.0;status=provisional;-noimport:=true,
                             org.apache.felix.gogo.commands.*;version=0.17.0;-noimport:=true,
                             org.apache.felix.service.command;version=0.17.0;status=provisional;-noimport:=true,
-                            org.apache.felix.service.threadio;version=0.17.0;status=provisional;-noimport:=true;
+                            org.apache.felix.service.threadio;version=0.17.0;status=provisional;-noimport:=true,
                             jline.console.completer;version=2.14;-noimport:=true
                         </Export-Package>
                         <Private-Package>
