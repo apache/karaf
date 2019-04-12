@@ -593,7 +593,7 @@ public abstract class MavenConfigurationSupport implements Action {
             List<String> names = new ArrayList<>(Arrays.stream(files).map(File::getName)
                     .collect(TreeSet<String>::new, TreeSet::add, TreeSet::addAll));
 
-            names.add(String.format(fileNameFormat, new Date().getTime()));
+            names.add(String.format(fileNameFormat, System.currentTimeMillis()));
 
             while (names.size() > MAX_SEQUENCE_SIZE) {
                 String name = names.remove(0);
