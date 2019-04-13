@@ -30,6 +30,7 @@
 
     <artifactId>karaf-profile-example-dynamic</artifactId>
     <name>Apache Karaf :: Examples :: Profile :: Dynamic Assembly</name>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
