@@ -52,9 +52,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
@@ -1568,42 +1566,44 @@ public class Builder {
             default:                     path = "lib"; break;
             }
             downloader.download(library, provider -> {
-                    synchronized (provider) {
-                        Path input = provider.getFile().toPath();
-                        String name = filename != null ? filename : input.getFileName().toString();
-                        Path libOutput = homeDirectory.resolve(path).resolve(name);
-                        if (!libOutput.toFile().getParentFile().isDirectory()) {
-                            libOutput.toFile().getParentFile().mkdirs();
-                        }
-                        LOGGER.info("{}   adding library: {}", indent, homeDirectory.relativize(libOutput));
-                        Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
-                        if (provider.getUrl().startsWith("mvn:")) {
-                            // copy boot library in system repository
-                            if (type.equals(Library.TYPE_BOOT)) {
-                                String mvnPath = Parser.pathFromMaven(provider.getUrl());
-                                Path sysOutput = systemDirectory.resolve(mvnPath);
-                                Files.createDirectories(sysOutput.getParent());
-                                Files.copy(input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
-                                libOutput = homeDirectory.resolve(path).resolve(name);
-                                // copy the file
-                                LOGGER.info("{}   adding maven library: {}", indent, provider.getUrl());
-                                Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
-                                /* a symlink could be used instead
+                synchronized (downloader) {
+                    Path input = provider.getFile().toPath();
+                    String name = filename != null ? filename : input.getFileName().toString();
+                    Path libOutput = homeDirectory.resolve(path).resolve(name);
+                    if (!libOutput.toFile().getParentFile().isDirectory()) {
+                        libOutput.toFile().getParentFile().mkdirs();
+                    }
+                    LOGGER.info("{}   adding library: {}", indent, homeDirectory.relativize(libOutput));
+                    Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
+                    if (provider.getUrl().startsWith("mvn:")) {
+                        // copy boot library in system repository
+                        if (type.equals(Library.TYPE_BOOT)) {
+                            String mvnPath = Parser.pathFromMaven(provider.getUrl());
+                            Path sysOutput = systemDirectory.resolve(mvnPath);
+                            Files.createDirectories(sysOutput.getParent());
+                            Files.copy(input, sysOutput, StandardCopyOption.REPLACE_EXISTING);
+                            libOutput = homeDirectory.resolve(path).resolve(name);
+                            // copy the file
+                            LOGGER.info("{}   adding maven library: {}", indent, provider.getUrl());
+                            Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
+                            /* a symlink could be used instead
 
-                                if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
-                                    try {
-                                        Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
-                                    } catch (FileSystemException e) {
-                                        Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
-                                    }
+                            if (Files.notExists(libOutput, LinkOption.NOFOLLOW_LINKS)) {
+                                try {
+                                    Files.createSymbolicLink(libOutput, libOutput.getParent().relativize(sysOutput));
+                                } catch (FileSystemException e) {
+                                    Files.copy(input, libOutput, StandardCopyOption.REPLACE_EXISTING);
                                 }
-                                */
                             }
+                            */
                         }
                     }
-                    boolean export = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_EXPORT));
-                    boolean delegate = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_DELEGATE));
-                    if (export || delegate) {
+                }
+                boolean export = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_EXPORT));
+                boolean delegate = Boolean.parseBoolean(clause.getDirective(LIBRARY_CLAUSE_DELEGATE));
+
+                if (export || delegate) {
+                    synchronized (config) {
                         Map<String, String> headers = getHeaders(provider);
                         String packages = headers.get(Constants.EXPORT_PACKAGE);
                         if (packages != null) {
@@ -1624,6 +1624,7 @@ public class Builder {
                             }
                         }
                     }
+                }
             });
         }
     }
