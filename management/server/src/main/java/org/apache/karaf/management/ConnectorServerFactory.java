@@ -69,6 +69,7 @@ public class ConnectorServerFactory {
     private KeystoreManager keystoreManager;
     private String algorithm;
     private String secureProtocol;
+    private String[] enabledProtocols;
     private String keyStore;
     private String trustStore;
     private String keyAlias;
@@ -313,7 +314,7 @@ public class ConnectorServerFactory {
 
     private void setupSsl() throws GeneralSecurityException {
         SSLServerSocketFactory sssf = keystoreManager.createSSLServerFactory(null, secureProtocol, algorithm, keyStore, keyAlias, trustStore,keyStoreAvailabilityTimeout);
-        RMIServerSocketFactory rssf = new KarafSslRMIServerSocketFactory(sssf, isClientAuth(), getRmiServerHost());
+        RMIServerSocketFactory rssf = new KarafSslRMIServerSocketFactory(sssf, isClientAuth(), getRmiServerHost(), getEnabledProtocols());
         RMIClientSocketFactory rcsf = new SslRMIClientSocketFactory();
         environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rssf);
         environment.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rcsf);
@@ -330,11 +331,13 @@ public class ConnectorServerFactory {
         private SSLServerSocketFactory sssf;
         private boolean clientAuth;
         private String rmiServerHost;
+        private String[] enabledProtocols;
 
-        public KarafSslRMIServerSocketFactory(SSLServerSocketFactory sssf, boolean clientAuth, String rmiServerHost) {
+        public KarafSslRMIServerSocketFactory(SSLServerSocketFactory sssf, boolean clientAuth, String rmiServerHost, String[] enabledProtocols) {
             this.sssf = sssf;
             this.clientAuth = clientAuth;
             this.rmiServerHost = rmiServerHost;
+            this.enabledProtocols = enabledProtocols;
         }
 
         public ServerSocket createServerSocket(int port) throws IOException {
@@ -342,10 +345,16 @@ public class ConnectorServerFactory {
             if (host.isLoopbackAddress()) {
                 final SSLServerSocket ss = (SSLServerSocket) sssf.createServerSocket(port, 50);
                 ss.setNeedClientAuth(clientAuth);
+                if (this.enabledProtocols != null && this.enabledProtocols.length > 0) {
+                    ss.setEnabledProtocols(this.enabledProtocols);
+                }
                 return new LocalOnlySSLServerSocket(ss);
             } else {
                 final SSLServerSocket ss = (SSLServerSocket) sssf.createServerSocket(port, 50, InetAddress.getByName(rmiServerHost));
                 ss.setNeedClientAuth(clientAuth);
+                if (this.enabledProtocols != null && this.enabledProtocols.length > 0) {
+                    ss.setEnabledProtocols(this.enabledProtocols);
+                }
                 return ss;
             }
         }
@@ -660,6 +669,14 @@ public class ConnectorServerFactory {
             // Ignore
         }
         throw new IOException("Only connections from clients running on the host where the RMI remote objects have been exported are accepted.");
+    }
+
+    public String[] getEnabledProtocols() {
+        return enabledProtocols;
+    }
+
+    public void setEnabledProtocols(String[] enabledProtocols) {
+        this.enabledProtocols = enabledProtocols;
     }
 
 }
