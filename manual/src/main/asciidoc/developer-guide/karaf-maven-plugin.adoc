@@ -415,12 +415,227 @@ META-INF in the kar, without getting installed into Karaf.
 
 ==== Instances and distributions goals
 
+The `karaf-maven-plugin` helps you to build custom Karaf distributions or archives existing Karaf instances:
+
+===== `karaf:assembly`
+
 [NOTE]
 ====
-You should use the karaf-assembly packaging instead of this individual goal.
+This goal is run as part of the karaf-assembly packaging.
 ====
 
-The `karaf-maven-plugin` helps you to build custom Karaf distributions or archives existing Karaf instances:
+The `karaf:assembly` goal creates a Karaf instance (assembly) filesystem using the Maven dependencies and a provided configuration.
+
+====== Example
+
+----
+    ...
+    <packaging>karaf-assembly</packaging>
+    ...
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <type>kar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <finalName>${project.artifactId}</finalName>
+                    <installedBundles>
+                        <installedBundle>${additional.bundle}</installedBundle>
+                    </installedBundles>
+                    <bootFeatures>
+                        <feature>bundle</feature>
+                        <feature>config</feature>
+                        <feature>diagnostic</feature>
+                        <feature>feature</feature>
+                        <feature>jaas</feature>
+                        <feature>shell</feature>
+                        <feature>log</feature>
+                        <feature>management</feature>
+                        <feature>package</feature>
+                        <feature>shell-compat</feature>
+                        <feature>ssh</feature>
+                        <feature>system</feature>
+                        <feature>wrap</feature>
+                    </bootFeatures>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+----
+
+By default, the generate Karaf instance is a dynamic distribution (it's started with default set of resources and then you can deploy new applications in this instance).
+
+It's also possible to generate a Karaf instance as a static distribution (kind of immutable):
+
+----
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>static</artifactId>
+            <type>kar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.staticcm</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <startupFeatures>
+                        <startupFeature>static-framework</startupFeature>
+                        <startupFeature>scr</startupFeature>
+                        <startupFeature>http-whiteboard</startupFeature>
+                    </startupFeatures>
+                    <framework>static</framework>
+                    <useReferenceUrls>true</useReferenceUrls>
+                    <environment>static</environment>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+----
+
+====== Parameters
+
+|===
+|Name |Type |Description
+
+|`sourceDirectory`
+|`File`
+| Base directory used to overwrite resources in generated assembly after the build (resource directory). Default value: ${project.basedir}/src/main/resources/assembly
+
+|`workDirectory`
+|`File`
+|Base directory used to copy the resources during the build (working directory). Default value: ${project.build.directory}/assembly
+
+|`featuresProcessing`
+|`File`
+|Optional location for custom features processing XML configuration (`etc/org.apache.karaf.features.cfg`). Default value: null
+
+|`installAllFeaturesByDefault`
+|`Boolean`
+|For given stage (startup, boot, install) if there are no stage-specific features and profiles, all features from stage-specific repositories will be used. Default value: true
+
+|`environment`
+|`String`
+|An environment identifier that may be used to select different variant of PID configuration file, e.g., `org.ops4j.pax.url.mvn.cfg#docker`. Default value: null
+
+|`defaultStartLevel`
+|`int`
+|Default start level for bundles in features that don't specify it. Default value: 30
+
+|`startupRepositories`
+|`List<String>`
+|List of compile-scope features XML files to be used in startup stage (etc/startup.properties).
+
+|`bootRepositories`
+|`List<String>`
+|List of runtime-scope features XML files to be used in boot stage (etc/org.apache.karaf.features.cfg)
+
+|`installedRepositories`
+|`List<String>`
+|List of provided-scope features XML files to be used in install stage
+
+|`blacklistedRepositories`
+|`List<String>`
+|List of blacklisted repository URIs. Blacklisted URI may use globs and version ranges.
+
+|`startupFeatures`
+|`List<String>`
+|List of features from compile-scope features XML files and KARs to be installed into system repo and listed in etc/startup.properties.
+
+|`bootFeatures`
+|`List<String>`
+|List of features from runtime-scope features XML files and KARs to be installed into system repo and listed in featuresBoot property in etc/org.apache.karaf.features.cfg
+
+|`installedFeatures`
+|`List<String>`
+|List of features from provided-scope features XML files and KARs to be installed into system repo and not mentioned elsewhere.
+
+|`blacklistedFeatures`
+|`List<String>`
+|List of feature blacklisting clauses. Each clause is in one of the formats (feature-name, feature-name;range=version-or-range, feature-name/version-or-range
+
+|`startupBundles`
+|`List<String>`
+|List of compile-scope bundles added to etc/startup.properties
+
+|`bootBundles`
+|`List<String>`
+|List of runtime-scope bundles wrapped in special feature added to featuresBoot property in etc/org.apache.karaf.features.cfg
+
+|`installedBundles`
+|`List<String>`
+|List of provided-scope bundles added to system repo
+
+|`blacklistedBundles`
+|`List<String>`
+|List of blacklisted bundle URIs. Blacklisted URI may use globs and version ranges.
+
+|`profilesUris`
+|`List<String>`
+|List of profile URIs to use
+
+|`startupProfiles`
+|`List<String>`
+|List of profiles names to load from configured `profilesUris` and use as startup profiles.
+
+|`bootProfiles`
+|`List<String>`
+|List of profiles names to load from configured `profilesUris` and use as boot profiles.
+
+|`installedProfiles`
+|`List<String>`
+|List of profiles names to load from configured `profilesUris` and use as installed profiles.
+
+|`blacklistedProfiles`
+|`List<String>`
+|List of blacklisted profile names (possibly using `*` glob).
+
+|`writeProfiles`
+|`boolean`
+|When assembly custom distribution, we can include generated and added profiles in the distribution itself, in `${karaf.etc}/profiles` directory. Default value: false
+
+|`generateConsistencyReport`
+|`String`
+|When assembly custom distribution, we can also generate an XML/XSLT report with the summary of bundles. This parameter specifies target directory, to which `bundle-report.xml` and `bundle-report-full.xml` (along with XSLT stylesheet) will be written.
+
+|`consistencyReportProjectName`
+|`String`
+|When generating consistency report, we can specify project name. Default value: Apache Karaf
+
+|`consistencyReportProjectVersion`
+|`String`
+|When generating consistency report, we can specify project version. Default value: ${project.version}
+|===
 
 ===== `karaf:archive`
 
@@ -478,9 +693,17 @@ The example below create archives for the given Karaf instance:
 |`File`
 |The location of the server repository. Default value: ${project.build.directory}/assembly
 
+|`pathPrefix`
+|`String`
+|Path prefix of files in the created archive. Default value: ${project.artifactId}-${project.version}
+
+|`usePathPrefix`
+|`boolean`
+|Use a path prefix of files in the created archive. Default value: false
+
 |`targetFile`
 |`File`
-|The target file to set as the project's artifact. Default value: ${project.file}
+|The target file to set as the project's artifact. Default value: ${project.artifactId}-${project.version}
 
 |`archiveZip`
 |`Boolean`
@@ -489,14 +712,290 @@ The example below create archives for the given Karaf instance:
 |`archiveTarGz`
 |`Boolean`
 |Switches creation of *.tar.gz artifact on or off. Default value: true
-|===
 
-===== `karaf:assembly`
+|`attach`
+|`boolean`
+|Whether to attach the resulting assembly to the project as an artifact. Default value: true
+
+|`classifier`
+|`String`
+|If supplied, the classifier for the artifact when attached.
+
+|`useSymLinks`
+|`boolean`
+|Use symbolic links in tar.gz or zip archives. Symbolic links are not very well supported by windows Platform. At least, is does not work on WinXP + NTFS, so do not include them for now. Default value: false
+|===
 
 ==== Run, client, deploy goals
 
+These goals allows you to run Karaf via Maven or interact with a running instance.
+
 ===== `karaf:run`
+
+`karaf:run` goal runs a Karaf instance from Maven.
+
+It can use the current project if it's a bundle to directly deploy the project artifact in the running Karaf instance.
+
+====== Example
+
+----
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>run</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <karafDistribution>mvn:org.apache.karaf/apache-karaf/4.2.4/zip</karafDistribution>
+                            <keepRunning>false</keepRunning>
+                            <deployProjectArtifact>false</deployProjectArtifact>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+----
+
+====== Parameters
+
+|===
+|Name |Type |Description
+
+|`karafDirectory`
+|`File`
+|Directory containing Karaf container base directory. Default value: ${project.build.directory}/karaf
+
+|`karafDistribution`
+|`File`
+|Location where to download the Karaf distribution. Default value: mvn:org.apache.karaf/apache-karaf/LATEST/zip
+
+|`deployProjectArtifact`
+|`boolean`
+|Define if the project artifact should be deployed in the started container or not. Default value: true
+
+|`featureRepositories`
+|`String[]`
+|A list of URLs referencing feature repositories that will be added to the karaf instance started by this goal.
+
+|`featuresToInstall`
+|`String`
+|Comma-separated list of features to install.
+
+|`keepRunning`
+|`boolean`
+|Define if the Karaf container keep running or stop just after the goal execution. Default value: true
+
+|`startSsh`
+|`boolean`
+|Define if the Karaf embedded sshd should be started or not. Default value: false
+|===
 
 ===== `karaf:client`
 
+The `karaf:client` interacts with a running Karaf instance directly from Maven via SSH.
+
+====== Example
+
+----
+<execution>
+    <id>client</id>
+    <goals>
+        <goal>client</goal>
+    <goals>
+    <configuration>
+        <commands>
+            <command>
+                <rank>1</rank>
+                <command>feature:install foo</command>
+            </command>
+        </commands>
+    </configuration>
+</execution>
+----
+
+====== Parameters
+
+|===
+|Name |Type |Description
+
+|`port`
+|`int`
+|SSH port of the running Karaf instance. Default value: 8101
+
+|`host`
+|`String`
+|Hostname or IP address of the running Karaf instance. Default value: localhost
+
+|`user`
+|`String`
+|The username to connect to the running Karaf instance. Default value: karaf
+
+|`password`
+|`String`
+|The password to connect to the running Karaf instance. Default value: karaf
+
+|`keyFile`
+|`File`
+|The key file to use to connecto to the running Karaf instance.
+
+|`attempts`
+|`int`
+|The number of tentative to connect to the running Karaf instance. Default value: 0
+
+|`delay`
+|`int`
+|The delay (in second) to wait before trying to connect to the Karaf instance. Default value: 2
+
+|`commands`
+|`List<CommandDescriptor>`
+|The list of the commands to execute on the running Karaf instance.
+
+|`scripts`
+|`List<ScriptDescriptor>`
+|The list of the scripts to execute on the running Karaf instance.
+
+|`skip`
+|`boolean`
+|Skip or not the execution of the client goal execution. Default value: false
+|===
+
 ===== `karaf:deploy`
+
+The `karaf:deploy` goal allows you to deploy bundles on a running Karaf instance (via SSH or JMX).
+
+===== Example
+
+----
+<execution>
+    <id>deploy</id>
+    <goals>
+        <goal>deploy</goal>
+    <goals>
+    <configuration>
+        <useProjectArtifact>true</useProjectArtifact>
+    </configuration>
+</execution>
+----
+
+===== Parameters
+
+|===
+|Name |Type |Description
+
+|`port`
+|`int`
+|SSH port of the running Karaf instance. Default value: 8101
+
+|`host`
+|`String`
+|Hostname or IP address of the running Karaf instance. Default value: localhost
+
+|`user`
+|`String`
+|The username to connect to the running Karaf instance. Default value: karaf
+
+|`password`
+|`String`
+|The password to connect to the running Karaf instance. Default value: karaf
+
+|`keyFile`
+|`File`
+|The key file to use to connecto to the running Karaf instance.
+
+|`attempts`
+|`int`
+|The number of tentative to connect to the running Karaf instance. Default value: 0
+
+|`delay`
+|`int`
+|The delay (in second) to wait before trying to connect to the Karaf instance. Default value: 2
+
+|`instance`
+|`String`
+|Name of the Karaf instance. Default value: karaf-root
+
+|`useSsh`
+|`boolean`
+| Define if the deployment is done via SSH or via JMX. Default value: false
+
+|`useProjectArtifact`
+|`boolean`
+|Define if deploy uses the current Maven project artifact (in the case of the project is a bundle project). Default value: true
+
+|`artifactLocations`
+|`List<String>`
+|The list of bundle locations (mvn, http, file, ... URLs) to deploy.
+|===
+
+==== Dockerfile, Docker
+
+The Karaf Maven plugin is also able to generate Dockerfile and eventually interact with a local Docker daemon.
+
+===== Dockerfile
+
+The `karaf:dockerfile` goal creates a ready to use Dockerfile for a given Karaf distribution/assembly.
+
+====== Example
+
+----
+<execution>
+    <id>dockerfile</id>
+    <goals>
+        <goal>dockerfile</goal>
+    </goals>
+</execution>
+----
+
+====== Parameters
+
+|===
+|Name |Type |Description
+
+|`destDir`
+|`File`
+|The directory where the Dockerfile is generated. Default value: ${project.build.directory}
+
+|`assembly`
+|`File`
+|The directory containing the Karaf assembly (as generated by `karaf:assembly`). Default value: ${project.build.directory}/assembly
+|===
+
+===== Docker
+
+The `karaf:docker` goal interacts directly with a local Docker daemon (via the command line) to directly create a Docker image with your Karaf assembly.
+
+[NOTE]
+====
+This goal requires a local Docker daemon and runs only on Unix. The `docker` command has to be in the `PATH`.
+====
+
+====== Example
+
+----
+<execution>
+    <id>docker</id>
+    <goals>
+        <goal>docker</docker>
+    </goals>
+</execution>
+----
+
+====== Parameters
+
+|===
+|Name |Type |Description
+
+|`location`
+|`File`
+|The directory containing the Dockerfile (can be generated by `karaf:dockerfile`). Default value: ${project.build.directory}
+
+|`imageName`
+|`String`
+|The name of the generated Docker image. Default value: karaf
+|===
