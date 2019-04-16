@@ -54,7 +54,7 @@ public class QuartzScheduler implements Scheduler {
     static final String DATA_MAP_OPTIONS = "QuartzJobScheduler.Options";
 
     /** Map key for non serializable context. */
-    static final String DATA_MAP_CONTEXT = "QuarteJobScheduler.Context";
+    static final String DATA_MAP_CONTEXT = "QuartzJobScheduler.Context";
 
     /** Map key for the logger. */
     static final String DATA_MAP_LOGGER = "QuartzJobScheduler.Logger";
@@ -246,28 +246,30 @@ public class QuartzScheduler implements Scheduler {
     }
 
     @Override
-    public void reschedule(String name, ScheduleOptions options) throws SchedulerError {
+    public void reschedule(String jobName, ScheduleOptions options) throws SchedulerError {
         final org.quartz.Scheduler s = this.scheduler;
-        if (name == null) {
+        if (jobName == null) {
             throw new IllegalArgumentException("Job name is mandatory");
         }
-        JobKey key = JobKey.jobKey(name);
+        JobKey key = JobKey.jobKey(jobName);
         if (key == null) {
-            throw new IllegalStateException("No job found with name " + name);
+            throw new IllegalStateException("No job found with name " + jobName);
         }
         try {
             JobDetail detail = s.getJobDetail(key);
 
-            Object job = detail.getJobDataMap().get(DATA_MAP_OBJECT);
+            final String contextKey = key.toString();
+            JobDataMap karafContext = ((KarafStdScheduler) s).getStorage().get(contextKey);
+            Object job = karafContext.get(QuartzScheduler.DATA_MAP_OBJECT);
 
             s.deleteJob(key);
 
             final InternalScheduleOptions opts = (InternalScheduleOptions)options;
-            Trigger trigger = opts.compile().withIdentity(name).build();
-            JobDataMap jobDataMap = this.initDataMap(name, job, opts);
-            detail = createJobDetail(name, jobDataMap, opts.canRunConcurrently);
+            Trigger trigger = opts.compile().withIdentity(jobName).build();
+            JobDataMap jobDataMap = this.initDataMap(jobName, job, opts);
+            detail = createJobDetail(jobName, jobDataMap, opts.canRunConcurrently);
 
-            logger.debug("Update job scheduling {} with name {} and trigger {}", job, name, trigger);
+            logger.debug("Update job scheduling {} with name {} and trigger {}", job, jobName, trigger);
             s.scheduleJob(detail, trigger);
         } catch (SchedulerException e) {
             throw new SchedulerError(e);
