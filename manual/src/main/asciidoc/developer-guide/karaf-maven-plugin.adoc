@@ -368,6 +368,10 @@ into the `target/features-repo` directory.
 |`repository`
 |`File`
 |The directory where the bundles will be copied by the plugin goal
+
+|`timestampedSnapshot`
+|`boolean`
+|For SNAPSHOT artifacts, if false we use the base version (foo-1.0-SNAPSHOT), else we use the timestamped version (foo-1.0-2019xxxx). Default value: false
 |===
 
 ===== `karaf:create-kar`
