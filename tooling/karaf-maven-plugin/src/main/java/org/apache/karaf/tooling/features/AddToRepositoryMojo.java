@@ -54,6 +54,9 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
     @Parameter
     protected List<CopyFileBasedDescriptor> copyFileBasedDescriptors;
 
+    @Parameter(defaultValue = "false")
+    private boolean timestampedSnapshot;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         Set<Feature> featuresSet = resolveFeatures();
         
@@ -129,7 +132,7 @@ public class AddToRepositoryMojo extends AbstractFeatureMojo {
      */
     private String getRelativePath(Artifact artifact) {
         String dir = (this.flatRepoLayout) ? "" : MavenUtil.getDir(artifact);
-        String name = MavenUtil.getFileName(artifact);
+        String name = MavenUtil.getFileName(artifact, timestampedSnapshot);
         return dir + name;
     }
 
