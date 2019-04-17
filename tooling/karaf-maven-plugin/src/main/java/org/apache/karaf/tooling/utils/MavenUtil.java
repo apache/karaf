@@ -207,9 +207,14 @@ public class MavenUtil {
         metadataWriter.write(writer, metadata);
     }
     
-    public static String getFileName(Artifact artifact) {
-        return artifact.getArtifactId() + "-" + artifact.getVersion()
-            + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
+    public static String getFileName(Artifact artifact, boolean timestampedSnapshot) {
+        if (timestampedSnapshot) {
+            return artifact.getArtifactId() + "-" + artifact.getVersion()
+                    + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
+        } else {
+            return artifact.getArtifactId() + "-" + artifact.getBaseVersion()
+                    + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
+        }
     }
 
     public static String getDir(Artifact artifact) {
