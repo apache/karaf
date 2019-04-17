@@ -17,9 +17,53 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.5
+
+Apache Karaf 4.2.5 is an update on the 4.2.x series, bringing fixes and updates.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6197] - Dot at the end of PATH_WITH_JAVA in karaf-wrapper.conf break PATH variable
+    * [KARAF-6198] - Spaces in the path stored in KARAF_ETC will prohibit service start-up
+    * [KARAF-6199] - Upgrade Hibernate feature to work with Java 11
+    * [KARAF-6201] - Karaf staticcm should export org.osgi.service.cm package with version 1.6
+    * [KARAF-6205] - bin\client.bat only passes 8 or 9 arguments to java
+    * [KARAF-6207] - bootFeatures sometimes being ignored
+    * [KARAF-6208] - Fix scr:* commands
+    * [KARAF-6226] - config core: ConfigRepository requires access to TypedProperties
+    * [KARAF-6229] - karaf-maven-plugin (>= 4.2.2) deploy/install zip twice 
+    * [KARAF-6232] - the karaf-maven-plugin features-add-to-repository goal creates fixed snapshot versions for bundles referenced via -SNAPSHOT version in a feature descriptor
+    * [KARAF-6235] - Date.getTime() can be changed to System.currentTimeMillis()
+    * [KARAF-6237] - Karaf Scheduler reschedule failed because the function lost the job reference (After reschedule job is null)
+    * [KARAF-6238] - org.apache.karaf.profile.assembly.Builder#downloadLibraries is not synchronized
+    * [KARAF-6239] - Duplicated Resource have been added to the Set<Resource> bundlesInRegion during compute
+
+#### New Feature
+    * [KARAF-6236] - Add karaf:dockerfile & karaf:docker Maven goals
+
+#### Improvement
+    * [KARAF-6209] - Add SortedProperties class to karaf tooling
+    * [KARAF-6220] - add principal info to audit logs
+    * [KARAF-6222] - add MAX_CONCURRENT_SESSIONS option to Karaf ssh server
+    * [KARAF-6230] - Prevent relative path in config install command and ConfigMBean
+    * [KARAF-6241] - introduce new property EnabledProtocals for org.apache.karaf.management.cfg
+
+#### Task
+    * [KARAF-6154] - Add a example with direct features generate, custom distro and docker image all in a row
+    * [KARAF-6219] - Add MDC/Sift example (commented) in provided etc/org.ops4j.pax.logging.cfg
+
+#### Dependency upgrade
+    * [KARAF-6212] - Upgrade to hibernate-validator 6.0.16.Final
+    * [KARAF-6213] - Upgrade to pax-jdbc 1.3.5 / pax-transx 0.4.3
+    * [KARAF-6214] - Upgrade to Aries Blueprint Core 1.10.2
+    * [KARAF-6216] - Upgrade to equinox 3.13.300
+    * [KARAF-6217] - Upgrade to narayana 5.9.4.Final
+    * [KARAF-6218] - Upgrade to Geronimo Connector 3.1.4
+
 ## Apache Karaf 4.2.4
 
-Apache Karaf 4.2.4 is a update on the 4.2.x series, bringing fixes and updates.
+Apache Karaf 4.2.4 is an update on the 4.2.x series, bringing fixes and updates.
 
 ### ChangeLog
 
