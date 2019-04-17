@@ -1342,8 +1342,14 @@ public class Deployer {
 
             // Compute the list of resources to deploy in the region
             Set<Resource> bundlesInRegion = bundlesPerRegions.get(region);
-            List<Resource> toDeploy = bundlesInRegion != null
-                    ? new ArrayList<>(bundlesInRegion) : new ArrayList<>();
+            // **********************************************************************
+            // KARAF-6239: workaround to avoid several entries for the same resource
+            Map<String, Resource> deduplicatedMap = new HashMap<>();
+            for (Resource resource : bundlesInRegion) {
+                deduplicatedMap.put(getSymbolicName(resource) + "/" + getVersion(resource), resource);
+            }
+            List<Resource> toDeploy = new ArrayList<>(deduplicatedMap.values());
+            // **********************************************************************
 
             // Remove the system bundle
             Bundle systemBundle = dstate.bundles.get(0l);
