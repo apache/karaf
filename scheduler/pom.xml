@@ -71,6 +71,7 @@
                             javax.transaction;resolution:=optional,
                             javax.servlet*;resolution:=optional,
                             org.jboss.*;resolution:=optional,
+                            com.zaxxer.hikari;resolution:=optional,
                             javax.xml.bind*;version="[2.2,3)",
                             *
                         </Import-Package>
@@ -111,7 +112,7 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <version>2.2.1</version>
+            <version>2.3.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
