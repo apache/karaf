@@ -274,7 +274,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
             return StreamSupport.stream(((Iterable<?>) val).spliterator(), false)
                     .map(Object::toString).toArray(String[]::new);
         } else {
-            return val.toString().split(",");
+            return val.toString().split("\\s*,\\s*");
         }
     }
 
