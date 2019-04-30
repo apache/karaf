@@ -504,9 +504,10 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
                     File bundleFile = this.dependencyHelper.resolve(artifact, getLog());
                     Manifest manifest = getManifest(bundleFile);
+                    boolean bundleNeedsWrapping = false;
                     if (manifest == null || !ManifestUtils.isBundle(manifest)) {
                         bundleName = "wrap:" + bundleName;
-                        needWrap = true;
+                        bundleNeedsWrapping = true;
                     }
 
                     Bundle bundle = null;
@@ -525,6 +526,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
                             simplifyBundleDependencies && isBundleIncludedTransitively(feature, otherFeatures, bundle);
                         if (!includedTransitively && (!"provided".equals(entry.getScope()) || !ignoreScopeProvided)) {
                             feature.getBundle().add(bundle);
+                            needWrap |= bundleNeedsWrapping;
                         }
                     }
                     if ("runtime".equals(entry.getScope())) {

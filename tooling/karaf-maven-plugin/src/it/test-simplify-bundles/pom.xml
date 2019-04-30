@@ -47,6 +47,7 @@
         <module>simplify-feature-as-is</module>
         <module>simplify-feature-reduced</module>
         <module>simplify-features</module>
+        <module>simplify-jar-c</module>
     </modules>
 
     <build>
