@@ -60,7 +60,7 @@ public interface SubsystemResolverResolution {
      * Prerequisites allow to install for example <code>wrap</code> feature before installing a feature with bundle
      * using <code>wrap:</code> protocol.
      *
-     * @return The collected prerequisistes.
+     * @return The collected prerequisites.
      */
     Set<String> collectPrerequisites();
 

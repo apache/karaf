@@ -85,10 +85,10 @@ root@karaf> bundles:install 'wrap:mvn:commons-lang/commons-lang/2.4$Bundle-Symbo
 Important notice : Add as child of your feature definition, the reference to wrap feature
 
 ----
-<feature prerequisiste="true">wrap</feature>
+<feature prerequisite="true">wrap</feature>
 ----
 
-Additional information about meaning of `prerequisiste` attribute can be found in link:provisioning[Feature prerequisites] description.
+Additional information about meaning of `prerequisite` attribute can be found in link:provisioning[Feature prerequisites] description.
 
 For instance : 
 
