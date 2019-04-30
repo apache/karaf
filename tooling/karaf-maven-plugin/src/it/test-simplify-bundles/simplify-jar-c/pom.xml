@@ -29,31 +29,12 @@
     </parent>
 
     <groupId>test</groupId>
-    <artifactId>simplify-bundle-a</artifactId>
+    <artifactId>simplify-jar-c</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>test</groupId>
-            <artifactId>simplify-jar-c</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.7</version>
-                <extensions>true</extensions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

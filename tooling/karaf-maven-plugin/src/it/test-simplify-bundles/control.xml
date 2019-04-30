@@ -23,8 +23,10 @@
     <feature name="simplify-feature-as-is" description="simplify-feature-as-is" version="1.0.0.SNAPSHOT">
         <details>Check that bundles are simplified</details>
         <feature version="1.0.0.SNAPSHOT" prerequisite="false" dependency="false">simplify-feature-a</feature>
+        <feature prerequisite="true" dependency="false">wrap</feature>
         <bundle>mvn:test/simplify-bundle-b/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/simplify-bundle-a/1.0-SNAPSHOT</bundle>
+        <bundle>wrap:mvn:test/simplify-jar-c/1.0-SNAPSHOT</bundle>
     </feature>
     <feature name="simplify-feature-reduced" description="simplify-feature-reduced" version="1.0.0.SNAPSHOT">
         <details>Check that bundles are simplified</details>
