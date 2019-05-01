@@ -295,6 +295,7 @@
         <pax.transx.version>0.4.3</pax.transx.version>
 
         <portlet-api.version>2.0</portlet-api.version>
+        <plexus-utils.version>3.0.24</plexus-utils.version>
         <slf4j.version>1.7.12</slf4j.version>
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
