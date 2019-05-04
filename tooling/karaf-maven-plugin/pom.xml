@@ -40,7 +40,6 @@
         <jacoco-class-line-covered-ratio>0.00</jacoco-class-line-covered-ratio>
         <jacoco-class-instruction-covered-ratio>0.00</jacoco-class-instruction-covered-ratio>
         <jacoco-class-missed-count-maximum>1</jacoco-class-missed-count-maximum>
-        <plexus-utils.version>3.0.24</plexus-utils.version>
     </properties>
 
     <dependencies>
@@ -136,7 +135,7 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-archiver</artifactId>
-            <version>3.5</version>
+            <version>3.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
