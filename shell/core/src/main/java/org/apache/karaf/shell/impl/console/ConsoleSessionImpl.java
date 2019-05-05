@@ -70,7 +70,6 @@ import org.jline.reader.*;
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal.Signal;
 import org.jline.terminal.impl.DumbTerminal;
-import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -578,7 +577,9 @@ public class ConsoleSessionImpl implements Session {
             session.execute(script);
         } catch (Exception e) {
             LOGGER.debug("Error in initialization script {}", scriptFileName, e);
-            System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
+            if (!(e instanceof InterruptedException)) {
+                System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
+            }
         } finally {
             session.put("script", oldScript);
         }

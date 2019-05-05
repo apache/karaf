@@ -151,7 +151,7 @@ public class ShellCommand implements Command, SessionAware {
     }
 
     public void destroy() {
-	}
+    }
 
     private void executeScript(String names, Session session) {
         FilesStream.stream(names).forEach(p -> doExecuteScript(session, p));
@@ -164,7 +164,9 @@ public class ShellCommand implements Command, SessionAware {
             session.execute(script);
         } catch (Exception e) {
             LOGGER.debug("Error in initialization script {}", scriptFileName, e);
-            System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
+            if (!(e instanceof InterruptedException)) {
+                System.err.println("Error in initialization script: " + scriptFileName + ": " + e.getMessage());
+            }
         }
     }
 
