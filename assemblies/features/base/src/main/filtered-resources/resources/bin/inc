@@ -34,7 +34,7 @@ detectOS() {
     os400=false;
     hpux=false;
     solaris=false;
-    case "$(uname)" in
+    case "`uname`" in
         CYGWIN*)
             cygwin=true
             ;;
@@ -72,9 +72,9 @@ unlimitFD() {
     fi
 
     # Increase the maximum file descriptors if we can
-    if [ "x$(command -v ulimit)" != "x" ] && [ "${os400}" = "false" ] ; then
+    if [ "x`command -v ulimit`" != "x" ] && [ "${os400}" = "false" ] ; then
         if [ "${MAX_FD}" = "maximum" ] || [ "${MAX_FD}" = "max" ]; then
-            MAX_FD_LIMIT=$(ulimit -H -n)
+            MAX_FD_LIMIT=`ulimit -H -n`
             if [ $? -eq 0 ]; then
                 # use the system max
                 MAX_FD="${MAX_FD_LIMIT}"
@@ -100,7 +100,7 @@ locateHome() {
         # In POSIX shells, CDPATH may cause cd to write to stdout
         (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
         # KARAF_HOME is not provided, fall back to default
-        KARAF_HOME=$(cd "${DIRNAME}/.." || exit 2; pwd)
+        KARAF_HOME=`cd "${DIRNAME}/.." || exit 2; pwd`
     fi
 
     if [ ! -d "${KARAF_HOME}" ]; then
@@ -158,7 +158,7 @@ setupNativePath() {
 
     # For Cygwin, set PATH from LD_LIBRARY_PATH
     if ${cygwin}; then
-        LD_LIBRARY_PATH=$(cygpath --path --windows "${LD_LIBRARY_PATH}")
+        LD_LIBRARY_PATH=`cygpath --path --windows "${LD_LIBRARY_PATH}"`
         PATH="${PATH};${LD_LIBRARY_PATH}"
         export PATH
     fi
@@ -168,18 +168,18 @@ setupNativePath() {
 pathCanonical() {
     dst="${1}"
     while [ -h "${dst}" ] ; do
-        ls=$(ls -ld "${dst}")
-        link=$(expr "${ls}" : '.*-> \(.*\)$')
+        ls=`ls -ld "${dst}"`
+        link=`expr "${ls}" : '.*-> \(.*\)$'`
         if expr "${link}" : '/.*' > /dev/null; then
             dst="${link}"
         else
-            dst="$(dirname "${dst}")/${link}"
+            dst="`dirname "${dst}"`/${link}"
         fi
     done
-    bas=$(basename "${dst}")
-    dir=$(dirname "${dst}")
+    bas=`basename "${dst}"`
+    dir=`dirname "${dst}"`
     if [ "${bas}" != "${dir}" ]; then
-        dst="$(pathCanonical "${dir}")/${bas}"
+        dst="`pathCanonical "${dir}"`/${bas}"
     fi
     echo "${dst}" | sed -e 's#//#/#g' -e 's#/./#/#g' -e 's#/[^/]*/../#/#g'
 }
@@ -187,15 +187,15 @@ pathCanonical() {
 locateJava() {
     # Setup the Java Virtual Machine
     if ${cygwin} ; then
-        [ -n "${JAVA}" ] && JAVA=$(cygpath --unix "${JAVA}")
-        [ -n "${JAVA_HOME}" ] && JAVA_HOME=$(cygpath --unix "${JAVA_HOME}")
+        [ -n "${JAVA}" ] && JAVA=`cygpath --unix "${JAVA}"`
+        [ -n "${JAVA_HOME}" ] && JAVA_HOME=`cygpath --unix "${JAVA_HOME}"`
     fi
 
     if [ "x${JAVA_HOME}" = "x" ] && [ "${darwin}" = "true" ]; then
-        JAVA_HOME="$(/usr/libexec/java_home -v 1.8)"
+        JAVA_HOME="`/usr/libexec/java_home -v 1.8`"
     fi
     if [ "x${JAVA_HOME}" = "x" ] && [ -r /etc/gentoo-release ] ; then
-        JAVA_HOME=$(java-config --jre-home)
+        JAVA_HOME=`java-config --jre-home`
     fi
     if [ "x${JAVA}" = "x" ]; then
         if [ "x${JAVA_HOME}" != "x" ]; then
@@ -205,14 +205,16 @@ locateJava() {
             JAVA="${JAVA_HOME}/bin/java"
         else
             warn "JAVA_HOME not set; results may vary"
-            JAVA=$(command -v java)
+            JAVA=`command -v java`
             if [ "x${JAVA}" = "x" ]; then
                 die "java command not found"
             fi
         fi
     fi
     if [ "x${JAVA_HOME}" = "x" ]; then
-        JAVA_HOME="$(dirname "$(dirname "$(pathCanonical "${JAVA}")")")"
+        JAVA_BIN=`pathCanonical "${JAVA}"`
+        JAVA_BIN_DIR=`dirname "${JAVA_BIN}"`
+        JAVA_HOME="`dirname "${JAVA_BIN_DIR}"`"
     fi
 }
 
@@ -241,7 +243,7 @@ checkJvmVersion() {
         fi
     fi
 
-    VERSION=$("${JAVA}" -version 2>&1 | ${AWK} -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;')
+    VERSION=`"${JAVA}" -version 2>&1 | ${AWK} -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;'`
 
     # java must be at least version 8
     if [ "${VERSION}" -lt "8" ]; then
@@ -316,19 +318,19 @@ setupDefaults() {
 convertPaths() {
     if $cygwin; then
         if [ ! -z "${KARAF_HOME}" ]; then
-            KARAF_HOME=$(cygpath --path --windows "${KARAF_HOME}")
+            KARAF_HOME=`cygpath --path --windows "${KARAF_HOME}"`
         fi
         if [ ! -z "${KARAF_BASE}" ]; then
-            KARAF_BASE=$(cygpath --path --windows "${KARAF_BASE}")
+            KARAF_BASE=`cygpath --path --windows "${KARAF_BASE}"`
         fi
         if [ ! -z "${KARAF_DATA}" ]; then
-            KARAF_DATA=$(cygpath --path --windows "${KARAF_DATA}")
+            KARAF_DATA=`cygpath --path --windows "${KARAF_DATA}"`
         fi
         if [ ! -z "${KARAF_ETC}" ]; then
-            KARAF_ETC=$(cygpath --path --windows "${KARAF_ETC}")
+            KARAF_ETC=`cygpath --path --windows "${KARAF_ETC}"`
         fi
         if [ ! -z "${CLASSPATH}" ]; then
-            CLASSPATH=$(cygpath --path --windows "${CLASSPATH}")
+            CLASSPATH=`cygpath --path --windows "${CLASSPATH}"`
         fi
     fi
 }
