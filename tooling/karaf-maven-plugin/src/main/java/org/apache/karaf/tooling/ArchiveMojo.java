@@ -115,11 +115,13 @@ public class ArchiveMojo extends MojoSupport {
     public void execute() throws MojoExecutionException, MojoFailureException {
         org.apache.maven.artifact.Artifact artifact = project.getArtifact();
         artifact.setFile(targetFile);
-        try {
-            if (project.getPackaging().equals("karaf-assembly") && !archiveTarGz && !archiveZip) {
-                throw new IllegalArgumentException("For karaf-assembly packaging, you have to specify at least one archive type (tar.gz or zip)");
-            }
 
+        // abort if there are no archives to be created
+        if (!archiveTarGz && !archiveZip) {
+            return;
+        }
+
+        try {
             if (project.getPackaging().equals("karaf-assembly")) {
                 if (archiveZip) {
                     archive("zip", false, true);
