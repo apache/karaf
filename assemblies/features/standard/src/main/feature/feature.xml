@@ -829,12 +829,12 @@ start-level = admin                           # admin can set any start level, i
         <requirement>http-service</requirement>
     </feature>
 
-    <feature name="httplite" version="${project.version}" description="Felix Httplite OSGi HTTP Service">
+    <feature name="felix-httplite" version="${felix.httplite.version}" description="Felix Httplite HTTP Service">
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.httplite.complete/${felix.httplite.version}</bundle>
         <capability>http-service;provider:=felix-httplite</capability>
     </feature>
 
-    <feature name="felix-http" version="4.0.6" description="Felix HTTP Jetty Service">
+    <feature name="felix-http" version="${felix.http.version}" description="Felix HTTP Service">
         <config name="org.apache.felix.http">
 ################################################################################
 #
@@ -855,12 +855,16 @@ start-level = admin                           # admin can set any start level, i
 #
 ################################################################################
 
-org.apache.felix.http.port=8181
+org.osgi.service.http.port=8181
         </config>
         <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.http.servlet-api/1.1.2</bundle>
-        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.jetty/4.0.6</bundle>
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.jetty/${felix.http.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.whiteboard/4.0.0</bundle>
-        <capability>http-service;provider:=felix</capability>
+        <capability>http-service;provider:=felix-http</capability>
+        <conditional>
+            <condition>webconsole</condition>
+            <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
+        </conditional>
     </feature>
 
     <feature name="pax-http-service" description="Pax-Web OSGi HTTP Service" version="${pax.web.version}">

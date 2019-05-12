@@ -95,6 +95,16 @@ public class StandardFeaturesTest extends KarafTestSupport {
     public void installWebConsoleFeature() throws Exception {
         installAssertAndUninstallFeatures("webconsole");
     }
+
+    @Test
+    public void installFelixHttplisteFeature() throws Exception {
+        installAssertAndUninstallFeatures("felix-httplite");
+    }
+
+    @Test
+    public void installFelixHttpFeature() throws Exception {
+        installAssertAndUninstallFeatures("felix-http");
+    }
     
     @Test
     public void installSchedulerFeature() throws Exception {
