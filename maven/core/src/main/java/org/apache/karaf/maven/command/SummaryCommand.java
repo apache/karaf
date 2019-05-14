@@ -61,7 +61,7 @@ public class SummaryCommand extends MavenSecuritySupport {
                 "Settings file that contain (or relocates to) master Maven password");
 
         if (showPasswords) {
-            addRow(table, propertyIds ? "<master>" : "Master password", new SourceAnd<String>(securitySettings.source, masterPassword),
+            addRow(table, propertyIds ? "<master>" : "Master password", new SourceAnd<>(securitySettings.source, masterPassword),
                     "Master password used to decrypt proxy and server passwords");
         }
 
@@ -86,7 +86,7 @@ public class SummaryCommand extends MavenSecuritySupport {
         } else {
             updateReleases = "true".equals(updateReleasesProperty);
         }
-        addRow(table, propertyIds ? PROPERTY_UPDATE_RELEASES : "Update releases", new SourceAnd<Boolean>(sourceInfo, updateReleases),
+        addRow(table, propertyIds ? PROPERTY_UPDATE_RELEASES : "Update releases", new SourceAnd<>(sourceInfo, updateReleases),
                 "Whether to download non-SNAPSHOT artifacts according to update policy");
 
         // see org.ops4j.pax.url.mvn.internal.config.MavenConfigurationImpl.isValid()
@@ -97,7 +97,7 @@ public class SummaryCommand extends MavenSecuritySupport {
         if (requireConfigAdmin) {
             sourceInfo = "BundleContext property (" + prefix + REQUIRE_CONFIG_ADMIN_CONFIG + ")";
         }
-        addRow(table, propertyIds ? REQUIRE_CONFIG_ADMIN_CONFIG : "Require Config Admin", new SourceAnd<Boolean>(sourceInfo, requireConfigAdmin),
+        addRow(table, propertyIds ? REQUIRE_CONFIG_ADMIN_CONFIG : "Require Config Admin", new SourceAnd<>(sourceInfo, requireConfigAdmin),
                 "Whether MavenResolver service is registered ONLY with proper " + PID + " PID configuration");
 
         // see org.ops4j.pax.url.mvn.internal.config.MavenConfigurationImpl.buildSettings()
@@ -107,7 +107,7 @@ public class SummaryCommand extends MavenSecuritySupport {
         if (useFallbackRepositoriesProperty != null) {
             sourceInfo = String.format(PATTERN_PID_PROPERTY, PID, prefix + PROPERTY_USE_FALLBACK_REPOSITORIES);
         }
-        addRow(table, propertyIds ? PROPERTY_USE_FALLBACK_REPOSITORIES : "Use fallback repository", new SourceAnd<Boolean>(sourceInfo, useFallbackRepositories),
+        addRow(table, propertyIds ? PROPERTY_USE_FALLBACK_REPOSITORIES : "Use fallback repository", new SourceAnd<>(sourceInfo, useFallbackRepositories),
                 "Whether Maven Central is used as implicit, additional remote repository");
 
         // see org.ops4j.pax.url.mvn.internal.config.MavenConfigurationImpl.enableProxy()
@@ -120,7 +120,7 @@ public class SummaryCommand extends MavenSecuritySupport {
         if (offlineProperty != null) {
             sourceInfo = String.format(PATTERN_PID_PROPERTY, PID, prefix + PROPERTY_OFFLINE);
         }
-        addRow(table, propertyIds ? PROPERTY_OFFLINE : "Offline mode", new SourceAnd<Boolean>(sourceInfo, offline),
+        addRow(table, propertyIds ? PROPERTY_OFFLINE : "Offline mode", new SourceAnd<>(sourceInfo, offline),
                 "Disables access to external remote repositories (file:// based ones are still used)");
 
         // see org.ops4j.pax.url.mvn.internal.HttpClients.createConnManager()
@@ -130,14 +130,14 @@ public class SummaryCommand extends MavenSecuritySupport {
         if (certificateCheckProperty != null) {
             sourceInfo = String.format(PATTERN_PID_PROPERTY, PID, prefix + PROPERTY_CERTIFICATE_CHECK);
         }
-        addRow(table, propertyIds ? PROPERTY_CERTIFICATE_CHECK : "SSL/TLS certificate check", new SourceAnd<Boolean>(sourceInfo, certificateCheck),
+        addRow(table, propertyIds ? PROPERTY_CERTIFICATE_CHECK : "SSL/TLS certificate check", new SourceAnd<>(sourceInfo, certificateCheck),
                 "Turns on server certificate validation for HTTPS remote repositories");
 
         // repositories (short list)
         MavenRepositoryURL[] remoteRepositories = repositories(config, true);
         boolean first = true;
         for (MavenRepositoryURL url : remoteRepositories) {
-            addRow(table, first ? (propertyIds ? PROPERTY_REPOSITORIES : "Remote repositories") : "", new SourceAnd<String>(url.getFrom().getSource(), url.getURL().toString()),
+            addRow(table, first ? (propertyIds ? PROPERTY_REPOSITORIES : "Remote repositories") : "", new SourceAnd<>(url.getFrom().getSource(), url.getURL().toString()),
                 first ? "Remote repositories where artifacts are being resolved if not found locally" : "");
             first = false;
         }
@@ -146,7 +146,7 @@ public class SummaryCommand extends MavenSecuritySupport {
         MavenRepositoryURL[] defaultRepositories = repositories(config, false);
         first = true;
         for (MavenRepositoryURL url : defaultRepositories) {
-            addRow(table, first ? (propertyIds ? PROPERTY_DEFAULT_REPOSITORIES : "Default repositories") : "", new SourceAnd<String>(url.getFrom().getSource(), url.getURL().toString()),
+            addRow(table, first ? (propertyIds ? PROPERTY_DEFAULT_REPOSITORIES : "Default repositories") : "", new SourceAnd<>(url.getFrom().getSource(), url.getURL().toString()),
                     first ? "Repositories where artifacts are looked up before trying remote resolution" : "");
             first = false;
         }
@@ -156,7 +156,7 @@ public class SummaryCommand extends MavenSecuritySupport {
             first = true;
             for (Proxy proxy : mavenSettings.getProxies()) {
                 String value = String.format("%s:%s", proxy.getHost(), proxy.getPort());
-                addRow(table, first ? (propertyIds ? "<proxies>" : "HTTP proxies") : "", new SourceAnd<String>(MavenRepositoryURL.FROM.SETTINGS.getSource(), value),
+                addRow(table, first ? (propertyIds ? "<proxies>" : "HTTP proxies") : "", new SourceAnd<>(MavenRepositoryURL.FROM.SETTINGS.getSource(), value),
                         first ? "Maven HTTP proxies" : "");
                 first = false;
             }

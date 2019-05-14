@@ -77,7 +77,7 @@ public class KarServiceImpl implements KarService {
         if (!storage.isDirectory()) {
             throw new IllegalStateException("KAR storage " + storage + " is not a directory");
         }
-        unsatisfiedKars = Collections.synchronizedList(new ArrayList<Kar>());
+        unsatisfiedKars = Collections.synchronizedList(new ArrayList<>());
         busy = new AtomicBoolean();
     }
 

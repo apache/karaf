@@ -474,7 +474,7 @@ public abstract class MavenConfigurationSupport implements Action {
                 if (mavenSettings != null) {
                     // see org.ops4j.pax.url.mvn.internal.config.MavenConfigurationImpl.getRepositories()
                     Set<String> activeProfiles = new LinkedHashSet<>(mavenSettings.getActiveProfiles());
-                    Map<String, Profile> profiles = (Map<String, Profile>)mavenSettings.getProfilesAsMap();
+                    Map<String, Profile> profiles = mavenSettings.getProfilesAsMap();
                     profiles.values().stream()
                             .filter((profile) -> profile.getActivation() != null && profile.getActivation().isActiveByDefault())
                             .map(Profile::getId)
@@ -591,7 +591,7 @@ public abstract class MavenConfigurationSupport implements Action {
         File result = null;
         if (files != null && files.length > 0) {
             List<String> names = new ArrayList<>(Arrays.stream(files).map(File::getName)
-                    .collect(TreeSet<String>::new, TreeSet::add, TreeSet::addAll));
+                    .collect(TreeSet::new, TreeSet::add, TreeSet::addAll));
 
             names.add(String.format(fileNameFormat, System.currentTimeMillis()));
 

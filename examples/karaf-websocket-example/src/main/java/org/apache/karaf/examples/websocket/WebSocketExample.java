@@ -37,7 +37,7 @@ import java.util.Set;
 @WebSocket
 public class WebSocketExample {
 
-    private static final Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
+    private static final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
 
     private boolean notification = false;
 

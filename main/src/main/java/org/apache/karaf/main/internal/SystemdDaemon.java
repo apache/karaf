@@ -23,7 +23,7 @@ import com.sun.jna.Native;
 
 
 public interface SystemdDaemon extends Library {
-    SystemdDaemon INSTANCE = (SystemdDaemon) Native.loadLibrary("systemd-daemon", SystemdDaemon.class);
+    SystemdDaemon INSTANCE = Native.loadLibrary("systemd-daemon", SystemdDaemon.class);
 
     int sd_notify(int unset_environment, String state);
     int sd_notifyf(int unset_environment, String format, Object... args);

@@ -111,7 +111,7 @@ public class ProxyServiceImpl implements ProxyService {
             Configuration configuration = getConfiguration();
             Dictionary<String, Object> configurationProperties = configuration.getProperties();
             if (configurationProperties == null) {
-                configurationProperties = new Hashtable<String, Object>();
+                configurationProperties = new Hashtable<>();
             }
             configurationProperties.put(CONFIGURATION_KEY, mapToProxyArray(this.proxies));
             configuration.update(configurationProperties);
@@ -131,7 +131,7 @@ public class ProxyServiceImpl implements ProxyService {
     }
 
     private String[] mapToProxyArray(Map<String, String> proxies) {
-        List<String> proxyList = new ArrayList<String>();
+        List<String> proxyList = new ArrayList<>();
         for (Map.Entry<String, String> entry : proxies.entrySet()) {
             proxyList.add(entry.getKey() + " " + entry.getValue());
         }

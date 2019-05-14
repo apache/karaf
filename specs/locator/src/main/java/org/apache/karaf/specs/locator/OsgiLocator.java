@@ -139,7 +139,7 @@ public class OsgiLocator {
     public static <T> List<Class<? extends T>> locateAll(Class<T> factoryClass, String factoryId) {
         LOCK.readLock().lock();
         try {
-            List<Class<? extends T>> classes = new ArrayList<Class<? extends T>>();
+            List<Class<? extends T>> classes = new ArrayList<>();
             List<Callable<Class>> l = FACTORIES.get(factoryId);
             if (l != null) {
                 for (Callable<Class> i : l) {

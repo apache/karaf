@@ -84,7 +84,7 @@ public class JdbcLoginModuleTest {
         options.put(BundleContext.class.getName(), context);
 
         expect(context.getServiceReferences(DataSource.class.getName(), null)).andReturn(new ServiceReference[] { reference });
-        expect((DataSource)context.getService(reference)).andReturn(dataSource);
+        expect(context.getService(reference)).andReturn(dataSource);
         expect(context.ungetService(reference)).andReturn(true);
 
         EasyMock.replay(context);
