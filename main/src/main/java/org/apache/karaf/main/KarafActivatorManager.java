@@ -53,8 +53,7 @@ public class KarafActivatorManager {
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
             String className = null;
-            InputStream is = url.openStream();
-            try {
+            try (InputStream is = url.openStream()) {
                 Manifest mf = new Manifest(is);
                 className = mf.getMainAttributes().getValue(KARAF_ACTIVATOR);
                 if (className != null) {
@@ -66,13 +65,6 @@ public class KarafActivatorManager {
                 if (className != null) {
                     System.err.println("Error starting karaf activator " + className + ": " + e.getMessage());
                     LOG.log(Level.WARNING, "Error starting karaf activator " + className + " from url " + url, e);
-                }
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                    }
                 }
             }
         }

@@ -162,28 +162,16 @@ public class InstanceServiceImplTest {
     }
 
     private void saveStorage(Properties props, File location, String comment) throws IOException {
-        OutputStream os = null;
-        try {
-            os = new FileOutputStream(location);
+        try (OutputStream os = new FileOutputStream(location)) {
             props.store(os, comment);
-        } finally {
-            if (os != null) {
-                os.close();
-            }
         }
     }
     
     private Properties loadStorage(File location) throws IOException {
-        InputStream is = null;
-        try {
-            is = new FileInputStream(location);
+        try (InputStream is = new FileInputStream(location)) {
             Properties props = new Properties();
             props.load(is);
             return props;
-        } finally {
-            if (is != null) {
-                is.close();
-            }
         }
     }
 
