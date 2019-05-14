@@ -140,13 +140,17 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
 
     @Override
     public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
+        File file = null;
         // We need to wrap the bundle to insert a Bundle-UpdateLocation header
         try {
-            File file = BundleUtils.fixBundleWithUpdateLocation(is, uri);
+            file = BundleUtils.fixBundleWithUpdateLocation(is, uri);
             bundle.update(new FileInputStream(file));
-            file.delete();
         } catch (IOException e) {
             throw new BundleException("Unable to update bundle", e);
+        } finally {
+            if (file != null) {
+                file.delete();
+            }
         }
     }
 
