@@ -17,6 +17,7 @@
 package org.apache.karaf.profile.impl;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,8 +53,8 @@ public class ProfilesTest {
         builder.addConfiguration("my.pid", "a2", "v1${profile:my.pid2/a3}");
         builder.addFeature("feature1");
         builder.addBlacklistedFeature("f34tu4e");
-        builder.addFileConfiguration("my.pid2.txt", "hello!".getBytes("UTF-8"));
-        builder.addFileConfiguration("my.pid2.cfg", "a2=v2".getBytes("UTF-8"));
+        builder.addFileConfiguration("my.pid2.txt", "hello!".getBytes(StandardCharsets.UTF_8));
+        builder.addFileConfiguration("my.pid2.cfg", "a2=v2".getBytes(StandardCharsets.UTF_8));
         builder.addRepository("mvn:my/repository/1/xml/features");
         builder.addBlacklistedRepository("mvn:my/repository/[0,1)/xml/features");
         builder.setOptionals(Arrays.asList("mvn:g/a/1", "mvn:g/a/2"));

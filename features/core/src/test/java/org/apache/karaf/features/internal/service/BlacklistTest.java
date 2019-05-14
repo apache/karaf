@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.stream.Stream;
@@ -80,7 +81,7 @@ public class BlacklistTest {
         }
         File blacklistedProperties = File.createTempFile("blacklisted-", ".properties", new File("target"));
         try (FileOutputStream fos = new FileOutputStream(blacklistedProperties)) {
-            fos.write(blacklistClause.getBytes("UTF-8"));
+            fos.write(blacklistClause.getBytes(StandardCharsets.UTF_8));
         }
         RepositoryImpl features = new RepositoryImpl(uri, true);
         FeaturesServiceConfig config = new FeaturesServiceConfig(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklistedProperties.toURI().toString(), null, null, null);

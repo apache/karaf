@@ -19,6 +19,7 @@ package org.apache.karaf.specs.activator;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -157,7 +158,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
                         if (clazz == null){
                             debugPrintln("creating factory for key: " + factoryId);
                             try (BufferedReader br = new BufferedReader(
-                                    new InputStreamReader(u.openStream(), "UTF-8"))) {
+                                    new InputStreamReader(u.openStream(), StandardCharsets.UTF_8))) {
                                 String factoryClassName = br.readLine();
                                 while (factoryClassName != null) {
                                     factoryClassName = factoryClassName.trim();

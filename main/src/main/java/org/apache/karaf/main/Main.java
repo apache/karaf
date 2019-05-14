@@ -29,6 +29,7 @@ import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
@@ -500,7 +501,7 @@ public class Main {
         String factoryClass = config.frameworkFactoryClass;
         if (factoryClass == null) {
             InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             factoryClass = br.readLine();
             br.close();
         }
