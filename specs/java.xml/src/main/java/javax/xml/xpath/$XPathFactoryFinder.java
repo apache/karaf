@@ -259,11 +259,8 @@ class $XPathFactoryFinder {
     private boolean isObjectModelSupportedBy(final XPathFactory factory,
                                              final String objectModel,
                                              AccessControlContext acc) {
-        return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-            public Boolean run() {
-                return factory.isObjectModelSupported(objectModel);
-            }
-        }, acc);
+        return AccessController.doPrivileged(
+            (PrivilegedAction<Boolean>) () -> factory.isObjectModelSupported(objectModel), acc);
     }
 
     private XPathFactory findServiceProvider(final String objectModel)
@@ -272,17 +269,15 @@ class $XPathFactoryFinder {
         assert objectModel != null;
         final AccessControlContext acc = AccessController.getContext();
         try {
-            return AccessController.doPrivileged(new PrivilegedAction<XPathFactory>() {
-                public XPathFactory run() {
-                    final ServiceLoader<XPathFactory> loader =
-                            ServiceLoader.load(SERVICE_CLASS);
-                    for (XPathFactory factory : loader) {
-                        if (isObjectModelSupportedBy(factory, objectModel, acc)) {
-                            return factory;
-                        }
+            return AccessController.doPrivileged((PrivilegedAction<XPathFactory>) () -> {
+                final ServiceLoader<XPathFactory> loader =
+                        ServiceLoader.load(SERVICE_CLASS);
+                for (XPathFactory factory : loader) {
+                    if (isObjectModelSupportedBy(factory, objectModel, acc)) {
+                        return factory;
                     }
-                    return null;
                 }
+                return null;
             });
         } catch (ServiceConfigurationError error) {
             throw new XPathFactoryConfigurationException(error);

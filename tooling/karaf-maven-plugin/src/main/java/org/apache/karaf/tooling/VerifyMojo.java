@@ -597,10 +597,8 @@ public class VerifyMojo extends MojoSupport {
         }
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(config);
         if (blacklistedDescriptors != null) {
-            blacklistedDescriptors.forEach(lp -> {
-                processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
-                        .add(new LocationPattern(lp));
-            });
+            blacklistedDescriptors.forEach(lp -> processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
+                    .add(new LocationPattern(lp)));
         }
         processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
                 .add(new LocationPattern("mvn:" + selfGroupId + "/" + selfArtifactId));

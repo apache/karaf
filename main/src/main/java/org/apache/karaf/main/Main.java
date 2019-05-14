@@ -347,17 +347,14 @@ public class Main {
                     signalHandlerClass
                 },
                     (proxy, method, args) -> {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    exiting = true;
-                                    framework.stop();
-                                } catch (BundleException e) {
-                                    e.printStackTrace();
-                                }
+                        new Thread(() -> {
+                            try {
+                                exiting = true;
+                                framework.stop();
+                            } catch (BundleException e) {
+                                e.printStackTrace();
                             }
-                        }.start();
+                        }).start();
                         return null;
                     }
             );

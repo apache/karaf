@@ -95,7 +95,7 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
 
     protected String getPrincipalInfo() {
         String principalInfo;
-        List<String> principalInfos = subject.getPrincipals(ClientPrincipal.class).stream().map(r->r.getName()).collect(toList());
+        List<String> principalInfos = subject.getPrincipals(ClientPrincipal.class).stream().map(ClientPrincipal::getName).collect(toList());
 
         if (principalInfos.size() > 0) {
             principalInfo = String.join(", ", principalInfos);

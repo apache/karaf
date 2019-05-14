@@ -281,7 +281,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     public String getStatusLine(List<ServletDetails> servlets, List<WebDetail> web) {
         Map<String, Integer> states = new HashMap<>();
         for (ServletDetails servlet : servlets) {
-            states.merge(servlet.getState(), 1, (a, b) -> a + b);
+            states.merge(servlet.getState(), 1, Integer::sum);
         }
         StringBuilder stateSummary = new StringBuilder();
         boolean first = true;

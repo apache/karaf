@@ -183,22 +183,19 @@ public class MavenTest /*extends KarafTestSupport*/ {
 
         updateSettings();
 
-        awaitMavenResolver(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    org.osgi.service.cm.Configuration config = cm.getConfiguration("org.ops4j.pax.url.mvn", null);
-                    Dictionary<String, Object> props = config.getProperties();
-                    props.put("org.ops4j.pax.url.mvn.globalChecksumPolicy", "ignore");
-                    props.put("org.ops4j.pax.url.mvn.socket.readTimeout", "2000");
-                    props.put("org.ops4j.pax.url.mvn.connection.retryCount", "0");
-                    props.put("org.ops4j.pax.url.mvn.repositories", "http://localhost:1111/repository@id=r1," +
-                            "http://localhost:2222/repository@id=r2," +
-                            "http://localhost:3333/repository@id=r3");
-                    config.update(props);
-                } catch (Exception e) {
-                    fail(e.getMessage());
-                }
+        awaitMavenResolver(() -> {
+            try {
+                org.osgi.service.cm.Configuration config = cm.getConfiguration("org.ops4j.pax.url.mvn", null);
+                Dictionary<String, Object> props = config.getProperties();
+                props.put("org.ops4j.pax.url.mvn.globalChecksumPolicy", "ignore");
+                props.put("org.ops4j.pax.url.mvn.socket.readTimeout", "2000");
+                props.put("org.ops4j.pax.url.mvn.connection.retryCount", "0");
+                props.put("org.ops4j.pax.url.mvn.repositories", "http://localhost:1111/repository@id=r1," +
+                        "http://localhost:2222/repository@id=r2," +
+                        "http://localhost:3333/repository@id=r3");
+                config.update(props);
+            } catch (Exception e) {
+                fail(e.getMessage());
             }
         });
 
@@ -227,12 +224,9 @@ public class MavenTest /*extends KarafTestSupport*/ {
      */
     private void awaitMavenResolver(Runnable task) throws Exception {
         final CountDownLatch latch = new CountDownLatch(2);
-        ServiceListener listener = new ServiceListener() {
-            @Override
-            public void serviceChanged(ServiceEvent event) {
-                if (event.getType() == ServiceEvent.UNREGISTERING || event.getType() == ServiceEvent.REGISTERED) {
-                    latch.countDown();
-                }
+        ServiceListener listener = event -> {
+            if (event.getType() == ServiceEvent.UNREGISTERING || event.getType() == ServiceEvent.REGISTERED) {
+                latch.countDown();
             }
         };
         bundleContext.addServiceListener(listener, "(objectClass=org.ops4j.pax.url.mvn.MavenResolver)");

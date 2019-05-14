@@ -23,7 +23,7 @@ import java.util.List;
 public class PrincipalHelper {
     
     public static List<String> names(Collection<? extends Principal> principals) {
-        return principals.stream().map(r->r.getName()).collect(toList());
+        return principals.stream().map(Principal::getName).collect(toList());
     }
     
 }

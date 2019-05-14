@@ -318,11 +318,7 @@ class ContextFinder {
         // search for jaxb.properties in the class loader of each class first
         for (final Class c : classes) {
             // this classloader is used only to load jaxb.properties, so doing this should be safe.
-            ClassLoader classLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-                public ClassLoader run() {
-                    return c.getClassLoader();
-                }
-            });
+            ClassLoader classLoader = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) c::getClassLoader);
             Package pkg = c.getPackage();
             if(pkg==null)
                 continue;       // this is possible for primitives, arrays, and classes that are loaded by poorly implemented ClassLoaders

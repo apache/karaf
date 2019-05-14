@@ -192,22 +192,20 @@ public class Main {
                     ChannelExec channel = session.createExecChannel(config.getCommand() + "\n");
                     channel.setIn(new ByteArrayInputStream(new byte[0]));
                     if (!config.isBatch()) {
-                        new Thread() {
-                            public void run() {
-                                while (true) {
-                                    try {
-                                        int a = System.in.read();
-                                        if (a == -1) {
-                                            channel.close(true);
-                                            break;
-                                        }
-                                        Thread.sleep(1000);
-                                    } catch (Exception e) {
-                                        //ignore
+                        new Thread(() -> {
+                            while (true) {
+                                try {
+                                    int a = System.in.read();
+                                    if (a == -1) {
+                                        channel.close(true);
+                                        break;
                                     }
+                                    Thread.sleep(1000);
+                                } catch (Exception e) {
+                                    //ignore
                                 }
                             }
-                        }.start();
+                        }).start();
                     }
                     channel.setAgentForwarding(true);
                     NoCloseOutputStream output = new NoCloseOutputStream(terminal.output());
