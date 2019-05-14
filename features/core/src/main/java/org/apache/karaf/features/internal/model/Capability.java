@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal.model;
 
+import java.util.Objects;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -65,7 +66,7 @@ public class Capability implements org.apache.karaf.features.Capability {
             return false;
         }
         Capability bundle = (Capability) o;
-        return value != null ? value.equals(bundle.value) : bundle.value == null;
+        return Objects.equals(value, bundle.value);
     }
 
     @Override

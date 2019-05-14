@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal.model;
 
+import java.util.Objects;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -201,7 +202,7 @@ public class Bundle implements BundleInfo {
         if ((startLevel != null ? startLevel : 0) != (bundle.startLevel != null ? bundle.startLevel : 0)) {
             return false;
         }
-        return value != null ? value.equals(bundle.value) : bundle.value == null;
+        return Objects.equals(value, bundle.value);
     }
 
     @Override

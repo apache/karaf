@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class InstanceSettings {
 
@@ -120,12 +121,12 @@ public class InstanceSettings {
         return is.sshPort == sshPort &&
                is.rmiRegistryPort == rmiRegistryPort &&
                is.rmiServerPort == rmiServerPort &&
-               (location == null ? is.location == null : location.equals(is.location)) &&
-               (javaOpts == null ? is.javaOpts == null : javaOpts.equals(is.javaOpts)) &&
-               (featureURLs == null ? is.featureURLs == null : featureURLs.equals(is.featureURLs)) &&
-               (features == null ? is.features == null : features.equals(is.features)) &&
-               (address == null ? is.address == null : address.equals(is.address)) &&
-               (profiles == null ? is.profiles == null : profiles.equals(is.profiles));
+               Objects.equals(location, is.location) &&
+               Objects.equals(javaOpts, is.javaOpts) &&
+               Objects.equals(featureURLs, is.featureURLs) &&
+               Objects.equals(features, is.features) &&
+               Objects.equals(address, is.address) &&
+               Objects.equals(profiles, is.profiles);
     }
 
     @Override

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -390,10 +391,10 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
             return false;
         }
         Feature feature = (Feature) o;
-        if (name != null ? !name.equals(feature.name) : feature.name != null) {
+        if (!Objects.equals(name, feature.name)) {
             return false;
         }
-        return version != null ? version.equals(feature.version) : feature.version == null;
+        return Objects.equals(version, feature.version);
     }
 
     @Override
