@@ -211,22 +211,10 @@ class $SchemaFactoryFinder {
             if (schemaFactory == null) {
                 schemaFactory = (SchemaFactory) clazz.newInstance();
             }
-        } catch (ClassCastException classCastException) {
+        } catch (ClassCastException | IllegalAccessException | InstantiationException classCastException) {
             debugPrintln(() -> "could not instantiate " + clazz.getName());
             if (debug) {
                 classCastException.printStackTrace();
-            }
-            return null;
-        } catch (IllegalAccessException illegalAccessException) {
-            debugPrintln(() -> "could not instantiate " + clazz.getName());
-            if (debug) {
-                illegalAccessException.printStackTrace();
-            }
-            return null;
-        } catch (InstantiationException instantiationException) {
-            debugPrintln(() -> "could not instantiate " + clazz.getName());
-            if (debug) {
-                instantiationException.printStackTrace();
             }
             return null;
         }
@@ -261,8 +249,6 @@ class $SchemaFactoryFinder {
             }
         } catch (ClassCastException e) {
             throw new SchemaFactoryConfigurationError(e.getMessage(), e);
-        } catch (NoSuchMethodException exc) {
-            return null;
         } catch (Exception exc) {
             return null;
         }

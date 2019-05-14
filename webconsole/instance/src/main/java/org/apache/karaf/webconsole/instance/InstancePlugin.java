@@ -223,8 +223,6 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
             }
             jw.endArray();
             jw.endObject();
-        } catch (IOException ex) {
-            Logger.getLogger(InstancePlugin.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(InstancePlugin.class.getName()).log(Level.SEVERE, null, ex);
         }

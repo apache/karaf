@@ -212,22 +212,10 @@ class $XPathFactoryFinder {
             if (xPathFactory == null) {
                 xPathFactory = (XPathFactory) clazz.newInstance();
             }
-        } catch (ClassCastException classCastException) {
+        } catch (ClassCastException | IllegalAccessException | InstantiationException classCastException) {
             debugPrintln(() -> "could not instantiate " + clazz.getName());
             if (debug) {
                 classCastException.printStackTrace();
-            }
-            return null;
-        } catch (IllegalAccessException illegalAccessException) {
-            debugPrintln(() -> "could not instantiate " + clazz.getName());
-            if (debug) {
-                illegalAccessException.printStackTrace();
-            }
-            return null;
-        } catch (InstantiationException instantiationException) {
-            debugPrintln(() -> "could not instantiate " + clazz.getName());
-            if (debug) {
-                instantiationException.printStackTrace();
             }
             return null;
         }
@@ -263,8 +251,6 @@ class $XPathFactoryFinder {
             }
         } catch (ClassCastException e) {
             throw new XPathFactoryConfigurationException(e);
-        } catch (NoSuchMethodException exc) {
-            return null;
         } catch (Exception exc) {
             return null;
         }

@@ -193,11 +193,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
             if (key instanceof PrivateKey) {
                 return (PrivateKey) key;
             }
-        } catch (KeyStoreException e) {
-            logger.error("Unable to read private key from keystore", e);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Unable to read private key from keystore", e);
-        } catch (UnrecoverableKeyException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             logger.error("Unable to read private key from keystore", e);
         }
         return null;
@@ -264,13 +260,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
                 }
             }
             return true;
-        } catch (KeyStoreException e) {
-            logger.error("Unable to open keystore with provided password", e);
-        } catch (IOException e) {
-            logger.error("Unable to open keystore with provided password", e);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Unable to open keystore with provided password", e);
-        } catch (CertificateException e) {
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
             logger.error("Unable to open keystore with provided password", e);
         }
         return false;

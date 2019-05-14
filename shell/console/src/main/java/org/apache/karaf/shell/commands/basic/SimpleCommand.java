@@ -57,9 +57,7 @@ public class SimpleCommand extends AbstractCommand {
     public Action createNewAction() {
         try {
             return actionClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
