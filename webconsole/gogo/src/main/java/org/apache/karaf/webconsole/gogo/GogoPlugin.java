@@ -143,7 +143,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String encoding = request.getHeader("Accept-Encoding");
-        boolean supportsGzip = (encoding != null && encoding.toLowerCase().indexOf("gzip") > -1);
+        boolean supportsGzip = (encoding != null && encoding.toLowerCase().contains("gzip"));
         SessionTerminal st = (SessionTerminal) request.getSession(true).getAttribute("terminal");
         if (st == null || st.isClosed()) {
             st = new SessionTerminal();

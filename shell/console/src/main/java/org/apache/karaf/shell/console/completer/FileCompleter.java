@@ -56,7 +56,7 @@ public class FileCompleter implements Completer
     }
 
     public static boolean isWindows() {
-        return (OS.indexOf("win") >= 0);
+        return OS.contains("win");
 
     }
 
