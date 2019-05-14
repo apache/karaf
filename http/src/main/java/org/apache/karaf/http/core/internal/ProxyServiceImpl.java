@@ -132,9 +132,7 @@ public class ProxyServiceImpl implements ProxyService {
 
     private String[] mapToProxyArray(Map<String, String> proxies) {
         List<String> proxyList = new ArrayList<String>();
-        Iterator<Map.Entry<String, String>> entries = proxies.entrySet().iterator();
-        while (entries.hasNext()) {
-            Map.Entry<String, String> entry = entries.next();
+        for (Map.Entry<String, String> entry : proxies.entrySet()) {
             proxyList.add(entry.getKey() + " " + entry.getValue());
         }
         return proxyList.stream().toArray(String[]::new);

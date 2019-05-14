@@ -305,8 +305,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
                 if (conditional) {
                     for (Conditional cond : resolved.getConditional()) {
                         List<Dependency> conditionDependencies = cond.getDependencies();
-                        for (int i = 0, j = conditionDependencies.size(); i < j; i++) {
-                            Dependency toDisplay = conditionDependencies.get(i);
+                        for (Dependency toDisplay : conditionDependencies) {
                             unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix);
                         }
                     }

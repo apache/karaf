@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.management;
 
+import javax.security.auth.callback.Callback;
 import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 
@@ -61,13 +62,13 @@ public class JaasAuthenticator implements JMXAuthenticator {
                 // Ignore
             }
             LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
-                for (int i = 0; i < callbacks.length; i++) {
-                    if (callbacks[i] instanceof NameCallback) {
-                        ((NameCallback) callbacks[i]).setName(params[0]);
-                    } else if (callbacks[i] instanceof PasswordCallback) {
-                        ((PasswordCallback) callbacks[i]).setPassword((params[1].toCharArray()));
+                for (Callback callback : callbacks) {
+                    if (callback instanceof NameCallback) {
+                        ((NameCallback) callback).setName(params[0]);
+                    } else if (callback instanceof PasswordCallback) {
+                        ((PasswordCallback) callback).setPassword((params[1].toCharArray()));
                     } else {
-                        throw new UnsupportedCallbackException(callbacks[i]);
+                        throw new UnsupportedCallbackException(callback);
                     }
                 }
             });
