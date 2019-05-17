@@ -13,11 +13,10 @@
  */
 package org.apache.karaf.itests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 
 import org.junit.Before;
@@ -28,7 +27,13 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import static org.junit.Assert.*;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -52,6 +57,61 @@ public class WebTest extends KarafTestSupport {
         ObjectName name = new ObjectName("org.apache.karaf:type=web,name=root");
         TabularData webBundles = (TabularData) mbeanServer.getAttribute(name, "WebBundles");
         assertEquals(0, webBundles.size());
+    }
+
+    @Test
+    public void installUninstallCommands() throws Exception {
+        System.out.println(executeCommand("web:install mvn:org.apache.karaf.examples/karaf-war-example-webapp/" + System.getProperty("karaf.version") + "/war test"));
+        String listOutput = executeCommand("web:list");
+        System.out.println(listOutput);
+        assertContains("/test", listOutput);
+        while (!listOutput.contains("Deployed")) {
+            Thread.sleep(500);
+            listOutput = executeCommand("web:list");
+        }
+        URL url = new URL("http://localhost:" + getHttpPort() + "/test");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setDoInput(true);
+        connection.setRequestMethod("GET");
+        StringBuffer buffer = new StringBuffer();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line).append("\n");
+            }
+        }
+        System.out.println(buffer.toString());
+        assertContains("Hello World!", buffer.toString());
+
+        System.out.println(executeCommand("web:uninstall 126"));
+        listOutput = executeCommand("web:list");
+        System.out.println(listOutput);
+        assertContainsNot("/test", listOutput);
+    }
+
+    @Test
+    public void installViaMBean() throws Exception {
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.apache.karaf:type=web,name=root");
+        mbeanServer.invoke(name, "install", new Object[]{ "mvn:org.apache.karaf.examples/karaf-war-example-webapp/" + System.getProperty("karaf.version") + "/war", "test" }, new String[]{ String.class.getName(), String.class.getName() });
+        TabularData webBundles = (TabularData) mbeanServer.getAttribute(name, "WebBundles");
+        assertEquals(1, webBundles.size());
+
+        Thread.sleep(2000);
+
+        URL url = new URL("http://localhost:" + getHttpPort() + "/test");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setDoInput(true);
+        connection.setRequestMethod("GET");
+        StringBuffer buffer = new StringBuffer();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line).append("\n");
+            }
+        }
+        System.out.println(buffer.toString());
+        assertContains("Hello World!", buffer.toString());
     }
 
 }

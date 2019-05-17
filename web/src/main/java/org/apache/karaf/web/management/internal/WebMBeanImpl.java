@@ -42,6 +42,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         this.webContainerService = webContainerService;
     }
 
+    @Override
     public TabularData getWebBundles() throws MBeanException {
         try {
             CompositeType webType = new CompositeType("Web Bundle", "An OSGi Web bundle",
@@ -77,6 +78,36 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         }
     }
 
+    @Override
+    public void install(String location, String contextPath) throws MBeanException {
+        try {
+            webContainerService.install(location, contextPath);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void uninstall(Long bundleId) throws MBeanException {
+        try {
+            List<Long> list = new ArrayList<>();
+            list.add(bundleId);
+            webContainerService.uninstall(list);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void uninstall(List<Long> bundleIds) throws MBeanException {
+        try {
+            webContainerService.uninstall(bundleIds);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
     public void start(Long bundleId) throws MBeanException {
         try {
             List<Long> list = new ArrayList<>();
@@ -87,6 +118,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         }
     }
 
+    @Override
     public void start(List<Long> bundleIds) throws MBeanException {
         try {
             webContainerService.start(bundleIds);
@@ -95,6 +127,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         }
     }
 
+    @Override
     public void stop(Long bundleId) throws MBeanException {
         try {
             List<Long> list = new ArrayList<>();
@@ -105,6 +138,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         }
     }
 
+    @Override
     public void stop(List<Long> bundleIds) throws MBeanException {
         try {
             webContainerService.stop(bundleIds);

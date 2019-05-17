@@ -34,6 +34,31 @@ public interface WebMBean {
     TabularData getWebBundles() throws MBeanException;
 
     /**
+     * Install a web application artifact.
+     *
+     * @param location The location of the web application artifact.
+     * @param contextPath The web context path of the web application.
+     * @throws MBeanException In case of installation exception.
+     */
+    void install(String location, String contextPath) throws MBeanException;
+
+    /**
+     * Uninstall a web application.
+     *
+     * @param bundleId the bundle ID.
+     * @throws MBeanException in case of uninstall failure.
+     */
+    void uninstall(Long bundleId) throws MBeanException;
+
+    /**
+     * Uninstall web applications.
+     *
+     * @param bundleIds The list of bundle IDs (TODO use a BundleSelector service).
+     * @throws MBeanException in case of uninstall failure.
+     */
+    void uninstall(List<Long> bundleIds) throws MBeanException;
+
+    /**
      * Start web context of the given web bundle (identified by ID).
      *
      * @param bundleId the bundle ID.
