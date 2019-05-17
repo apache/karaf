@@ -32,6 +32,24 @@ public interface WebContainerService {
     List<WebBundle> list() throws Exception;
 
     /**
+     * Helper method to create a webbundle location and install the bundle.
+     * It's a user convenient method to avoid to have to type 'webbundle:...?Web-ContextPath=...' URI.
+     *
+     * @param location The base bundle location.
+     * @param contextPath The web context path.
+     * @throws Exception In case of installation failure.
+     */
+    void install(String location, String contextPath) throws Exception;
+
+    /**
+     * Convenient method to uninstall web bundles.
+     *
+     * @param bundleIds The list of bundle IDs (TODO use a BundleSelector service).
+     * @throws Exception in case of uninstall failure.
+     */
+    void uninstall(List<Long> bundleIds) throws Exception;
+
+    /**
      * Get a string representation of the web state of a bundle (identified by id).
      *
      * @param bundleId the bundle ID.
