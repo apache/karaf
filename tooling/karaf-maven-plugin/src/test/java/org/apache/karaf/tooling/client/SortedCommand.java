@@ -46,7 +46,7 @@ public class SortedCommand {
         for (CommandDescriptor cmd : sortedCommands) {
             System.out.println("Rank: " + cmd.getRank());
             System.out.println("Command: " + cmd.getCommand());
-            System.out.println("");
+            System.out.println();
         }
     }
 

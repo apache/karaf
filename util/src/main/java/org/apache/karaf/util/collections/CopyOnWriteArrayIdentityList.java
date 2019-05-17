@@ -436,7 +436,7 @@ public class CopyOnWriteArrayIdentityList<E> implements List<E>, RandomAccess, C
         StringBuilder sb = new StringBuilder("[");
 
         for (Object o : this) {
-            sb.append(String.valueOf(o));
+            sb.append(o);
             sb.append(", ");
         }
         if (sb.length() > 1) {

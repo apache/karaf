@@ -108,33 +108,24 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
         boolean changed = false;
         for (String userName : users.keySet()) {
             String user = userName;
-            String userInfos = users.get(user);
 
             if (user.startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
                 continue;
             }
 
             // the password is in the first position
-            String[] infos = userInfos.split(",");
+            String[] infos = users.get(user).split(",");
             String storedPassword = infos[0];
 
             // check if the stored password is flagged as encrypted
             String encryptedPassword = encryptionSupport.encrypt(storedPassword);
             if (!storedPassword.equals(encryptedPassword)) {
                 LOGGER.debug("The password isn't flagged as encrypted, encrypt it.");
-                userInfos = encryptedPassword + ",";
-                for (int i = 1; i < infos.length; i++) {
-                    if (i == (infos.length - 1)) {
-                        userInfos = userInfos + infos[i];
-                    } else {
-                        userInfos = userInfos + infos[i] + ",";
-                    }
-                }
                 if (user.contains("\\")) {
                     users.remove(user);
                     user = user.replace("\\", "\\\\");
                 }
-                users.put(user, userInfos);
+                users.put(user, encryptedPassword + "," + String.join(",", infos));
                 changed = true;
             }
         }

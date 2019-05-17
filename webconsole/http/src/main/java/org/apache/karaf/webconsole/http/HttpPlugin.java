@@ -221,11 +221,11 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             String servletClassName = " ";
             if (servlet != null) {
                 servletClassName = servlet.getClass().getName();
-                servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1, servletClassName.length());
+                servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1);
             }
             String servletName = event.getServletName() != null ? event.getServletName() : " ";
             if (servletName.contains(".")) {
-                servletName = servletName.substring(servletName.lastIndexOf(".") + 1, servletName.length());
+                servletName = servletName.substring(servletName.lastIndexOf(".") + 1);
             }
 
             String alias = event.getAlias() != null ? event.getAlias() : " ";

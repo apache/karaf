@@ -107,7 +107,7 @@ public class NLS {
                         break;
                     }
                     // otherwise write out the chars inside the quotes
-                    buffer.append(message.substring(nextIndex, index));
+                    buffer.append(message, nextIndex, index);
                     i = index;
                     break;
                 default :

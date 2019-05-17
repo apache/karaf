@@ -59,7 +59,7 @@ public class EventSendCommand implements Action {
                     throw new IllegalArgumentException("Invalid property " + keyValue);
                 } else {
                     String key = keyValue.substring(0, splitAt);
-                    String value = keyValue.substring(splitAt + 1, keyValue.length());
+                    String value = keyValue.substring(splitAt + 1);
                     properties.put(key, value);
                 }
             }

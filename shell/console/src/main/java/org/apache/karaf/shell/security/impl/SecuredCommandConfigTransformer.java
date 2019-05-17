@@ -130,10 +130,8 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
         if (!commandACLArgs.endsWith("/]")) {
             throw new IllegalStateException("Badly formatted argument match: " + commandACLArgs + " Should end with '/]'");
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("[/.*/,"); // add a wildcard argument since the Function execute method has the arguments as second arg
-        sb.append(commandACLArgs.substring(1));
-        return sb.toString();
+        return "[/.*/," // add a wildcard argument since the Function execute method has the arguments as second arg
+            + commandACLArgs.substring(1);
     }
 
     void deleteServiceGuardConfig(String originatingPid, String scope) throws IOException, InvalidSyntaxException {

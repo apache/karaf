@@ -151,15 +151,15 @@ public class CommandListHelpProvider implements HelpProvider {
         table.column(new Col("Description").wrap());
         for (Map.Entry<String,String> entry : commands.entrySet()) {
             String key = NameScoping.getCommandNameWithoutGlobalPrefix(session, entry.getKey());
-            String prefix = "";
-            for (int i = 0; i < indent; i++) {
-                prefix += " ";
-            }
-            if (list) {
-                prefix += " *";
-            }
             if (indent > 0 || list) {
-                table.addRow().addContent(prefix, key, entry.getValue());
+                StringBuilder prefix = new StringBuilder();
+                for (int i = 0; i < indent; i++) {
+                    prefix.append(" ");
+                }
+                if (list) {
+                    prefix.append(" *");
+                }
+                table.addRow().addContent(prefix.toString(), key, entry.getValue());
             } else {
                 table.addRow().addContent(key, entry.getValue());
             }

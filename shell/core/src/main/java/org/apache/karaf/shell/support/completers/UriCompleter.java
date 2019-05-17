@@ -106,23 +106,23 @@ public class UriCompleter implements Completer {
         try {
             String[] parts = mvn.split("/");
             if (parts.length == 0 || parts.length == 1 && !mvn.endsWith("/")) {
-                String known = "";
-                String group = "";
+                StringBuilder known = new StringBuilder();
+                StringBuilder group = new StringBuilder();
                 String[] dirs = parts.length > 0 ? parts[0].split("\\.") : new String[] { "" };
                 if (parts.length > 0 && parts[0].endsWith(".")) {
                     for (String dir : dirs) {
-                        known += dir + "/";
-                        group += dir + ".";
+                        known.append(dir).append("/");
+                        group.append(dir).append(".");
                     }
                 } else {
                     for (int i = 0; i < dirs.length - 1; i++) {
-                        known += dirs[i] + "/";
-                        group += dirs[i] + ".";
+                        known.append(dirs[i]).append("/");
+                        group.append(dirs[i]).append(".");
                     }
                     rem = dirs[dirs.length - 1];
                 }
                 Path rep = Paths.get(repo);
-                Path dir = rep.resolve(known);
+                Path dir = rep.resolve(known.toString());
                 try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir, rem + "*")) {
                     for (Path path : paths) {
                         if (Files.isDirectory(path)) {

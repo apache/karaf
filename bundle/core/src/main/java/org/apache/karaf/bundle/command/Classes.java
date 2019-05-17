@@ -61,10 +61,10 @@ public class Classes extends BundlesCommand {
                     stringBuilder.append(SimpleAnsi.INTENSITY_BOLD);
                 }
                 if(ids == null || ids.size() != 1) {
-                    stringBuilder.append(bundle.getBundleId() + " | ");
+                    stringBuilder.append(bundle.getBundleId()).append(" | ");
                 }
-                stringBuilder.append(resource + " | ");
-                stringBuilder.append("exported: " + isExported(resource, exports));
+                stringBuilder.append(resource).append(" | ");
+                stringBuilder.append("exported: ").append(isExported(resource, exports));
                 if(localResource) {
                     stringBuilder.append(SimpleAnsi.INTENSITY_NORMAL);
                 }

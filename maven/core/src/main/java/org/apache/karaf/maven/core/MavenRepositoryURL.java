@@ -391,11 +391,9 @@ public class MavenRepositoryURL
     @Override
     public String toString()
     {
-        return new StringBuilder()
-            .append( m_repositoryURL.toString() )
-            .append( ",releases=" ).append( m_releasesEnabled )
-            .append( ",snapshots=" ).append( m_snapshotsEnabled )
-            .toString();
+        return m_repositoryURL.toString()
+            + ",releases=" + m_releasesEnabled
+            + ",snapshots=" + m_snapshotsEnabled;
     }
 
     public String asRepositorySpec() {

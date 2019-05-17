@@ -83,8 +83,8 @@ public class InfoAction extends SubsystemSupport implements Action {
     public static String getSubsystemName(Subsystem subsystem) {
         String name = subsystem.getSubsystemHeaders(null).get(SubsystemConstants.SUBSYSTEM_NAME);
         return (name == null)
-                ? "Subsystem " + Long.toString(subsystem.getSubsystemId())
-                : name + " (" + Long.toString(subsystem.getSubsystemId()) + ")";
+                ? "Subsystem " + subsystem.getSubsystemId()
+                : name + " (" + subsystem.getSubsystemId() + ")";
     }
 
     protected String generateFormattedOutput(Subsystem subsystem) {

@@ -119,7 +119,7 @@ public abstract class ObrCommandSupport implements Action {
         for (int i = 0; i < length; i++) {
             out.print('-');
         }
-        out.println("");
+        out.println();
     }
 
     protected void doDeploy(RepositoryAdmin admin, List<String> bundles, boolean start, boolean deployOptional) throws Exception {

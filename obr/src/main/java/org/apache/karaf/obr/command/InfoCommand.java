@@ -51,7 +51,7 @@ public class InfoCommand extends ObrCommandSupport {
                 {
                     if (resIdx > 0)
                     {
-                        System.out.println("");
+                        System.out.println();
                     }
                     printResource(System.out, resources[resIdx]);
                 }
