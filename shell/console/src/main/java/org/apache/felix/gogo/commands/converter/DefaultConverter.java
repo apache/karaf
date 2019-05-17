@@ -18,6 +18,7 @@
  */
 package org.apache.felix.gogo.commands.converter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Dictionary;
@@ -163,7 +164,7 @@ public class DefaultConverter {
             return Pattern.compile(value);
         } else if (Properties.class == toType) {
             Properties props = new Properties();
-            ByteArrayInputStream in = new ByteArrayInputStream(value.getBytes("UTF8"));
+            ByteArrayInputStream in = new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8));
             props.load(in);
             return props;
         } else if (Boolean.class == toType) {

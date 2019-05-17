@@ -65,7 +65,7 @@ public class BundleEventAdapter extends AbstractAdapter implements SynchronousBu
     @Override
     public void bundleChanged(final BundleEvent event)
     {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        final Dictionary<String, Object> properties = new Hashtable<>();
 
         properties.put(EventConstants.EVENT, event);
 

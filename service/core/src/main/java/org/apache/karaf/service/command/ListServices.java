@@ -103,7 +103,7 @@ public class ListServices implements Action {
                     String[] names = (String[])serviceReference.getProperty(Constants.OBJECTCLASS);
                     if (names != null) {
                     	for (String name : names) {
-                            serviceNames.merge(name, 1, (a, b) -> a + b);
+                            serviceNames.merge(name, 1, Integer::sum);
                     	}
                     }
                 }

@@ -114,9 +114,7 @@ public class ConfigurationPropertyCompleter implements Completer {
                         }
                     }
                 }
-            } catch (IOException e) {
-              //Ignore
-            } catch (InvalidSyntaxException e) {
+            } catch (IOException | InvalidSyntaxException e) {
                 //Ignore
             }
         }

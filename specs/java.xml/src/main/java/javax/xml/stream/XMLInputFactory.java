@@ -48,11 +48,8 @@ public abstract class XMLInputFactory {
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
         factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-        factory.setXMLResolver(new XMLResolver() {
-            @Override
-            public Object resolveEntity(String publicID, String systemID, String baseURI, String namespace) throws XMLStreamException {
-                throw new XMLStreamException("Reading external entities is disabled");
-            }
+        factory.setXMLResolver((publicID, systemID, baseURI, namespace) -> {
+            throw new XMLStreamException("Reading external entities is disabled");
         });
     }
     

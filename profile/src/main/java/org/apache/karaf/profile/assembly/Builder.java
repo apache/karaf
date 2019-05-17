@@ -1218,14 +1218,12 @@ public class Builder {
                                         bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
                                     }
                                 });
-                                feature.getConditional().forEach(cond -> {
-                                    cond.asFeature().getBundles().forEach(bundle -> {
-                                        // conditional bundles of feature
-                                        if (flavor.include(bundle)) {
-                                            bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
-                                        }
-                                    });
-                                });
+                                feature.getConditional().forEach(cond -> cond.asFeature().getBundles().forEach(bundle -> {
+                                    // conditional bundles of feature
+                                    if (flavor.include(bundle)) {
+                                        bundle2featureId.computeIfAbsent(bundle.getLocation().trim(), k -> new TreeSet<>()).add(feature.getId());
+                                    }
+                                }));
                             }
                         });
                     }

@@ -516,9 +516,7 @@ public class Subsystem extends ResourceImpl {
         // download direct bundle: requirements - without consulting overrides
         for (Clause bundle : Parser.parseClauses(this.bundles.toArray(new String[this.bundles.size()]))) {
             final String loc = bundle.getName();
-            downloader.download(loc, provider -> {
-                bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements));
-            });
+            downloader.download(loc, provider -> bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements)));
         }
         // we *don't* have to download overrides separately - they're already taken into account from processed model
 
@@ -528,9 +526,7 @@ public class Subsystem extends ResourceImpl {
             for (Library library : feature.getLibraries()) {
                 if (library.isExport()) {
                     final String loc = library.getLocation();
-                    downloader.download(loc, provider -> {
-                        bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements));
-                    });
+                    downloader.download(loc, provider -> bundles.put(loc, createResource(loc, getMetadata(provider), removeServiceRequirements)));
                 }
             }
         }

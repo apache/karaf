@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -77,7 +78,7 @@ public class KarServiceImpl implements KarService {
         if (!storage.isDirectory()) {
             throw new IllegalStateException("KAR storage " + storage + " is not a directory");
         }
-        unsatisfiedKars = Collections.synchronizedList(new ArrayList<Kar>());
+        unsatisfiedKars = Collections.synchronizedList(new ArrayList<>());
         busy = new AtomicBoolean();
     }
 
@@ -387,7 +388,7 @@ public class KarServiceImpl implements KarService {
         String manifestSt = "Manifest-Version: 1.0\n" +
             Kar.MANIFEST_ATTR_KARAF_FEATURE_START +": false\n" +
             Kar.MANIFEST_ATTR_KARAF_FEATURE_REPOS + ": " + repoUri.toString() + "\n";
-        InputStream manifestIs = new ByteArrayInputStream(manifestSt.getBytes("UTF-8"));
+        InputStream manifestIs = new ByteArrayInputStream(manifestSt.getBytes(StandardCharsets.UTF_8));
         Manifest manifest = new Manifest(manifestIs);
         return manifest;
     }

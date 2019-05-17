@@ -19,6 +19,7 @@ package org.apache.karaf.jaas.modules.properties;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HashSet;
 import java.util.Map;
@@ -65,7 +66,7 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
     public String doPasswordDigest(String nonce, String created, String password) {
         String passwdDigest = null;
         try {
-            passwdDigest = doPasswordDigest(nonce, created, password.getBytes("UTF-8"));
+            passwdDigest = doPasswordDigest(nonce, created, password.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
                 LOGGER.debug(e.getMessage(), e);
         }
@@ -76,7 +77,7 @@ public class  DigestPasswordLoginModule extends AbstractKarafLoginModule {
         String passwdDigest = null;
         try {
             byte[] b1 = nonce != null ? new Base64().decode(nonce) : new byte[0];
-            byte[] b2 = created != null ? created.getBytes("UTF-8") : new byte[0];
+            byte[] b2 = created != null ? created.getBytes(StandardCharsets.UTF_8) : new byte[0];
             byte[] b3 = password;
             byte[] b4 = new byte[b1.length + b2.length + b3.length];
             int offset = 0;

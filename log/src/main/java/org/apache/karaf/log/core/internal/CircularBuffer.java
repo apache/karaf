@@ -98,7 +98,7 @@ public class CircularBuffer<T> {
     public synchronized Iterable<T> getElements(int nb) {
         int s = size();
         nb = Math.min(Math.max(0, nb), s);
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
         for (int i = 0; i < nb; i++) {
             result.add(elements[(i + s - nb + start) % maxElements]);
         }

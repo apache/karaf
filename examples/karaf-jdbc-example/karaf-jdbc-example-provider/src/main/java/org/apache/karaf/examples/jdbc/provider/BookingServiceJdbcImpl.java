@@ -108,8 +108,8 @@ public class BookingServiceJdbcImpl implements BookingService {
                 // Tables does not exist so we create all the tables
                 String[] createTemplate = createTemplate = createTableQueryDerbyTemplate;
                 try (Statement createStatement = connection.createStatement()) {
-                    for (int cpt = 0; cpt < createTemplate.length; cpt++) {
-                        createStatement.addBatch(createTemplate[cpt]);
+                    for (String s : createTemplate) {
+                        createStatement.addBatch(s);
                     }
                     if (createStatement.executeBatch().length == 0) {
                         throw new SQLException("No table has been created !");

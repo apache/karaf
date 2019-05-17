@@ -146,7 +146,7 @@ public abstract class RepositoryEditCommandSupport extends MavenSecuritySupport 
      * @return
      */
     protected SourceAnd<String> validateRepositoryURL(String uri, boolean defaultRepository) throws URISyntaxException, MalformedURLException {
-        SourceAnd<String> result = new SourceAnd<String>();
+        SourceAnd<String> result = new SourceAnd<>();
         result.valid = false;
 
         if (uri == null || "".equals(uri.trim())) {

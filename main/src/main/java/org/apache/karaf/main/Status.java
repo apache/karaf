@@ -50,9 +50,7 @@ public class Status {
             }
         }
         if (config.shutdownPort > 0) {
-            Socket s = null;
-            try {
-                s = new Socket(config.shutdownHost, config.shutdownPort);
+            try (Socket s = new Socket(config.shutdownHost, config.shutdownPort)) {
                 if (s.isBound()) {
                     System.out.println("Running ...");
                     System.exit(0);
@@ -63,10 +61,6 @@ public class Status {
             } catch (ConnectException connectException) {
                 System.out.println("Not Running ...");
                 System.exit(1);
-            } finally {
-                if (s != null) {
-                    s.close();
-                }
             }
         } else {
             // using the pid file

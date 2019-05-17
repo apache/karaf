@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal.model;
 
+import java.util.Objects;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -154,10 +155,10 @@ public class Dependency implements org.apache.karaf.features.Dependency {
 
         Dependency that = (Dependency) o;
 
-        if (prerequisite != null ? !prerequisite.equals(that.prerequisite) : that.prerequisite != null) return false;
-        if (dependency != null ? !dependency.equals(that.dependency) : that.dependency != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        return version != null ? version.equals(that.version) : that.version == null;
+        if (!Objects.equals(prerequisite, that.prerequisite)) return false;
+        if (!Objects.equals(dependency, that.dependency)) return false;
+        if (!Objects.equals(name, that.name)) return false;
+        return Objects.equals(version, that.version);
     }
 
     @Override

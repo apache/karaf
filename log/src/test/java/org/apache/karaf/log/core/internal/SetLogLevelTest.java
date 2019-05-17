@@ -27,7 +27,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * Test cases for {@link SetLogLevel}
+ * Test cases for {@link org.apache.karaf.log.command.SetLogLevel}
  */
 @SuppressWarnings("unchecked")
 public class SetLogLevelTest extends TestCase {

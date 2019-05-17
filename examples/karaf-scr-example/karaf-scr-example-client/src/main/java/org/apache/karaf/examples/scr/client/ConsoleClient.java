@@ -45,20 +45,17 @@ public class ConsoleClient {
         bookingService.add(booking);
 
         running = true;
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (running) {
-                    try {
-                        Thread.sleep(5000);
-                        for (Booking booking : bookingService.list()) {
-                            System.out.println();
-                            System.out.println("-----------");
-                            System.out.println(booking.getId() + " - " + booking.getFlight() + " - " + booking.getCustomer());
-                        }
-                    } catch (Exception e) {
-                        // nothing to do
+        Thread thread = new Thread(() -> {
+            while (running) {
+                try {
+                    Thread.sleep(5000);
+                    for (Booking booking1 : bookingService.list()) {
+                        System.out.println();
+                        System.out.println("-----------");
+                        System.out.println(booking1.getId() + " - " + booking1.getFlight() + " - " + booking1.getCustomer());
                     }
+                } catch (Exception e) {
+                    // nothing to do
                 }
             }
         });

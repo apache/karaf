@@ -54,18 +54,12 @@ public class Stop {
             }
         }
         if (config.shutdownPort > 0) {
-            Socket s = null;
-            try {
-                s = new Socket(config.shutdownHost, config.shutdownPort);
+            try (Socket s = new Socket(config.shutdownHost, config.shutdownPort)) {
                 s.getOutputStream().write(config.shutdownCommand.getBytes());
                 System.exit(0);
             } catch (ConnectException connectException) {
                 System.err.println("Can't connect to the container. The container is not running.");
                 System.exit(1);
-            } finally {
-                if (s != null) {
-                    s.close();
-                }
             }
         } else {
             // using the pid file

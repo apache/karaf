@@ -23,8 +23,7 @@ public class NLS {
 
     public static void initializeMessages(final String bundleName, final Class<?> clazz) {
         String resource = bundleName.replace('.', '/') + ".properties";
-        final InputStream input = clazz.getClassLoader().getResourceAsStream(resource);
-        try {
+        try (InputStream input = clazz.getClassLoader().getResourceAsStream(resource)) {
             Properties properties = new Properties();
             properties.load(input);
             for (String key : properties.stringPropertyNames()) {
@@ -40,12 +39,6 @@ public class NLS {
             }
         } catch (IOException e) {
             // ignore
-        } finally {
-            try {
-                input.close();
-            } catch (IOException e) {
-                // ignore
-            }
         }
     }
 

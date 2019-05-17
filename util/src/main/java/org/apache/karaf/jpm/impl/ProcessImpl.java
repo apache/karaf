@@ -140,15 +140,10 @@ public class ProcessImpl implements Process {
     }
 
     private static int readPid(File pidFile) throws IOException {
-        InputStream is = new FileInputStream(pidFile);
-        try {
+        try (InputStream is = new FileInputStream(pidFile)) {
             BufferedReader r = new BufferedReader(new InputStreamReader(is));
             String pidString = r.readLine();
             return Integer.valueOf(pidString);
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {}
         }
     }
 

@@ -211,22 +211,10 @@ class $SchemaFactoryFinder {
             if (schemaFactory == null) {
                 schemaFactory = (SchemaFactory) clazz.newInstance();
             }
-        } catch (ClassCastException classCastException) {
+        } catch (ClassCastException | IllegalAccessException | InstantiationException classCastException) {
             debugPrintln(() -> "could not instantiate " + clazz.getName());
             if (debug) {
                 classCastException.printStackTrace();
-            }
-            return null;
-        } catch (IllegalAccessException illegalAccessException) {
-            debugPrintln(() -> "could not instantiate " + clazz.getName());
-            if (debug) {
-                illegalAccessException.printStackTrace();
-            }
-            return null;
-        } catch (InstantiationException instantiationException) {
-            debugPrintln(() -> "could not instantiate " + clazz.getName());
-            if (debug) {
-                instantiationException.printStackTrace();
             }
             return null;
         }
@@ -261,8 +249,6 @@ class $SchemaFactoryFinder {
             }
         } catch (ClassCastException e) {
             throw new SchemaFactoryConfigurationError(e.getMessage(), e);
-        } catch (NoSuchMethodException exc) {
-            return null;
         } catch (Exception exc) {
             return null;
         }
@@ -271,28 +257,23 @@ class $SchemaFactoryFinder {
     private boolean isSchemaLanguageSupportedBy(final SchemaFactory factory,
                                                 final String schemaLanguage,
                                                 AccessControlContext acc) {
-        return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-            public Boolean run() {
-                return factory.isSchemaLanguageSupported(schemaLanguage);
-            }
-        }, acc);
+        return AccessController.doPrivileged(
+            (PrivilegedAction<Boolean>) () -> factory.isSchemaLanguageSupported(schemaLanguage), acc);
     }
 
     private SchemaFactory findServiceProvider(final String schemaLanguage) {
         assert schemaLanguage != null;
         final AccessControlContext acc = AccessController.getContext();
         try {
-            return AccessController.doPrivileged(new PrivilegedAction<SchemaFactory>() {
-                public SchemaFactory run() {
-                    final ServiceLoader<SchemaFactory> loader =
-                            ServiceLoader.load(SERVICE_CLASS);
-                    for (SchemaFactory factory : loader) {
-                        if (isSchemaLanguageSupportedBy(factory, schemaLanguage, acc)) {
-                            return factory;
-                        }
+            return AccessController.doPrivileged((PrivilegedAction<SchemaFactory>) () -> {
+                final ServiceLoader<SchemaFactory> loader =
+                        ServiceLoader.load(SERVICE_CLASS);
+                for (SchemaFactory factory : loader) {
+                    if (isSchemaLanguageSupportedBy(factory, schemaLanguage, acc)) {
+                        return factory;
                     }
-                    return null;
                 }
+                return null;
             });
         } catch (ServiceConfigurationError error) {
             throw new SchemaFactoryConfigurationError(

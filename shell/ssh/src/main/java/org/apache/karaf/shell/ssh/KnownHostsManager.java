@@ -27,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -115,7 +116,7 @@ public class KnownHostsManager {
         bw.append(serverKey.getAlgorithm());
         bw.append(" ");
         serverKey.getEncoded();
-        bw.append(new String(Base64.getEncoder().encode(serverKey.getEncoded()), "UTF-8"));
+        bw.append(new String(Base64.getEncoder().encode(serverKey.getEncoded()), StandardCharsets.UTF_8));
         bw.append("\n");
     }
 

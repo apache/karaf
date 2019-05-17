@@ -20,10 +20,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -291,16 +291,13 @@ class ContextFinder {
                     classLoader.getResourceAsStream(resource.toString());
             
             if (resourceStream != null) {
-                r = new BufferedReader(new InputStreamReader(resourceStream, "UTF-8"));
+                r = new BufferedReader(new InputStreamReader(resourceStream, StandardCharsets.UTF_8));
                 factoryClassName = r.readLine().trim();
                 r.close();
                 return newInstance(contextPath, factoryClassName, classLoader, properties);
             } else {
                 logger.fine("Unable to load:" + resource.toString());
             }
-        } catch (UnsupportedEncodingException e) {
-            // should never happen
-            throw new JAXBException(e);
         } catch (IOException e) {
             throw new JAXBException(e);
         }
@@ -321,11 +318,7 @@ class ContextFinder {
         // search for jaxb.properties in the class loader of each class first
         for (final Class c : classes) {
             // this classloader is used only to load jaxb.properties, so doing this should be safe.
-            ClassLoader classLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-                public ClassLoader run() {
-                    return c.getClassLoader();
-                }
-            });
+            ClassLoader classLoader = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) c::getClassLoader);
             Package pkg = c.getPackage();
             if(pkg==null)
                 continue;       // this is possible for primitives, arrays, and classes that are loaded by poorly implemented ClassLoaders
@@ -378,15 +371,12 @@ class ContextFinder {
 
             if (resourceURL != null) {
                 logger.fine("Reading "+resourceURL);
-                r = new BufferedReader(new InputStreamReader(resourceURL.openStream(), "UTF-8"));
+                r = new BufferedReader(new InputStreamReader(resourceURL.openStream(), StandardCharsets.UTF_8));
                 factoryClassName = r.readLine().trim();
                 return newInstance(classes, properties, factoryClassName);
             } else {
                 logger.fine("Unable to find: " + resource);
             }
-        } catch (UnsupportedEncodingException e) {
-            // should never happen
-            throw new JAXBException(e);
         } catch (IOException e) {
             throw new JAXBException(e);
         }

@@ -74,15 +74,10 @@ public class IoUtils {
             throw new IOException("Destination '" + destFile + "' exists but is a directory");
         }
 
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        FileChannel input = null;
-        FileChannel output = null;
-        try {
-            fis = new FileInputStream(srcFile);
-            fos = new FileOutputStream(destFile);
-            input  = fis.getChannel();
-            output = fos.getChannel();
+        try (FileInputStream fis = new FileInputStream(srcFile);
+             FileOutputStream fos = new FileOutputStream(destFile);
+             FileChannel input = fis.getChannel();
+             FileChannel output = fos.getChannel()) {
             final long size = input.size(); // TODO See IO-386
             long pos = 0;
             long count = 0;
@@ -94,19 +89,6 @@ public class IoUtils {
                     break; // ensure we don't loop forever
                 }
                 pos += bytesCopied;
-            }
-        } finally {
-            if (output != null) {
-                try { output.close(); } catch (Exception e) { }
-            }
-            if (fos != null) {
-                try { fos.close(); } catch (Exception e) { }
-            }
-            if (input != null) {
-                try { input.close(); } catch (Exception e) { }
-            }
-            if (fis != null) {
-                try { fis.close(); } catch (Exception e) { }
             }
         }
 

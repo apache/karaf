@@ -115,7 +115,7 @@ public class ScriptUtils {
     private static final boolean windows;
 
     static {
-        windows = System.getProperty("os.name").toLowerCase().indexOf("windows") != -1;
+        windows = System.getProperty("os.name").toLowerCase().contains("windows");
     }
 
     public static boolean isWindows() {
