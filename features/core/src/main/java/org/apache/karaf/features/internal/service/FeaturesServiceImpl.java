@@ -423,7 +423,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             for (String r : state.repositories) {
                 if (!uri.toString().equals(r)) {
                     Repository rep = repositories.getRepository(r);
-                    repos.addAll(repositories.getRepositoryClosure(rep));
+                    if (rep != null) {
+                        repos.addAll(repositories.getRepositoryClosure(rep));
+                    } else {
+                        throw new IllegalArgumentException("Repository URI " + uri + " seems to have changed, can't remove repository");
+                    }
                 }
             }
             for (Repository rep : repos) {
