@@ -235,7 +235,12 @@ public class ClientConfig {
             if (val instanceof Number) {
                 return ((Number) val).intValue();
             } else if (val != null) {
-                return Integer.parseInt(val.toString());
+                try {
+                    return Integer.parseInt(val.toString());
+                } catch (Exception e) {
+                    System.err.println("Invalid value for " + key + ", using default " + def);
+                    return def;
+                }
             }
         }
         return def;
@@ -247,7 +252,12 @@ public class ClientConfig {
             if (val instanceof Number) {
                 return ((Number) val).longValue();
             } else if (val != null) {
-                return Long.parseLong(val.toString());
+                try {
+                    return Long.parseLong(val.toString());
+                } catch (Exception e) {
+                    System.err.println("Invalid value for " + key + ", using default " + def);
+                    return def;
+                }
             }
         }
         return def;
