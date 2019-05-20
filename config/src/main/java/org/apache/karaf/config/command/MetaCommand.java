@@ -117,15 +117,17 @@ public class MetaCommand extends ConfigCommandSupport {
         }
 
         protected ObjectClassDefinition getMetatype(MetaTypeService metaTypeService, String pid) {
-            for (Bundle bundle : context.getBundles()) {
-                MetaTypeInformation info = metaTypeService.getMetaTypeInformation(bundle);
-                if (info == null) {
-                    continue;
-                }
-                String[] pids = info.getPids();
-                for (String cPid : pids) {
-                    if (cPid.equals(pid)) {
-                        return info.getObjectClassDefinition(cPid, null);
+            if (metaTypeService != null) {
+                for (Bundle bundle : context.getBundles()) {
+                    MetaTypeInformation info = metaTypeService.getMetaTypeInformation(bundle);
+                    if (info == null) {
+                        continue;
+                    }
+                    String[] pids = info.getPids();
+                    for (String cPid : pids) {
+                        if (cPid.equals(pid)) {
+                            return info.getObjectClassDefinition(cPid, null);
+                        }
                     }
                 }
             }
