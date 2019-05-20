@@ -34,29 +34,33 @@ public class MetaServiceCaller {
 
     public static <T> T withMetaTypeService(BundleContext context, Function<MetaTypeService, T> callable) {
         ServiceReference<MetaTypeService> ref = context.getServiceReference(MetaTypeService.class);
-        try {
-            MetaTypeService metaService = context.getService(ref);
-            return callable.apply(metaService);
-        } finally {
-            context.ungetService(ref);
+        if (ref != null) {
+            try {
+                MetaTypeService metaService = context.getService(ref);
+                return callable.apply(metaService);
+            } finally {
+                context.ungetService(ref);
+            }
         }
+        return null;
     }
 
     public static List<String> getPidsWithMetaInfo(BundleContext context) {
         return withMetaTypeService(context, metatypeService -> {
             List<String> pids1 = new ArrayList<>();
             Bundle[] bundles = context.getBundles();
-            for (Bundle bundle : bundles) {
-
-                MetaTypeInformation info = metatypeService.getMetaTypeInformation(bundle);
-                if (info == null) {
-                    continue;
-                }
-                if (info.getFactoryPids() != null) {
-                    pids1.addAll(Arrays.asList(info.getFactoryPids()));
-                }
-                if (info.getPids() != null) {
-                    pids1.addAll(Arrays.asList(info.getPids()));
+            if (metatypeService != null) {
+                for (Bundle bundle : bundles) {
+                    MetaTypeInformation info = metatypeService.getMetaTypeInformation(bundle);
+                    if (info == null) {
+                        continue;
+                    }
+                    if (info.getFactoryPids() != null) {
+                        pids1.addAll(Arrays.asList(info.getFactoryPids()));
+                    }
+                    if (info.getPids() != null) {
+                        pids1.addAll(Arrays.asList(info.getPids()));
+                    }
                 }
             }
             return pids1;
