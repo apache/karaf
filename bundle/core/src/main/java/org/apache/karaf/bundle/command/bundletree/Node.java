@@ -155,9 +155,7 @@ public class Node<T> {
      */
     private boolean[] concat(boolean[] array, boolean element) {
         boolean[] result = new boolean[array.length + 1];
-        for (int i = 0 ; i < array.length ; i++) {
-            result[i] = array[i];
-        }
+        System.arraycopy(array, 0, result, 0, array.length);
         result[array.length] = element;
         return result;
     }
