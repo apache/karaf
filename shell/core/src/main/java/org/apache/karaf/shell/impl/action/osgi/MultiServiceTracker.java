@@ -98,9 +98,9 @@ public abstract class MultiServiceTracker<T> {
     }
 
     private void updateState() {
-        List<T> svcs = new ArrayList<>();
+        List<T> svcs;
         synchronized (refs) {
-            svcs.addAll(refs.values());
+            svcs = new ArrayList<>(refs.values());
         }
         updateState(svcs);
     }

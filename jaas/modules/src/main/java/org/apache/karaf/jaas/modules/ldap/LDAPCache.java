@@ -281,9 +281,7 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
                                 if (roleMappings.isEmpty()) {
                                     rolesList.add(role);
                                 } else {
-                                    for (String roleMapped : roleMappings) {
-                                        rolesList.add(roleMapped);
-                                    }
+                                    rolesList.addAll(roleMappings);
                                 }
                             }
                         }

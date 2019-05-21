@@ -93,8 +93,7 @@ public class KarafRealm implements JaasRealm {
         logOptions.put("logger", properties.get("audit.log.logger"));
         logOptions.put("level", properties.get("audit.log.level"));
 
-        Map<String, Object> eventadminOptions = new HashMap<>();
-        eventadminOptions.putAll(properties);
+        Map<String, Object> eventadminOptions = new HashMap<>(properties);
         eventadminOptions.put(BundleContext.class.getName(), bundleContext);
         eventadminOptions.put(ProxyLoginModule.PROPERTY_MODULE, EVENTADMIN_AUDIT_MODULE);
         eventadminOptions.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));
