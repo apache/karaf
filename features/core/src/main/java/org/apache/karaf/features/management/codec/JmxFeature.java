@@ -132,7 +132,7 @@ public class JmxFeature {
         TabularDataSupport table = new TabularDataSupport(FEATURE_CONFIG_TABLE);
         for (ConfigInfo configInfo : config) {
         	String[] itemNames = FeaturesServiceMBean.FEATURE_CONFIG;
-        	Object[] itemValues = { configInfo.getName(), getConfigElementTable(configInfo.getProperties()), new Boolean(configInfo.isAppend()) };
+        	Object[] itemValues = { configInfo.getName(), getConfigElementTable(configInfo.getProperties()), Boolean.valueOf(configInfo.isAppend()) };
 			CompositeData configComposite = new CompositeDataSupport(
 					FEATURE_CONFIG, itemNames, itemValues);
 			table.put(configComposite);

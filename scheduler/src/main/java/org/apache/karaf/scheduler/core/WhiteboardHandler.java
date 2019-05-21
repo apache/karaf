@@ -104,7 +104,7 @@ public class WhiteboardHandler {
             if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT) instanceof Boolean) {
                 concurrent = (Boolean) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT);
             } else {
-                concurrent = new Boolean((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT));
+                concurrent = Boolean.valueOf((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_CONCURRENT));
             }
         }
         final String expression = (String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_EXPRESSION);
@@ -147,7 +147,7 @@ public class WhiteboardHandler {
                             if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE) instanceof Boolean) {
                                 immediate = (Boolean) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE);
                             } else {
-                                immediate = new Boolean((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE));
+                                immediate = Boolean.valueOf((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE));
                             }
                         }
                         final Date date = new Date();
