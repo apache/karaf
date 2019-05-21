@@ -303,6 +303,13 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
     }
 
     @Override
+    public void deleteConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+        if (configInstaller != null) {
+            configInstaller.uninstallFeatureConfigs(feature);
+        }
+    }
+
+    @Override
     public void installLibraries(Feature feature) {
         // TODO: install libraries
     }

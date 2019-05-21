@@ -629,6 +629,11 @@ public class DeployerTest {
         }
 
         @Override
+        public void deleteConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+
+        }
+
+        @Override
         public void installLibraries(Feature feature) throws IOException {
 
         }

@@ -42,6 +42,8 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
+import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
@@ -49,6 +51,7 @@ import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.StreamProvider;
+import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.region.SubsystemResolver;
 import org.apache.karaf.features.internal.region.SubsystemResolverCallback;
 import org.apache.karaf.features.internal.resolver.FeatureResource;
@@ -60,6 +63,7 @@ import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
+import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -133,6 +137,7 @@ public class Deployer {
         void replaceDigraph(Map<String, Map<String, Map<String, Set<String>>>> policies,
                             Map<String, Set<Long>> bundles) throws BundleException, InvalidSyntaxException;
         void installConfigs(Feature feature) throws IOException, InvalidSyntaxException;
+        void deleteConfigs(Feature feature) throws IOException, InvalidSyntaxException;
         void installLibraries(Feature feature) throws IOException;
     }
 
@@ -359,6 +364,7 @@ public class Deployer {
                     || request.options.contains(FeaturesService.Option.DisplayAllWiring);
         boolean showFeaturesWiringOnly = request.options.contains(FeaturesService.Option.DisplayFeaturesWiring)
                     && !request.options.contains(FeaturesService.Option.DisplayAllWiring);
+        boolean deleteConfigurations = request.options.contains(FeaturesService.Option.DeleteConfigurations);
 
         // TODO: add an option to unmanage bundles instead of uninstalling those
 
@@ -645,6 +651,30 @@ public class Deployer {
                 print("  Managing bundle:", verbose);
                 for (Bundle bundle : toManage) {
                     print("    " + bundle.getSymbolicName() + "/" + bundle.getVersion(), verbose);
+                }
+            }
+            if (deleteConfigurations) {
+                print(" Configurations to delete:", verbose);
+                for (Map.Entry<String, Set<String>> entry : delFeatures.entrySet()) {
+                    for (String name : entry.getValue()) {
+                        Feature feature = dstate.featuresById.get(name);
+                        if (feature != null) {
+                            for (ConfigInfo configInfo : feature.getConfigurations()) {
+                                print("    " + configInfo.getName(), verbose);
+                            }
+                        }
+                    }
+                }
+                print(" Configuration Files to delete:", verbose);
+                for (Map.Entry<String, Set<String>> entry : delFeatures.entrySet()) {
+                    for (String name : entry.getValue()) {
+                        Feature feature = dstate.featuresById.get(name);
+                        if (feature != null) {
+                            for (ConfigFileInfo configFileInfo : feature.getConfigurationFiles()) {
+                                print("    " + configFileInfo.getFinalname(), verbose);
+                            }
+                        }
+                    }
                 }
             }
             return;
@@ -936,6 +966,16 @@ public class Deployer {
             }
         }
 
+        // Delete configurations
+        if (deleteConfigurations) {
+            for (Map.Entry<String, Set<String>> entry : delFeatures.entrySet()) {
+                for (String name : entry.getValue()) {
+                    Feature feature = dstate.featuresById.get(name);
+                    callback.deleteConfigs(feature);
+                }
+            }
+        }
+
         if (!noRefresh) {
             if (toRefresh.containsKey(dstate.bundles.get(0l))) {
                 print("The system bundle needs to be refreshed, restarting Karaf...", verbose);
@@ -1004,6 +1044,8 @@ public class Deployer {
                 throw new MultiException("Error restarting bundles", exceptions);
             }
         }
+
+        // If uninstall and delete configurations, actually delete configurations and configuration files
 
         // Call listeners
         for (Map.Entry<String, Set<String>> entry : delFeatures.entrySet()) {
